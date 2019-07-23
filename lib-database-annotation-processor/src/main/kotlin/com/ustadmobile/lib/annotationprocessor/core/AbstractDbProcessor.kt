@@ -14,6 +14,10 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.*
 import com.ustadmobile.door.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.annotation.SyncableEntity
+import java.util.*
+import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ExecutableType
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -43,11 +47,69 @@ fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
     "null"
 }
 
+/**
+ * Get a list of all the syncable entities associated with a given POJO. This will look at parent
+ * classes and embedded fields
+ *
+ * @param entityType the POJO to inspect to find
+ */
+fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
+    if(entityType in QUERY_SINGULAR_TYPES)
+        return listOf()
+
+    val entityTypeEl = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
+    val syncableEntityList = mutableListOf<ClassName>()
+    ancestorsToList(entityTypeEl, processingEnv).forEach {
+        if(it.getAnnotation(SyncableEntity::class.java) != null)
+            syncableEntityList.add(it.asClassName())
+
+        it.enclosedElements.filter { it.getAnnotation(Embedded::class.java) != null}.forEach {
+            syncableEntityList.addAll(findSyncableEntities(it.asType().asTypeName() as ClassName, processingEnv))
+        }
+    }
+
+    return syncableEntityList.toList()
+}
+
 fun jdbcDaoTypeSpecBuilder(simpleName: String, superTypeName: TypeName) = TypeSpec.classBuilder(simpleName)
         .primaryConstructor(FunSpec.constructorBuilder().addParameter("_db",
                 DoorDatabase::class).build())
         .addProperty(PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
         .superclass(superTypeName)
+
+
+fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
+    val dbTypeEl = processingEnv.elementUtils.getTypeElement(dbType.canonicalName) as TypeElement
+    return dbTypeEl.enclosedElements
+            .filter { it.kind == ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers}
+            .map { it as ExecutableElement }
+            .fold(mutableListOf(), {list, subEl ->
+        list.add(subEl.returnType.asTypeName() as ClassName)
+        list
+    })
+}
+
+fun syncableEntityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment) =
+        entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}
+
+fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
+    val daoType = processingEnv.elementUtils.getTypeElement(daoClass.canonicalName)
+    val syncableEntitiesOnDao = mutableListOf<ClassName>()
+    daoType.enclosedElements.filter { it.getAnnotation(Query::class.java) != null}.forEach {methodEl ->
+        //TODO: Add rest accessible methods
+        val querySql = methodEl.getAnnotation(Query::class.java).value.toLowerCase(Locale.ROOT).trim()
+        if(!(querySql.startsWith("update") || querySql.startsWith("delete"))) {
+            val methodResolved = processingEnv.typeUtils
+                    .asMemberOf(daoType.asType() as DeclaredType, methodEl) as ExecutableType
+            val returnType = resolveReturnTypeIfSuspended(methodResolved)
+            val entityType = resolveEntityFromResultType(resolveQueryResultType(returnType))
+            syncableEntitiesOnDao.addAll(findSyncableEntities(entityType as ClassName,
+                    processingEnv))
+        }
+    }
+
+    return syncableEntitiesOnDao.toList()
+}
 
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
@@ -66,7 +128,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * Run create
      */
     internal fun setupDb(roundEnv: RoundEnvironment) {
-        val dbs = roundEnv!!.getElementsAnnotatedWith(Database::class.java)
+        val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
         val dataSource = SQLiteDataSource()
         val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
         println("Db tmp file: ${dbTmpFile.absolutePath}")

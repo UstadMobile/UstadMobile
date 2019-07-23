@@ -101,8 +101,6 @@ fun entityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment): 
     return entityTypeElements
 }
 
-fun syncableEntityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment) =
-        entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}
 
 /**
  * Returns a list of the entity fields of a particular object. If getAutoIncLast is true, then
@@ -348,7 +346,7 @@ fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
 /**
  *
  */
-private fun ancestorsToList(child: TypeElement, processingEnv: ProcessingEnvironment): List<TypeElement> {
+internal fun ancestorsToList(child: TypeElement, processingEnv: ProcessingEnvironment): List<TypeElement> {
     val entityAncestors = mutableListOf<TypeElement>()
 
     var nextEntity = child as TypeElement?

@@ -13,6 +13,10 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.OPTION_KTOR_OUTPUT
 import io.ktor.routing.Route
 import com.ustadmobile.door.*
+import java.util.*
+import javax.lang.model.element.ElementKind
+import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ExecutableType
 
 fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
     val syncEntityAnnotationIndex = entityEl.annotationMirrors.map {processingEnv.typeUtils.asElement(it.annotationType) as TypeElement }
@@ -54,8 +58,57 @@ class DbProcessorSync: AbstractDbProcessor() {
             syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
         }
 
+        val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
+
+        for(daoElement in daos) {
+            val daoTypeEl = daoElement as TypeElement
+            val daoFileSpec = generateDaoSyncHelperInterface(daoTypeEl)
+            daoFileSpec.writeTo(File(abstractOutputDir))
+        }
+
+
         return true
     }
+
+    /**
+     * Generates an interface that will be used for
+     */
+    fun generateDaoSyncHelperInterface(daoType: TypeElement): FileSpec {
+        val syncableEntitiesOnDao = syncableEntitiesOnDao(daoType.asClassName(), processingEnv)
+        val syncHelperInterface = TypeSpec.interfaceBuilder("${daoType.simpleName}_SyncHelper")
+
+        syncableEntitiesOnDao.forEach {
+            syncHelperInterface.addFunction(
+                    FunSpec.builder("_replace${it.simpleName}")
+                            .addParameter("entityList", List::class.asClassName().parameterizedBy(it))
+                            .addModifiers(KModifier.ABSTRACT)
+                            .build())
+            val entitySyncTracker = getEntitySyncTracker(
+                    processingEnv.elementUtils.getTypeElement(it.canonicalName), processingEnv)
+            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker)
+
+            syncHelperInterface.addFunction(
+                    FunSpec.builder("_replace${entitySyncTrackerEl.simpleName}")
+                            .addParameter("entityTrackerList",
+                                    List::class.asClassName().parameterizedBy(entitySyncTrackerEl.asType().asTypeName()))
+                            .addModifiers(KModifier.ABSTRACT)
+                            .build())
+
+            syncHelperInterface.addFunction(
+                    FunSpec.builder("_update${entitySyncTrackerEl.simpleName}Received")
+                            .addParameter("status", BOOLEAN)
+                            .addParameter("requestId", INT)
+                            .addModifiers(KModifier.ABSTRACT)
+                            .build())
+
+        }
+
+        return FileSpec.builder(pkgNameOfElement(daoType, processingEnv),
+                "${daoType.simpleName}_SyncHelper")
+                .addType(syncHelperInterface.build())
+                .build()
+    }
+
 
     fun generateSyncKtorRoute(dbType: TypeElement): FileSpec {
         val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
@@ -66,12 +119,30 @@ class DbProcessorSync: AbstractDbProcessor() {
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
                 .addParameter("_syncDao", abstractDaoClassName)
+
         val callMemberName = MemberName("io.ktor.application", "call")
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
                 MemberName("io.ktor.routing", "route"), "sync")
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
+            val entityPkField = entityType.enclosedElements
+                    .first { it.getAnnotation(PrimaryKey::class.java) != null }
+            val entityMasterCsnField = entityType.enclosedElements
+                    .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
+            val entitySyncTracker = getEntitySyncTracker(entityType, processingEnv)
+            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker) as TypeElement
+            val entitySyncTrackCsnField = entitySyncTrackerEl.enclosedElements
+                    .first { it.getAnnotation(TrackerChangeSeqNum::class.java) != null }
+            val entitySyncTrackerPkField = entitySyncTrackerEl.enclosedElements
+                    .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
+            val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
+                    .first {it.getAnnotation(TrackDestId::class.java) != null}
+            val entitySyncTrackerReceivedField = entitySyncTrackerEl.enclosedElements
+                    .first {it.getAnnotation(TrackerReceived::class.java) != null}
+            val entitySyncTrackerReqIdField = entitySyncTrackerEl.enclosedElements
+                    .first {it.getAnnotation(TrackerRequestId::class.java) != null}
+
             codeBlock.beginControlFlow("%M(%S)",
                     MemberName("io.ktor.routing", "post"), entityType.simpleName)
                     .add("val _clientNodeId = %M.request.%M(%S)?.toInt() ?: 0\n",
@@ -81,7 +152,20 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .add("val _incomingRequest = %M.%M<%T>()\n", callMemberName,
                             MemberName("io.ktor.request", "receive"),
                             SyncRequest::class.asClassName().parameterizedBy(entityType.asClassName()))
-                    .add("val _changeToSend = _syncDao._find${entityType.simpleName}LocalUnsentChanges(_clientNodeId, 100)\n")
+                    .add("val _changesToSend = _syncDao._find${entityType.simpleName}MasterUnsentChanges(_clientNodeId, 100)\n")
+                    .add("val _reqId = %T().nextInt()\n", Random::class)
+                    .add("val _systemTime = %T.currentTimeMillis()\n", System::class)
+                    .add("""_syncDao._replace${entitySyncTrackerEl.simpleName}(_changesToSend.map { %T(
+                             |${entitySyncTrackerPkField.simpleName} = it.${entityPkField.simpleName},
+                             |${entitySyncTrackerDestField.simpleName} = _clientNodeId,
+                             |${entitySyncTrackCsnField.simpleName} = it.${entityMasterCsnField.simpleName},
+                             |${entitySyncTrackerReqIdField.simpleName} = _reqId
+                             |) })""".trimMargin(), entitySyncTracker)
+                    .add("\n")
+                    .add("%M.%M(%T(_changesToSend))\n", callMemberName,
+                            MemberName("io.ktor.response", "respond"),
+                            SyncResponse::class)
+
 
             codeBlock.endControlFlow()
 
@@ -104,6 +188,17 @@ class DbProcessorSync: AbstractDbProcessor() {
         val abstractDaoTypeSpec = TypeSpec.classBuilder(abstractDaoSimpleName)
                 .addAnnotation(Dao::class.asClassName())
                 .addModifiers(KModifier.ABSTRACT)
+                .addSuperinterface(ClassName(pkgNameOfElement(dbType, processingEnv), "I$abstractDaoSimpleName"))
+
+        daosOnDb(dbType.asClassName(), processingEnv)
+                .filter { syncableEntitiesOnDao(it, processingEnv).isNotEmpty()}
+                .forEach {
+                    abstractDaoTypeSpec.addSuperinterface(
+                            ClassName(it.packageName, "${it.simpleName}_SyncHelper"))
+                }
+
+        val abstractDaoInterfaceTypeSpec = TypeSpec.interfaceBuilder("I$abstractDaoSimpleName")
+
         val abstractFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 abstractDaoSimpleName)
                 .addImport("com.ustadmobile.door", "DoorDbType")
@@ -177,48 +272,64 @@ class DbProcessorSync: AbstractDbProcessor() {
             implDaoTypeSpec.addFunction(implMasterUnsentChangeFun)
 
             //generate an upsert function for the entity itself
-            val (abstractInsertEntityFun, implInsertEntityFun) = generateAbstractAndImplUpsertFuns(
+            val (abstractInsertEntityFun, implInsertEntityFun, abstractInterfaceInsertEntityFun) =
+                generateAbstractAndImplUpsertFuns(
                     "_replace${entityType.simpleName}",
                     ParameterSpec.builder("_entities", entityListClassName).build(),
-                    implDaoTypeSpec)
+                    implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertEntityFun)
+            abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertEntityFun)
             implDaoTypeSpec.addFunction(implInsertEntityFun)
 
-            val (abstractInsertTrackerFun, implInsertTrackerFun) = generateAbstractAndImplUpsertFuns(
+            val (abstractInsertTrackerFun, implInsertTrackerFun, abstractInterfaceInsertTrackerFun) =
+                    generateAbstractAndImplUpsertFuns(
                     "_replace${entitySyncTrackerEl.simpleName}",
                     ParameterSpec.builder("_entities", entitySyncTrackerListClassName).build(),
-                    implDaoTypeSpec)
+                    implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
             implDaoTypeSpec.addFunction(implInsertTrackerFun)
+            abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertTrackerFun)
 
             //generate an update function that can be used to set the status of the sync tracker
             val updateTrackerReceivedSql = "UPDATE ${entitySyncTrackerEl.simpleName} SET " +
                     "${entitySyncTrackerReceivedField.simpleName} = :status WHERE " +
                     "${entitySyncTrackerReqIdField.simpleName} = :requestId"
-            val (abstractUpdateTrackerFun, implUpdateTrackerFun) =
+            val (abstractUpdateTrackerFun, implUpdateTrackerFun, abstractInterfaceUpdateTrackerFun) =
                     generateAbstractAndImplQueryFunSpecs(updateTrackerReceivedSql,
                             "_update${entitySyncTrackerEl.simpleName}Received",
                             UNIT, listOf(ParameterSpec.builder("status", BOOLEAN).build(),
                             ParameterSpec.builder("requestId", INT).build()),
-                            addReturnStmt = false)
+                            addReturnStmt = false, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractUpdateTrackerFun)
             implDaoTypeSpec.addFunction(implUpdateTrackerFun)
+            abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceUpdateTrackerFun)
         }
 
 
+        abstractFileSpec.addType(abstractDaoInterfaceTypeSpec.build())
         abstractFileSpec.addType(abstractDaoTypeSpec.build())
+
         implFileSpec.addType(implDaoTypeSpec.build())
         return Pair(abstractFileSpec.build(), implFileSpec.build())
     }
 
+    data class AbstractImplAndInterfaceFunSpecs(val abstractFunSpec: FunSpec, val implFunSpec: FunSpec,
+                                                val interfaceFunSpec: FunSpec)
     private fun generateAbstractAndImplUpsertFuns(funName: String, paramSpec: ParameterSpec,
-                                                  daoTypeBuilder: TypeSpec.Builder): Pair<FunSpec, FunSpec> {
-        val funBuilders = (0..1).map {
+                                                  daoTypeBuilder: TypeSpec.Builder,
+                                                  abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
+        val funBuilders = (0..2).map {
             FunSpec.builder(funName)
                     .returns(UNIT)
                     .addParameter(paramSpec)
         }
         funBuilders[0].addModifiers(KModifier.ABSTRACT)
+        funBuilders[2].addModifiers(KModifier.ABSTRACT)
+
+        if(abstractFunIsOverride) {
+            funBuilders[0].addModifiers(KModifier.OVERRIDE)
+        }
+
         funBuilders[0].addAnnotation(AnnotationSpec.builder(Insert::class)
                 .addMember("onConflict = %T.REPLACE", OnConflictStrategy::class).build())
 
@@ -226,22 +337,28 @@ class DbProcessorSync: AbstractDbProcessor() {
         funBuilders[1].addCode(generateInsertCodeBlock(paramSpec, UNIT, daoTypeBuilder,
                 true))
 
-        return Pair(funBuilders[0].build(), funBuilders[1].build())
+        return AbstractImplAndInterfaceFunSpecs(funBuilders[0].build(), funBuilders[1].build(),
+                funBuilders[2].build())
     }
 
     private fun generateAbstractAndImplQueryFunSpecs(querySql: String,
                                              funName: String,
                                              returnType: TypeName,
                                              params: List<ParameterSpec>,
-                                             addReturnStmt: Boolean = true): Pair<FunSpec, FunSpec> {
-        val funBuilders = (0..1).map {
+                                             addReturnStmt: Boolean = true,
+                                             abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
+        val funBuilders = (0..2).map {
             FunSpec.builder(funName)
                     .returns(returnType)
                     .addParameters(params)
         }
 
         funBuilders[0].addModifiers(KModifier.ABSTRACT)
+        if(abstractFunIsOverride)
+            funBuilders[0].addModifiers(KModifier.OVERRIDE)
         funBuilders[1].addModifiers(KModifier.OVERRIDE)
+        funBuilders[2].addModifiers(KModifier.ABSTRACT)
+
 
         funBuilders[0].addAnnotation(AnnotationSpec.builder(Query::class)
                 .addMember("value = %S", querySql).build())
@@ -254,7 +371,8 @@ class DbProcessorSync: AbstractDbProcessor() {
             funBuilders[1].addCode("return _result\n")
         }
 
-        return Pair(funBuilders[0].build(), funBuilders[1].build())
+        return AbstractImplAndInterfaceFunSpecs(funBuilders[0].build(),
+                funBuilders[1].build(), funBuilders[2].build())
     }
 
 
