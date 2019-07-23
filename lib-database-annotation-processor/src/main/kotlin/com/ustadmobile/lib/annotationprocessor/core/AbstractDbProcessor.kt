@@ -14,7 +14,7 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.*
 import com.ustadmobile.door.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
@@ -94,7 +94,7 @@ fun syncableEntityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnviro
 
 fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
     val daoType = processingEnv.elementUtils.getTypeElement(daoClass.canonicalName)
-    val syncableEntitiesOnDao = mutableListOf<ClassName>()
+    val syncableEntitiesOnDao = mutableSetOf<ClassName>()
     daoType.enclosedElements.filter { it.getAnnotation(Query::class.java) != null}.forEach {methodEl ->
         //TODO: Add rest accessible methods
         val querySql = methodEl.getAnnotation(Query::class.java).value.toLowerCase(Locale.ROOT).trim()
@@ -109,6 +109,43 @@ fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironm
     }
 
     return syncableEntitiesOnDao.toList()
+}
+
+/**
+ * Refactor the given SQL
+ */
+fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
+                          processingEnv: ProcessingEnvironment,
+                          clientIdParamName: String = "clientId"): String {
+    val syncableEntities = findSyncableEntities(resultComponentClassName, processingEnv)
+    if(syncableEntities.isEmpty())
+        return sql
+
+    var newSql = "SELECT * FROM ($sql) AS ${resultComponentClassName.simpleName} WHERE "
+    syncableEntities.forEach {
+        val syncableEntityTypeEl = processingEnv.elementUtils.getTypeElement(it.canonicalName)
+        val entityPkField = syncableEntityTypeEl.enclosedElements
+                .first { it.getAnnotation(PrimaryKey::class.java) != null }
+        val entitySyncTracker = getEntitySyncTracker(syncableEntityTypeEl, processingEnv)
+        val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker) as TypeElement
+        val entityMasterCsnField = syncableEntityTypeEl.enclosedElements
+                .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
+        val entitySyncTrackerPkField = entitySyncTrackerEl.enclosedElements
+                .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
+        val entitySyncTrackCsnField = entitySyncTrackerEl.enclosedElements
+                .first { it.getAnnotation(TrackerChangeSeqNum::class.java) != null }
+        val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
+                .first {it.getAnnotation(TrackDestId::class.java) != null}
+
+
+        newSql += """( ${entityMasterCsnField.simpleName} > COALESCE((SELECT 
+            |${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName}  
+            |WHERE ${entitySyncTrackerPkField.simpleName} = ${resultComponentClassName.simpleName}.${entityPkField.simpleName} 
+            |AND ${entitySyncTrackerDestField.simpleName} = :$clientIdParamName), 0))
+        """.trimMargin()
+    }
+
+    return newSql
 }
 
 abstract class AbstractDbProcessor: AbstractProcessor() {

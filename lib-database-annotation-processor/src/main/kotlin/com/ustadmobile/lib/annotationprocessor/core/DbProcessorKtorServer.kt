@@ -131,6 +131,13 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .receiver(Route::class)
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
                 .addParameter("_db", DoorDatabase::class)
+
+        if(syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).isNotEmpty()) {
+            daoRouteFn.addParameter("_syncHelper",
+                    ClassName(pkgNameOfElement(daoTypeElement, processingEnv),
+                            "${daoTypeElement.simpleName}_SyncHelper"))
+        }
+
         val codeBlock = CodeBlock.builder()
 
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
@@ -181,16 +188,31 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val paramName = daoMethodEl.parameters[index].simpleName.toString()
             codeBlock.add(generateGetParamFromRequestCodeBlock(paramType,
                     paramName, declareVariableName = paramName, declareVariableType = "val"))
-
         }
+
+
+
 
         val queryVarsMap = daoMethodResolved.parameterTypes.mapIndexed { index, typeMirror ->
             daoMethodEl.parameters[index].simpleName.toString() to typeMirror.asTypeName().javaToKotlinType()
         }.filter {
             !isContinuationParam(it.second)
-        }.toMap()
+        }.toMap().toMutableMap()
 
-        val querySql = daoMethodEl.getAnnotation(Query::class.java).value
+        var querySql = daoMethodEl.getAnnotation(Query::class.java).value
+        val componentEntityType = resolveEntityFromResultType(returnType)
+        val isSyncableResult = (componentEntityType is ClassName
+                && findSyncableEntities(componentEntityType, processingEnv).isNotEmpty())
+        if(isSyncableResult) {
+            codeBlock.add("val clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                    CALL_MEMBER,
+                    MemberName("io.ktor.request","header"),
+                    "X-nid")
+            queryVarsMap.put("clientId", INT)
+            querySql = refactorSyncSelectSql(querySql, componentEntityType as ClassName,
+                    processingEnv)
+        }
+
 
         codeBlock.add(generateQueryCodeBlock(returnType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
         codeBlock.add(generateRespondCall(returnType, "_result!!"))
