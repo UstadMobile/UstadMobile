@@ -178,4 +178,10 @@
     <string name="feedback_hint">مهرباني وکړئ خپل نظر ولیکئ</string>
     <string name="send_feedback">غبرګون واستوئ</string>
     <string name="feedback_thanks">مننه</string>
+
+    <!--Sprint 6-->
+    <string name="my_women_entrepreneurs">My Women Entreprenrurs</string>
+    <string name="top_products">Top products</string>
+    <string name="profile">Profile</string>
+    <string name="summary">Summary</string>
 </resources>

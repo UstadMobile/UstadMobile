@@ -51,6 +51,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     private var changePasswordLL: LinearLayout? = null
     private var languageLL: LinearLayout? = null
     private var logoutLL: LinearLayout? = null
+    private var myWomenEntLL: LinearLayout? = null
 
     private var languageSet: TextView? = null
     internal lateinit var pictureEdit: ImageView
@@ -94,6 +95,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         changePasswordLL = findViewById(R.id.activity_user_profile_change_password_ll)
         languageLL = findViewById(R.id.activity_user_profile_language_ll)
         logoutLL = findViewById(R.id.activity_user_profile_logout_ll)
+        myWomenEntLL = findViewById(R.id.activity_user_profile_my_women_entrepreneurs_ll)
         languageSet = findViewById(R.id.activity_user_profile_language_selection)
         pictureEdit = findViewById(R.id.activity_user_profile_edit)
         personEditImage = findViewById(R.id.activity_user_profile_user_image)
@@ -106,6 +108,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         changePasswordLL!!.setOnClickListener { v -> mPresenter!!.handleClickChangePassword() }
         languageLL!!.setOnClickListener { v -> mPresenter!!.handleClickChangeLanguage() }
         logoutLL!!.setOnClickListener { v -> handleClickLogout() }
+        myWomenEntLL!!.setOnClickListener{ v -> mPresenter!!.handleClickMyWomenEntrepreneurs()}
 
         pictureEdit.setOnClickListener { v -> showGetImageAlertDialog() }
     }

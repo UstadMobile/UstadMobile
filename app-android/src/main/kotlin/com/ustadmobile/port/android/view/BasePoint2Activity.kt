@@ -33,7 +33,6 @@ import java.io.File
 import java.security.AccessController.getContext
 import java.util.*
 
-
 class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
     private var toolbar: Toolbar? = null
@@ -52,6 +51,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
     private var comingSoonFragment: ComingSoonFragment? = null
     private var catalogListFragment: CatalogListFragment? = null
     private lateinit var dashboardEntryListFragment: DashboardEntryListFragment
+    private var contentEntryListFragment: ContentEntryListFragment ?=null
 
     internal lateinit var bottomNavigation: AHBottomNavigation
     private var ab: ActionBar? = null
@@ -144,7 +144,6 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         val reports_item = AHBottomNavigationItem(R.string.reports,
                 R.drawable.ic_insert_chart_black_24dp, R.color.default_back_color)
 
-
         bottomNavigation.addItem(catalog_item)
         bottomNavigation.addItem(inventory_item)
         bottomNavigation.addItem(sales_item)
@@ -156,11 +155,11 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW)
 
         //Click listeners for the items.
-        bottomNavigation.setOnTabSelectedListener({ position, wasSelected ->
+        bottomNavigation.setOnTabSelectedListener { position, wasSelected ->
 
             if (!wasSelected) {
-                mPagerAdapter!!.getItem(position.toInt())
-                mPager!!.currentItem = position.toInt()
+                mPagerAdapter!!.getItem(position)
+                mPager!!.currentItem = position
             }
 
             //Update title
@@ -172,7 +171,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
                 4 -> updateTitle(getText(R.string.mne_dashboard).toString())
             }
             true
-        })
+        }
 
         // Setting the very 1st item as default home screen.
         bottomNavigation.setCurrentItem(2)
@@ -194,23 +193,21 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
             val iconDimen = dpToPx(36)
             runOnUiThread {
                 Picasso.get()
-                        .load(profileImage)
-                        .transform(CircleTransform())
-                        .resize(iconDimen, iconDimen)
-                        .centerCrop()
-                        .into(object : Target {
-                            override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-                                val d = BitmapDrawable(resources, bitmap)
-                                ab!!.setHomeAsUpIndicator(d)
-                                ab!!.setDisplayHomeAsUpEnabled(true)
-                            }
+                    .load(profileImage)
+                    .transform(CircleTransform())
+                    .resize(iconDimen, iconDimen)
+                    .centerCrop()
+                    .into(object : Target {
+                        override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
+                            val d = BitmapDrawable(resources, bitmap)
+                            ab!!.setHomeAsUpIndicator(d)
+                            ab!!.setDisplayHomeAsUpEnabled(true)
+                        }
 
-                            override fun onBitmapFailed(e: Exception, errorDrawable: Drawable) {
+                        override fun onBitmapFailed(e: Exception, errorDrawable: Drawable) {}
 
-                            }
-
-                            override fun onPrepareLoad(placeHolderDrawable: Drawable) {}
-                        })
+                        override fun onPrepareLoad(placeHolderDrawable: Drawable) {}
+                    })
             }
 
         }
@@ -331,9 +328,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
     }
 
-    override fun checkPermissions() {
-
-    }
+    override fun checkPermissions() {}
 
     override fun showShareAppDialog() {
         val builder = AlertDialog.Builder(this)
@@ -408,14 +403,14 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
                         return saleListFragment
                     }
                     3 -> {
-                        comingSoonFragment = ComingSoonFragment()
-                        this.positionMap[position] = comingSoonFragment
-                        return comingSoonFragment
+                        contentEntryListFragment = ContentEntryListFragment()
+                        this.positionMap.put(position, contentEntryListFragment)
+                        return contentEntryListFragment
                     }
                     4 -> {
-                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
-                        this.positionMap.put(position, dashboardEntryListFragment);
-                        return dashboardEntryListFragment;
+                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance()
+                        this.positionMap.put(position, dashboardEntryListFragment)
+                        return dashboardEntryListFragment
                     }
 
                     else -> return null

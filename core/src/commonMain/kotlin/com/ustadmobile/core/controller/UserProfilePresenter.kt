@@ -6,10 +6,8 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ChangePasswordView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.SelectLanguageDialogView
-import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonWithSaleInfoListView.Companion.ARG_LE_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -90,6 +88,13 @@ class UserProfilePresenter(context: Any,
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(Login2View.VIEW_NAME, args, context)
+    }
+
+    fun handleClickMyWomenEntrepreneurs(){
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        args[ARG_LE_UID] = loggedInPersonUid.toString()
+        impl.go(PersonWithSaleInfoListView.VIEW_NAME, args, context)
     }
 
     fun openPictureDialog(imagePath: String) {

@@ -178,4 +178,10 @@
     <string name="feedback_hint">لطفا نظرات خود را وارد کنید</string>
     <string name="send_feedback">ارسال بازخورد</string>
     <string name="feedback_thanks">متشکرم</string>
+
+    <!--Sprint 6-->
+    <string name="my_women_entrepreneurs">My Women Entreprenrurs</string>
+    <string name="top_products">Top products</string>
+    <string name="profile">Profile</string>
+    <string name="summary">Summary</string>
 </resources>

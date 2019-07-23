@@ -86,6 +86,9 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(ALL_SALE_LIST + FILTER_PREORDER)
     abstract fun findAllActiveSaleListDetailPreOrdersProvider(): DataSource.Factory<Int,SaleListDetail>
 
+    //WE filter
+    @Query(ALL_SALE_LIST_WE_FILTER)
+    abstract fun findAllSalesWithWEFilter(weUid:Long):DataSource.Factory<Int, SaleListDetail>
 
     //Payments due shows the payment amount pending vs the total amount of the sale.
     @Query(ALL_SALE_LIST + FILTER_PAYMENT_DUE)
@@ -279,6 +282,19 @@ abstract class SaleDao : BaseDao<Sale> {
             "  ORDER BY    saleDate DESC ")
     abstract suspend fun getSaleLog(): List<ReportSalesLog>
 
+
+    //My Women Entrepreneurs
+    @Query("SELECT " +
+            " SUM((SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece)-SaleItem.saleItemDiscount) AS totalSale, " +
+            " 'Product list goes here' AS topProducts, WE.* " +
+            " From SALE LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
+            " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid " +
+            " WHERE LE.personUid = :weUid AND Sale.saleActive =1  AND WE.active = 1 " +
+            " GROUP BY WE.personUid")
+    abstract fun getMyWomenEntrepreneurs(weUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+
+
     companion object {
 
         const val ALL_SELECTED = 1
@@ -304,7 +320,7 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val ALL_SALES_ACTIVE_QUERY = "SELECT * FROM Sale WHERE saleActive = 1"
 
-        const val ALL_SALE_LIST = " SELECT sl.*, " +
+        const val ALL_SALE_LIST_SELECT = " SELECT sl.*, " +
                 " (SELECT SaleItem.saleItemQuantity " +
                 " FROM Sale stg " +
                 " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid " +
@@ -338,9 +354,11 @@ abstract class SaleDao : BaseDao<Sale> {
                 " (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
                 "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
                 "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
-                " ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
-                " WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
-                " AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0)) AS saleAmountDue, " +
+                "           ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
+                "               WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
+                "                AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ," +
+                "           0)" +
+                " ) AS saleAmountDue, " +
                 " 'Afs' AS saleCurrency,  " +
                 " coalesce(" +
                 "    ( " +
@@ -351,16 +369,27 @@ abstract class SaleDao : BaseDao<Sale> {
                 "    ) ,0) AS earliestDueDate, " +
                 " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount," +
                 " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  " +
-                "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
-                "  AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0) " +
-                "  AS saleAmountPaid, " +
-                "  (select (case  when  " +
-                "   (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid and sip.saleItemPreOrder = 1 ) > 0 " +
-                "   then 1  else 0 end) " +
-                " from Sale)  as saleItemPreOrder " +
-                " FROM Sale sl " +
-                " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid WHERE sl.saleActive = 1  "
+                "   WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
+                "   AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0) " +
+                " AS saleAmountPaid, " +
+                " (select (case  when  " +
+                "   (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
+                "       AND sip.saleItemPreOrder = 1 ) > 0  then 1  else 0 end)  from Sale)  " +
+                " AS saleItemPreOrder " +
+                " FROM Sale sl "
 
+        const val ALL_SALE_LIST_LJ =
+                " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid WHERE sl.saleActive = 1 " +
+                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
+                " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
+                " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid "
+
+        const val ALL_SALE_LIST_WHERE_WE =
+                " WHERE WE.personUid = :weUid "
+
+
+        const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ
+        const val ALL_SALE_LIST_WE_FILTER = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_WHERE_WE + ALL_SALE_LIST_LJ
         //filter and sort
 
         const val FILTER_PREORDER = " AND (saleItemPreOrder = 1 OR salePreOrder = 1)"

@@ -9,6 +9,6 @@
         android:title="@string/search"
         app:showAsAction="always"
         android:visible="true"
-        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
         />
 </menu>

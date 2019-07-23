@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 
 @UmEntity(tableId = TABLE_ID)
 @Entity
-class Person() {
+open class Person() {
 
     @PrimaryKey(autoGenerate = true)
     var personUid: Long = 0
