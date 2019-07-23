@@ -57,6 +57,11 @@ abstract class ContainerManagerCommon(protected val container: Container,
          */
         val md5Sum: ByteArray
 
+        /**
+         * The compression (if this file is already compressed)
+         */
+        val compression: Int
+
     }
 
 

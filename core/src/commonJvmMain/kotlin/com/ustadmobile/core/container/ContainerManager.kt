@@ -23,7 +23,6 @@ import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.io.copyTo
-import kotlin.io.endsWith
 
 actual class ContainerManager actual constructor(container: Container,
                                                  db: UmAppDatabase,
@@ -100,8 +99,9 @@ actual class ContainerManager actual constructor(container: Container,
                 val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16) }
                 val destFile = File(newFileDir, md5HexStr)
                 val currentFilePath = it.filePath
-                val cantGzip = excludedGzipTypes.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
-                val compression = if (cantGzip) COMPRESSION_NONE else COMPRESSION_GZIP
+                val isExcludedFromGzip = excludedGzipTypes.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
+                val shouldGzipNow = isExcludedFromGzip || it.compression == COMPRESSION_GZIP
+                val compressionSetting = if (isExcludedFromGzip) COMPRESSION_NONE else COMPRESSION_GZIP
                 //TODO: check for any paths that are being overwritten
 
                 if (addOpts.moveExistingFiles && currentFilePath != null) {
@@ -116,7 +116,7 @@ actual class ContainerManager actual constructor(container: Container,
                         try {
                             inStream = it.inputStream
                             destOutStream = FileOutputStream(destFile)
-                            destOutStream = if (cantGzip) destOutStream else GZIPOutputStream(destOutStream)
+                            destOutStream = if (shouldGzipNow) destOutStream else GZIPOutputStream(destOutStream)
                             inStream.copyTo(destOutStream)
                         } catch (e: IOException) {
                             throw e
@@ -129,7 +129,7 @@ actual class ContainerManager actual constructor(container: Container,
                 }
 
                 val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
-                        destFile.length(), destFile.length(), compression, getSystemTimeInMillis())
+                        destFile.length(), destFile.length(), compressionSetting, getSystemTimeInMillis())
                 containerEntryFile.cefPath = destFile.absolutePath
                 containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
                 newContainerEntries.add(ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
