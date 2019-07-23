@@ -100,7 +100,8 @@ actual class ContainerManager actual constructor(container: Container,
                 val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16) }
                 val destFile = File(newFileDir, md5HexStr)
                 val currentFilePath = it.filePath
-                var compression = COMPRESSION_NONE
+                val cantGzip = excludedGzipTypes.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
+                val compression = if (cantGzip) COMPRESSION_NONE else COMPRESSION_GZIP
                 //TODO: check for any paths that are being overwritten
 
                 if (addOpts.moveExistingFiles && currentFilePath != null) {
@@ -110,10 +111,6 @@ actual class ContainerManager actual constructor(container: Container,
                 } else {
                     //copy it
                     GlobalScope.async {
-                        val cantGzip = excludedGzipTypes.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
-                        if (!cantGzip) {
-                            compression = COMPRESSION_GZIP
-                        }
                         var destOutStream = null as OutputStream?
                         var inStream = null as InputStream?
                         try {
