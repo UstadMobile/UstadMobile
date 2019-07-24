@@ -34,7 +34,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
 
     private var presenter: HomePresenter ? = null
 
@@ -60,6 +60,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
             presenter!!.handleDownloadAllClicked()
         }
 
+        viewPager.addOnPageChangeListener(this)
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
@@ -75,6 +76,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
         menuInflater.inflate(R.menu.menu_home_activity, menu)
         menu.findItem(R.id.create_new_content).isVisible = showControls
         return super.onCreateOptionsMenu(menu)
+    }
+
+
+    override fun onPageScrollStateChanged(state: Int) {}
+
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
+    override fun onPageSelected(position: Int) {
+        presenter!!.handleShowDownloadButton(position == 0)
     }
 
 
