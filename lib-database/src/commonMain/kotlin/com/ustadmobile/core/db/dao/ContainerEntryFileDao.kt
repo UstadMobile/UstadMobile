@@ -25,4 +25,11 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
             "WHERE ContainerEntry.ceContainerUid = :containerUid")
     abstract fun sumContainerFileEntrySizes(containerUid: Long): Long
 
+
+    @Query("SELECT * FROM ContainerEntryFile " +
+            "WHERE compression = 0 AND " +
+            "NOT EXISTS(SELECT * FROM ContainerEntry " +
+            "WHERE ceCefUid = ContainerEntryFile.cefUid AND (ContainerEntry.cePath LIKE '%.webm' OR ContainerEntry.cePath LIKE '%.mp4'))")
+    abstract suspend fun getAllFilesForCompression(): List<ContainerEntryFile>
+
 }
