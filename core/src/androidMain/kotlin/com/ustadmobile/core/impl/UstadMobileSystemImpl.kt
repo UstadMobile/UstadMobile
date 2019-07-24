@@ -91,7 +91,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
-            Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
+            LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}LoginActivity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
             AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),

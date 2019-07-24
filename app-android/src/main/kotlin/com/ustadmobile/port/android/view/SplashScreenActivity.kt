@@ -46,8 +46,6 @@ import java.util.concurrent.TimeUnit
 
 class SplashScreenActivity : SplashView, UstadBaseActivity() {
 
-    private val impl =  UstadMobileSystemImpl.instance
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -60,7 +58,7 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
 
     override fun startUi(delay: Boolean) {
         Handler().postDelayed({
-            impl.startUI(this@SplashScreenActivity)
+            UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
         }, if(delay) TimeUnit.SECONDS.toMillis(2) else 0)
     }
 

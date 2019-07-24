@@ -10,17 +10,19 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
 
     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
+    private var showDownloadAll = false
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        val showBtn = impl.getAppConfigString(
+        showDownloadAll = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, this)!!.toBoolean()
-        handleShowDownloadButton(showBtn)
+        handleShowDownloadButton(showDownloadAll)
     }
 
     fun handleShowDownloadButton(show: Boolean){
         view.runOnUiThread(Runnable {
-            view.showDownloadAllButton(show)
+            view.showDownloadAllButton(show && showDownloadAll)
         })
     }
 

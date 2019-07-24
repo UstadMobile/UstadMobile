@@ -10,7 +10,7 @@ import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.android.view.Login2Activity
+import com.ustadmobile.port.android.view.LoginActivity
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -20,10 +20,10 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 
-class Login2ActivityEspressoTest {
+class LoginActivityEspressoTest {
 
     @get:Rule
-    var mActivityRule = IntentsTestRule(Login2Activity::class.java, false, false)
+    var mActivityRule = IntentsTestRule(LoginActivity::class.java, false, false)
 
     private lateinit var mockRestServer: MockWebServer
 
