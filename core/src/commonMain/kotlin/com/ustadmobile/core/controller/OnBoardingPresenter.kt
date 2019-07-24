@@ -8,7 +8,7 @@ import kotlinx.coroutines.Runnable
 
 class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: OnBoardingView) : UstadBaseController<OnBoardingView>(context, arguments!!, view) {
 
-    private val languageOptions = mutableMapOf("en" to " English ","fa" to " Dari ", "ps" to " Pashto ")
+    private val languageOptions = mutableMapOf("en" to " English ","fa" to " دری ", "ps" to " پښتو ")
 
     val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
