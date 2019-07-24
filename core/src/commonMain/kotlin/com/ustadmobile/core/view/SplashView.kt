@@ -1,8 +1,10 @@
 package com.ustadmobile.core.view
 
-interface HomeView : UstadView {
+interface SplashView : UstadView {
 
-    fun showDownloadAllButton(show:Boolean)
+    fun preloadData()
+
+    fun startUi(delay: Boolean)
 
     companion object {
 
