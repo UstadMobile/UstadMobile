@@ -17,6 +17,7 @@ import java.util.*
 import javax.lang.model.element.ElementKind
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import javax.tools.Diagnostic
 
 fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
     val syncEntityAnnotationIndex = entityEl.annotationMirrors.map {processingEnv.typeUtils.asElement(it.annotationType) as TypeElement }
@@ -35,7 +36,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                           val ktorRouteOutputArg: String?)
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
-
+        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: Process")
         val (abstractOutputArg, implOutputArg, syncKtorRouteOutputArg) = OutputDirs(processingEnv.options[OPTION_ABSTRACT_OUTPUT_DIR],
                 processingEnv.options[OPTION_IMPL_OUTPUT_DIR], processingEnv.options[OPTION_KTOR_OUTPUT])
         val (abstractOutputDir, implOutputDir, syncKtorRouteOutputDir) = listOf(abstractOutputArg, implOutputArg, syncKtorRouteOutputArg)
@@ -49,6 +50,7 @@ class DbProcessorSync: AbstractDbProcessor() {
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         for(dbTypeEl in dbs) {
+            messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: db: ${dbTypeEl.simpleName}")
             val (abstractFileSpec, implFileSpec) = generateSyncDaoInterfaceAndImpl(dbTypeEl as TypeElement)
 
             abstractFileSpec.writeTo(File(abstractOutputDir))
@@ -59,14 +61,15 @@ class DbProcessorSync: AbstractDbProcessor() {
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
-
-        for(daoElement in daos) {
+        daos.filter { !it.simpleName.endsWith(SUFFIX_SYNCDAO_ABSTRACT) }.forEach {daoElement ->
+            messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: DAO: ${daoElement.simpleName}")
             val daoTypeEl = daoElement as TypeElement
             val daoFileSpec = generateDaoSyncHelperInterface(daoTypeEl)
             daoFileSpec.writeTo(File(abstractOutputDir))
         }
 
 
+        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: process Finished")
         return true
     }
 
@@ -190,7 +193,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addModifiers(KModifier.ABSTRACT)
                 .addSuperinterface(ClassName(pkgNameOfElement(dbType, processingEnv), "I$abstractDaoSimpleName"))
 
-        daosOnDb(dbType.asClassName(), processingEnv)
+        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl: ${dbType.simpleName}")
+        daosOnDb(dbType.asClassName(), processingEnv, excludeDbSyncDao = true)
                 .filter { syncableEntitiesOnDao(it, processingEnv).isNotEmpty()}
                 .forEach {
                     abstractDaoTypeSpec.addSuperinterface(
@@ -198,6 +202,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                 }
 
         val abstractDaoInterfaceTypeSpec = TypeSpec.interfaceBuilder("I$abstractDaoSimpleName")
+        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl " +
+                "- make DAO interface ${dbType.simpleName}")
 
         val abstractFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 abstractDaoSimpleName)
@@ -310,6 +316,8 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractFileSpec.addType(abstractDaoTypeSpec.build())
 
         implFileSpec.addType(implDaoTypeSpec.build())
+        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl " +
+                "- finished making sync DAO interface for ${dbType.simpleName}")
         return Pair(abstractFileSpec.build(), implFileSpec.build())
     }
 

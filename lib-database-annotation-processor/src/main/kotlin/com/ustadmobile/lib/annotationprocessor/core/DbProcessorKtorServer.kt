@@ -250,10 +250,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             if(isListOrArrayResult) {
                 var prefix = "_result"
                 it.key.forEach {embedVarName ->
-                    prefix += ".map { it.$embedVarName }.filter { it != null }"
+                    prefix += ".map { it!!.$embedVarName }.filter { it != null }"
                 }
                 wrapperFnName = Pair("$prefix.map {", "}")
-                varName = "it"
+                varName = "it!!"
             }else {
                 var accessorName = "_result"
                 it.key.forEach {embedVarName ->

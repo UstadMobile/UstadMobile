@@ -16,6 +16,7 @@ import io.ktor.routing.Route
 import com.ustadmobile.door.*
 import db2.ExampleDao2Route
 import db2.ExampleEntity2
+import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.HttpRequestBuilder
@@ -48,6 +49,7 @@ class TestDbRoute  {
 
             install(Routing) {
                 ExampleDao2Route(exampleDb.exampleDao2(), exampleDb)
+                //ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, )
             }
         }
 
@@ -80,4 +82,16 @@ class TestDbRoute  {
 
         httpClient.close()
     }
+
+    @Test
+    fun givenSyncableEntityInserted_whenReceiptAcknowledged_thenShouldReturnEmptyList() = runBlocking {
+        val httpClient = HttpClient() {
+            install(JsonFeature)
+        }
+
+        val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
+
+
+    }
+
 }

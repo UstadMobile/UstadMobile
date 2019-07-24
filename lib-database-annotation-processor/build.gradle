@@ -13,8 +13,8 @@ task fatJar(type: Jar) {
     with jar
 }
 
-
 kapt {
+    correctErrorTypes = true
     arguments {
         arg("door_jdbc_kt_out", "filer")
         arg("door_ktor_server_out", "filer")

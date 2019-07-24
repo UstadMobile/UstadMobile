@@ -99,15 +99,22 @@ fun jdbcDaoTypeSpecBuilder(simpleName: String, superTypeName: TypeName) = TypeSp
         .superclass(superTypeName)
 
 
-fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
+fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment, excludeDbSyncDao: Boolean = false): List<ClassName> {
     val dbTypeEl = processingEnv.elementUtils.getTypeElement(dbType.canonicalName) as TypeElement
-    return dbTypeEl.enclosedElements
+    processingEnv.messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: daosOnDb: ${dbType.simpleName}")
+    val daoList = dbTypeEl.enclosedElements
             .filter { it.kind == ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers}
             .map { it as ExecutableElement }
-            .fold(mutableListOf(), {list, subEl ->
+            .fold(mutableListOf<ClassName>(), {list, subEl ->
         list.add(subEl.returnType.asTypeName() as ClassName)
         list
     })
+
+    return if(excludeDbSyncDao) {
+        daoList.filter { it.simpleName != "${dbType.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}" }
+    }else {
+        daoList
+    }
 }
 
 fun syncableEntityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment) =
@@ -143,7 +150,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
         return sql
 
     var newSql = "SELECT * FROM ($sql) AS ${resultComponentClassName.simpleName} WHERE "
-    syncableEntities.values.forEach {
+    val whereClauses = syncableEntities.values.map {
         val syncableEntityTypeEl = processingEnv.elementUtils.getTypeElement(it.canonicalName)
         val entityPkField = syncableEntityTypeEl.enclosedElements
                 .first { it.getAnnotation(PrimaryKey::class.java) != null }
@@ -159,27 +166,28 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
                 .first {it.getAnnotation(TrackDestId::class.java) != null}
 
 
-        newSql += """( ${entityMasterCsnField.simpleName} > COALESCE((SELECT 
+        """( ${entityMasterCsnField.simpleName} > COALESCE((SELECT 
             |${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName}  
             |WHERE ${entitySyncTrackerPkField.simpleName} = ${resultComponentClassName.simpleName}.${entityPkField.simpleName} 
             |AND ${entitySyncTrackerDestField.simpleName} = :$clientIdParamName), 0))
         """.trimMargin()
     }
+    newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
 
     return newSql
 }
 
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
-    protected var messager: Messager? = null
+    protected lateinit var messager: Messager
 
     protected var dbConnection: Connection? = null
 
     protected val allKnownEntities = mutableListOf<TypeElement>()
 
-    override fun init(p0: ProcessingEnvironment?) {
+    override fun init(p0: ProcessingEnvironment) {
         super.init(p0)
-        messager = p0?.messager
+        messager = p0.messager
     }
 
     /**

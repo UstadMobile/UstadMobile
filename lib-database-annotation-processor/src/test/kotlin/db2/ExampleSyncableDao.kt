@@ -16,4 +16,9 @@ abstract class ExampleSyncableDao {
     @Query("SELECT * FROM ExampleSyncableEntity WHERE esUid = :uid")
     abstract fun findByUid(uid: Long): ExampleSyncableEntity?
 
+    @Query("SELECT ExampleSyncableEntity.*, OtherSyncableEntity.* FROM " +
+            "ExampleSyncableEntity LEFT JOIN OtherSyncableEntity ON ExampleSyncableEntity.esUid = OtherSyncableEntity.otherFk")
+    abstract fun findAllWithOtherByUid(): List<ExampleSyncableEntityWithOtherSyncableEntity>
+
+
 }

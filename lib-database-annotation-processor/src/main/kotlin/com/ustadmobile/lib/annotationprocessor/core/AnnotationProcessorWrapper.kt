@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
+import javax.tools.Diagnostic
 
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -14,10 +15,19 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
     val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(),
             DbProcessorRepository(), DbProcessorSync())
 
-    override fun init(p0: ProcessingEnvironment?) = processors.forEach { it.init(p0) }
+    lateinit var messager: Messager
+
+    override fun init(p0: ProcessingEnvironment) {
+        messager = p0.messager
+        processors.forEach { it.init(p0) }
+    }
 
     override fun process(p0: MutableSet<out TypeElement>?, p1: RoundEnvironment?): Boolean {
-        processors.forEach { it.process(p0, p1) }
+        processors.forEach {
+            messager.printMessage(Diagnostic.Kind.NOTE, "Running processor: ${it.javaClass.simpleName}")
+            it.process(p0, p1)
+            messager.printMessage(Diagnostic.Kind.NOTE, "Finished running processor: ${it.javaClass.simpleName}")
+        }
 
         return true
     }
