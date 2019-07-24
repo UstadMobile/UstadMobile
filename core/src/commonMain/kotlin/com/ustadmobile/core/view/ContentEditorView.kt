@@ -141,8 +141,6 @@ interface ContentEditorView : ViewWithErrorNotifier {
 
         const val VIEW_NAME = "ContentEditor"
 
-        const val EDITOR_PREVIEW_PATH = "request_uri"
-
         const val CONTENT_ENTRY_UID = "content_entry__uid"
 
         const val CONTENT_STORAGE_OPTION = "content_storage_option"

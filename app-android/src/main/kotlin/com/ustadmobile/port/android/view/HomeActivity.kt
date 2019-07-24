@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -14,6 +15,8 @@ import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.HomePresenter
+import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -29,13 +32,19 @@ import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
 
+    private var presenter: HomePresenter ? = null
+
+    private lateinit var downloadAllBtn: FloatingTextButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        downloadAllBtn = findViewById(R.id.download_all)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
@@ -47,7 +56,17 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
         val tabLayout = findViewById<TabLayout>(R.id.tabs)
         tabLayout.setupWithViewPager(viewPager)
 
+        downloadAllBtn.setOnClickListener {
+            presenter!!.handleDownloadAllClicked()
+        }
 
+
+        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
+        presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+    }
+
+    override fun showDownloadAllButton(show: Boolean) {
+        downloadAllBtn.visibility = if(show) View.VISIBLE else View.GONE
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -144,7 +163,5 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
 
     }
 
-    companion object {
-        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
-    }
+
 }

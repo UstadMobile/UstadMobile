@@ -33,19 +33,18 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.os.Handler
-
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
-
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.view.OnBoardingView
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.SplashPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.SplashView
+import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
 import java.util.concurrent.TimeUnit
 
 
-class SplashScreenActivity : UstadBaseActivity() {
+class SplashScreenActivity : SplashView, UstadBaseActivity() {
 
     private val impl =  UstadMobileSystemImpl.instance
 
@@ -53,24 +52,23 @@ class SplashScreenActivity : UstadBaseActivity() {
         super.onCreate(savedInstanceState)
 
         setTheme(R.style.ThemeOnboarding)
-
         setContentView(R.layout.activity_splash_screen)
+        val presenter = SplashPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this)
+        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
+    }
 
-        if(!launched){val dbWork = OneTimeWorkRequest.Builder(
-                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
-                .build()
-            WorkManager.getInstance().enqueue(dbWork)
-        }
-
-        val showSplash = impl.getAppConfigString(
-                AppConfig.KEY_SHOW_SPASH_SCREEN, null, this)!!.toBoolean()
-
+    override fun startUi(delay: Boolean) {
         Handler().postDelayed({
             impl.startUI(this@SplashScreenActivity)
-        }, if(showSplash || !launched) TimeUnit.SECONDS.toMillis(2) else 0)
+        }, if(delay) TimeUnit.SECONDS.toMillis(2) else 0)
+    }
 
+    override fun preloadData() {
+        val dbWork = OneTimeWorkRequest.Builder(
+                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
+                .build()
+        WorkManager.getInstance().enqueue(dbWork)
     }
 
 }
