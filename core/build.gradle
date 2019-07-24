@@ -64,10 +64,60 @@ task copyTestResources(type: Copy) {
         outWriter.close()
     }
 }
+/*
+ * Generate a class with constant integer flags for each string message ID. See localization docs
+ * for further information.
+ */
+task prepareLocale {
+    inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
+    File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+    if(!outFile.parentFile.exists()) {
+        outFile.parentFile.mkdirs()
+    }
+    outFile.text = ''
+    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
+    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+    outFile << 'object MessageID{\n\n'
+
+    Map<String, Integer> messageIds = new HashMap<>()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+
+    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
+        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        xmlDoc.string.each() { str ->
+            String msgName = str.@name
+
+            if (!messageIds.containsKey(msgName)) {
+                Integer value;
+                if (str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                } else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+
+                messageIds.put(msgName, value)
+            }
+        }
+    }
+
+    Iterator<String> nameIterator = messageIds.keySet().iterator()
+
+    while (nameIterator.hasNext()) {
+        String strName = nameIterator.next()
+        Integer value = messageIds.get(strName)
+        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+    }
+    outFile << '}'
+}
+
 
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(copyTestResources)
+    }
+
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+        task.dependsOn(prepareLocale)
     }
 }
 
@@ -105,6 +155,7 @@ kotlin {
 
     sourceSets {
         commonMain {
+            kotlin.srcDirs += "build/generated/source/umlocale/"
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
@@ -266,7 +317,7 @@ kotlin {
 }
 
 jacoco {
-    toolVersion = "0.8.2"
+    toolVersion = "$version_jacoco_tool"
 }
 
 /**
@@ -321,48 +372,7 @@ if (rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
-/*
- * Generate a class with constant integer flags for each string message ID. See localization docs
- * for further information.
- */
-task prepareLocale {
-    inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("src/commonMain/kotlin/com/ustadmobile/core/generated/locale/MessageID.kt")
-    outFile.text = ''
-    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
-    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-    outFile << 'object MessageID{\n\n'
 
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-
-    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
-
-            if (!messageIds.containsKey(msgName)) {
-                Integer value;
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
-                }
-
-                messageIds.put(msgName, value)
-            }
-        }
-    }
-
-    Iterator<String> nameIterator = messageIds.keySet().iterator()
-
-    while (nameIterator.hasNext()) {
-        String strName = nameIterator.next()
-        Integer value = messageIds.get(strName)
-        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
-    }
-    outFile << '}'
-}
 
 /**
  * Generate locale json file whic maps code to actual string

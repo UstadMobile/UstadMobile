@@ -63,7 +63,8 @@ class DownloadJobConnectivityChangeTriggerJDBCEventsTest {
     }
 
 
-    @Test
+    //19/July/19 - temporarily disabled for testing out coverage
+    //@Test
     fun givenActiveDownloadJob_whenConnectivityStatusChanges_shouldTriggerUpdates() = runBlocking{
 
 

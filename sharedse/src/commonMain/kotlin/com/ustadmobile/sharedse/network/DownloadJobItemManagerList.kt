@@ -65,12 +65,6 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
         }
     }
 
-
-//    fun getActiveDownloadJobItemManagers(): List<DownloadJobItemManager> {
-//        return managerMap.values.toList()
-//    }
-
-
     override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long)  : DownloadJobItemStatus?{
         managerMap.values.forEach {
             val status = it.findStatusByContentEntryUid(contentEntryUid)
