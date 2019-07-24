@@ -15,8 +15,12 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
 
         val showBtn = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, this)!!.toBoolean()
+        handleShowDownloadButton(showBtn)
+    }
+
+    fun handleShowDownloadButton(show: Boolean){
         view.runOnUiThread(Runnable {
-            view.showDownloadAllButton(showBtn)
+            view.showDownloadAllButton(show)
         })
     }
 
