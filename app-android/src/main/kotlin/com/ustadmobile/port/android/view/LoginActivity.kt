@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
@@ -8,9 +9,9 @@ import android.widget.TextView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.LoginView
 
-class Login2Activity : UstadBaseActivity(), Login2View {
+class LoginActivity : UstadBaseActivity(), LoginView {
 
     private var mPresenter: Login2Presenter? = null
 
@@ -29,7 +30,10 @@ class Login2Activity : UstadBaseActivity(), Login2View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login2)
-        setSupportActionBar(findViewById(R.id.um_toolbar))
+
+        setUMToolbar(R.id.um_toolbar)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         mPresenter = Login2Presenter(this, bundleToMap(intent.extras),
                 this)
@@ -56,6 +60,7 @@ class Login2Activity : UstadBaseActivity(), Login2View {
     }
 
     override fun setErrorMessage(errorMessage: String) {
+        mErrorTextView!!.visibility = View.VISIBLE
         mErrorTextView!!.text = errorMessage
     }
 
@@ -69,5 +74,14 @@ class Login2Activity : UstadBaseActivity(), Login2View {
 
     override fun setPassword(password: String) {
         mPasswordTextView!!.text = password
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }

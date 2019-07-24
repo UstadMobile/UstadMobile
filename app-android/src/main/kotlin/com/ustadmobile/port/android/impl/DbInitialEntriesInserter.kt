@@ -16,7 +16,7 @@ class DbInitialEntriesInserter(private val context: Context) {
 
     class DbInitialEntriesInserterWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-        override fun doWork(): ListenableWorker.Result {
+        override fun doWork(): Result {
             return DbInitialEntriesInserter(applicationContext).doWork()
         }
     }
