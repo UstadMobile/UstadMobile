@@ -16,7 +16,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         super.onCreate(savedState)
 
         showDownloadAll = impl.getAppConfigString(
-                AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, this)!!.toBoolean()
+                AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
     }
 
