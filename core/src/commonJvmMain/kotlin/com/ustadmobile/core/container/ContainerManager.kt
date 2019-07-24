@@ -100,7 +100,7 @@ actual class ContainerManager actual constructor(container: Container,
                 val destFile = File(newFileDir, md5HexStr)
                 val currentFilePath = it.filePath
                 val isExcludedFromGzip = excludedGzipTypes.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
-                val shouldGzipNow = isExcludedFromGzip || it.compression == COMPRESSION_GZIP
+                val shouldGzipNow = if (it.compression == COMPRESSION_GZIP) false else !isExcludedFromGzip
                 val compressionSetting = if (isExcludedFromGzip) COMPRESSION_NONE else COMPRESSION_GZIP
                 //TODO: check for any paths that are being overwritten
 
@@ -116,7 +116,7 @@ actual class ContainerManager actual constructor(container: Container,
                         try {
                             inStream = it.inputStream
                             destOutStream = FileOutputStream(destFile)
-                            destOutStream = if (shouldGzipNow) destOutStream else GZIPOutputStream(destOutStream)
+                            destOutStream = if (shouldGzipNow) GZIPOutputStream(destOutStream) else destOutStream
                             inStream.copyTo(destOutStream)
                         } catch (e: IOException) {
                             throw e
@@ -150,10 +150,10 @@ actual class ContainerManager actual constructor(container: Container,
 
     actual fun getInputStream(containerEntry: ContainerEntryWithContainerEntryFile): InputStream {
         val fileIn = FileInputStream(File(containerEntry.containerEntryFile!!.cefPath!!))
-        if (containerEntry.containerEntryFile?.compression == ContainerEntryFile.COMPRESSION_GZIP) {
-            return GZIPInputStream(fileIn)
+        return if (containerEntry.containerEntryFile?.compression == COMPRESSION_GZIP) {
+            GZIPInputStream(fileIn)
         } else {
-            return fileIn
+            fileIn
         }
     }
 

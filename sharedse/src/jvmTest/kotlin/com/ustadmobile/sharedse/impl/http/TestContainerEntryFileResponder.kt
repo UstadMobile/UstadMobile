@@ -4,6 +4,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryFileResponder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import fi.iki.elonen.NanoHTTPD
@@ -16,7 +17,9 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
+import java.util.zip.GZIPInputStream
 
 class TestContainerEntryFileResponder {
 
@@ -27,6 +30,14 @@ class TestContainerEntryFileResponder {
     private var appDatabase: UmAppDatabase? = null
 
     private var appRepo: UmAppDatabase? = null
+
+    private fun getGZIPInputStreamFromResponse(data: InputStream, gzipHeader: Int): InputStream {
+        return if (gzipHeader == COMPRESSION_GZIP) {
+            GZIPInputStream(data)
+        } else {
+            data
+        }
+    }
 
     @Before
     @Throws(IOException::class)
@@ -61,10 +72,11 @@ class TestContainerEntryFileResponder {
             val response = ContainerEntryFileResponder().get(mockUriResource, mutableMapOf(),
                     mockSession)
 
-            val containerIn = containerManager.getInputStream(containerManager.allEntries[0])
+            val entry = containerManager.allEntries[0]
+            val containerIn = containerManager.getInputStream(entry)
             Assert.assertTrue("Response contents equals file contents",
                     Arrays.equals(UMIOUtils.readStreamToByteArray(containerIn),
-                            UMIOUtils.readStreamToByteArray(response.data)))
+                            UMIOUtils.readStreamToByteArray(getGZIPInputStreamFromResponse(response.data, entry.containerEntryFile!!.compression))))
             Assert.assertEquals("Response status is 200 OK", NanoHTTPD.Response.Status.OK,
                     response.status)
         }

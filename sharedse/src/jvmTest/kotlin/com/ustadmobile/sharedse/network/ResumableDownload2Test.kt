@@ -73,7 +73,6 @@ class ResumableDownload2Test {
                     downloadDstFile.length())
             Assert.assertArrayEquals("File content is the same",
                     testFile.readBytes(), downloadDstFile.readBytes())
-
         }
     }
 
