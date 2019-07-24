@@ -33,6 +33,6 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
 
 
     companion object {
-        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+        const val MASTER_SERVER_ROOT_ENTRY_UID = 12347120167L
     }
 }

@@ -8,6 +8,6 @@ interface SplashView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "Home"
+        const val VIEW_NAME = "Splash"
     }
 }

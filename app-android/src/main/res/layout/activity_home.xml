@@ -75,10 +75,10 @@
         android:padding="@dimen/dimen_8dp"
         android:layout_height="wrap_content"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_file_download_black_24dp"
+        app:floating_left_icon="@drawable/ic_file_download_white_24dp"
         app:floating_title="@string/download_all"
         app:layout_anchorGravity="bottom|center"
-        app:floating_title_color="@android:color/black" />
+        app:floating_title_color="@android:color/white" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
