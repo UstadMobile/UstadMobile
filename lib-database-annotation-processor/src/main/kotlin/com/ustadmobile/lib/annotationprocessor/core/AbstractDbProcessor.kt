@@ -51,24 +51,45 @@ fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
  * Get a list of all the syncable entities associated with a given POJO. This will look at parent
  * classes and embedded fields
  *
- * @param entityType the POJO to inspect to find
+ * @param entityType the POJO to inspect to find syncable entities. This will inspect the class
+ * itself, the parent classes, and any fields annotated with Embedded
+ * @param processingEnv the annotation processor environment
+ * @param embedPath the current embed path. This function is designed to work recursively.
+ *
+ * @return A map in the form of a list of the embedded variables to the syncable entity
+ * e.g.
+ * given
+ *
+ * <pre>
+ * class SyncableEntityWithOtherSyncableEntity(@Embedded var embedded: OtherSyncableEntity?): SyncableEntity()
+ * </pre>
+ * This will result in:
+ * <pre>
+ * {
+ * [] -> SyncableEntity,
+ * ['embedded'] -> OtherSyncableEntity
+ * }
+ * </pre>
  */
-fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
+fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnvironment,
+                         embedPath: List<String> = listOf()): Map<List<String>, ClassName> {
     if(entityType in QUERY_SINGULAR_TYPES)
-        return listOf()
+        return mapOf()
 
     val entityTypeEl = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
-    val syncableEntityList = mutableListOf<ClassName>()
+    val syncableEntityList = mutableMapOf<List<String>, ClassName>()
     ancestorsToList(entityTypeEl, processingEnv).forEach {
         if(it.getAnnotation(SyncableEntity::class.java) != null)
-            syncableEntityList.add(it.asClassName())
+            syncableEntityList.put(embedPath, it.asClassName())
 
         it.enclosedElements.filter { it.getAnnotation(Embedded::class.java) != null}.forEach {
-            syncableEntityList.addAll(findSyncableEntities(it.asType().asTypeName() as ClassName, processingEnv))
+            val subEmbedPath = mutableListOf(*embedPath.toTypedArray()) + "${it.simpleName}"
+            syncableEntityList.putAll(findSyncableEntities(it.asType().asTypeName() as ClassName,
+                    processingEnv, subEmbedPath))
         }
     }
 
-    return syncableEntityList.toList()
+    return syncableEntityList.toMap()
 }
 
 fun jdbcDaoTypeSpecBuilder(simpleName: String, superTypeName: TypeName) = TypeSpec.classBuilder(simpleName)
@@ -104,7 +125,7 @@ fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironm
             val returnType = resolveReturnTypeIfSuspended(methodResolved)
             val entityType = resolveEntityFromResultType(resolveQueryResultType(returnType))
             syncableEntitiesOnDao.addAll(findSyncableEntities(entityType as ClassName,
-                    processingEnv))
+                    processingEnv).values)
         }
     }
 
@@ -122,7 +143,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
         return sql
 
     var newSql = "SELECT * FROM ($sql) AS ${resultComponentClassName.simpleName} WHERE "
-    syncableEntities.forEach {
+    syncableEntities.values.forEach {
         val syncableEntityTypeEl = processingEnv.elementUtils.getTypeElement(it.canonicalName)
         val entityPkField = syncableEntityTypeEl.enclosedElements
                 .first { it.getAnnotation(PrimaryKey::class.java) != null }

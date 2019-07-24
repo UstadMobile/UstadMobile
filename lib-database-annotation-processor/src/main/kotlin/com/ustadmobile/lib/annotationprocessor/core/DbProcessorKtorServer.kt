@@ -13,6 +13,7 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.*
+import java.util.*
 
 fun isQueryParam(typeName: TypeName) =
     if(QUERY_SINGULAR_TYPES.contains(typeName)) {
@@ -97,7 +98,7 @@ fun generateRespondCall(returnType: TypeName, varName: String): CodeBlock{
                 DbProcessorKtorServer.RESPOND_MEMBER)
 
         else -> codeBlock.beginControlFlow("if($varName != null)")
-                .add("%M.%M($varName)\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER)
+                .add("%M.%M($varName!!)\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER)
                 .nextControlFlow("else")
                 .add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
                         DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
@@ -142,6 +143,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
                 "${daoTypeElement.simpleName}")
+
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
             val daoMethodEl = daoSubEl as ExecutableElement
             val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
@@ -168,8 +170,26 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             }
 
             codeBlock.endControlFlow()
-
         }
+
+        syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).forEach {
+            val entitySyncTracker = getEntitySyncTracker(
+                    processingEnv.elementUtils.getTypeElement(it.canonicalName), processingEnv)
+            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker)
+            val updateTrackerReceivedFunName = "_update${entitySyncTrackerEl.simpleName}Received"
+            codeBlock.beginControlFlow("%M(%S)", GET_MEMBER, updateTrackerReceivedFunName)
+                    .add("val _clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                        CALL_MEMBER,
+                        MemberName("io.ktor.request","header"),
+                        "X-nid")
+                    .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId"))
+                    //TODO: Add the clientId to this query (to prevent other clients interfering)
+                    .add("_syncHelper.$updateTrackerReceivedFunName(true, _requestId)\n")
+                    .add("%M.%M(%T.NoContent, \"\")\n", CALL_MEMBER, RESPOND_MEMBER,
+                            HttpStatusCode::class)
+                    .endControlFlow()
+        }
+
         codeBlock.endControlFlow()
         daoRouteFn.addCode(codeBlock.build())
         daoImplFile.addFunction(daoRouteFn.build())
@@ -201,13 +221,18 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         var querySql = daoMethodEl.getAnnotation(Query::class.java).value
         val componentEntityType = resolveEntityFromResultType(returnType)
-        val isSyncableResult = (componentEntityType is ClassName
-                && findSyncableEntities(componentEntityType, processingEnv).isNotEmpty())
-        if(isSyncableResult) {
+        val syncableEntitiesList = if(componentEntityType is ClassName) {
+            findSyncableEntities(componentEntityType, processingEnv)
+        }else {
+            null
+        }
+
+        if(syncableEntitiesList != null) {
             codeBlock.add("val clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
                     CALL_MEMBER,
                     MemberName("io.ktor.request","header"),
                     "X-nid")
+                    .add("val _reqId = %T().nextInt()\n", Random::class)
             queryVarsMap.put("clientId", INT)
             querySql = refactorSyncSelectSql(querySql, componentEntityType as ClassName,
                     processingEnv)
@@ -215,7 +240,50 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
 
         codeBlock.add(generateQueryCodeBlock(returnType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
-        codeBlock.add(generateRespondCall(returnType, "_result!!"))
+
+        syncableEntitiesList?.forEach {
+            val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
+
+            val isListOrArrayResult = isListOrArray(returnType)
+            var wrapperFnName = Pair("", "")
+            var varName = ""
+            if(isListOrArrayResult) {
+                var prefix = "_result"
+                it.key.forEach {embedVarName ->
+                    prefix += ".map { it.$embedVarName }.filter { it != null }"
+                }
+                wrapperFnName = Pair("$prefix.map {", "}")
+                varName = "it"
+            }else {
+                var accessorName = "_result"
+                it.key.forEach {embedVarName ->
+                    accessorName += "?.$embedVarName"
+                }
+
+                varName = "_se${sEntityInfo.syncableEntity.simpleName}"
+                codeBlock.add("val $varName = $accessorName\n")
+
+                wrapperFnName = Pair("listOf(", ")")
+            }
+
+
+            if(!isListOrArrayResult) {
+                codeBlock.beginControlFlow("if($varName != null)")
+            }
+
+            codeBlock.add("""_syncHelper._replace${sEntityInfo.tracker.simpleName}( ${wrapperFnName.first} %T(
+                             |${sEntityInfo.trackerPkField.name} = $varName.${sEntityInfo.entityPkField.name},
+                             |${sEntityInfo.trackerDestField.name} = clientId,
+                             |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name},
+                             |${sEntityInfo.trackerReqIdField.name} = _reqId
+                             |) ${wrapperFnName.second} )
+                             |""".trimMargin(), sEntityInfo.tracker)
+            if(!isListOrArrayResult) {
+                codeBlock.endControlFlow()
+            }
+        }
+
+        codeBlock.add(generateRespondCall(returnType, "_result"))
 
         return codeBlock.build()
     }
