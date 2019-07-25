@@ -24,7 +24,7 @@ class CompressJob {
         runBlocking {
             var fileList = entryFileDao.getAllFilesForCompression()
             println("found ${fileList.size} files")
-          //  do {
+            do {
                 fileList.forEach {
 
                     val sourceFile = File(it.cefPath!!)
@@ -65,9 +65,9 @@ class CompressJob {
                 fileList = entryFileDao.getAllFilesForCompression()
                 println("found ${fileList.size} more files")
 
-            //} while (fileList.isNotEmpty())
+            } while (fileList.isNotEmpty())
 
-            //containerDao.updateFileSizeForAllContainers()
+            containerDao.updateFileSizeForAllContainers()
 
         }
 
