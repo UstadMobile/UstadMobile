@@ -10,8 +10,8 @@
 
    <ImageView
        android:id="@+id/organisation_icon"
-       android:layout_width="1dp"
-       android:layout_height="1dp"
+       android:layout_width="150dp"
+       android:layout_height="150dp"
        android:layout_centerHorizontal="true"
        android:layout_centerVertical="true"
        android:src="@drawable/ic_launch_green"
