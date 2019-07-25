@@ -14,7 +14,7 @@
        android:layout_height="150dp"
        android:layout_centerHorizontal="true"
        android:layout_centerVertical="true"
-       android:src="@drawable/ic_launch_green"
+       android:src="@drawable/ic_launcher_icon"
        app:layout_constraintBottom_toBottomOf="parent"
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
