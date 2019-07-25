@@ -6,7 +6,6 @@ import com.squareup.kotlinpoet.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
 import java.io.File
-import javax.annotation.processing.Messager
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
@@ -127,6 +126,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val daoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_KTOR_ROUTE}")
         daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
+        daoImplFile.addImport("io.ktor.response", "header")
 
         val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}Route")
                 .receiver(Route::class)
@@ -233,6 +233,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     MemberName("io.ktor.request","header"),
                     "X-nid")
                     .add("val _reqId = %T().nextInt()\n", Random::class)
+                    .add("%M.response.header(%S, _reqId)\n", CALL_MEMBER, "X-reqid")
             queryVarsMap.put("clientId", INT)
             querySql = refactorSyncSelectSql(querySql, componentEntityType as ClassName,
                     processingEnv)
@@ -333,5 +334,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val CALL_MEMBER = MemberName("io.ktor.application", "call")
 
         val RESPOND_MEMBER = MemberName("io.ktor.response", "respond")
+
+        val RESPONSE_HEADER = MemberName("io.ktor.response", "header")
     }
 }

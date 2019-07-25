@@ -8,7 +8,7 @@ import androidx.room.Query
 abstract class ExampleSyncableDao {
 
     @Insert
-    abstract fun insert(syncableEntity: ExampleSyncableEntity)
+    abstract fun insert(syncableEntity: ExampleSyncableEntity): Long
 
     @Query("SELECT * FROM ExampleSyncableEntity")
     abstract fun findAll(): List<ExampleSyncableEntity>

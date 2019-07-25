@@ -17,17 +17,25 @@ import com.ustadmobile.door.*
 import db2.ExampleDao2Route
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
+import db2.ExampleDatabase2SyncDaoImpl
+import db2.ExampleSyncableDaoRoute
+import io.ktor.application.call
 import io.ktor.client.HttpClient
+import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.url
+import io.ktor.client.request.*
+import io.ktor.client.response.HttpResponse
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.request.header
+import io.ktor.response.header
+import io.ktor.routing.get
+import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
+import io.ktor.util.url
 import org.junit.After
+import org.junit.Assert
 import java.util.concurrent.TimeUnit
 
 class TestDbRoute  {
@@ -47,9 +55,10 @@ class TestDbRoute  {
                 register(ContentType.Any, GsonConverter())
             }
 
+            val syncDao = ExampleDatabase2SyncDaoImpl(exampleDb)
             install(Routing) {
                 ExampleDao2Route(exampleDb.exampleDao2(), exampleDb)
-                //ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, )
+                ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, syncDao)
             }
         }
 
@@ -88,9 +97,25 @@ class TestDbRoute  {
         val httpClient = HttpClient() {
             install(JsonFeature)
         }
-
         val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
+        exampleSyncableEntity.esUid = exampleDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
+        val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleSyncableDao/findAll") {
+            header("X-nid", 1)
+        }
+        val reqId = firstGetListResponse.headers.get("X-reqid")!!.toInt()
+        val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
+        httpClient.get<Unit>("http://localhost:8089/ExampleSyncableDao/_updateExampleSyncableEntityTrackerReceived?reqId=$reqId")
+
+        val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleSyncableDao/findAll") {
+            header("X-nid", 1)
+        }
+
+        Assert.assertEquals("First list has one item", 1, firstGetList.size)
+        Assert.assertEquals("First entity in list is the item inserted", exampleSyncableEntity.esUid,
+                firstGetList[0].esUid)
+        Assert.assertTrue("Second response is empty after receipt was acknowledged",
+                secondGetList.isEmpty())
 
     }
 
