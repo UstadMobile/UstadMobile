@@ -51,7 +51,7 @@ class CompressJob {
 
 
                         it.compression = COMPRESSION_GZIP
-                        println("sourceFile compressed length ${sourceFile.length()}")
+                        println("sourceFile compressed length ${it.ceCompressedSize}")
 
                         entryFileDao.updateCompressedFile(it.compression, it.ceCompressedSize, it.cefUid)
                     } catch (io: IOException) {
