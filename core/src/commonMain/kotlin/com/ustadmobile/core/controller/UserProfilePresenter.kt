@@ -87,7 +87,7 @@ class UserProfilePresenter(context: Any,
         UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.instance)
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
-        impl.go(Login2View.VIEW_NAME, args, context)
+        impl.go(LoginView.VIEW_NAME, args, context)
     }
 
     fun handleClickMyWomenEntrepreneurs(){

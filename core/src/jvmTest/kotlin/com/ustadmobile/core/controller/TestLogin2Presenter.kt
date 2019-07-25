@@ -7,7 +7,7 @@
 //import com.ustadmobile.core.generated.locale.MessageID
 //import com.ustadmobile.core.impl.UmAccountManager
 //import com.ustadmobile.core.impl.UstadMobileSystemImpl
-//import com.ustadmobile.core.view.Login2View
+//import com.ustadmobile.core.view.LoginView
 //import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer
 //import com.ustadmobile.lib.db.entities.Person
 //import com.ustadmobile.lib.db.entities.PersonAuth
@@ -42,7 +42,7 @@
 //
 //    private var repo: UmAppDatabase? = null
 //
-//    private var mockView: Login2View? = null
+//    private var mockView: LoginView? = null
 //
 //
 //    @Before
@@ -64,11 +64,11 @@
 //                PersonAuthDao.ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptThisPassword(VALID_PASS))
 //        repo!!.personAuthDao.insert(testPersonAuth)
 //
-//        mockView = Mockito.mock(Login2View::class.java)
+//        mockView = Mockito.mock(LoginView::class.java)
 //        doAnswer {
 //            Thread(it.getArgument<Any>(0) as Runnable).start()
 //            null
-//        }.`when`<Login2View>(mockView).runOnUiThread(any())
+//        }.`when`<LoginView>(mockView).runOnUiThread(any())
 //    }
 //
 //    @After
@@ -107,8 +107,8 @@
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
 //                MessageID.wrong_user_pass_combo, Any())
 //
-//        verify<Login2View>(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg)
-//        verify<Login2View>(mockView, timeout(5000)).setPassword("")
+//        verify<LoginView>(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg)
+//        verify<LoginView>(mockView, timeout(5000)).setPassword("")
 //    }
 //
 //
@@ -122,7 +122,7 @@
 //        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI)
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
 //                MessageID.login_network_error, Any())
-//        verify<Login2View>(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg)
+//        verify<LoginView>(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg)
 //    }
 //
 //    companion object {

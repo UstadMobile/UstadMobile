@@ -25,8 +25,12 @@ object AppConfig {
 
     const val KEY_WIFI_P2P_INSTANCE_NAME = "wifiP2pInstanceName"
 
-    const val KEY_SHOW_CONTENT_EDITOR_CONTROLS = "show_content_editor_controls"
+    const val KEY_SHOW_CONTENT_EDITOR_CONTROLS = "editor.show_content_editor_controls"
 
-    const val KEY_SHOW_SPASH_SCREEN = "show_splash_screen"
+    const val KEY_SHOW_SPASH_SCREEN = "splashscreen.show_splash_screen"
+
+    const val KEY_ANIMATE_ORGANISATION_ICON = "splashscreen.animate_organisation_icon"
+
+    const val KEY_SHOW_DOWNLOAD_ALL_BTN = "homescreen.show_download_all_button"
 
 }

@@ -9,7 +9,7 @@ import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.core.view.BasePoint2View
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
@@ -130,7 +130,7 @@ class BasePoint2Presenter(context: Any,
         val impl = UstadMobileSystemImpl.instance
         UmAccountManager.updatePasswordHash(null, context, impl)
         val args = HashMap<String, String>()
-        impl.go(Login2View.VIEW_NAME, args, context)
+        impl.go(LoginView.VIEW_NAME, args, context)
     }
 
     /**

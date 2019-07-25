@@ -12,7 +12,7 @@ import android.view.View
 import android.widget.*
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.lib.db.entities.UmAccount
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -34,7 +34,7 @@ import javax.crypto.SecretKey
 import javax.security.cert.CertificateException
 
 
-class Login2Activity : UstadBaseActivity(), Login2View,
+class LoginActivity : UstadBaseActivity(), LoginView,
         FingerprintAuthenticationHelper.FingerprintHelperListener {
     override fun authenticationFailed(error: String) {
         //Does nothing

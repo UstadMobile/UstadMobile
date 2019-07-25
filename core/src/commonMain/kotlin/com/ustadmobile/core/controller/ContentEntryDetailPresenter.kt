@@ -18,7 +18,6 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_F
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
-import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.atomic
@@ -247,26 +246,34 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>?,
     fun handleDownloadButtonClick() {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
-            ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
-                    context, object : UmCallback<Any> {
 
-                override fun onSuccess(result: Any?) {}
+            val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
+                    "false",context)!!.toBoolean()
 
-                override fun onFailure(exception: Throwable?) {
-                    if (exception != null) {
-                        val message = exception.message
-                        if (exception is NoAppFoundException) {
-                            view.runOnUiThread(Runnable {
-                                view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
-                                        MessageID.get_app,
-                                        exception.mimeType!!)
-                            })
-                        } else {
-                            view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+            if(loginFirst){
+                impl.go(LoginView.VIEW_NAME, args, view.viewContext)
+            }else{
+                ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
+                        context, object : UmCallback<Any> {
+
+                    override fun onSuccess(result: Any?) {}
+
+                    override fun onFailure(exception: Throwable?) {
+                        if (exception != null) {
+                            val message = exception.message
+                            if (exception is NoAppFoundException) {
+                                view.runOnUiThread(Runnable {
+                                    view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
+                                            MessageID.get_app,
+                                            exception.mimeType!!)
+                                })
+                            } else {
+                                view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
 
 
         } else {

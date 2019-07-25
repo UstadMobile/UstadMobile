@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com /tools"
     android:layout_width="match_parent"
@@ -16,7 +17,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
 
         <include layout="@layout/toolbar_with_progress" />
 
@@ -75,6 +75,8 @@
         android:layout_marginEnd="8dp"
         android:backgroundTint="@color/accent"
         android:text="@string/login"
+        android:textSize="@dimen/text_body"
+        android:padding="@dimen/dimen_16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
@@ -82,6 +84,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login_forgot_password" />
 
     <TextView
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/activity_login_forgot_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -97,6 +100,9 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login_errormessage" />
 
     <TextView
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/activity_login_errormessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

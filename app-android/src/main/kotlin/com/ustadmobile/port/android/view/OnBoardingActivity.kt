@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.rd.PageIndicatorView
@@ -17,14 +17,17 @@ import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import java.util.*
 
+class OnBoardingActivity : UstadBaseActivity(), OnBoardingView,
+        AdapterView.OnItemSelectedListener {
 
-
-class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 
     private var pageIndicatorView: PageIndicatorView? = null
 
     private var presenter: OnBoardingPresenter? = null
+
+    private lateinit var languageOptions: Spinner
 
     private var viewPager: ViewPager? = null
 
@@ -92,23 +95,42 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
         viewPager = findViewById(R.id.onBoardPagerView)
         getStartedBtn = findViewById(R.id.get_started_btn)
         pageIndicatorView = findViewById(R.id.pageIndicatorView)
+        languageOptions = findViewById(R.id.language_option)
 
         presenter = OnBoardingPresenter(this,
                 bundleToMap(intent.extras), this)
         presenter!!.onCreate(bundleToMap(savedInstanceState))
         pageIndicatorView!!.setAnimationType(AnimationType.WORM)
 
-        getStartedBtn!!.setOnClickListener { v -> presenter!!.handleGetStarted() }
+        getStartedBtn!!.setOnClickListener { presenter!!.handleGetStarted() }
 
+    }
+
+    override fun setLanguageOptions(languages: MutableList<String>) {
+        val adapter = ArrayAdapter(this,android.R.layout.simple_spinner_item, languages)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        languageOptions.adapter = adapter
+
+        languageOptions.onItemSelectedListener = this
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        presenter!!.handleLanguageSelected(position)
     }
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle.isVersionKitKatOrBelow) {
             getStartedBtn!!.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
-            getStartedBtn!!.setTextColor(resources
-                    .getColorStateList(R.color.pre_lollipop_btn_selector_txt_onboarding))
+            getStartedBtn!!.setTextColor(ContextCompat.getColor(this,
+                    R.color.pre_lollipop_btn_selector_txt_onboarding))
         }
+    }
+
+    override fun restartUI() {
+        onResume()
     }
 
     override fun setScreenList() {
@@ -121,6 +143,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 
                 override fun onPageSelected(position: Int) {
                     pageIndicatorView!!.setSelected(position)
+
                 }
 
                 override fun onPageScrollStateChanged(state: Int) {}

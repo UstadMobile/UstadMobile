@@ -5,8 +5,8 @@ import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.Login2View.Companion.ARG_LOGIN_USERNAME
+import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.LoginView.Companion.ARG_LOGIN_USERNAME
 import com.ustadmobile.lib.util.encryptPassword
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -16,8 +16,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
 
-class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login2View)
-    : UstadBaseController<Login2View>(context, arguments, view) {
+class Login2Presenter(context: Any, arguments: Map<String, String?>, view: LoginView)
+    : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null
 
