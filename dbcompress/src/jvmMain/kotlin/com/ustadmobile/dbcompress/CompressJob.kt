@@ -28,21 +28,20 @@ class CompressJob {
                 fileList.forEach {
 
                     val sourceFile = File(it.cefPath!!)
-                    val destFile = File(sourceFile.parentFile, "tmp")
+                    val destFile = File(sourceFile.parentFile, "${sourceFile.name}.tmp")
                     val fileInput = FileInputStream(sourceFile)
-                    val fileOutput = FileOutputStream(destFile)
-                    val gzipOut = GZIPOutputStream(fileOutput)
+                    val gzipOut = GZIPOutputStream(FileOutputStream(destFile))
 
                     try {
 
-                        println("sourceFile original length ${sourceFile.length()}")
+                        println("Source file ${sourceFile.name} original length ${sourceFile.length()}, containerEntryFileUid = ${it.cefUid}")
 
                         UMIOUtils.readFully(fileInput, gzipOut)
 
                         UMIOUtils.closeInputStream(fileInput)
-                        UMIOUtils.closeOutputStream(fileOutput)
                         UMIOUtils.closeOutputStream(gzipOut)
 
+                        it.ceCompressedSize = destFile.length()
                         val isDeleted = sourceFile.delete()
                         if (isDeleted) {
                             destFile.renameTo(sourceFile)
@@ -50,9 +49,8 @@ class CompressJob {
                             throw IOException("original source file was not deleted for file ${sourceFile.path}")
                         }
 
-                        it.compression = COMPRESSION_GZIP
-                        it.ceCompressedSize = sourceFile.length()
 
+                        it.compression = COMPRESSION_GZIP
                         println("sourceFile compressed length ${sourceFile.length()}")
 
                         entryFileDao.updateCompressedFile(it.compression, it.ceCompressedSize, it.cefUid)
@@ -61,7 +59,6 @@ class CompressJob {
                         io.printStackTrace()
                     } finally {
                         UMIOUtils.closeInputStream(fileInput)
-                        UMIOUtils.closeOutputStream(fileOutput)
                         UMIOUtils.closeOutputStream(gzipOut)
                     }
                 }
