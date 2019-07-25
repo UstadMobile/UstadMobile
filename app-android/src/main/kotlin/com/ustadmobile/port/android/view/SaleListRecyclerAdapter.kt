@@ -20,7 +20,8 @@ import com.ustadmobile.core.controller.CommonHandlerPresenter
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.SaleListDetail
 
-class SaleListRecyclerAdapter : PagedListAdapter<SaleListDetail, SaleListRecyclerAdapter.SaleListViewHolder> {
+class SaleListRecyclerAdapter
+    : PagedListAdapter<SaleListDetail, SaleListRecyclerAdapter.SaleListViewHolder> {
 
     internal var theContext: Context
     internal var theActivity: Activity? = null

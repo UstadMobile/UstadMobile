@@ -19,14 +19,15 @@ import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
  **/
 class PersonWithSaleInfoListPresenter(context: Any,
                                       arguments: Map<String, String>?,
-                                      view: PersonWithSaleInfoListView)
+                                      view: PersonWithSaleInfoListView,
+                                      val systemImpl: UstadMobileSystemImpl)
     : UstadBaseController<PersonWithSaleInfoListView>(context, arguments!!, view) {
 
     internal lateinit var repository: UmAppDatabase
 
+    //Use lateinit - these should never be null
     private var entityDao: SaleDao? = null
     private var entity: Person? = null
-
     private var personDao: PersonDao? = null
     private var currentPerson: Person? = null
     private var loggedInPersonUid = 0L
@@ -43,29 +44,15 @@ class PersonWithSaleInfoListPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        if (loggedInPersonUid != 0L) {
-            GlobalScope.launch {
-                var result = personDao!!.findByUidAsync(loggedInPersonUid)
-                currentPerson = result
-            }
-        }
-
-        //Any arguments
-        if(arguments.containsKey(PersonWithSaleInfoListView.ARG_LE_UID)){
-            personUid = (arguments[PersonWithSaleInfoListView.ARG_LE_UID]!!.toLong())
-        }
+        personUid = (arguments[PersonWithSaleInfoListView.ARG_LE_UID]!!.toLong())
 
         //Get assigned people
         factory = entityDao!!.getMyWomenEntrepreneurs(personUid)
         view.setWEListFactory(factory)
     }
 
-    fun handleClickWE(weUid:Long){
-        val impl = UstadMobileSystemImpl.instance
-        val args = HashMap<String, String>()
-        args.put(ARG_WE_UID, weUid.toString())
-        impl.go(PersonWithSaleInfoDetailView.VIEW_NAME, args, context)
-    }
+    fun handleClickWE(weUid:Long) = systemImpl.go(PersonWithSaleInfoDetailView.VIEW_NAME,
+                    mapOf(ARG_WE_UID to weUid.toString()), context)
 
     fun handleClickSearch(){
         val impl = UstadMobileSystemImpl.instance

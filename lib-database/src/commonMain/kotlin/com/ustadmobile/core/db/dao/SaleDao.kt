@@ -320,7 +320,8 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val ALL_SALES_ACTIVE_QUERY = "SELECT * FROM Sale WHERE saleActive = 1"
 
-        const val ALL_SALE_LIST_SELECT = " SELECT sl.*, " +
+        const val ALL_SALE_LIST_SELECT =
+                " SELECT sl.*, " +
                 " (SELECT SaleItem.saleItemQuantity " +
                 " FROM Sale stg " +
                 " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid " +
@@ -378,18 +379,20 @@ abstract class SaleDao : BaseDao<Sale> {
                 " AS saleItemPreOrder " +
                 " FROM Sale sl "
 
-        const val ALL_SALE_LIST_LJ =
-                " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid WHERE sl.saleActive = 1 " +
-                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
+        const val ALL_SALE_LIST_LJ1 =
+                " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid  " +
+                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid "
+        const val ALL_SALE_LIST_LJ2 =
                 " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
-                " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid "
+                " LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid "
 
-        const val ALL_SALE_LIST_WHERE_WE =
-                " WHERE WE.personUid = :weUid "
+        const val ALL_SALE_LIST_WHERE = " WHERE sl.saleActive = 1 "
+        const val ALL_SALE_LIST_WHERE_WE =" AND WE.personUid = :weUid "
 
 
-        const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ
-        const val ALL_SALE_LIST_WE_FILTER = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_WHERE_WE + ALL_SALE_LIST_LJ
+        const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 +  ALL_SALE_LIST_WHERE
+        const val ALL_SALE_LIST_WE_FILTER = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 +
+                ALL_SALE_LIST_LJ2 + ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_WE
         //filter and sort
 
         const val FILTER_PREORDER = " AND (saleItemPreOrder = 1 OR salePreOrder = 1)"
@@ -405,7 +408,7 @@ abstract class SaleDao : BaseDao<Sale> {
 
         //Filter queries
         //ALL_SALE_LIST
-        const private val SEARCH_BY_QUERY = " AND " +
+        const val SEARCH_BY_QUERY = " AND " +
                 " sl.saleLocationUid = :locationuid " +
                 " AND saleAmount > :amountl AND saleAmount < :amounth " +
                 " AND saleProductNames LIKE :title " +
