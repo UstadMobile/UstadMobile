@@ -5,6 +5,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -20,7 +21,7 @@ class CompressJob {
         val entryFileDao = db.containerEntryFileDao
         val containerDao = db.containerDao
 
-        GlobalScope.launch {
+        runBlocking {
             var fileList = entryFileDao.getAllFilesForCompression()
             println("found ${fileList.size} files")
             do {
