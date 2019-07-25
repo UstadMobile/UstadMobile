@@ -16,7 +16,7 @@ class DbInitialEntriesInserter(private val context: Context) {
 
     class DbInitialEntriesInserterWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-        override fun doWork(): ListenableWorker.Result {
+        override fun doWork(): Result {
             return DbInitialEntriesInserter(applicationContext).doWork()
         }
     }
@@ -42,58 +42,68 @@ class DbInitialEntriesInserter(private val context: Context) {
                 val fileResult = context.assets.open("db/$entryData")
                 val contentData = UMIOUtils.readStreamToString(fileResult)
 
-                if (entryData.startsWith("languageVariant.")) {
-                    val resultList = gson.fromJson<List<LanguageVariant>>(contentData, object : TypeToken<List<LanguageVariant>>() {
+                when {
+                    entryData.startsWith("languageVariant.") -> {
+                        val resultList = gson.fromJson<List<LanguageVariant>>(contentData, object : TypeToken<List<LanguageVariant>>() {
 
-                    }.type)
-                    appDatabase.languageVariantDao.insertList(resultList)
-                } else if (entryData.startsWith("language.")) {
-                    val resultList = gson.fromJson<List<Language>>(contentData, object : TypeToken<List<Language>>() {
-
-                    }.type)
-                    appDatabase.languageDao.insertList(resultList)
-                } else if (entryData.startsWith("contentCategorySchema.")) {
-                    val resultList = gson.fromJson<List<ContentCategorySchema>>(contentData, object : TypeToken<List<ContentCategorySchema>>() {
-
-                    }.type)
-                    appDatabase.contentCategorySchemaDao.insertList(resultList)
-                } else if (entryData.startsWith("contentEntryContentCategoryJoin.")) {
-                    val resultList = gson.fromJson<List<ContentEntryContentCategoryJoin>>(contentData, object : TypeToken<List<ContentEntryContentCategoryJoin>>() {
-
-                    }.type)
-                    appDatabase.contentEntryContentCategoryJoinDao.insertList(resultList)
-                } else if (entryData.startsWith("contentCategory.")) {
-                    val resultList = gson.fromJson<List<ContentCategory>>(contentData, object : TypeToken<List<ContentCategory>>() {
-
-                    }.type)
-                    appDatabase.contentCategoryDao.insertList(resultList)
-                } else if (entryData.startsWith("container.")) {
-                    val resultList = gson.fromJson<List<Container>>(contentData, object : TypeToken<List<Container>>() {
-
-                    }.type)
-                    appDatabase.containerDao.insertList(resultList)
-                } else if (entryData.startsWith("contentEntryRelatedEntryJoin.")) {
-                    val resultList = gson.fromJson<List<ContentEntryRelatedEntryJoin>>(contentData, object : TypeToken<List<ContentEntryRelatedEntryJoin>>() {
-
-                    }.type)
-                    appDatabase.contentEntryRelatedEntryJoinDao.insertList(resultList)
-                } else if (entryData.startsWith("contentEntryParentChildJoin.")) {
-                    val resultList = gson.fromJson<List<ContentEntryParentChildJoin>>(contentData, object : TypeToken<List<ContentEntryParentChildJoin>>() {
-
-                    }.type)
-                    appDatabase.contentEntryParentChildJoinDao.insertList(resultList)
-                } else if (entryData.startsWith("contentEntry.")) {
-                    val resultList = gson.fromJson<List<ContentEntry>>(contentData, object : TypeToken<List<ContentEntry>>() {
-
-                    }.type)
-                    val uniques = HashSet<Long>()
-                    for (entry in resultList) {
-                        val isAdded = uniques.add(entry.contentEntryUid)
-                        if (!isAdded) {
-                            Log.d("Export", "content entry id was found again " + entry.contentEntryUid)
-                        }
+                        }.type)
+                        appDatabase.languageVariantDao.insertList(resultList)
                     }
-                    appDatabase.contentEntryDao.insertList(resultList)
+                    entryData.startsWith("language.") -> {
+                        val resultList = gson.fromJson<List<Language>>(contentData, object : TypeToken<List<Language>>() {
+
+                        }.type)
+                        appDatabase.languageDao.insertList(resultList)
+                    }
+                    entryData.startsWith("contentCategorySchema.") -> {
+                        val resultList = gson.fromJson<List<ContentCategorySchema>>(contentData, object : TypeToken<List<ContentCategorySchema>>() {
+
+                        }.type)
+                        appDatabase.contentCategorySchemaDao.insertList(resultList)
+                    }
+                    entryData.startsWith("contentEntryContentCategoryJoin.") -> {
+                        val resultList = gson.fromJson<List<ContentEntryContentCategoryJoin>>(contentData, object : TypeToken<List<ContentEntryContentCategoryJoin>>() {
+
+                        }.type)
+                        appDatabase.contentEntryContentCategoryJoinDao.insertList(resultList)
+                    }
+                    entryData.startsWith("contentCategory.") -> {
+                        val resultList = gson.fromJson<List<ContentCategory>>(contentData, object : TypeToken<List<ContentCategory>>() {
+
+                        }.type)
+                        appDatabase.contentCategoryDao.insertList(resultList)
+                    }
+                    entryData.startsWith("container.") -> {
+                        val resultList = gson.fromJson<List<Container>>(contentData, object : TypeToken<List<Container>>() {
+
+                        }.type)
+                        appDatabase.containerDao.insertList(resultList)
+                    }
+                    entryData.startsWith("contentEntryRelatedEntryJoin.") -> {
+                        val resultList = gson.fromJson<List<ContentEntryRelatedEntryJoin>>(contentData, object : TypeToken<List<ContentEntryRelatedEntryJoin>>() {
+
+                        }.type)
+                        appDatabase.contentEntryRelatedEntryJoinDao.insertList(resultList)
+                    }
+                    entryData.startsWith("contentEntryParentChildJoin.") -> {
+                        val resultList = gson.fromJson<List<ContentEntryParentChildJoin>>(contentData, object : TypeToken<List<ContentEntryParentChildJoin>>() {
+
+                        }.type)
+                        appDatabase.contentEntryParentChildJoinDao.insertList(resultList)
+                    }
+                    entryData.startsWith("contentEntry.") -> {
+                        val resultList = gson.fromJson<List<ContentEntry>>(contentData, object : TypeToken<List<ContentEntry>>() {
+
+                        }.type)
+                        val uniques = HashSet<Long>()
+                        for (entry in resultList) {
+                            val isAdded = uniques.add(entry.contentEntryUid)
+                            if (!isAdded) {
+                                Log.d("Export", "content entry id was found again " + entry.contentEntryUid)
+                            }
+                        }
+                        appDatabase.contentEntryDao.insertList(resultList)
+                    }
                 }
 
 
