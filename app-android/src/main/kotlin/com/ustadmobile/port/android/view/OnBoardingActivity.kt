@@ -95,7 +95,6 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView,
         viewPager = findViewById(R.id.onBoardPagerView)
         getStartedBtn = findViewById(R.id.get_started_btn)
         pageIndicatorView = findViewById(R.id.pageIndicatorView)
-        languageOptions = findViewById(R.id.language_option)
 
         presenter = OnBoardingPresenter(this,
                 bundleToMap(intent.extras), this)

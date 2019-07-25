@@ -20,13 +20,12 @@ import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 class PersonWithSaleInfoListPresenter(context: Any,
                                       arguments: Map<String, String>?,
                                       view: PersonWithSaleInfoListView,
-                                      val systemImpl: UstadMobileSystemImpl)
+                                      val systemImpl: UstadMobileSystemImpl,
+                                      private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context),
+                                      private val saleDao: SaleDao = repository.saleDao)
     : UstadBaseController<PersonWithSaleInfoListView>(context, arguments!!, view) {
 
-    internal lateinit var repository: UmAppDatabase
-
     //Use lateinit - these should never be null
-    private var entityDao: SaleDao? = null
     private var entity: Person? = null
     private var personDao: PersonDao? = null
     private var currentPerson: Person? = null
@@ -36,8 +35,6 @@ class PersonWithSaleInfoListPresenter(context: Any,
     private lateinit var factory : DataSource.Factory<Int, PersonWithSaleInfo>
 
     init {
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        entityDao = repository.saleDao
         personDao = repository.personDao
     }
 
@@ -47,7 +44,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
         personUid = (arguments[PersonWithSaleInfoListView.ARG_LE_UID]!!.toLong())
 
         //Get assigned people
-        factory = entityDao!!.getMyWomenEntrepreneurs(personUid)
+        factory = saleDao!!.getMyWomenEntrepreneurs(personUid)
         view.setWEListFactory(factory)
     }
 
