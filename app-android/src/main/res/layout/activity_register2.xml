@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:elevation="@dimen/dimen_4dp"
                 android:background="@color/divider"
-                android:textColor="@color/primary_text"
+                android:textColor="@android:color/black"
                 android:text="@string/create_new_account" />
 
         </LinearLayout>

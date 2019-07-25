@@ -7,7 +7,7 @@ object AppConfig {
 
     const val KEY_CONTENT_DIR_NAME = "content_dir"
 
-    const val KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN = "login_before_open"
+    const val KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN = "app.login_before_open"
 
     const val KEY_LOGIN_REQUIRED_FOR_CONTENT_DOWNLOAD = "login_before_download"
 
@@ -32,5 +32,11 @@ object AppConfig {
     const val KEY_ANIMATE_ORGANISATION_ICON = "splashscreen.animate_organisation_icon"
 
     const val KEY_SHOW_DOWNLOAD_ALL_BTN = "homescreen.show_download_all_button"
+
+    const val KEY_PRELOAD_LIBRARIES = "app.preload_contents"
+
+    const val KEY_SUPPORTED_LANGUAGES = "app.ui_languages"
+
+    const val KEY_SHOW_REGISTER = "app.register_before_open"
 
 }

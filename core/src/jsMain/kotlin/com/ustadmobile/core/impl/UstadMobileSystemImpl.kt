@@ -14,7 +14,7 @@ import kotlin.js.json
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     @JsName("stringMap")
     private var stringMap : Any = Any()

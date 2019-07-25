@@ -6,10 +6,8 @@ import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashView
 import kotlinx.coroutines.Runnable
 
-class SplashPresenter(context: Any, arguments: Map<String, String?>, view: SplashView)
+class SplashPresenter(context: Any, arguments: Map<String, String?>, view: SplashView, val impl: UstadMobileSystemImpl)
     : UstadBaseController<SplashView>(context, arguments, view) {
-
-    val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -17,19 +15,21 @@ class SplashPresenter(context: Any, arguments: Map<String, String?>, view: Splas
         val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",context).toBoolean()
 
         val showSplash = impl.getAppConfigString(AppConfig.KEY_SHOW_SPASH_SCREEN,
-                null, context)!!.toBoolean()
+                "false", context)!!.toBoolean()
 
         val animateIcon = impl.getAppConfigString(AppConfig.KEY_ANIMATE_ORGANISATION_ICON,
-                null, context)!!.toBoolean()
+                "false", context)!!.toBoolean()
 
-        view.runOnUiThread(Runnable {
-            view.animateOrganisationIcon(animateIcon)
-        })
+        val preloadLibs = impl.getAppConfigString(AppConfig.KEY_PRELOAD_LIBRARIES,
+                "false", context)!!.toBoolean()
 
-        if(!launched){
+        val delay = showSplash || !launched
+        view.animateOrganisationIcon(animateIcon, delay)
+
+        if(!launched && preloadLibs){
             view.preloadData()
         }
 
-        view.startUi(showSplash || !launched, animateIcon)
+        view.startUi(delay, animateIcon)
     }
 }
