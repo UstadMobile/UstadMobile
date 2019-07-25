@@ -17,13 +17,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
@@ -33,7 +31,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UserProfileView
-
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -115,11 +112,9 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     override fun onResume() {
         super.onResume()
-
     }
 
     fun showGetImageAlertDialog() {
-
         val adb = AlertDialog.Builder(this)
                 .setTitle("")
                 .setMessage(getText(R.string.select_image_from_camera_or_gallery))
@@ -158,7 +153,8 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                         .into(personEditImage)
 
                 //Click on image - open dialog to show bigger picture
-                personEditImage.setOnClickListener { view -> mPresenter!!.openPictureDialog(imagePath) }
+                personEditImage.setOnClickListener { view ->
+                    mPresenter!!.openPictureDialog(imagePath) }
             }
 
         }
@@ -179,7 +175,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     override fun addImageFromGallery() {
         //READ_EXTERNAL_STORAGE
         if (ContextCompat.checkSelfPermission(applicationContext,
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this@UserProfileActivity,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                     GALLERY_REQUEST_CODE)

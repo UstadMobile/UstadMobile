@@ -146,7 +146,6 @@ ext {
     version_crystalrangeseekbar = "1.1.3"
     version_gcacace_signaturepad = "1.2.1"
     version_androidsvg="1.4"
-
     version_tellh_recyclertreeview = "1.2.0"
 
 }

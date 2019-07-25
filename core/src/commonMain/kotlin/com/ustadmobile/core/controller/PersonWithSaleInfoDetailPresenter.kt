@@ -71,11 +71,6 @@ class PersonWithSaleInfoDetailPresenter(context: Any,
                 salesFactory = entityDao!!.findAllSalesWithWEFilter(person.personUid)
                 view.setSalesFactory(salesFactory)
             }
-
         }
-
-
     }
-
-
 }
