@@ -33,6 +33,11 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.os.Handler
+import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
@@ -46,20 +51,28 @@ import java.util.concurrent.TimeUnit
 
 class SplashScreenActivity : SplashView, UstadBaseActivity() {
 
+    private lateinit var organisationIcon : ImageView
+
+    private lateinit var constraintLayout: ConstraintLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setTheme(R.style.ThemeOnboarding)
         setContentView(R.layout.activity_splash_screen)
+
+        organisationIcon = findViewById(R.id.organisation_icon)
+        constraintLayout = findViewById(R.id.constraint_layout)
+
         val presenter = SplashPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
     }
 
-    override fun startUi(delay: Boolean) {
+    override fun startUi(delay: Boolean, animate: Boolean) {
         Handler().postDelayed({
             UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
-        }, if(delay) TimeUnit.SECONDS.toMillis(2) else 0)
+        }, if(delay) TimeUnit.SECONDS.toMillis(if(animate) 3 else 2) else 0)
     }
 
     override fun preloadData() {
@@ -68,5 +81,23 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
                 .build()
         WorkManager.getInstance().enqueue(dbWork)
     }
+
+    override fun animateOrganisationIcon(animate: Boolean) {
+
+        organisationIcon.setOnClickListener{
+            val constraint = ConstraintSet()
+            val transition = AutoTransition()
+            transition.duration = 1000
+            constraint.clone(this, R.layout.activity_splash_screen)
+            TransitionManager.beginDelayedTransition(constraintLayout, transition)
+            constraint.applyTo(constraintLayout)
+        }
+
+        Handler().postDelayed({
+            organisationIcon.performClick()
+        }, TimeUnit.MILLISECONDS.toMillis(if(animate) 200 else 0))
+
+    }
+
 
 }

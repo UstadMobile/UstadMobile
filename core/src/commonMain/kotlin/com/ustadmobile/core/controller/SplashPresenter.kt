@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashView
+import kotlinx.coroutines.Runnable
 
 class SplashPresenter(context: Any, arguments: Map<String, String?>, view: SplashView)
     : UstadBaseController<SplashView>(context, arguments, view) {
@@ -18,10 +19,17 @@ class SplashPresenter(context: Any, arguments: Map<String, String?>, view: Splas
         val showSplash = impl.getAppConfigString(AppConfig.KEY_SHOW_SPASH_SCREEN,
                 null, context)!!.toBoolean()
 
+        val animateIcon = impl.getAppConfigString(AppConfig.KEY_ANIMATE_ORGANISATION_ICON,
+                null, context)!!.toBoolean()
+
+        view.runOnUiThread(Runnable {
+            view.animateOrganisationIcon(animateIcon)
+        })
+
         if(!launched){
             view.preloadData()
         }
 
-        view.startUi(showSplash || !launched)
+        view.startUi(showSplash || !launched, animateIcon)
     }
 }
