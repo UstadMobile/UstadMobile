@@ -1,23 +1,18 @@
-package com.ustadmobile.core
+package com.ustadmobile.dbcompress
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import sun.misc.IOUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.file.Files
 import java.util.zip.GZIPOutputStream
 
-class CompressJob {
 
-    fun main(args: Array<String>) {
-        CompressJob()
-    }
+class CompressJob {
 
     constructor() {
 
@@ -36,7 +31,7 @@ class CompressJob {
                     val fileInput = FileInputStream(sourceFile)
                     val fileOutput = FileOutputStream(destFile)
                     val gzipOut = GZIPOutputStream(fileOutput)
-                    
+
                     try {
 
                         println("sourceFile original length ${sourceFile.length()}")
@@ -76,6 +71,15 @@ class CompressJob {
 
             containerDao.updateFileSizeForAllContainers()
 
+        }
+
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            CompressJob()
         }
 
     }
