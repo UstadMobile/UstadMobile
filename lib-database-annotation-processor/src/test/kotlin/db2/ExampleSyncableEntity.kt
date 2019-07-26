@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 
 @Entity
-data class ExampleSyncableEntityTracker(@PrimaryKey var pk: Long = 0,
+data class ExampleSyncableEntityTracker(@PrimaryKey(autoGenerate = true) var pk: Long = 0,
                                         @TrackerEntityPrimaryKey var eUid: Long = 0,
                                         @TrackDestId var clientId: Int = 0,
                                         @TrackerChangeSeqNum var lastCsn: Int = 0,
@@ -15,7 +15,7 @@ data class ExampleSyncableEntityTracker(@PrimaryKey var pk: Long = 0,
 
 @Entity
 @SyncableEntity(tableId = 42, syncTrackerEntity = ExampleSyncableEntityTracker::class)
-open class ExampleSyncableEntity(@PrimaryKey var esUid: Long = 0,
+open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Long = 0,
                                  @LocalChangeSeqNum var esLcsn: Int = 0,
                                  @MasterChangeSeqNum var esMcsn: Int = 0,
                                  @LastChangedBy var esLcb: Int = 0,

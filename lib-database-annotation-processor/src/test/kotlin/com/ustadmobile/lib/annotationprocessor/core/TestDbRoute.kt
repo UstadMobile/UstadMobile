@@ -116,7 +116,33 @@ class TestDbRoute  {
                 firstGetList[0].esUid)
         Assert.assertTrue("Second response is empty after receipt was acknowledged",
                 secondGetList.isEmpty())
-
     }
+
+    @Test
+    fun givenSyncableEntityInserted_whenReceiptIsNotAcknowledged_thenShouldReturnSameListAgain() = runBlocking {
+        val httpClient = HttpClient() {
+            install(JsonFeature)
+        }
+        val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
+        exampleSyncableEntity.esUid = exampleDb.exampleSyncableDao().insert(exampleSyncableEntity)
+
+        val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleSyncableDao/findAll") {
+            header("X-nid", 1)
+        }
+
+        val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
+
+        val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleSyncableDao/findAll") {
+            header("X-nid", 1)
+        }
+
+        Assert.assertEquals("First list has one item", 1, firstGetList.size)
+        Assert.assertEquals("First entity in list is the item inserted", exampleSyncableEntity.esUid,
+                firstGetList[0].esUid)
+        Assert.assertEquals("Second response has one item when response not acknowledged",
+                1, secondGetList.size)
+    }
+
+
 
 }

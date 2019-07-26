@@ -151,25 +151,14 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
 
     var newSql = "SELECT * FROM ($sql) AS ${resultComponentClassName.simpleName} WHERE "
     val whereClauses = syncableEntities.values.map {
-        val syncableEntityTypeEl = processingEnv.elementUtils.getTypeElement(it.canonicalName)
-        val entityPkField = syncableEntityTypeEl.enclosedElements
-                .first { it.getAnnotation(PrimaryKey::class.java) != null }
-        val entitySyncTracker = getEntitySyncTracker(syncableEntityTypeEl, processingEnv)
-        val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker) as TypeElement
-        val entityMasterCsnField = syncableEntityTypeEl.enclosedElements
-                .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
-        val entitySyncTrackerPkField = entitySyncTrackerEl.enclosedElements
-                .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
-        val entitySyncTrackCsnField = entitySyncTrackerEl.enclosedElements
-                .first { it.getAnnotation(TrackerChangeSeqNum::class.java) != null }
-        val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
-                .first {it.getAnnotation(TrackDestId::class.java) != null}
+        val syncableEntityInfo = SyncableEntityInfo(it, processingEnv)
 
-
-        """( ${entityMasterCsnField.simpleName} > COALESCE((SELECT 
-            |${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName}  
-            |WHERE ${entitySyncTrackerPkField.simpleName} = ${resultComponentClassName.simpleName}.${entityPkField.simpleName} 
-            |AND ${entitySyncTrackerDestField.simpleName} = :$clientIdParamName), 0))
+        """( ${syncableEntityInfo.entityMasterCsnField.name} > COALESCE((SELECT 
+            |${syncableEntityInfo.trackerCsnField.name} FROM ${syncableEntityInfo.tracker.simpleName}  
+            |WHERE  ${syncableEntityInfo.trackerDestField.name} = :$clientIdParamName 
+            |AND ${syncableEntityInfo.trackerPkField.name} = 
+            |${resultComponentClassName.simpleName}.${syncableEntityInfo.entityPkField.name} 
+            |AND ${syncableEntityInfo.trackerReceivedField.name}), 0))
         """.trimMargin()
     }
     newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
