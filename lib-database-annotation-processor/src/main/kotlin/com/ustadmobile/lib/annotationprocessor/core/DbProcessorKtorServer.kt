@@ -11,15 +11,8 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.*
 import java.util.*
-
-fun isQueryParam(typeName: TypeName) =
-    if(QUERY_SINGULAR_TYPES.contains(typeName)) {
-        true
-    }else {
-        typeName is ParameterizedTypeName && typeName.typeArguments[0] in QUERY_SINGULAR_TYPES
-    }
+import com.ustadmobile.door.DoorDatabase
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -149,9 +142,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                     daoMethodEl) as ExecutableType
 
-            val numNonQueryParams =  daoMethodEl.parameters
-                    .map { it.asType().asTypeName().javaToKotlinType() }
-                    .count { !isContinuationParam(it) && !isQueryParam(it) }
+            val numNonQueryParams = getHttpBodyParams(daoMethodEl, daoMethodResolved).size
 
             val memberFn = if(numNonQueryParams == 1){
                 POST_MEMBER
@@ -200,7 +191,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
     fun generateSelectCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement,
                                 daoTypeEl: TypeElement) : CodeBlock {
         val codeBlock = CodeBlock.builder()
-        val returnType = resolveQueryResultType(resolveReturnTypeIfSuspended(daoMethodResolved))
+        val resultType = resolveQueryResultType(resolveReturnTypeIfSuspended(daoMethodResolved))
 
         daoMethodResolved.parameterTypes.map { it.asTypeName() }.filter { !isContinuationParam(it) }
                 .forEachIndexed { index, paramType ->
@@ -220,7 +211,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         }.toMap().toMutableMap()
 
         var querySql = daoMethodEl.getAnnotation(Query::class.java).value
-        val componentEntityType = resolveEntityFromResultType(returnType)
+        val componentEntityType = resolveEntityFromResultType(resultType)
         val syncableEntitiesList = if(componentEntityType is ClassName) {
             findSyncableEntities(componentEntityType, processingEnv)
         }else {
@@ -240,51 +231,11 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         }
 
 
-        codeBlock.add(generateQueryCodeBlock(returnType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
+        codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
+        codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
+                processingEnv = processingEnv))
 
-        syncableEntitiesList?.forEach {
-            val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
-
-            val isListOrArrayResult = isListOrArray(returnType)
-            var wrapperFnName = Pair("", "")
-            var varName = ""
-            if(isListOrArrayResult) {
-                var prefix = "_result"
-                it.key.forEach {embedVarName ->
-                    prefix += ".map { it!!.$embedVarName }.filter { it != null }"
-                }
-                wrapperFnName = Pair("$prefix.map {", "}")
-                varName = "it!!"
-            }else {
-                var accessorName = "_result"
-                it.key.forEach {embedVarName ->
-                    accessorName += "?.$embedVarName"
-                }
-
-                varName = "_se${sEntityInfo.syncableEntity.simpleName}"
-                codeBlock.add("val $varName = $accessorName\n")
-
-                wrapperFnName = Pair("listOf(", ")")
-            }
-
-
-            if(!isListOrArrayResult) {
-                codeBlock.beginControlFlow("if($varName != null)")
-            }
-
-            codeBlock.add("""_syncHelper._replace${sEntityInfo.tracker.simpleName}( ${wrapperFnName.first} %T(
-                             |${sEntityInfo.trackerPkField.name} = $varName.${sEntityInfo.entityPkField.name},
-                             |${sEntityInfo.trackerDestField.name} = clientId,
-                             |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name},
-                             |${sEntityInfo.trackerReqIdField.name} = _reqId
-                             |) ${wrapperFnName.second} )
-                             |""".trimMargin(), sEntityInfo.tracker)
-            if(!isListOrArrayResult) {
-                codeBlock.endControlFlow()
-            }
-        }
-
-        codeBlock.add(generateRespondCall(returnType, "_result"))
+        codeBlock.add(generateRespondCall(resultType, "_result"))
 
         return codeBlock.build()
     }

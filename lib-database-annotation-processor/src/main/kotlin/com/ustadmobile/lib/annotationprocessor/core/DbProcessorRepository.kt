@@ -4,6 +4,7 @@ import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
+import org.jetbrains.annotations.Nullable
 import java.io.File
 import java.util.*
 import javax.annotation.processing.RoundEnvironment
@@ -110,13 +111,11 @@ class DbProcessorRepository: AbstractDbProcessor() {
         val repoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
         repoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
+        val syncableEntitiesOnDao = syncableEntitiesOnDao(daoTypeElement.asClassName(),
+                processingEnv)
+
 
         val repoClassSpec = TypeSpec.classBuilder("${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
-                .primaryConstructor(FunSpec.constructorBuilder()
-                        .addParameter("_dao", daoTypeElement.asType().asTypeName())
-                        .addParameter("_httpClient", HttpClient::class)
-                        .addParameter("_clientId", Int::class)
-                        .addParameter("_endpoint", String::class).build())
                 .addProperty(PropertySpec.builder("_dao",
                         daoTypeElement.asType().asTypeName()).initializer("_dao").build())
                 .addProperty(PropertySpec.builder("_httpClient",
@@ -126,6 +125,24 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .addProperty(PropertySpec.builder("_endpoint", String::class)
                         .initializer("_endpoint").build())
                 .superclass(daoTypeElement.asClassName())
+
+        val primaryConstructorFn = FunSpec.constructorBuilder()
+                .addParameter("_dao", daoTypeElement.asType().asTypeName())
+                .addParameter("_httpClient", HttpClient::class)
+                .addParameter("_clientId", Int::class)
+                .addParameter("_endpoint", String::class)
+
+        if(!syncableEntitiesOnDao.isNullOrEmpty()) {
+            val syncHelperClassName = ClassName(pkgNameOfElement(daoTypeElement, processingEnv),
+                    "${daoTypeElement.simpleName}_SyncHelper")
+            primaryConstructorFn.addParameter("_syncHelper",
+                    syncHelperClassName)
+            repoClassSpec.addProperty(PropertySpec.builder("_syncHelper", syncHelperClassName)
+                    .initializer("_syncHelper").build())
+        }
+
+        repoClassSpec.primaryConstructor(primaryConstructorFn.build())
+
 
 
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
@@ -139,6 +156,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
             val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
+            val resultType = resolveQueryResultType(returnTypeResolved)
+            val resultComponentType = resolveEntityFromResultType(resultType)
+            val isSuspendedMethod = daoMethodResolved.parameterTypes.
+                    any { isContinuationParam(it.asTypeName().javaToKotlinType()) }
 
             //TODO: tidy up forcenullable so this is not violating the DRY principle
             val overrideFunSpec = overrideAndConvertToKotlinTypes(daoMethodEl,
@@ -162,6 +183,42 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     }
                 }
             }
+
+            val syncableEntitiesList = if(resultComponentType is ClassName) {
+                findSyncableEntities(resultComponentType, processingEnv)
+            }else {
+                null
+            }
+
+            if(!isUpdateDeleteOrInsertMethod(daoSubEl) && resultType != UNIT) {
+                if (!isSuspendedMethod) {
+                    codeBlock.beginControlFlow("%M",
+                            MemberName("kotlinx.coroutines", "runBlocking"))
+                }
+
+                codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                        daoName = daoTypeElement.simpleName.toString(),
+                        methodName = daoSubEl.simpleName.toString(),
+                        httpResultType = resultType,
+                        params = daoSubEl.parameters.map {
+                            var paramSpec = ParameterSpec.builder(it.simpleName.toString(),
+                                    it.asType().asTypeName().javaToKotlinType()).build()
+                            if(it.getAnnotation(Nullable::class.java) != null) {
+                                paramSpec = ParameterSpec.builder(paramSpec.name,
+                                        paramSpec.type.copy(nullable = true)).build()
+                            }
+
+                            paramSpec
+                        }))
+
+                codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
+                        resultType, processingEnv = processingEnv))
+
+                if (!isSuspendedMethod) {
+                    codeBlock.endControlFlow()
+                }
+            }
+
 
             if(returnTypeResolved != UNIT)
                 codeBlock.add("val _result = ")

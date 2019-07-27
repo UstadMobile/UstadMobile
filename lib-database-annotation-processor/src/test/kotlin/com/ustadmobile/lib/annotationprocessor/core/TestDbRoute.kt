@@ -28,6 +28,7 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.takeFrom
 import io.ktor.request.header
 import io.ktor.response.header
 import io.ktor.routing.get
@@ -126,7 +127,12 @@ class TestDbRoute  {
         val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
         exampleSyncableEntity.esUid = exampleDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleSyncableDao/findAll") {
+        val firstGetListResponse = httpClient.get<HttpResponse> {
+            url{
+                takeFrom("http://localhost:8089/")
+                path("ExampleSyncableDao", "findAll")
+                parameter("x", 1)
+            }
             header("X-nid", 1)
         }
 

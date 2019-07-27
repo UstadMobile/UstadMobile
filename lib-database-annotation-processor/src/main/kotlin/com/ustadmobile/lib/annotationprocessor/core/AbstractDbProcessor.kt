@@ -12,12 +12,13 @@ import org.sqlite.SQLiteDataSource
 import java.io.File
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.*
-import com.ustadmobile.door.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.annotation.*
+import io.ktor.client.response.HttpResponse
 import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import com.ustadmobile.door.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -165,6 +166,229 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
 
     return newSql
 }
+
+
+/**
+ * Determine if the given
+ */
+internal fun isQueryParam(typeName: TypeName) = typeName in QUERY_SINGULAR_TYPES
+        || (typeName is ParameterizedTypeName
+        && (typeName.rawType == List::class.asClassName() && typeName.typeArguments[0] in QUERY_SINGULAR_TYPES))
+
+
+/**
+ * Given a list of parameters, get a list of those that get not pass as query parameters over http.
+ * This is any parameters except primitive types, strings, or lists and arrays thereof
+ *
+ * @param params List of parameters to check for which ones cannot be passed as query parameters
+ * @return List of parameters from the input list which cannot be passed as http query parameters
+ */
+internal fun getHttpBodyParams(params: List<ParameterSpec>) = params.filter {
+    !isQueryParam(it.type) && !isContinuationParam(it.type)
+}
+
+
+/**
+ * Given a list of parameters, get a list of those that get not pass as query parameters over http.
+ * This is any parameters except primitive types, strings, or lists and arrays thereof
+ *
+ * @param daoMethodEl the method element itself, used to find parameter names
+ * @param daoExecutableType the executable type, used to find parameter types (the executable type
+ * may well come from typeUtils.asMemberOf to resolve type arguments
+ */
+internal fun getHttpBodyParams(daoMethodEl: ExecutableElement, daoExecutableType: ExecutableType) =
+        getHttpBodyParams(daoMethodEl.parameters.mapIndexed { index, paramEl ->
+            ParameterSpec.builder(paramEl.simpleName.toString(),
+                    daoExecutableType.parameterTypes[index].asTypeName().javaToKotlinType()).build()
+        })
+
+/**
+ * Given a list of http parameters, find the first, if any, which should be sent as the http body
+ */
+internal fun getRequestBodyParam(params: List<ParameterSpec>) = params.firstOrNull {
+    !isQueryParam(it.type) && !isContinuationParam(it.type)
+}
+
+
+internal val CLIENT_GET_MEMBER_NAME = MemberName("io.ktor.client.request", "get")
+
+internal val CLIENT_POST_MEMBER_NAME = MemberName("io.ktor.client.request", "post")
+
+internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "receive")
+
+/**
+ * Generates a CodeBlock that will make KTOR HTTP Client Request for a DAO method. It will set
+ * the correct URL (e.g. endpoint/DaoName/methodName and parameters (including the request body
+ * if required). It will decide between using get or post based on the parameters.
+ *
+ * @param httpEndpointVarName the variable name that contains the base http endpoint to start with for the url
+ * @param daoName the DAO name (e.g. simple class name of the DAO class)
+ * @param methodName the name of the method that is being queried
+ * @param httpResponseVarName the variable name that will be added to the codeblock that will contain
+ * the http response object
+ * @param httpResultType the type of response expected from the other end (e.g. the result type of
+ * the method)
+ * @param params a list of the parameters (e.g. from the method signature) that need to be sent
+ */
+internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String = "_endpoint",
+                                                   daoName: String,
+                                                   methodName: String,
+                                                   httpResponseVarName: String = "_httpResponse",
+                                                   httpResultVarName: String = "_httpResult",
+                                                   httpResultType: TypeName,
+                                                   params: List<ParameterSpec> ): CodeBlock {
+    val nonQueryParams = getHttpBodyParams(params)
+    val codeBlock = CodeBlock.builder()
+            .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
+                    if(nonQueryParams.isNullOrEmpty()) CLIENT_GET_MEMBER_NAME else CLIENT_POST_MEMBER_NAME,
+                    HttpResponse::class)
+            .beginControlFlow("url")
+            .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
+            .add("path(%S, %S)\n", daoName, methodName)
+            .endControlFlow()
+
+    params.filter { isQueryParam(it.type) }.forEach {
+        codeBlock.addWithNullCheckIfNeeded(it.name, it.type,
+                CodeBlock.of("%M(%S, ${it.name})\n",
+                        MemberName("io.ktor.client.request", "parameter"),
+                        it.name))
+    }
+
+    val requestBodyParam = getRequestBodyParam(params)
+
+    if(requestBodyParam != null) {
+        codeBlock.addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
+                CodeBlock.of("body = ${requestBodyParam.name}\n"))
+    }
+
+    codeBlock.endControlFlow()
+
+    codeBlock.add("val $httpResultVarName = $httpResponseVarName.%M<%T>()\n",
+            CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+
+    return codeBlock.build()
+}
+
+/**
+ * Generate a CodeBlock that will use a synchelper DAO to insert sync status tracker entities
+ * e.g. _syncHelper._replaceSyncEntityTracker(_result.map { SyncEntityTracker(...) })
+ */
+fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resultType: TypeName,
+                                                    syncHelperDaoVarName: String = "_syncHelper",
+                                                    processingEnv: ProcessingEnvironment): CodeBlock {
+    val codeBlock = CodeBlock.builder()
+    val resultComponentType = resolveEntityFromResultType(resultType)
+    if(resultComponentType !is ClassName)
+        return codeBlock.build()
+
+    val syncableEntitiesList = findSyncableEntities(resultComponentType, processingEnv)
+
+    syncableEntitiesList.forEach {
+        val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
+
+        val isListOrArrayResult = isListOrArray(resultType)
+        var wrapperFnName = Pair("", "")
+        var varName = ""
+        if(isListOrArrayResult) {
+            var prefix = resultVarName
+            it.key.forEach {embedVarName ->
+                prefix += ".map { it!!.$embedVarName }.filter { it != null }"
+            }
+            wrapperFnName = Pair("$prefix.map {", "}")
+            varName = "it!!"
+        }else {
+            var accessorName = resultVarName
+            it.key.forEach {embedVarName ->
+                accessorName += "?.$embedVarName"
+            }
+
+            varName = "_se${sEntityInfo.syncableEntity.simpleName}"
+            codeBlock.add("val $varName = $accessorName\n")
+
+            wrapperFnName = Pair("listOf(", ")")
+        }
+
+
+        if(!isListOrArrayResult) {
+            codeBlock.beginControlFlow("if($varName != null)")
+        }
+
+        codeBlock.add("""$syncHelperDaoVarName._replace${sEntityInfo.tracker.simpleName}( ${wrapperFnName.first} %T(
+                             |${sEntityInfo.trackerPkField.name} = $varName.${sEntityInfo.entityPkField.name},
+                             |${sEntityInfo.trackerDestField.name} = clientId,
+                             |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name},
+                             |${sEntityInfo.trackerReqIdField.name} = _reqId
+                             |) ${wrapperFnName.second} )
+                             |""".trimMargin(), sEntityInfo.tracker)
+        if(!isListOrArrayResult) {
+            codeBlock.endControlFlow()
+        }
+    }
+
+    return codeBlock.build()
+}
+
+fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: TypeName,
+                                           syncHelperDaoVarName: String = "_syncHelper",
+                                           processingEnv: ProcessingEnvironment): CodeBlock {
+    val codeBlock = CodeBlock.builder()
+
+    val resultComponentType = resolveEntityFromResultType(resultType)
+    if(resultComponentType !is ClassName)
+        return codeBlock.build()
+
+    val syncableEntitiesList = findSyncableEntities(resultComponentType, processingEnv)
+
+    syncableEntitiesList.forEach {
+        val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
+
+        val isListOrArrayResult = isListOrArray(resultType)
+
+        val replaceEntityFnName ="_replace${sEntityInfo.syncableEntity.simpleName}"
+
+        if(isListOrArrayResult) {
+            codeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($resultVarName")
+            it.key.forEach {embedVarName ->
+                codeBlock.add(".filter { it.$embedVarName != null }.map { it.$embedVarName as %T }",
+                        it.value)
+            }
+
+            if(it.key.isEmpty() && it.value != sEntityInfo.syncableEntity) {
+                codeBlock.add(".map { it as %T }", sEntityInfo.syncableEntity)
+            }
+            codeBlock.add(")\n")
+        }else {
+            val accessorVarName = "_se${sEntityInfo.syncableEntity.simpleName}"
+            codeBlock.add("val $accessorVarName = $resultVarName")
+                .add(it.key.joinToString (prefix = "", separator = "?.", postfix = ""))
+                .add("\n")
+                .beginControlFlow("if($accessorVarName != null)")
+                .add("${syncHelperDaoVarName}.$replaceEntityFnName(listOf($accessorVarName))\n")
+                .endControlFlow()
+        }
+    }
+
+    return codeBlock.build()
+}
+
+
+/**
+ * Will add the given codeblock, and surround it with if(varName != null) if the given typename
+ * is nullable
+ */
+fun CodeBlock.Builder.addWithNullCheckIfNeeded(varName: String, typeName: TypeName,
+                                               codeBlock: CodeBlock): CodeBlock.Builder {
+    if(typeName.isNullable)
+        beginControlFlow("if($varName != null)")
+
+    add(codeBlock)
+
+    if(typeName.isNullable)
+        endControlFlow()
+
+    return this
+}
+
 
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
