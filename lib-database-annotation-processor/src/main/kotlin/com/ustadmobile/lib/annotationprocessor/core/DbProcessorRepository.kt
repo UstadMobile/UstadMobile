@@ -13,6 +13,7 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import com.ustadmobile.door.SyncableDoorDatabase
 
 class DbProcessorRepository: AbstractDbProcessor() {
 
@@ -39,7 +40,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
     }
 
 
-    fun generateDbRepositoryClass(dbTypeElement: TypeElement): FileSpec {
+    fun generateDbRepositoryClass(dbTypeElement: TypeElement,
+                                  syncDaoMode: Int = REPO_SYNCABLE_DAO_CONSTRUCT): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
 
@@ -71,11 +73,25 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to createAllTables!")
                         .build())
 
+        val syncableDbType = processingEnv.elementUtils
+                .getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType()
+        if(processingEnv.typeUtils.isAssignable(dbTypeElement.asType(), syncableDbType)) {
+            val syncableDaoClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
+                    "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
+            val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
+            if(syncDaoMode == REPO_SYNCABLE_DAO_CONSTRUCT) {
+                syncDaoProperty.delegate("lazy {%T(this) }",
+                        ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
+                                "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+            }
+            dbRepoType.addProperty(syncDaoProperty.build())
+        }
+
         methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
             .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
 
             var daoFromDbGetter = ""
-            val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType)
+            val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
             if(daoTypeEl == null)
                 return@forEach
 
@@ -87,9 +103,15 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             val repoImplClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                     "${daoTypeEl.simpleName}_$SUFFIX_REPOSITORY")
+            val syncDaoParam = if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
+                ", _syncDao"
+            }else {
+                ""
+            }
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  daoTypeEl.asType().asTypeName())
-                    .delegate("lazy { %T(_db.$daoFromDbGetter, _httpClient, _clientId, _endpoint) }", repoImplClassName).build())
+                    .delegate("lazy { %T(_db.$daoFromDbGetter, _httpClient, _clientId, _endpoint $syncDaoParam) }",
+                            repoImplClassName).build())
 
             if(it.simpleName.toString().startsWith("get")) {
                 val propName = it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
@@ -200,6 +222,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         daoName = daoTypeElement.simpleName.toString(),
                         methodName = daoSubEl.simpleName.toString(),
                         httpResultType = resultType,
+                        requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
+                            MemberName("io.ktor.client.request", "header"),
+                                "X-nid"),
                         params = daoSubEl.parameters.map {
                             var paramSpec = ParameterSpec.builder(it.simpleName.toString(),
                                     it.asType().asTypeName().javaToKotlinType()).build()
@@ -210,9 +235,25 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
                             paramSpec
                         }))
+                codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: 0\n",
+                        "X-reqid")
 
                 codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
-                        resultType, processingEnv = processingEnv))
+                        afterInsertCode = {
+                            CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
+                                    CLIENT_GET_MEMBER_NAME)
+                                    .beginControlFlow("url")
+                                    .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
+                                    .add("path(%S, %S)\n", daoTypeElement.simpleName,
+                                            "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
+                                    .endControlFlow()
+                                    .add("%M(%S, _requestId)\n",
+                                            MemberName("io.ktor.client.request", "parameter"),
+                                            "reqId")
+                                    .endControlFlow()
+                                    .build()
+                        },
+                        resultType = resultType, processingEnv = processingEnv))
 
                 if (!isSuspendedMethod) {
                     codeBlock.endControlFlow()
@@ -244,6 +285,21 @@ class DbProcessorRepository: AbstractDbProcessor() {
         const val SUFFIX_REPOSITORY = "Repo"
 
         const val OPTION_OUTPUT_DIR = "door_repo_output"
+
+        /**
+         * When creating a repository, the Syncable DAO is constructed (JDBC). This is because
+         * the database itself cannot have fields or method signatures that are themselves generated
+         * classes
+         */
+        const val REPO_SYNCABLE_DAO_CONSTRUCT = 1
+
+        /**
+         * When creatin ga repository, the Syncable DAO is obtained from the database. This is done
+         * on Room on Android, where the database class is slightly modified and all DAOs must come
+         * from the database object
+         */
+        const val REPO_SYNCABLE_DAO_FROMDB = 2
+
     }
 
 

@@ -235,6 +235,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    methodName: String,
                                                    httpResponseVarName: String = "_httpResponse",
                                                    httpResultVarName: String = "_httpResult",
+                                                   requestBuilderCodeBlock: CodeBlock = CodeBlock.of(""),
                                                    httpResultType: TypeName,
                                                    params: List<ParameterSpec> ): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
@@ -246,6 +247,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
             .add("path(%S, %S)\n", daoName, methodName)
             .endControlFlow()
+            .add(requestBuilderCodeBlock)
 
     params.filter { isQueryParam(it.type) }.forEach {
         codeBlock.addWithNullCheckIfNeeded(it.name, it.type,
@@ -330,6 +332,7 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
 
 fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: TypeName,
                                            syncHelperDaoVarName: String = "_syncHelper",
+                                           afterInsertCode: (ClassName) -> CodeBlock = {CodeBlock.of("")},
                                            processingEnv: ProcessingEnvironment): CodeBlock {
     val codeBlock = CodeBlock.builder()
 
@@ -366,6 +369,8 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
                 .add("${syncHelperDaoVarName}.$replaceEntityFnName(listOf($accessorVarName))\n")
                 .endControlFlow()
         }
+
+        codeBlock.add(afterInsertCode(it.value))
     }
 
     return codeBlock.build()
