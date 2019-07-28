@@ -36,6 +36,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
+import kotlinx.io.InputStream
 import java.io.IOException
 import java.util.*
 
@@ -120,7 +121,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                 DefaultTrackSelector(), DefaultLoadControl())
 
         playerView.player = player
-        if (mPresenter.audioPath != null && mPresenter.audioPath!!.isNotEmpty()) {
+        if (mPresenter.audioInput != null) {
 
             player!!.addListener(object : Player.DefaultEventListener() {
                 override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -138,11 +139,11 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
         player!!.playWhenReady = playWhenReady
         player!!.seekTo(currentWindow, playbackPosition)
-        setVideoParams(mPresenter.videoPath, mPresenter.audioPath, mPresenter.srtLangList, mPresenter.srtMap)
+        setVideoParams(mPresenter.videoPath, mPresenter.audioInput, mPresenter.srtLangList, mPresenter.srtMap)
     }
 
-    override fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
-        if (audioPath != null && audioPath.isNotEmpty()) {
+    override fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
+        if (audioPath != null) {
 
             player?.addListener(object : Player.DefaultEventListener() {
                 override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -237,7 +238,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
 
     fun playAudio(fromMs: Long) {
-        audioPlayer = Codec2Player(mPresenter.audioPath!!, fromMs)
+        audioPlayer = Codec2Player(mPresenter.audioInput!!, fromMs)
         audioPlayer!!.play()
     }
 

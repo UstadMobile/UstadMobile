@@ -14,7 +14,7 @@ pluginManagement {
     }
 }
 
-include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular',
+include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular', ':dbcompress',
         ':app-ktor-server',
         ':lib-test-common',
         ':core',

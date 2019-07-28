@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.xmlpull.v1.XmlPullParserException
@@ -81,17 +82,19 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
             val umRepo = UmAccountManager.getRepositoryForActiveAccount(context)
             val entryFile = umRepo.containerEntryDao.findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                    "text/plain", "Entry not found in container")
-
+                            "text/plain", "Entry not found in container")
 
             val filterList = uriResource.initParameter(1, List::class.java)
                     as List<MountedContainerFilter>
             var response = newResponseFromFile(uriResource, session,
                     FileSource(File(entryFile.containerEntryFile!!.cefPath!!)))
+
+            if (entryFile.containerEntryFile!!.compression == COMPRESSION_GZIP)
+                response.addHeader("Content-Encoding", "gzip")
+
             for (filter in filterList) {
                 response = filter.filterResponse(response, uriResource, urlParams, session)
             }
-
             return response
         } catch (e: URISyntaxException) {
             e.printStackTrace()

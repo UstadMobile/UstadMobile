@@ -5,8 +5,8 @@ import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import kotlinx.coroutines.runBlocking
@@ -17,6 +17,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.util.zip.GZIPInputStream
 
 class TestMountedContainerResponder {
 
@@ -31,6 +33,16 @@ class TestMountedContainerResponder {
     private var containerManager: ContainerManager? = null
 
     private var context = Any()
+
+    private fun getGZIPInputStreamFromResponse(response: NanoHTTPD.Response): InputStream {
+        val gzipHeader = response.getHeader("Content-Encoding")
+        val data = response.data
+        return if (gzipHeader != null && gzipHeader == "gzip") {
+            GZIPInputStream(data)
+        } else {
+            data
+        }
+    }
 
     @Before
     @Throws(IOException::class)
@@ -75,13 +87,14 @@ class TestMountedContainerResponder {
         `when`(mockUriResource.uri).thenReturn(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
 
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
+        val gzipHeader = response.getHeader("Content-Encoding")
+        Assert.assertEquals("Content was gzipped", "gzip", gzipHeader)
         val containerIn = containerManager!!.getInputStream(
                 containerManager!!.getEntry("subfolder/testfile1.png")!!)
         Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
                 UMIOUtils.readStreamToByteArray(containerIn),
-                UMIOUtils.readStreamToByteArray(response.data))
+                UMIOUtils.readStreamToByteArray(getGZIPInputStreamFromResponse(response)))
         containerIn.close()
-
         Assert.assertEquals("Response is 200 OK", NanoHTTPD.Response.Status.OK,
                 response.status)
 

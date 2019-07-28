@@ -15,6 +15,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+        classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
     }
 }
 
@@ -24,6 +25,7 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
 apply plugin: "jacoco"
+apply plugin: 'com.github.johnrengelman.shadow'
 
 
 android {
