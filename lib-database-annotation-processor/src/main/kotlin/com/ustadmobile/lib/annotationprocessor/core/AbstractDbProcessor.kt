@@ -23,6 +23,11 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
 
+fun isUpdateDeleteOrInsertMethod(funSpec: FunSpec) =
+        funSpec.annotations.any { it.className in listOf(Insert::class.asClassName(),
+                    Delete::class.asClassName(), Update::class.asClassName())}
+
+
 fun isModifyingQueryMethod(methodEl: Element) : Boolean {
     if(isUpdateDeleteOrInsertMethod(methodEl)) {
         return true

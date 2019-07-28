@@ -59,13 +59,19 @@ fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType,
     }
 }
 
+
 /**
  * Given an input result type (e.g. Entity, Entity[], List<Entity>, String, int, etc), figure out
  * what the actual entity type is
  */
 fun resolveEntityFromResultType(type: TypeName) =
         if(type is ParameterizedTypeName && type.rawType.canonicalName == "kotlin.collections.List") {
-            type.typeArguments[0]
+            val typeArg = type.typeArguments[0]
+            if(typeArg is WildcardTypeName) {
+                typeArg.outTypes[0]
+            }else {
+                typeArg
+            }
         }else {
             type
         }

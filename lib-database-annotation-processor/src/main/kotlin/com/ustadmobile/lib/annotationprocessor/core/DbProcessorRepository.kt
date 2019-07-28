@@ -1,10 +1,10 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import androidx.paging.DataSource
 import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
-import org.jetbrains.annotations.Nullable
 import java.io.File
 import java.util.*
 import javax.annotation.processing.RoundEnvironment
@@ -14,6 +14,8 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.door.DoorLiveData
+import kotlinx.coroutines.GlobalScope
 
 class DbProcessorRepository: AbstractDbProcessor() {
 
@@ -129,6 +131,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
         return dbRepoFileSpec.build()
     }
 
+
+
+
     fun generateDaoRepositoryClass(daoTypeElement: TypeElement): FileSpec {
         val repoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
@@ -166,7 +171,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
         repoClassSpec.primaryConstructor(primaryConstructorFn.build())
 
 
-
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
                 return@forEach
@@ -179,97 +183,27 @@ class DbProcessorRepository: AbstractDbProcessor() {
             // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
             val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
             val resultType = resolveQueryResultType(returnTypeResolved)
-            val resultComponentType = resolveEntityFromResultType(resultType)
-            val isSuspendedMethod = daoMethodResolved.parameterTypes.
-                    any { isContinuationParam(it.asTypeName().javaToKotlinType()) }
+            val incSyncableHttpRequest = !isUpdateDeleteOrInsertMethod(daoSubEl) && resultType != UNIT
 
             //TODO: tidy up forcenullable so this is not violating the DRY principle
-            val overrideFunSpec = overrideAndConvertToKotlinTypes(daoMethodEl,
+            val (overrideFunSpec, daoFunSpec) = (0..1).map {overrideAndConvertToKotlinTypes(daoMethodEl,
                     daoTypeElement.asType() as DeclaredType, processingEnv,
                     forceNullableReturn = isNullableResultType(returnTypeResolved),
                     forceNullableParameterTypeArgs = isLiveData(returnTypeResolved)
-                            && isNullableResultType((returnTypeResolved as ParameterizedTypeName).typeArguments[0]))
+                            && isNullableResultType((returnTypeResolved as ParameterizedTypeName).typeArguments[0])) }
+                    .zipWithNext()[0]
+
+            daoFunSpec.addAnnotations(daoMethodEl.annotationMirrors.map { AnnotationSpec.get(it) })
+
             val codeBlock = CodeBlock.builder()
-            if(isUpdateDeleteOrInsertMethod(daoSubEl)) {
-                val entityParam = daoMethodEl.parameters[0]
-                val entityType = entityTypeFromFirstParam(daoMethodEl, daoTypeElement.asType() as DeclaredType,
-                        processingEnv)
-                val lastChangedByField = processingEnv.typeUtils.asElement(entityType).enclosedElements
-                        .firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(LastChangedBy::class.java) != null}
 
-                if(lastChangedByField != null) {
-                    if(isListOrArray(entityParam.asType().asTypeName())) {
-                        codeBlock.add("${entityParam.simpleName}.forEach { it.${lastChangedByField.simpleName} = _clientId }\n")
-                    }else {
-                        codeBlock.add("${entityParam.simpleName}.${lastChangedByField.simpleName} = _clientId\n")
-                    }
-                }
-            }
 
-            val syncableEntitiesList = if(resultComponentType is ClassName) {
-                findSyncableEntities(resultComponentType, processingEnv)
+            if(incSyncableHttpRequest) {
+                codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+                        daoTypeElement.simpleName.toString()))
             }else {
-                null
+                codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
             }
-
-            if(!isUpdateDeleteOrInsertMethod(daoSubEl) && resultType != UNIT) {
-                if (!isSuspendedMethod) {
-                    codeBlock.beginControlFlow("%M",
-                            MemberName("kotlinx.coroutines", "runBlocking"))
-                }
-
-                codeBlock.add(generateKtorRequestCodeBlockForMethod(
-                        daoName = daoTypeElement.simpleName.toString(),
-                        methodName = daoSubEl.simpleName.toString(),
-                        httpResultType = resultType,
-                        requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
-                            MemberName("io.ktor.client.request", "header"),
-                                "X-nid"),
-                        params = daoSubEl.parameters.map {
-                            var paramSpec = ParameterSpec.builder(it.simpleName.toString(),
-                                    it.asType().asTypeName().javaToKotlinType()).build()
-                            if(it.getAnnotation(Nullable::class.java) != null) {
-                                paramSpec = ParameterSpec.builder(paramSpec.name,
-                                        paramSpec.type.copy(nullable = true)).build()
-                            }
-
-                            paramSpec
-                        }))
-                codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: 0\n",
-                        "X-reqid")
-
-                codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
-                        afterInsertCode = {
-                            CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
-                                    CLIENT_GET_MEMBER_NAME)
-                                    .beginControlFlow("url")
-                                    .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
-                                    .add("path(%S, %S)\n", daoTypeElement.simpleName,
-                                            "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
-                                    .endControlFlow()
-                                    .add("%M(%S, _requestId)\n",
-                                            MemberName("io.ktor.client.request", "parameter"),
-                                            "reqId")
-                                    .endControlFlow()
-                                    .build()
-                        },
-                        resultType = resultType, processingEnv = processingEnv))
-
-                if (!isSuspendedMethod) {
-                    codeBlock.endControlFlow()
-                }
-            }
-
-
-            if(returnTypeResolved != UNIT)
-                codeBlock.add("val _result = ")
-
-            codeBlock.add("_dao.${daoMethodEl.simpleName}(")
-                    .add(daoMethodEl.parameters.filter { !isContinuationParam(it.asType().asTypeName())}.joinToString { it.simpleName })
-                    .add(")\n")
-
-            if(returnTypeResolved != UNIT)
-                codeBlock.add("return _result\n")
 
             overrideFunSpec.addCode(codeBlock.build())
             repoClassSpec.addFunction(overrideFunSpec.build())
@@ -278,6 +212,99 @@ class DbProcessorRepository: AbstractDbProcessor() {
         repoImplFile.addType(repoClassSpec.build())
 
         return repoImplFile.build()
+    }
+
+    /**
+     * Generates a repository method that will delegate to the DAO. If this is an Insert, Delete, or
+     * Update method and the parameter type is syncable, then the last changed by field on the
+     * syncable entity will be updated
+     */
+    fun generateRepositoryDelegateToDaoFun(daoFunSpec: FunSpec): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        if(isUpdateDeleteOrInsertMethod(daoFunSpec)) {
+            val entityParam = daoFunSpec.parameters[0]
+            val entityType = resolveEntityFromResultType(daoFunSpec.parameters[0].type) as ClassName
+            val lastChangedByField = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
+                    .enclosedElements.firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(LastChangedBy::class.java) != null}
+
+            if(lastChangedByField != null) {
+                if(isListOrArray(entityParam.type)) {
+                    codeBlock.add("${entityParam.name}.forEach { it.${lastChangedByField.simpleName} = _clientId }\n")
+                }else {
+                    codeBlock.add("${entityParam.name}.${lastChangedByField.simpleName} = _clientId\n")
+                }
+            }
+        }
+
+        if(daoFunSpec.returnType != UNIT)
+            codeBlock.add("val _result = ")
+
+        codeBlock.add("_dao.${daoFunSpec.name}(")
+                .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
+                .add(")\n")
+
+        if(daoFunSpec.returnType != UNIT)
+            codeBlock.add("return _result\n")
+
+        return codeBlock.build()
+    }
+
+    fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val daoFunReturnType = daoFunSpec.returnType!!
+        val resultType = resolveQueryResultType(daoFunReturnType)
+        val isLiveDataOrDataSourceFactory = daoFunReturnType is ParameterizedTypeName
+                && daoFunReturnType.rawType in
+                listOf(DoorLiveData::class.asClassName(), DataSource.Factory::class.asClassName())
+
+        if (KModifier.SUSPEND !in daoFunSpec.modifiers) {
+            if(isLiveDataOrDataSourceFactory) {
+                codeBlock.beginControlFlow("%T.%M",
+                        GlobalScope::class, MemberName("kotlinx.coroutines", "launch"))
+            }else {
+                codeBlock.beginControlFlow("%M",
+                        MemberName("kotlinx.coroutines", "runBlocking"))
+            }
+        }
+
+
+        codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                daoName = daoName,
+                methodName = daoFunSpec.name,
+                httpResultType = resultType,
+                requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
+                    MemberName("io.ktor.client.request", "header"),
+                        "X-nid"),
+                params = daoFunSpec.parameters))
+        codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
+                "X-reqid")
+
+        codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
+                afterInsertCode = {
+                    CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
+                            CLIENT_GET_MEMBER_NAME)
+                            .beginControlFlow("url")
+                            .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
+                            .add("path(%S, %S)\n", daoName,
+                                    "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
+                            .endControlFlow()
+                            .add("%M(%S, _requestId)\n",
+                                    MemberName("io.ktor.client.request", "parameter"),
+                                    "reqId")
+                            .endControlFlow()
+                            .build()
+                },
+                resultType = resultType, processingEnv = processingEnv))
+
+        if(KModifier.SUSPEND !in daoFunSpec.modifiers) {
+            codeBlock.endControlFlow()
+        }
+
+        codeBlock.add("return _dao.${daoFunSpec.name}(")
+                .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
+                .add(")\n")
+
+        return codeBlock.build()
     }
 
 

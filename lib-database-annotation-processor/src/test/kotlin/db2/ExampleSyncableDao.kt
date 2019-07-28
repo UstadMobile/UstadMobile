@@ -1,8 +1,10 @@
 package db2
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 
 @Dao
 abstract class ExampleSyncableDao {
@@ -20,5 +22,10 @@ abstract class ExampleSyncableDao {
             "ExampleSyncableEntity LEFT JOIN OtherSyncableEntity ON ExampleSyncableEntity.esUid = OtherSyncableEntity.otherFk")
     abstract fun findAllWithOtherByUid(): List<ExampleSyncableEntityWithOtherSyncableEntity>
 
+    @Query("SELECT * FROM ExampleSyncableEntity")
+    abstract fun findAllLive(): DoorLiveData<List<ExampleSyncableEntity>>
+
+    @Query("SELECT * FROM ExampleSyncableEntity")
+    abstract fun findAllDataSource(): DataSource.Factory<Int, ExampleSyncableEntity>
 
 }
