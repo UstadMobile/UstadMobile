@@ -43,19 +43,19 @@ import kotlin.math.round
  */
 object UMFileUtil {
 
-    val FILE_SEP = '/'
+    const val FILE_SEP = '/'
 
     /**
      * Constant string - the file:/// protocol
      */
-    val PROTOCOL_FILE = "file:///"
+    const val PROTOCOL_FILE = "file:///"
 
 
-    private val UNIT_GB = 1024L * 1024L * 1024L
+    private const val UNIT_GB = 1024L * 1024L * 1024L
 
-    private val UNIT_MB = 1024L * 1024L
+    private const val UNIT_MB = 1024L * 1024L
 
-    private val UNIT_KB: Long = 1024
+    private const val UNIT_KB: Long = 1024
 
     /**
      * Join multiple paths - make sure there is just one FILE_SEP character
