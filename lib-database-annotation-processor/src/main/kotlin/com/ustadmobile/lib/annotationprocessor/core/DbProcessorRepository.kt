@@ -15,6 +15,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.Repository
 import kotlinx.coroutines.GlobalScope
 
 class DbProcessorRepository: AbstractDbProcessor() {
@@ -188,6 +189,19 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val resultType = resolveQueryResultType(returnTypeResolved)
             val incSyncableHttpRequest = !isUpdateDeleteOrInsertMethod(daoSubEl) && resultType != UNIT
 
+            var repoMethodType = if(daoMethodEl.getAnnotation(Repository::class.java) != null) {
+                daoMethodEl.getAnnotation(Repository::class.java).methodType
+            }else {
+                Repository.METHOD_AUTO
+            }
+
+            if(repoMethodType == Repository.METHOD_AUTO) {
+                repoMethodType = when {
+                    incSyncableHttpRequest -> Repository.METHOD_SYNCABLE_GET
+                    else -> Repository.METHOD_DELEGATE_TO_DAO
+                }
+            }
+
             //TODO: tidy up forcenullable so this is not violating the DRY principle
             val (overrideFunSpec, daoFunSpec) = (0..1).map {overrideAndConvertToKotlinTypes(daoMethodEl,
                     daoTypeElement.asType() as DeclaredType, processingEnv,
@@ -200,12 +214,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             val codeBlock = CodeBlock.builder()
 
-
-            if(incSyncableHttpRequest) {
-                codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+            when(repoMethodType) {
+                Repository.METHOD_SYNCABLE_GET ->
+                        codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
                         daoTypeElement.simpleName.toString()))
-            }else {
-                codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
+                Repository.METHOD_DELEGATE_TO_DAO ->
+                    codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
             }
 
             overrideFunSpec.addCode(codeBlock.build())
