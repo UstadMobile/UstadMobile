@@ -54,6 +54,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                         .addParameter(ParameterSpec.builder("_clientId", INT).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
+                        .addParameter("_accessToken", String::class)
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
                         .build())
                 .addProperties(listOf(
@@ -63,6 +64,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 INT).initializer("_clientId").build(),
                         PropertySpec.builder("_endpoint",
                                 String::class.asClassName()).initializer("_endpoint").build(),
+                        PropertySpec.builder("_accessToken", String::class)
+                                .initializer("_accessToken").build(),
                         PropertySpec.builder("_httpClient",
                             HttpClient::class.asClassName()).initializer("_httpClient").build()
                 ))
