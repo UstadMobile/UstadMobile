@@ -40,8 +40,6 @@ actual class ContainerManager actual constructor(container: Container,
 
     val mutex = Mutex()
 
-    val excludedGzipTypes: List<String> = listOf(".webm", ".mp4")
-
     open class FileEntrySource(private val file: File, override val pathInContainer: String,
                                override val compression: Int = 0) : EntrySource {
         override val length: Long
@@ -180,6 +178,10 @@ actual class ContainerManager actual constructor(container: Container,
             //return the items remaining (e.g. those that actually need downloaded)
             return itemsToDownloadPartitioned.second
         }
+    }
+
+    companion object {
+        val excludedGzipTypes: List<String> = listOf(".webm", ".mp4")
     }
 
 }

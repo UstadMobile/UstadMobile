@@ -10,7 +10,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-class Codec2Player(private val fileInput: InputStream, private val pos: Long) : Runnable {
+class Codec2Player(private val inStream: InputStream, private val pos: Long) : Runnable {
     private val playing: AtomicBoolean = AtomicBoolean()
 
     fun play() {
@@ -40,11 +40,11 @@ class Codec2Player(private val fileInput: InputStream, private val pos: Long) : 
                     AudioTrack.MODE_STREAM)
             track.play()
 
-            codec2 = Codec2Decoder(fileInput, Codec2.CODEC2_MODE_3200)
+            codec2 = Codec2Decoder(inStream, Codec2.CODEC2_MODE_3200)
             val headerSize = 7
             val frameDurationMs = codec2.samplesPerFrame.toFloat() / 8f
             val framesToSkip = Math.round(pos / frameDurationMs)
-            fileInput.skip((headerSize + framesToSkip * codec2.inputBufferSize).toLong())
+            inStream.skip((headerSize + framesToSkip * codec2.inputBufferSize).toLong())
             var buffer = codec2.readFrame()
             while (playing.get() && buffer != null) {
                 track.write(buffer.array(), 0, buffer.capacity())
@@ -56,7 +56,7 @@ class Codec2Player(private val fileInput: InputStream, private val pos: Long) : 
         } finally {
             track?.release()
             codec2?.destroy()
-            UMIOUtils.closeInputStream(fileInput)
+            UMIOUtils.closeInputStream(inStream)
         }
 
     }

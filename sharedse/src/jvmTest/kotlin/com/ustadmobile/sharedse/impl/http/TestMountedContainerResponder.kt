@@ -34,7 +34,9 @@ class TestMountedContainerResponder {
 
     private var context = Any()
 
-    private fun getGZIPInputStreamFromResponse(data: InputStream, gzipHeader: String?): InputStream {
+    private fun getGZIPInputStreamFromResponse(response: NanoHTTPD.Response): InputStream {
+        val gzipHeader = response.getHeader("Content-Encoding")
+        val data = response.data
         return if (gzipHeader != null && gzipHeader == "gzip") {
             GZIPInputStream(data)
         } else {
@@ -91,8 +93,7 @@ class TestMountedContainerResponder {
                 containerManager!!.getEntry("subfolder/testfile1.png")!!)
         Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
                 UMIOUtils.readStreamToByteArray(containerIn),
-                UMIOUtils.readStreamToByteArray(getGZIPInputStreamFromResponse(response.data, gzipHeader)))
-
+                UMIOUtils.readStreamToByteArray(getGZIPInputStreamFromResponse(response)))
         containerIn.close()
         Assert.assertEquals("Response is 200 OK", NanoHTTPD.Response.Status.OK,
                 response.status)

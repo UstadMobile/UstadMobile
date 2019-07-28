@@ -15,6 +15,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.*
+import java.util.zip.GZIPInputStream
 
 
 class TestContainerManager {
@@ -248,6 +249,7 @@ class TestContainerManager {
             val containerEntry = containerManager.getEntry("testfile2.png")!!
             Assert.assertEquals("png was gzipped", COMPRESSION_GZIP,
                     containerEntry.containerEntryFile!!.compression)
+            Assert.assertTrue("inputstream is GzipInputStream", containerManager.getInputStream(containerEntry) is GZIPInputStream)
             Assert.assertArrayEquals("Byte content should be the same",
                     FileInputStream(testFiles[2]).readBytes(),
                     containerManager.getInputStream(containerEntry).readBytes())
@@ -258,9 +260,7 @@ class TestContainerManager {
     }
 
     @Test
-    fun givenNonCompressableEntry_whenAdded_thenShouldBeGzipped() {
-        //test that the content is gzipped, but then, when using getInputStream, should be inflated
-
+    fun givenNonCompressableEntry_whenAdded_thenShouldNotBeGzipped() {
         val container = Container()
         container.containerUid = db.containerDao.insert(container)
 
@@ -273,6 +273,7 @@ class TestContainerManager {
             val containerEntry = containerManager.getEntry("BigBuckBunny.mp4")!!
             Assert.assertEquals("mp4 was not gzipped", COMPRESSION_NONE,
                     containerEntry.containerEntryFile!!.compression)
+            Assert.assertTrue("inputstream is FileInputStream",containerManager.getInputStream(containerEntry) !is GZIPInputStream)
             Assert.assertArrayEquals("Byte content should be the same",
                     FileInputStream(testFiles[3]).readBytes(),
                     containerManager.getInputStream(containerEntry).readBytes())
