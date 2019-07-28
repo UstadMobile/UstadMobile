@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -15,7 +15,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * Class has all the shared function across all supported platforms
  */
-abstract class UstadMobileSystemCommon {
+open abstract class UstadMobileSystemCommon {
 
     /**
      * Returns whether or not the init method has already been run
@@ -216,13 +216,27 @@ abstract class UstadMobileSystemCommon {
     }
 
     /**
+     * Get list of all UI supported languages
+     */
+    open fun getAllUiLanguage(context: Any): Map<String,String>{
+        val languageList = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context)!!.split(",")
+        val languageMap = HashMap<String,String>()
+        for(language in languageList){
+            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?: error("English")
+        }
+        return languageMap
+    }
+
+
+    /**
      * Starts the user interface for the app
      */
     open fun startUI(context: Any) {
         val activeAccount = UmAccountManager.getActiveAccount(context)
 
         if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(Login2View.VIEW_NAME, mapOf(), context)
+            go(LoginView.VIEW_NAME, mapOf(), context)
         } else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }

@@ -164,7 +164,7 @@ kotlin {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
-                implementation project(":lib-test-util")
+                implementation project(":lib-test-common")
 
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "com.soywiz:klock-metadata:$version_klock"
@@ -264,6 +264,45 @@ tasks.whenTaskAdded { task ->
 }
 jvmTest.dependsOn(copyTestResources)
 
+jacoco {
+    toolVersion = "$version_jacoco_tool"
+}
+
+/**
+ * Create a Jacocco task for reporting test coverage - as per:
+ * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
+ */
+project.afterEvaluate {
+    def testTaskName = "jvmTest"
+
+    // Create gradle task
+    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
+        group = "Reporting"
+        description = "Generate Jacoco coverage reports on the common module build."
+
+        def excludes = [
+                '**/*Test*.*'
+        ]
+
+        classDirectories = fileTree(
+                dir: "${project.buildDir}/classes/kotlin/jvm/",
+                excludes: excludes
+        )
+
+        def coverageSourceDirs = [
+                "src/commonMain/kotlin"
+        ]
+
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+}
 
 publishing {
     publications {

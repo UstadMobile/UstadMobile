@@ -43,7 +43,6 @@ kotlin {
 
 afterEvaluate {
     android.libraryVariants.all { variant ->
-        variant.javaCompileProvider.get().dependsOn(copyMainXmlLocaleFilesFromCore)
         variant.javaCompileProvider.get().dependsOn(generateCoreStringToAndroidResMap)
     }
 }
@@ -57,6 +56,8 @@ tasks.whenTaskAdded { task ->
 android {
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
+        main.res.srcDirs += "../core/locale/main/"
+        main.java.srcDirs += "build/generated/source/umlocale/"
     }
 
     compileOptions {
@@ -178,23 +179,16 @@ gradle.taskGraph.useFilter { task ->
             || task.name.equals("testVanillaReleaseUnitTest")
             || task.name.equals("processVanillaDebugAndroidTestManifest")
             || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
-        return false;
+        return false
     }
 
-    return true;
+    return true
 }
 
-task copyMainXmlLocaleFilesFromCore(type: Copy) {
-    inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
-    from("../core/locale/main")
-    exclude "**/*.properties"
-    into "src/main/res"
-}
-assemble.dependsOn(copyMainXmlLocaleFilesFromCore)
 //connectedCheck.dependsOn(":lib-http-testserver:startDaemon")
 
 task generateCoreStringToAndroidResMap {
-    inputs.files("core/locale/main/*.xml")
+    inputs.files("../core/locale/main/**/*.xml")
     onlyIf {
         /*
          Only run this task if the input files have been updated since the task was last run.
@@ -207,7 +201,7 @@ task generateCoreStringToAndroidResMap {
                 inputLastModified = file.lastModified()
         }
 
-        File outputFile = project.file("src/main/kotlin/com/ustadmobile/port/android/generated/MessageIDMap.kt")
+        File outputFile = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated/MessageIDMap.kt")
         return outputFile.lastModified() < inputLastModified;
     }
 
@@ -246,12 +240,12 @@ task generateCoreStringToAndroidResMap {
         genSrcFooter = "\t}\n"
         genSrcFooter += "}\n"
 
-        File oldMessageIdFile = project.file("src/main/kotlin/com/ustadmobile/port/android/generated/MessageIDMap.kt")
+        File oldMessageIdFile = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated/MessageIDMap.kt")
         if (oldMessageIdFile.exists()) {
             oldMessageIdFile.delete()
         }
 
-        File outDir = project.file("src/main/kotlin/com/ustadmobile/port/android/generated")
+        File outDir = project.file("build/generated/source/umlocale/com/ustadmobile/port/android/generated")
         if (!outDir.isDirectory()) {
             outDir.mkdirs()
         }
@@ -260,7 +254,12 @@ task generateCoreStringToAndroidResMap {
         outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
     }
 }
-assemble.dependsOn(generateCoreStringToAndroidResMap)
+tasks.whenTaskAdded { task ->
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+        task.dependsOn(generateCoreStringToAndroidResMap)
+    }
+}
+
 
 configurations.all {
     resolutionStrategy {
@@ -359,6 +358,7 @@ dependencies {
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
+    androidTestImplementation project(":lib-test-common")
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_support_lib"
 

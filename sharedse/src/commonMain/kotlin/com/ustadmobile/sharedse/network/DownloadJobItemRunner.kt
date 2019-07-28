@@ -104,6 +104,10 @@ class DownloadJobItemRunner
 
     private val entriesDownloaded = atomic(0)
 
+    private val connectionRequestActive = atomic(false)
+
+    private val statusRef = atomic<ConnectivityStatus?>(null)
+
     var startDownloadFnJob: Job? = null
 
     private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
@@ -478,7 +482,7 @@ class DownloadJobItemRunner
                 BleMessage.getNextMessageIdForReceiver(currentNetworkNode!!.bluetoothMacAddress!!),
                 BleMessageUtil.bleMessageLongToBytes(listOf(1L)))
         UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() + " connecting local network: requesting group credentials ")
-        val connectionRequestActive = atomic(true)
+        connectionRequestActive.value = true
         networkManager.lockWifi(downloadWiFiLock)
 
         val channel = Channel<Boolean>(1)
@@ -541,7 +545,6 @@ class DownloadJobItemRunner
         networkManager.connectToWiFi(wiFiDirectGroupBle.value!!.ssid,
                 wiFiDirectGroupBle.value!!.passphrase)
 
-        val statusRef = atomic<ConnectivityStatus?>(null)
 
         launch (mainCoroutineDispatcher) {
             waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong()) {

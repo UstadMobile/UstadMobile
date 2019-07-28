@@ -23,6 +23,7 @@ apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
+apply plugin: "jacoco"
 
 
 android {
@@ -63,10 +64,60 @@ task copyTestResources(type: Copy) {
         outWriter.close()
     }
 }
+/*
+ * Generate a class with constant integer flags for each string message ID. See localization docs
+ * for further information.
+ */
+task prepareLocale {
+    inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
+    File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+    if(!outFile.parentFile.exists()) {
+        outFile.parentFile.mkdirs()
+    }
+    outFile.text = ''
+    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
+    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+    outFile << 'object MessageID{\n\n'
+
+    Map<String, Integer> messageIds = new HashMap<>()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+
+    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
+        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        xmlDoc.string.each() { str ->
+            String msgName = str.@name
+
+            if (!messageIds.containsKey(msgName)) {
+                Integer value;
+                if (str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                } else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+
+                messageIds.put(msgName, value)
+            }
+        }
+    }
+
+    Iterator<String> nameIterator = messageIds.keySet().iterator()
+
+    while (nameIterator.hasNext()) {
+        String strName = nameIterator.next()
+        Integer value = messageIds.get(strName)
+        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+    }
+    outFile << '}'
+}
+
 
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(copyTestResources)
+    }
+
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+        task.dependsOn(prepareLocale)
     }
 }
 
@@ -104,6 +155,7 @@ kotlin {
 
     sourceSets {
         commonMain {
+            kotlin.srcDirs += "build/generated/source/umlocale/"
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
@@ -152,7 +204,7 @@ kotlin {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
-                implementation project(":lib-test-util")
+                implementation project(":lib-test-common")
             }
         }
 
@@ -264,6 +316,47 @@ kotlin {
     }
 }
 
+jacoco {
+    toolVersion = "$version_jacoco_tool"
+}
+
+/**
+ * Create a Jacocco task for reporting test coverage - as per:
+ * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
+ */
+project.afterEvaluate {
+    def testTaskName = "jvmJacocoTestReport"
+
+    // Create gradle task
+    task "jvm" (type:JacocoReport, dependsOn: "$testTaskName") {
+        group = "Reporting"
+        description = "Generate Jacoco coverage reports on the common module build."
+
+        def excludes = [
+                '**/*Test*.*'
+        ]
+
+        classDirectories = fileTree(
+                dir: "${project.buildDir}/classes/kotlin/jvm/",
+                excludes: excludes
+        )
+
+        def coverageSourceDirs = [
+                "src/commonMain/kotlin"
+        ]
+
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+}
+
+
 
 def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
 Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
@@ -279,48 +372,7 @@ if (rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
-/*
- * Generate a class with constant integer flags for each string message ID. See localization docs
- * for further information.
- */
-task prepareLocale {
-    inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("src/commonMain/kotlin/com/ustadmobile/core/generated/locale/MessageID.kt")
-    outFile.text = ''
-    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
-    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-    outFile << 'object MessageID{\n\n'
 
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-
-    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
-
-            if (!messageIds.containsKey(msgName)) {
-                Integer value;
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
-                }
-
-                messageIds.put(msgName, value)
-            }
-        }
-    }
-
-    Iterator<String> nameIterator = messageIds.keySet().iterator()
-
-    while (nameIterator.hasNext()) {
-        String strName = nameIterator.next()
-        Integer value = messageIds.get(strName)
-        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
-    }
-    outFile << '}'
-}
 
 /**
  * Generate locale json file whic maps code to actual string

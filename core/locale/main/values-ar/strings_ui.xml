@@ -292,6 +292,7 @@
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
+    <string name="no_account">Don\'t have an account?</string>
 
 
 
