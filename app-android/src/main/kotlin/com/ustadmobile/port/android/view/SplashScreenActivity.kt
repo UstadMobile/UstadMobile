@@ -64,7 +64,8 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
         organisationIcon = findViewById(R.id.organisation_icon)
         constraintLayout = findViewById(R.id.constraint_layout)
 
-        val presenter = SplashPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this)
+        val presenter = SplashPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
     }
@@ -82,7 +83,7 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
         WorkManager.getInstance().enqueue(dbWork)
     }
 
-    override fun animateOrganisationIcon(animate: Boolean) {
+    override fun animateOrganisationIcon(animate: Boolean, delay: Boolean) {
 
         organisationIcon.setOnClickListener{
             val constraint = ConstraintSet()
@@ -93,9 +94,11 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
             constraint.applyTo(constraintLayout)
         }
 
-        Handler().postDelayed({
-            organisationIcon.performClick()
-        }, TimeUnit.MILLISECONDS.toMillis(if(animate) 200 else 0))
+        if(delay){
+            Handler().postDelayed({
+                organisationIcon.performClick()
+            }, TimeUnit.MILLISECONDS.toMillis(if(animate) 200 else 0))
+        }
 
     }
 
