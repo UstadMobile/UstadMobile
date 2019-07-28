@@ -69,6 +69,17 @@ class ScreenNamePresenterTest: AbstractScreenNamePresenterTest() {
 }
 ```
 
+Unfortunately, the normal IDE test runner will not work as it doessn't 
+get the classpath correct. Click the Gradle bar on the top right of the
+IDE, select the module containing ScreenNamePresenterTest, select **tasks**,
+and then select **verification**. You can then double click the **jvmTest**
+ task to run the test. To run only one test, select the run configuration
+ from the top, then select **Edit configurations**. Add the following to
+ the arguments:
+ ```
+ --tests fully.qualified.name.of.ScreenNamePresenterTest
+ ```
+
 * **ScreenNameEspressoTest** - this is the Android UI test and can be used
 to test the functionality across different Android versions. It is in
 the androidTest source of the app-android module. Instead of writing
