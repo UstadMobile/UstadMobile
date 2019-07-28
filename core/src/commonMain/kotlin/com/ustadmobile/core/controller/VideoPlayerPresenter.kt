@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UmAccountManager
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlinx.io.InputStream
 
 class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: VideoPlayerView)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
@@ -25,7 +27,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
 
     private var navigation: String? = null
 
-    var audioPath: String? = null
+    var audioInput: InputStream? = null
         private set
     var videoPath: String? = null
         private set
@@ -62,6 +64,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         GlobalScope.launch {
             container = containerDao.findByUidAsync(containerUid)
             val result = containerEntryDao.findByContainerAsync(containerUid)
+            val containerManager = ContainerManager(container!!, db, dbRepo)
             var defaultLangName = ""
             for (entry in result) {
 
@@ -72,7 +75,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
                         videoPath = containerEntryFile.cefPath
                     } else if (fileInContainer == "audio.c2") {
-                        audioPath = containerEntryFile.cefPath
+                        audioInput = containerManager.getInputStream(entry)
                     } else if (fileInContainer == "subtitle.srt" || fileInContainer.toLowerCase() == "subtitle-english.srt") {
 
                         defaultLangName = if (fileInContainer.contains("-"))
@@ -98,7 +101,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
             srtLangList.add(0, "No Subtitles")
             srtLangList.add(1, defaultLangName)
 
-            view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioPath, srtLangList, srtMap) })
+            view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioInput, srtLangList, srtMap) })
         }
 
     }
