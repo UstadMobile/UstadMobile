@@ -13,8 +13,3 @@
 -keep interface com.j256.**
 -keepclassmembers interface com.j256.** { *; }
 -dontwarn com.j256.**
-
-#content editor
--keep public class com.ustadmobile.port.android.umeditor.**{
-       *;
-}

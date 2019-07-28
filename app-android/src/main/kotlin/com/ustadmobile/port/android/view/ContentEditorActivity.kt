@@ -40,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEditorPresenter
 import com.ustadmobile.core.controller.ContentEditorPresenterCommon.Companion.EDITOR_BASE_DIR_NAME
@@ -177,10 +178,12 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     /**
      * Class which represent a link inside the editor.
      */
-    private inner class UmLink {
+    inner class UmLink {
 
+        @SerializedName("linkText")
         internal val linkText: String? = null
 
+        @SerializedName("linkUrl")
         internal val linkUrl: String? = null
     }
 
@@ -1016,7 +1019,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 builder.setView(view)
                 builder.setNegativeButton(R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }
-                if (umLink.linkUrl!!.isNotEmpty()) {
+                if (umLink.linkUrl?.isNotEmpty()!!) {
                     builder.setNeutralButton(R.string.content_editor_link_remove) { _, _ ->
                         executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "removeLink",
                                 this@ContentEditorActivity)
