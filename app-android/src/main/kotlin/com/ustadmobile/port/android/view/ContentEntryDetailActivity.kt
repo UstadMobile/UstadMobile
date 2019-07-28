@@ -263,7 +263,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun showDownloadOptionsDialog(map: HashMap<String, String>) {
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable { impl.go("DownloadDialog", map, this) },
                 impl.getString(MessageID.download_storage_permission_title, this),
                 impl.getString(MessageID.download_storage_permission_message, this))

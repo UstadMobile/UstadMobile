@@ -89,7 +89,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
     }
 
     override fun browseFiles(callback: UmResultCallback<String>?, vararg mimeType: String) {
-        runAfterGrantingPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        runAfterGrantingPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable{
                     runAfterFileSection(Runnable{
                         HandleFileSelectionAsyncTask(callback ?: object : UmResultCallback<String> {
