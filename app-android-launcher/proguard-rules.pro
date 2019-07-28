@@ -24,11 +24,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Content Editor
--keepclasseswithmembers class * {
-   @android.webkit.JavascriptInterface <methods>;
-}
-
 # database entities
 -keep public class com.ustadmobile.lib.db.entities.**{
        *;
@@ -49,6 +44,11 @@
 -keep public class com.toughra.ustadmobile.BuildConfig
 -keep public class com.ustadmobile.codec2.Codec2{
         *;
+}
+
+#content editor
+-keep public class com.ustadmobile.port.android.umeditor.**{
+       *;
 }
 
  #
