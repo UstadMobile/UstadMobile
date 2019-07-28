@@ -30,14 +30,6 @@ class TestContainerEntryFileResponder {
 
     private var appRepo: UmAppDatabase? = null
 
-    private fun getGZIPInputStreamFromResponse(data: InputStream, gzipHeader: Int): InputStream {
-        return if (gzipHeader == COMPRESSION_GZIP) {
-            GZIPInputStream(data)
-        } else {
-            data
-        }
-    }
-
     @Before
     @Throws(IOException::class)
     fun setup() {

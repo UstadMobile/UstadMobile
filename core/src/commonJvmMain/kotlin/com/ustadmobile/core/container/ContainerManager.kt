@@ -97,7 +97,7 @@ actual class ContainerManager actual constructor(container: Container,
                 val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16) }
                 val destFile = File(newFileDir, md5HexStr)
                 val currentFilePath = it.filePath
-                val isExcludedFromGzip = excludedGzipTypes.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
+                val isExcludedFromGzip = EXCLUDED_GZIP_TYPES.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
                 val shouldGzipNow = if (it.compression == COMPRESSION_GZIP) false else !isExcludedFromGzip
                 val compressionSetting = if (isExcludedFromGzip) COMPRESSION_NONE else COMPRESSION_GZIP
                 //TODO: check for any paths that are being overwritten
@@ -181,7 +181,7 @@ actual class ContainerManager actual constructor(container: Container,
     }
 
     companion object {
-        val excludedGzipTypes: List<String> = listOf(".webm", ".mp4")
+        val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4")
     }
 
 }
