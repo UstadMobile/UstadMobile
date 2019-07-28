@@ -839,6 +839,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         when (item.itemId) {
             R.id.content_action_pages -> {
                 presenter.isPageManagerOpen = true
+                saveContent()
                 viewSwitcher!!.closeActivity(false)
 
             }
