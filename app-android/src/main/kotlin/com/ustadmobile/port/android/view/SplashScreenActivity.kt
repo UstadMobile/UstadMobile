@@ -33,44 +33,74 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.os.Handler
-
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
-
+import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.view.OnBoardingView
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.SplashPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.SplashView
+import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
 import java.util.concurrent.TimeUnit
 
 
-class SplashScreenActivity : UstadBaseActivity() {
+class SplashScreenActivity : SplashView, UstadBaseActivity() {
 
-    private val impl =  UstadMobileSystemImpl.instance
+    private lateinit var organisationIcon : ImageView
+
+    private lateinit var constraintLayout: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setTheme(R.style.ThemeOnboarding)
-
         setContentView(R.layout.activity_splash_screen)
 
-        val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
+        organisationIcon = findViewById(R.id.organisation_icon)
+        constraintLayout = findViewById(R.id.constraint_layout)
 
-        if(!launched){val dbWork = OneTimeWorkRequest.Builder(
-                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
-                .build()
-            WorkManager.getInstance().enqueue(dbWork)
-        }
-
-        val showSplash = impl.getAppConfigString(
-                AppConfig.KEY_SHOW_SPASH_SCREEN, null, this)!!.toBoolean()
-
-        Handler().postDelayed({
-            impl.startUI(this@SplashScreenActivity)
-        }, if(showSplash || !launched) TimeUnit.SECONDS.toMillis(2) else 0)
+        val presenter = SplashPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UstadMobileSystemImpl.instance)
+        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
     }
+
+    override fun startUi(delay: Boolean, animate: Boolean) {
+        Handler().postDelayed({
+            UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
+        }, if(delay) TimeUnit.SECONDS.toMillis(if(animate) 3 else 2) else 0)
+    }
+
+    override fun preloadData() {
+        val dbWork = OneTimeWorkRequest.Builder(
+                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
+                .build()
+        WorkManager.getInstance().enqueue(dbWork)
+    }
+
+    override fun animateOrganisationIcon(animate: Boolean, delay: Boolean) {
+
+        organisationIcon.setOnClickListener{
+            val constraint = ConstraintSet()
+            val transition = AutoTransition()
+            transition.duration = 1000
+            constraint.clone(this, R.layout.activity_splash_screen_zoom)
+            TransitionManager.beginDelayedTransition(constraintLayout, transition)
+            constraint.applyTo(constraintLayout)
+        }
+
+        if(delay){
+            Handler().postDelayed({
+                organisationIcon.performClick()
+            }, TimeUnit.MILLISECONDS.toMillis(if(animate) 200 else 0))
+        }
+
+    }
+
 
 }

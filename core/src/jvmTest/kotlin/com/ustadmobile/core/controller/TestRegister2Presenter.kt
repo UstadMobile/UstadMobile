@@ -68,7 +68,7 @@
 //
 //
 //        args = mutableMapOf<String,String>()
-//        args!![Login2Presenter.ARG_NEXT] = DESTINATION
+//        args!![LoginPresenter.ARG_NEXT] = DESTINATION
 //
 //        mockView = Mockito.mock(Register2View::class.java)
 //        doAnswer {
