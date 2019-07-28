@@ -5,22 +5,25 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Register2View
+import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class Login2Presenter(context: Any, arguments: Map<String, String?>, view: LoginView)
+class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView, val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null
 
     init {
-        if (arguments.containsKey(ARG_NEXT)) {
-            mNextDest = arguments[ARG_NEXT]
+        mNextDest = if (arguments.containsKey(ARG_NEXT)) {
+            arguments[ARG_NEXT]
         } else {
-            mNextDest = UstadMobileSystemImpl.instance.getAppConfigString(
+            impl.getAppConfigString(
                     AppConfig.KEY_FIRST_DEST, "BasePoint", context)
         }
     }
@@ -33,6 +36,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
             view.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", context)!!)
         }
+
+        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER, "false", context)!!.toBoolean()
+
+        view.setRegistrationLinkVisible(showRegisterLink)
     }
 
     @JsName("handleClickLogin")
@@ -66,6 +73,12 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
                 })
             }
         }
+    }
+
+    fun handleCreateAccount(){
+        val args = HashMap(arguments)
+        args[ARG_NEXT] = ContentEntryDetailView.VIEW_NAME
+        impl.go(Register2View.VIEW_NAME,args,context)
     }
 
     companion object {

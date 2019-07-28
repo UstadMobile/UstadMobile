@@ -217,7 +217,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         val impl = UstadMobileSystemImpl.instance
         if(::ustadBaseActivity.isInitialized){
             ustadBaseActivity.runAfterGrantingPermission(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
                     impl.getString(MessageID.download_storage_permission_title, context!!),
                     impl.getString(MessageID.download_storage_permission_message, context!!))
