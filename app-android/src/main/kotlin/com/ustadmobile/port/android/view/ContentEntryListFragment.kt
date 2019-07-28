@@ -30,7 +30,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContai
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 
 /**
@@ -57,9 +59,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private var contentEntryListener: ContentEntryListener? = null
 
-    private var ustadBaseActivity: UstadBaseActivity? = null
+    private lateinit var ustadBaseActivity: UstadBaseActivity
 
-    private var managerAndroidBle: NetworkManagerBle? = null
+    private lateinit var managerAndroidBle: NetworkManagerBle
 
     private var recyclerAdapter: ContentEntryListRecyclerViewAdapter? = null
 
@@ -149,10 +151,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             this.ustadBaseActivity = context
-            ustadBaseActivity!!.runAfterServiceConnection(Runnable{
-                ustadBaseActivity!!.runOnUiThread {
-                    managerAndroidBle = ustadBaseActivity!!
-                            .networkManagerBle
+            ustadBaseActivity.runAfterServiceConnection(Runnable{
+                ustadBaseActivity.runOnUiThread {
+                    managerAndroidBle = ustadBaseActivity.networkManagerBle!!
                     checkReady()
                 }
             })
@@ -166,7 +167,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
-        if (entryListPresenter == null && rootContainer != null) {
+        if (entryListPresenter == null && rootContainer != null && ::managerAndroidBle.isInitialized) {
+            //create entry adapter here to make sure bleManager is not null
+            recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
+                    managerAndroidBle)
+            recyclerAdapter!!.addListeners()
+            recyclerAdapter!!.setEmptyStateListener(this)
+
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
                     bundleToMap(arguments), this)
             entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
@@ -176,17 +183,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onDetach() {
         super.onDetach()
         this.contentEntryListener = null
-        this.ustadBaseActivity = null
     }
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>) {
-        if (recyclerAdapter != null)
-            recyclerAdapter!!.removeListeners()
 
-        recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
-                managerAndroidBle)
-        recyclerAdapter!!.addListeners()
-        recyclerAdapter!!.setEmptyStateListener(this)
         val data = LivePagedListBuilder(entryProvider, 20).build()
         data.observe(this, Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
 
@@ -215,24 +215,26 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun downloadStatusClicked(entry: ContentEntry?) {
         val impl = UstadMobileSystemImpl.instance
-        ustadBaseActivity!!.runAfterGrantingPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
-                impl.getString(MessageID.download_storage_permission_title, context!!),
-                impl.getString(MessageID.download_storage_permission_message, context!!))
+        if(::ustadBaseActivity.isInitialized){
+            ustadBaseActivity.runAfterGrantingPermission(
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
+                    impl.getString(MessageID.download_storage_permission_title, context!!),
+                    impl.getString(MessageID.download_storage_permission_message, context!!))
+        }
     }
 
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        Thread {
-            if (managerAndroidBle != null) {
-                managerAndroidBle!!.startMonitoringAvailability(monitor, entryUidsToMonitor)
+        GlobalScope.launch {
+            if (::managerAndroidBle.isInitialized) {
+                managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
             }
-        }.start()
+        }
     }
 
     override fun stopMonitoringAvailability(monitor: Any) {
-        if (managerAndroidBle != null) {
-            managerAndroidBle!!.stopMonitoringAvailability(monitor)
+        if (::managerAndroidBle.isInitialized) {
+            managerAndroidBle.stopMonitoringAvailability(monitor)
         }
     }
 
@@ -252,7 +254,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     companion object {
-
 
         fun newInstance(args: Bundle): ContentEntryListFragment {
             val fragment = ContentEntryListFragment()

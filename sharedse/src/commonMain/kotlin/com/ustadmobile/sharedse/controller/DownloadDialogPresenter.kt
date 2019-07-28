@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.controller
+package com.ustadmobile.sharedse.controller
 
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
@@ -74,7 +74,6 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
                     setup()
                 }
             }
-
         })
 
         networkManagerBle.addDownloadChangeListener(this)
@@ -92,7 +91,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun startObservingDownloadJobMeteredState() {
         view.runOnUiThread(Runnable {
             allowedMeteredLive = appDatabase.downloadJobDao
-                    .getLiveMeteredNetworkAllowed(currentJobId!!)
+                    .getLiveMeteredNetworkAllowed(currentJobId)
             allowedMeteredLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobMeteredStateChange)
         })
@@ -103,97 +102,105 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private fun handleDownloadJobStatusChange(downloadJob: DownloadJob?) {
+
         if (downloadJob != null) {
             val downloadStatus = downloadJob.djStatus
             downloadJobStatus.value = downloadStatus
-            view.setCalculatingViewVisible(false)
-            view.setWifiOnlyOptionVisible(true)
-            if (downloadStatus >= JobStatus.COMPLETE_MIN) {
-                deleteFileOptions = true
-                view.setStackOptionsVisible(false)
-                view.setBottomButtonsVisible(true)
-                statusMessage = impl!!.getString(MessageID.download_state_downloaded,
-                        context)
-                view.setBottomButtonPositiveText(impl!!.getString(
-                        MessageID.download_delete_btn_label, context))
-                view.setBottomButtonNegativeText(impl!!.getString(
-                        MessageID.download_cancel_label, context))
-            } else if (downloadStatus >= JobStatus.RUNNING_MIN) {
-                deleteFileOptions = false
-                view.setStackOptionsVisible(true)
-                view.setBottomButtonsVisible(false)
-                val optionTexts = arrayOf(impl!!.getString(MessageID.download_pause_stacked_label, context), impl!!.getString(MessageID.download_cancel_stacked_label, context), impl!!.getString(MessageID.download_continue_stacked_label, context))
-                statusMessage = impl!!.getString(MessageID.download_state_downloading,
-                        context)
-                view.setStackedOptions(
-                        intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL, STACKED_BUTTON_CONTINUE),
-                        optionTexts)
-            } else {
-                deleteFileOptions = false
-                statusMessage = impl!!.getString(MessageID.download_state_download,
-                        context)
-                view.setStackOptionsVisible(false)
-                view.setBottomButtonsVisible(true)
-                view.setBottomButtonPositiveText(impl!!.getString(
-                        MessageID.download_continue_btn_label, context))
-                view.setBottomButtonNegativeText(impl!!.getString(
-                        MessageID.download_cancel_label, context))
+            when {
+                downloadStatus >= JobStatus.COMPLETE_MIN -> {
+                    deleteFileOptions = true
+                    view.setStackOptionsVisible(false)
+                    view.setBottomButtonsVisible(true)
+                    statusMessage = impl!!.getString(MessageID.download_state_downloaded,
+                            context)
+                    view.setBottomButtonPositiveText(impl!!.getString(
+                            MessageID.download_delete_btn_label, context))
+                    view.setBottomButtonNegativeText(impl!!.getString(
+                            MessageID.download_cancel_label, context))
+                }
+                downloadStatus >= JobStatus.RUNNING_MIN -> {
+                    deleteFileOptions = false
+                    view.setStackOptionsVisible(true)
+                    view.setBottomButtonsVisible(false)
+                    val optionTexts = arrayOf(impl!!.getString(MessageID.pause_download, context),
+                            impl!!.getString(MessageID.download_cancel_label, context),
+                            impl!!.getString(MessageID.download_continue_stacked_label, context))
+                    statusMessage = impl!!.getString(MessageID.download_state_downloading,
+                            context)
+                    view.setStackedOptions(
+                            intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL, STACKED_BUTTON_CONTINUE),
+                            optionTexts)
+                }
             }
-
-            onDownloadJobItemChange(jobItemManager?.rootItemStatus, downloadJob.djUid)
+        }else{
+            deleteFileOptions = false
+            statusMessage = impl!!.getString(MessageID.download_state_download,
+                    context)
+            view.setStackOptionsVisible(false)
+            view.setBottomButtonsVisible(true)
+            view.setBottomButtonPositiveText(impl!!.getString(
+                    MessageID.download_continue_btn_label, context))
+            view.setBottomButtonNegativeText(impl!!.getString(
+                    MessageID.download_cancel_label, context))
         }
+
+        generateStatusMessage()
+        view.setCalculatingViewVisible(false)
+        view.setWifiOnlyOptionVisible(true)
     }
 
-    private fun setup() {
+    private suspend fun setup() {
         currentJobId = appDatabase.downloadJobDao
                 .getLatestDownloadJobUidForContentEntryUid(contentEntryUid)
 
-        GlobalScope.launch {
-            if (currentJobId == 0) {
-                createDownloadJobRecursive()
-            }else {
-                jobItemManager = networkManagerBle.openDownloadJobItemManager(currentJobId)!!
-            }
+        if (currentJobId != 0) {
+            jobItemManager = networkManagerBle.openDownloadJobItemManager(currentJobId)!!
         }
 
-
         startObservingJob()
-
         startObservingDownloadJobMeteredState()
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-        println("onDownloadJobItemChange: $status  / $downloadJobUid")
-        if(status != null && status.contentEntryUid == jobItemManager?.rootContentEntryUid) {
-            GlobalScope.launch {
-                val rootStatus = jobItemManager?.rootItemStatus
-                view.runOnUiThread(Runnable {
-                    view.setStatusText(statusMessage ?: "", jobItemManager?.size ?: 0,
-                            UMFileUtil.formatFileSize(rootStatus?.totalBytes ?: 0))
-                })
-            }
-        }
+    private fun generateStatusMessage(){
+        GlobalScope.launch {
+            val umEntriesWithSize = appDatabase.contentEntryParentChildJoinDao
+                    .getParentChildContainerRecursiveAsync(contentEntryUid)!!
 
+            view.runOnUiThread(Runnable {
+                view.setStatusText(statusMessage ?: "", umEntriesWithSize.numEntries,
+                        UMFileUtil.formatFileSize(umEntriesWithSize.fileSize))
+            })
+        }
     }
 
-    private fun createDownloadJobRecursive() {
+
+    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+        println("onDownloadJobItemChange: $status  / $downloadJobUid")
+    }
+
+    private suspend fun createDownloadJobRecursive() : Boolean{
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
-        GlobalScope.launch {
-            jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
-            jobItemManager!!.awaitLoaded()
-            currentJobId = jobItemManager!!.downloadJobUid ?: 0
-            DownloadJobPreparer(jobItemManager!!, appDatabase, appDatabaseRepo).run()
-        }
+        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
+        jobItemManager!!.awaitLoaded()
+        currentJobId = jobItemManager!!.downloadJobUid
+        DownloadJobPreparer(jobItemManager!!, appDatabase, appDatabaseRepo).run()
+        return currentJobId != 0
     }
 
 
     fun handleClickPositive() {
         if (deleteFileOptions) {
-            TODO("Run this on coroutine")
-            //Thread { networkManagerBle?.cancelAndDeleteDownloadJob(currentJobId!!) }.start()
+            GlobalScope.launch {
+                networkManagerBle.cancelAndDeleteDownloadJob(currentJobId)
+            }
         } else {
-            continueDownloading()
+            GlobalScope.launch {
+                val created = createDownloadJobRecursive()
+                if(created){
+                    continueDownloading()
+                }
+            }
         }
     }
 
@@ -204,7 +211,9 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
      */
     fun handleClickNegative(dismissAfter: Boolean = true) {
         if (downloadJobStatus.value == 0) {
-            //Thread { networkManagerBle?.deleteUnusedDownloadJob(currentJobId!!) }.start()
+           GlobalScope.launch {
+               networkManagerBle.deleteUnusedDownloadJob(currentJobId)
+           }
         }
 
         //if the download has not been started
@@ -215,9 +224,10 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     fun handleClickStackedButton(idClicked: Int) {
         when (idClicked) {
             STACKED_BUTTON_PAUSE -> GlobalScope.launch {
-                appDatabase.downloadJobDao.updateJobAndItems(currentJobId!!,
+                appDatabase.downloadJobDao.updateJobAndItems(currentJobId,
                         JobStatus.PAUSED, JobStatus.PAUSING)
-            }.start()
+                view.cancelOrPauseDownload(currentJobId.toLong(), false)
+            }
 
             STACKED_BUTTON_CONTINUE -> continueDownloading()
 
@@ -230,9 +240,9 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private fun continueDownloading() {
         GlobalScope.launch {
-            appDatabase.downloadJobDao.updateJobAndItems(currentJobId!!,
+            appDatabase.downloadJobDao.updateJobAndItems(currentJobId,
                     JobStatus.QUEUED, -1)
-        }.start()
+        }
     }
 
     private fun dismissDialog() {
@@ -242,14 +252,15 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun cancelDownload() {
         GlobalScope.launch {
             appDatabase.downloadJobDao
-                    .updateJobAndItems(currentJobId!!, JobStatus.CANCELED,
+                    .updateJobAndItems(currentJobId, JobStatus.CANCELED,
                             JobStatus.CANCELLING)
-        }.start()
+            view.cancelOrPauseDownload(currentJobId.toLong(), true)
+        }
     }
 
     fun handleWiFiOnlyOption(wifiOnly: Boolean) {
         GlobalScope.launch {
-            appDatabase.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId!!,
+            appDatabase.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId,
                     !wifiOnly)
         }
 
@@ -258,7 +269,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     fun handleStorageOptionSelection(selectedDir: String) {
         GlobalScope.launch {
             appDatabase.downloadJobDao.updateDestinationDirectoryAsync(
-                    currentJobId!!, selectedDir)
+                    currentJobId, selectedDir)
         }
     }
 

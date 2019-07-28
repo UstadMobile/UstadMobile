@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.contentformats.epub
 
-import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin
+import com.ustadmobile.core.catalog.contenttype.EPUBType
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -19,7 +19,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
 /**
  * Class which handles EPUB content import tasks, creates content entry from the H5P file
  */
-class EpubTypePlugin : EPUBTypePlugin(), ContentTypePlugin {
+class EpubTypePlugin : EPUBType(), ContentTypePlugin {
 
     override fun getContentEntry(file: File): ContentEntry? {
         var contentEntry: ContentEntry? = null

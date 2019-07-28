@@ -16,7 +16,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.*
-import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pGroup
 import android.net.wifi.p2p.WifiP2pManager
@@ -30,21 +29,22 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
-import java.lang.reflect.Proxy
 import java.net.InetAddress
 import java.util.*
 import java.util.concurrent.Executors
@@ -83,7 +83,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     lateinit var httpd: EmbeddedHTTPD
 
-    private var wifiManager: WifiManager? = null
+    private lateinit var wifiManager: WifiManager
 
     private var bluetoothManager: Any? = null
 
@@ -114,12 +114,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     private var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager? = null
 
-    /**
-     * A list of wifi direct ssids that are connected to using connectToWifiDirectGroup, the
-     * WiFI configuration for these items should be deleted once we are done so they do not appear
-     * on the user's list of remembered networks
-     */
-    private val temporaryWifiDirectSsids = ArrayList<String>()
+    private lateinit var managerHelper : NetworkManagerBleHelper
 
     @Volatile
     private var bleAdvertisingLastStartTime: Long = 0
@@ -136,7 +131,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
     /**
-     *
+     * Receiver to handle bluetooth state changes
      */
     private val mBluetoothAndWifiStateChangeBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -144,15 +139,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
     }
 
-
-    /**
-     * Callback for BLE service scans for devices with
-     * Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP
-     *
-     * @see android.bluetooth.BluetoothAdapter.LeScanCallback
-     */
-
-    //private BluetoothAdapter.LeScanCallback leScanCallback = nu
 
     private val delayedExecutor = Executors.newSingleThreadScheduledExecutor()
 
@@ -276,14 +262,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
     }
 
-    private val isConnectedToWifi: Boolean
-        get() {
-            val info = connectivityManager!!.activeNetworkInfo
-
-            return (info != null
-                    && info.type == ConnectivityManager.TYPE_WIFI
-                    && info.isConnected)
-        }
 
     /**
      * Check if the device needs runtime-permission
@@ -448,15 +426,15 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
 
     private fun handleDisconnected() {
-        //localConnectionOpener = null
+        localHttpClient?.close()
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
         GlobalScope.launch {
+            addLogs("changed to ${ConnectivityStatus.STATE_DISCONNECTED}, updating DB")
             umAppDatabase.connectivityStatusDao
                     .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
         }
-
     }
 
 
@@ -479,24 +457,39 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
         val status = ConnectivityStatus(state, true,
                 ssid)
+        addLogs("changed to $state")
         connectivityStatusRef.value = status
 
         //get network SSID
         if (ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
-            if (isVersionLollipopOrAbove) {
-                //TODO: implement this as an ktor httpclient generator
-//                localConnectionOpener = object : URLConnectionOpener {
-//                    override fun openConnection(url: URL): URLConnection {
-//                        return network!!.openConnection(url)
-//                    }
-//                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //only on main thread
+                //first - check if the old client exists and close it
+
+
+                if(localHttpClient == null){
+                    localHttpClient = HttpClient(OkHttp) {
+                        engine {
+                            config {
+                                socketFactory(network!!.socketFactory)
+                            }
+                        }
+                        install(JsonFeature)
+                    }
+                }
             }
         }
 
         GlobalScope.launch {
+            addLogs("changed to ${status.connectivityState}, updating DB =$umAppDatabase")
             umAppDatabase.connectivityStatusDao.insertAsync(status)
         }
+    }
+
+
+    private fun addLogs(message : String){
+        println("NetworkConnectivityStatus: $message")
     }
 
 
@@ -514,9 +507,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
 
     override fun onCreate() {
-        if (wifiManager == null) {
-            wifiManager = mContext.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        }
+        wifiManager = managerHelper.wifiManager
 
         if (wifiP2pManager == null) {
             wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
@@ -533,9 +524,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
         if (isBleDeviceSDKVersion && isBleCapable) {
 
-            bleScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
+            bleScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
                 val networkNode = NetworkNode()
-                networkNode.bluetoothMacAddress = device.getAddress()
+                networkNode.bluetoothMacAddress = device.address
                 handleNodeDiscovered(networkNode)
             }
 
@@ -583,7 +574,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     fun checkP2PBleServices() {
         val permissionGranted = ActivityCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val scanningEnabled = permissionGranted && isBluetoothEnabled && isBleCapable && wifiManager!!.isWifiEnabled
+        val scanningEnabled = permissionGranted && isBluetoothEnabled && isBleCapable && wifiManager.isWifiEnabled
         val advertisingEnabled = scanningEnabled and canDeviceAdvertise()
         var waitedLongEnoughToStartScanning = true
         val timeNow = System.currentTimeMillis()
@@ -605,7 +596,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override val isWiFiEnabled: Boolean
-        get() = wifiManager!!.isWifiEnabled
+        get() = wifiManager.isWifiEnabled
 
     /**
      * {@inheritDoc}
@@ -649,7 +640,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override fun setWifiEnabled(enabled: Boolean): Boolean {
-        return wifiManager!!.setWifiEnabled(enabled)
+        return wifiManager.setWifiEnabled(enabled)
     }
 
 
@@ -666,12 +657,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int) {
-        deleteTemporaryWifiDirectSsids()
+        managerHelper.deleteTemporaryWifiDirectSsids()
         endAnyLocalSession()
-
-        if (ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
-            temporaryWifiDirectSsids.add(ssid)
-        }
+        managerHelper.setGroupInfo(ssid,passphrase)
 
         val connectionDeadline = System.currentTimeMillis() + timeout
 
@@ -682,7 +670,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         do {
             UMLog.l(UMLog.INFO, 693, "Trying to connect to $ssid")
             if (!networkEnabled) {
-                enableWifiNetwork(ssid, passphrase)
+                managerHelper.enableWifiNetwork()
+
                 UMLog.l(UMLog.INFO, 693,
                         "Network changed  to $ssid")
                 networkEnabled = true
@@ -691,7 +680,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                         "ConnectToWifi: Already connected to WiFi with ssid =$ssid")
                 break
             } else {
-                val routeInfo = wifiManager!!.dhcpInfo
+                val routeInfo = wifiManager.dhcpInfo
                 if (routeInfo != null && routeInfo.gateway > 0) {
                     @SuppressLint("DefaultLocale")
                     val gatewayIp = String.format("%d.%d.%d.%d",
@@ -735,133 +724,49 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         return false
     }
 
-    private fun disableCurrentWifiNetwork() {
-        //This may or may not be allowed depending on the version of android we are using.
-        //Sometimes Android will feel like reconnecting to the last network, even though we told
-        //it what network to connect with.
-
-        //TODO: we must track any networks we successfully disable, so that we can reenable them
-        if (isConnectedToWifi && wifiManager!!.disconnect()) {
-            wifiManager!!.disableNetwork(wifiManager!!.connectionInfo.networkId)
-        }
-    }
-
     private fun isConnectedToRequiredWiFi(ssid: String): Boolean {
-        val wifiInfo = wifiManager!!.connectionInfo
+        val wifiInfo = wifiManager.connectionInfo
         return wifiInfo != null && normalizeAndroidWifiSsid(wifiInfo.ssid) == normalizeAndroidWifiSsid(ssid)
-    }
-
-
-    /**
-     * Connect to a given WiFi network. Here we are assuming that the security is WPA2 PSK as
-     * per the WiFi Direct spec. In theory, it should be possible to leave these settings to
-     * autodetect. In reality, we should specify these to reduce the chance of the connection
-     * timing out.
-     *
-     * @param ssid ssid to use
-     * @param passphrase network passphrase
-     */
-    private fun enableWifiNetwork(ssid: String, passphrase: String) {
-        if (isConnectedToWifi) {
-            disableCurrentWifiNetwork()
-        }
-
-        val config = WifiConfiguration()
-        config.SSID = "\"" + ssid + "\""
-        config.preSharedKey = "\"" + passphrase + "\""
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK)
-        config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN)
-        config.allowedProtocols.set(WifiConfiguration.Protocol.RSN)
-        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP)
-        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP)
-        config.allowedProtocols.set(WifiConfiguration.Protocol.RSN)
-
-        val netId = wifiManager!!.addNetwork(config)
-
-        try {
-            val actionLister = Class.forName("android.net.wifi.WifiManager\$ActionListener")
-            val proxyInstance = Proxy.newProxyInstance(actionLister.classLoader,
-                    arrayOf(actionLister), WifiConnectInvocationProxyHandler())
-
-            val connectMethod = wifiManager!!.javaClass.getMethod("connect",
-                    Int::class.javaPrimitiveType, actionLister)
-            connectMethod.invoke(wifiManager, netId, proxyInstance)
-
-        } catch (e: ClassNotFoundException) {
-            e.printStackTrace()
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: InvocationTargetException) {
-            e.printStackTrace()
-        }
-
     }
 
 
     actual override fun restoreWifi() {
         UMLog.l(UMLog.INFO, 339, "NetworkManager: restore wifi")
         endAnyLocalSession()
-        wifiManager!!.disconnect()
-        deleteTemporaryWifiDirectSsids()
-        wifiManager!!.reconnect()
+        managerHelper.restoreWiFi()
     }
 
     /**
      * Send an http request to the server so it knows we are done
      */
     private fun endAnyLocalSession() {
-        val currentConnectivityStatus = connectivityStatusRef.value
-        val currentWifiSsid = currentConnectivityStatus?.wifiSsid
-        if (currentConnectivityStatus == null
-                || currentWifiSsid == null
-                || !currentWifiSsid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
-            return
+        GlobalScope.launch {
+            val currentConnectivityStatus = connectivityStatusRef.value
+            val currentWifiSsid = currentConnectivityStatus?.wifiSsid
+            if (currentConnectivityStatus == null
+                    || currentWifiSsid == null
+                    || !currentWifiSsid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
+                return@launch
 
-        val endpoint = umAppDatabase.networkNodeDao.getEndpointUrlByGroupSsid(
-                currentWifiSsid)
-        if (endpoint == null) {
-            UMLog.l(UMLog.ERROR, 699,
-                    "ERROR: No endpoint url for ssid$currentWifiSsid")
-            return
-        }
+            val endpoint = umAppDatabase.networkNodeDao.getEndpointUrlByGroupSsid(
+                    currentWifiSsid)
+            if (endpoint == null) {
+                UMLog.l(UMLog.ERROR, 699,
+                        "ERROR: No endpoint url for ssid$currentWifiSsid")
+                return@launch
+            }
 
-        try {
-            val endSessionUrl = endpoint + "endsession"
-            //TODO: send this request
-//            val response = UstadMobileSystemImpl.instance.makeRequestSync(UmHttpRequest(mContext,
-//                    endSessionUrl))
-            UMLog.l(UMLog.INFO, 699, "Send end of session request $endSessionUrl")
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-    }
-
-    private fun deleteTemporaryWifiDirectSsids() {
-        if (temporaryWifiDirectSsids.isEmpty())
-            return
-
-        val configuredNetworks = wifiManager!!.configuredNetworks
-
-        var ssid: String?
-        for (config in configuredNetworks) {
-            if (config.SSID == null)
-                continue
-
-            ssid = normalizeAndroidWifiSsid(config.SSID)
-            if (temporaryWifiDirectSsids.contains(ssid)) {
-                val removedOk = wifiManager!!.removeNetwork(config.networkId)
-                if (removedOk) {
-                    temporaryWifiDirectSsids.remove(ssid)
-                    if (temporaryWifiDirectSsids.isEmpty())
-                        return
-                }
-
+            try {
+                val endSessionUrl = endpoint + "endsession"
+                localHttpClient?.get<Any>(endSessionUrl)
+                UMLog.l(UMLog.INFO, 699, "Send end of session request $endSessionUrl")
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
+
     }
+
 
     /**
      * {@inheritDoc}
@@ -900,9 +805,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * Start monitoring network changes
      */
     private fun startMonitoringNetworkChanges() {
-
-        connectivityManager = mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+        managerHelper = NetworkManagerBleHelper(mContext)
+        connectivityManager = managerHelper.connectivityManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val networkRequest = NetworkRequest.Builder()
@@ -939,7 +843,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         super.lockWifi(lockHolder)
 
         if (wifiLockReference.get() == null) {
-            wifiLockReference.set(wifiManager!!.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+            wifiLockReference.set(wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
                     "UstadMobile-Wifi-Lock-Tag"))
             UMLog.l(UMLog.INFO, 699, "WiFi lock acquired for $lockHolder")
         }
@@ -988,19 +892,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
 
 
-    /**
-     * This class is used when creating a ActionListener proxy to be used on
-     * WifiManager#connect(int,ActionListener) invocation through reflection.
-     */
-    inner class WifiConnectInvocationProxyHandler : InvocationHandler {
-
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any? {
-            UMLog.l(UMLog.INFO, 699,
-                    "Method was invoked using reflection  " + method.name)
-            return null
-        }
-    }
-
     companion object {
 
         /**
@@ -1014,16 +905,5 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         const val BLE_ADVERTISE_MIN_SDK_VERSION = 21
 
         const val BLE_MIN_SDK_VERSION = 18
-
-        /**
-         * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
-         * This method simply removes the quotes, if they are there. Will also handle null safely.
-         *
-         * @param ssid network ssid to be normalized
-         * @return normalized network ssid
-         */
-        private fun normalizeAndroidWifiSsid(ssid: String?): String? {
-            return ssid?.replace("\"", "") ?: ssid
-        }
     }
 }

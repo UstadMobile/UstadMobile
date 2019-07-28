@@ -29,7 +29,7 @@ class H5PTypePlugin : H5PContentType(), ContentTypePlugin {
                 while ({ zipEntry = zipIn.nextEntry; zipEntry }() != null) {
 
                     val fileName = zipEntry!!.name
-                    if (fileName == "h5p.json") {
+                    if (fileName == H5P_JSON) {
                         val h5pJsonString = UMIOUtils.readStreamToString(zipIn)
                         val h5pJsonObj = Json.parse<H5PContentSerializer>(h5pJsonString)
 

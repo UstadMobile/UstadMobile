@@ -36,6 +36,9 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("showFileOpenWithMimeTypeError")
     fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String)
 
+    @JsName("showEditButton")
+    fun showEditButton(show: Boolean)
+
     @JsName("showFileOpenError")
     fun showFileOpenError(message: String)
 
@@ -62,6 +65,8 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
 
     @JsName("showDownloadOptionsDialog")
     fun showDownloadOptionsDialog(map: HashMap<String, String>)
+
+    fun stopForeGroundService(jobId: Long,cancel: Boolean)
 
     companion object {
 

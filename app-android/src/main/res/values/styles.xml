@@ -4,6 +4,28 @@
 
     <style name="Theme.UstadTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!--Base ustadmobile app theme-->
+    <style name="Theme.UstadTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:dialogTheme">@style/CustomDialog</item>
+    </style>
+
+
+    <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">false</item>
+    </style>
+
+    <style name="AppTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/primary_text</item>
+        <item name="android:background">@color/primary</item>
+        <item name="tabBackground">@color/primary</item>
+        <item name="tabSelectedTextColor">@color/primary_text</item>
+    </style>
+
+
+
     <style name="TabLayoutStyleHome" parent="Widget.Design.TabLayout">
         <item name="tabIndicatorColor">@color/icons</item>
         <item name="tabIndicatorHeight">@dimen/dimen_2dp</item>
@@ -129,5 +151,11 @@
         <item name="colorControlHighlight">@color/primary</item>
     </style>
 
+    <style name="ExoMediaButton.Subtitle">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:layout_width">@dimen/exo_media_button_width</item>
+        <item name="android:layout_height">@dimen/exo_media_button_height</item>
+        <item name="android:src">@drawable/ic_closed_caption_white_24dp</item>
+    </style>
 
 </resources>

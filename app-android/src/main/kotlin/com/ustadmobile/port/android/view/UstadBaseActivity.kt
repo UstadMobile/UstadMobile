@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
@@ -17,10 +18,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
@@ -28,7 +27,6 @@ import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ACTION_LOCALE_CHANGE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.ViewWithErrorNotifier
@@ -36,8 +34,10 @@ import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
+import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
+import androidx.core.app.ActivityCompat
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
@@ -65,11 +65,9 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     /**
      * @return Active NetworkManagerBleCommon
      */
-     var networkManagerBle: NetworkManagerBle? = null
+    var networkManagerBle: NetworkManagerBle? = null
 
     private var fragmentList: MutableList<WeakReference<Fragment>>? = null
-
-    private var localeChanged = false
 
     private var localeOnCreate: String? = null
 
@@ -93,7 +91,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var permissionDialogMessage: String? = null
 
-    private var permission: String? = null
+    private var permissions: Array<String>? = null
 
     internal var selectedFileUri: Uri?= null
 
@@ -118,7 +116,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
             bleServiceBound = true
-            onBleNetworkServiceBound(networkManagerBle)
+            if(networkManagerBle != null){
+                UstadMobileSystemImpl.instance.networkManager = networkManagerBle
+                onBleNetworkServiceBound(networkManagerBle!!)
+            }
             runWhenServiceConnectedQueue.setReady(true)
         }
 
@@ -136,18 +137,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
 
-    /**
-     * Handles internal locale changes. When the user changes the locale using the system settings
-     * Android will take care of destroying and recreating the activity.
-     */
-    private val mLocaleChangeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                UstadMobileSystemImpl.ACTION_LOCALE_CHANGE -> localeChanged = true
-            }
-        }
-    }
-
     override val viewContext: Any
         get() = this
 
@@ -156,10 +145,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         //bind to the LRS forwarding service
         instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_LOCALE_CHANGE)
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
-                intentFilter)
         super.onCreate(savedInstanceState)
         localeOnCreate = instance.getDisplayedLocale(this)
 
@@ -227,7 +212,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      *
      * @param networkManagerBle
      */
-    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {}
+    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {}
 
     protected fun onBleNetworkServiceUnbound() {
 
@@ -235,11 +220,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onResume() {
         super.onResume()
-        if (localeChanged) {
-            if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
-                Handler().postDelayed({ this.recreate() }, 200)
-            }
+        if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+            Handler().postDelayed({ this.recreate() }, 200)
         }
+
         if (shakeDetector != null && sensorManager != null) {
             shakeDetector!!.start(sensorManager)
         }
@@ -279,11 +263,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-    }
-
-
     public override fun onStart() {
         isStarted = true
         super.onStart()
@@ -299,7 +278,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             unbindService(bleServiceConnection)
         }
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver)
         instance.handleActivityDestroy(this)
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection)
@@ -413,7 +391,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param dialogTitle   Permission dialog title
      * @param dialogMessage Permission dialog message
      */
-    fun runAfterGrantingPermission(permission: String, runnable: Runnable?,
+    fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
                                    dialogTitle: String?, dialogMessage: String?) {
         this.afterPermissionMethodRunner = runnable
 
@@ -426,17 +404,17 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
         this.permissionDialogMessage = dialogMessage
         this.permissionDialogTitle = dialogTitle
-        this.permission = permission
+        this.permissions = permissions
 
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (!permissionGranted(permissions)) {
             if (!permissionRequestRationalesShown) {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle(permissionDialogTitle)
                         .setMessage(permissionDialogMessage)
                         .setNegativeButton(getString(android.R.string.cancel)
-                        ) { dialog, which -> dialog.dismiss() }
-                        .setPositiveButton(getString(android.R.string.ok)) { dialog, which ->
-                            runAfterGrantingPermission(permission, afterPermissionMethodRunner,
+                        ) { dialog, _ -> dialog.dismiss() }
+                        .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                            runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
                                     permissionDialogTitle, permissionDialogMessage)
                         }
                 val dialog = builder.create()
@@ -444,12 +422,25 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 permissionRequestRationalesShown = true
             } else {
                 permissionRequestRationalesShown = false
-                ActivityCompat.requestPermissions(this, arrayOf(permission), RUN_TIME_REQUEST_CODE)
+                ActivityCompat.requestPermissions(this, permissions, RUN_TIME_REQUEST_CODE)
             }
         } else {
             afterPermissionMethodRunner!!.run()
             afterPermissionMethodRunner = null
         }
+    }
+
+
+    private fun permissionGranted(permissions: Array<String>) : Boolean{
+        val requiredPermissions: MutableList<String> = mutableListOf<String>()
+        for(permission in permissions){
+            if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+                requiredPermissions.add(permission);
+            }
+        }
+
+        return requiredPermissions.isEmpty()
+
     }
 
 
@@ -462,7 +453,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                     allPermissionGranted = allPermissionGranted and (result == PackageManager.PERMISSION_GRANTED)
                 }
 
-                if (!allPermissionGranted && permission == Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                if (!allPermissionGranted && permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE) ) {
                     afterPermissionMethodRunner!!.run()
                     afterPermissionMethodRunner = null
                 }
@@ -474,6 +465,19 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 }
             }
         }
+    }
+
+    /**
+     * Stop current runing notification fore ground service
+     */
+    open fun stopForeGroundService(jobId: Long, cancel: Boolean){
+        val notificationServiceIntent = Intent(this,DownloadNotificationService::class.java)
+        notificationServiceIntent.action = if(cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
+        else DownloadNotificationService.ACTION_PAUSE_DOWNLOAD
+        notificationServiceIntent.putExtra(DownloadNotificationService.JOB_ID_TAG, jobId)
+        val servicePendingIntent = PendingIntent.getService(applicationContext,
+                0, notificationServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        servicePendingIntent.send()
     }
 
     /**

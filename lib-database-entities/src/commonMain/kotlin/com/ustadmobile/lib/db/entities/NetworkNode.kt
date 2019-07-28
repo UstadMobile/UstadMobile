@@ -127,8 +127,8 @@ class NetworkNode() {
      * @param wifiDirectMacAddress Device Wi-Fi MAC address
      * @param ipAddress Device IP address
      */
-    constructor(wifiDirectMacAddress: String, ipAddress: String) : this() {
-        this.wifiDirectMacAddress = wifiDirectMacAddress
+    constructor(bluetoothMacAddress: String, ipAddress: String) : this() {
+        this.bluetoothMacAddress = bluetoothMacAddress
         this.ipAddress = ipAddress
     }
 

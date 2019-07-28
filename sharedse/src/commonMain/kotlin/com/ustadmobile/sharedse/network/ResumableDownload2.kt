@@ -57,6 +57,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
         try {
+            UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - starting download")
             val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)
             val dlPartFile = FileSe(destinationFile + DLPART_EXTENSION)
 
@@ -103,7 +104,6 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                         headResponse = null
                     }
 
-
                     requestBuilder.url(httpUrl)
                     val requestStart = getSystemTimeInMillis()
                     httpResponse = httpClient.get<HttpResponse>(requestBuilder)
@@ -146,7 +146,6 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                         if (rc == -1) break
                         bytesDownloaded.addAndGet(rc.toLong())
                         onDownloadProgress(bytesDownloaded.value)
-                        //copied += rc
                         fileOutput.writeFully(buffer)
                     } while (true)
 
@@ -159,12 +158,15 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     fileOutput.close()
                     fileOutput = null
 
-                    if (dlPartFile.renameFile(FileSe(destinationFile))) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    val byteCount = bytesDownloaded.value
+                    UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - completed " +
+                            "downloaded ${byteCount} . Response time = $responseTime ms, " +
+                            "download time = $copyTime ms")
+
+                    return dlPartFile.renameFile(FileSe(destinationFile))
                 }catch(e: Exception) {
+                    UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - exception " +
+                            " $e : ${e.message}")
                     if(e is CancellationException)
                         throw e
 
@@ -183,7 +185,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
             }
 
         }catch (e: CancellationException) {
-            println("ResumableDownload2: cancellation exception on $httpUrl")
+            println("ResumableDownload2: $httpUrl - cancellation exception")
             throw e
         }
 

@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -15,7 +15,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * Class has all the shared function across all supported platforms
  */
-abstract class UstadMobileSystemCommon {
+open abstract class UstadMobileSystemCommon {
 
     /**
      * Returns whether or not the init method has already been run
@@ -24,6 +24,9 @@ abstract class UstadMobileSystemCommon {
      * false otherwise
      */
     private var isInitialized: Boolean = false
+
+    //for testing purpose only
+    var networkManager: Any? = null
 
 
     /**
@@ -151,13 +154,10 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
-    open fun getLocale(context: Any): String? {
-        return locale
-    }
+    open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
-    open fun setLocale(locale: String, context: Any) {
-        this.locale = locale
-    }
+    fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
+
 
 
     /**
@@ -168,6 +168,14 @@ abstract class UstadMobileSystemCommon {
      */
     @JsName("getAppPref")
     abstract fun getAppPref(key: String, context: Any): String?
+
+    /**
+     * Set a preference for the app
+     *
+     * @param key preference that is being set
+     * @param value value to be set
+     */
+    abstract fun setAppPref(key: String, value: String?, context: Any)
 
     /**
      * Get a preference for the app.  If not set, return the provided defaultVal
@@ -208,13 +216,27 @@ abstract class UstadMobileSystemCommon {
     }
 
     /**
+     * Get list of all UI supported languages
+     */
+    open fun getAllUiLanguage(context: Any): Map<String,String>{
+        val languageList = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context)!!.split(",")
+        val languageMap = HashMap<String,String>()
+        for(language in languageList){
+            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?: error("English")
+        }
+        return languageMap
+    }
+
+
+    /**
      * Starts the user interface for the app
      */
     open fun startUI(context: Any) {
         val activeAccount = UmAccountManager.getActiveAccount(context)
 
         if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(Login2View.VIEW_NAME, mapOf(), context)
+            go(LoginView.VIEW_NAME, mapOf(), context)
         } else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }
@@ -418,6 +440,10 @@ abstract class UstadMobileSystemCommon {
          */
         const val LOCALE_USE_SYSTEM = ""
 
+        /**
+         * The preference key where we save a string for the user's locale preference
+         */
+        const val PREFKEY_LOCALE = "locale"
 
 
         /**

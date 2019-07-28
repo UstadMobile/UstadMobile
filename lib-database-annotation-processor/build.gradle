@@ -17,6 +17,7 @@ task fatJar(type: Jar) {
 kapt {
     arguments {
         arg("door_jdbc_kt_out", "filer")
+        arg("door_ktor_server_out", "filer")
     }
 }
 
@@ -44,6 +45,13 @@ dependencies {
     implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
+    implementation "io.ktor:ktor-server-netty:$version_ktor"
+    implementation "io.ktor:ktor-jackson:$version_ktor"
+    implementation "io.ktor:ktor-gson:$version_ktor"
+
+
+    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-gson:$version_ktor"
 
     //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")

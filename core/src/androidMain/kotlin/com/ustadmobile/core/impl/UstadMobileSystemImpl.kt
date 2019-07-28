@@ -65,7 +65,7 @@ import java.util.zip.ZipOutputStream
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
 
@@ -91,7 +91,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
-            Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
+            LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}LoginActivity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
             AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
@@ -288,15 +288,15 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.phone_memory, context), true,
-                    true, false, canWriteFileInDir(umDir.absolutePath)))
+                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
 
             if (storageOptions.size > 1) {
                 val sdCardStorage = storageOptions[sdCardStorageIndex]
                 umDir = File(sdCardStorage, contentDirName)
                 if (!umDir.exists()) umDir.mkdirs()
                 dirList.add(UMStorageDir(umDir.absolutePath,
-                        getString(MessageID.memory_card, context), true,
-                        true, false, canWriteFileInDir(umDir.absolutePath)))
+                        getString(MessageID.memory_card, context), removableMedia = true,
+                        isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
             }
 
             callback.onDone(dirList)
@@ -313,7 +313,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         if (!umDir.exists()) umDir.mkdirs()
         dirList.add(UMStorageDir(umDir.absolutePath,
                 getString(MessageID.phone_memory, context), true,
-                true, false, canWriteFileInDir(umDir.absolutePath)))
+                isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
 
         if (storageOptions.size > 1) {
             val sdCardStorage = storageOptions[sdCardStorageIndex]
@@ -321,7 +321,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.memory_card, context), true,
-                    true, false, canWriteFileInDir(umDir.absolutePath)))
+                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
         }
         return dirList
     }
@@ -361,7 +361,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual fun setAppPref(key: String, value: String?, context: Any){
+    override actual fun setAppPref(key: String, value: String?, context: Any){
         val prefs = getAppSharedPreferences(context as Context)
         val editor = prefs.edit()
         if (value != null) {
@@ -568,8 +568,6 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
-
-        const val ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change"
 
         /**
          * Get an instance of the system implementation - relies on the platform

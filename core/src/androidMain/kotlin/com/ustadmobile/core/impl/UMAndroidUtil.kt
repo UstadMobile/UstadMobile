@@ -10,13 +10,14 @@ import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.View
 import android.webkit.MimeTypeMap
+import android.widget.ImageView
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
-
-import java.util.HashMap
-import java.util.Hashtable
+import com.squareup.picasso.Picasso
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.roundToInt
 
 /**
  * Created by mike on 9/21/15.
@@ -69,28 +70,6 @@ object UMAndroidUtil {
         return retVal
     }
 
-    fun hashtableToBundle(table: Hashtable<*, *>?): Bundle? {
-        if (table == null)
-            return null
-
-        val bundle = Bundle()
-
-        val iterator = table.keys.iterator()
-        var key: String
-        var `val`: Any
-        while (iterator.hasNext()) {
-            key = iterator.next() as String
-            `val` = table[key]!!
-            when (`val`) {
-                is Int -> bundle.putInt(key, `val`)
-                is String -> bundle.putString(key, `val`)
-                is Array<*> -> bundle.putStringArray(key, `val` as Array<String>?)
-                is Long -> bundle.putLong(key, `val`)
-            }
-        }
-        return bundle
-
-    }
 
     /**
      * @param map
@@ -203,7 +182,7 @@ object UMAndroidUtil {
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)
         val density = activity.resources.displayMetrics.density
-        return Math.round(outMetrics.widthPixels / density)
+        return (outMetrics.widthPixels / density).roundToInt()
     }
 
     /**
@@ -213,7 +192,7 @@ object UMAndroidUtil {
      */
     fun convertDpToPixel(dp: Int): Int {
         val metrics = Resources.getSystem().displayMetrics
-        return Math.round(dp * (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT))
+        return (dp * (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
     }
 
     /**
@@ -223,7 +202,7 @@ object UMAndroidUtil {
      */
     fun convertPixelsToDp(px: Float): Int {
         val metrics = Resources.getSystem().displayMetrics
-        return Math.round(px / (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT))
+        return (px / (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
     }
 
     /**
@@ -237,7 +216,20 @@ object UMAndroidUtil {
         display.getMetrics(outMetrics)
         val density = activity.resources.displayMetrics.density
         val dpWidth = outMetrics.widthPixels / density
-        return Math.round(dpWidth / width!!)
+        return (dpWidth / width!!).roundToInt()
+    }
+
+    /**
+     * Load image to an image view
+     * @param imageUrl image remote URL
+     * @param placeHolder place holder image in case of error/loading progress
+     * @param targetView target view whenre image should be loaded to
+     */
+    fun loadImage(imageUrl: String?, placeHolder: Int, targetView: ImageView){
+        Picasso.get()
+                .load(if(imageUrl == null || imageUrl.isEmpty()) "empty" else imageUrl)
+                .placeholder(placeHolder)
+                .into(targetView)
     }
 
 }

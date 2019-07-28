@@ -46,6 +46,11 @@
         *;
 }
 
+#content editor
+-keep public class com.ustadmobile.port.android.umeditor.**{
+       *;
+}
+
  #
  ###################################################################################################
  #### OKHttp3 rules as per

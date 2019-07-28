@@ -639,6 +639,21 @@ abstract class UmAppDatabase : DoorDatabase() {
                 }
             })
 
+              builder.addMigration(object : UmDbMigration(18, 20) {
+                    fun migrate(db: DoorDbAdapter) {
+                    when (db.getDbType()) {
+                     UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
+
+                      UmDbType.TYPE_POSTGRES -> {
+                               db.execSql("ALTER TABLE ContainerEntryFile ADD COLUMN lastModified BIGINT");
+                        }
+                  }
+
+                 }
+
+                 })
+
+
           builder.addMigration(object : UmDbMigration(20, 22) {
               fun migrate(db: DoorDbAdapter) {
                   db.execSql("DROP TABLE DownloadSet")
@@ -646,7 +661,7 @@ abstract class UmAppDatabase : DoorDatabase() {
               }
           })
 
-          builder.addMigration(new UmDbMigration(20, 22) {
+          builder.addMigration(new UmDbMigration(22, 24) {
             @Override
             public void migrate(DoorDbAdapter db) {
                 switch (db.getDbType()) {

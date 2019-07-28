@@ -1,14 +1,10 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
+import com.ustadmobile.core.catalog.contenttype.EPUBType
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.coroutines.coroutineContext
 
 /**
  * Created by mike on 6/18/17.
@@ -21,10 +17,10 @@ class TestUMFileUtil {
     fun testAppendExtensionToFilenameIfNeeded() {
         assertEquals("Will append file extension when needed", "foo.bar.epub",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.bar",
-                        EPUBTypePlugin.MIME_TYPES[0]))
+                        EPUBType.MIME_TYPES[0]))
         assertEquals("Will leave filename when extension is already there", "foo.epub",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.epub",
-                        EPUBTypePlugin.MIME_TYPES[0]))
+                        EPUBType.MIME_TYPES[0]))
         assertEquals("Will leave filename when extension is unknown", "foo.bar",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.bar",
                         "application/x-foo-bar"))

@@ -9,9 +9,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
@@ -26,9 +26,12 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
-class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity, private val listener: AdapterViewListener,
+class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
+                                                               private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
-                                                               private val managerAndroidBle: NetworkManagerBle?) : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK), LocalAvailabilityListener, OnDownloadJobItemChangeListener {
+                                                               private val managerAndroidBle: NetworkManagerBle)
+    : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
+        LocalAvailabilityListener, OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
 
@@ -62,13 +65,13 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     fun addListeners() {
-        managerAndroidBle?.addLocalAvailabilityListener(this)
-        managerAndroidBle?.addDownloadChangeListener(this)
+        managerAndroidBle.addLocalAvailabilityListener(this)
+        managerAndroidBle.addDownloadChangeListener(this)
     }
 
     fun removeListeners() {
-        managerAndroidBle?.removeLocalAvailabilityListener(this)
-        managerAndroidBle?.removeDownloadChangeListener(this)
+        managerAndroidBle.removeLocalAvailabilityListener(this)
+        managerAndroidBle.removeDownloadChangeListener(this)
     }
 
     fun setEmptyStateListener(stateListener: EmptyStateListener) {
@@ -158,10 +161,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.availabilityStatus.text = ""
             holder.availabilityIcon.setImageDrawable(null)
         } else {
-            var available = false
-            if (managerAndroidBle != null)
-                available = managerAndroidBle.isEntryLocallyAvailable(
-                        entry.mostRecentContainer)
+            val available: Boolean = managerAndroidBle.isEntryLocallyAvailable(
+                    entry.mostRecentContainer)
 
             if (entry.leaf) {
                 holder.updateLocallyAvailabilityStatus(available)
@@ -176,9 +177,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             if (entry.thumbnailUrl == null || entry.thumbnailUrl!!.isEmpty()) {
                 holder.thumbnailView.setImageDrawable(null)
             } else {
-                Picasso.get()
-                        .load(entry.thumbnailUrl)
-                        .into(holder.thumbnailView)
+                UMAndroidUtil.loadImage(entry.thumbnailUrl,R.drawable.img_placeholder,
+                        holder.thumbnailView)
             }
 
 
@@ -189,10 +189,10 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 val status = entry.contentEntryStatus
                 val dlStatus = status!!.downloadStatus
 
-                if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.totalSize > 0) {
-                    contentDescription = context.getString(R.string.download_entry_state_downloading)
+                contentDescription = if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.totalSize > 0) {
+                    context.getString(R.string.downloading)
                 } else {
-                    contentDescription = context.getString(R.string.download_entry_state_queued)
+                    context.getString(R.string.download_entry_state_queued)
                 }
 
                 if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
@@ -201,7 +201,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 } else if (dlStatus == JobStatus.COMPLETE) {
                     showLocallyAvailabilityViews = false
                     holder.downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
-                    contentDescription = context.getString(R.string.download_entry_state_downloaded)
+                    contentDescription = context.getString(R.string.downloaded)
                 } else {
                     holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
                 }
@@ -233,7 +233,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.availabilityStatus.visibility = viewVisibility
 
             val containerUidList = uniqueContainerUidsListTobeMonitored
-            if (!containerUidList.isEmpty()) {
+            if (containerUidList.isNotEmpty()) {
                 containerUidsToMonitor.addAll(containerUidList)
                 monitor!!.startMonitoringAvailability(monitor, containerUidList)
             }
@@ -243,55 +243,32 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             GlobalScope.launch(Dispatchers.Main) {
-                val downloadJobItemStatus = managerAndroidBle?.findDownloadJobItemStatusByContentEntryUid(
+                val downloadJobItemStatus = managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(
                     entry.contentEntryUid)
                 if(downloadJobItemStatus != null){
                     holder.downloadView.progressVisibility = View.VISIBLE
                     holder.onDownloadJobItemChange(downloadJobItemStatus)
                 }else {
-                    holder.downloadView.progressVisibility == View.INVISIBLE
+                    holder.downloadView.progressVisibility = View.INVISIBLE
                 }
             }
-//            managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
-//                    object : UmResultCallback<DownloadJobItemStatus?> {
-//                        override fun onDone(result: DownloadJobItemStatus?) {
-//                            if (result != null) {
-//                                activity.runOnUiThread {
-//                                    holder.downloadView.progressVisibility = View.VISIBLE
-//                                    holder.onDownloadJobItemChange(result)
-//                                }
-//                            } else {
-//                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
-//                            }
-//                        }
-//                    })
+
         }
     }
 
     inner class ViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view) {
-        internal val entryTitle: TextView
-        internal val entryDescription: TextView
-        val entrySize: TextView
-        internal val thumbnailView: ImageView
-        val availabilityIcon: ImageView
-        val availabilityStatus: TextView
-        val downloadView: DownloadStatusButton
-        val iconView: ImageView
+        internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
+        internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
+        private val entrySize: TextView = view.findViewById(R.id.content_entry_item_library_size)
+        internal val thumbnailView: ImageView = view.findViewById(R.id.content_entry_item_thumbnail)
+        val availabilityIcon: ImageView = view.findViewById(R.id.content_entry_local_availability_icon)
+        val availabilityStatus: TextView = view.findViewById(R.id.content_entry_local_availability_status)
+        val downloadView: DownloadStatusButton = view.findViewById(R.id.content_entry_item_download)
+        val iconView: ImageView = view.findViewById(R.id.content_entry_item_imageview)
 
         internal var containerUid: Long = 0
 
         var contentEntryUid: Long = 0
-
-        init {
-            entryTitle = view.findViewById(R.id.content_entry_item_title)
-            entryDescription = view.findViewById(R.id.content_entry_item_description)
-            entrySize = view.findViewById(R.id.content_entry_item_library_size)
-            thumbnailView = view.findViewById(R.id.content_entry_item_thumbnail)
-            downloadView = view.findViewById(R.id.content_entry_item_download)
-            iconView = view.findViewById(R.id.content_entry_item_imageview)
-            availabilityIcon = view.findViewById(R.id.content_entry_local_availability_icon)
-            availabilityStatus = view.findViewById(R.id.content_entry_local_availability_status)
-        }
 
         internal fun updateLocallyAvailabilityStatus(available: Boolean) {
             val icon = if (available)

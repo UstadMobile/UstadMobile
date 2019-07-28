@@ -40,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEditorPresenter
 import com.ustadmobile.core.controller.ContentEditorPresenterCommon.Companion.EDITOR_BASE_DIR_NAME
@@ -83,7 +84,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback, UmEditorActionView.OnQuickActionMenuItemClicked, UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
 
-    private var presenter: ContentEditorPresenter? = null
+    private lateinit var presenter: ContentEditorPresenter
 
     private var viewSwitcher: UmEditorAnimatedViewSwitcher? = null
 
@@ -92,13 +93,11 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     private val assetsDir = String.format("assets-%s",
             SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date()))
 
-    @get:VisibleForTesting
+    @VisibleForTesting
     var mediaSourceBottomSheetBehavior: BottomSheetBehavior<NestedScrollView>? = null
-        private set
 
-    @get:VisibleForTesting
+    @VisibleForTesting
     var contentOptionsBottomSheetBehavior: BottomSheetBehavior<NestedScrollView>? = null
-        private set
 
     private var umBottomToolbarHolder: AppBarLayout? = null
 
@@ -128,22 +127,22 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
     @VisibleForTesting
     fun insertTestContent(content: String) {
-        presenter!!.handleEditorActions(ContentEditorView.ACTION_INSERT_CONTENT, content)
+        presenter.handleEditorActions(ContentEditorView.ACTION_INSERT_CONTENT, content)
     }
 
 
     override fun updateDocument(title: String, description: String) {
-        presenter!!.handleUpdateDocumentMetaInfo(title, description)
+        presenter.handleUpdateDocumentMetaInfo(title, description)
     }
 
     @VisibleForTesting
     fun selectAllTestContent() {
-        presenter!!.handleEditorActions(ContentEditorView.ACTION_SELECT_ALL, null)
+        presenter.handleEditorActions(ContentEditorView.ACTION_SELECT_ALL, null)
     }
 
     @VisibleForTesting
     fun clearAll() {
-        presenter!!.handleEditorActions(ContentEditorView.ACTION_CLEAR_ALL, null)
+        presenter.handleEditorActions(ContentEditorView.ACTION_CLEAR_ALL, null)
     }
 
     @get:VisibleForTesting
@@ -152,40 +151,39 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
     val isEditorInitialized: Boolean
         @VisibleForTesting
-        get() = presenter!!.isEditorInitialized
+        get() = ::presenter.isInitialized && presenter.isEditorInitialized
 
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
+        val embeddedHttp =  networkManagerBle.httpd
 
-        if(networkManagerBle != null){
-            val embeddedHttp =  networkManagerBle.httpd
+        embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
+        presenter = ContentEditorPresenter(this, args!!, this,
+                args!![CONTENT_STORAGE_OPTION]) {
 
-            embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
-            presenter = ContentEditorPresenter(this, args!!, this,
-                    args!![CONTENT_STORAGE_OPTION]) {
-
-                val mountedPath: String = embeddedHttp!!.mountContainer(it, null)!!
-                val counterMountedUrl: String = joinPaths(embeddedHttp!!.localHttpUrl,
-                        mountedPath)
-                counterMountedUrl
-            }
-            presenter!!.onCreate(bundleToMap(mSavedInstance))
-
-            val adapter = ContentFormattingPagerAdapter(supportFragmentManager)
-            mViewPager!!.adapter = adapter
-            mTabLayout!!.setupWithViewPager(mViewPager!!)
+            val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
+            val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
+                    mountedPath)
+            counterMountedUrl
         }
+        presenter.onCreate(bundleToMap(mSavedInstance))
+
+        val adapter = ContentFormattingPagerAdapter(supportFragmentManager)
+        mViewPager!!.adapter = adapter
+        mTabLayout!!.setupWithViewPager(mViewPager!!)
     }
 
 
     /**
      * Class which represent a link inside the editor.
      */
-    private inner class UmLink {
+    inner class UmLink {
 
+        @SerializedName("linkText")
         internal val linkText: String? = null
 
+        @SerializedName("linkUrl")
         internal val linkUrl: String? = null
     }
 
@@ -525,7 +523,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
         override fun getItem(position: Int): Fragment {
             return FormattingFragment.newInstance(position,
-                    umFormatHelper!!, presenter!!)
+                    umFormatHelper!!, presenter)
         }
 
         @Nullable
@@ -767,7 +765,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mFromCamera.setOnClickListener {
             isOpeningFilePickerOrCamera = true
             viewSwitcher!!.closeAnimatedView(UmEditorAnimatedViewSwitcher.ANIMATED_MEDIA_TYPE_PANEL)
-            runAfterGrantingPermission(Manifest.permission.CAMERA,
+            runAfterGrantingPermission(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     Runnable { this.showMediaTypeDialog() }, getString(R.string.permission_camera_title),
                     getString(R.string.permission_camera_message))
         }
@@ -776,12 +774,12 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mInsertMultimedia.setOnClickListener { viewSwitcher!!.animateView(UmEditorAnimatedViewSwitcher.ANIMATED_MEDIA_TYPE_PANEL) }
 
         mInsertMultipleChoice.setOnClickListener {
-            presenter!!.handleEditorActions(ContentEditorView.CONTENT_INSERT_MULTIPLE_CHOICE_QN, null)
+            presenter.handleEditorActions(ContentEditorView.CONTENT_INSERT_MULTIPLE_CHOICE_QN, null)
             viewSwitcher!!.closeAnimatedView(ANIMATED_CONTENT_OPTION_PANEL)
         }
 
         mInsertFillBlanks.setOnClickListener {
-            presenter!!.handleEditorActions(ContentEditorView.CONTENT_INSERT_FILL_THE_BLANKS_QN, null)
+            presenter.handleEditorActions(ContentEditorView.CONTENT_INSERT_FILL_THE_BLANKS_QN, null)
             viewSwitcher!!.closeAnimatedView(ANIMATED_CONTENT_OPTION_PANEL)
         }
 
@@ -805,8 +803,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onAttachFragment(fragment: Fragment?) {
         if (fragment is ContentEditorPageListFragment) {
-            fragment.setUmFileHelper(presenter!!)
-            fragment.setCurrentPage(presenter!!.currentPage)
+            fragment.setUmFileHelper(presenter)
+            fragment.setCurrentPage(presenter.currentPage)
         } else if (fragment is ContentEntryEditFragment) {
             fragment.setActionListener(this)
         }
@@ -843,27 +841,28 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
         when (item.itemId) {
             R.id.content_action_pages -> {
-                presenter!!.isPageManagerOpen = true
+                presenter.isPageManagerOpen = true
+                saveContent()
                 viewSwitcher!!.closeActivity(false)
 
             }
             R.id.content_action_format -> viewSwitcher!!.animateView(UmEditorAnimatedViewSwitcher.ANIMATED_FORMATTING_PANEL)
             R.id.content_action_preview -> {
-                presenter!!.isOpenPreviewRequest = true
-                presenter!!.isPageManagerOpen = false
+                presenter.isOpenPreviewRequest = true
+                presenter.isPageManagerOpen = false
                 requestContentAutoSave(false)
 
             }
             R.id.content_action_insert -> viewSwitcher!!.animateView(ANIMATED_CONTENT_OPTION_PANEL)
-            R.id.content_action_undo -> presenter!!.handleEditorActions(ContentEditorView.ACTION_UNDO, null)
-            R.id.content_action_redo -> presenter!!.handleEditorActions(ContentEditorView.ACTION_REDO, null)
+            R.id.content_action_undo -> presenter.handleEditorActions(ContentEditorView.ACTION_UNDO, null)
+            R.id.content_action_redo -> presenter.handleEditorActions(ContentEditorView.ACTION_REDO, null)
             R.id.content_action_direction -> {
                 val popUpView = UmEditorPopUpView(this, toolbar!!)
                         .setMenuList(umFormatHelper!!.getLanguageDirectionalityList(null))
                         .setWidthDimen(getDisplayWidth(this), true)
                 popUpView.showWithListener(object : UmEditorPopUpView.OnPopUpMenuClickListener{
                     override fun onMenuClicked(format: UmFormat) {
-                        presenter!!.handleEditorActions(format.formatCommand!!, null)
+                        presenter.handleEditorActions(format.formatCommand!!, null)
                         popUpView.setMenuList(umFormatHelper!!.getLanguageDirectionalityList(format))
                         mFormat = format
                         invalidateOptionsMenu()
@@ -886,16 +885,18 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString(PAGE_NAME_TAG, presenter!!.currentPage)
-        outState.putSerializable(DIRECTION_TAG, mFormat)
+        if(::presenter.isInitialized){
+            outState.putString(PAGE_NAME_TAG, presenter.currentPage)
+            outState.putSerializable(DIRECTION_TAG, mFormat)
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        if (presenter != null) {
-            presenter!!.handleSelectedPage(savedInstanceState.getString(PAGE_NAME_TAG)!!)
-            mFormat = savedInstanceState.getSerializable(DIRECTION_TAG) as UmFormat
-        }
+       if(::presenter.isInitialized){
+           presenter.handleSelectedPage(savedInstanceState.getString(PAGE_NAME_TAG)!!)
+           mFormat = savedInstanceState.getSerializable(DIRECTION_TAG) as UmFormat
+       }
     }
 
 
@@ -914,9 +915,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     private fun handleFinishActivity() {
-        if (presenter!!.isEditorInitialized && isDoneEditing) {
-            presenter!!.isEditorInitialized = false
-            presenter!!.isInEditorPreview = false
+        if (presenter.isEditorInitialized && isDoneEditing) {
+            presenter.isEditorInitialized = false
+            presenter.isInEditorPreview = false
             isDoneEditing = false
             viewSwitcher!!.closeAnimatedView(ANIMATED_SOFT_KEYBOARD_PANEL)
             finish()
@@ -925,7 +926,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onAllAnimatedViewsClosed(finish: Boolean) {
-        presenter!!.handlePageManager(finish)
+        if(::presenter.isInitialized){
+            presenter.handlePageManager(finish)
+        }
     }
 
     override fun onFocusRequested() {
@@ -939,8 +942,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onPageFinishedLoading() {
         progressDialog!!.visibility = View.GONE
-        if (presenter!!.isInEditorPreview) {
-            presenter!!.isInEditorPreview = false
+        if (presenter.isInEditorPreview) {
+            presenter.isInEditorPreview = false
         }
     }
 
@@ -965,24 +968,24 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
             //callback received when editor is switched on
             ContentEditorView.ACTION_ENABLE_EDITING -> {
-                presenter!!.isEditorInitialized = content.toBoolean()
-                if (presenter!!.isEditorInitialized) {
+                presenter.isEditorInitialized = content.toBoolean()
+                if (presenter.isEditorInitialized) {
                     handleWebViewMargin()
                     mWebView!!.postDelayed({
-                        if (!presenter!!.isPageManagerOpen) {
+                        if (!presenter.isPageManagerOpen) {
                             viewSwitcher!!.animateView(ANIMATED_SOFT_KEYBOARD_PANEL)
                         }
                     },
                             MAX_SOFT_KEYBOARD_DELAY)
                 }
                 progressDialog!!.visibility = View.GONE
-                viewSwitcher!!.setEditorActivated(presenter!!.isEditorInitialized)
+                viewSwitcher!!.setEditorActivated(presenter.isEditorInitialized)
                 handleQuickActions()
             }
 
             //callback received to trigger save event
             ContentEditorView.ACTION_SAVE_CONTENT -> {
-                presenter!!.handleSaveContent(content)
+                presenter.handleSaveContent(content)
                 viewSwitcher!!.closeActivity(true)
             }
 
@@ -1014,9 +1017,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 linkText.setText(umLink.linkText)
                 linkUrl.setText(umLink.linkUrl)
                 builder.setView(view)
-                builder.setNegativeButton(R.string.content_page_dialog_cancel
+                builder.setNegativeButton(R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }
-                if (umLink.linkUrl!!.isNotEmpty()) {
+                if (umLink.linkUrl?.isNotEmpty()!!) {
                     builder.setNeutralButton(R.string.content_editor_link_remove) { _, _ ->
                         executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "removeLink",
                                 this@ContentEditorActivity)
@@ -1040,17 +1043,19 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun onStop() {
-        if(!presenter!!.isOpenPreviewRequest){
-            presenter!!.handlePreviewAndFilePicker(false, isOpeningFilePickerOrCamera)
+
+        if(::presenter.isInitialized && !presenter.isOpenPreviewRequest){
+            presenter.handlePreviewAndFilePicker(false, isOpeningFilePickerOrCamera)
         }
+
         super.onStop()
     }
 
     override fun onResume() {
         super.onResume()
-        if (presenter != null) {
-            presenter!!.isEditorInitialized = true
-            presenter!!.isOpenPreviewRequest = false
+        if(::presenter.isInitialized){
+            presenter.isEditorInitialized = true
+            presenter.isOpenPreviewRequest = false
         }
     }
 
@@ -1071,7 +1076,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
     private fun requestContentAutoSave(doneEditing: Boolean) {
         isDoneEditing = doneEditing
-        presenter!!.handleEditorActions(ContentEditorView.ACTION_SAVE_CONTENT, null)
+        presenter.handleEditorActions(ContentEditorView.ACTION_SAVE_CONTENT, null)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -1093,11 +1098,11 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
      */
     override fun cleanUnUsedResources() {
         GlobalScope.launch {
-            val result =  presenter!!.handleRemoveUnUsedResources()
+            val result =  presenter.handleRemoveUnUsedResources()
             if(result){
                 runOnUiThread {
-                    if (presenter!!.isOpenPreviewRequest) {
-                        presenter!!.handlePreviewAndFilePicker(true, isOpeningFilePickerOrCamera)
+                    if (presenter.isOpenPreviewRequest) {
+                        presenter.handlePreviewAndFilePicker(true, isOpeningFilePickerOrCamera)
                     } else {
                         handleFinishActivity()
                     }
@@ -1113,7 +1118,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     override fun onQuickMenuItemClicked(command: String?) {
         val format = umFormatHelper!!.getFormatByCommand(command)
         if (format != null) {
-            presenter!!.handleEditorActions(format.formatCommand!!, null)
+            presenter.handleEditorActions(format.formatCommand!!, null)
         }
     }
 
@@ -1126,7 +1131,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
      * Show /Hide quick action menus on top of the keyboard
      */
     private fun handleQuickActions() {
-        umBottomToolbarHolder!!.visibility = if (presenter!!.isEditorInitialized) View.VISIBLE else View.GONE
+        umBottomToolbarHolder!!.visibility = if (presenter.isEditorInitialized) View.VISIBLE else View.GONE
     }
 
     /**
@@ -1184,7 +1189,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 intArrayOf(android.R.attr.actionBarSize))
         val actionBarSize = attrs.getDimension(0, 0f).toInt()
         attrs.recycle()
-        val marginBottomValue = (if (presenter!!.isEditorInitialized) actionBarSize + 8 else 0).toFloat()
+        val marginBottomValue = (if (presenter.isEditorInitialized) actionBarSize + 8 else 0).toFloat()
         val params = findViewById<RelativeLayout>(R.id.umEditorHolder).layoutParams as ViewGroup.MarginLayoutParams
         params.bottomMargin = marginBottomValue.toInt()
 
@@ -1208,7 +1213,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             rawFile
 
         GlobalScope.launch {
-            val inserted = presenter!!.handleAddMediaContent(mFile!!.absolutePath, mimeType)
+            val inserted = presenter.handleAddMediaContent(mFile!!.absolutePath, mimeType)
             if(inserted){
                 isOpeningFilePickerOrCamera = false
                 runOnUiThread {
@@ -1217,7 +1222,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                             this@ContentEditorActivity, mFile.name, mimeType)
                 }
             }else{
-                showErrorMessage(getString(R.string.failed_message))
+                showErrorMessage(getString(R.string.failed))
             }
 
         }

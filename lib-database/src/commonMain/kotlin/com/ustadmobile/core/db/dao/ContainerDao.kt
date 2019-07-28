@@ -3,12 +3,9 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 @Dao
@@ -76,6 +73,13 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE containerUid = :containerUid")
     @JsName("updateContainerSizeAndNumEntries")
     abstract fun updateContainerSizeAndNumEntries(containerUid: Long)
+
+    @Query("UPDATE Container SET fileSize = " +
+            "(SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize " +
+            "FROM ContainerEntry JOIN ContainerEntryFile ON " +
+            "ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
+            "WHERE ContainerEntry.ceContainerUid = Container.containerUid)")
+    abstract suspend fun updateFileSizeForAllContainers()
 
     @Query("SELECT Container.containerUid FROM Container " +
             "WHERE Container.containerUid = :containerUid " +

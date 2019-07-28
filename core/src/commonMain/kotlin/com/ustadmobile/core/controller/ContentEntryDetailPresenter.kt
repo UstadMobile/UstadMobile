@@ -100,6 +100,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
+
+        statusProvider?.addDownloadChangeListener(this)
     }
 
     private fun onEntryChanged(entry: ContentEntry?) {
@@ -145,7 +147,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = true
-            statusProvider?.addDownloadChangeListener(this)
             GlobalScope.launch {
                 val dlJobStatusResult = statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid)
                 onDownloadJobItemChange(dlJobStatusResult, dlJobStatusResult?.jobItemUid ?: 0)
@@ -245,26 +246,34 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     fun handleDownloadButtonClick() {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
-            ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
-                    context, object : UmCallback<Any> {
 
-                override fun onSuccess(result: Any?) {}
+            val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
+                    "false",context)!!.toBoolean()
 
-                override fun onFailure(exception: Throwable?) {
-                    if (exception != null) {
-                        val message = exception.message
-                        if (exception is NoAppFoundException) {
-                            view.runOnUiThread(Runnable {
-                                view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
-                                        MessageID.get_app,
-                                        exception.mimeType!!)
-                            })
-                        } else {
-                            view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+            if(loginFirst){
+                impl.go(LoginView.VIEW_NAME, args, view.viewContext)
+            }else{
+                ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
+                        context, object : UmCallback<Any> {
+
+                    override fun onSuccess(result: Any?) {}
+
+                    override fun onFailure(exception: Throwable?) {
+                        if (exception != null) {
+                            val message = exception.message
+                            if (exception is NoAppFoundException) {
+                                view.runOnUiThread(Runnable {
+                                    view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
+                                            MessageID.get_app,
+                                            exception.mimeType!!)
+                                })
+                            } else {
+                                view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
 
 
         } else {
@@ -292,6 +301,19 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     MessageID.download_cloud_availability, context)
 
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
+    }
+
+    fun handleShowEditButton(show: Boolean){
+        view.runOnUiThread(Runnable { view.showEditButton(show)})
+    }
+
+    suspend fun handleCancelDownload(){
+        val currentJobId = appdb.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
+        appdb.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
+                        JobStatus.CANCELLING)
+        appdb.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        statusProvider?.removeDownloadChangeListener(this)
+        view.stopForeGroundService(currentJobId.toLong(), true)
     }
 
 
@@ -338,10 +360,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         const val LOCALLY_NOT_AVAILABLE_ICON = 2
 
         private const val BAD_NODE_FAILURE_THRESHOLD = 3
-
-        private const val TIME_INTERVAL_FROM_LAST_FAILURE = 5
-
-        const val NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype"
     }
 
 }

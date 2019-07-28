@@ -25,11 +25,14 @@ class ContainerEntryFile() {
 
     var compression: Int = 0
 
-    constructor(md5: String, totalSize: Long, compressedSize: Long, compression: Int) : this() {
+    var lastModified: Long = 0
+
+    constructor(md5: String, totalSize: Long, compressedSize: Long, compression: Int, lastModified: Long) : this() {
         this.cefMd5 = md5
         this.ceTotalSize = totalSize
         this.ceCompressedSize = compressedSize
         this.compression = compression
+        this.lastModified = lastModified
     }
 
     companion object {
