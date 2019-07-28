@@ -30,4 +30,8 @@ class PersonGroup() {
      * @return person UID if this group is created for one user only, otherwise 0
      */
     var groupPersonUid: Long = 0
+
+    constructor(name: String) : this() {
+        this.groupName = name
+    }
 }

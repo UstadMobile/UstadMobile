@@ -155,6 +155,43 @@ abstract class PersonDao : BaseDao<Person> {
             " from Person WHERE personUid in (:uids)")
     abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
 
+
+    @Insert
+    abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long
+
+    @Insert
+    abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
+
+    suspend fun createPersonAndGroup(person:Person):Long{
+        //1. Insert the person if unique
+        try {
+            val personUid = insertAsync(person)
+            person.personUid = personUid
+
+            //2. Create person group
+
+            val personGroup = PersonGroup()
+            personGroup.groupName =
+                    (if (person.firstNames != null) {
+                        person.firstNames
+                    }else{
+                        person.personUid.toString() }) + "'s group"
+            val personGroupUid = insertPersonGroup(personGroup)
+
+            //3. Create person group member and assign to it
+            val personGroupMember = PersonGroupMember()
+            personGroupMember.groupMemberGroupUid = personGroupUid
+            personGroupMember.groupMemberPersonUid = personUid
+            personGroupMember.groupMemberUid = insertPersonGroupMember(personGroupMember)
+
+            return personGroupUid
+
+        }catch(e:Exception){
+            e.message
+            return 0L
+        }
+    }
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +

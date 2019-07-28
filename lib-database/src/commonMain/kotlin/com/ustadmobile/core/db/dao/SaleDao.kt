@@ -285,15 +285,29 @@ abstract class SaleDao : BaseDao<Sale> {
 
     //My Women Entrepreneurs
     @Query("SELECT " +
-            " SUM((SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece)-SaleItem.saleItemDiscount) AS totalSale, " +
-            " 'Product list goes here' AS topProducts, WE.* " +
-            " From SALE LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
-            " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
-            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid " +
-            " WHERE LE.personUid = :weUid AND Sale.saleActive =1  AND WE.active = 1 " +
-            " GROUP BY WE.personUid")
-    abstract fun getMyWomenEntrepreneurs(weUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+            "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
+            "   'Product list goes here' AS topProducts, " +
+            "   Members.* " +
+            " FROM PersonGroupMember " +
+            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
+            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
+            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
+            "   GROUP BY(Members.personUid)")
+    abstract fun getMyWomenEntrepreneurs(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
+
+    @Query("SELECT " +
+            "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
+            "   'Product list goes here' AS topProducts, " +
+            "   Members.* " +
+            " FROM PersonGroupMember " +
+            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
+            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
+            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid AND Members.firstNames||' '||Members.lastName like :searchBit" +
+            "   GROUP BY(Members.personUid)")
+    abstract fun getMyWomenEntrepreneursSearch(groupUid :Long, searchBit:String):DataSource.Factory<Int, PersonWithSaleInfo>
 
     companion object {
 

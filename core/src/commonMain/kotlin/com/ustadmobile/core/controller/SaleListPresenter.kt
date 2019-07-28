@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.db.dao.SaleDao.Companion.ALL_SELECTED
 import com.ustadmobile.core.db.dao.SaleDao.Companion.PAYMENT_SELECTED
@@ -56,30 +55,34 @@ class SaleListPresenter(context: Any,
 
     }
 
-    fun handleChangeSortOrder(order: Long) {
-        var order = order
-        order = order + 1
+    //Can be used to put "static" methods in for kotlin
+    companion object{
+        /**
+         * Common method to convert Array List to String Array
+         *
+         * @param presetAL The array list of string type
+         * @return  String array
+         */
+        fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
+            val objectArr = presetAL.toTypedArray()
+            val strArr = arrayOfNulls<String>(objectArr.size)
+            for (j in objectArr.indices) {
+                strArr[j] = objectArr[j]
+            }
+            return strArr
+        }
+    }
 
-        if (idToOrderInteger!!.containsKey(order)) {
-            currentSortOrder = idToOrderInteger!![order]!!
+    fun handleChangeSortOrder(order: Long) {
+        var orderI = order + 1
+
+        if (idToOrderInteger!!.containsKey(orderI)) {
+            currentSortOrder = idToOrderInteger!![orderI]!!
             getAndSetProvider(currentSortOrder)
         }
     }
 
-    /**
-     * Common method to convert Array List to String Array
-     *
-     * @param presetAL The array list of string type
-     * @return  String array
-     */
-    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
-        val objectArr = presetAL.toTypedArray()
-        val strArr = arrayOfNulls<String>(objectArr.size)
-        for (j in objectArr.indices) {
-            strArr[j] = objectArr[j]
-        }
-        return strArr
-    }
+
 
     /**
      * Updates the sort by drop down (spinner) on the Class list. For now the sort options are

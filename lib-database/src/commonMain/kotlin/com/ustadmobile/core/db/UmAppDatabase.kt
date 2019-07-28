@@ -42,7 +42,7 @@ import com.ustadmobile.core.db.dao.SaleDao
     SaleVoiceNote::class, SaleProductParentJoin::class,
     SaleItemReminder::class,
     DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class
-    ], version = 24)
+    ], version = 26)
 
 abstract class UmAppDatabase : DoorDatabase() {
 

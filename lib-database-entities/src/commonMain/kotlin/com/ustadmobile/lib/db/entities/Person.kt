@@ -32,6 +32,14 @@ open class Person() {
 
     var admin: Boolean = false
 
+    var personNotes: String? = null
+
+    var personAddress: String? = null
+
+    //Added speicifically for Goldozi : mPersonGroupUid is this person's managing group .
+    //In Goldozi's case, a Lead Entrepreneur will be managing Women Entrepreneurs group.
+    var mPersonGroupUid : Long = 0L
+
     @UmSyncMasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0
 
@@ -41,10 +49,14 @@ open class Person() {
     @UmSyncLastChangedBy
     var personLastChangedBy: Int = 0
 
-    constructor(username: String, firstNames: String, lastName: String) : this() {
+    constructor(username: String, firstNames: String, lastName: String, active:Boolean = false,
+                notes:String = "", address:String = "") : this() {
         this.username = username
         this.firstNames = firstNames
         this.lastName = lastName
+        this.active = active
+        this.personNotes = notes
+        this.personAddress = address
     }
 
     companion object {
