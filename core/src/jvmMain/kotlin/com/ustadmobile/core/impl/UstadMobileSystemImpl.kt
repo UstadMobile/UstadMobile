@@ -51,7 +51,7 @@ import kotlin.collections.ArrayList
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
+actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
     private var appConfig: Properties? = null
 
@@ -196,8 +196,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @param key preference that is being set
      * @param value value to be set
      */
-    override actual fun setAppPref(key: String, value: String?, context: Any){
-        TODO("not implemented")
+    actual override fun setAppPref(key: String, value: String?, context: Any){
+
     }
 
 

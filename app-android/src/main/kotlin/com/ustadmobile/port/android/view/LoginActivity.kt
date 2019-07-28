@@ -7,13 +7,14 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.Login2Presenter
+import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
-    private var mPresenter: Login2Presenter? = null
+    private var mPresenter: LoginPresenter? = null
 
     private var mServerUrl: String? = null
 
@@ -27,6 +28,10 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
     private var mLoginButton: Button? = null
 
+    private lateinit var registerMessage : TextView
+
+    private lateinit var registerNow: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login2)
@@ -35,8 +40,11 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        mPresenter = Login2Presenter(this, bundleToMap(intent.extras),
-                this)
+        registerMessage = findViewById(R.id.activity_register_label)
+        registerNow = findViewById(R.id.activity_register_now)
+
+        mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
+                this, UstadMobileSystemImpl.instance)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
         mUsernameTextView = findViewById(R.id.activity_login_username)
         mPasswordTextView = findViewById(R.id.activity_login_password)
@@ -48,6 +56,10 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         findViewById<View>(R.id.activity_login_button_login).setOnClickListener { evt ->
             mPresenter!!.handleClickLogin(mUsernameTextView!!.text.toString(),
                     mPasswordTextView!!.text.toString(), mServerUrl!!)
+        }
+
+        registerNow.setOnClickListener {
+            mPresenter!!.handleCreateAccount()
         }
     }
 
@@ -83,5 +95,11 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun setRegistrationLinkVisible(visible: Boolean) {
+        val visibility = if(visible) View.VISIBLE else View.GONE
+        registerMessage.visibility = visibility
+        registerNow.visibility = visibility
     }
 }

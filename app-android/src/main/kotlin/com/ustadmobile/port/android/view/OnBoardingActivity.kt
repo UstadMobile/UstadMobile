@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,9 +14,9 @@ import com.rd.animation.type.AnimationType
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import java.util.*
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemSelectedListener {
 
@@ -89,7 +88,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         languageOptions = findViewById(R.id.language_option)
 
         presenter = OnBoardingPresenter(this,
-                bundleToMap(intent.extras), this)
+                bundleToMap(intent.extras), this, UstadMobileSystemImpl.instance)
         presenter!!.onCreate(bundleToMap(savedInstanceState))
         pageIndicatorView!!.setAnimationType(AnimationType.WORM)
 

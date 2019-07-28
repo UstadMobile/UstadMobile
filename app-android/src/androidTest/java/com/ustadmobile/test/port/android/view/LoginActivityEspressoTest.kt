@@ -8,7 +8,7 @@ import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.gson.Gson
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.Login2Presenter
+import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.view.LoginActivity
 import okhttp3.mockwebserver.Dispatcher
@@ -51,7 +51,7 @@ class LoginActivityEspressoTest {
     @Test
     fun givenValidUsernameAndPassword_whenLoginClicked_thenShouldFireIntent() {
         val launchIntent = Intent()
-        launchIntent.putExtra(Login2Presenter.ARG_SERVER_URL,
+        launchIntent.putExtra(LoginPresenter.ARG_SERVER_URL,
                 mockRestServer.url("/").toString())
         mActivityRule.launchActivity(launchIntent)
 

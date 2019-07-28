@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -17,8 +16,7 @@
         tools:ignore="MissingConstraints">
 
 
-        <include
-            layout="@layout/toolbar_with_progress"/>
+        <include layout="@layout/toolbar_with_progress" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -27,8 +25,8 @@
         android:id="@+id/activity_login_password"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="@dimen/dimen_16dp"
+        android:layout_marginEnd="@dimen/dimen_16dp"
         android:layout_marginBottom="8dp"
         android:ems="10"
         android:hint="@string/password"
@@ -43,10 +41,10 @@
         android:id="@+id/activity_login_username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/dimen_16dp"
         android:layout_marginTop="28dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="@dimen/dimen_16dp"
+        android:layout_marginBottom="@dimen/dimen_16dp"
         android:ems="10"
         android:hint="@string/username"
         android:inputType="textPersonName"
@@ -65,11 +63,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_16dp"
         android:backgroundTint="@color/accent"
-        android:text="@string/login"
-        android:textSize="@dimen/text_body"
         android:padding="@dimen/dimen_16dp"
+        android:text="@string/login"
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -77,11 +75,11 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login_forgot_password" />
 
     <TextView
-        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/activity_login_forgot_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="@string/forgot_password"
@@ -95,20 +93,57 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login_errormessage" />
 
     <TextView
-        android:textColor="@android:color/holo_red_dark"
-        android:visibility="gone"
-        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/activity_login_errormessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text=""
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/activity_login_forgot_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_password" />
+
+    <TextView
+        android:id="@+id/activity_register_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_10dp"
+        android:gravity="end"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:text="@string/no_account"
+        android:textColor="@color/text_primary"
+        app:layout_constraintStart_toStartOf="@id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/activity_register_now"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_10dp"
+        android:gravity="start"
+        android:padding="@dimen/dimen_16dp"
+        android:paddingStart="@dimen/dimen_16dp"
+        android:paddingEnd="@dimen/dimen_16dp"
+        android:text="@string/create_new_account"
+        android:textColor="@color/text_primary"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/activity_register_label"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"
+        tools:layout_editor_absoluteX="231dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.15" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

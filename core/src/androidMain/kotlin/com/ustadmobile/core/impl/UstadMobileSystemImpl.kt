@@ -65,7 +65,7 @@ import java.util.zip.ZipOutputStream
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
 

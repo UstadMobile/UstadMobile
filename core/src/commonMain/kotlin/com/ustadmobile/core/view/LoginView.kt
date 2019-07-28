@@ -19,6 +19,9 @@ interface LoginView : UstadView {
     @JsName("setPassword")
     fun setPassword(password: String)
 
+    @JsName("setRegistrationLinkVisible")
+    fun setRegistrationLinkVisible(visible: Boolean)
+
     companion object {
 
         const val VIEW_NAME = "Login"
