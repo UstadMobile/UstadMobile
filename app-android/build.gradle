@@ -284,7 +284,7 @@ dependencies {
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
     implementation project(":lib-database-annotations")
-    implementation project(":lib-util")
+    implementation project(':lib-util')
 
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"

@@ -1,8 +1,8 @@
 
 
 plugins {
-    id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
+    id 'com.android.library'
 }
 
 android {
@@ -15,20 +15,37 @@ android {
     }
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
 
 kotlin {
-    targets {
-        fromPreset(presets.jvm, 'jvm')
-        fromPreset(presets.android, 'android')
-        fromPreset(presets.js, 'js') {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
     }
+
+    android()
+
+    js {
+        nodejs()
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
     jvm {
         compilations.main.kotlinOptions {
@@ -40,9 +57,10 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation project(":lib-database-annotations")
                 compileOnly project(":lib-room-annotations")
-                implementation kotlin("stdlib-common:$version_kotlin")
+
             }
         }
 

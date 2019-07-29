@@ -14,25 +14,57 @@ android {
     }
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
+
 kotlin {
-    targets {
-        fromPreset(presets.jvm, 'jvm')
-        fromPreset(presets.js, 'js')  {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
-        fromPreset(presets.android, 'android')
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
     }
+
+    android()
+
+    js {
+        nodejs()
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin("stdlib-common:$version_kotlin")
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+            }
+        }
+
+        jsTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
+            }
+        }
+
+        commonTest {
+            commonTest {
+                dependencies {
+                    implementation project(":lib-database-mpp")
+                }
             }
         }
 

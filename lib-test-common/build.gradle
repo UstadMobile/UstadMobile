@@ -15,36 +15,42 @@ android {
 
 apply plugin: "maven-publish"
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
 
 kotlin {
-    targets {
-        fromPreset(presets.jvm, 'jvm') {
-            compilations.main.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
-
-            compilations.test.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
 
-        fromPreset(presets.js, 'js') {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
-        fromPreset(presets.android, 'android')
     }
+
+    android()
+
+    js {
+        nodejs()
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin("stdlib-common:$version_kotlin")
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")

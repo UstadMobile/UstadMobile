@@ -4,7 +4,7 @@ plugins {
     id 'war'
     id 'maven-publish'
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
-    id 'com.github.johnrengelman.shadow' version "5.1.0"
+    id 'com.github.johnrengelman.shadow'
 }
 
 configurations {

@@ -69,7 +69,7 @@ dependencies {
     implementation project(":lib-database-entities")
     implementation project(':lib-door-runtime')
     implementation project(":lib-database-annotations")
-    implementation project(":lib-util")
+    implementation project(':lib-util')
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
