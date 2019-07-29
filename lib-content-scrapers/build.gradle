@@ -68,7 +68,7 @@ task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateB
     buildConfigField "String", "CODEC2_PATH", rootProject.ext.buildConfigProperties["shrinker.codec2"]
 
 }
-//compileJava.dependsOn(generateScraperBuildConfig)
+//compileKotlinJvm.dependsOn(generateScraperBuildConfig)
 
 kotlin {
     targets {
@@ -125,6 +125,7 @@ kotlin {
                     implementation "junit:junit:$version_junit"
                     implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                     implementation "org.mockito:mockito-core:$version_android_mockito"
+                    implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 }
             }
 
