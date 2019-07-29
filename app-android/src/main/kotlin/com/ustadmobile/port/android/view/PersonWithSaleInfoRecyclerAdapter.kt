@@ -34,7 +34,7 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
 
 
         val list = LayoutInflater.from(theContext).inflate(
-                R.layout.item_sale, parent, false)
+                R.layout.item_personwithsaleinfo, parent, false)
         return PersonWithSaleInfoViewHolder(list)
 
     }
@@ -52,7 +52,7 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
         val personName= entity!!.firstNames + " " + entity!!.lastName
         val totalSale = entity!!.totalSale
         val topP = entity!!.topProducts
-        personTitle.setText(personTitle.toString())
+        personTitle.setText(personName.toString())
         saleAmount.setText(totalSale.toString())
         topProducts.setText(topP.toString())
 

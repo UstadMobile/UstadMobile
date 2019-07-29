@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_UID
 import com.ustadmobile.core.view.PersonWithSaleInfoListView
+import com.ustadmobile.util.test.AbstractSaleRelatedSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
 import org.junit.Test

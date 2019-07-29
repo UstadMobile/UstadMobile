@@ -6,7 +6,6 @@ import com.ustadmobile.core.impl.UmAccountManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import com.ustadmobile.core.view.PersonWithSaleInfoListView;
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -52,11 +51,12 @@ class PersonWithSaleInfoListPresenter(context: Any,
 
         GlobalScope.launch {
             val person = personDao.findByUidAsync(personUid)
-            weGroupUid = person!!.mPersonGroupUid
-            //Get assigned people
-            getAndSetProvider(currentSortOrder)
+            if(person!=null) {
+                weGroupUid = person.mPersonGroupUid
+                //Get assigned people
+                getAndSetProvider(currentSortOrder)
+            }
         }
-
     }
 
     /**
@@ -69,7 +69,11 @@ class PersonWithSaleInfoListPresenter(context: Any,
      * Upon clicking search -> should open up search experience.
      */
     fun handleSearchQuery(searchBit:String){
-        factory =saleDao.getMyWomenEntrepreneursSearch(weGroupUid, searchBit)
+        if(searchBit == null || searchBit.isEmpty()){
+            factory = saleDao.getMyWomenEntrepreneurs(weGroupUid)
+        }else {
+            factory = saleDao.getMyWomenEntrepreneursSearch(weGroupUid, searchBit)
+        }
         view.setWEListFactory(factory)
     }
 

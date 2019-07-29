@@ -1,4 +1,4 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.util.test
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
@@ -7,6 +7,7 @@ abstract class AbstractSaleRelatedSetup {
 
     var le1Uid:Long = 0
     var le2Uid:Long = 0
+
 
     fun insert(db: UmAppDatabase, clear:Boolean = false){
 

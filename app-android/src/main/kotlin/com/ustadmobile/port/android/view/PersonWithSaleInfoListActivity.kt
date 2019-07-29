@@ -8,7 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Spinner
+import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -34,7 +34,7 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
     private lateinit var toolbar: Toolbar
     private lateinit var mPresenter: PersonWithSaleInfoListPresenter
     private lateinit var mRecyclerView: RecyclerView
-    private lateinit var sortSpinner: Spinner
+    private lateinit var sortSpinner: AppCompatSpinner
     private lateinit var searchView:SearchView
 
 
@@ -77,15 +77,11 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
 
         // Associate searchable configuration with the SearchView
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        searchView = menu.findItem(R.id.action_search)
-                .actionView as SearchView
+        searchView = menu.findItem(R.id.action_search).actionView as SearchView
 
-        searchView.isFocusable = true
-        searchView.isIconified = false
-        searchView.requestFocusFromTouch()
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(componentName))
-        searchView.queryHint = getText(R.string.product_name)
+        searchView.queryHint = getText(R.string.name)
 
         searchView.maxWidth = Integer.MAX_VALUE
 
@@ -105,7 +101,7 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
             }
         })
 
-        searchView!!.setOnCloseListener {
+        searchView.setOnCloseListener {
             val query=""
             // filter recycler view when query submitted
             mPresenter.handleSearchQuery(query)

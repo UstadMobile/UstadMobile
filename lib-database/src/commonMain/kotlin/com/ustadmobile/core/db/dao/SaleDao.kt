@@ -298,15 +298,16 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     @Query("SELECT " +
-            "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
+            "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
             "   'Product list goes here' AS topProducts, " +
             "   Members.* " +
             " FROM PersonGroupMember " +
             "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
             "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
             "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
-            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid AND Members.firstNames||' '||Members.lastName like :searchBit" +
-            "   GROUP BY(Members.personUid)")
+            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
+            "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit  OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
+            " GROUP BY(Members.personUid)")
     abstract fun getMyWomenEntrepreneursSearch(groupUid :Long, searchBit:String):DataSource.Factory<Int, PersonWithSaleInfo>
 
     companion object {

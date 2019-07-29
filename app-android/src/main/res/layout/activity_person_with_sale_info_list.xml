@@ -19,7 +19,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <Spinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/activity_person_with_saleinfo_list_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

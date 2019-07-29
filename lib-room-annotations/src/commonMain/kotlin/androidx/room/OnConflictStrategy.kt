@@ -24,7 +24,8 @@ import androidx.annotation.IntDef
  * Set of conflict handling strategies for various [Dao] methods.
  */
 @Retention(AnnotationRetention.SOURCE)
-@IntDef(OnConflictStrategy.REPLACE, OnConflictStrategy.ROLLBACK, OnConflictStrategy.ABORT, OnConflictStrategy.FAIL, OnConflictStrategy.IGNORE)
+@IntDef(OnConflictStrategy.REPLACE, OnConflictStrategy.ABORT, OnConflictStrategy.ABORT,
+        OnConflictStrategy.ABORT, OnConflictStrategy.IGNORE)
 annotation class OnConflictStrategy {
     companion object {
         /**

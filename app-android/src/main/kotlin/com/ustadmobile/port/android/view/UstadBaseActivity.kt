@@ -104,17 +104,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
 
     private var permission: String? = null
 
-
     var checkLogout:Boolean = true
 
-    val PREFKEY_LAST_ACTIVE = "prefke.lastactive"
+
     val TIMEOUT_LOGOUT = 600000L
 
     internal var selectedFileUri: Uri?= null
 
     internal var isOpeningFilePickerOrCamera = false
-
-
 
     private val mSyncServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -564,6 +561,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         const val ACTION_REMINDER_NOTIFICATION = 752
 
         private const val FILE_SELECTION_REQUEST_CODE = 112
+
+        val PREFKEY_LAST_ACTIVE = "prefke.lastactive"
 
     }
 }
