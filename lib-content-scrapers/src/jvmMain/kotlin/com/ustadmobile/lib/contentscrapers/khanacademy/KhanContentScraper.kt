@@ -694,9 +694,9 @@ class KhanContentScraper : Runnable {
 
     companion object {
 
-        private val KHAN_CSS = "<link rel='stylesheet' href='/khanscraper.css' type='text/css'/>"
-        private val KHAN_COOKIE = "<script> document.cookie = \"fkey=abcde;\" </script>"
-        val CONTENT_DETAIL_SOURCE_URL_KHAN_ID = "content-detail?sourceUrl=khan-id://"
+        private const val KHAN_CSS = "<link rel='stylesheet' href='/khanscraper.css' type='text/css'/>"
+        private const val KHAN_COOKIE = "<script> document.cookie = \"fkey=abcde;\" </script>"
+        const val CONTENT_DETAIL_SOURCE_URL_KHAN_ID = "content-detail?sourceUrl=khan-id://"
     }
 
 

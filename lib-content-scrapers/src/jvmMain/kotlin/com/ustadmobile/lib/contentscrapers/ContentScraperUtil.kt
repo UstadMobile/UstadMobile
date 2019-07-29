@@ -30,7 +30,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.port.sharedse.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManager
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
@@ -99,6 +99,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
+import kotlinx.coroutines.runBlocking
 import java.time.temporal.TemporalQuery
 
 
@@ -822,7 +823,11 @@ object ContentScraperUtil {
         }
         val manager = ContainerManager(container, db,
                 repository, containerDir.absolutePath)
-        manager.addEntries(fileMap, true)
+        runBlocking {
+            fileMap.forEach {
+                manager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
+            }
+        }
 
         return container
     }

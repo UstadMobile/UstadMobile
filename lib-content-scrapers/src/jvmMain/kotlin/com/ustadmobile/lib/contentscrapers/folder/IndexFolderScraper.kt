@@ -127,7 +127,7 @@ class IndexFolderScraper {
                         document.loadFromOPF(xmlPullParser)
 
                         val title = document.title
-                        val lang = if (document.getLanguages() != null && document.getLanguages().size > 0) document.getLanguages()[0] else EMPTY_STRING
+                        val lang = if (document.getLanguages().isNotEmpty()) document.getLanguages()[0] else EMPTY_STRING
 
                         val creators = StringBuilder()
                         for (i in 0 until document.numCreators) {

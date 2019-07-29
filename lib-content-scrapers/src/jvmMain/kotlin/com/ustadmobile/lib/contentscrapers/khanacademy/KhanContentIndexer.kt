@@ -5,40 +5,35 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
 import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.lib.db.entities.ScrapeRun
-import com.ustadmobile.port.sharedse.util.WorkQueue
-
-import org.apache.commons.lang.exception.ExceptionUtils
-import org.apache.commons.pool2.impl.GenericObjectPool
-import org.jsoup.Jsoup
-import org.jsoup.nodes.DataNode
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
-import org.openqa.selenium.chrome.ChromeDriver
-
-import java.io.File
-import java.io.IOException
-import java.net.MalformedURLException
-import java.net.URL
-import java.util.concurrent.CountDownLatch
-
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
+import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC
+import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeRun
+import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.apache.commons.lang.exception.ExceptionUtils
+import org.apache.commons.pool2.impl.GenericObjectPool
+import org.jsoup.Jsoup
+import org.openqa.selenium.chrome.ChromeDriver
+import java.io.File
+import java.io.IOException
+import java.net.MalformedURLException
+import java.net.URL
+import kotlin.system.exitProcess
 
 /**
  * The Khan Academy website has a list of topics that they teach about at https://www.khanacademy.org/
@@ -319,7 +314,6 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
             ContentScraperUtil.createQueueItem(queueDao!!, url, entry, newContentFolder,
                     contentItem.kind!!, runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
-            scrapeWorkQueue!!.checkQueue()
 
         }
 
@@ -335,22 +329,22 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
         val SUBJECT_CHALLENGE = "SubjectChallenge"
         val SUBJECT_PROGRESS = "SubjectProgress"
         private val KHAN_PREFIX = "khan-id://"
-        private var contentEntryDao: ContentEntryDao? = null
-        private var contentParentChildJoinDao: ContentEntryParentChildJoinDao? = null
-        private var englishLang: Language? = null
+        private lateinit var contentEntryDao: ContentEntryDao
+        private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
+        private lateinit var englishLang: Language
 
 
-        private var gson: Gson? = null
-        private var queueDao: ScrapeQueueItemDao? = null
-        private var scrapeWorkQueue: WorkQueue? = null
-        private var factory: GenericObjectPool<ChromeDriver>? = null
+        private lateinit var gson: Gson
+        private lateinit var queueDao: ScrapeQueueItemDao
+        private lateinit var scrapeWorkQueue: LiveDataWorkQueue<ScrapeQueueItem>
+        private lateinit var factory: GenericObjectPool<ChromeDriver>
 
 
         @JvmStatic
         fun main(args: Array<String>) {
             if (args.size < 2) {
                 System.err.println("Usage:<file destination><file container><optional log{trace, debug, info, warn, error, fatal}>")
-                System.exit(1)
+                exitProcess(1)
             }
 
             UMLogUtil.logDebug(args[0])
@@ -420,68 +414,55 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
             ContentScraperUtil.createQueueItem(queueDao!!, url, khanAcademyEntry, englishFolder, ScraperConstants.KhanContentType.TOPICS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
-            //create to work queues - one for indexing, one for content scrape
-            val indexerSource = {
-                val item = queueDao!!.getNextItemAndSetStatus(runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
-                if (item == null)
-                    return null
-
-                val parent = contentEntryDao!!.findByUid(item!!.sqiContentEntryParentUid)
-                val queueUrl: URL
-                try {
-                    queueUrl = URL(item!!.scrapeUrl!!)
-                    return KhanContentIndexer(queueUrl, parent, File(item.destDir!!),
-                            item.contentType, item.sqiUid, runId)
-                } catch (ignored: IOException) {
-                    //Must never happen
-                    throw RuntimeException("SEVERE: invalid URL to index: should not be in queue:" + item!!.scrapeUrl!!)
-                }
-            }
-
-            val scraperSource = {
-
-                val item = queueDao!!.getNextItemAndSetStatus(runId,
-                        ScrapeQueueItem.ITEM_TYPE_SCRAPE)
-                if (item == null) {
-                    return null
-                }
-
-                val parent = contentEntryDao!!.findByEntryId(item!!.sqiContentEntryParentUid)
-
-                val scrapeUrl: URL
-                try {
-                    scrapeUrl = URL(item!!.scrapeUrl!!)
-                    return KhanContentScraper(scrapeUrl, File(item.destDir!!),
-                            containerDir, parent,
-                            item.contentType, item.sqiUid, factory)
-                } catch (ignored: IOException) {
-                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + item!!.scrapeUrl!!)
-                }
-            }
 
             factory = GenericObjectPool(KhanDriverFactory())
             //start the indexing work queue
-            val indexerLatch = CountDownLatch(1)
-            val indexWorkQueue = WorkQueue(indexerSource, 4)
-            indexWorkQueue.addEmptyWorkQueueListener({ srcQueu -> indexerLatch.countDown() })
-            indexWorkQueue.start()
-            val scraperLatch = CountDownLatch(1)
-            scrapeWorkQueue = WorkQueue(scraperSource, 6)
-            scrapeWorkQueue!!.start()
 
-            try {
-                indexerLatch.await()
-            } catch (ignored: InterruptedException) {
+            val indexProcessor = 4
+            val indexWorkQueue = LiveDataWorkQueue<ScrapeQueueItem>(queueDao!!.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX, indexProcessor),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid },
+                    indexProcessor) {
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
+                val queueUrl: URL
+
+                try {
+                    queueUrl = URL(it.scrapeUrl!!)
+                    KhanContentIndexer(queueUrl, parent!!, File(it.destDir!!),
+                            it.contentType!!, it.sqiUid, runId)
+                } catch (ignored: IOException) {
+                    //Must never happen
+                    throw RuntimeException("SEVERE: invalid URL to index: should not be in queue:" + it.scrapeUrl!!)
+                }
             }
 
-            scrapeWorkQueue!!.addEmptyWorkQueueListener({ scrapeQueu -> scraperLatch.countDown() })
-            try {
-                scraperLatch.await()
-            } catch (ignored: InterruptedException) {
-
+            GlobalScope.launch {
+                indexWorkQueue.start()
             }
 
-            factory!!.close()
+
+            val scrapePrecessor = 6
+            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE, scrapePrecessor),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
+
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
+
+                val scrapeUrl: URL
+                try {
+                    scrapeUrl = URL(it.scrapeUrl!!)
+                    KhanContentScraper(scrapeUrl, File(it.destDir!!),
+                            containerDir, parent!!,
+                            it.contentType!!, it.sqiUid, factory)
+                } catch (ignored: IOException) {
+                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it!!.scrapeUrl!!)
+                }
+            }
+            GlobalScope.launch {
+                scrapeWorkQueue.start()
+            }
+
+            factory.close()
 
         }
 

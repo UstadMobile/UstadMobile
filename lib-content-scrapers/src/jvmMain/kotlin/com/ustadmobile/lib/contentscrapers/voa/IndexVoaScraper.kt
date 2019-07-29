@@ -3,39 +3,34 @@ package com.ustadmobile.lib.contentscrapers.voa
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
 import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.PUBLIC_DOMAIN
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
-import com.ustadmobile.port.sharedse.util.WorkQueue
-
+import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
-
 import java.io.File
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.Arrays
-import java.util.concurrent.CountDownLatch
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.PUBLIC_DOMAIN
-import java.util.function.Predicate
+import java.util.*
+import kotlin.system.exitProcess
 
 /**
  * The VOA website can be scraped at https://learningenglish.voanews.com/
@@ -149,7 +144,6 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
             ContentScraperUtil.createQueueItem(queueDao!!, lesson, lessonEntry, categoryFolder,
                     "", runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
-            scrapeWorkQueue!!.checkQueue()
 
         }
 
@@ -169,19 +163,19 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
         private val VOA = "VOA"
         private var url: URL? = null
-        private var contentEntryDao: ContentEntryDao? = null
-        private var contentParentChildJoinDao: ContentEntryParentChildJoinDao? = null
+        private lateinit var contentEntryDao: ContentEntryDao
+        private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
 
         private val CATEGORY = arrayOf("Test Your English", "The Day in Photos", "Most Popular ", "Read, Listen & Learn")
-        private var englishLang: Language? = null
-        private var queueDao: ScrapeQueueItemDao? = null
-        private var scrapeWorkQueue: WorkQueue? = null
+        private lateinit var englishLang: Language
+        private lateinit var queueDao: ScrapeQueueItemDao
+        private lateinit var scrapeWorkQueue: LiveDataWorkQueue<ScrapeQueueItem>
 
         @JvmStatic
         fun main(args: Array<String>) {
             if (args.size < 2) {
                 System.err.println("Usage: <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>")
-                System.exit(1)
+                exitProcess(1)
             }
             UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
             UMLogUtil.logInfo(args[0])
@@ -281,64 +275,55 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             ContentScraperUtil.createQueueItem(queueDao!!, URL(historyUrl), usHistory,
                     destinationDir, ScraperConstants.VoaContentType.LEVELS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
-            val indexerSource = {
-                val item = queueDao!!.getNextItemAndSetStatus(runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
-                if (item == null)
-                    return
 
-                val parent = contentEntryDao!!.findByEntryId(item!!.sqiContentEntryParentUid)
-                val queueUrl: URL
-                try {
-                    queueUrl = URL(item!!.scrapeUrl!!)
-                    return IndexVoaScraper(queueUrl, parent, File(item.destDir!!),
-                            item.contentType, item.sqiUid, runId)
-                } catch (ignored: IOException) {
-                    //Must never happen
-                    throw RuntimeException("SEVERE: invalid URL to index: should not be in queue:" + item!!.scrapeUrl!!)
-                }
-            }
+            //start the indexing work queue
+            val indexProcessors = 2
+            val indexWorkQueue = LiveDataWorkQueue<ScrapeQueueItem>(queueDao!!.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX, indexProcessors),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid },
+                    indexProcessors) {
 
-            val scraperSource = {
-
-                val item = queueDao!!.getNextItemAndSetStatus(runId,
-                        ScrapeQueueItem.ITEM_TYPE_SCRAPE)
-                if (item == null) {
-                    return null
-                }
-
-                val parent = contentEntryDao!!.findByEntryId(item!!.sqiContentEntryParentUid)
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
 
                 val scrapeContentUrl: URL
                 try {
-                    scrapeContentUrl = URL(item!!.scrapeUrl!!)
-                    return VoaScraper(scrapeContentUrl,
-                            File(item.destDir!!),
+                    scrapeContentUrl = URL(it.scrapeUrl!!)
+                    VoaScraper(scrapeContentUrl,
+                            File(it.destDir!!),
                             containerDir,
-                            parent, item.sqiUid)
+                            parent!!, it.sqiUid)
                 } catch (ignored: IOException) {
-                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + item!!.scrapeUrl!!)
+                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it!!.scrapeUrl!!)
+                }
+
+            }
+            GlobalScope.launch {
+                indexWorkQueue.start()
+            }
+
+
+            val scrapePrecessor = 6
+            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE, scrapePrecessor),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
+
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it!!.sqiContentEntryParentUid)
+
+                val scrapeContentUrl: URL
+                try {
+                    scrapeContentUrl = URL(it.scrapeUrl!!)
+                    VoaScraper(scrapeContentUrl,
+                            File(it.destDir!!),
+                            containerDir,
+                            parent!!, it.sqiUid)
+                } catch (ignored: IOException) {
+                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!)
                 }
             }
-            //start the indexing work queue
-            val indexerLatch = CountDownLatch(1)
-            val indexWorkQueue = WorkQueue(indexerSource, 2)
-            indexWorkQueue.addEmptyWorkQueueListener({ srcQueu -> indexerLatch.countDown() })
-            indexWorkQueue.start()
-            val scraperLatch = CountDownLatch(1)
-            scrapeWorkQueue = WorkQueue(scraperSource, 1)
-            scrapeWorkQueue!!.start()
-
-            try {
-                indexerLatch.await()
-            } catch (ignored: InterruptedException) {
+            GlobalScope.launch {
+                scrapeWorkQueue.start()
             }
 
-            scrapeWorkQueue!!.addEmptyWorkQueueListener({ scrapeQueu -> scraperLatch.countDown() })
-            try {
-                scraperLatch.await()
-            } catch (ignored: InterruptedException) {
-
-            }
 
         }
     }

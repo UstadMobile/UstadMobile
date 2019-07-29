@@ -5,35 +5,33 @@ import com.google.gson.JsonSyntaxException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
 import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.ALL_RIGHTS_RESERVED
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
-
+import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.io.charsets.Charset
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
-
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.concurrent.CountDownLatch
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.ALL_RIGHTS_RESERVED
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
-import kotlinx.io.charsets.Charset
-import org.apache.commons.lang.CharSet
 
 
 /**
@@ -61,19 +59,19 @@ import org.apache.commons.lang.CharSet
  */
 object IndexEdraakK12Content {
 
-    private val ROOT_URL = "https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41"
+    private const val ROOT_URL = "https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41"
 
-    val EDRAAK = "Edraak"
+    const val EDRAAK = "Edraak"
     private var url: URL? = null
     private var destinationDirectory: File? = null
     private var response: ContentResponse? = null
-    private var contentEntryDao: ContentEntryDao? = null
-    private var contentParentChildJoinDao: ContentEntryParentChildJoinDao? = null
-    private var arabicLang: Language? = null
-    private var queueDao: ScrapeQueueItemDao? = null
-    private var scrapeWorkQueue: WorkQueue? = null
+    private lateinit var contentEntryDao: ContentEntryDao
+    private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
+    private lateinit var arabicLang: Language
+    private lateinit var queueDao: ScrapeQueueItemDao
+    private lateinit var scrapeWorkQueue: LiveDataWorkQueue<ScrapeQueueItem>
     private var runId: Int = 0
-    private var containerDirectory: File? = null
+    private lateinit var containerDirectory: File
 
 
     @JvmStatic
@@ -135,16 +133,14 @@ object IndexEdraakK12Content {
         var connection: HttpURLConnection? = null
         try {
             connection = url!!.openConnection() as HttpURLConnection
-            connection!!.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01")
-            response = GsonBuilder().disableHtmlEscaping().create().fromJson<ContentResponse>(IOUtils.toString(connection!!.getInputStream(), UTF_ENCODING), ContentResponse::class.java!!)
+            connection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01")
+            response = GsonBuilder().disableHtmlEscaping().create().fromJson<ContentResponse>(IOUtils.toString(connection.inputStream, UTF_ENCODING), ContentResponse::class.java)
         } catch (e: IOException) {
             throw IllegalArgumentException("JSON INVALID", e.cause)
         } catch (e: JsonSyntaxException) {
             throw IllegalArgumentException("JSON INVALID", e.cause)
         } finally {
-            if (connection != null) {
-                connection!!.disconnect()
-            }
+            connection?.disconnect()
         }
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
@@ -160,7 +156,7 @@ object IndexEdraakK12Content {
         description = String(description.toByteArray(), Charset.defaultCharset())
 
         val edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
-                "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang!!.langUid, null,
+                "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang.langUid, null,
                 description, false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
 
@@ -168,41 +164,32 @@ object IndexEdraakK12Content {
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, edraakParentEntry, 0)
 
 
-        val scraperSource = {
+        val scrapePrecessor = 1
+        scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE, scrapePrecessor),
+                { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
-            val item = queueDao!!.getNextItemAndSetStatus(runId,
-                    ScrapeQueueItem.ITEM_TYPE_SCRAPE)
-            if (item == null) {
-                return null
-            }
 
-            val parent = contentEntryDao!!.findByEntryId(item!!.sqiContentEntryParentUid)
+            queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+            val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
 
             val scrapeContentUrl: URL
             try {
-                scrapeContentUrl = URL(item!!.scrapeUrl!!)
-                return EdraakK12ContentScraper(scrapeContentUrl,
-                        File(item!!.destDir!!),
+                scrapeContentUrl = URL(it.scrapeUrl!!)
+                EdraakK12ContentScraper(scrapeContentUrl,
+                        File(it.destDir!!),
                         containerDir,
-                        parent, item!!.sqiUid)
+                        parent!!, it.sqiUid)
             } catch (ignored: IOException) {
-                throw RuntimeException(("SEVERE: invalid URL to scrape: should not be in queue:" + item!!.scrapeUrl!!))
+                throw RuntimeException(("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!))
             }
-        }
 
-        val scraperLatch = CountDownLatch(1)
-        scrapeWorkQueue = WorkQueue(scraperSource, 1)
-        scrapeWorkQueue!!.start()
+
+        }
+        GlobalScope.launch {
+            scrapeWorkQueue.start()
+        }
 
         findImportedComponent(response!!, edraakParentEntry)
-
-        scrapeWorkQueue!!.addEmptyWorkQueueListener({ scrapeQueu -> scraperLatch.countDown() })
-        try {
-            scraperLatch.await()
-        } catch (ignored: InterruptedException) {
-
-        }
-
     }
 
     @Throws(MalformedURLException::class)
@@ -221,7 +208,6 @@ object IndexEdraakK12Content {
             ContentScraperUtil.createQueueItem(queueDao!!, URL(scrapeUrl), parentEntry,
                     File(destinationDirectory, parentContent.id!!), "",
                     runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
-            scrapeWorkQueue!!.checkQueue()
 
         } else {
 
