@@ -19,6 +19,8 @@ class SyncableEntityInfo {
 
     lateinit var entityLocalCsnField: PropertySpec
 
+    lateinit var entityLastChangedByField: PropertySpec
+
     lateinit var tracker: ClassName
 
     lateinit var trackerCsnField: PropertySpec
@@ -43,6 +45,17 @@ class SyncableEntityInfo {
                 .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
         entityMasterCsnField = PropertySpec.builder("${entityMasterCsnFieldEl.simpleName}",
                 entityMasterCsnFieldEl.asType().asTypeName()).build()
+
+        val entityLocalCsnFieldEl = syncableEntityEl.enclosedElements
+                .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
+        entityLocalCsnField = PropertySpec.builder("${entityLocalCsnFieldEl.simpleName}",
+                entityLocalCsnFieldEl.asType().asTypeName()).build()
+
+
+        val entityLastModifiedField = syncableEntityEl.enclosedElements
+                .first { it.getAnnotation(LastChangedBy::class.java) != null}
+        entityLastChangedByField = PropertySpec.builder("${entityLastModifiedField.simpleName}",
+                entityLastModifiedField.asType().asTypeName()).build()
 
 
         val syncableEntityTracker = getEntitySyncTracker(syncableEntityEl, processingEnv)

@@ -56,8 +56,9 @@ class DbProcessorSync: AbstractDbProcessor() {
             abstractFileSpec.writeTo(File(abstractOutputDir))
             implFileSpec.writeTo(File(implOutputDir))
 
-            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-            syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
+            //TODO: use the normal ktor generator for this - it will refactor the query and do the required inserts
+//            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
+//            syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -218,36 +219,20 @@ class DbProcessorSync: AbstractDbProcessor() {
                 implDaoSimpleName)
                 .addImport("com.ustadmobile.door", "DoorDbType")
 
-        //was .filter { it.getAnnotation(SyncableEntity::class.java) != null}
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
-            val entityPkField = entityType.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
-            val entityLastModifiedField = entityType.enclosedElements.first { it.getAnnotation(LastChangedBy::class.java) != null}
-            val entitySyncTracker = getEntitySyncTracker(entityType, processingEnv)
-            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker) as TypeElement
-            val entityLocalCsnFieldEl = entityType.enclosedElements
-                    .first { it.getAnnotation(LocalChangeSeqNum::class.java) != null}
-            val entitySyncTrackCsnField = entitySyncTrackerEl.enclosedElements
-                    .first { it.getAnnotation(TrackerChangeSeqNum::class.java) != null }
-            val entitySyncTrackerPkField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
-            val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackDestId::class.java) != null}
-            val entitySyncTrackerReceivedField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackerReceived::class.java) != null}
-            val entitySyncTrackerReqIdField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackerRequestId::class.java) != null}
+            val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
-            val entitySyncTrackerListClassName = List::class.asClassName().parameterizedBy(entitySyncTrackerEl.asClassName())
+            val entitySyncTrackerListClassName = List::class.asClassName().parameterizedBy(syncableEntityInfo.tracker)
 
             //Generate the find local unsent changes function for this entity
             val findLocalUnsentSql = "SELECT * FROM " +
                     "(SELECT * FROM ${entityType.simpleName} ) AS ${entityType.simpleName} " +
                     "WHERE " +
-                    "${entityLastModifiedField.simpleName} = (SELECT dbNodeId FROM DoorDatabaseSyncInfo) AND " +
-                    "(${entityType.simpleName}.$entityLocalCsnFieldEl > " +
-                    "COALESCE((SELECT ${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName} " +
-                    "WHERE ${entitySyncTrackerPkField.simpleName} = ${entityType.simpleName}.${entityPkField.simpleName} " +
-                    "AND ${entitySyncTrackerDestField.simpleName} = :destClientId), 0)" +
+                    "${syncableEntityInfo.entityLastChangedByField.name} = (SELECT dbNodeId FROM DoorDatabaseSyncInfo) AND " +
+                    "(${entityType.simpleName}.${syncableEntityInfo.entityLocalCsnField.name} > " +
+                    "COALESCE((SELECT ${syncableEntityInfo.trackerCsnField.name} FROM ${syncableEntityInfo.tracker.simpleName} " +
+                    "WHERE ${syncableEntityInfo.trackerPkField.name} = ${entityType.simpleName}.${syncableEntityInfo.entityPkField.name} " +
+                    "AND ${syncableEntityInfo.trackerDestField.name} = :destClientId), 0)" +
                     ") LIMIT :limit"
 
 
@@ -255,27 +240,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                     ParameterSpec.builder("limit", INT).build())
             val (abstractLocalUnsentChangeFun, implLocalUnsetChangeFun) =
                     generateAbstractAndImplQueryFunSpecs(findLocalUnsentSql,
-                            "_find${entityType.simpleName}LocalUnsentChanges",
+                            "_findLocalUnsent${entityType.simpleName}",
                             entityListClassName, findUnsentParamsList)
             abstractDaoTypeSpec.addFunction(abstractLocalUnsentChangeFun)
             implDaoTypeSpec.addFunction(implLocalUnsetChangeFun)
-
-            //Generate the find master unsent changes function for this entity
-            val findMasterUnsentSql = "SELECT * FROM " +
-                    "(SELECT * FROM ${entityType.simpleName} ) AS ${entityType.simpleName} " +
-                    "WHERE ${entityLastModifiedField.simpleName}  != :destClientId AND " +
-                    "(${entityType.simpleName}.$entityLocalCsnFieldEl > " +
-                    "COALESCE((SELECT ${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName} " +
-                    "WHERE ${entitySyncTrackerPkField.simpleName} = ${entityType.simpleName}.${entityPkField.simpleName} " +
-                    "AND ${entitySyncTrackerDestField.simpleName} = :destClientId), 0)" +
-                    ") LIMIT :limit"
-
-            val (abstractMasterUnsentChangeFun, implMasterUnsentChangeFun) =
-                    generateAbstractAndImplQueryFunSpecs(findMasterUnsentSql,
-                            "_find${entityType.simpleName}MasterUnsentChanges",
-                            entityListClassName, findUnsentParamsList)
-            abstractDaoTypeSpec.addFunction(abstractMasterUnsentChangeFun)
-            implDaoTypeSpec.addFunction(implMasterUnsentChangeFun)
 
             //generate an upsert function for the entity itself
             val (abstractInsertEntityFun, implInsertEntityFun, abstractInterfaceInsertEntityFun) =
@@ -289,7 +257,7 @@ class DbProcessorSync: AbstractDbProcessor() {
 
             val (abstractInsertTrackerFun, implInsertTrackerFun, abstractInterfaceInsertTrackerFun) =
                     generateAbstractAndImplUpsertFuns(
-                    "_replace${entitySyncTrackerEl.simpleName}",
+                    "_replace${syncableEntityInfo.tracker.simpleName}",
                     ParameterSpec.builder("_entities", entitySyncTrackerListClassName).build(),
                     implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
@@ -297,12 +265,12 @@ class DbProcessorSync: AbstractDbProcessor() {
             abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertTrackerFun)
 
             //generate an update function that can be used to set the status of the sync tracker
-            val updateTrackerReceivedSql = "UPDATE ${entitySyncTrackerEl.simpleName} SET " +
-                    "${entitySyncTrackerReceivedField.simpleName} = :status WHERE " +
-                    "${entitySyncTrackerReqIdField.simpleName} = :requestId"
+            val updateTrackerReceivedSql = "UPDATE ${syncableEntityInfo.tracker.simpleName} SET " +
+                    "${syncableEntityInfo.trackerReceivedField.name} = :status WHERE " +
+                    "${syncableEntityInfo.trackerReqIdField.name} = :requestId"
             val (abstractUpdateTrackerFun, implUpdateTrackerFun, abstractInterfaceUpdateTrackerFun) =
                     generateAbstractAndImplQueryFunSpecs(updateTrackerReceivedSql,
-                            "_update${entitySyncTrackerEl.simpleName}Received",
+                            "_update${syncableEntityInfo.tracker.simpleName}Received",
                             UNIT, listOf(ParameterSpec.builder("status", BOOLEAN).build(),
                             ParameterSpec.builder("requestId", INT).build()),
                             addReturnStmt = false, abstractFunIsOverride = true)
