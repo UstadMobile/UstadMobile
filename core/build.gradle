@@ -311,10 +311,10 @@ jacoco {
  * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
  */
 project.afterEvaluate {
-    def testTaskName = "jvmJacocoTestReport"
+    def testTaskName = "jvmTest"
 
     // Create gradle task
-    task "jvm" (type:JacocoReport, dependsOn: "$testTaskName") {
+    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
         group = "Reporting"
         description = "Generate Jacoco coverage reports on the common module build."
 
