@@ -74,6 +74,13 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("updateContainerSizeAndNumEntries")
     abstract fun updateContainerSizeAndNumEntries(containerUid: Long)
 
+    @Query("UPDATE Container SET fileSize = " +
+            "(SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize " +
+            "FROM ContainerEntry JOIN ContainerEntryFile ON " +
+            "ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
+            "WHERE ContainerEntry.ceContainerUid = Container.containerUid)")
+    abstract suspend fun updateFileSizeForAllContainers()
+
     @Query("SELECT Container.containerUid FROM Container " +
             "WHERE Container.containerUid = :containerUid " +
             "AND (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries")

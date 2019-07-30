@@ -4,7 +4,7 @@ plugins {
     id 'war'
     id 'maven-publish'
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
-    id 'com.github.johnrengelman.shadow' version "5.1.0"
+    id 'com.github.johnrengelman.shadow'
 }
 
 configurations {
@@ -41,7 +41,7 @@ dependencies {
     implementation "io.ktor:ktor-jackson:$version_ktor"
     implementation "io.ktor:ktor-gson:$version_ktor"
 
-    implementation project(":core")
+    implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
     implementation project(":lib-door-runtime")
@@ -50,7 +50,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     testImplementation project(":lib-test-common")
-    testImplementation project(":sharedse")
+    testImplementation project(path: ":sharedse", configuration: "jvmDefault")
 
     testImplementation "junit:junit:$version_junit"
 

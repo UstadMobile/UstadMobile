@@ -1,7 +1,22 @@
-plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.multiplatform'
+//plugins {
+//    id 'kotlin-multiplatform'
+//    //id 'kotlinx-serialization'
+//    id 'com.android.library'
+//}
+
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+
+group rootProject.group
+version rootProject.version
+
+ext {
+    version_serialization = "0.11.0"
+    version_napier = "0.0.6"
 }
+
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
@@ -11,56 +26,64 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 }
 
-apply plugin: "maven-publish"
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
 
 
 kotlin {
-    targets {
-        fromPreset(presets.jvm, 'jvm') {
-            compilations.main.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
 
-            compilations.test.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
-        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
-        // the project to avoid it being seen as an extra jvm variant
-        //fromPreset(presets.jvm, 'commonJvm') //comment this out for code completion
-        fromPreset(presets.js, 'js') {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
-        }
-        fromPreset(presets.android, 'android')
     }
+
+    android()
+
+    js("js") {
+
+        nodejs()
+
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin("stdlib-common:$version_kotlin")
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_serialization"
+                implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation project(":lib-door-runtime")
             }
         }
-        jsMain {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-            }
-        }
+
         commonJvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
@@ -69,42 +92,60 @@ kotlin {
             }
         }
 
+        commonTest {
+            dependencies {
+                implementation project(":lib-database-mpp")
+            }
+        }
+
         jvmMain {
             dependencies {
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
             }
+
             dependsOn commonJvmMain
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
+                implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
+            }
+        }
+
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_serialization"
+                implementation "com.github.aakira:napier-js:$version_napier"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
+            }
+        }
+
+        jsTest {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
+            }
         }
 
         androidMain {
             dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
                 implementation "androidx.room:room-runtime:$version_android_room"
             }
+
             dependsOn commonJvmMain
         }
 
-        commonTest{
-
-        }
-
-        jvmTest{
-            dependencies {
-                implementation "junit:junit:$version_junit"
-            }
-        }
-
-
     }
-}
-
-
-// workaround for https://youtrack.jetbrains.com/issue/KT-27170
-configurations {
-    compileClasspath
 }
 
 
@@ -123,3 +164,4 @@ publishing {
         }
     }
 }
+

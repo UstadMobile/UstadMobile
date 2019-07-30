@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.File
@@ -28,7 +29,9 @@ class ContainerEntryFileResponder : FileResponder(), RouterNanoHTTPD.UriResponde
             }
 
             val file = File(entryFile.cefPath!!)
-            return FileResponder.newResponseFromFile(uriResource, session, FileResponder.FileSource(file))
+
+
+            return newResponseFromFile(uriResource, session, FileSource(file))
         } catch (ne: NumberFormatException) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", null)

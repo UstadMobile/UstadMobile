@@ -4,26 +4,16 @@ import java.util.concurrent.atomic.AtomicInteger
  * Core module build script : see buildconfig.core.default.gradle for configuration
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
-    }
-}
 
+group rootProject.group
+version rootProject.version
 
 apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
 apply plugin: "jacoco"
+apply plugin: 'com.github.johnrengelman.shadow'
 
 
 android {
@@ -124,33 +114,31 @@ tasks.whenTaskAdded { task ->
 
 kotlin {
 
-
-    targets {
-        fromPreset(presets.jvm, 'jvm') {
-            compilations.main.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
-
-            compilations.test.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
 
-        fromPreset(presets.android, 'android')
-        fromPreset(presets.js, 'js') {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
-        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
-        // the project to avoid it being seen as an extra jvm variant
-        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
+
+    android()
+
+    js("js") {
+        nodejs()
+
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
 
     sourceSets {
@@ -308,8 +296,6 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-
-
             }
         }
 
@@ -325,10 +311,10 @@ jacoco {
  * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
  */
 project.afterEvaluate {
-    def testTaskName = "jvmJacocoTestReport"
+    def testTaskName = "jvmTest"
 
     // Create gradle task
-    task "jvm" (type:JacocoReport, dependsOn: "$testTaskName") {
+    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
         group = "Reporting"
         description = "Generate Jacoco coverage reports on the common module build."
 
