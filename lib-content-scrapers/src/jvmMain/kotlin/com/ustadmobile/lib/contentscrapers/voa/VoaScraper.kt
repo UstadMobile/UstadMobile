@@ -160,8 +160,6 @@ class VoaScraper : Runnable {
 
         }
 
-        isUpdated = true
-
         if (!isUpdated) {
             isContentUpdated = false
             driver.close()

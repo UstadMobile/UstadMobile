@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.db.entities.ScrapeRun
 import okhttp3.mockwebserver.Dispatcher
@@ -23,6 +24,11 @@ import java.io.IOException
 import java.nio.file.Files
 
 class TestIndexKhanAcademy {
+
+    @Before
+    fun setup(){
+        ContentScraperUtil.checkIfPathsToDriversExist()
+    }
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {

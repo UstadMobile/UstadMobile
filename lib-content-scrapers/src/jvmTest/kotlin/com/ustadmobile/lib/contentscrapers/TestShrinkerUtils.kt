@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
 import org.apache.commons.io.FileUtils
@@ -21,8 +22,6 @@ import org.jsoup.select.Elements
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 
 import java.io.File
 import java.io.FileInputStream
@@ -36,6 +35,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.kmp.io.KMPPullParserException
 import java.util.function.Consumer
 
 class TestShrinkerUtils {
@@ -50,6 +50,7 @@ class TestShrinkerUtils {
     fun before() {
         try {
             initDb()
+            checkIfPathsToDriversExist()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -79,7 +80,7 @@ class TestShrinkerUtils {
 
 
     @Test
-    @Throws(IOException::class, XmlPullParserException::class)
+    @Throws(IOException::class, KMPPullParserException::class)
     fun givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() {
 
         ShrinkerUtil.shrinkEpub(firstepub!!)

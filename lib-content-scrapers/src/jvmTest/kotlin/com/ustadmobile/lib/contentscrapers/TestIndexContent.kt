@@ -14,11 +14,17 @@ import okio.Buffer
 import okio.Okio
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 import java.nio.file.Files
 
 class TestIndexContent {
+
+    @Before
+    fun setup(){
+        ContentScraperUtil.checkIfPathsToDriversExist()
+    }
 
     private val MAIN_CONTENT_CONTENT_FILE = "/com/ustadmobile/lib/contentscrapers/edraakK12/edraak-main-content.txt"
 

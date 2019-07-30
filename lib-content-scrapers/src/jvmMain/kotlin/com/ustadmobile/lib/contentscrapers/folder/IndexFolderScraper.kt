@@ -127,7 +127,7 @@ class IndexFolderScraper {
                         document.loadFromOPF(xmlPullParser)
 
                         val title = document.title
-                        val lang = if (document.getLanguages().isNotEmpty()) document.getLanguages()[0] else EMPTY_STRING
+                        val lang = if (document.getLanguages().isNotEmpty()) document.getLanguages()[0] else null
 
                         val creators = StringBuilder()
                         for (i in 0 until document.numCreators) {
@@ -141,12 +141,12 @@ class IndexFolderScraper {
 
                         val date = folder.lastModified()
 
-                        val country = lang.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                        val twoCode = country[0]
-                        val variant = if (country.size > 1) country[1] else EMPTY_STRING
+                        val country = lang?.split("-")
+                        val twoCode = country?.get(0)
+                        val variant = if (country != null && country.size > 1) country[1] else EMPTY_STRING
 
-                        val language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao!!, twoCode)
-                        val languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao!!, variant, language)
+                        val language = if (twoCode != null) ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao!!, twoCode) else null
+                        val languageVariant = if (language != null)ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao!!, variant, language) else null
 
                         val childEntry = ContentScraperUtil.createOrUpdateContentEntry(id!!, title,
                                 filePrefix + folder.path, publisher!!, PUBLIC_DOMAIN, language?.langUid

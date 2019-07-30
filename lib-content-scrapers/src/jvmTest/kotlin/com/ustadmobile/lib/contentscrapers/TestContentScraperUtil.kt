@@ -27,8 +27,14 @@ import okio.BufferedSource
 import okio.Okio
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.junit.Before
 
 class TestContentScraperUtil {
+
+    @Before
+    fun setup(){
+        ContentScraperUtil.checkIfPathsToDriversExist()
+    }
 
     private val RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/files/"
     internal val dispatcher: Dispatcher = object : Dispatcher() {

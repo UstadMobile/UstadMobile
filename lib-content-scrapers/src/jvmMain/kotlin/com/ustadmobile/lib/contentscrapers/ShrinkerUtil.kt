@@ -6,6 +6,9 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CODEC2_PATH_KEY
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.FFMPEG_PATH_KEY
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.WEBP_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
@@ -37,10 +40,13 @@ import org.kmp.io.KMPPullParserException
 
 object ShrinkerUtil {
 
-    val HTML_MIME_TYPES = Arrays.asList("application/xhtml+xml", "text/html")
-    val IMAGE_MIME_TYPES = Arrays.asList(MIMETYPE_JPG, "image/png", "image/jpeg")
+    val HTML_MIME_TYPES = listOf("application/xhtml+xml", "text/html")
+    val IMAGE_MIME_TYPES = listOf(MIMETYPE_JPG, "image/png", "image/jpeg")
 
-
+    var cwebpPath = System.getProperty(WEBP_PATH_KEY)
+    
+    var ffmpegPath = System.getProperty(FFMPEG_PATH_KEY)
+    
     const val STYLE_OUTSOURCE_TO_LINKED_CSS = 0
 
     const val STYLE_KEEP = 1
@@ -353,6 +359,8 @@ object ShrinkerUtil {
         }
 
     }
+    
+   
 
     /**
      * Given a source file and a destination file, convert the image(src) to webp(dest)
@@ -366,13 +374,13 @@ object ShrinkerUtil {
             throw FileNotFoundException("convertImageToWebp: Source file: " + src.absolutePath + " does not exist")
         }
 
-        val webpExecutableFile = File(ScraperBuildConfig.CWEBP_PATH)
+        val webpExecutableFile = File(cwebpPath)
         if (!webpExecutableFile.exists()) {
-            throw IOException("Webp executable does not exist: " + ScraperBuildConfig.CWEBP_PATH)
+            throw IOException("Webp executable does not exist: $cwebpPath")
         }
         var pngFile: File? = null
         var process: Process? = null
-        val builder = ProcessBuilder(ScraperBuildConfig.CWEBP_PATH, src.path, "-o", dest.path)
+        val builder = ProcessBuilder(cwebpPath, src.path, "-o", dest.path)
         try {
             process = builder.start()
             process!!.waitFor()
@@ -412,9 +420,9 @@ object ShrinkerUtil {
             throw FileNotFoundException("convertImageToWebp: Source file: " + src.absolutePath + " does not exist")
         }
 
-        val webpExecutableFile = File(ScraperBuildConfig.CWEBP_PATH)
+        val webpExecutableFile = File(cwebpPath)
         if (!webpExecutableFile.exists()) {
-            throw IOException("Webp executable does not exist: " + ScraperBuildConfig.CWEBP_PATH)
+            throw IOException("Webp executable does not exist: $cwebpPath")
         }
 
         var process: Process? = null
@@ -449,12 +457,12 @@ object ShrinkerUtil {
             throw FileNotFoundException("convertVideoToWebm: Source file: " + src.absolutePath + " does not exist")
         }
 
-        val webpExecutableFile = File(ScraperBuildConfig.FFMPEG_PATH)
+        val webpExecutableFile = File(ffmpegPath)
         if (!webpExecutableFile.exists()) {
-            throw IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH)
+            throw IOException("ffmpeg executable does not exist: $ffmpegPath")
         }
 
-        val builder = ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i",
+        val builder = ProcessBuilder(ffmpegPath, "-i",
                 src.path, "-vf", "scale=480x270", "-r", "20", "-c:v", "vp9", "-crf", "40", "-b:v", "0", "-c:a", "libopus", "-b:a", "12000", "-vbr", "on", dest.path)
         builder.redirectErrorStream(true)
         var process: Process? = null
@@ -488,12 +496,12 @@ object ShrinkerUtil {
             throw FileNotFoundException("convertAudioToOpos: Source file: " + src.absolutePath + " does not exist")
         }
 
-        val webpExecutableFile = File(ScraperBuildConfig.FFMPEG_PATH)
+        val webpExecutableFile = File(ffmpegPath)
         if (!webpExecutableFile.exists()) {
-            throw IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH)
+            throw IOException("ffmpeg executable does not exist: $ffmpegPath")
         }
 
-        val builder = ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.path, "-c:a", "libopus", "-b:a", "12000", "-vbr", "on", dest.path)
+        val builder = ProcessBuilder(ffmpegPath, "-i", src.path, "-c:a", "libopus", "-b:a", "12000", "-vbr", "on", dest.path)
         builder.redirectErrorStream(true)
         var process: Process? = null
         try {
@@ -527,20 +535,20 @@ object ShrinkerUtil {
             throw FileNotFoundException("convertKhanToWebmAndCodec2: Source file: " + src.absolutePath + " does not exist")
         }
 
-        val webpExecutableFile = File(ScraperBuildConfig.FFMPEG_PATH)
+        val webpExecutableFile = File(ffmpegPath)
         if (!webpExecutableFile.exists()) {
-            throw IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH)
+            throw IOException("ffmpeg executable does not exist: $ffmpegPath")
         }
 
-        val videoBuilder = ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.path, "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", "-y", dest.path)
+        val videoBuilder = ProcessBuilder(ffmpegPath, "-i", src.path, "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", "-y", dest.path)
         videoBuilder.redirectErrorStream(true)
 
         val rawFile = File(dest.parentFile, "audio.raw")
-        val rawBuilder = ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.path, "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", "-y", rawFile.path)
+        val rawBuilder = ProcessBuilder(ffmpegPath, "-i", src.path, "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", "-y", rawFile.path)
         rawBuilder.redirectErrorStream(true)
 
         val audioFile = File(dest.parentFile, "audio.c2")
-        val audioBuilder = ProcessBuilder(ScraperBuildConfig.CODEC2_PATH, "3200", rawFile.path, audioFile.path)
+        val audioBuilder = ProcessBuilder(System.getProperty(CODEC2_PATH_KEY), "3200", rawFile.path, audioFile.path)
         audioBuilder.redirectErrorStream(true)
 
         var process: Process? = null

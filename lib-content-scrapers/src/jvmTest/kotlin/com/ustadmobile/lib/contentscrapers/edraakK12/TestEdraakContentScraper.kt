@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.edraakK12
 
 import com.google.gson.GsonBuilder
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_BOLD
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_REGULAR
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON
@@ -22,6 +23,7 @@ import okio.Buffer
 import okio.Okio
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.io.IOException
@@ -50,6 +52,11 @@ class TestEdraakContentScraper {
     private val RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/files/"
 
     internal val COMPONENT_API_PREFIX = "/api/component/"
+
+    @Before
+    fun setup(){
+        checkIfPathsToDriversExist()
+    }
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         @Throws(InterruptedException::class)

@@ -154,10 +154,10 @@ class AsbScraper {
             bookObj = africanBooksList[i]
             val bookId = bookObj.id
             val ePubFile = File(destinationDir, "asb$bookId.epub")
-            val epubUrl = generateEPubUrl(africanBooksUrl, bookId)
+            val epubUrl = generateEPubUrl(africanBooksUrl, bookId!!)
             val publishUrl = generatePublishUrl(africanBooksUrl, bookId)
             val makeUrl = generateMakeUrl(africanBooksUrl, bookId)
-            val modifiedFile = File(destinationDir, bookId!! + ScraperConstants.LAST_MODIFIED_TXT)
+            val modifiedFile = File(destinationDir, bookId + ScraperConstants.LAST_MODIFIED_TXT)
             UMLogUtil.logTrace("Started with book id $bookId")
             try {
 
@@ -347,17 +347,17 @@ class AsbScraper {
 
     @Throws(MalformedURLException::class)
     fun generatePublishUrl(africanBooksUrl: URL, bookId: String?): URL {
-        return URL(africanBooksUrl, "/myspace/publish/epub.php?id=" + bookId!!)
+        return URL(africanBooksUrl, "/myspace/publish/epub.php?id=$bookId")
     }
 
     @Throws(MalformedURLException::class)
-    fun generateMakeUrl(africanBooksUrl: URL, bookId: String?): URL {
-        return URL(africanBooksUrl, "/make/publish/epub.php?id=" + bookId!!)
+    fun generateMakeUrl(africanBooksUrl: URL, bookId: String): URL {
+        return URL(africanBooksUrl, "/make/publish/epub.php?id=$bookId")
     }
 
     @Throws(MalformedURLException::class)
-    fun generateEPubUrl(africanBooksUrl: URL, bookId: String?): URL {
-        return URL(africanBooksUrl, "/read/downloadepub.php?id=" + bookId!!)
+    fun generateEPubUrl(africanBooksUrl: URL, bookId: String): URL {
+        return URL(africanBooksUrl, "/read/downloadepub.php?id=$bookId")
     }
 
 
@@ -374,16 +374,16 @@ class AsbScraper {
 
         val reader = BufferedReader(InputStreamReader(booklistIn, "UTF-8"))
         val retVal = ArrayList<AfricanBooksResponse>()
-        var line: String
         var inList = false
         var currentObj: AfricanBooksResponse
         var parsedCounter = 0
         var failCounter = 0
 
-        while (reader.readLine().also { line = it } != null) {
-            if (!inList && !line.startsWith("<script>"))
-                continue
+        reader.lineSequence().forEach {
+            if (!inList && !it.startsWith("<script>"))
+                return@forEach
 
+            var line = it
             if (line.startsWith("<script>")) {
                 line = line.substring("<script>".length)
                 inList = true
@@ -396,7 +396,7 @@ class AsbScraper {
                 jsonStr = jsonStr.replace("\n", " ")
                 jsonStr = jsonStr.replace("\r", " ")
                 try {
-                    currentObj = gson.fromJson<AfricanBooksResponse>(jsonStr, AfricanBooksResponse::class.java)
+                    currentObj = gson.fromJson(jsonStr, AfricanBooksResponse::class.java)
                     retVal.add(currentObj)
                     parsedCounter++
                 } catch (e: Exception) {
@@ -434,32 +434,31 @@ class AsbScraper {
             opfReader = BufferedReader(
                     InputStreamReader(Files.newInputStream(zipFs!!.getPath("content.opf")), UTF_ENCODING))
             val opfModBuffer = StringBuffer()
-            var line: String
             var modified = false
             var hasDescription = false
 
             val descTag = ("<dc:description>" + StringEscapeUtils.escapeXml(booklistEntry.summary)
                     + "</dc:description>")
-            while (opfReader.readLine().also { line = it } != null) {
-                if (line.contains("dc:description")) {
+           opfReader.lineSequence().forEach {
+                if (it.contains("dc:description")) {
                     opfModBuffer.append(descTag).append('\n')
                     hasDescription = true
                     modified = true
-                } else if (!hasDescription && line.contains("</metadata>")) {
+                } else if (!hasDescription && it.contains("</metadata>")) {
                     opfModBuffer.append(descTag).append("\n</metadata>\n")
                     modified = true
-                } else if (line.contains("<item id=\"cover-image\"") && !line.contains("properties=\"cover-image\"")) {
+                } else if (it.contains("<item id=\"cover-image\"") && !it.contains("properties=\"cover-image\"")) {
                     opfModBuffer.append(" <item id=\"cover-image\" href=\"images/cover.png\"  media-type=\"image/png\" properties=\"cover-image\"/>\n")
                 } else {
-                    opfModBuffer.append(line).append('\n')
+                    opfModBuffer.append(it).append('\n')
                 }
             }
 
-            opfReader!!.close()
+            opfReader.close()
 
             if (modified) {
                 Files.write(
-                        zipFs!!.getPath("content.opf"), opfModBuffer.toString().toByteArray(charset(UTF_ENCODING)),
+                        zipFs.getPath("content.opf"), opfModBuffer.toString().toByteArray(charset(UTF_ENCODING)),
                         StandardOpenOption.TRUNCATE_EXISTING)
             }
 

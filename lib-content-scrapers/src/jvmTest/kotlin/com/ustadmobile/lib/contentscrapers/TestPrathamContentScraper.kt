@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
@@ -18,8 +22,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.spy
 import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
@@ -28,6 +30,11 @@ import java.nio.file.Files
 
 class TestPrathamContentScraper {
 
+
+    @Before
+    fun setup(){
+        ContentScraperUtil.checkIfPathsToDriversExist()
+    }
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         @Throws(InterruptedException::class)
@@ -79,7 +86,7 @@ class TestPrathamContentScraper {
 
     @Test
     @Throws(IOException::class, URISyntaxException::class)
-    fun givenServerOnline_whenDdlSiteScraped_thenShouldFindConvertAndDownloadAllFiles() {
+    fun givenServerOnline_whenPrathamSiteScraped_thenShouldFindConvertAndDownloadAllFiles() {
 
         val tmpDir = Files.createTempDirectory("testindexPrathamcontentscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()
@@ -116,11 +123,11 @@ class TestPrathamContentScraper {
         mockWebServer.setDispatcher(dispatcher)
 
         val scraper = spy(AsbScraper())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generateURL()
-        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub").url()).`when`(scraper).generateEPubUrl(Mockito.any<URL>(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generatePublishUrl(Mockito.any<URL>(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generateMakeUrl(Mockito.any<URL>(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asbreader.txt").url().toString()).`when`(scraper).generateReaderUrl(Mockito.any<URL>(), Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).whenever(scraper).generateURL()
+        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub").url()).whenever(scraper).generateEPubUrl(any(), Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generatePublishUrl(any(), Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generateMakeUrl(any(), Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asbreader.txt").url().toString()).`when`(scraper).generateReaderUrl(any(), Mockito.anyString())
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asburl.txt").url().toString()).`when`(scraper).africanStoryBookUrl
 
         scraper.findContent(tmpDir, containerDir)

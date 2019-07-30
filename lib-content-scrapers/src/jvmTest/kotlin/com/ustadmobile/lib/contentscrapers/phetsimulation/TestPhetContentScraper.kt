@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -9,6 +10,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
 import okio.Okio
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.io.IOException
@@ -16,7 +18,10 @@ import java.nio.file.Files
 
 class TestPhetContentScraper {
 
-
+    @Before
+    fun setup(){
+        ContentScraperUtil.checkIfPathsToDriversExist()
+    }
     private val EN_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/phetsimulation/simulation_en.html"
     private val ES_LOCATION_FILE = "/com/ustadmobile/lib/contentscrapers/phetsimulation/simulation_es.html"
     private val HTML_FILE_LOCATION = "/com/ustadmobile/lib/contentscrapers/phetsimulation/phet-html-detail.html"
@@ -63,7 +68,7 @@ class TestPhetContentScraper {
                     val buffer = readFile(EN_LOCATION_FILE)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
-                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT")
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 
@@ -74,7 +79,7 @@ class TestPhetContentScraper {
                     val buffer = readFile(ES_LOCATION_FILE)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
-                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT")
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 
@@ -85,7 +90,7 @@ class TestPhetContentScraper {
                     val buffer = readFile(FLASH_FILE_LOCATION)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
-                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT")
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 
@@ -96,7 +101,7 @@ class TestPhetContentScraper {
                     val buffer = readFile(JAR_FILE_LOCATION)
                     val response = MockResponse().setResponseCode(200)
                     response.addHeader("ETag", "16adca-5717010854ac0")
-                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT")
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2050 15:36:51 GMT")
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 
@@ -185,6 +190,7 @@ class TestPhetContentScraper {
         val mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString()
         val scraper = PhetContentScraper(mockServerUrl, tmpDir, containerDir)
         scraper.scrapeContent()
+
         val englishLocation = File(tmpDir, "en")
         val titleDirectory = File(englishLocation, scraper.title)
         val englishSimulation = File(titleDirectory, SIM_EN)

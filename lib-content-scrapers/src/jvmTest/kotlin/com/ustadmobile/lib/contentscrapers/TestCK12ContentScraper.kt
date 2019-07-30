@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader
 
@@ -11,7 +12,6 @@ import org.mockito.Mockito
 
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 import java.nio.file.Files
 
 import okhttp3.mockwebserver.Dispatcher
@@ -19,12 +19,12 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.BufferedSource
+
 import okio.Okio
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.junit.Before
 import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.spy
 
 class TestCK12ContentScraper {
     private val PRACTICE_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-practice.txt"
@@ -53,6 +53,11 @@ class TestCK12ContentScraper {
     internal var practiceUrl = "https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/asmtpractice/Add-to-10-with-Images-Practice?referrer=featured_content&collectionHandle=elementary-math-grade-1&collectionCreatorID=3&conceptCollectionHandle=elementary-math-grade-1-::-add-to-10-with-images?referrer=concept_details"
     internal var readUrl = "https://www.ck12.org/c/physical-science/chemistry-of-compounds/lesson/Chemistry-of-Compounds-MS-PS/?referrer=concept_details"
     internal var plixUrl = "https://www.ck12.org/c/trigonometry/distance-formula-and-the-pythagorean-theorem/plix/Pythagorean-Theorem-to-Determine-Distance-Tree-Shadows-53d147578e0e0876d4df82f1?referrer=concept_details"
+
+    @Before
+    fun setup(){
+        ContentScraperUtil.checkIfPathsToDriversExist()
+    }
 
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {

@@ -26,6 +26,9 @@ class TestFolderScraper {
         val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
 
+
+        ContentScraperUtil.checkIfPathsToDriversExist()
+
         tmpDir = Files.createTempDirectory("testIndexFolderScraper").toFile()
         containerDir = Files.createTempDirectory("container").toFile()
         englishFolder = File(tmpDir, "English")

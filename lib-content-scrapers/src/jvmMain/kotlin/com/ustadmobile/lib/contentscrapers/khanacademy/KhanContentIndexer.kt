@@ -419,7 +419,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             //start the indexing work queue
 
             val indexProcessor = 4
-            val indexWorkQueue = LiveDataWorkQueue<ScrapeQueueItem>(queueDao!!.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX, indexProcessor),
+            val indexWorkQueue = LiveDataWorkQueue(queueDao!!.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX, indexProcessor),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessor) {
                 queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)

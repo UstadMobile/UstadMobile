@@ -27,6 +27,14 @@ shrinker.webp = path_to_file
 or for ubuntu only
 use apt-get install webp
 
+## Setup Mogrify
+
+if using ubuntu
+apt-get install imagemagick
+
+On Windows:
+download from https://imagemagick.org/script/download.php
+
 
 ###Find and Scrap Edraak K12 Content
 

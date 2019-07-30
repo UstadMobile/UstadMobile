@@ -195,13 +195,14 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
             val simulationFile = File(simulationLocation, fileName)
 
             var isUpdated = ContentScraperUtil.isFileModified(conn, languageLocation!!, fileName)
-            if (ContentScraperUtil.fileHasContent(simulationLocation)) {
-                isUpdated = false
-                FileUtils.deleteDirectory(simulationLocation)
-            }
 
             if (!isUpdated) {
                 return false
+            }
+
+            if (ContentScraperUtil.fileHasContent(simulationLocation)) {
+                FileUtils.deleteDirectory(simulationLocation)
+                simulationLocation.mkdirs()
             }
 
             FileUtils.writeStringToFile(File(simulationLocation, ScraperConstants.ABOUT_HTML), aboutText, ScraperConstants.UTF_ENCODING)
@@ -269,7 +270,7 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
 
                                     val path = simulationUrl!!.toString().replace("/en/", "/$langCode/")
                                     val translationUrl = URL(path)
-                                    val country = langCode.replace("_".toRegex(), "-").split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                                    val country = langCode.replace("_", "-").split("-")
 
                                     val lang = country[0]
                                     val variant = if (country.size > 1) country[1] else ""

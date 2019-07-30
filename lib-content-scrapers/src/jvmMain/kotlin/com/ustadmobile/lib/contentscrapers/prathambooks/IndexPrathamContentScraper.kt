@@ -113,7 +113,7 @@ class IndexPrathamContentScraper {
 
         gson = GsonBuilder().disableHtmlEscaping().create()
 
-        downloadPrathamContentList(generatePrathamUrl(288.toString()), cookie, destinationDir)
+        downloadPrathamContentList(generatePrathamUrl(1.toString()), cookie, destinationDir)
 
     }
 
@@ -124,7 +124,7 @@ class IndexPrathamContentScraper {
 
         val contentBooksList = gson!!.fromJson(IOUtils.toString(contentUrl.toURI(), UTF_ENCODING), BooksResponse::class.java)
 
-        if (contentBooksList.data!!.size == 0) {
+        if (contentBooksList.data!!.isEmpty()) {
             return
         }
 
@@ -160,8 +160,6 @@ class IndexPrathamContentScraper {
 
                 val content = File(resourceFolder, data.slug!! + ZIP_EXT)
                 var isUpdated = ContentScraperUtil.isFileModified(connection, resourceFolder, data.id.toString())
-
-                isUpdated = true
 
                 if (!isUpdated) {
                     contentCount++

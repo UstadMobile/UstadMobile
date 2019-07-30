@@ -5,7 +5,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
         classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
@@ -16,59 +15,6 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "jacoco"
 
-/*
-task scrapeContent(type: JavaExec) {
-    classpath sourceSets.main.runtimeClasspath
-
-    systemProperties["java.naming.factory.initial"] = "org.osjava.sj.SimpleContextFactory"
-    systemProperties["java.naming.factory.object"] = "org.apache.commons.dbcp2.BasicDataSourceFactory"
-    systemProperties["org.osjava.sj.delimiter"] = "/"
-    systemProperties["org.osjava.sj.space"] = "java:/comp/env"
-    systemProperties["org.osjava.sj.root"] = "jndi-config/"
-    systemProperties["org.osjava.sj.jndi.shared"] = "true"
-
-    outputs.upToDateWhen { false }
-}
-*/
-
-task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    doFirst {
-        if (!rootProject.file(rootProject.ext.buildConfigProperties["shrinker.webp"]).exists()) {
-            throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
-                    " You must define a path to the cwebp executable in buildconfig.local.properties.  " +
-                    " On Ubuntu you can install this using apt-get install webp. " +
-                    "Please open the README file in lib-content-scrapers for further instructions")
-        }
-
-        if (!rootProject.ext.localProperties.containsKey("scraper.chrome_driver_path")) {
-            throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
-                    " You must define a path to the chrome driver in local.properties. " +
-                    "Please open the README file in lib-content-scrapers for further instructions")
-        }
-
-        if (!rootProject.file(rootProject.ext.buildConfigProperties["ffmpeg.webm"]).exists()) {
-            throw new GradleException("Shrinker Util requires ffmpeg to turn videos to webm format which needs to run on the command line" +
-                    " You must define a path to the ffmpeg executable in buildconfig.local.properties.  " +
-                    " On Ubuntu you can install this using apt-get install ffmpeg. " +
-                    "Please open the README file in lib-content-scrapers for further instructions")
-        }
-    }
-
-
-    inputs.files(rootProject.file("local.properties"))
-    outputDir = new File("${projectDir}/src/main/kotlin")
-    packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
-    appName = rootProject.ext.buildConfigProperties['appName']
-    clsName = "ScraperBuildConfig"
-    version = rootProject.version
-
-    buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
-    buildConfigField "String", "CWEBP_PATH", rootProject.ext.buildConfigProperties["shrinker.webp"]
-    buildConfigField "String", "FFMPEG_PATH", rootProject.ext.buildConfigProperties["ffmpeg.webm"]
-    buildConfigField "String", "CODEC2_PATH", rootProject.ext.buildConfigProperties["shrinker.codec2"]
-
-}
-//compileKotlinJvm.dependsOn(generateScraperBuildConfig)
 
 kotlin {
     targets {
@@ -126,6 +72,7 @@ kotlin {
                     implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                     implementation "org.mockito:mockito-core:$version_android_mockito"
                     implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                    implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
                 }
             }
 
@@ -134,13 +81,12 @@ kotlin {
 }
 
 task copyTestResources(type: Copy) {
-    from "${projectDir}/src/main/resources"
+    from "${projectDir}/src/jvmMain/resources"
     into "${buildDir}/classes/test"
     exclude "**/jndi.properties"
 }
 
-//processTestResources.dependsOn copyTestResources
-//compileTestJava.options.encoding = 'UTF-8'
+jvmTest.dependsOn(copyTestResources)
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"

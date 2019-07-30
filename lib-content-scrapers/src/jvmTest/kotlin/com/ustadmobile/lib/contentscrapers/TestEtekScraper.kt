@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.etekkatho.EtekkathoScraper
@@ -38,6 +39,7 @@ class TestEtekScraper {
                     val body = IOUtils.toString(javaClass.getResourceAsStream(fileName), UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", UTF_ENCODING.hashCode())
+                    response.addHeader("Content-Type","text/plain")
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.setBody(body)
 
@@ -54,6 +56,7 @@ class TestEtekScraper {
 
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", (buffer.size().toString() + UTF_ENCODING).hashCode())
+                    response.addHeader("Content-Type","image/png")
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 
@@ -73,6 +76,7 @@ class TestEtekScraper {
     fun clearDb() {
         val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
+        checkIfPathsToDriversExist()
     }
 
     @Test
@@ -134,7 +138,7 @@ class TestEtekScraper {
         val eTagFile = File(lessonFolder, "123-321$ETAG_TXT")
         Assert.assertEquals(true, eTagFile.isFile)
 
-        Assert.assertTrue("container has the file", containerDir.listFiles()!!.size > 0)
+        Assert.assertTrue("container has the file", containerDir.listFiles()!!.isNotEmpty())
 
     }
 

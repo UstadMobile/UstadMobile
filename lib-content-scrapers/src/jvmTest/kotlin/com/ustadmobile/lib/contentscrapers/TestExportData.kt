@@ -18,6 +18,7 @@ class TestExportData {
     fun before() {
         try {
             initDb()
+            ContentScraperUtil.checkIfPathsToDriversExist()
         } catch (e: IOException) {
             e.printStackTrace()
         }

@@ -100,13 +100,51 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
 import kotlinx.coroutines.runBlocking
+import java.lang.System.exit
 import java.time.temporal.TemporalQuery
+import kotlin.system.exitProcess
 
 
 object ContentScraperUtil {
 
     private val LOOSE_ISO_DATE_TIME_ZONE_PARSER = DateTimeFormatter.ofPattern("[yyyyMMdd][yyyy-MM-dd][yyyy-DDD]['T'[HHmmss][HHmm][HH:mm:ss][HH:mm][.SSSSSSSSS][.SSSSSS][.SSS][.SS][.S]][OOOO][O][z][XXXXX][XXXX]['['VV']']")
 
+
+    const val CHROME_PATH_KEY = "chromedriver"
+
+    const val FFMPEG_PATH_KEY = "webm"
+
+    const val CODEC2_PATH_KEY = "codec2"
+
+    const val WEBP_PATH_KEY = "webp"
+
+    const val MOGRIFY_PATH_KEY = "mogrify"
+
+    val SEARCH_LOCATIONS = mapOf(
+            CHROME_PATH_KEY to listOf("//home/samih/chromedriver"),
+            FFMPEG_PATH_KEY to listOf("/usr/bin/ffmpeg"),
+            CODEC2_PATH_KEY to listOf("/usr/local/bin/c2enc"),
+            WEBP_PATH_KEY to listOf("/usr/bin/cwebp"),
+            MOGRIFY_PATH_KEY to listOf("/usr/bin/mogrify"))
+
+    val driversList = listOf(CHROME_PATH_KEY, FFMPEG_PATH_KEY, /*CODEC2_PATH_KEY,*/ WEBP_PATH_KEY)
+
+    fun checkIfPathsToDriversExist() {
+        driversList.forEach { driver ->
+            if(System.getProperty(driver) == null){
+                val location = SEARCH_LOCATIONS.getValue(driver).firstOrNull { File(it).exists() }
+                if(location != null)
+                    System.setProperty(driver, location)
+                else{
+                    println("$driver path is not set")
+                    exitProcess(0)
+                }
+
+            }
+        }
+
+
+    }
 
     /**
      * Is the given componentType "Imported Component"
@@ -442,7 +480,7 @@ object ContentScraperUtil {
      * Set the system property of the driver in your machine
      */
     fun setChromeDriverLocation() {
-        System.setProperty("webdriver.chrome.driver", ScraperBuildConfig.CHROME_DRIVER_PATH)
+        System.setProperty("webdriver.chrome.driver", System.getProperty(CHROME_PATH_KEY))
     }
 
 
@@ -462,13 +500,13 @@ object ContentScraperUtil {
         if (eTag != null) {
             eTag = eTag.replace("\"".toRegex(), EMPTY_STRING)
             val eTagFile = File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT)
-            return ContentScraperUtil.isFileContentsUpdated(eTagFile, eTag)
+            return isFileContentsUpdated(eTagFile, eTag)
         }
 
         val lastModified = conn.getHeaderField("Last-Modified")
         val modifiedFile = File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT)
         return if (lastModified != null) {
-            ContentScraperUtil.isFileContentsUpdated(modifiedFile, lastModified)
+            isFileContentsUpdated(modifiedFile, lastModified)
         } else true
 
     }
@@ -1139,9 +1177,9 @@ object ContentScraperUtil {
         val js = driver as JavascriptExecutor
         js.executeScript("console.clear()")
 
-        while (driver.manage().logs().get(LogType.PERFORMANCE).all.size != 0) {
+       /* while (driver.manage().logs().get(LogType.PERFORMANCE).all.size != 0) {
             driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS)
-        }
+        }*/
     }
 
     fun loginKhanAcademy(): ChromeDriver {
@@ -1156,7 +1194,7 @@ object ContentScraperUtil {
         driver.findElement(By.cssSelector("div#login-signup-root input[id*=email-or-username]")).sendKeys(KHAN_USERNAME)
         driver.findElement(By.cssSelector("div#login-signup-root input[id*=text-field-1-password]")).sendKeys(KHAN_PASS)
 
-        val elements = driver.findElements(By.cssSelector("div#login-signup-root div[class*=inner]"))
+        val elements = driver.findElements(By.cssSelector("div#login-signup-root button div"))
         for (element in elements) {
             if (element.text.contains("Log in")) {
                 element.click()
@@ -1164,7 +1202,7 @@ object ContentScraperUtil {
             }
         }
 
-        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2[class*=moduleTitle]")))
+        waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.user-info-container")))
 
         clearChromeConsoleLog(driver)
 
