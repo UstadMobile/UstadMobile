@@ -4,8 +4,10 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryFileResponder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.io.GzInputStreamConstants
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import kotlinx.coroutines.runBlocking
@@ -14,9 +16,9 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import java.io.File
-import java.io.IOException
+import java.io.*
 import java.util.*
+import java.util.zip.GZIPInputStream
 
 class TestContainerEntryFileResponder {
 
@@ -60,11 +62,23 @@ class TestContainerEntryFileResponder {
 
             val response = ContainerEntryFileResponder().get(mockUriResource, mutableMapOf(),
                     mockSession)
+            val entry = containerManager.allEntries[0]
 
-            val containerIn = containerManager.getInputStream(containerManager.allEntries[0])
-            Assert.assertTrue("Response contents equals file contents",
-                    Arrays.equals(UMIOUtils.readStreamToByteArray(containerIn),
-                            UMIOUtils.readStreamToByteArray(response.data)))
+            val originalBytes = FileInputStream(entry.containerEntryFile!!.cefPath!!).readBytes()
+            val responseBytes = response.data.readBytes()
+            Assert.assertArrayEquals("Content served is the same as in file", originalBytes,
+                    responseBytes)
+
+            //Assert that responseBytes has the magic bytes as well
+            Assert.assertTrue("Has the magic bytes",
+                    responseBytes[0] == GzInputStreamConstants.GZIP_MAGIC.toByte()
+                    && responseBytes[1] == (GzInputStreamConstants.GZIP_MAGIC shr 8).toByte())
+
+
+            Assert.assertArrayEquals("Data can be inflated and is equal",
+                    GZIPInputStream(ByteArrayInputStream(originalBytes)).readBytes(),
+                    GZIPInputStream(ByteArrayInputStream(responseBytes)).readBytes())
+
             Assert.assertEquals("Response status is 200 OK", NanoHTTPD.Response.Status.OK,
                     response.status)
         }

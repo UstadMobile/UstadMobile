@@ -7,12 +7,18 @@ buildscript {
         jcenter()
         google()
         mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0-rc01'
         classpath 'com.google.gms:google-services:4.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+        classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -65,7 +71,7 @@ ext {
     version_klock = "1.4.0"
     version_kmp = "0.0.2"
     version_ktor = "1.2.2"
-    version_coroutines = "1.2.1"
+    version_coroutines = "1.2.2"
     version_atomicfu = "0.12.8"
     version_krypto = "1.0.1"
 

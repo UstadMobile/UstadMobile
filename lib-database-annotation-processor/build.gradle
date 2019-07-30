@@ -30,7 +30,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$version_kotlin"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
 
-    implementation project(":lib-util")
+    implementation project(':lib-util')
 
 
     implementation "com.squareup:kotlinpoet:1.2.0"

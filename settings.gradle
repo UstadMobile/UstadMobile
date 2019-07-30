@@ -1,20 +1,9 @@
-pluginManagement {
 
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "com.crowdproj.plugins.jar2pm") {
-                useModule("com.crowdproj.plugins:jar2npm-plugin:${requested.version}")
-            }
-        }
-    }
 
-    repositories {
-        gradlePluginPortal()
-        maven { setUrl("https://dl.bintray.com/svok/jar2npm") }
-    }
-}
 
-include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular',
+include ':app-android', ':lib-database-annotations', ':lib-door-runtime',
+        //':app-angular',
+        ':dbcompress',
         ':app-ktor-server',
         ':lib-test-common',
         ':core',
@@ -32,4 +21,5 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-
         //':lib-content-scrapers'
 //include ':app-rest-server'
 
+rootProject.name = "UstadMobile"
 
