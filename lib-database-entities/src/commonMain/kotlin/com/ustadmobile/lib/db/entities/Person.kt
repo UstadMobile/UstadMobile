@@ -50,13 +50,14 @@ open class Person() {
     var personLastChangedBy: Int = 0
 
     constructor(username: String, firstNames: String, lastName: String, active:Boolean = false,
-                notes:String = "", address:String = "") : this() {
+                notes:String = "", address:String = "", phone:String = "") : this() {
         this.username = username
         this.firstNames = firstNames
         this.lastName = lastName
         this.active = active
         this.personNotes = notes
         this.personAddress = address
+        this.phoneNum = phone
     }
 
     companion object {

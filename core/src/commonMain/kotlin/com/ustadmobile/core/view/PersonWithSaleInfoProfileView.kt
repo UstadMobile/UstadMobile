@@ -4,9 +4,9 @@ import com.ustadmobile.lib.db.entities.Person
 
 
 /**
- * Core View. Screen is for SelectLanguageDialog's View
+ * Core View. Screen is for SaleList's View
  */
-interface PersonWithSaleInfoDetailView : UstadView {
+interface PersonWithSaleInfoProfileView : UstadView {
 
     //Any argument keys:
 
@@ -17,13 +17,14 @@ interface PersonWithSaleInfoDetailView : UstadView {
 
     fun updatePersonOnView(person: Person)
 
+    fun updateImageOnView(imagePath: String)
+
     companion object {
 
 
         // This defines the view name that is an argument value in the go() in impl.
-        const val VIEW_NAME = "WomenEntrepreneurDetail"
+        const val VIEW_NAME = "PersonWithSaleInfoDetail"
 
-        const val ARG_WE_UID = "ArgWomenEntrepreneurPersonUid"
     }
 
 

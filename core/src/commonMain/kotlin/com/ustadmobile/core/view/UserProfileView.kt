@@ -27,7 +27,6 @@ interface UserProfileView : UstadView {
 
     companion object {
 
-
         // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "UserProfile"
     }

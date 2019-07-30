@@ -54,12 +54,6 @@ class PersonWithSaleInfoDetailActivityEspressoTest{
 
 
     }
-    
-
-    @Test
-    fun givenActivityLoads_whenCreated_shouldFillProfileFragment(){
-        launchActivity()
-    }
 
     @Test
     fun givenActivityLoads_whenProfileSelected_shouldLoadProfileFragment(){
@@ -71,10 +65,6 @@ class PersonWithSaleInfoDetailActivityEspressoTest{
         launchActivity()
     }
 
-    @Test
-    fun givenActivityLoads_whenPhoneNumberClickedOnProfile_shouldOpenCall(){
-        launchActivity()
-    }
 
 
     var le1Uid:Long = 0

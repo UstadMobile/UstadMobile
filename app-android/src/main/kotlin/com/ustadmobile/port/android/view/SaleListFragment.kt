@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -44,6 +45,8 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
     private var preOrderCounter: TextView? = null
     private var paymentsDueCounter: TextView? = null
 
+    private var personUid : Long = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -66,10 +69,13 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
 
         sortSpinner = rootContainer.findViewById(R.id.fragment_sale_list_sort_by_spinner)
 
-
         allSalesCounter = rootContainer.findViewById(R.id.fragment_sale_list_filter_all_sales_counter)
         preOrderCounter = rootContainer.findViewById(R.id.fragment_sale_list_filter_pre_orders_counter)
         paymentsDueCounter = rootContainer.findViewById(R.id.fragment_sale_list_filter_payments_due_counter)
+
+        if(arguments!!.containsKey(PersonWithSaleInfoDetailView.ARG_WE_UID)){
+            personUid = arguments!!.get(PersonWithSaleInfoDetailView.ARG_WE_UID).toString().toLong()
+        }
 
         //set up Presenter
         mPresenter = SaleListPresenter(context!!,
@@ -94,12 +100,10 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
             disableAllButtonSelected()
             mPresenter!!.filterPreOrder()
             preOrdersButton!!.background = getTintedDrawable(preOrdersButton!!.background, R.color.fab)
-//            getTintedDrawable(preOrdersButton!!.background, R.color.fab)
         }
         paymentsDueButton!!.setOnClickListener { v ->
             disableAllButtonSelected()
             mPresenter!!.filterPaymentDue()
-            //getTintedDrawable(paymentsDueButton!!.background, R.color.fab)
             paymentsDueButton!!.background = getTintedDrawable(paymentsDueButton!!.background, R.color.fab)
         }
 
@@ -109,14 +113,23 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
                 mPresenter!!.handleChangeSortOrder(id)
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
-            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
         fab!!.setOnClickListener({ v -> mPresenter!!.handleClickPrimaryActionButton() })
 
-        allSalesButton!!.callOnClick()
+        if(personUid != 0L){
+            allSalesButton!!.visibility = View.GONE
+            allSalesCounter!!.visibility = View.GONE
+            preOrderCounter!!.visibility = View.GONE
+            preOrdersButton!!.visibility = View.GONE
+            paymentsDueButton!!.visibility = View.GONE
+            paymentsDueCounter!!.visibility = View.GONE
+            fab!!.visibility = View.GONE
+
+        }else{
+            allSalesButton!!.callOnClick()
+        }
 
         return rootContainer
     }
@@ -130,20 +143,28 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
     }
 
     override fun updatePreOrderCounter(count: Int) {
-        if (count == 0) {
-            preOrderCounter!!.visibility = View.INVISIBLE
-        } else {
-            preOrderCounter!!.text = count.toString()
-            preOrderCounter!!.visibility = View.VISIBLE
+        if(personUid == 0L) {
+            if (count == 0) {
+                preOrderCounter!!.visibility = View.INVISIBLE
+            } else {
+                preOrderCounter!!.text = count.toString()
+                preOrderCounter!!.visibility = View.VISIBLE
+            }
+        }else{
+            preOrderCounter!!.visibility = View.GONE
         }
     }
 
     override fun updatePaymentDueCounter(count: Int) {
-        if (count == 0) {
-            paymentsDueCounter!!.visibility = View.INVISIBLE
-        } else {
-            paymentsDueCounter!!.text = count.toString()
-            paymentsDueCounter!!.visibility = View.VISIBLE
+        if(personUid == 0L) {
+            if (count == 0) {
+                paymentsDueCounter!!.visibility = View.INVISIBLE
+            } else {
+                paymentsDueCounter!!.text = count.toString()
+                paymentsDueCounter!!.visibility = View.VISIBLE
+            }
+        }else{
+            paymentsDueCounter!!.visibility = View.GONE
         }
     }
 
@@ -151,8 +172,6 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
         allSalesButton!!.invalidateDrawable(allSalesButton!!.getBackground())
         preOrdersButton!!.invalidateDrawable(preOrdersButton!!.getBackground())
         paymentsDueButton!!.invalidateDrawable(paymentsDueButton!!.getBackground())
-
-
 
         allSalesButton!!.setBackground(
                 getTintedDrawable(allSalesButton!!.getBackground(), R.color.color_gray))
@@ -162,14 +181,6 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
 
         paymentsDueButton!!.setBackground(
                 getTintedDrawable(paymentsDueButton!!.getBackground(), R.color.color_gray))
-
-//        runOnUiThread ( Runnable {
-//
-//            getTintedDrawable(allSalesButton!!.background, R.color.color_gray)
-//            getTintedDrawable(preOrdersButton!!.background, R.color.color_gray)
-//            getTintedDrawable(paymentsDueButton!!.background, R.color.color_gray)
-//            }
-//        )
     }
 
     /**
@@ -211,6 +222,12 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
         fun newInstance(): SaleListFragment {
             val fragment = SaleListFragment()
             val args = Bundle()
+            fragment.arguments = args
+            return fragment
+        }
+
+        fun newInstance(args:Bundle): SaleListFragment {
+            val fragment = SaleListFragment()
             fragment.arguments = args
             return fragment
         }

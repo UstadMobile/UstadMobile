@@ -89,12 +89,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
     }
 
     private fun getAndSetProvider(sortCode: Int) {
-        //TODO: Make it aware of a sort code
-        factory = when(sortCode) {
-            1 -> saleDao.getMyWomenEntrepreneurs(weGroupUid)
-            else -> saleDao.getMyWomenEntrepreneurs(weGroupUid)
-        }
-
+        factory = saleDao.getMyWomenEntrepreneurs(weGroupUid, sortCode)
         view.setWEListFactory(factory)
     }
 

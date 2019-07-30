@@ -123,7 +123,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
             SelectMultipleProductTypeTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleProductTypeTreeDialogFragment"),
             SelectMultiplePeopleView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultiplePeopleFragment"),
-            PersonWithSaleInfoListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonWithSaleInfoListActivity")
+            PersonWithSaleInfoListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonWithSaleInfoListActivity"),
+            PersonWithSaleInfoDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonWithSaleInfoDetailActivity")
             )
 
 

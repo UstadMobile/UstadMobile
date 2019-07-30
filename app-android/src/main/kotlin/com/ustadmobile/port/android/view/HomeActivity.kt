@@ -129,7 +129,10 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 impl.getString(MessageID.location_permission_message, this))
     }
 
-    class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
+    class LibraryPagerAdapter internal constructor(
+            fragmentManager: FragmentManager, private val context: Context)
+        : FragmentPagerAdapter(fragmentManager) {
+
         private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
         // Returns total number of pages

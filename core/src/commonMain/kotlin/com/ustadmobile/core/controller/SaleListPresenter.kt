@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.dao.SalePaymentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_GEN_NAME
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
@@ -44,6 +45,8 @@ class SaleListPresenter(context: Any,
     private var filterSelected: Int = 0
 
     private var currentSortOrder = 0
+
+    private var personUid = 0L
 
     init {
 
@@ -82,8 +85,6 @@ class SaleListPresenter(context: Any,
         }
     }
 
-
-
     /**
      * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
      * defined within this method and will automatically update the sort options without any
@@ -116,7 +117,11 @@ class SaleListPresenter(context: Any,
 
     private fun getAndSetProvider(sortCode: Int) {
 
-        umProvider = saleDao.filterAndSortSale(filterSelected, sortCode)
+        if(personUid != 0L){
+            umProvider = saleDao.filterAndSortSale(sortCode, personUid)
+        }else {
+            umProvider = saleDao.filterAndSortSale(filterSelected, sortCode)
+        }
         view.setListProvider(umProvider!!, false, false)
 
     }
@@ -137,6 +142,10 @@ class SaleListPresenter(context: Any,
         updateSortSpinnerPreset()
 
         observePreOrderAndPaymentCounters()
+
+        if(arguments.containsKey(PersonWithSaleInfoDetailView.ARG_WE_UID)){
+            personUid = arguments.get(PersonWithSaleInfoDetailView.ARG_WE_UID).toString().toLong()
+        }
 
     }
 

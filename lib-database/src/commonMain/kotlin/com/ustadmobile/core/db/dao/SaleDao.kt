@@ -131,6 +131,37 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract fun findAllSaleFilterPreOrderSortDateDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
 
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_ASC)
+    abstract fun findAllSaleFilterAllSortNameAscProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_DEC)
+    abstract fun findAllSaleFilterAllSortNameDescProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_DESC)
+    abstract fun findAllSaleFilterAllSortTotalAscProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_ASC)
+    abstract fun findAllSaleFilterAllSortTotalDescProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_DESC)
+    abstract fun findAllSaleFilterAllSortDateAscProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_ASC)
+    abstract fun findAllSaleFilterAllSortDateDescProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+
+    fun filterAndSortSale(sort:Int, weUid:Long): DataSource.Factory<Int, SaleListDetail>{
+        when(sort) {
+            SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider(weUid)
+            SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider(weUid)
+            SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider(weUid)
+            SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider(weUid)
+            SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider(weUid)
+            SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProvider(weUid)
+        }
+        return findAllActiveAsSaleListDetailProvider()
+    }
+
     fun filterAndSortSale(filter: Int, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (filter) {
@@ -284,19 +315,32 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     //My Women Entrepreneurs
-    @Query("SELECT " +
-            "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
-            "   'Product list goes here' AS topProducts, " +
-            "   Members.* " +
-            " FROM PersonGroupMember " +
-            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
-            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
-            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
-            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            "   GROUP BY(Members.personUid)")
+    @Query(MY_WE + MY_WE_SORT_BY_NAME_ASC)
+    abstract fun getMyWomenEntrepreneursNameAsc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+
+    @Query(MY_WE + MY_WE_SORT_BY_NAME_DESC)
+    abstract fun getMyWomenEntrepreneursNameDesc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+
+    @Query(MY_WE + MY_WE_SORT_BY_TOTAL_ASC)
+    abstract fun getMyWomenEntrepreneursTotalAsc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+
+    @Query(MY_WE + MY_WE_SORT_BY_TOTAL_DESC)
+    abstract fun getMyWomenEntrepreneursTotalDesc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+
+    @Query(MY_WE)
     abstract fun getMyWomenEntrepreneurs(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
+    fun getMyWomenEntrepreneurs(groupUid:Long, sort:Int):DataSource.Factory<Int, PersonWithSaleInfo>{
 
+        return when (sort) {
+            SORT_ORDER_NAME_ASC -> getMyWomenEntrepreneursNameAsc(groupUid)
+            SORT_ORDER_NAME_DESC -> getMyWomenEntrepreneursNameDesc(groupUid)
+            SORT_ORDER_AMOUNT_ASC -> getMyWomenEntrepreneursTotalAsc(groupUid)
+            SORT_ORDER_AMOUNT_DESC -> getMyWomenEntrepreneursTotalDesc(groupUid)
+            else -> getMyWomenEntrepreneurs(groupUid)
+        }
+    }
+    
     @Query("SELECT " +
             "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
             "   'Product list goes here' AS topProducts, " +
@@ -506,10 +550,27 @@ abstract class SaleDao : BaseDao<Sale> {
         "   firstDateOccurence ASC ";
 
         const val SALE_PERFORMANCE_REPORT_1 =
-        SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_SUM + SALE_PERFORMANCE_REPORT_SELECT_BIT1 +
-        SALE_PERFORMANCE_REPORT_SELECT_DATE_WEEKLY + SALE_PERFORMANCE_REPORT_SELECT_BIT2 +
-        SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION + SALE_PERFORMANCE_REPORT_HAVING_BIT +
-        SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC;
+            SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_SUM + SALE_PERFORMANCE_REPORT_SELECT_BIT1 +
+            SALE_PERFORMANCE_REPORT_SELECT_DATE_WEEKLY + SALE_PERFORMANCE_REPORT_SELECT_BIT2 +
+            SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION + SALE_PERFORMANCE_REPORT_HAVING_BIT +
+            SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC;
+
+        const val MY_WE =
+                "SELECT " +
+                        "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
+                        "   'Product list goes here' AS topProducts, " +
+                        "   Members.* " +
+                        " FROM PersonGroupMember " +
+                        "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
+                        "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
+                        "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+                        " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
+                        "   GROUP BY(Members.personUid) "
+        const val MY_WE_SORT_BY_NAME_ASC = " ORDER BY Members.firstNames ASC"
+        const val MY_WE_SORT_BY_NAME_DESC = " ORDER BY Members.firstNames DESC"
+        const val MY_WE_SORT_BY_TOTAL_ASC = " ORDER BY totalSale ASC"
+        const val MY_WE_SORT_BY_TOTAL_DESC = " ORDER BY totalSale DESC"
+
     }
 
 

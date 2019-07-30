@@ -8,6 +8,9 @@ abstract class AbstractSaleRelatedSetup {
     var le1Uid:Long = 0
     var le2Uid:Long = 0
 
+    var we1PersonUid:Long = 0L
+    var we2PersonUid:Long = 0L
+
 
     fun insert(db: UmAppDatabase, clear:Boolean = false){
 
@@ -39,8 +42,8 @@ abstract class AbstractSaleRelatedSetup {
         val we7 = Person("we7", "We", "Seven", true, "We7 Summary notes", "4422, Fourth Street, Fifth Avenue")
         val we8 = Person("we8", "We", "Eight", true, "We8 Summary notes", "42, Fourth Street, Fifth Avenue")
 
-        val we1PersonUid = personDao.insert(we1)
-        val we2PersonUid = personDao.insert(we2)
+        we1PersonUid = personDao.insert(we1)
+        we2PersonUid = personDao.insert(we2)
         val we3PersonUid = personDao.insert(we3)
         val we4PersonUid = personDao.insert(we4)
         val we5PersonUid = personDao.insert(we5)

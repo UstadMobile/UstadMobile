@@ -34,7 +34,7 @@ import androidx.test.espresso.action.ViewActions.click
 import org.hamcrest.CoreMatchers.*
 
 
-class PersonWithSalesInfoListActivityEspressoTest {
+class PersonWithSaleInfoListActivityEspressoTest {
 
     @get:Rule
     var mActivityRule = IntentsTestRule(PersonWithSaleInfoListActivity::class.java,
