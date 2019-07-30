@@ -154,3 +154,44 @@ if(project.file("buildconfig.local.properties").exists()) {
 ext.localProperties = new Properties()
 ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 
+/**
+ * Task to create package.json files for all modules with source
+ */
+
+task generatePackageJsonFile {
+    doLast{
+        def dependencies = []
+        def ext = rootProject.ext
+        ext.config.each {
+            if(it.name == "jsMainImplementation"){
+                dependencies = it.allDependencies
+            }
+        }
+        new File("${buildDir}/js/packages").eachDir{
+            if(file("${it}/kotlin").exists()){
+                new File("${it}/package.json").delete()
+                def mainFile = ""
+                new File("${it}/kotlin").eachFile {file ->
+                    if(!file.name.contains("meta") && file.name.endsWith(".js")){
+                        mainFile = file.name
+                    }
+                }
+
+                def fileContent = "{\n"
+                fileContent <<= '    "main" : "kotlin/'+"${mainFile}"+'",\n'
+                fileContent <<= '    "devDependencies": {},\n'
+                fileContent <<= '    "dependencies": {\n'
+                dependencies.each {
+                    fileContent <<= '        "'+"${it.name}"+'": "'+"${it.version}"+'",\n'
+                }
+                fileContent <<= '    },\n'
+                fileContent <<= '    "name": "'+"${rootProject.name}-${ext.name}"+'",\n'
+                fileContent <<= '    "version": "'+"${rootProject.version}"+'",\n'
+                fileContent <<= '}\n'
+
+                File outFile = file("${it}/package.json")
+                outFile << fileContent
+            }
+        }
+    }
+}

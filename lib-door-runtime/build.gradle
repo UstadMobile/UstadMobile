@@ -113,3 +113,15 @@ publishing {
         }
     }
 }
+
+/**
+ * Prepare details to be used when creating package.json file
+ */
+task preparePackageJsonFile{
+    doFirst {
+        rootProject.ext.config = configurations
+        rootProject.ext.name = project.name
+    }
+}
+rootProject.getTasksByName("generatePackageJsonFile", true)[0].dependsOn(preparePackageJsonFile)
+build.finalizedBy(rootProject.getTasksByName("generatePackageJsonFile", true)[0])
