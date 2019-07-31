@@ -51,7 +51,7 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         for(dbTypeEl in dbs) {
             messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: db: ${dbTypeEl.simpleName}")
-            val (abstractFileSpec, implFileSpec) = generateSyncDaoInterfaceAndImpl(dbTypeEl as TypeElement)
+            val (abstractFileSpec, implFileSpec, repoImplSpec) = generateSyncDaoInterfaceAndImpls(dbTypeEl as TypeElement)
 
             abstractFileSpec.writeTo(File(abstractOutputDir))
             implFileSpec.writeTo(File(implOutputDir))
@@ -181,11 +181,14 @@ class DbProcessorSync: AbstractDbProcessor() {
         return routeFileSpec.build()
     }
 
+
+    data class SyncFileSpecs(val abstractFileSpec: FileSpec, val daoImplFileSpec: FileSpec, val repoImplFileSpec: FileSpec)
+
     /**
      *
      * @return Pair of FileSpecs: first = the abstract DAO filespec, the second one is the implementation
      */
-    fun generateSyncDaoInterfaceAndImpl(dbType: TypeElement): Pair<FileSpec, FileSpec> {
+    fun generateSyncDaoInterfaceAndImpls(dbType: TypeElement): SyncFileSpecs {
         val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
         val abstractDaoClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
                 abstractDaoSimpleName)
@@ -218,6 +221,10 @@ class DbProcessorSync: AbstractDbProcessor() {
         val implFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 implDaoSimpleName)
                 .addImport("com.ustadmobile.door", "DoorDbType")
+
+        val repoImplSimpleName = "${dbType.simpleName}${DbProcessorRepository.SUFFIX_REPOSITORY}"
+        val repoImplSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
+                repoImplSimpleName)
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
@@ -286,7 +293,7 @@ class DbProcessorSync: AbstractDbProcessor() {
         implFileSpec.addType(implDaoTypeSpec.build())
         messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl " +
                 "- finished making sync DAO interface for ${dbType.simpleName}")
-        return Pair(abstractFileSpec.build(), implFileSpec.build())
+        return SyncFileSpecs(abstractFileSpec.build(), implFileSpec.build(), repoImplSpec.build())
     }
 
     data class AbstractImplAndInterfaceFunSpecs(val abstractFunSpec: FunSpec, val implFunSpec: FunSpec,

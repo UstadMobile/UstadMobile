@@ -18,6 +18,38 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import kotlinx.coroutines.GlobalScope
 
+internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
+    val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
+            .addProperty(PropertySpec.builder("_dao",
+                    daoType).initializer("_dao").build())
+            .addProperty(PropertySpec.builder("_httpClient",
+                    HttpClient::class).initializer("_httpClient").build())
+            .addProperty(PropertySpec.builder("_clientId", Int::class)
+                    .initializer("_clientId").build())
+            .addProperty(PropertySpec.builder("_endpoint", String::class)
+                    .initializer("_endpoint").build())
+            .superclass(daoType)
+
+    val primaryConstructorFn = FunSpec.constructorBuilder()
+            .addParameter("_dao", daoType)
+            .addParameter("_httpClient", HttpClient::class)
+            .addParameter("_clientId", Int::class)
+            .addParameter("_endpoint", String::class)
+
+    if(addSyncHelperParam) {
+        val syncHelperClassName = ClassName(daoType.packageName,
+                "${daoType.simpleName}_SyncHelper")
+        primaryConstructorFn.addParameter("_syncHelper",
+                syncHelperClassName)
+        repoClassSpec.addProperty(PropertySpec.builder("_syncHelper", syncHelperClassName)
+                .initializer("_syncHelper").build())
+    }
+
+    repoClassSpec.primaryConstructor(primaryConstructorFn.build())
+
+    return repoClassSpec
+}
+
 class DbProcessorRepository: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
@@ -146,33 +178,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 processingEnv)
 
 
-        val repoClassSpec = TypeSpec.classBuilder("${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
-                .addProperty(PropertySpec.builder("_dao",
-                        daoTypeElement.asType().asTypeName()).initializer("_dao").build())
-                .addProperty(PropertySpec.builder("_httpClient",
-                        HttpClient::class).initializer("_httpClient").build())
-                .addProperty(PropertySpec.builder("_clientId", Int::class)
-                        .initializer("_clientId").build())
-                .addProperty(PropertySpec.builder("_endpoint", String::class)
-                        .initializer("_endpoint").build())
-                .superclass(daoTypeElement.asClassName())
-
-        val primaryConstructorFn = FunSpec.constructorBuilder()
-                .addParameter("_dao", daoTypeElement.asType().asTypeName())
-                .addParameter("_httpClient", HttpClient::class)
-                .addParameter("_clientId", Int::class)
-                .addParameter("_endpoint", String::class)
-
-        if(!syncableEntitiesOnDao.isNullOrEmpty()) {
-            val syncHelperClassName = ClassName(pkgNameOfElement(daoTypeElement, processingEnv),
-                    "${daoTypeElement.simpleName}_SyncHelper")
-            primaryConstructorFn.addParameter("_syncHelper",
-                    syncHelperClassName)
-            repoClassSpec.addProperty(PropertySpec.builder("_syncHelper", syncHelperClassName)
-                    .initializer("_syncHelper").build())
-        }
-
-        repoClassSpec.primaryConstructor(primaryConstructorFn.build())
+        val repoClassSpec = newRepositoryClassBuilder(daoTypeElement.asClassName(),
+                syncableEntitiesOnDao.isNotEmpty())
 
 
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
