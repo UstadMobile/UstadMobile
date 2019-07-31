@@ -106,7 +106,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
         }
     }
 
-    suspend fun getLabelList(value: Int, list: List<String>): Map<String, String> {
+    private suspend fun getLabelList(value: Int, list: List<String>): Map<String, String> {
         val mutableMap = mutableMapOf<String, String>()
         when (value) {
             GENDER -> {

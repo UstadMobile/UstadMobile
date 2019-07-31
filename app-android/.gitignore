@@ -1,6 +1,2 @@
 /build
 /src/main/assets/http/umEditor/
-/src/main/kotlin/com/ustadmobile/port/android/generated
-/src/main/res/values/strings_ui.xml
-/src/main/res/values-ar/strings_ui.xml
-/src/main/res/values-fa/strings_ui.xml

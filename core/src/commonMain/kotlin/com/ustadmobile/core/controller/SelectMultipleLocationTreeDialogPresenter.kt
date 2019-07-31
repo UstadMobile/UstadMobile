@@ -9,7 +9,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
-class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>, view: UstadView) : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
+class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>, view: SelectMultipleLocationTreeDialogView) : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
 
     var selectedLocationsList: List<Long> = listOf()
 

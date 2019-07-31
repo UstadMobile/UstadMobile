@@ -108,9 +108,11 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
 
-        <activity android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity" />
+        <activity android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
 
-        <activity android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity" />
+        <activity android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
