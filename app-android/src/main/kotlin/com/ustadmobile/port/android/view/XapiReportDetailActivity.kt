@@ -12,11 +12,10 @@ import com.ustadmobile.core.controller.XapiReportDetailPresenter
 import com.ustadmobile.core.controller.XapiReportOptions
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.util.*
-
-
 
 
 class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
@@ -52,7 +51,8 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
         presenter = XapiReportDetailPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this)
+                this, UstadMobileSystemImpl.instance
+        )
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         floatingButton.setOnClickListener {

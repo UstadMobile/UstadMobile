@@ -331,11 +331,6 @@
     <string name="activity_preview_xapi">Preview</string>
     <string name="add_to_dashboard">Add to Dashboard</string>
 
-    <string name="xapi_score">Score (%)</string>
-    <string name="xapi_duration">Total Duration</string>
-    <string name="xapi_avg_duration">Average Duration</string>
-    <string name="xapi_count_activities"># of activities</string>
-
     <string name="xapi_hours">Hrs</string>
     <string name="xapi_minutes">Mins</string>
     <string name="xapi_seconds">Secs</string>

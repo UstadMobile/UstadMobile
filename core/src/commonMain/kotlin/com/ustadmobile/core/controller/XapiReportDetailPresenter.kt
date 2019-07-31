@@ -27,10 +27,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
-class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, view: XapiReportDetailView)
+class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, view: XapiReportDetailView, val impl: UstadMobileSystemImpl)
     : UstadBaseController<XapiReportDetailView>(context, arguments!!, view) {
 
-    private lateinit var impl: UstadMobileSystemImpl
     private lateinit var db: UmAppDatabase
 
     private lateinit var reportOptions: XapiReportOptions
@@ -39,7 +38,6 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
         super.onCreate(savedState)
 
         db = UmAccountManager.getRepositoryForActiveAccount(context)
-        impl = UstadMobileSystemImpl.instance
 
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments.getValue(ARG_REPORT_OPTIONS)!!
@@ -98,10 +96,10 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
 
     private fun getLabel(value: Int, time: Int): String {
         return when (value) {
-            SCORE -> impl.getString(MessageID.xapi_score, context)
-            DURATION -> impl.getString(MessageID.xapi_duration, context) + " (" + impl.getString(time, context) + ")"
-            AVG_DURATION -> impl.getString(MessageID.xapi_avg_duration, context) + " (" + impl.getString(time, context) + ")"
-            COUNT_ACTIVITIES -> impl.getString(MessageID.xapi_count_activities, context)
+            SCORE -> impl.getString(SCORE, context)
+            DURATION -> impl.getString(DURATION, context) + " (" + impl.getString(time, context) + ")"
+            AVG_DURATION -> impl.getString(AVG_DURATION, context) + " (" + impl.getString(time, context) + ")"
+            COUNT_ACTIVITIES -> impl.getString(COUNT_ACTIVITIES, context)
             else -> ""
         }
     }

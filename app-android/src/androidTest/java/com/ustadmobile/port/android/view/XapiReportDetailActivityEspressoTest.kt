@@ -100,5 +100,46 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
     }
 
 
+    @Test
+    fun givenDataWithFilters_whenActivityLaunches_thenDisplayDataWithChartAndList() {
+        val intent = Intent()
+        intent.putExtra(XapiReportDetailView.ARG_REPORT_OPTIONS,
+                Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled))
+        mActivityRule.launchActivity(intent)
+        activity = mActivityRule.activity
+
+        Espresso.onView(ViewMatchers.withId(R.id.preview_chart_view)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+
+        val textView2 = Espresso.onView(
+                Matchers.allOf(ViewMatchers.withText("Preview"),
+                        UmAndroidTestUtil.childAtPosition(
+                                Matchers.allOf(ViewMatchers.withId(R.id.preview_toolbar),
+                                        UmAndroidTestUtil.childAtPosition(
+                                                ViewMatchers.withId(R.id.new_report_collapsing_toolbar),
+                                                0)),
+                                1),
+                        ViewMatchers.isDisplayed()))
+        textView2.check(ViewAssertions.matches(ViewMatchers.withText("Preview")))
+
+        val textView = Espresso.onView(Matchers.allOf(ViewMatchers.withId(R.id.preview_ylabel), ViewMatchers.isDisplayed()))
+        textView.check(ViewAssertions.matches(ViewMatchers.withText("Score (%)")))
+
+        val textView3 = Espresso.onView(ViewMatchers.withId(R.id.xapi_person_header))
+        textView3.check(ViewAssertions.matches(ViewMatchers.withText("Person")))
+
+        val textView4 = Espresso.onView(ViewMatchers.withId(R.id.xapi_verb_header))
+        textView4.check(ViewAssertions.matches(ViewMatchers.withText("Did what")))
+
+        val textView5 = Espresso.onView(ViewMatchers.withId(R.id.xapi_result_header))
+        textView5.check(ViewAssertions.matches(ViewMatchers.withText("Result")))
+
+        val textView6 = Espresso.onView(ViewMatchers.withId(R.id.xapi_when_header))
+        textView6.check(ViewAssertions.matches(ViewMatchers.withText("When")))
+
+        assertTrue(activity.findViewById<RecyclerView>(R.id.preview_report_list).adapter!!.itemCount > 5)
+
+    }
+
+
 
 }

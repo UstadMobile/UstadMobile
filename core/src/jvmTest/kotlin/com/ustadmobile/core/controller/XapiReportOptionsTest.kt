@@ -74,7 +74,7 @@ class XapiReportOptionsTest {
                 "WHERE (StatementEntity.xObjectUid IN (?) OR EXISTS(SELECT contextXObjectStatementJoinUid FROM ContextXObjectStatementJoin " +
                 "WHERE contextStatementUid = StatementEntity.statementUid AND contextXObjectUid IN (?))) AND " +
                 "StatementEntity.personUid IN (?) AND StatementEntity.verbUid IN (?) AND " +
-                "(StatementEntity.timestamp <= ? AND StatementEntity.timestamp >= ?) " +
+                "(StatementEntity.timestamp >= ? AND StatementEntity.timestamp <= ?) " +
                 "GROUP BY xAxis, subgroup", report.toSql().sqlStr)
 
     }

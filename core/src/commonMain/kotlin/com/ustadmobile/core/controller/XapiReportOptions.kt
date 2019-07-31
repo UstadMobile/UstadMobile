@@ -68,7 +68,7 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
                 paramList.addAll(listOf<Any>(didFilterList))
             }
             if (toDate > 0L && fromDate > 0L) {
-                whereList.add("(StatementEntity.timestamp <= ? AND StatementEntity.timestamp >= ?) ")
+                whereList.add("(StatementEntity.timestamp >= ? AND StatementEntity.timestamp <= ?) ")
                 paramList.add(fromDate)
                 paramList.add(toDate)
             }
