@@ -88,4 +88,15 @@ publishing {
     }
 }
 
+/**
+ * Prepare details to be used when creating package.json file
+ */
+task preparePackageJsonFile{
+    doLast {
+        preparePackageJsonFile.ext.config = configurations
+        preparePackageJsonFile.ext.name = "${rootProject.name}-${project.name}"
+    }
+}
+preparePackageJsonFile.dependsOn(build)
+
 

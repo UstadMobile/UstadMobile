@@ -154,44 +154,64 @@ if(project.file("buildconfig.local.properties").exists()) {
 ext.localProperties = new Properties()
 ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 
+
 /**
  * Task to create package.json files for all modules with source
  */
 
-task generatePackageJsonFile {
+task processPackageJsonFile {
     doLast{
-        def dependencies = []
-        def ext = rootProject.ext
-        ext.config.each {
-            if(it.name == "jsMainImplementation"){
-                dependencies = it.allDependencies
+
+        if(project.hasProperty("modname")){
+            def dependencies = []
+            def ext = tasks.findByPath(":${modname}:preparePackageJsonFile").ext
+            ext.config.each {
+                if(it.name == "jsMainImplementation"){
+                    dependencies = it.allDependencies
+                }
             }
-        }
-        new File("${buildDir}/js/packages").eachDir{
-            if(file("${it}/kotlin").exists()){
-                new File("${it}/package.json").delete()
-                def mainFile = ""
-                new File("${it}/kotlin").eachFile {file ->
-                    if(!file.name.contains("meta") && file.name.endsWith(".js")){
-                        mainFile = file.name
+            new File("${buildDir}/js/packages").eachDir{
+                println("Kileha3 ${it.name} - ${ext.name}")
+                if(file("${it}/kotlin").exists() && (!file("${it}/package.json").exists() || it.name == ext.name)){
+                    new File("${it}/package.json").delete()
+                    def mainFile = ""
+                    new File("${it}/kotlin").eachFile {file ->
+                        if(!file.name.contains("meta") && file.name.endsWith(".js")){
+                            mainFile = file.name
+                        }
                     }
-                }
+                    def counter = 0
+                    def terminator = ","
+                    def fileContent = "{\n"
+                    fileContent <<= '  "main" : "kotlin/'+"${mainFile}"+'",\n'
+                    fileContent <<= '  "devDependencies": {},\n'
+                    fileContent <<= '  "dependencies": {\n'
+                    dependencies.each {
+                        if(counter == dependencies.toArray().length -1){
+                            terminator = ""
+                        }
+                        fileContent <<= '    "'+"${it.name}"+'": "'+"${it.version}"+'"'+"${terminator}\n"
+                        counter++
+                    }
+                    fileContent <<= '  },\n'
+                    fileContent <<= '  "name": "'+"${ext.name}"+'",\n'
+                    fileContent <<= '  "version": "'+"${rootProject.version}"+'",\n'
+                    fileContent <<= '}\n'
 
-                def fileContent = "{\n"
-                fileContent <<= '    "main" : "kotlin/'+"${mainFile}"+'",\n'
-                fileContent <<= '    "devDependencies": {},\n'
-                fileContent <<= '    "dependencies": {\n'
-                dependencies.each {
-                    fileContent <<= '        "'+"${it.name}"+'": "'+"${it.version}"+'",\n'
+                    File outFile = file("${it}/package.json")
+                    outFile << fileContent
                 }
-                fileContent <<= '    },\n'
-                fileContent <<= '    "name": "'+"${rootProject.name}-${ext.name}"+'",\n'
-                fileContent <<= '    "version": "'+"${rootProject.version}"+'",\n'
-                fileContent <<= '}\n'
-
-                File outFile = file("${it}/package.json")
-                outFile << fileContent
             }
         }
     }
 }
+
+
+task generatePackageJsonFile {
+    if(project.hasProperty("modname")){
+        processPackageJsonFile.dependsOn(":${modname}:preparePackageJsonFile")
+    }
+}
+generatePackageJsonFile.finalizedBy(processPackageJsonFile)
+
+
