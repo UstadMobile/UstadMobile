@@ -13,12 +13,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_OTHER
-import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
 import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
 import com.ustadmobile.util.test.checkJndiSetup
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import org.junit.Before
@@ -157,16 +155,17 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
                 args, mockView, mockImpl)
         presenter.onCreate(args)
 
+
         verify(mockView, timeout(15000)).setChartYAxisLabel("# of activities")
         verify(mockView, timeout(15000)).setChartData(any(), any(),
-                eq(mapOf("07 07 2019" to "07 07 2019",
-                        "19 05 2019" to "19 05 2019",
+                eq(mapOf("07 04 2019" to "07 04 2019",
+                        "07 07 2019" to "07 07 2019",
                         "09 06 2019" to "09 06 2019",
-                        "07 04 2019" to "07 04 2019",
-                        "30 06 2019" to "30 06 2019",
-                        "28 04 2019" to "28 04 2019")),
+                        "19 05 2019" to "19 05 2019",
+                        "28 04 2019" to "28 04 2019",
+                        "30 06 2019" to "30 06 2019")),
                 eq(mapOf("300" to "Answer",
-                        "393" to "Me")))
+                        "301" to "Me")))
         verify(mockView, timeout(15000)).setReportListData(any())
 
     }
@@ -182,6 +181,10 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("Score (%)")
+        verify(mockView, timeout(15000)).setChartData(any(), any(),
+                eq(mapOf("06 2019" to "06 2019")),
+                eq(mapOf("2" to "Male")))
+        verify(mockView, timeout(15000)).setReportListData(any())
 
     }
 

@@ -163,7 +163,8 @@ abstract class AbstractXapiReportOptionsTest {
         var secondObject = XObjectEntity()
         secondObject.objectId = "world"
         secondObject.objectContentEntryUid = khanclass2.contentEntryUid
-        secondObject.xObjectUid = objectDao.insert(secondObject)
+        secondObject.xObjectUid = 301
+        objectDao.insert(secondObject)
 
         var secondObjectLangMap = XLangMapEntry(0, secondObject.xObjectUid, 0, 0, "Me")
         secondObjectLangMap.languageLangMapUid = entryLangMap.insert(secondObjectLangMap)
@@ -171,7 +172,8 @@ abstract class AbstractXapiReportOptionsTest {
         var thirdObject = XObjectEntity()
         thirdObject.objectId = "now"
         thirdObject.objectContentEntryUid = khanclass1.contentEntryUid
-        thirdObject.xObjectUid = objectDao.insert(thirdObject)
+        thirdObject.xObjectUid = 302
+        objectDao.insert(thirdObject)
 
         var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, "Now")
         thirdObjectLangMap.languageLangMapUid = entryLangMap.insert(thirdObjectLangMap)
