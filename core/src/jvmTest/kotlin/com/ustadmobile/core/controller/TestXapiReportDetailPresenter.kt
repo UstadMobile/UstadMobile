@@ -10,6 +10,7 @@ import com.ustadmobile.core.controller.XapiReportOptions.Companion.COUNT_ACTIVIT
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.DURATION
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.SCORE
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
@@ -48,8 +49,8 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
 
     private var stringMap = mapOf(SCORE to "Score (%)", DURATION to "Total Duration",
             AVG_DURATION to "Average Duration", SECS to "Secs", MINS to "Mins", HRS to "Hrs",
-            COUNT_ACTIVITIES to "# of activities", GENDER_MALE to "Male", GENDER_FEMALE to "Female",
-            GENDER_OTHER to "Other", GENDER_UNSET to "Unset")
+            COUNT_ACTIVITIES to "# of activities", MessageID.male to "Male", MessageID.female to "Female",
+            MessageID.other to "Other", MessageID.unset to "Unset")
 
 
     @Before
@@ -105,6 +106,18 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("Average Duration (Hrs)")
+        verify(mockView, timeout(15000)).setChartData(any(), any(),
+                eq(mapOf("01 05 2019" to "01 05 2019",
+                        "10 04 2019" to "10 04 2019",
+                        "10 07 2019" to "10 07 2019",
+                        "11 06 2019" to "11 06 2019",
+                        "25 05 2019" to "25 05 2019",
+                        "30 06 2019" to "30 06 2019")),
+                eq(mapOf("05 2019" to "05 2019",
+                        "04 2019" to "04 2019",
+                        "07 2019" to "07 2019",
+                        "06 2019" to "06 2019")))
+        verify(mockView, timeout(15000)).setReportListData(any())
 
 
     }
@@ -121,6 +134,16 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("Total Duration (Hrs)")
+        verify(mockView, timeout(15000)).setChartData(any(), any(),
+                eq(mapOf("2" to "Male",
+                        "1" to "Female",
+                        "4" to "Other")),
+                eq(mapOf("07 2019" to "07 2019",
+                        "04 2019" to "04 2019",
+                        "06 2019" to "06 2019",
+                        "05 2019" to "05 2019")))
+        verify(mockView, timeout(15000)).setReportListData(any())
+
 
     }
 
@@ -135,6 +158,16 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("# of activities")
+        verify(mockView, timeout(15000)).setChartData(any(), any(),
+                eq(mapOf("07 07 2019" to "07 07 2019",
+                        "19 05 2019" to "19 05 2019",
+                        "09 06 2019" to "09 06 2019",
+                        "07 04 2019" to "07 04 2019",
+                        "30 06 2019" to "30 06 2019",
+                        "28 04 2019" to "28 04 2019")),
+                eq(mapOf("300" to "Answer",
+                        "393" to "Me")))
+        verify(mockView, timeout(15000)).setReportListData(any())
 
     }
 
