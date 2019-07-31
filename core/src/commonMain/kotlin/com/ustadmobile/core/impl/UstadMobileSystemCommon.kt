@@ -222,7 +222,8 @@ abstract class UstadMobileSystemCommon {
     open fun startUI(context: Any) {
         val activeAccount = UmAccountManager.getActiveAccount(context)
 
-        if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
+        if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context)
+                && activeAccount == null) {
             go(LoginView.VIEW_NAME, mapOf(), context)
         } else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)

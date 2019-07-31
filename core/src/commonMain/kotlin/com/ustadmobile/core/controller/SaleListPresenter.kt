@@ -23,16 +23,15 @@ import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+
 
 /**
  * Presenter for SaleList view
  */
 class SaleListPresenter(context: Any,
                         arguments: Map<String, String>?,
-                        view: SaleListView)
+                        view: SaleListView,
+                        val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : CommonHandlerPresenter<SaleListView>(context, arguments!!, view) {
 
     private var umProvider: DataSource.Factory<Int, SaleListDetail>? = null
@@ -92,7 +91,6 @@ class SaleListPresenter(context: Any,
      */
     private fun updateSortSpinnerPreset() {
         val presetAL = ArrayList<String>()
-        val impl = UstadMobileSystemImpl.instance
 
         idToOrderInteger = HashMap<Long, Int>()
 
@@ -126,11 +124,6 @@ class SaleListPresenter(context: Any,
 
     }
 
-    fun filterAndSetProvider(search: String) {
-        umProvider = saleDao.filterAndSortSale(filterSelected, search, currentSortOrder)
-        view.setListProvider(umProvider!!, false, false)
-    }
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
@@ -138,7 +131,7 @@ class SaleListPresenter(context: Any,
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider()
         view.setListProvider(umProvider!!, false, false)
 
-        idToOrderInteger = HashMap<Long, Int>()
+        idToOrderInteger = HashMap()
         updateSortSpinnerPreset()
 
         observePreOrderAndPaymentCounters()
@@ -153,11 +146,9 @@ class SaleListPresenter(context: Any,
         val preOrderLiveData = saleDao.getPreOrderSaleCountLive()
         val paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive()
 
-        val thisP = this
-        GlobalScope.launch(Dispatchers.Main) {
-            preOrderLiveData.observe(thisP, thisP::handlePreOrderCountUpdate)
-            paymentsDueLiveData.observe(thisP, thisP::handlePaymentDueCountUpdate)
-        }
+        preOrderLiveData.observe(this, this::handlePreOrderCountUpdate)
+        paymentsDueLiveData.observe(this, this::handlePaymentDueCountUpdate)
+
     }
 
     fun handlePreOrderCountUpdate(count: Int?) {
@@ -193,10 +184,9 @@ class SaleListPresenter(context: Any,
     }
 
     internal fun handleClickSale(saleUid: Long, saleName: String?) {
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args.put(ARG_SALE_UID, saleUid.toString())
-        if (saleName != null)
+        if (saleName != null && !saleName.isEmpty())
             args.put(ARG_SALE_GEN_NAME, saleName)
         impl.go(SaleDetailView.VIEW_NAME, args, context)
 
@@ -204,13 +194,11 @@ class SaleListPresenter(context: Any,
 
     fun handleClickPrimaryActionButton() {
 
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(SaleDetailView.VIEW_NAME, args, context)
     }
 
     fun handleClickSearch() {
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(SaleListSearchView.VIEW_NAME, args, context)
     }

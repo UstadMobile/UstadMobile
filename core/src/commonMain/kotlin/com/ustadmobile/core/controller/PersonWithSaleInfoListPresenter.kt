@@ -20,7 +20,7 @@ import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 class PersonWithSaleInfoListPresenter(context: Any,
                       arguments: Map<String, String>?,
                       view: PersonWithSaleInfoListView,
-                      val systemImpl: UstadMobileSystemImpl,
+                      val systemImpl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
                       private val repository: UmAppDatabase =
                                       UmAccountManager.getRepositoryForActiveAccount(context),
                       private val saleDao: SaleDao = repository.saleDao)

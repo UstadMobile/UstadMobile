@@ -3,6 +3,9 @@ package com.ustadmobile.port.android.view
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
 import kotlinx.coroutines.GlobalScope
@@ -22,6 +25,7 @@ class DummyData {
     private var context:Any ?= null
 
     var le1Uid : Long = 0L
+    var le1Username : String = "le1"
     var le2Uid : Long = 0L
 
     constructor(theContext:Any, theRepo:UmAppDatabase){
@@ -62,6 +66,18 @@ class DummyData {
 
                 //For testing: TODO: Remove or find better solution
                 addTestData()
+
+                //Dont time out for signing in.
+                val impl = UstadMobileSystemImpl.instance
+                impl.setAppPref(UstadBaseActivity.PREFKEY_LAST_ACTIVE,
+                        UMCalendarUtil.getDateInMilliPlusDays(0).toString(), context!!)
+
+                //Set active account
+                val activeAccount = UmAccountManager.getActiveAccount(context!!)
+                if(activeAccount == null){
+                    val le1Account = UmAccount(le1Uid, le1Username, "auth", "endpoint")
+                    UmAccountManager.setActiveAccount(le1Account, context!!)
+                }
             }
 
         } else {
@@ -539,7 +555,7 @@ class DummyData {
         val personAuthDao = repo!!.personAuthDao
 
         //Create two LEs
-        val le1 = Person("le1", "Le", "One", true)
+        val le1 = Person(le1Username, "Le", "One", true)
         le1Uid = personDao.insert(le1)
         le1.personUid = le1Uid
         val le2 = Person("le2", "Le", "Two", true)
@@ -626,6 +642,15 @@ class DummyData {
         sale11.saleNotes = "Test Sale"
         sale11.salePersonUid = le1Uid
         val sale11Uid = saleDao.insert(sale11)
+
+        val sale12 = Sale(true)
+        sale12.saleTitle = "Test Sale 1.2"
+        sale12.saleDone = true
+        sale12.saleNotes = "Test Sale"
+        sale12.salePersonUid = le1Uid
+        var sale12Uid = saleDao.insert(sale12)
+
+
         //b. Create SaleItem
         val saleItem11 = SaleItem(saleProduct1Uid, 10, 420L, sale11Uid, 0L)
         saleItem11.saleItemProducerUid = we1PersonUid
@@ -633,6 +658,14 @@ class DummyData {
         saleItem12.saleItemProducerUid = we2PersonUid
         saleItemDao.insert(saleItem11)
         saleItemDao.insert(saleItem12)
+
+        val saleItem111 = SaleItem(saleProduct1Uid, 12, 440L, sale12Uid, 0L)
+        saleItem111.saleItemProducerUid = we1PersonUid
+        val saleItem122 = SaleItem(saleProduct2Uid, 4, 220, sale12Uid, 0L)
+        saleItem122.saleItemProducerUid = we2PersonUid
+        saleItemDao.insert(saleItem111)
+        saleItemDao.insert(saleItem122)
+
 
         //Create new Sales for LE2
         //a. Create Sale

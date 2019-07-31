@@ -15,11 +15,11 @@ import kotlinx.coroutines.launch
  * Presenter for UserProfile view
  */
 class PersonWithSaleInfoProfilePresenter(context: Any,
-                                         arguments: Map<String, String>?,
-                                         view: PersonWithSaleInfoProfileView,
-                                         val systemImpl: UstadMobileSystemImpl,
-                                         private val repository: UmAppDatabase =
-                                                 UmAccountManager.getRepositoryForActiveAccount(context) )
+                         arguments: Map<String, String>?,
+                         view: PersonWithSaleInfoProfileView,
+                         val systemImpl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
+                         private val repository: UmAppDatabase =
+                                 UmAccountManager.getRepositoryForActiveAccount(context) )
     : UstadBaseController<PersonWithSaleInfoProfileView>(context, arguments!!, view) {
 
 
