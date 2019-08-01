@@ -144,7 +144,7 @@ UmEditorCore.onCreate  = (locale = "en", dir = "ltr", showToolbar = false, testE
     if(saveContentTimerId != null){
         clearInterval(saveContentTimerId);
     }
-    saveContentTimerId = setInterval(() => {UmEditorCore.saveContent();}, saveContentTimeout);
+    saveContentTimerId = setInterval(() => {UmEditorCore.prototype.saveContent();}, saveContentTimeout);
 };
 
 
@@ -289,9 +289,9 @@ UmEditorCore.prototype.registerObservers = () => {
 /**
  * Save content only when the content has been changed
  */
-UmEditorCore.saveContent = (forceSaving = false) =>{
+UmEditorCore.prototype.saveContent = () =>{
     const newContent = UmWidgetManager.preparingPreview($(".um-editor").html());
-    if(contentToSave !== newContent || forceSaving == "true"){
+    if(contentToSave !== newContent){
         contentToSave = newContent;
         const previewContent = JSON.stringify({
             action:'onSaveContent',
