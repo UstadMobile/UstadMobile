@@ -31,8 +31,11 @@
 
 package com.ustadmobile.port.android.view
 
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.view.Window
+import android.view.WindowManager
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -58,7 +61,16 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setTheme(R.style.ThemeOnboarding)
+        //add translucent effect on toolbar - full screen
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+
+        setTheme(R.style.ThemeSplash)
         setContentView(R.layout.activity_splash_screen)
 
         organisationIcon = findViewById(R.id.organisation_icon)
