@@ -18,6 +18,8 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import javax.tools.Diagnostic
+import com.ustadmobile.door.DoorDatabaseSyncRepository
+import kotlin.reflect.KClass
 
 fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
     val syncEntityAnnotationIndex = entityEl.annotationMirrors.map {processingEnv.typeUtils.asElement(it.annotationType) as TypeElement }
@@ -55,6 +57,9 @@ class DbProcessorSync: AbstractDbProcessor() {
 
             abstractFileSpec.writeTo(File(abstractOutputDir))
             implFileSpec.writeTo(File(implOutputDir))
+
+            val syncRepoFileSpec = generateSyncRepository(dbTypeEl)
+            syncRepoFileSpec.writeTo(File(implOutputDir))
 
             //TODO: use the normal ktor generator for this - it will refactor the query and do the required inserts
 //            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
@@ -183,6 +188,61 @@ class DbProcessorSync: AbstractDbProcessor() {
 
 
     data class SyncFileSpecs(val abstractFileSpec: FileSpec, val daoImplFileSpec: FileSpec, val repoImplFileSpec: FileSpec)
+
+
+    fun generateSyncRepository(dbType: TypeElement): FileSpec {
+        val dbClassName = dbType.asClassName()
+        val syncRepoSimpleName =
+                "${dbClassName.simpleName}$SUFFIX_SYNCDAO_ABSTRACT${DbProcessorRepository.SUFFIX_REPOSITORY}"
+        val repoFileSpec = FileSpec.builder(dbClassName.packageName,
+                syncRepoSimpleName)
+        val daoClassName = ClassName(dbClassName.packageName,
+                "${dbClassName.simpleName}$SUFFIX_SYNCDAO_ABSTRACT")
+        val repoTypeSpec = newRepositoryClassBuilder(daoClassName, false)
+                .addSuperinterface(DoorDatabaseSyncRepository::class as KClass<*>)
+
+        syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
+            val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
+
+            repoTypeSpec.addFunction(FunSpec.builder("_replace${entityType.simpleName}")
+                    .addParameter("_entities", List::class.asClassName().parameterizedBy(entityType.asClassName()))
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addCode("_dao._replace${entityType.simpleName}(_entities)\n")
+                    .build())
+
+
+            repoTypeSpec.addFunction(FunSpec.builder("_replace${syncableEntityInfo.tracker.simpleName}")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addParameter("_entities",
+                            List::class.asClassName().parameterizedBy(syncableEntityInfo.tracker))
+                    .addCode("_dao._replace${syncableEntityInfo.tracker.simpleName}(_entities)\n")
+                    .build())
+
+            repoTypeSpec.addFunction(FunSpec.builder("_findLocalUnsent${entityType.simpleName}")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addParameter("destClientId", INT)
+                    .addParameter("limit", INT)
+                    .addCode("return _dao._findLocalUnsent${entityType.simpleName}(destClientId, limit)\n")
+                    .returns(List::class.asClassName().parameterizedBy(syncableEntityInfo.syncableEntity))
+                    .build())
+
+            repoTypeSpec.addFunction(FunSpec.builder("_update${syncableEntityInfo.tracker.simpleName}Received")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addParameter("status", BOOLEAN)
+                    .addParameter("requestId", INT)
+                    .addCode("_dao._update${syncableEntityInfo.tracker.simpleName}Received(status, requestId)\n")
+                    .build())
+        }
+
+
+        repoTypeSpec.addFunction(FunSpec.builder("sync")
+                .addModifiers(KModifier.OVERRIDE)
+                .addParameter("entities", List::class.asClassName().parameterizedBy(
+                        KClass::class.asClassName().parameterizedBy(STAR)))
+                .build())
+
+        return repoFileSpec.addType(repoTypeSpec.build()).build()
+    }
 
     /**
      *
