@@ -136,7 +136,7 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
         val textView6 = Espresso.onView(ViewMatchers.withId(R.id.xapi_when_header))
         textView6.check(ViewAssertions.matches(ViewMatchers.withText("When")))
 
-        assertTrue(activity.findViewById<RecyclerView>(R.id.preview_report_list).adapter!!.itemCount > 5)
+        assertTrue(activity.findViewById<RecyclerView>(R.id.preview_report_list).adapter!!.itemCount > 0)
 
     }
 

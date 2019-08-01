@@ -78,7 +78,7 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
 
         }
         sql += "GROUP BY xAxis, subgroup"
-        return QueryParts(sql, sqlList, paramList.toList().toTypedArray())
+        return QueryParts(sql, sqlList, paramList.toTypedArray())
     }
 
     private fun groupBy(value: Int): String {

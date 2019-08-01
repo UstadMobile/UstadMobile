@@ -340,6 +340,8 @@
     <string name="xapi_result_header">Result</string>
     <string name="xapi_when_header">When</string>
 
+    <string name="xapi_score">Score (%)</string>
+
 
     <string name="no_account">Don\'t have an account?</string>
 </resources>

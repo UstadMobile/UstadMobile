@@ -96,7 +96,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
 
     private fun getLabel(value: Int, time: Int): String {
         return when (value) {
-            SCORE -> impl.getString(SCORE, context)
+            SCORE -> impl.getString(MessageID.xapi_score, context)
             DURATION -> impl.getString(DURATION, context) + " (" + impl.getString(time, context) + ")"
             AVG_DURATION -> impl.getString(AVG_DURATION, context) + " (" + impl.getString(time, context) + ")"
             COUNT_ACTIVITIES -> impl.getString(COUNT_ACTIVITIES, context)

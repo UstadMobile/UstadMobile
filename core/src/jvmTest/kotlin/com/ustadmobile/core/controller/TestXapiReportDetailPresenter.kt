@@ -45,7 +45,7 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
     private lateinit var reportOptionsWithAvgDurationLabels: XapiReportOptions
 
 
-    private var stringMap = mapOf(SCORE to "Score (%)", DURATION to "Total Duration",
+    private var stringMap = mapOf(MessageID.xapi_score to "Score (%)", DURATION to "Total Duration",
             AVG_DURATION to "Average Duration", SECS to "Secs", MINS to "Mins", HRS to "Hrs",
             COUNT_ACTIVITIES to "# of activities", MessageID.male to "Male", MessageID.female to "Female",
             MessageID.other to "Other", MessageID.unset to "Unset")
