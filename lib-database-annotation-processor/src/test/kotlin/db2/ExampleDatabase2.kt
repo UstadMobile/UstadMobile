@@ -4,9 +4,11 @@ import androidx.room.Database
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncInfo
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.door.SyncNode
 
 @Database(version = 1, entities = [ExampleEntity2::class, ExampleLinkEntity::class,
     ExampleEntityPkInt::class, DoorDatabaseSyncInfo::class,
+    SyncNode::class,
     ExampleSyncableEntity::class, ExampleSyncableEntityTracker::class,
     OtherSyncableEntity::class, OtherSyncableEntityTracker::class])
 abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {

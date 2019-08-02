@@ -33,9 +33,12 @@ class SyncableEntityInfo {
 
     lateinit var trackerReqIdField: PropertySpec
 
+    var tableId: Int = 0
+
     constructor(syncableEntityParam: ClassName, processingEnv: ProcessingEnvironment) {
         syncableEntity = syncableEntityParam
         val syncableEntityEl = processingEnv.elementUtils.getTypeElement(syncableEntity.canonicalName)
+        tableId = syncableEntityEl.getAnnotation(SyncableEntity::class.java).tableId
         val entityPkFieldEl = syncableEntityEl.enclosedElements
                 .first { it.getAnnotation(PrimaryKey::class.java) != null }
         entityPkField = PropertySpec.builder("${entityPkFieldEl.simpleName}",
@@ -47,7 +50,7 @@ class SyncableEntityInfo {
                 entityMasterCsnFieldEl.asType().asTypeName()).build()
 
         val entityLocalCsnFieldEl = syncableEntityEl.enclosedElements
-                .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
+                .first { it.getAnnotation(LocalChangeSeqNum::class.java) != null}
         entityLocalCsnField = PropertySpec.builder("${entityLocalCsnFieldEl.simpleName}",
                 entityLocalCsnFieldEl.asType().asTypeName()).build()
 

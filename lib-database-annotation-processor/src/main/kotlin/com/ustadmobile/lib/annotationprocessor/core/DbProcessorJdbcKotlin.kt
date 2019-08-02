@@ -619,6 +619,11 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
             for(entityType in dbEntityTypes) {
                 codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(entityType,
                         dbProductType))
+                if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
+                    codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
+                            "_stmt.executeUpdate", dbProductType))
+                }
+
 
                 for(field in getEntityFieldElements(entityType, false)) {
                     if(field.getAnnotation(ColumnInfo::class.java)?.index == true) {
