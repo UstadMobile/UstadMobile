@@ -870,6 +870,110 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return codeBlock.build()
     }
 
+    /**
+     * Generates a CodeBlock for running an SQL select statement on the KTOR serer and then returning
+     * the result as JSON.
+     *
+     * e.g.
+     * get("methodName") {
+     *   val paramVal = request.queryParameters['uid']?.toLong()
+     *   .. query execution code (as per JDBC)
+     *   call.respond(_result)
+     * }
+     *
+     * The method will automatically choose between using get or post, and will use post if there
+     * are any parameters which cannot be sent as query parameters (e.g. JSON), or get otherwise.
+     *
+     * This will handle refactoring the query to remove syncable entities already delivered to the
+     * client making the request
+     *
+     * @param daoMethod A FunSpec representing the DAO method that this CodeBlock is being generated for
+     * @param daoTypeEl The DAO element that this is being generated for: optional for error logging purposes
+     *
+     */
+    fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, daoTypeEl: TypeElement?) : CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val resultType = resolveQueryResultType(daoMethod.returnType!!)
+
+        daoMethod.parameters.forEach {
+            codeBlock.add(generateGetParamFromRequestCodeBlock(it.type,
+                    it.name, declareVariableName = it.name, declareVariableType = "val"))
+        }
+
+        val queryVarsMap = daoMethod.parameters.map { it.name to it.type}.toMap().toMutableMap()
+
+        var querySql = daoMethod.annotations.first { it.className == Query::class.asClassName() }
+                .members.first { it.toString().trim().startsWith("value") || it.toString().trim().startsWith("\"") }.toString()
+        querySql = querySql.removeSurrounding("\"")
+
+        val componentEntityType = resolveEntityFromResultType(resultType)
+        val syncableEntitiesList = if(componentEntityType is ClassName) {
+            findSyncableEntities(componentEntityType, processingEnv)
+        }else {
+            null
+        }
+
+        if(syncableEntitiesList != null) {
+            codeBlock.add("val clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                    DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request","header"),
+                    "X-nid")
+                    .add("val _reqId = %T().nextInt()\n", Random::class)
+                    .add("%M.response.header(%S, _reqId)\n", DbProcessorKtorServer.CALL_MEMBER, "X-reqid")
+            queryVarsMap.put("clientId", INT)
+            querySql = refactorSyncSelectSql(querySql, componentEntityType as ClassName,
+                    processingEnv)
+        }
+
+
+        codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, null))
+        codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
+                processingEnv = processingEnv))
+
+        codeBlock.add(generateRespondCall(resultType, "_result"))
+
+        return codeBlock.build()
+    }
+
+    /**
+     * Generates a Codeblock that will call the DAO method, and then call.respond with the result
+     *
+     * e.g.
+     * val paramName = request.queryParameters['paramName']?.toLong()
+     * val _result = _dao.methodName(paramName)
+     * call.respond(_result)
+     *
+     * @param daoMethod FunSpec representing the method that is being delegated
+     */
+    fun generateKtorPassToDaoCodeBlock(daoMethod: FunSpec): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val returnType = daoMethod.returnType
+        if(returnType != UNIT) {
+            codeBlock.add("val _result = ")
+        }
+
+        codeBlock.add("_dao.${daoMethod.name}(")
+        var paramOutCount = 0
+        daoMethod.parameters.forEachIndexed {index, param ->
+            val paramTypeName = param.type.javaToKotlinType()
+            if(isContinuationParam(paramTypeName))
+                return@forEachIndexed
+
+            if(paramOutCount > 0)
+                codeBlock.add(",")
+
+            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name))
+
+            paramOutCount++
+        }
+
+        codeBlock.add(")\n")
+
+        codeBlock.add(generateRespondCall(returnType!!, "_result"))
+
+        return codeBlock.build()
+    }
+
 
     fun logMessage(kind: Diagnostic.Kind, message: String, enclosing: TypeElement? = null,
                    element: Element? = null, annotation: AnnotationMirror? = null) {

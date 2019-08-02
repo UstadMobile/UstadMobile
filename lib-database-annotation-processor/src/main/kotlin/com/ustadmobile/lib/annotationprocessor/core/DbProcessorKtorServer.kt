@@ -153,19 +153,21 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
             codeBlock.beginControlFlow("%M(%S)", memberFn, daoSubEl.simpleName)
 
-            if(daoSubEl.getAnnotation(Query::class.java) != null) {
-                codeBlock.add(generateSelectCodeBlock(daoMethodResolved, daoMethodEl,
+            val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
+                    .returns(resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType())
+            daoMethodEl.parameters.forEachIndexed { index, paramEl ->
+                funSpec.addParameter(paramEl.simpleName.toString(),
+                        daoMethodResolved.parameterTypes[index].asTypeName())
+            }
+
+            val queryAnnotation = daoSubEl.getAnnotation(Query::class.java)
+            if(queryAnnotation != null) {
+                funSpec.addAnnotation(AnnotationSpec.builder(Query::class.asClassName())
+                        .addMember(CodeBlock.of("%S", queryAnnotation.value)).build())
+                codeBlock.add(generateKtorRouteSelectCodeBlock(funSpec.build(),
                         daoTypeElement))
             }else {
-                val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
-                        .returns(daoMethodResolved.returnType.asTypeName().javaToKotlinType())
-                daoMethodEl.parameters.forEachIndexed { index, paramEl ->
-                    funSpec.addParameter(paramEl.simpleName.toString(),
-                            daoMethodResolved.parameterTypes[index].asTypeName())
-                }
-
-
-                codeBlock.add(generatePassToDaoCodeBlock(funSpec.build()))
+                codeBlock.add(generateKtorPassToDaoCodeBlock(funSpec.build()))
             }
 
             codeBlock.endControlFlow()
@@ -196,89 +198,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         return daoImplFile.build()
     }
 
-    fun generateSelectCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement,
-                                daoTypeEl: TypeElement) : CodeBlock {
-        val codeBlock = CodeBlock.builder()
-        val resultType = resolveQueryResultType(resolveReturnTypeIfSuspended(daoMethodResolved))
 
-        daoMethodResolved.parameterTypes.map { it.asTypeName() }.filter { !isContinuationParam(it) }
-                .forEachIndexed { index, paramType ->
-
-            val paramName = daoMethodEl.parameters[index].simpleName.toString()
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramType,
-                    paramName, declareVariableName = paramName, declareVariableType = "val"))
-        }
-
-
-
-
-        val queryVarsMap = daoMethodResolved.parameterTypes.mapIndexed { index, typeMirror ->
-            daoMethodEl.parameters[index].simpleName.toString() to typeMirror.asTypeName().javaToKotlinType()
-        }.filter {
-            !isContinuationParam(it.second)
-        }.toMap().toMutableMap()
-
-        var querySql = daoMethodEl.getAnnotation(Query::class.java).value
-        val componentEntityType = resolveEntityFromResultType(resultType)
-        val syncableEntitiesList = if(componentEntityType is ClassName) {
-            findSyncableEntities(componentEntityType, processingEnv)
-        }else {
-            null
-        }
-
-        if(syncableEntitiesList != null) {
-            codeBlock.add("val clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
-                    CALL_MEMBER,
-                    MemberName("io.ktor.request","header"),
-                    "X-nid")
-                    .add("val _reqId = %T().nextInt()\n", Random::class)
-                    .add("%M.response.header(%S, _reqId)\n", CALL_MEMBER, "X-reqid")
-            queryVarsMap.put("clientId", INT)
-            querySql = refactorSyncSelectSql(querySql, componentEntityType as ClassName,
-                    processingEnv)
-        }
-
-
-        codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
-        codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
-                processingEnv = processingEnv))
-
-        codeBlock.add(generateRespondCall(resultType, "_result"))
-
-        return codeBlock.build()
-    }
-
-    /**
-     * Generates a Codeblock that will call the DAO method, and then call.respond with the result
-     */
-    fun generatePassToDaoCodeBlock(daoMethod: FunSpec): CodeBlock {
-        val codeBlock = CodeBlock.builder()
-        val returnType = daoMethod.returnType
-        if(returnType != UNIT) {
-            codeBlock.add("val _result = ")
-        }
-
-        codeBlock.add("_dao.${daoMethod.name}(")
-        var paramOutCount = 0
-        daoMethod.parameters.forEachIndexed {index, param ->
-            val paramTypeName = param.type.javaToKotlinType()
-            if(isContinuationParam(paramTypeName))
-                return@forEachIndexed
-
-            if(paramOutCount > 0)
-                codeBlock.add(",")
-
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name))
-
-            paramOutCount++
-        }
-
-        codeBlock.add(")\n")
-
-        codeBlock.add(generateRespondCall(returnType!!, "_result"))
-
-        return codeBlock.build()
-    }
 
     companion object {
 
