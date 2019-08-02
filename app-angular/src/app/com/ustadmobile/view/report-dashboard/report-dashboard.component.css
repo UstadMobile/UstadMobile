@@ -1,0 +1,13 @@
+.selected-chip{
+    background: rgb(114, 113, 113);
+    color: black
+}
+
+.options{
+    position:relative;
+    Z-index: 1;
+    cursor: pointer
+}
+h2 {
+    font-size: 1.7em
+}

@@ -3,14 +3,13 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, Subject} from 'rxjs';
 import { MzToastService } from 'ngx-materialize';
-import { map, filter, scan } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UmBaseService {
 
-  private context: UmContextWrapper;
   private umObserver = new Subject < any > ();
   private directionality: string;
   public supportedLanguages  = []
@@ -49,7 +48,6 @@ export class UmBaseService {
   }
 
   setContext(context: UmContextWrapper) {
-    this.context = context;
   }
 
   /**

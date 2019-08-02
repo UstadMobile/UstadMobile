@@ -9,11 +9,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
-  protected env = environment;
+  public env = environment;
   protected systemImpl: any;
   protected readonly context: UmContextWrapper;
   protected readonly MessageID;
-  protected app_name: String = "...";
+  public app_name: String = "...";
   protected viewContext: UmContextWrapper;
   protected subscription : Subscription;
 

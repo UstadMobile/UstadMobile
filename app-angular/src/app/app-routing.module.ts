@@ -8,6 +8,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-list/content-entry-list.component';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
+import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
+import { ReportDetailsComponent } from './com/utadmobile/view/report-details/report-details.component';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -19,7 +21,9 @@ const routes: Routes = [
           {path: "XapiPackage", component: XapiContentComponent},
           {path: "VideoPlayer", component: XapiContentComponent},
           {path: "webChunk", component: XapiContentComponent},
-          {path: "Container", component: XapiContentComponent}
+          {path: "Container", component: XapiContentComponent},
+          {path: "Reports", component: ReportDashboardComponent},
+          {path: "ReportDetails", component: ReportDetailsComponent}
         ],
         canActivate: [AuthGuard],
         runGuardsAndResolvers: "always"

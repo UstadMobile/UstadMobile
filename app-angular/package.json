@@ -23,6 +23,7 @@
     "@angular/platform-browser": "~7.2.0",
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
+    "angular-google-charts": "^0.1.6",
     "core-js": "^2.5.4",
     "ngx-infinite-scroll": "^6.0.0",
     "ngx-materialize": "^6.1.3",

@@ -5,7 +5,7 @@ import {Observable} from 'rxjs';
 export const appRountes = {
   "list":"ContentEntryList", "details":"ContentEntryDetail", "register":"RegisterAccount",
   "login":"Login", "xapi":"XapiPackage", "video":"VideoPlayer", "web":"webChunk", 
-  "container":"Container", "report":"Reports"
+  "container":"Container", "report":"Reports","reportDetails":"ReportDetails"
 }
 
 export class UmAngularUtil {
