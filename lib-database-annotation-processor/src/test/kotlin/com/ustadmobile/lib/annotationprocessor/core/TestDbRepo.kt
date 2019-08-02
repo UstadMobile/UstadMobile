@@ -11,7 +11,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import com.ustadmobile.door.DatabaseBuilder
-import db2.ExampleDatabase2SyncDaoImpl
+import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
 
 
@@ -41,7 +41,7 @@ class TestDbRepo {
 
         val db = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         db.clearAllTables()
-        val dbSyncDao = ExampleDatabase2SyncDaoImpl(db)
+        val dbSyncDao = ExampleDatabase2SyncDao_JdbcKt(db)
 
         val clientNodeId = 5
         val repo = ExampleSyncableDao_Repo(db.exampleSyncableDao(), httpClient, clientNodeId,

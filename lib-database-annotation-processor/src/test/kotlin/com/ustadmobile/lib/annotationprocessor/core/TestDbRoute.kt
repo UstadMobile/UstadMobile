@@ -17,7 +17,7 @@ import com.ustadmobile.door.*
 import db2.ExampleDao2Route
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
-import db2.ExampleDatabase2SyncDaoImpl
+import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDaoRoute
 import io.ktor.application.call
 import io.ktor.client.HttpClient
@@ -56,7 +56,7 @@ class TestDbRoute  {
                 register(ContentType.Any, GsonConverter())
             }
 
-            val syncDao = ExampleDatabase2SyncDaoImpl(exampleDb)
+            val syncDao = ExampleDatabase2SyncDao_JdbcKt(exampleDb)
             install(Routing) {
                 ExampleDao2Route(exampleDb.exampleDao2(), exampleDb)
                 ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, syncDao)

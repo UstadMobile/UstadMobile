@@ -176,7 +176,7 @@ class DbProcessorSync: AbstractDbProcessor() {
     fun generateSyncRepository(dbType: TypeElement): FileSpec {
         val dbClassName = dbType.asClassName()
         val syncRepoSimpleName =
-                "${dbClassName.simpleName}$SUFFIX_SYNCDAO_ABSTRACT${DbProcessorRepository.SUFFIX_REPOSITORY}"
+                "${dbClassName.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}_${DbProcessorRepository.SUFFIX_REPOSITORY}"
         val repoFileSpec = FileSpec.builder(dbClassName.packageName,
                 syncRepoSimpleName)
         val daoClassName = ClassName(dbClassName.packageName,
@@ -410,9 +410,9 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         const val SUFFIX_SYNCDAO_ABSTRACT = "SyncDao"
 
-        const val SUFFIX_SYNCDAO_IMPL = "SyncDaoImpl"
+        const val SUFFIX_SYNCDAO_IMPL = "SyncDao_JdbcKt"
 
-        const val SUFFIX_SYNC_ROUTE = "SyncRoute"
+        const val SUFFIX_SYNC_ROUTE = "SyncDao_Route"
     }
 
 }
