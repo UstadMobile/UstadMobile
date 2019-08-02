@@ -891,7 +891,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * @param daoTypeEl The DAO element that this is being generated for: optional for error logging purposes
      *
      */
-    fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, daoTypeEl: TypeElement?) : CodeBlock {
+    fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, daoTypeEl: TypeElement? = null,
+                                         syncHelperDaoVarName: String = "_syncHelper") : CodeBlock {
         val codeBlock = CodeBlock.builder()
         val resultType = resolveQueryResultType(daoMethod.returnType!!)
 
@@ -928,7 +929,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, null))
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
-                processingEnv = processingEnv))
+                processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName))
 
         codeBlock.add(generateRespondCall(resultType, "_result"))
 

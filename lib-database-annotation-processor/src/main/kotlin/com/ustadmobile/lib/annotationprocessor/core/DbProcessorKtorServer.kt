@@ -100,6 +100,21 @@ fun generateRespondCall(returnType: TypeName, varName: String): CodeBlock{
     return codeBlock.build()
 }
 
+internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper") =
+    CodeBlock.builder()
+            .beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_update${trackerClassName.simpleName}Received")
+            .add("val _clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                    DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request","header"),
+                    "X-nid")
+            .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId"))
+            //TODO: Add the clientId to this query (to prevent other clients interfering)
+            .add("$syncHelperVarName._update${trackerClassName.simpleName}Received(true, _requestId)\n")
+            .add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER,
+                    HttpStatusCode::class)
+            .endControlFlow()
+            .build()
+
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
@@ -174,21 +189,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         }
 
         syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).forEach {
-            val entitySyncTracker = getEntitySyncTracker(
-                    processingEnv.elementUtils.getTypeElement(it.canonicalName), processingEnv)
-            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker)
-            val updateTrackerReceivedFunName = "_update${entitySyncTrackerEl.simpleName}Received"
-            codeBlock.beginControlFlow("%M(%S)", GET_MEMBER, updateTrackerReceivedFunName)
-                    .add("val _clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
-                        CALL_MEMBER,
-                        MemberName("io.ktor.request","header"),
-                        "X-nid")
-                    .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId"))
-                    //TODO: Add the clientId to this query (to prevent other clients interfering)
-                    .add("_syncHelper.$updateTrackerReceivedFunName(true, _requestId)\n")
-                    .add("%M.%M(%T.NoContent, \"\")\n", CALL_MEMBER, RESPOND_MEMBER,
-                            HttpStatusCode::class)
-                    .endControlFlow()
+            val syncableEntityinfo = SyncableEntityInfo(it, processingEnv)
+            codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityinfo.tracker))
         }
 
         codeBlock.endControlFlow()

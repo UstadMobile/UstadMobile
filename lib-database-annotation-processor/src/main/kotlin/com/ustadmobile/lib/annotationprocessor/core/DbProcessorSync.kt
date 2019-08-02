@@ -19,6 +19,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import javax.tools.Diagnostic
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorDatabase
 import kotlin.reflect.KClass
 
 fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
@@ -62,8 +63,8 @@ class DbProcessorSync: AbstractDbProcessor() {
             syncRepoFileSpec.writeTo(File(implOutputDir))
 
             //TODO: use the normal ktor generator for this - it will refactor the query and do the required inserts
-//            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-//            syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
+            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
+            syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -125,58 +126,40 @@ class DbProcessorSync: AbstractDbProcessor() {
                 abstractDaoSimpleName)
         val routeFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 "${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
+                .addImport("io.ktor.response", "header")
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
-                .addParameter("_syncDao", abstractDaoClassName)
-
-        val callMemberName = MemberName("io.ktor.application", "call")
+                .addParameter("_dao", abstractDaoClassName)
+                .addParameter("_db", DoorDatabase::class)
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
-                MemberName("io.ktor.routing", "route"), "sync")
+                MemberName("io.ktor.routing", "route"), abstractDaoSimpleName)
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
-            val entityPkField = entityType.enclosedElements
-                    .first { it.getAnnotation(PrimaryKey::class.java) != null }
-            val entityMasterCsnField = entityType.enclosedElements
-                    .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
-            val entitySyncTracker = getEntitySyncTracker(entityType, processingEnv)
-            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker) as TypeElement
-            val entitySyncTrackCsnField = entitySyncTrackerEl.enclosedElements
-                    .first { it.getAnnotation(TrackerChangeSeqNum::class.java) != null }
-            val entitySyncTrackerPkField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
-            val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackDestId::class.java) != null}
-            val entitySyncTrackerReceivedField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackerReceived::class.java) != null}
-            val entitySyncTrackerReqIdField = entitySyncTrackerEl.enclosedElements
-                    .first {it.getAnnotation(TrackerRequestId::class.java) != null}
+            val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
+            val entityTypeListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
+            val getAllSql = "SELECT * FROM ${entityType.simpleName}"
+            val getAllFunSpec = FunSpec.builder("_findMasterUnsent${entityType.simpleName}")
+                    .returns(entityTypeListClassName)
+                    .addAnnotation(AnnotationSpec.builder(Query::class)
+                            .addMember("%S", getAllSql).build())
+                    .build()
+            codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
+                    "_findMasterUnsent${entityType.simpleName}")
+                .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
+                .endControlFlow()
 
-            codeBlock.beginControlFlow("%M(%S)",
-                    MemberName("io.ktor.routing", "post"), entityType.simpleName)
-                    .add("val _clientNodeId = %M.request.%M(%S)?.toInt() ?: 0\n",
-                            callMemberName,
-                            MemberName("io.ktor.request","header"),
-                            "X-nid")
-                    .add("val _incomingRequest = %M.%M<%T>()\n", callMemberName,
-                            MemberName("io.ktor.request", "receive"),
-                            SyncRequest::class.asClassName().parameterizedBy(entityType.asClassName()))
-                    .add("val _changesToSend = _syncDao._find${entityType.simpleName}MasterUnsentChanges(_clientNodeId, 100)\n")
-                    .add("val _reqId = %T().nextInt()\n", Random::class)
-                    .add("val _systemTime = %T.currentTimeMillis()\n", System::class)
-                    .add("""_syncDao._replace${entitySyncTrackerEl.simpleName}(_changesToSend.map { %T(
-                             |${entitySyncTrackerPkField.simpleName} = it.${entityPkField.simpleName},
-                             |${entitySyncTrackerDestField.simpleName} = _clientNodeId,
-                             |${entitySyncTrackCsnField.simpleName} = it.${entityMasterCsnField.simpleName},
-                             |${entitySyncTrackerReqIdField.simpleName} = _reqId
-                             |) })""".trimMargin(), entitySyncTracker)
-                    .add("\n")
-                    .add("%M.%M(%T(_changesToSend))\n", callMemberName,
-                            MemberName("io.ktor.response", "respond"),
-                            SyncResponse::class)
+            val replaceEntityFunSpec = FunSpec.builder("_replace${entityType.simpleName}")
+                    .addParameter("entities", entityTypeListClassName)
+                    .returns(UNIT)
+                    .build()
+            codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.POST_MEMBER,
+                    "_replace${entityType.simpleName}")
+                    .add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec))
+                    .endControlFlow()
 
-
-            codeBlock.endControlFlow()
+            codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityInfo.tracker,
+                    syncHelperVarName = "_dao"))
 
         }
         codeBlock.endControlFlow()
