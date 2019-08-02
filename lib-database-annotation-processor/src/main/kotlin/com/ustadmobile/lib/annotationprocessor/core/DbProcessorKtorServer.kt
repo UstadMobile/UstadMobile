@@ -157,7 +157,15 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 codeBlock.add(generateSelectCodeBlock(daoMethodResolved, daoMethodEl,
                         daoTypeElement))
             }else {
-                codeBlock.add(generatePassToDaoCodeBlock(daoMethodResolved, daoMethodEl))
+                val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
+                        .returns(daoMethodResolved.returnType.asTypeName().javaToKotlinType())
+                daoMethodEl.parameters.forEachIndexed { index, paramEl ->
+                    funSpec.addParameter(paramEl.simpleName.toString(),
+                            daoMethodResolved.parameterTypes[index].asTypeName())
+                }
+
+
+                codeBlock.add(generatePassToDaoCodeBlock(funSpec.build()))
             }
 
             codeBlock.endControlFlow()
@@ -243,31 +251,31 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
     /**
      * Generates a Codeblock that will call the DAO method, and then call.respond with the result
      */
-    fun generatePassToDaoCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement): CodeBlock {
+    fun generatePassToDaoCodeBlock(daoMethod: FunSpec): CodeBlock {
         val codeBlock = CodeBlock.builder()
-        val returnType = resolveReturnTypeIfSuspended(daoMethodResolved)
+        val returnType = daoMethod.returnType
         if(returnType != UNIT) {
             codeBlock.add("val _result = ")
         }
 
-        codeBlock.add("_dao.${daoMethodEl.simpleName}(")
+        codeBlock.add("_dao.${daoMethod.name}(")
         var paramOutCount = 0
-        daoMethodEl.parameters.forEachIndexed {index, el ->
-            val paramTypeName = daoMethodResolved.parameterTypes[index].asTypeName().javaToKotlinType()
+        daoMethod.parameters.forEachIndexed {index, param ->
+            val paramTypeName = param.type.javaToKotlinType()
             if(isContinuationParam(paramTypeName))
                 return@forEachIndexed
 
             if(paramOutCount > 0)
                 codeBlock.add(",")
 
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, el.simpleName.toString()))
+            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name))
 
             paramOutCount++
         }
 
         codeBlock.add(")\n")
 
-        codeBlock.add(generateRespondCall(returnType, "_result"))
+        codeBlock.add(generateRespondCall(returnType!!, "_result"))
 
         return codeBlock.build()
     }
