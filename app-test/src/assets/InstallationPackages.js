@@ -47,7 +47,7 @@ function installPackage(packagePath){
         }else{
             console.log("All packages were installed successfully")
             console.log("Removing temp package file......")
-            deletePackageFile(tmpPackages.shift())
+            //deletePackageFile(tmpPackages.shift())
         }
     });
 }
