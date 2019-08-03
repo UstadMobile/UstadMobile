@@ -477,25 +477,42 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val codeBlock = CodeBlock.builder()
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
         when(dbType){
-            DoorDbType.SQLITE -> codeBlock.add("$execSqlFn(%S)\n", """CREATE TRIGGER upd_${syncableEntityInfo.tableId}
-                |AFTER UPDATE ON ${entityClass.simpleName} FOR EACH ROW WHEN
-                |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                |(NEW.${syncableEntityInfo.entityMasterCsnField.name} = 0 OR 
-                |OLD.${syncableEntityInfo.entityMasterCsnField.name} = NEW.${syncableEntityInfo.entityMasterCsnField.name})
-                |ELSE
-                |(NEW.${syncableEntityInfo.entityLocalCsnField.name} = 0 OR 
-                |OLD.${syncableEntityInfo.entityLocalCsnField.name} = NEW.${syncableEntityInfo.entityLocalCsnField.name}) END)
-                |BEGIN 
-                |UPDATE ${entityClass.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} = 
-                |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
-                |ELSE (SELECT MAX(${syncableEntityInfo.entityLocalCsnField.name}) + 1 FROM ${entityClass.simpleName}) END),
-                |${syncableEntityInfo.entityMasterCsnField.name} = 
-                |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                |(SELECT MAX(${syncableEntityInfo.entityMasterCsnField.name}) + 1 FROM ${entityClass.simpleName})
-                |ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
-                |WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name}
-                |; END
-            """.trimMargin())
+            DoorDbType.SQLITE -> {
+                listOf("UPDATE", "INSERT").forEach {op_name ->
+                    codeBlock.add("$execSqlFn(%S)\n", """CREATE TRIGGER ${op_name.substring(0, 3)}_${syncableEntityInfo.tableId}
+                        |AFTER $op_name ON ${entityClass.simpleName} FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.${syncableEntityInfo.entityMasterCsnField.name} = 0 
+                        |${
+                        if(op_name == "UPDATE") {
+                            "OR OLD.${syncableEntityInfo.entityMasterCsnField.name} = NEW.${syncableEntityInfo.entityMasterCsnField.name}"
+                        }else {
+                            ""
+                        }}
+                        |)
+                        |ELSE
+                        |(NEW.${syncableEntityInfo.entityLocalCsnField.name} = 0  
+                        |${
+                        if(op_name == "UPDATE") {
+                            "OR OLD.${syncableEntityInfo.entityLocalCsnField.name} = NEW.${syncableEntityInfo.entityLocalCsnField.name}"
+                        }else {
+                            ""
+                        }}
+                        |) END)
+                        |BEGIN 
+                        |UPDATE ${entityClass.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
+                        |ELSE (SELECT MAX(${syncableEntityInfo.entityLocalCsnField.name}) + 1 FROM ${entityClass.simpleName}) END),
+                        |${syncableEntityInfo.entityMasterCsnField.name} = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(${syncableEntityInfo.entityMasterCsnField.name}) + 1 FROM ${entityClass.simpleName})
+                        |ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
+                        |WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name}
+                        |; END
+                    """.trimMargin())
+                }
+
+            }
         }
 
         return codeBlock.build()
