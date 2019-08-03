@@ -10,13 +10,13 @@ function createModuleList(){
     let modules = []
     const moduleDir = path.resolve('../build/js/node_modules/')
     fs.readdirSync(moduleDir).forEach(file => {
-        if(fs.existsSync(path.resolve(moduleDir+'/'+file+'/package.json')) 
-        && (!file.includes("UstadMobile-core") || !file.includes("UstadMobile-lib-util")) && file.indexOf("-test") == -1){
+        if(fs.existsSync(path.resolve(moduleDir+'/'+file+'/package.json'))  && !file.includes("UstadMobile-core")
+        && !file.includes("UstadMobile-lib-util")){
             modules.push(path.resolve(moduleDir+'/'+file))
         }
       });
+      modules.splice(0,0,path.resolve(moduleDir+'/UstadMobile-lib-util'))
       modules.splice(0,0,path.resolve(moduleDir+'/UstadMobile-core'));
-      modules.splice(1,0,path.resolve(moduleDir+'/UstadMobile-lib-util'))
       return modules;
 }
 
