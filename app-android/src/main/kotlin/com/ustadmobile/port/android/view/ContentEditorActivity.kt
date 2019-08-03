@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -798,6 +799,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mWebView!!.addJavascriptInterface(
                 UmWebContentEditorInterface(this, this), "UmEditor")
         mWebView!!.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
     }
 
 

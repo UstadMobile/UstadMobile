@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.MenuItem
 import android.view.View
+import android.webkit.WebView
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -142,6 +143,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        //enable webview debugging
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         //bind to the LRS forwarding service
         instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
