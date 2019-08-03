@@ -11,7 +11,7 @@ function createModuleList(){
     const moduleDir = path.resolve('../build/js/node_modules/')
     fs.readdirSync(moduleDir).forEach(file => {
         if(fs.existsSync(path.resolve(moduleDir+'/'+file+'/package.json'))  && !file.includes("UstadMobile-core")
-        && !file.includes("UstadMobile-lib-util") && file.indexOf("-test") == -1){
+        && !file.includes("UstadMobile-lib-util")){
             modules.push(path.resolve(moduleDir+'/'+file))
         }
       });
