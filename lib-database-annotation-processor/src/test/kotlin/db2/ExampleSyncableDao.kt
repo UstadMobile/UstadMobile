@@ -28,4 +28,7 @@ abstract class ExampleSyncableDao {
     @Query("SELECT * FROM ExampleSyncableEntity")
     abstract fun findAllDataSource(): DataSource.Factory<Int, ExampleSyncableEntity>
 
+    @Query("UPDATE ExampleSyncableEntity SET esNumber = :newNumber where esUid = :uid")
+    abstract fun updateNumberByUid(uid: Long, newNumber: Long)
+
 }
