@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="UmEditorCore.min.css">
+    <link rel="stylesheet" href="lib/material-icon/material-icons.css">
+    <script src="jquery3.3.1.min.js" type="text/javascript"></script>
+    <script src="lib/tinymce/js/tinymce.min.js" type="text/javascript"></script>
+    <script src="UmWidgetManager.min.js" type="text/javascript"></script>
+    <script src="UmEditorCore.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        window.onload = () => {
+            const umEditor = $(".um-editor");
+            umEditor.css("min-height",$(window).height());
+            try{
+                UmEditor.handleJsCallbackValue(JSON.stringify({
+                action:'onWindowLoad',
+                directionality: directionality,
+                content:UmEditorCore.base64Encode(true)}
+            ));
+            }catch(e){
+                UmEditorCore.onCreate("en", umEditor.attr("dir"), false);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container-fluid row default-margin-top">
+        <div class="um-fit-screen um-editor default-margin-top">
+                <div data-um-widget="extra-content" class="um-row default-margin-top extra-content">
+                    <p><br></p>
+                </div>
+        </div>
+    </div>
+</body>
+</html>
