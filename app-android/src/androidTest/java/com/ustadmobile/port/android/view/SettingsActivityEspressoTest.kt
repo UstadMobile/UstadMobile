@@ -3,10 +3,8 @@ package com.ustadmobile.port.android.view
 
 import android.content.Intent
 import android.os.SystemClock
-import android.view.View
-import android.view.ViewGroup
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -15,21 +13,16 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
-import org.hamcrest.Description
-import org.hamcrest.Matcher
-import org.hamcrest.Matchers
-import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class PersonWithSaleInfoProfileFragmentEspressoTest{
+class SettingsActivityEspressoTest {
 
     @get:Rule
-    var mActivityRule = IntentsTestRule(PersonWithSaleInfoDetailActivity::class.java,
+    var mActivityRule = IntentsTestRule(SettingsActivity::class.java,
             false, false)
 
     private lateinit var db: UmAppDatabase
@@ -37,7 +30,7 @@ class PersonWithSaleInfoProfileFragmentEspressoTest{
     private var context = InstrumentationRegistry.getInstrumentation().context
 
     @Before
-    fun setup(){
+    fun setup() {
 
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         db = UmAppDatabase.getInstance(context)
@@ -51,96 +44,81 @@ class PersonWithSaleInfoProfileFragmentEspressoTest{
 
     }
 
-    fun launchActivity(weUid:Long = we1PersonUid){
+    fun launchActivity() {
         val launchIntent = Intent()
-        launchIntent.putExtra(PersonWithSaleInfoDetailView.ARG_WE_UID, weUid.toString())
+        //IF any arguments. Put them here: 
+        //launchIntent.putExtra()
         mActivityRule.launchActivity(launchIntent)
-
 
         SystemClock.sleep(1000)
     }
 
     @Test
-    fun givenActivityLoads_whenCreated_shouldUpdateView(){
+    fun givenActivityLoads_whenCreated_shouldUpdateView() {
         launchActivity()
 
 
-        val tabView = Espresso.onView(
-                Matchers.allOf(withContentDescription("Profile"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.activity_person_with_saleinfo_detail_tabs),
-                                        0),
-                                0),
-                        isDisplayed()))
-        tabView.perform(ViewActions.click())
+        Espresso.onView(withId(R.id.activity_settings_toolbar)).check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withText(R.string.settings)).check(ViewAssertions.matches(withParent(withId(R.id.activity_settings_toolbar))))
 
-        val imageView = Espresso.onView(
-                Matchers.allOf(withId(R.id.fragment_personwithsaleinfo_profile_picture),
-                        childAtPosition(
-                                withParent(withId(R.id.activity_person_with_saleinfo_detail_viewpager)),
-                                0),
-                        isDisplayed()))
-        imageView.check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withId(R.id.activity_settings_users_cl)).check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withId(R.id.activity_settings_groups_cl)).check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withId(R.id.activity_settings_locations_cl)).check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withId(R.id.activity_settings_locations_imageview)).check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withId(R.id.imageView12)).check(ViewAssertions.matches(isDisplayed()))
+        Espresso.onView(withId(R.id.activity_settings_roles_imageview)).check(ViewAssertions.matches(isDisplayed()))
 
-        val textView = Espresso.onView(withId(R.id.fragment_personwithsaleinfo_profile_notes))
-        textView.check(ViewAssertions.matches(withText("We1 Summary notes")))
+        Espresso.onView(withId(R.id.activity_settings_roles_title)).check(ViewAssertions.matches(withText(R.string.users)))
+        Espresso.onView(withId(R.id.activity_settings_roles_desc)).check(ViewAssertions.matches(withText(R.string.users_settings_desc)))
+        Espresso.onView(withId(R.id.textView8)).check(ViewAssertions.matches(withText(R.string.group_setting_desc)))
+        Espresso.onView(withId(R.id.textView7)).check(ViewAssertions.matches(withText(R.string.groups)))
+        Espresso.onView(withId(R.id.activity_settings_locations_title)).check(ViewAssertions.matches(withText(R.string.locations)))
+        Espresso.onView(withId(R.id.activity_settings_locations_desc)).check(ViewAssertions.matches(withText(R.string.locations_setting_desc)))
 
-        val textView2 = Espresso.onView(withId(R.id.fragment_personwithsaleinfo_profile_phone))
-
-        textView2.check(ViewAssertions.matches(withText("+912121212121")))
-
-        val textView3 = Espresso.onView(withId(R.id.fragment_personwithsaleinfo_profile_address))
-
-        textView3.check(ViewAssertions.matches(withText("123, Fourth Street, Fifth Avenue")))
-
-        val textView4 = Espresso.onView(withId(R.id.fragment_personwithsaleinfo_profile_address))
-
-        textView4.check(ViewAssertions.matches(withText("123, Fourth Street, Fifth Avenue")))
     }
-
 
     @Test
-    fun givenActivityLoads_whenCreated_shouldLoadPicture(){
+    fun givenActivityLoads_whenUserCreated_shouldGoWithRightArgs(){
         launchActivity()
+        Espresso.onView(withId(R.id.activity_settings_users_cl)).perform(click())
 
-        //TODO: KMP Add when Backend ready.
+        //TODO: Finish this
     }
 
-    private fun childAtPosition(
-            parentMatcher: Matcher<View>, position: Int): Matcher<View> {
+    @Test
+    fun givenActivityLoads_whenGroupCreated_shouldGoWithRightArgs(){
+        launchActivity()    
+        Espresso.onView(withId(R.id.activity_settings_groups_cl)).perform(click())
 
-        return object : TypeSafeMatcher<View>() {
-            override fun describeTo(description: Description) {
-                description.appendText("Child at position $position in parent ")
-                parentMatcher.describeTo(description)
-            }
-
-            public override fun matchesSafely(view: View): Boolean {
-                val parent = view.parent
-                return parent is ViewGroup && parentMatcher.matches(parent)
-                        && view == parent.getChildAt(position)
-            }
-        }
+        //TODO: Finish this
     }
+
+    @Test
+    fun givenActivityLoads_whenLocationCreated_shouldGoWithRightArgs(){
+        launchActivity()
+        Espresso.onView(withId(R.id.activity_settings_locations_cl)).perform(click())
+
+        //TODO: Finish this
+    }
+
 
 
 
     //SETUP//
 
-    var le1Uid:Long = 0
-    var le2Uid:Long = 0
+    var le1Uid: Long = 0
+    var le2Uid: Long = 0
 
-    var we1PersonUid:Long = 0L
-    var we2PersonUid:Long = 0L
+    var we1PersonUid: Long = 0L
+    var we2PersonUid: Long = 0L
 
-    var sale11Uid:Long = 0L
-    var sale22Uid:Long = 0L
+    var sale11Uid: Long = 0L
+    var sale22Uid: Long = 0L
 
 
-    fun insert(db: UmAppDatabase, clear:Boolean = false){
+    fun insert(db: UmAppDatabase, clear: Boolean = false) {
 
-        if(clear){
+        if (clear) {
             db.clearAllTables()
         }
         val personDao = db.personDao

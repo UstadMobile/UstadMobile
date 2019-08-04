@@ -180,6 +180,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     }
 
 
+    var appPref = HashMap<String, String>()
     /**
      * Get a preference for the app
      *
@@ -187,7 +188,11 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String?{
-        TODO("not implemented")
+        if(appPref.containsKey(key)){
+            return appPref.get(key)
+        }else{
+            return null
+        }
     }
 
 
@@ -197,7 +202,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @param value value to be set
      */
     override actual fun setAppPref(key: String, value: String?, context: Any){
-        TODO("not implemented")
+        appPref.put(key, value!!)
     }
 
 

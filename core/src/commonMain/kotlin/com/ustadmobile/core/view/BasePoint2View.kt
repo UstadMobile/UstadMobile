@@ -18,6 +18,8 @@ interface BasePoint2View : UstadView {
     fun sendToast(messageId: Int)
     fun checkPermissions()
 
+    fun showSettings(show: Boolean)
+
     /**
      * Show a dialog used to share the application itself offline
      */

@@ -20,7 +20,6 @@ import com.ustadmobile.core.controller.SelectProducerPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SelectProducerView
 import com.ustadmobile.lib.db.entities.Person
-import java.util.*
 
 class SelectProducerActivity : UstadBaseActivity(), SelectProducerView {
 

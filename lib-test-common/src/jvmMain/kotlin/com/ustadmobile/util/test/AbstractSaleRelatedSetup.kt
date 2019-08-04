@@ -14,6 +14,8 @@ abstract class AbstractSaleRelatedSetup {
     var sale11Uid:Long = 0L
     var sale22Uid:Long = 0L
 
+    var umAccount: UmAccount? = null
+
 
     fun insert(db: UmAppDatabase, clear:Boolean = false){
 
@@ -131,6 +133,8 @@ abstract class AbstractSaleRelatedSetup {
         saleItemDao.insert(saleItem23)
         saleItemDao.insert(saleItem24)
 
+        //Set active account to le1
+        umAccount = UmAccount(le1Uid, "le1", "auth", "endpoint")
 
     }
 }

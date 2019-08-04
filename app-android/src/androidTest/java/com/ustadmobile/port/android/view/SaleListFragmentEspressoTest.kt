@@ -80,11 +80,6 @@ class SaleListFragmentEspressoTest{
         onView(withId(R.id.fragment_sale_list_sort_by_spinner)).perform(click())
         Espresso.onData(CoreMatchers.anything()).atPosition(0).perform(click())
 
-
-
-
-
-
         //RV ok
 
         val textView = onView(

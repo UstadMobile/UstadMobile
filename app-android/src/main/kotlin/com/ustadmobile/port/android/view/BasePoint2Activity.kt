@@ -248,6 +248,14 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
     }
 
+    override fun showSettings(show: Boolean) {
+
+        val allClazzSettingsMenuItem = mOptionsMenu!!.findItem(R.id.menu_settings_gear)
+        if (allClazzSettingsMenuItem != null) {
+            allClazzSettingsMenuItem.isVisible = show
+        }
+    }
+
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
      * the activity goes back when the back button is pressed.
@@ -268,6 +276,9 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         }
         if (i == R.id.menu_basepoint_sync) {
             forceSync()
+        }
+         if ( i == R.id.menu_settings_gear){
+            mPresenter!!.handleClickSettingsIcon()
         }
 
         if (i == R.id.menu_basepoint_search) {

@@ -195,4 +195,24 @@
     <string name="top_products">Top products</string>
     <string name="profile">Profile</string>
     <string name="summary">Summary</string>
+
+    <!--Sprint 7-->
+    <string name="users">Users</string>
+    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
+    <string name="user">User</string>
+    <string name="send_message">Send message</string>
+    <string name="reset_password">Reset password</string>
+    <string name="deactivate">Deactivate</string>
+    <string name="groups">Groups</string>
+    <string name="group">Group</string>
+    <string name="group_setting_desc">Add, remove, or modify groups</string>
+    <string name="group_name">Group name</string>
+    <string name="members">Members</string>
+    <string name="add_members">Add members</string>
+    <string name="remove">Remove</string>
+    <string name="subgroup">Subgroup</string>
+    <string name="locations">Locations</string>
+    <string name="locations_setting_desc">Manage locations</string>
+
+
 </resources>

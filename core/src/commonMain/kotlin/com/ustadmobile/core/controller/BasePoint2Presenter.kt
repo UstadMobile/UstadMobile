@@ -7,10 +7,7 @@ import com.ustadmobile.core.db.dao.SalePaymentDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.BasePoint2View
-import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -25,7 +22,8 @@ import kotlinx.coroutines.launch
  */
 class BasePoint2Presenter(context: Any,
                           arguments: Map<String, String>?,
-                          view: BasePoint2View)
+                          view: BasePoint2View,
+                          val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<BasePoint2View>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
@@ -58,14 +56,17 @@ class BasePoint2Presenter(context: Any,
 
         personLive = repository.personDao.findByUidLive(loggedInPersonUid!!)
         val thisP = this
-        GlobalScope.launch(Dispatchers.Main) {
-            personLive.observe(thisP, thisP::handlePersonValueChanged)
-        }
+        personLive.observe(thisP, thisP::handlePersonValueChanged)
+
+//        GlobalScope.launch(Dispatchers.Main) {
+//
+//        }
 
         personPictureLive = repository.personPictureDao.findByPersonUidLive(loggedInPersonUid!!)
-        GlobalScope.launch(Dispatchers.Main) {
-            personPictureLive.observe(thisP, thisP::handlePersonPictureChanged)
-        }
+        personPictureLive.observe(thisP, thisP::handlePersonPictureChanged)
+//        GlobalScope.launch(Dispatchers.Main) {
+//
+//        }
 
 
 
@@ -127,7 +128,6 @@ class BasePoint2Presenter(context: Any,
     fun handleLogOut() {
         val blankAccount = UmAccount(0, null, null,null)
         UmAccountManager.setActiveAccount(blankAccount, context)
-        val impl = UstadMobileSystemImpl.instance
         UmAccountManager.updatePasswordHash(null, context, impl)
         val args = HashMap<String, String>()
         impl.go(LoginView.VIEW_NAME, args, context)
@@ -137,17 +137,22 @@ class BasePoint2Presenter(context: Any,
      * About menu clicked.
      */
     fun handleClickAbout() {
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(AboutView.VIEW_NAME, args, context)
     }
+
+
+    fun handleClickSettingsIcon(){
+        val args = HashMap<String, String>()
+        impl.go(SettingsView.VIEW_NAME, args, context)
+    }
+
 
     /**
      * Confirm that user wants to share the app which will get the app set up file and share it
      * upon getting it from System Impl.
      */
     fun handleConfirmShareApp() {
-        val impl = UstadMobileSystemImpl.instance
 
         //Get setup file
         impl.getAppSetupFile(context, false, object : UmCallback<Any> {
@@ -197,7 +202,6 @@ class BasePoint2Presenter(context: Any,
     }
 
     fun handleClickPersonIcon() {
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(UserProfileView.VIEW_NAME, args, context)
     }
