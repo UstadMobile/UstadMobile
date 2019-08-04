@@ -4,5 +4,5 @@ import kotlin.reflect.KClass
 
 interface DoorDatabaseSyncRepository {
 
-    fun sync(tablesToSync: List<KClass<*>>)
+    suspend fun sync(tablesToSync: List<KClass<*>>?)
 }

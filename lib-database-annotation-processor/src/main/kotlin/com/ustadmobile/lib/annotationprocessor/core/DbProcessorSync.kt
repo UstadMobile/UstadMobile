@@ -175,8 +175,9 @@ class DbProcessorSync: AbstractDbProcessor() {
 
     fun generateSyncRepository(dbType: TypeElement): FileSpec {
         val dbClassName = dbType.asClassName()
+        val syncDaoSimpleName = "${dbClassName.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}"
         val syncRepoSimpleName =
-                "${dbClassName.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}_${DbProcessorRepository.SUFFIX_REPOSITORY}"
+                "${syncDaoSimpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}"
         val repoFileSpec = FileSpec.builder(dbClassName.packageName,
                 syncRepoSimpleName)
         val daoClassName = ClassName(dbClassName.packageName,
@@ -184,14 +185,18 @@ class DbProcessorSync: AbstractDbProcessor() {
         val repoTypeSpec = newRepositoryClassBuilder(daoClassName, false)
                 .addSuperinterface(DoorDatabaseSyncRepository::class as KClass<*>)
 
+        val syncFnCodeBlock = CodeBlock.builder()
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
+            val entityListTypeName = List::class.asClassName().parameterizedBy(entityType.asClassName())
 
-            repoTypeSpec.addFunction(FunSpec.builder("_replace${entityType.simpleName}")
+            val replaceEntitiesFn = FunSpec.builder("_replace${entityType.simpleName}")
                     .addParameter("_entities", List::class.asClassName().parameterizedBy(entityType.asClassName()))
                     .addModifiers(KModifier.OVERRIDE)
                     .addCode("_dao._replace${entityType.simpleName}(_entities)\n")
-                    .build())
+                    .build()
+            repoTypeSpec.addFunction(replaceEntitiesFn)
 
 
             repoTypeSpec.addFunction(FunSpec.builder("_replace${syncableEntityInfo.tracker.simpleName}")
@@ -215,13 +220,38 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .addParameter("requestId", INT)
                     .addCode("_dao._update${syncableEntityInfo.tracker.simpleName}Received(status, requestId)\n")
                     .build())
+
+
+            val findMasterUnsentFnSpec = FunSpec.builder("_findMasterUnsent${entityType.simpleName}")
+                    .returns(entityListTypeName)
+                    .addModifiers(KModifier.SUSPEND)
+                    .addAnnotation(AnnotationSpec.builder(Query::class)
+                            .addMember(CodeBlock.of("%S", "SELECT * FROM ${entityType.simpleName}")).build())
+
+            syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
+                    entityType)
+                    .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
+                            syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
+                    .add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                    .beginControlFlow("if(!_entities.isEmpty())")
+                    .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
+                            daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
+                            httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
+                            httpResultType = UNIT, params = replaceEntitiesFn.parameters))
+                    .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
+                            entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
+                            reqIdVarName = "0", processingEnv = processingEnv))
+                    .endControlFlow()
+                    .endControlFlow()
+
         }
 
 
         repoTypeSpec.addFunction(FunSpec.builder("sync")
-                .addModifiers(KModifier.OVERRIDE)
+                .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
                 .addParameter("entities", List::class.asClassName().parameterizedBy(
-                        KClass::class.asClassName().parameterizedBy(STAR)))
+                        KClass::class.asClassName().parameterizedBy(STAR)).copy(nullable = true))
+                .addCode(syncFnCodeBlock.build())
                 .build())
 
         return repoFileSpec.addType(repoTypeSpec.build()).build()

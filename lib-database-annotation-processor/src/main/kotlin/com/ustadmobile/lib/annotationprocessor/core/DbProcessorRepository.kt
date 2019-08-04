@@ -278,64 +278,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
         return codeBlock.build()
     }
 
-    fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String): CodeBlock {
-        val codeBlock = CodeBlock.builder()
-        val daoFunReturnType = daoFunSpec.returnType!!
-        val resultType = resolveQueryResultType(daoFunReturnType)
-        val isLiveDataOrDataSourceFactory = daoFunReturnType is ParameterizedTypeName
-                && daoFunReturnType.rawType in
-                listOf(DoorLiveData::class.asClassName(), DataSource.Factory::class.asClassName())
-
-        if (KModifier.SUSPEND !in daoFunSpec.modifiers) {
-            if(isLiveDataOrDataSourceFactory) {
-                codeBlock.beginControlFlow("%T.%M",
-                        GlobalScope::class, MemberName("kotlinx.coroutines", "launch"))
-            }else {
-                codeBlock.beginControlFlow("%M",
-                        MemberName("kotlinx.coroutines", "runBlocking"))
-            }
-        }
-
-
-        codeBlock.add(generateKtorRequestCodeBlockForMethod(
-                daoName = daoName,
-                methodName = daoFunSpec.name,
-                httpResultType = resultType,
-                requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
-                    MemberName("io.ktor.client.request", "header"),
-                        "X-nid"),
-                params = daoFunSpec.parameters))
-        codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
-                "X-reqid")
-
-        codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
-                afterInsertCode = {
-                    CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
-                            CLIENT_GET_MEMBER_NAME)
-                            .beginControlFlow("url")
-                            .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
-                            .add("path(%S, %S)\n", daoName,
-                                    "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
-                            .endControlFlow()
-                            .add("%M(%S, _requestId)\n",
-                                    MemberName("io.ktor.client.request", "parameter"),
-                                    "reqId")
-                            .endControlFlow()
-                            .build()
-                },
-                resultType = resultType, processingEnv = processingEnv))
-
-        if(KModifier.SUSPEND !in daoFunSpec.modifiers) {
-            codeBlock.endControlFlow()
-        }
-
-        codeBlock.add("return _dao.${daoFunSpec.name}(")
-                .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
-                .add(")\n")
-
-        return codeBlock.build()
-    }
-
 
     companion object {
         const val SUFFIX_REPOSITORY = "Repo"

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import androidx.paging.DataSource
 import androidx.room.*
 import com.squareup.kotlinpoet.*
 import java.lang.RuntimeException
@@ -18,7 +19,9 @@ import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorLiveData
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import kotlinx.coroutines.GlobalScope
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -282,6 +285,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
  */
 fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resultType: TypeName,
                                                     syncHelperDaoVarName: String = "_syncHelper",
+                                                    clientIdVarName: String = "clientId",
+                                                    reqIdVarName: String = "_reqId",
                                                     processingEnv: ProcessingEnvironment): CodeBlock {
     val codeBlock = CodeBlock.builder()
     val resultComponentType = resolveEntityFromResultType(resultType)
@@ -322,9 +327,9 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
 
         codeBlock.add("""$syncHelperDaoVarName._replace${sEntityInfo.tracker.simpleName}( ${wrapperFnName.first} %T(
                              |${sEntityInfo.trackerPkField.name} = $varName.${sEntityInfo.entityPkField.name},
-                             |${sEntityInfo.trackerDestField.name} = clientId,
+                             |${sEntityInfo.trackerDestField.name} = $clientIdVarName,
                              |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name},
-                             |${sEntityInfo.trackerReqIdField.name} = _reqId
+                             |${sEntityInfo.trackerReqIdField.name} = $reqIdVarName
                              |) ${wrapperFnName.second} )
                              |""".trimMargin(), sEntityInfo.tracker)
         if(!isListOrArrayResult) {
@@ -1019,6 +1024,70 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.add(")\n")
 
         codeBlock.add(generateRespondCall(returnType!!, "_result"))
+
+        return codeBlock.build()
+    }
+
+    fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String,
+                                                 syncHelperDaoVarName: String = "_syncHelper",
+                                                 addReturnDaoResult: Boolean  = true): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val daoFunReturnType = daoFunSpec.returnType!!
+        val resultType = resolveQueryResultType(daoFunReturnType)
+        val isLiveDataOrDataSourceFactory = daoFunReturnType is ParameterizedTypeName
+                && daoFunReturnType.rawType in
+                listOf(DoorLiveData::class.asClassName(), DataSource.Factory::class.asClassName())
+
+        if (KModifier.SUSPEND !in daoFunSpec.modifiers) {
+            if(isLiveDataOrDataSourceFactory) {
+                codeBlock.beginControlFlow("%T.%M",
+                        GlobalScope::class, MemberName("kotlinx.coroutines", "launch"))
+            }else {
+                codeBlock.beginControlFlow("%M",
+                        MemberName("kotlinx.coroutines", "runBlocking"))
+            }
+        }
+
+
+        codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                daoName = daoName,
+                methodName = daoFunSpec.name,
+                httpResultType = resultType,
+                requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
+                        MemberName("io.ktor.client.request", "header"),
+                        "X-nid"),
+                params = daoFunSpec.parameters))
+        codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
+                "X-reqid")
+
+        codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
+                afterInsertCode = {
+                    CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
+                            CLIENT_GET_MEMBER_NAME)
+                            .beginControlFlow("url")
+                            .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
+                            .add("path(%S, %S)\n", daoName,
+                                    "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
+                            .endControlFlow()
+                            .add("%M(%S, _requestId)\n",
+                                    MemberName("io.ktor.client.request", "parameter"),
+                                    "reqId")
+                            .endControlFlow()
+                            .build()
+                },
+                resultType = resultType, processingEnv = processingEnv,
+                syncHelperDaoVarName = syncHelperDaoVarName))
+
+        if(KModifier.SUSPEND !in daoFunSpec.modifiers) {
+            codeBlock.endControlFlow()
+        }
+
+        if(addReturnDaoResult) {
+            codeBlock.add("return _dao.${daoFunSpec.name}(")
+                    .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
+                    .add(")\n")
+        }
+
 
         return codeBlock.build()
     }
