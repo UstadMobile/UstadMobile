@@ -399,6 +399,9 @@ fun CodeBlock.Builder.addWithNullCheckIfNeeded(varName: String, typeName: TypeNa
     return this
 }
 
+internal fun isSyncableDb(dbTypeEl: TypeElement, processingEnv: ProcessingEnvironment) =
+        processingEnv.typeUtils.isAssignable(dbTypeEl.asType(),
+                processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())
 
 abstract class AbstractDbProcessor: AbstractProcessor() {
 

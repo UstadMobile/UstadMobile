@@ -17,6 +17,9 @@ import db2.ExampleSyncableDao_Repo
 
 class TestDbRepo {
 
+    lateinit var serverDb : ExampleDatabase2
+
+
     @Before
     fun setupMockServer() {
 
@@ -60,7 +63,9 @@ class TestDbRepo {
         Assert.assertEquals("Repo made request to acknowledge receipt of entities",
                 "/ExampleSyncableDao/_updateExampleSyncableEntityTrackerReceived?reqId=50",
                 secondRequest.path)
-
     }
+
+
+
 
 }

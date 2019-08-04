@@ -576,12 +576,22 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 "${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
 
 
+        val constructorFn = FunSpec.constructorBuilder()
+                .addParameter("dataSource", DataSource::class)
+                .addCode("this.dataSource = dataSource\n")
+                .addCode("setupFromDataSource()\n")
         val dbImplType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
                 .superclass(dbTypeElement.asClassName())
-                .addFunction(FunSpec.constructorBuilder()
-                        .addParameter("dataSource", DataSource::class)
-                        .addCode("this.dataSource = dataSource\n")
-                        .addCode("setupFromDataSource()\n").build())
+
+        if(isSyncableDb(dbTypeElement, processingEnv)) {
+            constructorFn.addParameter(ParameterSpec.builder("master", BOOLEAN)
+                    .addModifiers(KModifier.OVERRIDE).build())
+            dbImplType.addProperty(PropertySpec.builder("master", BOOLEAN)
+                    .initializer("master").build())
+        }
+
+
+        dbImplType.addFunction(constructorFn.build())
         dbImplType.addFunction(generateCreateTablesFun(dbTypeElement))
         dbImplType.addFunction(generateClearAllTablesFun(dbTypeElement))
 
