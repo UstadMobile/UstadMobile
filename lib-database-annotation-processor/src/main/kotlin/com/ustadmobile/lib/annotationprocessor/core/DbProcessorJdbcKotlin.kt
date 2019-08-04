@@ -481,7 +481,7 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
     codeBlock.add("val _nodeId = %T.nextInt(1, %T.MAX_VALUE)\n",
             Random::class, Int::class)
             .add("println(\"Setting SyncNode nodeClientId = \$_nodeId\")\n")
-            .add("$stmtVarName.executeUpdate(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES·(\$_nodeId,0)\")\n")
+            .add("$stmtVarName.executeUpdate(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES·(\$_nodeId,\${if(master) 1 else 0})\")\n")
     syncableEntityTypesOnDb(dbType, processingEnv).forEach {
         if(isUpdate) {
             codeBlock.add("$stmtVarName.executeUpdate(%S)\n",
@@ -585,13 +585,14 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
         if(isSyncableDb(dbTypeElement, processingEnv)) {
             constructorFn.addParameter(ParameterSpec.builder("master", BOOLEAN)
+                    .defaultValue("false")
                     .addModifiers(KModifier.OVERRIDE).build())
             dbImplType.addProperty(PropertySpec.builder("master", BOOLEAN)
                     .initializer("master").build())
         }
 
 
-        dbImplType.addFunction(constructorFn.build())
+        dbImplType.primaryConstructor(constructorFn.build())
         dbImplType.addFunction(generateCreateTablesFun(dbTypeElement))
         dbImplType.addFunction(generateClearAllTablesFun(dbTypeElement))
 

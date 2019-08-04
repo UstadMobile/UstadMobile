@@ -111,18 +111,23 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to createAllTables!")
                         .build())
 
-        val syncableDbType = processingEnv.elementUtils
-                .getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType()
-        if(processingEnv.typeUtils.isAssignable(dbTypeElement.asType(), syncableDbType)) {
+
+        if(isSyncableDb(dbTypeElement, processingEnv)) {
             val syncableDaoClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                     "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
             val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
             if(syncDaoMode == REPO_SYNCABLE_DAO_CONSTRUCT) {
-                syncDaoProperty.delegate("lazy {%T(this) }",
+                syncDaoProperty.delegate("lazy {%T(_db) }",
                         ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                                 "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
             }
             dbRepoType.addProperty(syncDaoProperty.build())
+
+            dbRepoType.addProperty(PropertySpec.builder("master", BOOLEAN)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .getter(FunSpec.getterBuilder().addCode("return _db.master").build())
+                    .build())
+
         }
 
         methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)

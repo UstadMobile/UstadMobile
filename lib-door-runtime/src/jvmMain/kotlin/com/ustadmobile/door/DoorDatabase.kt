@@ -57,7 +57,9 @@ actual abstract class DoorDatabase {
         tableNamesList.toList()
     }
 
-    actual constructor()
+    actual constructor() {
+
+    }
 
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource
