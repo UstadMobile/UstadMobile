@@ -6,16 +6,16 @@
  */
 
 const path = require('path');
-const fs = require('fs-extra');
+const fs = require('fs');
 let cp = require("child_process");
 const dependencies = [];
-const moduleList = createModuleList();
+let moduleList = null;
 const packages = [];
 
 /**
  * Create list of all packages to be installed
  */
-function createModuleList(){
+function getModuleList(){
     const moduleDir = path.resolve('../build/js/node_modules/')
     const modules = []
     fs.readdirSync(moduleDir).forEach(file => {
@@ -30,6 +30,26 @@ function createModuleList(){
       modules.splice(0,0,path.resolve(moduleDir+'/UstadMobile-lib-util'))
       modules.splice(0,0,path.resolve(moduleDir+'/UstadMobile-core'));
       return modules
+}
+
+/**
+ * Prepare package.json for use, remove all offline dependencies and install default app dependencies
+ */
+function prepareJsonPackageFile(){
+    const packagePath = path.resolve(path.resolve('./')+'/package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packagePath)) 
+    const dependencyList = packageJson.dependencies
+    Object.keys(dependencyList).forEach(key => {
+        const value = dependencyList[key]
+        if(value.toString().includes("file:../build/js/node_modules/")){
+            delete dependencyList[key]
+        }
+    })
+    
+    packageJson.dependencies = dependencyList
+    fs.writeFileSync(packagePath, JSON.stringify(packageJson,null, 2));
+    cp.execSync("sudo npm install", {cwd: path.resolve("./")});
+    generateCoreModules();
 }
 
 
@@ -56,9 +76,8 @@ function createPackage(modulePath){
     });
 }
 
-
 /**
- * Build core before creating module packages
+ * Generate JS core modules from source and start packing them 
  */
 function generateCoreModules(){
     console.log("Building :core.....")
@@ -66,8 +85,11 @@ function generateCoreModules(){
     console.log(result.toString())
     if(result.toString().includes("BUILD SUCCESSFUL")){
         console.log("Packaging .........");
-        createPackage(moduleList.pop())
+        moduleList = getModuleList();
+        createPackage(moduleList.pop());
     }
 }
 
-generateCoreModules();
+
+prepareJsonPackageFile();
+

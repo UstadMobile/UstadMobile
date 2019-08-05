@@ -16,14 +16,9 @@ After acquiring a copy of this app, the first thing to do is to install [Node](h
 ```
 npm install -g @angular/cli
 ```
-* Installing all dependencies
-```
-npm install
-```
 
 ## Development
-While you are still in app-angular , you can now build this module. It will create modules dependencies and install
-it for you.
+While you are still in app-angular , you can now build this module. It will create modules dependencies from core source and install them.
 
 * Install module dependencies
 ```
