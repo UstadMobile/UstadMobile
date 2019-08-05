@@ -11,4 +11,9 @@ interface PersonDetailView : UstadView {
     fun updateImageOnView(imagePath: String)
 
     fun updatePersonOnView(person: Person)
+
+    companion object{
+        val VIEW_NAME = "PersonDetailView"
+        val ARG_PERSON_UID = "ArgPersonUid"
+    }
 }

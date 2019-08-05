@@ -87,7 +87,7 @@ class SettingsActivityEspressoTest {
 
     @Test
     fun givenActivityLoads_whenGroupCreated_shouldGoWithRightArgs(){
-        launchActivity()    
+        launchActivity()
         Espresso.onView(withId(R.id.activity_settings_groups_cl)).perform(click())
 
         //TODO: Finish this
