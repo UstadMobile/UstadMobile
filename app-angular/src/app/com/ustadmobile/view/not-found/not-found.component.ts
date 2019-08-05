@@ -1,8 +1,6 @@
-import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
+import { UmDbMockService } from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
-import {environment} from 'src/environments/environment.prod';
-import { Router, ActivatedRoute, Params, NavigationEnd } from '@angular/router';
-import { com as core } from 'core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 

@@ -48,3 +48,4 @@ Thumbs.db
 /src/assets/locale/locale.*.json
 /src/assets/locale/messages.xlf
 /src/assets/locale/messages.*.xlf
+/package-lock.json

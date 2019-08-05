@@ -10,7 +10,7 @@ powered by open standards:
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
 
 ## Prerequisites
-After acquiring a copy of this app, the first thing to do is to install [Node](https://nodejs.org/en/download/) v8 or above (Everything depends on it). After Node installation, install angular CLI. Finally, install all dependencies used in the project since node_modules directory is git ignored. 
+After acquiring a copy of this app, the first thing to do is to install [Node](https://nodejs.org/en/download/) v8 or above (Everything depends on it). After Node installation, install angular CLI. Finally,change working directory to app-angular and install all dependencies used in the project since node_modules directory is git ignored. 
 
 * Installing Angular CLI
 ```
@@ -22,27 +22,22 @@ npm install
 ```
 
 ## Development
-We have used [Jar2Npm Plugin](https://github.com/svok/kotlin-jar2npm-plugin) to create Node package from kotlin multiplatform generated Jar file. To create node package follow the following procedures.
+While you are still in app-angular , you can now build this module. It will create modules dependencies and install
+it for you.
 
-* Generate Jar from Kotlin Multi-platform source
+* Install module dependencies
 ```
-./gradlew core:jsJar
+npm run um-build
 ```
+After that your IDE should see all the module dependencies and should be used like this:
+```
+import entity from 'UstadMobile-lib-database-entities';
 
-* Create Node package
+//it can be used by specifying full path to the class or object
+i.e
+const contentEntry = new entity.com.ustadmobile.lib.db.entities.ContentEntry();
 ```
-./gradlew app-angular:jar2npm
-```
-* Simplified
-```
- ./gradlew app-angular:clean core:clean core:jsJar app-angular:jar2npm
-```
-
-After that your IDE should see that:
-```
-import {com} from 'core';
-```
-* Running an app locally
+* Running an app locally (More info on how to customize this like specifying ports and e.t.c, check angular offical website)
 ```
 ng serve
 ```
