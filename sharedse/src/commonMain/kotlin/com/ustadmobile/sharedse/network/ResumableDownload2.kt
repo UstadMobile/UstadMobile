@@ -1,6 +1,7 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.defaultHttClient
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.io.*
 import io.ktor.client.HttpClient
@@ -35,7 +36,7 @@ import kotlin.coroutines.coroutineContext
  * beginning.
  */
 class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000,
-                         private val calcMd5: Boolean = true, val httpClient: HttpClient = HttpClient()) {
+                         private val calcMd5: Boolean = true, val httpClient: HttpClient = defaultHttClient()) {
 
     private var md5SumBytes: ByteArray? = null
 

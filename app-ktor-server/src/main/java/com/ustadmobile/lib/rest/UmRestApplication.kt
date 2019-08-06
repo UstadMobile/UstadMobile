@@ -9,9 +9,12 @@ import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.routing.Routing
+import java.io.File
+import java.nio.file.Files
 
-internal val _restApplicationDb = DatabaseBuilder.databaseBuilder(Any() , UmAppDatabase::class,
+internal val _restApplicationDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
         "UmAppDatabase").build()
+
 fun Application.umRestApplication() {
     install(ContentNegotiation) {
         gson {
@@ -22,5 +25,8 @@ fun Application.umRestApplication() {
 
     install(Routing) {
         ContainerDownload(_restApplicationDb)
+        H5PImportRoute(_restApplicationDb) { url: String, entryUid: Long, urlContent: String->
+            downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent)
+        }
     }
 }

@@ -13,7 +13,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0-rc01'
+        classpath 'com.android.tools.build:gradle:3.5.0-rc02'
         classpath 'com.google.gms:google-services:4.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -100,9 +100,9 @@ ext {
     version_compressor = "2.1.0"
     version_apache_commons_pool2 = "2.6.0"
     version_jsoup = "1.11.3"
-    version_selenium = "3.14.0"
+    version_selenium = "3.141.59"
     version_nv_lang = "1.23"
-    version_web_driver = "3.0.0"
+    version_web_driver = "3.6.2"
     version_jersey = "2.27"
     version_retrofit = "2.4.0"
     version_postgres_jdbc = "42.2.5"

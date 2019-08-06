@@ -5,6 +5,7 @@ plugins {
     id 'maven-publish'
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
     id 'com.github.johnrengelman.shadow'
+    id 'kotlinx-serialization'
 }
 
 configurations {
@@ -38,8 +39,13 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     standaloneRuntime "io.ktor:ktor-server-netty:$version_ktor"
     servletRuntime "io.ktor:ktor-server-servlet:$version_ktor"
+    implementation "io.ktor:ktor-server-netty:$version_ktor"
     implementation "io.ktor:ktor-jackson:$version_ktor"
     implementation "io.ktor:ktor-gson:$version_ktor"
+    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "commons-io:commons-io:$version_commons_io"
+    implementation "org.jsoup:jsoup:$version_jsoup"
 
     implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(":lib-database")
@@ -58,6 +64,8 @@ dependencies {
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    testImplementation "io.ktor:ktor-server-netty:$version_ktor"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
     standaloneRuntime "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     standaloneRuntime "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
