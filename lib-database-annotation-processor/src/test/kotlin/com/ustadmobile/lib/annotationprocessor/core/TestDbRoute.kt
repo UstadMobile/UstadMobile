@@ -96,7 +96,7 @@ class TestDbRoute  {
     }
 
     @Test
-    fun givenSyncableEntityInserted_whenReceiptAcknowledged_thenShouldReturnEmptyList() = runBlocking {
+    fun givenSyncableEntityInsertedOnServer_whenReceiptAcknowledged_thenNextRequestShouldReturnEmptyList() = runBlocking {
         val httpClient = HttpClient() {
             install(JsonFeature)
         }
@@ -122,7 +122,7 @@ class TestDbRoute  {
     }
 
     @Test
-    fun givenSyncableEntityInserted_whenReceiptIsNotAcknowledged_thenShouldReturnSameListAgain() = runBlocking {
+    fun givenSyncableEntityInsertedOnServer_whenReceiptIsNotAcknowledged_thenNextRequestShouldReturnSameListAgain() = runBlocking {
         val httpClient = HttpClient() {
             install(JsonFeature)
         }

@@ -199,6 +199,64 @@ class TestDbRepo {
         }
     }
 
+    @Test
+    fun givenEntityCreatedOnClient_whenUpdatedOnServerAndSyncCalled_thenShouldBeUpdatedOnClient() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+                httpClient) as ExampleDatabase2
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
+            exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            val entityOnServerAfterSync = serverDb.exampleSyncableDao()
+                    .findByUid(exampleSyncableEntity.esUid)
+
+            val serverRepo= serverDb.asRepository<ExampleDatabase2>("http://localhost/dummy", "token",
+                    httpClient) as ExampleDatabase2
+            serverRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 52)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            Assert.assertNotNull("Entity was synced to server after being created on client",
+                    entityOnServerAfterSync)
+            Assert.assertEquals("Syncing after change made on server, value on client is udpated",
+                    52, clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)!!.esNumber)
+        }
+    }
+
+    @Test
+    fun givenEntityCreatedOnServer_whenUpdatedOnClientAndSyncCalled_thenShouldBeUpdatedOnServer() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+                httpClient) as ExampleDatabase2
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>("http://localhost/dummy", "token",
+                httpClient) as ExampleDatabase2
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
+            exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            val entityOnClientAfterSync = clientDb.exampleSyncableDao()
+                    .findByUid(exampleSyncableEntity.esUid)
+
+
+            clientRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 53)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            Assert.assertNotNull("Entity was synced to client after being created on server",
+                    entityOnClientAfterSync)
+            Assert.assertEquals("Syncing after change made on server, value on server is udpated",
+                    53, serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)!!.esNumber)
+        }
+    }
+
 
 
 }
