@@ -4,8 +4,6 @@ import io.ktor.client.HttpClient
 
 interface SyncableDoorDatabase {
 
-    val nodeId: Int
-
     val master: Boolean
 
 }

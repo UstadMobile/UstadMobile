@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import com.google.gson.Gson
 import db2.ExampleDatabase2
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
@@ -50,6 +51,7 @@ class TestDbRoute  {
         exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         exampleDb.clearAllTables()
 
+        val gson = Gson()
         server = embeddedServer(Netty, 8089) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, GsonConverter())
@@ -58,8 +60,8 @@ class TestDbRoute  {
 
             val syncDao = ExampleDatabase2SyncDao_JdbcKt(exampleDb)
             install(Routing) {
-                ExampleDao2Route(exampleDb.exampleDao2(), exampleDb)
-                ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, syncDao)
+                ExampleDao2Route(exampleDb.exampleDao2(), exampleDb, gson)
+                ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, gson, syncDao)
             }
         }
 

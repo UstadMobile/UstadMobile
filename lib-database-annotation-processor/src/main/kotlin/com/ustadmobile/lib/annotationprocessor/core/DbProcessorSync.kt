@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.*
+import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.*
 import java.io.File
@@ -131,6 +132,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .receiver(Route::class)
                 .addParameter("_dao", abstractDaoClassName)
                 .addParameter("_db", DoorDatabase::class)
+                .addParameter("_gson", Gson::class)
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
@@ -186,6 +188,12 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addSuperinterface(DoorDatabaseSyncRepository::class as KClass<*>)
 
         val syncFnCodeBlock = CodeBlock.builder()
+
+        repoTypeSpec.addFunction(FunSpec.builder("_findSyncNodeClientId")
+                .addModifiers(KModifier.OVERRIDE)
+                .returns(INT)
+                .addCode("return _dao._findSyncNodeClientId()\n")
+                .build())
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
@@ -295,9 +303,16 @@ class DbProcessorSync: AbstractDbProcessor() {
                 implDaoSimpleName)
                 .addImport("com.ustadmobile.door", "DoorDbType")
 
+        //TODO: this is no longer made here - remove it from this fn
         val repoImplSimpleName = "${dbType.simpleName}${DbProcessorRepository.SUFFIX_REPOSITORY}"
         val repoImplSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 repoImplSimpleName)
+
+        val (abstractDaoFindSyncClientIdFn, implFindSyncClientIdFn) = generateAbstractAndImplQueryFunSpecs(
+                "SELECT nodeClientId FROM SyncNode", "_findSyncNodeClientId",
+                INT, listOf(), addReturnStmt = true)
+        abstractDaoTypeSpec.addFunction(abstractDaoFindSyncClientIdFn)
+        implDaoTypeSpec.addFunction(implFindSyncClientIdFn)
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
@@ -308,7 +323,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             val findLocalUnsentSql = "SELECT * FROM " +
                     "(SELECT * FROM ${entityType.simpleName} ) AS ${entityType.simpleName} " +
                     "WHERE " +
-                    "${syncableEntityInfo.entityLastChangedByField.name} = (SELECT dbNodeId FROM DoorDatabaseSyncInfo) AND " +
+                    "${syncableEntityInfo.entityLastChangedByField.name} = (SELECT nodeClientId FROM SyncNode) AND " +
                     "(${entityType.simpleName}.${syncableEntityInfo.entityLocalCsnField.name} > " +
                     "COALESCE((SELECT ${syncableEntityInfo.trackerCsnField.name} FROM ${syncableEntityInfo.tracker.simpleName} " +
                     "WHERE ${syncableEntityInfo.trackerPkField.name} = ${entityType.simpleName}.${syncableEntityInfo.entityPkField.name} " +

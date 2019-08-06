@@ -14,6 +14,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
 import db2.ExampleSyncableDaoRoute
+import db2.ExampleDatabase2SyncDao_Route
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -25,6 +26,8 @@ import io.ktor.server.netty.Netty
 import com.ustadmobile.door.asRepository
 import org.junit.After
 import java.util.concurrent.TimeUnit
+import com.ustadmobile.door.DoorDatabaseSyncRepository
+import kotlinx.coroutines.runBlocking
 
 
 class TestDbRepo {
@@ -44,8 +47,10 @@ class TestDbRepo {
         }
 
         val syncDao = ExampleDatabase2SyncDao_JdbcKt(db)
+        val gson = Gson()
         install(Routing) {
-            ExampleSyncableDaoRoute(db.exampleSyncableDao(), db, syncDao)
+            ExampleSyncableDaoRoute(db.exampleSyncableDao(), db, gson, syncDao)
+            ExampleDatabase2SyncDao_Route(syncDao, db, gson)
         }
     }
 
@@ -154,6 +159,45 @@ class TestDbRepo {
                 clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)!!.esNumber)
     }
 
+
+    @Test
+    fun givenEntityCreatedOnServer_whenRepoSyncCalled_thenShouldBePresentOnClient() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        runBlocking {
+
+
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
+            exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+                    httpClient) as ExampleDatabase2
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            Assert.assertNotNull("Entity is in client database after sync",
+                    clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid))
+        }
+    }
+
+    @Test
+    fun givenEntityCreatedOnClient_whenRepoSyncCalled_thenShouldBePresentOnServer() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+                httpClient) as ExampleDatabase2
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
+            exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            Assert.assertNotNull("Entity is in client database after sync",
+                    serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid))
+        }
+    }
 
 
 

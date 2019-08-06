@@ -13,9 +13,6 @@ import com.ustadmobile.door.SyncNode
     OtherSyncableEntity::class, OtherSyncableEntityTracker::class])
 abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {
 
-    override val nodeId
-        get() = 0
-
     abstract fun exampleSyncableDao(): ExampleSyncableDao
 
     abstract fun exampleDao2(): ExampleDao2

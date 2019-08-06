@@ -48,6 +48,7 @@ dependencies {
     implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     implementation "org.apache.commons:commons-text:$version_apache_commons_text"
 
+    implementation "com.google.code.gson:gson:$version_gson"
 
     //SQLite dependencies
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"

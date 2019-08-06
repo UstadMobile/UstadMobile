@@ -2,6 +2,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
@@ -12,6 +13,8 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.DoorDatabase
+import com.google.gson.reflect.TypeToken
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -22,12 +25,14 @@ import com.ustadmobile.door.DoorDatabase
  */
 fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
                                          declareVariableName: String? = null,
-                                         declareVariableType: String = "val"): CodeBlock {
+                                         declareVariableType: String = "val",
+                                         gsonVarName: String = "_gson"): CodeBlock {
     val codeBlock = CodeBlock.builder()
-
-    if(declareVariableName != null){
+    if(declareVariableName != null) {
         codeBlock.add("%L %L =", declareVariableType, declareVariableName)
     }
+
+    val precedingCodeblock = CodeBlock.builder()
 
     if(isQueryParam(typeName)) {
         if(typeName in QUERY_SINGULAR_TYPES) {
@@ -47,16 +52,17 @@ fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
             codeBlock.add(" ?: listOf()\n")
         }
     }else {
-        codeBlock.add("%M.%M<%T>()", DbProcessorKtorServer.CALL_MEMBER,
-                MemberName("io.ktor.request", "receive"),
-                removeTypeProjection(typeName))
+        codeBlock.add("$gsonVarName.fromJson(%M.%M<String>(), object: %T() {}.type)",
+                    DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request", "receiveOrNull"),
+                    TypeToken::class.asClassName().parameterizedBy(removeTypeProjection(typeName)))
     }
 
     if(declareVariableName != null){
         codeBlock.add("\n")
     }
 
-    return codeBlock.build()
+    return precedingCodeblock.add(codeBlock.build()).build()
 }
 
 /**
@@ -139,6 +145,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .receiver(Route::class)
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
                 .addParameter("_db", DoorDatabase::class)
+                .addParameter("_gson", Gson::class)
 
         if(syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).isNotEmpty()) {
             daoRouteFn.addParameter("_syncHelper",
@@ -169,9 +176,11 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
             val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
                     .returns(resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType())
-            daoMethodEl.parameters.forEachIndexed { index, paramEl ->
+            daoMethodEl.parameters
+                    .filter { !isContinuationParam(it.asType().asTypeName()) }
+                    .forEachIndexed { index, paramEl ->
                 funSpec.addParameter(paramEl.simpleName.toString(),
-                        daoMethodResolved.parameterTypes[index].asTypeName())
+                        daoMethodResolved.parameterTypes[index].asTypeName().javaToKotlinType())
             }
 
             val queryAnnotation = daoSubEl.getAnnotation(Query::class.java)

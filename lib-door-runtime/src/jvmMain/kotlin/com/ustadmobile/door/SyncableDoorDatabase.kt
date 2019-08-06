@@ -7,8 +7,7 @@ actual inline fun <reified  T> SyncableDoorDatabase.asRepository(endpoint: Strin
     val dbClass = Class.forName(dbClassName)
     val repoImplClass = Class.forName("${dbClassName}_Repo") as Class<T>
     val repo = repoImplClass
-            .getConstructor(dbClass, Int::class.javaPrimitiveType, String::class.java,
-                    String::class.java, HttpClient::class.java)
-            .newInstance(this, this.nodeId, endpoint, accessToken, httpClient)
+            .getConstructor(dbClass, String::class.java,String::class.java, HttpClient::class.java)
+            .newInstance(this, endpoint, accessToken, httpClient)
     return repo
 }

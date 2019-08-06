@@ -268,7 +268,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
 
     if(requestBodyParam != null) {
         codeBlock.addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
-                CodeBlock.of("body = ${requestBodyParam.name}\n"))
+                CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
+                        MemberName("io.ktor.client.features.json", "defaultSerializer")))
     }
 
     codeBlock.endControlFlow()

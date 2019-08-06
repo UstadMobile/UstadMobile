@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 import androidx.paging.DataSource
 import androidx.room.*
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
 import java.io.File
@@ -15,8 +16,10 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
 import kotlinx.coroutines.GlobalScope
+import kotlin.reflect.KClass
 
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
@@ -85,7 +88,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .superclass(dbTypeElement.asClassName())
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
-                        .addParameter(ParameterSpec.builder("_clientId", INT).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
                         .addParameter("_accessToken", String::class)
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
@@ -93,8 +95,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
                             dbTypeElement.asClassName()).initializer("_db").build(),
-                        PropertySpec.builder("_clientId",
-                                INT).initializer("_clientId").build(),
                         PropertySpec.builder("_endpoint",
                                 String::class.asClassName()).initializer("_endpoint").build(),
                         PropertySpec.builder("_accessToken", String::class)
@@ -123,9 +123,25 @@ class DbProcessorRepository: AbstractDbProcessor() {
             }
             dbRepoType.addProperty(syncDaoProperty.build())
 
+            dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
+                    .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
+
             dbRepoType.addProperty(PropertySpec.builder("master", BOOLEAN)
                     .addModifiers(KModifier.OVERRIDE)
                     .getter(FunSpec.getterBuilder().addCode("return _db.master").build())
+                    .build())
+
+            val repoImplClassName = ClassName(dbTypeElement.asClassName().packageName,
+                    "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
+            dbRepoType.addProperty(PropertySpec
+                    .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
+                    .delegate("lazy { %T(_syncDao, _httpClient, _clientId, _endpoint) }", repoImplClassName).build())
+            dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
+            dbRepoType.addFunction(FunSpec.builder("sync")
+                    .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
+                    .addParameter("entities", List::class.asClassName().parameterizedBy(
+                            KClass::class.asClassName().parameterizedBy(STAR)).copy(nullable = true))
+                    .addCode("_${syncableDaoClassName.simpleName}.sync(entities)\n")
                     .build())
 
         }
