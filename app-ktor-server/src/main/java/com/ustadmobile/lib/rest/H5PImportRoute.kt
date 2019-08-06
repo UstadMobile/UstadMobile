@@ -99,6 +99,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
             val iContext = InitialContext()
             val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
             val containerDir = File(containerDirPath)
+            containerDir.mkdirs()
 
             try {
 
