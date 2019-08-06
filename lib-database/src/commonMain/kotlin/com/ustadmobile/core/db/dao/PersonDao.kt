@@ -1,11 +1,14 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -16,7 +19,8 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 
 @UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
-        + ENTITY_LEVEL_PERMISSION_CONDITION2, updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
+        + ENTITY_LEVEL_PERMISSION_CONDITION2,
+        updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
         + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
@@ -28,8 +32,9 @@ abstract class PersonDao : BaseDao<Person> {
         var personUid: Long = 0
     }
 
+    //TODO: KMP Undo when Server bits ready
     @UmRestAccessible
-    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    //@UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
     suspend fun loginAsync(username: String, password: String): UmAccount? {
 
         val person = findUidAndPasswordHashAsync(username)
@@ -67,12 +72,16 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-  /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun incrementPrimaryKey()*/
+    /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
+      protected abstract fun incrementPrimaryKey()*/
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
-        val accessToken = AccessToken(personUid,
+        var accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
+
+        //TODO: KMP Disable when Access Token TODO is fixed.
+        accessToken = AccessToken(personUid, getSystemTimeInMillis() +
+                SESSION_LENGTH, getSystemTimeInMillis().toString())
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)
     }
@@ -112,11 +121,77 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
-    @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
+    @Query("SELECT Person.* FROM PERSON WHERE Person.personUid = :uid")
     abstract fun findByUid(uid: Long): Person?
+
+    @Query("SELECT * From Person WHERE personUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>
 
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long
+
+    @Query("SELECT * FROM Person WHERE personUid = :uid")
+    abstract suspend fun findByUidAsync(uid: Long) : Person?
+
+
+    @Query("SELECT * FROM Person WHERE active =1")
+    abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
+
+    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
+    abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person>
+
+    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
+    abstract fun findAllPeopleNameDescProvider(): DataSource.Factory<Int, Person>
+
+    @Update
+    abstract fun updateAsync(entity: Person):Int
+
+    @Query("Select * From Person WHERE active = 1")
+    abstract fun findAllPeople(): List<Person>
+
+    @Query("Select * From Person")
+    abstract fun findAllPeopleIncludingInactive(): List<Person>
+
+    @Query("select group_concat(firstNames||' '||lastNAme, ', ') " +
+            " from Person WHERE personUid in (:uids)")
+    abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
+
+
+    @Insert
+    abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long
+
+    @Insert
+    abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
+
+    suspend fun createPersonAndGroup(person:Person):Long{
+        //1. Insert the person if unique
+        try {
+            val personUid = insertAsync(person)
+            person.personUid = personUid
+
+            //2. Create person group
+
+            val personGroup = PersonGroup()
+            personGroup.groupName =
+                    (if (person.firstNames != null) {
+                        person.firstNames
+                    }else{
+                        person.personUid.toString() }) + "'s group"
+            val personGroupUid = insertPersonGroup(personGroup)
+
+            //3. Create person group member and assign to it
+            val personGroupMember = PersonGroupMember()
+            personGroupMember.groupMemberGroupUid = personGroupUid
+            personGroupMember.groupMemberPersonUid = personUid
+            personGroupMember.groupMemberUid = insertPersonGroupMember(personGroupMember)
+
+            return personGroupUid
+
+        }catch(e:Exception){
+            e.message
+            return 0L
+        }
+    }
 
     companion object {
 

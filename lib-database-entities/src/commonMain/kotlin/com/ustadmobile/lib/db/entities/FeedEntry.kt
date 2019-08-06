@@ -2,8 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity
 @Entity
@@ -20,6 +19,8 @@ class FeedEntry()  {
     var description: String? = null
 
     var link: String? = null
+
+    var feedEntryClazzName: String? = null
 
     /**
      * Get the deadline (in utime) by which the entry should be actioned (or 0 for no deadline)
@@ -47,5 +48,38 @@ class FeedEntry()  {
      * @param feedEntryHash the feed entry hash
      */
     var feedEntryHash: Long = 0
+
+    var isFeedEntryDone: Boolean = false
+
+    var feedEntryClazzLogUid: Long = 0
+
+    var dateCreated: Long = 0
+
+    /**
+     * As per ScheduledCheck.TYPE_ constants
+     */
+    var feedEntryCheckType: Int = 0
+
+    @UmSyncLocalChangeSeqNum
+    var feedEntryLocalChangeSeqNum: Long = 0
+
+    @UmSyncMasterChangeSeqNum
+    var feedEntryMasterChangeSeqNum: Long = 0
+
+    @UmSyncLastChangedBy
+    var feedEntryLastChangedBy: Int = 0
+
+
+    constructor(feedEntryUid: Long, title: String, description: String, link: String,
+                feedEntryClazzName: String, personUid: Long) : this() {
+        this.feedEntryUid = feedEntryUid
+        this.title = title
+        this.description = description
+        this.link = link
+        this.feedEntryClazzName = feedEntryClazzName
+        this.feedEntryPersonUid = personUid
+        this.dateCreated = 0
+        //TODO: date created bit
+    }
 
 }

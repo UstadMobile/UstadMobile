@@ -7,7 +7,7 @@ import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 47)
 @Entity
-class EntityRole() {
+open class EntityRole() {
 
     @PrimaryKey(autoGenerate = true)
     var erUid: Long = 0
@@ -37,11 +37,14 @@ class EntityRole() {
     @ColumnInfo(index = true)
     var erRoleUid: Long = 0
 
+    var erActive: Boolean = false
+
     constructor(erTableId: Int, erEntityUid: Long, erGroupUid: Long, erRoleUid: Long) : this() {
         this.erTableId = erTableId
         this.erEntityUid = erEntityUid
         this.erGroupUid = erGroupUid
         this.erRoleUid = erRoleUid
+        this.erActive = true
     }
 
 }

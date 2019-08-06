@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 
 @UmEntity(tableId = TABLE_ID)
 @Entity
-class Person() {
+open class Person() {
 
     @PrimaryKey(autoGenerate = true)
     var personUid: Long = 0
@@ -31,6 +31,18 @@ class Person() {
     var active: Boolean = false
 
     var admin: Boolean = false
+
+    private val fatherName: String? = null
+
+    private val fatherNumber: String? = null
+
+    private val motherName: String? = null
+
+    private val motherNum: String? = null
+
+    private val dateOfBirth: Long = 0
+
+    private val address: String? = null
 
     @UmSyncMasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

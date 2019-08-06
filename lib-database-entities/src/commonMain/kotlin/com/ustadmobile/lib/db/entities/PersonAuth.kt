@@ -24,6 +24,8 @@ class PersonAuth() {
 
     var passwordHash: String? = null
 
+    private val personAuthStatus: Int = 0
+
     @UmSyncLocalChangeSeqNum
     var personAuthLocalChangeSeqNum: Long = 0
 

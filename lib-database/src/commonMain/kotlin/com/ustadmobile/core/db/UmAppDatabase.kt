@@ -11,17 +11,32 @@ import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
-    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
-    ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
-    ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
-    Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
-    EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
-    LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
-    ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class,
-    VerbEntity::class, XObjectEntity::class, StatementEntity::class,
-    ContextXObjectStatementJoin::class, AgentEntity::class,
-    StateEntity::class, StateContentEntity::class], version = 24)
+    PersonCustomField::class, ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class,
+    ContentCategory::class, Language::class, LanguageVariant::class, Container::class,
+    ContainerEntry::class, ContainerEntryFile::class, VerbEntity::class, XObjectEntity::class,
+    StatementEntity::class, ContextXObjectStatementJoin::class, AgentEntity::class,
+    StateEntity::class, StateContentEntity::class
+
+    ,Clazz::class, ClazzMember::class, ClazzLog::class,
+    ClazzLogAttendanceRecord::class, FeedEntry::class,
+    PersonField::class, PersonCustomFieldValue::class,
+    PersonDetailPresenterField::class,
+    SelQuestion::class, SelQuestionResponse::class,
+    SelQuestionResponseNomination::class, SelQuestionSet::class,
+    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
+    Schedule::class, DateRange::class, UMCalendar::class,
+    ClazzActivity::class, ClazzActivityChange::class,
+    ContentEntry::class, ContentEntryContentCategoryJoin::class,
+    ContentEntryParentChildJoin::class, ContentEntryRelatedEntryJoin::class,
+    Location::class,
+    AccessToken::class, PersonAuth::class, Role::class, EntityRole::class,
+    PersonGroup::class, PersonGroupMember::class, LocationAncestorJoin::class,
+    SelQuestionOption::class, ScheduledCheck::class,
+    PersonLocationJoin::class, PersonPicture::class, ScrapeQueueItem::class, ScrapeRun::class,
+    ContentEntryStatus::class, ConnectivityStatus::class,
+    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class
+
+    ], version = 29)
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
@@ -115,6 +130,29 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val stateContentDao: StateContentDao
 
     abstract val agentDao: AgentDao
+
+
+    abstract val auditLogDao : AuditLogDao
+    abstract val clazzActivityChangeDao : ClazzActivityChangeDao
+    abstract val clazzActivityDao : ClazzActivityDao
+    abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
+    abstract val clazzLogDao : ClazzLogDao
+    abstract val customFieldDao: CustomFieldDao
+    abstract val customFieldValueDao : CustomFieldValueDao
+    abstract val customFieldValueOptionDao : CustomFieldValueOptionDao
+    abstract val dateRangeDao : DateRangeDao
+    abstract val feedEntryDao : FeedEntryDao
+    abstract val personDetailPresenterFieldDao : PersonDetailPresenterFieldDao
+    abstract val scheduleDao : ScheduleDao
+    abstract val scheduledCheckDao : ScheduledCheckDao
+    abstract val selQuestionDao : SelQuestionDao
+    abstract val selQuestionOptionDao : SelQuestionOptionDao
+    abstract val selQuestionResponseDao : SelQuestionResponseDao
+    abstract val selQuestionResponseNominationDao : SelQuestionResponseNominationDao
+    abstract val selQuestionSetDao : SelQuestionSetDao
+    abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
+    abstract val umCalendarDao : UMCalendarDao
+    
 
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
 
@@ -380,13 +418,13 @@ abstract class UmAppDatabase : DoorDatabase() {
                             db.execSql("CREATE TRIGGER inc_csn_9_trig AFTER UPDATE OR INSERT ON Person FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_9_fn()")
                             //END Create Person (PostgreSQL)
 
-                            //BEGIN Create Clazz (PostgreSQL)
+                            //BEGIN Create Clazz2 (PostgreSQL)
                             db.execSql("CREATE SEQUENCE spk_seq_6 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                            db.execSql("ALTER TABLE Clazz ALTER COLUMN clazzUid SET DEFAULT NEXTVAL('spk_seq_6')")
+                            db.execSql("ALTER TABLE Clazz2 ALTER COLUMN clazzUid SET DEFAULT NEXTVAL('spk_seq_6')")
                             db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (6, 1, 0, 0)")
-                            db.execSql("CREATE OR REPLACE FUNCTION inc_csn_6_fn() RETURNS trigger AS $$ BEGIN UPDATE Clazz SET clazzLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) END),clazzMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) ELSE NEW.clazzMasterChangeSeqNum END) WHERE clazzUid = NEW.clazzUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 6; RETURN null; END $\$LANGUAGE plpgsql")
-                            db.execSql("CREATE TRIGGER inc_csn_6_trig AFTER UPDATE OR INSERT ON Clazz FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_6_fn()")
-                            //END Create Clazz (PostgreSQL)
+                            db.execSql("CREATE OR REPLACE FUNCTION inc_csn_6_fn() RETURNS trigger AS $$ BEGIN UPDATE Clazz2 SET clazzLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) END),clazzMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) ELSE NEW.clazzMasterChangeSeqNum END) WHERE clazzUid = NEW.clazzUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 6; RETURN null; END $\$LANGUAGE plpgsql")
+                            db.execSql("CREATE TRIGGER inc_csn_6_trig AFTER UPDATE OR INSERT ON Clazz2 FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_6_fn()")
+                            //END Create Clazz2 (PostgreSQL)
 
                             //BEGIN Create ClazzMember (PostgreSQL)
                             db.execSql("CREATE SEQUENCE spk_seq_11 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))

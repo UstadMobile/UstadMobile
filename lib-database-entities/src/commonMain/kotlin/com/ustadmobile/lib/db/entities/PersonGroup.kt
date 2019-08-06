@@ -6,7 +6,7 @@ import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 43)
 @Entity
-class PersonGroup() {
+open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
     var groupUid: Long = 0
@@ -21,7 +21,6 @@ class PersonGroup() {
     var groupLastChangedBy: Int = 0
 
     var groupName: String? = null
-
 
     /**
      * If this was created as a group for one person, this is the uid for that Person object.

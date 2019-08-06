@@ -25,9 +25,13 @@ class Role() {
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
 
+    //active
+    var roleActive: Boolean = false
+
     constructor(roleName: String, rolePermissions: Long) : this() {
         this.roleName = roleName
         this.rolePermissions = rolePermissions
+        this.roleActive = true
     }
 
     companion object {
