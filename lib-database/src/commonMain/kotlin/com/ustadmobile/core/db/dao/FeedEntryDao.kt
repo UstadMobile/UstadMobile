@@ -54,12 +54,12 @@ abstract class FeedEntryDao : BaseDao<FeedEntry> {
     companion object {
 
         fun generateFeedEntryHash(personUid: Long, clazzLogUid: Long, alertType: Int,
-                                  link: String): Int {
+                                  link: String): Long {
             var hash = clazzLogUid.hashCode()
             hash = 31 * hash + personUid.hashCode()
             hash = 31 * hash + alertType
             hash = 31 * hash + link.hashCode()
-            return hash
+            return hash.toLong()
         }
     }
 }

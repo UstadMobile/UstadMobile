@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.AuditLog
 import com.ustadmobile.lib.db.entities.AuditLogWithNames
@@ -23,7 +24,7 @@ interface AuditLogListView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: UmProvider<AuditLogWithNames>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, AuditLogWithNames>)
 
     /**
      * Generate csv report from the View which has the table data

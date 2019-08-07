@@ -1,9 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.soywiz.klock.DateFormat
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.Month
-import com.soywiz.klock.Year
+import com.soywiz.klock.*
 
 /**
  * Basic calendar related utility methods. These are isolated in their own class as Calendar is not
@@ -76,6 +73,52 @@ object UMCalendarUtil {
         } else {
             year
         }
+    }
+
+    /**
+     * Gets date in long plus/minus the days specified from today.
+     *
+     * @param days  The days (positive or negative) off from today
+     * @return  The date in long
+     */
+    public fun getDateInMilliPlusDays(nDays: Int):Long {
+        val now = DateTime.now()
+        val duration = nDays.days
+        val then = now + duration
+        return then.unixMillisLong
+    }
+
+    /**
+     * Gets simple pretty looking date (eg; 23/Jan/89) from a long date specified.
+     *
+     * @param thisDate  The date in long for which we want a pretty simple date.
+     * @return  The pretty simple date for the long date specified as string.
+     */
+    fun getPrettyDateSuperSimpleFromLong(thisDate: Long):String{
+
+        val format: DateFormat = DateFormat("dd/MMM/yyyy")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    fun getPrettyDateSuperSimpleFromLong(thisDate: Long, locale: Any?):String{
+        return getPrettyDateSuperSimpleFromLong(thisDate)
+    }
+
+    /***
+     * Returns date as 23/Jan/1989
+     * @param thisDate  Long date
+     * @param locale    Locale
+     * @return          String "23/Jan/1989"
+     */
+    fun getPrettyDateSimpleFromLong(thisDate:Long,locale:Any?):String{
+        return getPrettyDateSuperSimpleFromLong(thisDate)
+    }
+
+    fun convertYYYYMMddToLong(date:String):Long{
+        val format = DateFormat("yyyy-MM-dd")
+        val date = format.parse(date)
+        return date.local.unixMillis.toLong()
     }
 
 }

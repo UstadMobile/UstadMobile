@@ -26,17 +26,17 @@ open class ClazzLog() {
 
     var timeRecorded: Long = 0
 
-    private var clazzLogDone: Boolean = false
+    var clazzLogDone: Boolean = false
 
-    private var clazzLogCancelled: Boolean = false
+    var clazzLogCancelled: Boolean = false
 
-    private var clazzLogNumPresent: Int = 0
+    var clazzLogNumPresent: Int = 0
 
-    private var clazzLogNumAbsent: Int = 0
+    var clazzLogNumAbsent: Int = 0
 
-    private var clazzLogNumPartial: Int = 0
+    var clazzLogNumPartial: Int = 0
 
-    private var clazzLogScheduleUid: Long = 0
+    var clazzLogScheduleUid: Long = 0
 
     @UmSyncMasterChangeSeqNum
     var clazzLogMSQN: Long = 0

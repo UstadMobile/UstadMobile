@@ -156,6 +156,9 @@ abstract class PersonDao : BaseDao<Person> {
             " from Person WHERE personUid in (:uids)")
     abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
 
+    @Query("SELECT * FROM Person WHERE admin = 1")
+    abstract fun findAllAdminsAsList(): List<Person>
+
 
     @Insert
     abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long

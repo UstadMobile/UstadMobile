@@ -152,7 +152,7 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val selQuestionSetDao : SelQuestionSetDao
     abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
     abstract val umCalendarDao : UMCalendarDao
-    
+
 
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
 

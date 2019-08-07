@@ -32,17 +32,17 @@ open class Person() {
 
     var admin: Boolean = false
 
-    private val fatherName: String? = null
+    var fatherName: String? = null
 
-    private val fatherNumber: String? = null
+    var fatherNumber: String? = null
 
-    private val motherName: String? = null
+    var motherName: String? = null
 
-    private val motherNum: String? = null
+    var motherNum: String? = null
 
-    private val dateOfBirth: Long = 0
+    var dateOfBirth: Long = 0
 
-    private val address: String? = null
+    var address: String? = null
 
     @UmSyncMasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

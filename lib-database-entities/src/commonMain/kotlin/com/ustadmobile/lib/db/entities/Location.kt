@@ -31,9 +31,9 @@ open class Location() {
     @UmSyncLastChangedBy
     var locationLastChangedBy: Int = 0
 
-    private var timeZone: String? = null
+    var timeZone: String? = null
 
-    private var locationActive: Boolean = false
+    var locationActive: Boolean = false
 
     constructor(title: String, description: String) : this() {
         this.title = title
