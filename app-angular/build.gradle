@@ -1,3 +1,6 @@
+import groovy.json.JsonBuilder
+import org.json.simple.JSONObject
+
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.tools.ant.taskdefs.condition.Os
 import com.github.eerohele.SaxonXsltTask
@@ -6,11 +9,13 @@ plugins {
   id("com.github.eerohele.saxon-gradle") version "0.7.0"
 }
 
+apply plugin: 'java'
+
 def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
 Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
 
 //Prepare dynamic task to generate XLF for each language locale
-def generateTranslationLocales = []
+def generateTranslationLocaleTasks = []
 new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
 
   def langCode = ""
@@ -29,14 +34,14 @@ new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
       strings_src: "${localeDir.absolutePath}/strings_ui.xml)"
     )
   }
-  generateTranslationLocales.push(taskName)
+  generateTranslationLocaleTasks.push(taskName)
 }
 
 
 /**
  * Generate locale json file whic maps code to actual string
  */
-task prepareWebJsonLocales{
+task prepareMessageIDMapJsonFilesForWeb{
   File outFile = null
   if(!file(translationsOutPath).exists()){
     file(translationsOutPath).mkdirs()
@@ -48,6 +53,7 @@ task prepareWebJsonLocales{
   rootProject.fileTree(dir: "core/locale/main").each() { File file ->
 
     Map<String, String> idToTranslationMap = new HashMap<>()
+    def jsonObj = new JSONObject()
 
     def separator = "/"
     if(Os.isFamily(Os.FAMILY_WINDOWS)){
@@ -67,9 +73,6 @@ task prepareWebJsonLocales{
     }
 
     def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-    def counter = 0
-    def terminator = ","
-    def fileContent = "{\n\n"
     def value = 0
     xmlDoc.string.each() { str ->
       String msgName = str.@name
@@ -85,22 +88,14 @@ task prepareWebJsonLocales{
         value = messageIds.get(msgName)
       }
 
-      if(counter == xmlDoc.string.size() -1){
-        terminator = ""
-      }
-
       msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
-      fileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
+      jsonObj.put(String.valueOf(value),msgValue)
 
       idToTranslationMap.put(msgName,msgValue)
       languageMapOfMaps.put(localeCode, idToTranslationMap)
-
-      counter++
     }
 
-    fileContent <<=  '}'
-    fileContent <<= ""
-    outFile << fileContent
+    outFile.write(new JsonBuilder(jsonObj).toPrettyString())
   }
 
 }
@@ -108,16 +103,51 @@ task prepareWebJsonLocales{
 /**
  * Generate default XLF file to be used for other translation
  */
-task generateDefaultLocaleXlf(type: Exec){
-  commandLine 'npm', 'run','um-translate'
+task generateDefaultLocaleXlf{
+  exec {
+    workingDir rootProject.file("app-angular/").path
+    commandLine 'ng','xi18n', '--output-path', 'assets/locale'
+  }
 }
-generateDefaultLocaleXlf.dependsOn(prepareWebJsonLocales)
-generateDefaultLocaleXlf.finalizedBy(generateTranslationLocales)
+generateDefaultLocaleXlf.dependsOn(prepareMessageIDMapJsonFilesForWeb)
+generateDefaultLocaleXlf.finalizedBy(generateTranslationLocaleTasks)
 
 /**
  * Generate other locale XLF files based on default translation
  */
 task generateOtherXliff{}
 generateOtherXliff.dependsOn(generateDefaultLocaleXlf)
+
+/**
+ * Remove node_modules directory from app-angular
+ */
+task deleteNodeModulesDirectory{
+  doLast{
+    if(project.file("node_modules").exists()){
+      exec {
+        workingDir rootProject.file("app-angular/").path
+        commandLine 'rm', '-r',project.file("node_modules").path
+      }
+    }
+  }
+}
+clean.dependsOn(deleteNodeModulesDirectory)
+
+/**
+ * Install all offline and other dependencies from project package.json
+ */
+task installDependencies{
+  doLast{
+    exec {
+      workingDir rootProject.file("app-angular/").path
+      commandLine 'npm', 'install'
+    }
+  }
+}
+
+
+build.dependsOn(installDependencies)
+installDependencies.dependsOn(":prepareModules")
+installDependencies.finalizedBy(generateOtherXliff)
 
 
