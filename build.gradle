@@ -217,6 +217,4 @@ task packPreparedModules{
     }
 }
 
-task prepareModules{}
-prepareModules.dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)
-prepareModules.finalizedBy(packPreparedModules)
+packPreparedModules.dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)

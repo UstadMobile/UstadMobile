@@ -104,9 +104,11 @@ task prepareMessageIDMapJsonFilesForWeb{
  * Generate default XLF file to be used for other translation
  */
 task generateDefaultLocaleXlf{
-  exec {
-    workingDir rootProject.file("app-angular/").path
-    commandLine 'ng','xi18n', '--output-path', 'assets/locale'
+  doLast{
+    exec {
+      workingDir rootProject.file("app-angular/").path
+      commandLine 'ng','xi18n', '--output-path', 'assets/locale'
+    }
   }
 }
 generateDefaultLocaleXlf.dependsOn(prepareMessageIDMapJsonFilesForWeb)
@@ -147,7 +149,7 @@ task installDependencies{
 
 
 build.dependsOn(installDependencies)
-installDependencies.dependsOn(":prepareModules")
-installDependencies.finalizedBy(generateOtherXliff)
+installDependencies.dependsOn(":packPreparedModules")
+generateOtherXliff.shouldRunAfter(installDependencies)
 
 
