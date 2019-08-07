@@ -6,4 +6,12 @@ interface ContentEntryImportLinkView : UstadView {
 
     fun displayUrl(url: String)
 
+    companion object{
+
+        const val CONTENT_ENTRY_PARENT_UID = "ContentEntryParentUid"
+
+        const val VIEW_NAME = "ContentEntryImportLinkView"
+
+    }
+
 }

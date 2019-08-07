@@ -4,7 +4,7 @@ import com.google.common.collect.Lists
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttClient
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
@@ -70,7 +70,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     val container = Container(contentEntry)
                     container.containerUid = containerDao.insert(container)
 
-                    call.respond(H5PImportData(contentEntry.contentEntryUid, container.containerUid))
+                    call.respond(H5PImportData(contentEntry, container, parentChildJoin))
                     h5pDownloadFn(url, contentEntry.contentEntryUid, pair.second)
 
                 }
@@ -94,7 +94,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
             val indexList = mutableListOf<LogIndex.IndexEntry>()
 
             val json = Json(JsonConfiguration.Stable.copy(strictMode = false))
-            val http = defaultHttClient()
+            val http = defaultHttpClient()
 
             val iContext = InitialContext()
             val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String

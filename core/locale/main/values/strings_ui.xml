@@ -289,4 +289,5 @@
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="no_account">Don\'t have an account?</string>
+    <string name="enter_url">Enter Url</string>
 </resources>

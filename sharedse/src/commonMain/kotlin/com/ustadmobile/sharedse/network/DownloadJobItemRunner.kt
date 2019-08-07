@@ -6,7 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.defaultHttClient
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
@@ -361,7 +361,7 @@ class DownloadJobItemRunner
                 downloadEndpoint = currentNetworkNode!!.endpointUrl
             }
 
-            currentHttpClient = (if (networkManager.localHttpClient != null) networkManager.localHttpClient else defaultHttClient())!!
+            currentHttpClient = (if (networkManager.localHttpClient != null) networkManager.localHttpClient else defaultHttpClient())!!
 
 
             history.url = downloadEndpoint

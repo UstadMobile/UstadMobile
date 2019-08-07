@@ -42,7 +42,7 @@ suspend fun checkIfH5PValidAndReturnItsContent(url: String): Pair<Boolean?, Stri
         return null
     }
 
-    var content = defaultHttClient().get<String>(urlLink)
+    var content = defaultHttpClient().get<String>(urlLink)
     return Pair(content.contains("H5PIntegration"), content)
 
 
