@@ -16,19 +16,15 @@ After acquiring a copy of this app, the first thing to do is to install [Node](h
 ```
 npm install -g @angular/cli
 ```
-* Installing all dependencies
-```
-npm install
-```
 
 ## Development
-While you are still in app-angular , you can now build this module. It will create modules dependencies and install
-it for you.
+While you are still in app-angular , you can now build this module. It will create modules dependencies from core source ready to be installed.
 
-* Install module dependencies
+* Building and installing
 ```
-npm run um-build
+./gradlew app-angular:build
 ```
+
 After that your IDE should see all the module dependencies and should be used like this:
 ```
 import entity from 'UstadMobile-lib-database-entities';

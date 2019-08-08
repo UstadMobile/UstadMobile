@@ -1,4 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+import groovy.json.JsonBuilder
+import org.json.simple.JSONObject
 
 buildscript {
     ext.version_kotlin = '1.3.41'
@@ -57,7 +59,7 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.2.8.65L1074"
+version = "0.2.8"
 group = "com.ustadmobile.app"
 
 ext {
@@ -154,3 +156,65 @@ if(project.file("buildconfig.local.properties").exists()) {
 ext.localProperties = new Properties()
 ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 
+
+//Map dependencies with the actual packages inside build/js/node_modules
+def dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"kmpxmlpullparser",
+                     "klock-js":"klock","":"kotlin-test","kotlinx-coroutines-core-js":"kotlinx-coroutines-core",
+                     "kotlinx-serialization-runtime-js":"kotlinx-serialization-runtime-js",
+                     "ktor-client-js":"ktor-ktor-client-js","ktor-client-serialization-js":"ktor-ktor-client-serialization",
+                     "napier-js":"napier"]
+def prepareModuleTasks = []
+subprojects { project ->
+    afterEvaluate{
+        if(project.tasks.findByName("jsJar") != null){
+            def fixJsonTask = "fixPackageJsonTask"
+            def packageName = "${rootProject.name}-${project.name}"
+            def modulePath = "${rootProject.file("build/js/node_modules/${packageName}").path}"
+            //add dynamic task to each module except core to fix package.json
+            project.task(fixJsonTask){
+                doLast{
+                    if(!project.name.contains("core")){
+                        def jsonObj = new JSONObject()
+                        jsonObj.put("main","kotlin/${packageName}.js")
+                        jsonObj.put("devDependencies",new JSONObject())
+
+                        def dependencies = new JSONObject()
+                        project.configurations.each {
+                            if (it.name == "jsMainImplementation") {
+                                it.allDependencies.each{ dep ->
+                                    dependencies.put(dependencyMap[dep.name],dep.version)
+                                }
+
+                                jsonObj.put("dependencies",dependencies)
+                            }
+                        }
+                        jsonObj.put("name","${packageName}")
+                        jsonObj.put("version","${rootProject.version}")
+                        new File("${modulePath}/package.json").write(new JsonBuilder(jsonObj).toPrettyString())
+                    }
+                }
+            }
+            //Run fixJsonTask after running jsJar to each modules
+            project.tasks.findByName(fixJsonTask).shouldRunAfter(project.tasks.findByName("jsJar"))
+            //Add all dynamic tasks to the list
+            prepareModuleTasks.push("${project.path}:${fixJsonTask}")
+        }
+    }
+}
+
+/**
+ * Pack all modules under build/js/node_modules/
+ */
+task packPreparedModules{
+    doLast{
+        new File("${rootProject.file("build/js/node_modules").path}").eachDir {
+            def dir = it.absolutePath
+            exec {
+                workingDir dir
+                commandLine 'npm', 'pack'
+            }
+        }
+    }
+}
+
+packPreparedModules.dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)
