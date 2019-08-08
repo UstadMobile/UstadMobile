@@ -112,6 +112,7 @@ kotlin {
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
             }
         }
 

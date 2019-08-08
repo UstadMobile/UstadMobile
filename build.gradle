@@ -90,6 +90,7 @@ ext {
     version_apache_commons_lang = "3.8.1"
     version_apache_commons_text = "1.6"
     version_apache_commons_dbcp2 = "2.5.0"
+    version_mpandroidchart = "v3.0.3"
 
     version_mockwebserver = "3.10.0"
     version_javapoet = "1.11.1"
@@ -111,6 +112,7 @@ ext {
     version_log4j = "2.8.2"
     version_exo_player = "2.8.4"
     version_napier = "0.0.6"
+    version_tellh_recyclertreeview = "1.2.0"
 
     version_android_buildtools = "28.0.3"
     version_android_compile_sdk = 28

@@ -2,12 +2,17 @@ package com.ustadmobile.test.port.android
 
 import android.os.Environment
 import android.os.SystemClock
+import android.view.View
+import android.view.ViewGroup
 import androidx.test.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.test.port.android.view.VideoPlayerTest
+import org.hamcrest.Description
+import org.hamcrest.Matcher
+import org.hamcrest.TypeSafeMatcher
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -63,6 +68,30 @@ object UmAndroidTestUtil {
             }
         }
         return false
+    }
+
+    fun swipeScreenDown(){
+        val uiDevice = UiDevice.getInstance(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation())
+        val deviceHeight = uiDevice.displayHeight
+        uiDevice.swipe(100, deviceHeight /2 , 0, 0, 10)
+    }
+
+
+    fun childAtPosition(
+            parentMatcher: Matcher<View>, position: Int): Matcher<View> {
+
+        return object : TypeSafeMatcher<View>() {
+            override fun describeTo(description: Description) {
+                description.appendText("Child at position $position in parent ")
+                parentMatcher.describeTo(description)
+            }
+
+            public override fun matchesSafely(view: View): Boolean {
+                val parent = view.parent
+                return parent is ViewGroup && parentMatcher.matches(parent)
+                        && view == parent.getChildAt(position)
+            }
+        }
     }
 
     private fun isAirPlaneModeSupported(contentDesc: String): Boolean {

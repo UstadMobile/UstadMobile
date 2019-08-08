@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinationLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nested_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/dimen_16dp">
+
+            <TextView
+                android:id="@+id/general_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_general"
+                android:textColor="@color/primary"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/visual_type_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_visual_type"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/general_label" />
+
+            <Spinner
+                android:id="@+id/type_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/visual_type_label" />
+
+            <TextView
+                android:id="@+id/axes_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_axes"
+                android:textColor="@color/primary"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/type_spinner" />
+
+            <TextView
+                android:id="@+id/yaxis_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_y_axes"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/axes_label" />
+
+            <Spinner
+                android:id="@+id/yaxis_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/yaxis_label" />
+
+            <TextView
+                android:id="@+id/xaxis_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_x_axes"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/yaxis_spinner" />
+
+            <Spinner
+                android:id="@+id/xaxis_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/xaxis_label" />
+
+            <TextView
+                android:id="@+id/subgroup_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_subgroup"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/xaxis_spinner" />
+
+            <Spinner
+                android:id="@+id/sub_group_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/subgroup_label" />
+
+            <TextView
+                android:id="@+id/filters_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_filters"
+                android:textColor="@color/primary"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sub_group_spinner" />
+
+            <TextView
+                android:id="@+id/who_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_who"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/filters_label" />
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/whoFlex"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/dimen_4dp"
+                app:alignContent="stretch"
+                app:alignItems="stretch"
+                app:flexWrap="wrap"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/who_label">
+
+                <AutoCompleteTextView
+                    android:id="@+id/whoAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
+
+            </com.google.android.flexbox.FlexboxLayout>
+
+            <TextView
+                android:id="@+id/did_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_did"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/whoFlex" />
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/didFlex"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/dimen_4dp"
+                app:alignContent="stretch"
+                app:alignItems="stretch"
+                app:flexWrap="wrap"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/did_label">
+
+                <AutoCompleteTextView
+                    android:id="@+id/didAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
+
+            </com.google.android.flexbox.FlexboxLayout>
+
+            <TextView
+                android:id="@+id/whatLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_what"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/didFlex" />
+
+
+            <EditText
+                android:id="@+id/whatEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/whatLabel" />
+
+
+            <TextView
+                android:id="@+id/when_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_when"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/whatEditText" />
+
+            <EditText
+                android:id="@+id/whenEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/when_label" />
+
+           <!-- <TextView
+                android:id="@+id/where_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xapi_options_where"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/whenEditText" />
+
+            <EditText
+                android:id="@+id/whereEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/where_label" />-->
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/new_report_collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="?colorPrimary"
+            app:expandedTitleMarginStart="48dp"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:titleEnabled="false">
+
+            <include
+                android:id="@+id/new_report_toolbar"
+                layout="@layout/toolbar" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

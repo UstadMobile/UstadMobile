@@ -54,6 +54,8 @@
     <string name='name'>Name</string>
     <string name='male'>Male</string>
     <string name='female'>Female</string>
+    <string name="other">Other</string>
+    <string name="unset">Unset</string>
     <string name='could_not_open_file'>Sorry! Could not open file.</string>
     <string name='settings'>Settings</string>
     <string name='lang_sys'>System Language</string>
@@ -288,5 +290,58 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
+
+    <string name="bar_chart" value="100">Bar Chart</string>
+    <string name="line_graph" value="101">Line Graph</string>
+
+    <string name="score" value="200">Average Score</string>
+    <string name="total_duration" value="201">Total Duration</string>
+    <string name="average_duration" value="202">Average Duration</string>
+    <string name="count_activity" value="203"># of activities</string>
+
+    <string name="xapi_day" value="300">Day</string>
+    <string name="xapi_week" value="301">Week</string>
+    <string name="xapi_month" value="302">Month</string>
+    <string name="xapi_custom_date" value="303">Custom Date</string>
+    <string name="xapi_content_entry" value="304">Content Entry</string>
+    <string name="xapi_location" value="305">Location</string>
+    <string name="xapi_gender" value="306">Gender</string>
+
+    <string name="from">From</string>
+    <string name="tocao">To</string>
+    <string name="date_range">Date Range</string>
+
+    <string name="done">Done</string>
+    <string name="select_locations">Select Locations</string>
+
+    <string name="xapi_options_general">General</string>
+    <string name="xapi_options_report_title">Report Title</string>
+    <string name="xapi_options_visual_type">Visualization Type</string>
+    <string name="xapi_options_axes">Axes</string>
+    <string name="xapi_options_y_axes">Y-Axis</string>
+    <string name="xapi_options_x_axes">X-Axis</string>
+    <string name="xapi_options_subgroup">Subgroup by</string>
+    <string name="xapi_options_filters">Filters</string>
+    <string name="xapi_options_who">Who</string>
+    <string name="xapi_options_did">Did</string>
+    <string name="xapi_options_what">What</string>
+    <string name="xapi_options_when">When</string>
+    <string name="xapi_options_where">Where</string>
+
+    <string name="activity_preview_xapi">Preview</string>
+    <string name="add_to_dashboard">Add to Dashboard</string>
+
+    <string name="xapi_hours">Hrs</string>
+    <string name="xapi_minutes">Mins</string>
+    <string name="xapi_seconds">Secs</string>
+
+    <string name="xapi_person_header">Person</string>
+    <string name="xapi_verb_header">Did what</string>
+    <string name="xapi_result_header">Result</string>
+    <string name="xapi_when_header">When</string>
+
+    <string name="xapi_score">Score (%)</string>
+
+
     <string name="no_account">Don\'t have an account?</string>
 </resources>
