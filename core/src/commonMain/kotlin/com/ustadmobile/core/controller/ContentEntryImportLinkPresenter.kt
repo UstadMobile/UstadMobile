@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
@@ -11,10 +10,8 @@ import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
-import io.ktor.http.URLBuilder
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
-import kotlinx.coroutines.Runnable
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
@@ -68,9 +65,6 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             db.contentEntryDao.insert(content.contentEntry)
             db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
             db.containerDao.insert(content.container)
-
-        } else {
-
 
         }
 

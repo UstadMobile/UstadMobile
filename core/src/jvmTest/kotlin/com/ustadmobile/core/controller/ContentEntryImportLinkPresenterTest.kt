@@ -8,9 +8,6 @@ import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.server.engine.ApplicationEngine
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -25,7 +22,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
     private lateinit var context: Any
 
-    private lateinit var db: UmAppDatabase
+    private lateinit var clientDb: UmAppDatabase
+
+    private lateinit var defaultDb: UmAppDatabase
 
     private lateinit var repo: UmAppDatabase
 
@@ -43,18 +42,21 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
         context = Any()
         try {
-            db = UmAppDatabase.getInstance(context)
-            repo = db//.getRepository("http://localhost/dummy/", "")
-            db.clearAllTables()
+            clientDb = UmAppDatabase.getInstance(context, "clientdb")
+            defaultDb = UmAppDatabase.getInstance(context)
+            repo = clientDb//.getRepository("http://localhost/dummy/", "")
+            clientDb.clearAllTables()
+            defaultDb.clearAllTables()
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        server = createServer(db, counter)
-        createDb(db)
+        server = createServer(clientDb, counter)
+        createDb(clientDb)
+        createDb(defaultDb)
 
         val args = Hashtable<String, String>()
-        args.put(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-100).toString())
+        args.put(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         presenter = ContentEntryImportLinkPresenter(context,
                 args, mockView, "http://localhost:8096")
         presenter.onCreate(args)
@@ -133,7 +135,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             presenter.handleUrlTextUpdated(url)
             presenter.handleClickImport()
 
-            Assert.assertTrue(db.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
+            Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertEquals("Func for h5p download called", 1, count)
 
 

@@ -38,6 +38,9 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = "Report Options"
 
+        val endpoint = intent.getStringExtra(ContentEntryImportLinkView.END_POINT_URL)
+                ?: UmAccountManager.getActiveEndpoint(viewContext)!!
+
         webView = findViewById(R.id.import_link_preview_webview)
         textInput = findViewById(R.id.entry_import_link_textInput)
         editText = findViewById(R.id.entry_import_link_editText)
@@ -46,7 +49,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
         presenter = ContentEntryImportLinkPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this, UmAccountManager.getActiveEndpoint(viewContext)!!)
+                this, endpoint)
         presenter.onCreate(UMAndroidUtil.bundleToMap(saved))
 
     }
