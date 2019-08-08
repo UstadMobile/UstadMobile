@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -47,10 +48,10 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
     route("ImportH5P") {
         get("importUrl") {
-            val url = call.request.queryParameters["url"] ?: ""
+            val urlString = call.request.queryParameters["hp5Url"]?.toString() ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
-            val pair = checkIfH5PValidAndReturnItsContent(url)
-            val isValid = pair?.first
+            val content = checkIfH5PValidAndReturnItsContent(urlString)
+            val isValid = content?.contains("H5PIntegration")
             when {
                 isValid == null -> call.respond(HttpStatusCode.BadRequest, "Invalid URL")
                 isValid -> {
@@ -71,7 +72,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     container.containerUid = containerDao.insert(container)
 
                     call.respond(H5PImportData(contentEntry, container, parentChildJoin))
-                    h5pDownloadFn(url, contentEntry.contentEntryUid, pair.second)
+                    h5pDownloadFn(urlString, contentEntry.contentEntryUid, content)
 
                 }
                 !isValid -> call.respond(HttpStatusCode.UnsupportedMediaType, "Content not supported")
@@ -337,8 +338,6 @@ suspend fun getResponseFromUrl(http: HttpClient, url: String, requestHeaders: Ma
 
 
 const val RESPONSE_RECEIVED = "Network.responseReceived"
-
-data class H5PImportData(val contentEntryUid: Long, val containerUid: Long)
 
 @Serializable
 data class LogResponse(val message: Message? = null) {

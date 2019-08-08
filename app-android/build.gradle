@@ -359,6 +359,7 @@ dependencies {
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
     androidTestImplementation project(":lib-test-common")
+    androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_support_lib"
 

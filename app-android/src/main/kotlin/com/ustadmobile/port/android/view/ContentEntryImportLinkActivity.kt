@@ -42,6 +42,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         textInput = findViewById(R.id.entry_import_link_textInput)
         editText = findViewById(R.id.entry_import_link_editText)
 
+        editText.addTextChangedListener(textWatcher)
 
         presenter = ContentEntryImportLinkPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -58,7 +59,9 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.import_link_done -> {
-                presenter.handleClickImport()
+                GlobalScope.launch {
+                    presenter.handleClickImport()
+                }
                 return true
             }
 
@@ -68,11 +71,16 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
 
     override fun showUrlStatus(isValid: Boolean, message: String) {
-        textInput.error = if (isValid) null else message
+        runOnUiThread {
+            textInput.error = if (isValid) null else message
+        }
+
     }
 
     override fun displayUrl(url: String) {
-        webView.loadUrl(url)
+        runOnUiThread {
+            webView.loadUrl(url)
+        }
     }
 
 

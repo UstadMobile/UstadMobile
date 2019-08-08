@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -36,8 +37,9 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
+import com.ustadmobile.util.test.AbstractImportLinkTest
 
-class TestH5PImportRoute {
+class TestH5PImportRoute : AbstractImportLinkTest() {
 
     lateinit var server: ApplicationEngine
 
@@ -92,19 +94,8 @@ class TestH5PImportRoute {
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
         db.clearAllTables()
-        server = embeddedServer(Netty, port = 8096) {
-            install(ContentNegotiation) {
-                gson {
-                    register(ContentType.Application.Json, GsonConverter())
-                    register(ContentType.Any, GsonConverter())
-                }
-            }
-
-            install(Routing) {
-                H5PImportRoute(db, counter)
-            }
-        }.start(wait = false)
-
+        server = createServer(db, counter)
+        createDb(db)
     }
 
     var count = 0
@@ -129,7 +120,7 @@ class TestH5PImportRoute {
             }
 
             val response = httpClient.get<HttpResponse>("http://localhost:8096/ImportH5P/importUrl") {
-                parameter("url", "")
+                parameter("hp5Url", "")
                 parameter("parentUid", -1)
             }
 
@@ -151,7 +142,7 @@ class TestH5PImportRoute {
             mockServer.start()
 
             val response = httpClient.get<HttpResponse>("http://localhost:8096/ImportH5P/importUrl") {
-                parameter("url", mockServer.url("/nohp5here").toString())
+                parameter("hp5Url", mockServer.url("/nohp5here").toString())
                 parameter("parentUid", -1)
             }
 
@@ -173,7 +164,7 @@ class TestH5PImportRoute {
 
 
             val response = httpClient.get<HttpResponse>("http://localhost:8096/ImportH5P/importUrl") {
-                parameter("url", mockServer.url("/somehp5here").toString())
+                parameter("hp5Url", mockServer.url("/somehp5here").toString())
                 parameter("parentUid", -1)
             }
 
@@ -216,6 +207,7 @@ class TestH5PImportRoute {
         Assert.assertEquals("list count matches", 11, list.size)
 
     }
+
 
 
 }

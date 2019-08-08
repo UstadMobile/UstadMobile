@@ -55,7 +55,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    testImplementation project(":lib-test-common")
+    testImplementation project(path: ":lib-test-common", configuration: "jvmDefault")
     testImplementation project(path: ":sharedse", configuration: "jvmDefault")
 
     testImplementation "junit:junit:$version_junit"
