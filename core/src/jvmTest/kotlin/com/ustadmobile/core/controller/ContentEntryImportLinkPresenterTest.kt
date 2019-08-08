@@ -133,7 +133,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             presenter.handleUrlTextUpdated(url)
             presenter.handleClickImport()
 
-            Assert.assertTrue(db.contentEntryParentChildJoinDao.findListOfParentsByChildUuid(-101).isNotEmpty())
+            Assert.assertTrue(db.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertEquals("Func for h5p download called", 1, count)
 
 

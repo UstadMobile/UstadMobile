@@ -375,6 +375,7 @@ dependencies {
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
+    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
 

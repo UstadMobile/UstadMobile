@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
-import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -12,10 +12,14 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import com.google.android.material.textfield.TextInputLayout
+import com.nhaarman.mockitokotlin2.mock
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.util.test.AbstractImportLinkTest
+import io.ktor.server.engine.ApplicationEngine
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -29,11 +33,15 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
     @get:Rule
     var mActivityRule = IntentsTestRule(ContentEntryImportLinkActivity::class.java, false, false)
 
+    private var context = InstrumentationRegistry.getInstrumentation().context
+
     private lateinit var db: UmAppDatabase
 
     private lateinit var repo: UmAppDatabase
 
     var mockWebServer = MockWebServer()
+
+    private var server: ApplicationEngine = mock {}
 
     @Before
     @Throws(IOException::class)
@@ -45,6 +53,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         createDb(db)
 
+        server.start()
 
     }
 
@@ -120,10 +129,17 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         mActivityRule.launchActivity(intent)
 
+
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
 
-        
+        runBlocking {
+
+            onView(withId(R.id.import_link_done)).perform(click())
+
+            val list = db.contentEntryParentChildJoinDao.findParentByChildUuids(-100)
+            println(list.toString())
+        }
     }
 
 
