@@ -4,8 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
@@ -26,11 +24,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     abstract override fun insert(entity: ClazzLogAttendanceRecord): Long
 
     @Insert
-    abstract fun insertAsync(entity: ClazzLogAttendanceRecord, resultObject: UmCallback<Long>)
-
-    @Insert
-    abstract fun insertListAsync(entities: List<ClazzLogAttendanceRecord>,
-                                 callback: UmCallback<Array<Long>>)
+    abstract suspend fun insertListAsync(entities: List<ClazzLogAttendanceRecord>): Array<Long>
 
     @Query("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord
@@ -105,10 +99,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
+    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
                                                   toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float,
-                                                  resultList: UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>)
+                                                  midAttendanceThreshold: Float)
+                                                :List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
             " count(DISTINCT Person.personUid) as total, " +
@@ -143,10 +137,11 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
+    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
                                                   toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float, clazzes: List<Long>,
-                                                  resultList: UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>)
+                                                  midAttendanceThreshold: Float,
+                                                  clazzes: List<Long>):
+            List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
             " count(DISTINCT Person.personUid) as total, " +
@@ -192,11 +187,11 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " WHERE numSessionsTbl.locationUid = :locationUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
+    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
                                                   toTime: Long, lowAttendanceThreshold: Float,
                                                   midAttendanceThreshold: Float, clazzes: List<Long>,
-                                                  locationUid: Long,
-                                                  resultList: UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>)
+                                                  locationUid: Long)
+            : List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
             " count(DISTINCT Person.personUid) as total, " +
@@ -241,21 +236,24 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " WHERE numSessionsTbl.locationUid = :locationUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
+    abstract suspend  fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
                                                   toTime: Long, lowAttendanceThreshold: Float,
                                                   midAttendanceThreshold: Float,
-                                                  locationUid: Long,
-                                                  resultList: UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>)
+                                                  locationUid: Long):
+    List<AttendanceResultGroupedByAgeAndThreshold>
 
-    fun getAttendanceGroupedByThresholdsAndClasses(datetimeNow: Long, fromTime: Long,
+    suspend fun getAttendanceGroupedByThresholdsAndClasses(datetimeNow: Long, fromTime: Long,
                                                    toTime: Long, lowAttendanceThreshold: Float, midAttendanceThreshold: Float,
-                                                   clazzes: List<Long>, resultList: UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>) {
+                                                   clazzes: List<Long>):
+    List<AttendanceResultGroupedByAgeAndThreshold> {
         if (clazzes.isEmpty()) {
-            getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime, lowAttendanceThreshold,
-                    midAttendanceThreshold, resultList)
+            return getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime,
+                    lowAttendanceThreshold,
+                    midAttendanceThreshold)
         } else {
-            getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime, lowAttendanceThreshold,
-                    midAttendanceThreshold, clazzes, resultList)
+            return getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime,
+                    lowAttendanceThreshold,
+                    midAttendanceThreshold, clazzes)
         }
     }
 
@@ -277,14 +275,13 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " EXCEPT " +
             "SELECT clazzLogAttendanceRecordClazzMemberUid FROM ClazzLogAttendanceRecord " +
             " WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
-    abstract fun findPersonUidsWithNoClazzAttendanceRecord(clazzId: Long, clazzLogUid: Long,
-                                                           callback: UmCallback<List<Long>>)
+    abstract suspend fun findPersonUidsWithNoClazzAttendanceRecord(clazzId: Long,
+                                           clazzLogUid: Long) :List<Long>
 
 
     @Query(QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE)
-    abstract fun findDailyAttendanceByClazzUidAndDateAsync(clazzUid: Long, fromDate: Long,
-                                                           toDate: Long, resultObject: UmCallback<List<DailyAttendanceNumbers>>)
-
+    abstract suspend fun findDailyAttendanceByClazzUidAndDateAsync(clazzUid: Long, fromDate: Long,
+                                                           toDate: Long): List<DailyAttendanceNumbers>
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
@@ -312,8 +309,9 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
-    abstract fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long,
-                                                                 toDate: Long, clazzes: List<Long>, resultObject: UmCallback<List<DailyAttendanceNumbers>>)
+    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long,
+                                                                 toDate: Long, clazzes: List<Long>)
+            : List<DailyAttendanceNumbers>
 
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
@@ -344,9 +342,9 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
-    abstract fun findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate: Long,
-                                                                               toDate: Long, clazzes: List<Long>, locations: List<Long>,
-                                                                               resultObject: UmCallback<List<DailyAttendanceNumbers>>)
+    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate: Long,
+                                           toDate: Long, clazzes: List<Long>, locations: List<Long>)
+            : List<DailyAttendanceNumbers>
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
@@ -375,9 +373,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
-    abstract fun findOverallDailyAttendanceNumbersByDateAndLocation(fromDate: Long,
-                                                                    toDate: Long, locations: List<Long>,
-                                                                    resultObject: UmCallback<List<DailyAttendanceNumbers>>)
+    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndLocation(fromDate: Long,
+                                                                    toDate: Long, locations:
+                                                                                List<Long>)
+            :List<DailyAttendanceNumbers>
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
@@ -404,8 +403,9 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
-    abstract fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long,
-                                                                 toDate: Long, resultObject: UmCallback<List<DailyAttendanceNumbers>>)
+    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long,
+                                                                 toDate: Long):
+    List<DailyAttendanceNumbers>
 
 
     /**
@@ -415,22 +415,22 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
      * @param locations list of locations
      * @param resultObject  the result
      */
-    fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long, toDate: Long,
-                                                        clazzes: List<Long>, locations: List<Long>,
-                                                        resultObject: UmCallback<List<DailyAttendanceNumbers>>) {
+    suspend fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long, toDate: Long,
+                                                        clazzes: List<Long>, locations:
+    List<Long>) : List<DailyAttendanceNumbers> {
         if (clazzes.isEmpty()) {
             if (locations.isEmpty()) {
-                findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, resultObject)
+                return findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate)
             } else {
-                findOverallDailyAttendanceNumbersByDateAndLocation(fromDate, toDate, locations,
-                        resultObject)
+                return findOverallDailyAttendanceNumbersByDateAndLocation(fromDate, toDate,
+                        locations)
             }
         } else {
             if (locations.isEmpty()) {
-                findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, clazzes, resultObject)
+                return findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, clazzes)
             } else {
-                findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate, toDate,
-                        clazzes, locations, resultObject)
+                return findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate,
+                        toDate,clazzes, locations)
             }
         }
     }
@@ -443,29 +443,23 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
      * @param clazzLogUid
      * @param callback
      */
-    fun insertAllAttendanceRecords(clazzId: Long, clazzLogUid: Long,
-                                   callback: UmCallback<Array<Long>>) {
-        findPersonUidsWithNoClazzAttendanceRecord(clazzId, clazzLogUid, object : UmCallback<List<Long>> {
-            override fun onSuccess(result: List<Long>?) {
-                if (result!!.isEmpty()) {
-                    UmCallbackUtil.onSuccessIfNotNull(callback, null)
-                } else {
-                    val toInsert = ArrayList<ClazzLogAttendanceRecord>()
-                    for (clazzMemberUid in result) {
-                        val record = ClazzLogAttendanceRecord()
-                        record.clazzLogAttendanceRecordClazzLogUid = clazzLogUid
-                        record.clazzLogAttendanceRecordClazzMemberUid = clazzMemberUid
-                        toInsert.add(record)
-                    }
-
-                    insertListAsync(toInsert, callback)
-                }
+    suspend fun insertAllAttendanceRecords(clazzId: Long, clazzLogUid: Long) : Array<Long>? {
+        val result = findPersonUidsWithNoClazzAttendanceRecord(clazzId, clazzLogUid)
+        if (result!!.isEmpty()) {
+            return null
+        } else {
+            val toInsert = ArrayList<ClazzLogAttendanceRecord>()
+            for (clazzMemberUid in result) {
+                val record = ClazzLogAttendanceRecord()
+                record.clazzLogAttendanceRecordClazzLogUid = clazzLogUid
+                record.clazzLogAttendanceRecordClazzMemberUid = clazzMemberUid
+                toInsert.add(record)
             }
 
-            override fun onFailure(exception: Throwable?) {
-                UmCallbackUtil.onFailIfNotNull(callback, exception!!)
-            }
-        })
+            val ret = insertListAsync(toInsert)
+            return ret
+        }
+
     }
 
     @Query("SELECT " +
@@ -489,22 +483,20 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate < :toDate " +
             " GROUP BY clazzMemberUid " +
             " ORDER BY clazzName ")
-    abstract fun findMasterReportDataForAllAsync(fromDate: Long, toDate: Long,
-                                                 resultList: UmCallback<List<ReportMasterItem>>)
+    abstract suspend fun findMasterReportDataForAllAsync(fromDate: Long, toDate: Long) :
+    List<ReportMasterItem>
 
     @Query("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus " +
             "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid AND " +
             "attendanceStatus != :attendanceStatus")
-    abstract fun updateAllByClazzLogUid(clazzLogUid: Long, attendanceStatus: Int,
-                                        callback: UmCallback<Int>)
+    abstract suspend fun updateAllByClazzLogUid(clazzLogUid: Long, attendanceStatus: Int): Int
 
 
     @Query("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus " +
             "WHERE clazzLogAttendanceRecordUid = :clazzLogAttendanceRecordUid AND " +
             " attendanceStatus != :attendanceStatus")
-    abstract fun updateAttendanceStatus(clazzLogAttendanceRecordUid: Long,
-                                        attendanceStatus: Int,
-                                        callback: UmCallback<Int>)
+    abstract suspend fun updateAttendanceStatus(clazzLogAttendanceRecordUid: Long,
+                                        attendanceStatus: Int) : Int
 
     @Query("SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
             "where clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +

@@ -5,21 +5,26 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
+import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
+import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
+import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION1
+import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzActivity
 import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT
+import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT
+import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE
 
 @UmDao(permissionJoin = " JOIN Clazz ON ClazzActivity.clazzActivityClazzUid = Clazz.clazzUid ", 
-        selectPermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
-        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2, 
-        updatePermissionCondition = ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
-        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE + ClazzDao.ENTITY_LEVEL_PERMISSION_CONDITION2, 
-        insertPermissionCondition = ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION1 +
-        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT + ClazzDao.TABLE_LEVEL_PERMISSION_CONDITION2)
+        selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 +
+            PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT + ENTITY_LEVEL_PERMISSION_CONDITION2,
+        updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 +
+            PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2,
+        insertPermissionCondition = TABLE_LEVEL_PERMISSION_CONDITION1 +
+            PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT + TABLE_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 @Dao
 abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
@@ -30,14 +35,11 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
     @Update
     abstract override fun update(entity: ClazzActivity)
 
-    @Insert
-    abstract fun insertAsync(entity: ClazzActivity, resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM ClazzActivity")
     abstract fun findAllClazzActivityChanges(): DataSource.Factory<Int, ClazzActivity>
 
     @Update
-    abstract fun updateAsync(entity: ClazzActivity, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: ClazzActivity): Int
 
     @Query("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid AND "
             + "clazzActivityDone = 1 ORDER BY clazzActivityLogDate DESC")
@@ -56,7 +58,7 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
     abstract fun findByUid(uid: Long): ClazzActivity
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<ClazzActivity>)
+    abstract suspend fun findByUidAsync(uid: Long): ClazzActivity
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND "
             + " clazzActivityLogDate = :logDate")
@@ -64,8 +66,7 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND "
             + " clazzActivityLogDate = :logDate")
-    abstract fun findByClazzAndDateAsync(clazzUid: Long, logDate: Long,
-                                         resultObject: UmCallback<ClazzActivity>)
+    abstract suspend fun findByClazzAndDateAsync(clazzUid: Long, logDate: Long): ClazzActivity
 
 
     @Query("SELECT  " +
@@ -78,8 +79,8 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
             " AND ClazzActivity.clazzActivityLogDate > :fromDate " +
             " AND ClazzActivity.clazzActivityLogDate < :toDate " +
             " GROUP BY ClazzActivity.clazzActivityLogDate ")
-    abstract fun getDailyAggregateFeedback(clazzUid: Long, fromDate: Long, toDate: Long,
-                                           resultList: UmCallback<List<DailyActivityNumbers>>)
+    abstract suspend fun getDailyAggregateFeedback(clazzUid: Long, fromDate: Long, toDate: Long)
+                                                    : List<DailyActivityNumbers>
 
     @Query("SELECT  " +
             " COUNT(CASE WHEN ClazzActivity.clazzActivityGoodFeedback THEN 1 END) as good, " +
@@ -92,40 +93,30 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
             " AND ClazzActivity.clazzActivityLogDate < :toDate " +
             " AND ClazzActivity.clazzActivityClazzActivityChangeUid = :activityChangeUid " +
             " GROUP BY ClazzActivity.clazzActivityLogDate ")
-    abstract fun getDailyAggregateFeedbackByActivityChange(
-            clazzUid: Long, fromDate: Long, toDate: Long, activityChangeUid: Long,
-            resultList: UmCallback<List<DailyActivityNumbers>>)
+    abstract suspend fun getDailyAggregateFeedbackByActivityChange(
+            clazzUid: Long, fromDate: Long, toDate: Long, activityChangeUid: Long)
+                : List<DailyActivityNumbers>
 
-    fun createClazzActivityForDate(currentClazzUid: Long, currentLogDate: Long,
-                                   callback: UmCallback<Long>) {
+    suspend fun createClazzActivityForDate(currentClazzUid: Long, currentLogDate: Long) : Long {
 
-        findByClazzAndDateAsync(currentClazzUid, currentLogDate, object : UmCallback<ClazzActivity> {
-            override fun onSuccess(result: ClazzActivity?) {
-                if (result != null) {
-                    callback.onSuccess(result.clazzActivityUid)
-                } else {
-                    //Create one
-                    val newClazzActivity = ClazzActivity()
-                    newClazzActivity.clazzActivityLogDate = currentLogDate
-                    newClazzActivity.isClazzActivityDone = false //should be set to true with done
-                    newClazzActivity.clazzActivityClazzUid = currentClazzUid
+        val result = findByClazzAndDateAsync(currentClazzUid, currentLogDate)
+        if (result != null) {
+            return (result.clazzActivityUid)
+        } else {
+            //Create one
+            val newClazzActivity = ClazzActivity()
+            newClazzActivity.clazzActivityLogDate = currentLogDate
+            newClazzActivity.isClazzActivityDone = false //should be set to true with done
+            newClazzActivity.clazzActivityClazzUid = currentClazzUid
 
-                    insertAsync(newClazzActivity, object : UmCallback<Long> {
-                        override fun onSuccess(result: Long?) {
-                            callback.onSuccess(result)
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
-                }
+            val res = insertAsync(newClazzActivity)
+            if(res!= null){
+                return res
+            }else{
+                return 0
             }
+        }
 
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
     }
 
 

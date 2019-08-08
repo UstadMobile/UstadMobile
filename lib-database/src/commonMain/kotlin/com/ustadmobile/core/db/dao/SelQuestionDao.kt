@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -22,36 +21,31 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     @Update
     abstract override fun update(entity: SelQuestion)
 
-    @Insert
-    abstract fun insertAsync(entity: SelQuestion, resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM SelQuestion")
     abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestion>
 
     @Update
-    abstract fun updateAsync(entity: SelQuestion, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SelQuestion):Int
 
     @Query("SELECT * FROM SelQuestion WHERE selQuestionUid = :uid")
     abstract fun findByUid(uid: Long): SelQuestion
 
     @Query("SELECT * FROM SelQuestion WHERE selQuestionUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<SelQuestion>)
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestion
 
     @Query("SELECT * FROM SelQuestion WHERE selQuestionUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<SelQuestion>
 
     @Query("SELECT MAX(questionIndex) FROM SelQuestion")
-    abstract fun getMaxIndexAsync(resultObject: UmCallback<Int>)
+    abstract suspend fun getMaxIndexAsync() : Int
 
     @Query("SELECT MAX(questionIndex) FROM SelQuestion WHERE " +
             "selQuestionSelQuestionSetUid = :questionSetUid " +
             " AND questionActive = 1")
-    abstract fun getMaxIndexByQuestionSetAsync(questionSetUid: Long,
-                                               resultObject: UmCallback<Int>)
+    abstract suspend fun getMaxIndexByQuestionSetAsync(questionSetUid: Long): Int
 
     @Query("SELECT * FROM SelQuestion where " + "selQuestionSelQuestionSetUid = :questionSetUid")
-    abstract fun findAllByQuestionSetUidAsync(questionSetUid: Long,
-                                              resultObject: UmCallback<List<SelQuestion>>)
+    abstract suspend fun findAllByQuestionSetUidAsync(questionSetUid: Long) :SelQuestion
 
     @Query("SELECT * FROM SelQuestion WHERE " + "selQuestionSelQuestionSetUid = :questionUid")
     abstract fun findAllQuestionsInSet(questionUid: Long): DataSource.Factory<Int, SelQuestion>
@@ -64,11 +58,11 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     @Query("SELECT * FROM SelQuestion WHERE " +
             " selQuestionSelQuestionSetUid = :questionSetUid " +
             " AND questionIndex > :previousIndex ORDER BY questionIndex ASC LIMIT 1    ")
-    abstract fun findNextQuestionByQuestionSetUidAsync(questionSetUid: Long,
-                                                       previousIndex: Int, snQuestion: UmCallback<SelQuestion>)
+    abstract suspend fun findNextQuestionByQuestionSetUidAsync(questionSetUid: Long,
+                                                       previousIndex: Int) : SelQuestion
 
     @Query("SELECT MIN(questionIndex) FROM SelQuestion")
-    abstract fun getMinIndexAsync(resultObject: UmCallback<Int>)
+    abstract suspend fun getMinIndexAsync() : Int
 
     @Query("SELECT COUNT(*) FROM SelQuestion")
     abstract fun findTotalNumberOfQuestions(): Int
@@ -79,8 +73,7 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     abstract fun findTotalNumberOfActiveQuestionsInAQuestionSet(questionSetUid: Long): Int
 
     @Query("SELECT * FROM SelQuestion WHERE questionText = :question")
-    abstract fun findByQuestionStringAsync(question: String,
-                                           resultList: UmCallback<List<SelQuestion>>)
+    abstract suspend fun findByQuestionStringAsync(question: String) : List<SelQuestion>
 
     companion object {
 

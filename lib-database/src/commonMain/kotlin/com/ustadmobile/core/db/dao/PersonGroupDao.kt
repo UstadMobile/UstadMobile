@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -47,18 +46,18 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     abstract fun findAllActivePersonPersonGroupLive(): DoorLiveData<List<PersonGroup>>
 
     @Query("UPDATE PersonGroup SET groupActive = 0 WHERE groupUid = :uid")
-    abstract fun inactivateGroupAsync(uid: Long, resultObject: UmCallback<Int>)
+    abstract suspend fun inactivateGroupAsync(uid: Long) : Int
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
     abstract fun findByUid(uid: Long): PersonGroup
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<PersonGroup>)
+    abstract suspend fun findByUidAsync(uid: Long) : PersonGroup
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<PersonGroup>
 
     @Update
-    abstract fun updateAsync(entity: PersonGroup, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: PersonGroup) : Int
 
 }

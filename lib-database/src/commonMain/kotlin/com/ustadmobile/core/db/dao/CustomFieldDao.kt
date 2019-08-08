@@ -3,11 +3,10 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.core.impl.UmCallback
+import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.database.annotation.UmUpdate
 import com.ustadmobile.lib.db.entities.CustomField
 
 @UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, 
@@ -20,10 +19,10 @@ abstract class CustomFieldDao : BaseDao<CustomField> {
     abstract fun findByUidLive(uid: Long): DoorLiveData<CustomField>
 
     @Query("SELECT * FROM CustomField WHERE customFieldUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<CustomField>)
+    abstract suspend fun findByUidAsync(uid: Long) : CustomField
 
-    @UmUpdate
-    abstract fun updateAsync(entity: CustomField, resultObjcet: UmCallback<Int>)
+    @Update
+    abstract suspend fun updateAsync(entity: CustomField): Int
 
     @Query("SELECT * FROM CustomField WHERE customFieldEntityType = :tableId AND "
             + " customFieldActive = 1")
@@ -31,16 +30,15 @@ abstract class CustomFieldDao : BaseDao<CustomField> {
 
     @Query("SELECT * FROM CustomField WHERE customFieldEntityType = :tableId AND "
             + " customFieldActive = 1")
-    abstract fun findAllCustomFieldsProviderForEntityAsync(tableId: Int,
-                                               listResultCallback: UmCallback<List<CustomField>>)
+    abstract suspend fun findAllCustomFieldsProviderForEntityAsync(tableId: Int) : List<CustomField>
 
     @Query("UPDATE CustomField SET customFieldActive = 0 WHERE customFieldUid = :customFieldUid")
-    abstract fun deleteCustomField(customFieldUid: Long, resultCallback: UmCallback<Int>)
+    abstract suspend fun deleteCustomField(customFieldUid: Long) : Int
 
     @Query("SELECT * FROM CustomField WHERE customFieldName = :fieldName COLLATE NOCASE AND "
             + "customFieldEntityType = :tableId AND customFieldActive = 1 ")
-    abstract fun findByFieldNameAndEntityTypeAsync(fieldName: String, tableId: Int,
-                                               listResultCallback: UmCallback<List<CustomField>>)
+    abstract suspend fun findByFieldNameAndEntityTypeAsync(fieldName: String, tableId: Int) :
+            List<CustomField>
 
     //For debugging
     @Query("SELECT * FROM CustomField")

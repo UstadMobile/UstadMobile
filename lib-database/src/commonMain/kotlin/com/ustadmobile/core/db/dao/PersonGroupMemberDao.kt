@@ -3,8 +3,6 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Person
@@ -18,8 +16,7 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
 
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid")
-    abstract fun findAllGroupWherePersonIsIn(personUid: Long,
-                                             resultList: UmCallback<List<PersonGroupMember>>)
+    abstract suspend fun findAllGroupWherePersonIsIn(personUid: Long) : List<PersonGroupMember>
 
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid")
     abstract fun findAllGroupWherePersonIsInSync(personUid: Long): List<PersonGroupMember>
@@ -44,11 +41,9 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract fun findPersonByGroupUid(groupUid: Long): List<Person>
 
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid AND " + " groupMemberPersonUid = :personUid ")
-    abstract fun findMemberByGroupAndPersonAsync(groupUid: Long, personUid: Long,
-                                                 resultObject: UmCallback<PersonGroupMember>)
+    abstract suspend fun findMemberByGroupAndPersonAsync(groupUid: Long, personUid: Long) : PersonGroupMember
 
     @Query("UPDATE PersonGroupMember SET groupMemberActive = 0 " + " WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid")
-    abstract fun inactivateMemberFromGroupAsync(personUid: Long, groupUid: Long,
-                                                resultObject: UmCallback<Int>)
+    abstract suspend fun inactivateMemberFromGroupAsync(personUid: Long, groupUid: Long) : Int
 
 }

@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -23,26 +22,23 @@ abstract class ClazzActivityChangeDao : BaseDao<ClazzActivityChange> {
     @Update
     abstract override fun update(entity: ClazzActivityChange)
 
-    @Insert
-    abstract fun insertAsync(entity: ClazzActivityChange, resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM ClazzActivityChange")
     abstract fun findAllClazzActivityChanges(): DataSource.Factory<Int, ClazzActivityChange>
 
     @Query("SELECT * FROM ClazzActivityChange")
-    abstract fun findAllClazzActivityChangesAsync(resultList: UmCallback<List<ClazzActivityChange>>)
+    abstract suspend fun findAllClazzActivityChangesAsync(): List<ClazzActivityChange>
 
     @Query("SELECT * FROM ClazzActivityChange")
     abstract fun findAllClazzActivityChangesAsyncLive(): DoorLiveData<List<ClazzActivityChange>>
 
     @Update
-    abstract fun updateAsync(entity: ClazzActivityChange, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: ClazzActivityChange): Int
 
     @Query("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
     abstract fun findByUid(uid: Long): ClazzActivityChange
 
     @Query("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<ClazzActivityChange>)
+    abstract suspend fun findByUidAsync(uid: Long): ClazzActivityChange
 
     @Query("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeTitle = :title")
     abstract fun findByTitle(title: String): ClazzActivityChange

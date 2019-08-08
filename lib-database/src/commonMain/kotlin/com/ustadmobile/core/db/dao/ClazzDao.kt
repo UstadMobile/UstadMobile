@@ -39,9 +39,6 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Insert
     abstract override fun insert(entity: Clazz): Long
 
-    @Insert
-    abstract fun insertAsync(entity: Clazz, resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUid(uid: Long): Clazz
 
@@ -55,10 +52,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findAllLive(): DoorLiveData<List<Clazz>>
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<Clazz>)
+    abstract suspend fun findByUidAsync(uid: Long) : Clazz?
 
     @Update
-    abstract fun updateAsync(entity: Clazz, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: Clazz): Int
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
@@ -73,19 +70,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
         createAuditLog(personUid, loggedInPersonUid)
     }
 
-    fun insertClazzAsync(entity: Clazz, loggedInPersonUid: Long, callback: UmCallback<Long>) {
-        //long personUid = insert(entity);
-        insertAsync(entity, object : UmCallback<Long> {
-            override fun onSuccess(result: Long?) {
-                createAuditLog(entity.clazzUid, loggedInPersonUid)
-                callback.onSuccess(result)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                callback.onFailure(exception)
-            }
-        })
-
+    suspend fun insertClazzAsync(entity: Clazz, loggedInPersonUid: Long): Long {
+        val result = insertAsync(entity)
+        createAuditLog(entity.clazzUid, loggedInPersonUid)
+        return result
     }
 
     fun updateClazz(entity: Clazz, loggedInPersonUid: Long) {
@@ -93,23 +81,15 @@ abstract class ClazzDao : BaseDao<Clazz> {
         createAuditLog(entity.clazzUid, loggedInPersonUid)
     }
 
-    fun updateClazzAsync(entity: Clazz, loggedInPersonUid: Long, callback: UmCallback<Int>) {
+    suspend fun updateClazzAsync(entity: Clazz, loggedInPersonUid: Long): Int {
         //long personUid = insert(entity);
-        updateAsync(entity, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                createAuditLog(entity.clazzUid, loggedInPersonUid)
-                callback.onSuccess(result)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                callback.onFailure(exception)
-            }
-        })
-
+        val result = updateAsync(entity)
+        createAuditLog(entity.clazzUid, loggedInPersonUid)
+        return result
     }
 
     @Query("UPDATE Clazz SET clazzActive = 0 WHERE clazzUid = :clazzUid")
-    abstract fun inactivateClazz(clazzUid: Long, resultCallback: UmCallback<Int>)
+    abstract suspend fun inactivateClazz(clazzUid: Long) : Int
 
     @Query(CLAZZ_WHERE +
             " FROM Clazz WHERE :personUid in " +
@@ -130,42 +110,37 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findAllClazzesInLocationList(locations: List<Long>): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query("$CLAZZ_WHERE FROM Clazz WHERE clazzLocationUid in (:locations)")
-    abstract fun findAllClazzesInLocationListAsync(locations: List<Long>,
-                                                   resultList: UmCallback<List<ClazzWithNumStudents>>)
+    abstract suspend fun findAllClazzesInLocationListAsync(locations: List<Long>) :
+            List<ClazzWithNumStudents>
 
 
     @Query("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND clazzActive = 1")
-    abstract fun findClazzesByUidListAsync(clazzUidList: List<Long>,
-                                           resultList: UmCallback<List<Clazz>>)
+    abstract suspend fun findClazzesByUidListAsync(clazzUidList: List<Long>): List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE clazzActive = 1")
-    abstract fun findAllActiveClazzesAsync(resultList: UmCallback<List<Clazz>>)
+    abstract suspend fun findAllActiveClazzesAsync() : List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " + " OR clazzUid in (:allClasses) AND clazzActive = 1")
-    abstract fun findAllClazzesInUidAndLocationAsync(allLocations: List<Long>,
-                                                     allClasses: List<Long>,
-                                                     resultList: UmCallback<List<Clazz>>)
+    abstract suspend fun findAllClazzesInUidAndLocationAsync(allLocations: List<Long>,
+                                                     allClasses: List<Long>) : List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE  clazzUid in (:allClasses) AND clazzActive = 1")
-    abstract fun findAllClazzesInUidAsync(allClasses: List<Long>,
-                                          resultList: UmCallback<List<Clazz>>)
+    abstract suspend fun findAllClazzesInUidAsync(allClasses: List<Long>) : List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " + " AND clazzActive = 1")
-    abstract fun findAllClazzesInLocationAsync(allLocations: List<Long>,
-                                               resultList: UmCallback<List<Clazz>>)
+    abstract suspend fun findAllClazzesInLocationAsync(allLocations: List<Long>) : List<Clazz>
 
-    fun findAllClazzesByLocationAndUidList(allLocations: List<Long>,
-                                           allClazzes: List<Long>,
-                                           resultList: UmCallback<List<Clazz>>) {
+    suspend fun findAllClazzesByLocationAndUidList(allLocations: List<Long>,
+                                           allClazzes: List<Long>): List<Clazz> {
         if (allLocations.isEmpty() && allClazzes.isEmpty()) {
-            findAllActiveClazzesAsync(resultList)
+            return findAllActiveClazzesAsync()
         } else {
             if (allLocations.isEmpty()) {
-                findAllClazzesInUidAsync(allClazzes, resultList)
+                return findAllClazzesInUidAsync(allClazzes)
             } else if (allClazzes.isEmpty()) {
-                findAllClazzesInLocationAsync(allLocations, resultList)
+                return findAllClazzesInLocationAsync(allLocations)
             } else {
-                findAllClazzesInUidAndLocationAsync(allLocations, allClazzes, resultList)
+                return findAllClazzesInUidAndLocationAsync(allLocations, allClazzes)
             }
         }
     }
@@ -213,7 +188,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and clazzActive = 1")
-    abstract fun findByClazzNameAsync(name: String, resultList: UmCallback<List<Clazz>>)
+    abstract suspend fun findByClazzNameAsync(name: String): List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and clazzActive = 1")
     abstract fun findByClazzName(name: String): List<Clazz>
@@ -227,7 +202,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             " AND ClazzMember.role = " + ClazzMember.ROLE_TEACHER + ") as numTeachers, " +
             " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE Clazz.clazzActive = 1 ) / " +
             " (SELECT COUNT(*) FROM Clazz Where Clazz.clazzActive = 1)) as attendanceAverage ")
-    abstract fun getClazzSummaryAsync(resultObject: UmCallback<ClazzAverage>)
+    abstract suspend fun getClazzSummaryAsync(): List<Clazz>
 
     @Query("SELECT Clazz.*, (:personUid) AS personUid, " +
             "(SELECT COUNT(*) FROM ClazzMember " +
@@ -296,29 +271,18 @@ abstract class ClazzDao : BaseDao<Clazz> {
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
     @Query("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")
-    abstract fun personHasPermission(accountPersonUid: Long, clazzUid: Long, permission: Long,
-                                     callback: UmCallback<Boolean>)
+    abstract suspend fun personHasPermission(accountPersonUid: Long, clazzUid: Long,
+                                             permission: Long) : Boolean
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
-    abstract fun personHasPermission(accountPersonUid: Long, permission: Long,
-                                     callback: UmCallback<Boolean>)
-
-//    @Query("SELECT Clazz.clazzUid as primaryKey, " +
-//            "(" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
-//            Role.PERMISSION_CLAZZ_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
-//            " AS userCanUpdate " +
-//            " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
-//    @UmSyncCheckIncomingCanUpdate
-//    abstract fun syncFindExistingEntities(primaryKeys: List<Long>,
-//                                          accountPersonUid: Long): List<UmSyncExistingEntity>
+    abstract suspend fun personHasPermission(accountPersonUid: Long, permission: Long): Boolean
 
     @Query("SELECT COUNT(*) FROM Clazz " +
             "WHERE " +
             "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
             "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
             "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can updateState it
-
             ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
             " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 +
             Role.PERMISSION_CLAZZ_INSERT + //can insert on table
@@ -338,7 +302,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun getClazzName(clazzUid: Long): String
 
     @Query("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
-    abstract fun getClazzNameAsync(clazzUid: Long, callback: UmCallback<String>)
+    abstract suspend fun getClazzNameAsync(clazzUid: Long): String?
 
     @Query("SELECT Person.* " +
             "FROM PersonGroupMember " +
@@ -358,7 +322,8 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     companion object {
 
-        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " (SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
+        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " (SELECT admin FROM Person WHERE " +
+                "personUid = :accountPersonUid) OR " +
                 "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
                 "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
                 "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
@@ -375,7 +340,8 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
-        const val TABLE_LEVEL_PERMISSION_CONDITION1 = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
+        const val TABLE_LEVEL_PERMISSION_CONDITION1 = "(SELECT admin FROM Person WHERE personUid " +
+                "= :accountPersonUid) " +
                 "OR " +
                 "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
                 " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +

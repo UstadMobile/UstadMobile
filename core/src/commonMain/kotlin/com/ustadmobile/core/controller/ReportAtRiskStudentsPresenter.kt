@@ -2,9 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.ClazzMemberDao
-import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -94,7 +91,7 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
 
                         val clazzDone = ArrayList<String>()
                         //Run Live Data Query
-                        clazzMemberDao.findAllStudentsAtRiskForClazzListAsync(clazzUidList,
+                        clazzMemberDao.findAllStudentsAtRiskForClazzList(clazzUidList,
                                 RISK_THRESHOLD, object : UmCallback<List<PersonWithEnrollment>> {
                             override fun onSuccess(result: List<PersonWithEnrollment>?) {
                                 for (pwe in result!!) {
@@ -144,7 +141,7 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
                         }
 
                         //Run Live Data Query
-                        atRiskStudentsUmProvider = clazzMemberDao.findAllStudentsAtRiskForClazzListAsync(clazzUidList,
+                        atRiskStudentsUmProvider = clazzMemberDao.findAllStudentsAtRiskForClazzList(clazzUidList,
                                 RISK_THRESHOLD)
                         updateProviderToView()
                     }
@@ -212,7 +209,7 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
 
                             val clazzDone = ArrayList<String>()
                             //Run Live Data Query
-                            clazzMemberDao.findAllStudentsAtRiskForClazzListAsync(clazzUidList,
+                            clazzMemberDao.findAllStudentsAtRiskForClazzList(clazzUidList,
                                     RISK_THRESHOLD, object : UmCallback<List<PersonWithEnrollment>> {
                                 override fun onSuccess(result: List<PersonWithEnrollment>?) {
                                     for (pwe in result!!) {

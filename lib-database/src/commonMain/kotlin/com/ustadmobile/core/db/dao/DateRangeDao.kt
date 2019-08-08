@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.DateRange
@@ -22,9 +21,6 @@ abstract class DateRangeDao : BaseDao<DateRange> {
     @Update
     abstract override fun update(entity: DateRange)
 
-    @Insert
-    abstract fun insertAsync(entity: DateRange, result: UmCallback<Long>)
-
     @Query("SELECT * FROM DateRange")
     abstract fun findAllDateRanges(): DataSource.Factory<Int, DateRange>
 
@@ -35,16 +31,16 @@ abstract class DateRangeDao : BaseDao<DateRange> {
     abstract fun findByUid(uid: Long): DateRange
 
     @Query("SELECT * FROM DateRange WHERE dateRangeUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<DateRange>)
+    abstract suspend fun findByUidAsync(uid: Long): DateRange
 
     @Query("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
     abstract fun inactivateRange(uid: Long)
 
     @Query("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
-    abstract fun inactivateRangeAsync(uid: Long, resultObject: UmCallback<Int>)
+    abstract suspend fun inactivateRangeAsync(uid: Long): Int
 
     @Update
-    abstract fun updateAsync(entity: DateRange, result: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: DateRange): Int
 
     @Query("SELECT * FROM DateRange " +
             " LEFT JOIN Clazz ON Clazz.clazzUid = :clazzUid " +

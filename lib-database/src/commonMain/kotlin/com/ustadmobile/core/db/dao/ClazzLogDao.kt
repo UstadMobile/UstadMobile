@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -66,30 +65,26 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Insert(onConflict = UmOnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
 
-    @Insert
-    abstract fun insertAsync(entity: ClazzLog, resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLog
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
-    abstract fun findByUidAsync(uid: Long, callback: UmCallback<ClazzLog>)
+    abstract suspend fun findByUidAsync(uid: Long): ClazzLog?
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate DESC LIMIT 1")
-    abstract fun findMostRecentByClazzUid(clazzUid: Long, callback: UmCallback<ClazzLog>)
+    abstract suspend fun findMostRecentByClazzUid(clazzUid: Long) : ClazzLog?
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzid AND logDate = :date")
     abstract fun findByClazzIdAndDate(clazzid: Long, date: Long): ClazzLog
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzid and logDate = :date")
-    abstract fun findByClazzIdAndDateAsync(clazzid: Long, date: Long,
-                                           resultObject: UmCallback<ClazzLog>)
+    abstract suspend fun findByClazzIdAndDateAsync(clazzid: Long, date: Long) : ClazzLog?
 
     @Query("SELECT * FROM ClazzLog")
     abstract fun findAll(): List<ClazzLog>
 
     @Query("UPDATE ClazzLog SET done = 1 where clazzLogUid = :clazzLogUid ")
-    abstract fun updateDoneForClazzLogAsync(clazzLogUid: Long, callback: UmCallback<Int>)
+    abstract suspend fun updateDoneForClazzLogAsync(clazzLogUid: Long) : Int
 
     @Query("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
     abstract fun findByClazzUid(clazzUid: Long): DataSource.Factory<Int, ClazzLog>
@@ -107,32 +102,32 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun findByClazzUidNotCancelledWithSchedule(clazzUid: Long): DataSource.Factory<Int, ClazzLogWithScheduleStartEndTimes>
 
     @Query("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " + "numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
-    abstract fun updateClazzAttendanceNumbersAsync(clazzLogUid: Long, numPresent: Int,
-                                                   numAbsent: Int, numPartial: Int,
-                                                   callback: UmCallback<Any>)
+    abstract suspend fun updateClazzAttendanceNumbersAsync(clazzLogUid: Long, numPresent: Int,
+                                                   numAbsent: Int, numPartial: Int) : Any
 
     @Query("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
             " GROUP BY ClazzLog.logDate")
-    abstract fun getNumberOfClassesOpenForDate(fromDate: Long, toDate: Long,
-                                               resultList: UmCallback<List<NumberOfDaysClazzesOpen>>)
+    abstract suspend fun getNumberOfClassesOpenForDate(fromDate: Long, toDate: Long) :
+        List<NumberOfDaysClazzesOpen>
 
     @Query("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
             "       AND ClazzLog.clazzLogClazzUid in (:clazzes) " +
             " GROUP BY ClazzLog.logDate")
-    abstract fun getNumberOfClassesOpenForDateClazzes(fromDate: Long, toDate: Long,
-                                                      clazzes: List<Long>, resultList: UmCallback<List<NumberOfDaysClazzesOpen>>)
+    abstract suspend fun getNumberOfClassesOpenForDateClazzes(fromDate: Long, toDate: Long,
+                                                      clazzes: List<Long>) :
+    List<NumberOfDaysClazzesOpen>
 
     @Query("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
             "       AND Clazz.clazzLocationUid in (:locations) " +
             " GROUP BY ClazzLog.logDate")
-    abstract fun getNumberOfClassesOpenForDateLocations(fromDate: Long, toDate: Long,
-                                                        locations: List<Long>, resultList: UmCallback<List<NumberOfDaysClazzesOpen>>)
+    abstract suspend fun getNumberOfClassesOpenForDateLocations(fromDate: Long, toDate: Long,
+                                    locations: List<Long> ) :List<NumberOfDaysClazzesOpen>
 
     @Query("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
@@ -140,24 +135,25 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
             "       AND ClazzLog.clazzLogClazzUid in (:clazzes) " +
             "       AND Clazz.clazzLocationUid in (:locations) " +
             " GROUP BY ClazzLog.logDate")
-    abstract fun getNumberOfClassesOpenForDateClazzesLocation(fromDate: Long, toDate: Long,
-                                                              clazzes: List<Long>, locations: List<Long>,
-                                                              resultList: UmCallback<List<NumberOfDaysClazzesOpen>>)
+    abstract suspend fun getNumberOfClassesOpenForDateClazzesLocation(fromDate: Long, toDate: Long,
+                              clazzes: List<Long>, locations: List<Long>)
+            : List<NumberOfDaysClazzesOpen>
 
-    fun getNumberOfClassesOpenForDateClazzes(fromDate: Long, toDate: Long,
-                                             clazzes: List<Long>, locations: List<Long>,
-                                             resultList: UmCallback<List<NumberOfDaysClazzesOpen>>) {
+    suspend fun getNumberOfClassesOpenForDateClazzes(fromDate: Long, toDate: Long,
+                                             clazzes: List<Long>, locations: List<Long>) :
+            List<NumberOfDaysClazzesOpen> {
         if (locations.isEmpty()) {
             if (clazzes.isEmpty()) {
-                getNumberOfClassesOpenForDate(fromDate, toDate, resultList)
+                return getNumberOfClassesOpenForDate(fromDate, toDate)
             } else {
-                getNumberOfClassesOpenForDateClazzes(fromDate, toDate, clazzes, resultList)
+                return getNumberOfClassesOpenForDateClazzes(fromDate, toDate, clazzes)
             }
         } else {
             if (clazzes.isEmpty()) {
-                getNumberOfClassesOpenForDateLocations(fromDate, toDate, locations, resultList)
+                return getNumberOfClassesOpenForDateLocations(fromDate, toDate, locations)
             } else {
-                getNumberOfClassesOpenForDateClazzesLocation(fromDate, toDate, clazzes, locations, resultList)
+                return getNumberOfClassesOpenForDateClazzesLocation(fromDate, toDate, clazzes,
+                        locations)
             }
         }
 
@@ -167,8 +163,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun cancelFutureInstances(scheduleUid: Long, after: Long, canceled: Boolean)
 
     @Query("SELECT ClazzLog.clazzLogUid, ClazzLog.logDate FROM ClazzLog " + " WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate ASC")
-    abstract fun getListOfClazzLogUidsAndDatesForClazz(clazzUid: Long,
-                                                       callback: UmCallback<List<ClazzLogUidAndDate>>)
+    abstract fun getListOfClazzLogUidsAndDatesForClazz( )
 
     companion object {
 

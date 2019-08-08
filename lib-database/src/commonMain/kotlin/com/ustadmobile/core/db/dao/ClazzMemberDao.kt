@@ -5,13 +5,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 
-@UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid", inheritPermissionJoinedPrimaryKey = "clazzUid")
+@UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid",
+        inheritPermissionJoinedPrimaryKey = "clazzUid")
 @UmRepository
 @Dao
 abstract class ClazzMemberDao : BaseDao<ClazzMember> {
@@ -19,15 +19,11 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     @Insert
     abstract override fun insert(entity: ClazzMember): Long
 
-    @Insert
-    abstract fun insertAsync(entity: ClazzMember, resultObject: UmCallback<Long>)
-
     @Update
     abstract override fun update(entity: ClazzMember)
 
     @Update
-    abstract fun updateAsync(entity: ClazzMember, resultObject: UmCallback<Int>)
-
+    abstract suspend fun updateAsync(entity: ClazzMember):Int
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
@@ -65,8 +61,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
             " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
             "AND ClazzMember.role = :role")
-    abstract fun findClazzMemberWithPersonByRoleForClazzUid(uid: Long, role: Int,
-                                                            resultList: UmCallback<List<ClazzMemberWithPerson>>)
+    abstract suspend fun findClazzMemberWithPersonByRoleForClazzUid(uid: Long, role: Int) :
+        List<ClazzMemberWithPerson>
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
@@ -79,8 +75,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findByPersonUidAndClazzUid(personUid: Long, clazzUid: Long): ClazzMember
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
-    abstract fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long,
-                                                 resultObject: UmCallback<ClazzMember>)
+    abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long)
+            : ClazzMember
 
     @Query("Update ClazzMember SET attendancePercentage " +
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
@@ -116,8 +112,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
             " WHERE clazzMemberClazzUid = :clazzUid" +
             " AND num = :days")
-    abstract fun findAllMembersForAttendanceOverConsecutiveDays(
-            type: Int, days: Int, clazzUid: Long, resultList: UmCallback<List<PersonNameWithClazzName>>)
+    abstract suspend fun findAllMembersForAttendanceOverConsecutiveDays(
+            type: Int, days: Int, clazzUid: Long) :List<PersonNameWithClazzName>
 
 
     @Query("SELECT  " +
@@ -151,8 +147,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE ClazzLog.clazzLogClazzUid = :clazzUid  " +
             "  AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  AND ClazzMember.role = 1 " +
             " GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid ) ")
-    abstract fun findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(type: Int,
-                                                                             clazzUid: Long, fromTime: Long, toTime: Long, resultUmCallback: UmCallback<ThresholdResult>)
+    abstract suspend fun findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(type: Int,
+                                                    clazzUid: Long, fromTime: Long, toTime: Long)
+        : ThresholdResult
 
     @Query("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
@@ -324,16 +321,16 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "   )" +
             " AND attendancePercentage < :riskThreshold " +
             " AND Person.active = 1 ORDER BY attendancePercentage DESC")
-    abstract fun findAllStudentsAtRiskForClazzUidAsync(clazzUid: Long, riskThreshold: Float,
-                                                       resultList: UmCallback<List<PersonWithEnrollment>>)
+    abstract suspend fun findAllStudentsAtRiskForClazzUidAsync(clazzUid: Long, riskThreshold:
+        Float):List<PersonWithEnrollment>
 
     @Query(AT_RISK_STUDENT_REPORT_QUERY)
-    abstract fun findAllStudentsAtRiskForClazzListAsync(clazzes: List<Long>,
-                                                        riskThreshold: Float): DataSource.Factory<Int, PersonWithEnrollment>
+    abstract fun findAllStudentsAtRiskForClazzList(clazzes: List<Long>,
+                                                   riskThreshold: Float): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query(AT_RISK_STUDENT_REPORT_QUERY)
-    abstract fun findAllStudentsAtRiskForClazzListAsync(clazzes: List<Long>,
-                                                        riskThreshold: Float, resultCallback: UmCallback<List<PersonWithEnrollment>>)
+    abstract suspend fun findAllStudentsAtRiskForClazzListAsync(
+            clazzes: List<Long>,riskThreshold: Float) : List<PersonWithEnrollment>
 
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
@@ -419,7 +416,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT AVG(attendancePercentage) FROM ClazzMember WHERE clazzMemberPersonUid = :personUid")
-    abstract fun getAverageAttendancePercentageByPersonUidAsync(personUid: Long, callback: UmCallback<Float>)
+    abstract suspend fun getAverageAttendancePercentageByPersonUidAsync(personUid: Long): Float
 
 
     @Query("SELECT " +
@@ -441,9 +438,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " FROM ClazzMember " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT + " ")
-    abstract fun getAttendanceAverageAsListForClazzBetweenDates(clazzUid: Long,
-                                                                fromDate: Long, toDate: Long,
-                                                                resultList: UmCallback<List<Float>>)
+    abstract suspend fun getAttendanceAverageAsListForClazzBetweenDates(clazzUid: Long,
+                                                                fromDate: Long, toDate: Long): List<Float>
 
 
     @Query("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " + "clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")
@@ -469,7 +465,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     }
 
     @Query("UPDATE ClazzMember SET clazzMemberActive = 0 WHERE clazzMemberPersonUid = :personUid")
-    abstract fun inactivateClazzMemberForPerson(personUid: Long, resultCallback: UmCallback<Int>)
+    abstract suspend fun inactivateClazzMemberForPerson(personUid: Long): Int
 
     companion object {
 

@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SELNominationItem
@@ -23,22 +22,17 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
             "WHERE " +
             "selQuestionResponseNominationClazzMemberUid = :clazzMemberUid " +
             "AND selQuestionResponseNominationSelQuestionResponseUId = :questionResponseUid")
-    abstract fun findExistingNomination(clazzMemberUid: Long, questionResponseUid: Long,
-                                        resultList: UmCallback<List<SelQuestionResponseNomination>>)
+    abstract suspend fun findExistingNomination(clazzMemberUid: Long, questionResponseUid: Long)
+            : List<SelQuestionResponseNomination>
 
     @Update
     abstract override fun update(entity: SelQuestionResponseNomination)
-
-    @Insert
-    abstract fun insertAsync(entity: SelQuestionResponseNomination,
-                             result: UmCallback<Long>)
 
     @Query("SELECT * FROM SelQuestionResponseNomination")
     abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestionResponseNomination>
 
     @Update
-    abstract fun updateAsync(entity: SelQuestionResponseNomination,
-                             result: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SelQuestionResponseNomination) : Int
 
 
     @Query("SELECT * FROM SelQuestionResponseNomination " + "WHERE selQuestionResponseNominationUid = :uid")
@@ -52,8 +46,8 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
             "   AND SelQuestionSetResponse.selQuestionSetResponseFinishTime < :toTime " +
 
             " ORDER BY clazzName")
-    abstract fun getAllNominationsReportAllClazzesAsync(fromTime: Long, toTime: Long,
-                                                        resultList: UmCallback<List<SELNominationItem>>)
+    abstract suspend fun getAllNominationsReportAllClazzesAsync(fromTime: Long, toTime: Long) :
+            List<SELNominationItem>
 
     @Query(SEL_REPORT_SELECT +
             " WHERE " +
@@ -63,15 +57,15 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
             "   AND SelQuestionSetResponse.selQuestionSetResponseFinishTime < :toTime " +
             "   AND Clazz.clazzUid IN (:clazzList) " +
             " ORDER BY clazzName")
-    abstract fun getAllNominationsReportInClazzAsync(fromTime: Long, toTime: Long, clazzList: List<Long>,
-                                                     resultList: UmCallback<List<SELNominationItem>>)
+    abstract suspend fun getAllNominationsReportInClazzAsync(fromTime: Long, toTime: Long, clazzList:
+    List<Long>) : List<SELNominationItem>
 
-    fun getAllNominationReportAsync(fromTime: Long, toTime: Long, clazzes: List<Long>?,
-                                    resultList: UmCallback<List<SELNominationItem>>) {
+    suspend fun getAllNominationReportAsync(fromTime: Long, toTime: Long, clazzes: List<Long>?) :
+            List<SELNominationItem> {
         if (clazzes != null && !clazzes.isEmpty()) {
-            getAllNominationsReportInClazzAsync(fromTime, toTime, clazzes, resultList)
+            return getAllNominationsReportInClazzAsync(fromTime, toTime, clazzes)
         } else {
-            getAllNominationsReportAllClazzesAsync(fromTime, toTime, resultList)
+            return getAllNominationsReportAllClazzesAsync(fromTime, toTime)
         }
     }
 

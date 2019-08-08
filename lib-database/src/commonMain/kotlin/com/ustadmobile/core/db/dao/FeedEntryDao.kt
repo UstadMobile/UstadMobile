@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.FeedEntry
@@ -18,17 +17,14 @@ abstract class FeedEntryDao : BaseDao<FeedEntry> {
     @Insert
     abstract override fun insert(entity: FeedEntry): Long
 
-    @Insert
-    abstract fun insertAsync(entity: FeedEntry, result: UmCallback<Long>)
-
     @Update
-    abstract fun updateAsync(entity: FeedEntry, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: FeedEntry):Int
 
     @Query("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
     abstract fun findByUid(uid: Long): FeedEntry
 
     @Query("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<FeedEntry>)
+    abstract suspend fun findByUidAsync(uid: Long) : FeedEntry
 
     @Query("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0" + " ORDER BY dateCreated DESC")
     abstract fun findByPersonUid(personUid: Long): DataSource.Factory<Int, FeedEntry>

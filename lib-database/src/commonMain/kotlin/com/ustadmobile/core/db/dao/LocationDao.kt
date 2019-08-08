@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -22,14 +21,11 @@ abstract class LocationDao : BaseDao<Location> {
     @Insert
     abstract override fun insert(entity: Location): Long
 
-    @Insert
-    abstract fun insertAsync(entity: Location, resultObject: UmCallback<Long>)
-
     @Update
     abstract override fun update(entity: Location)
 
     @Update
-    abstract fun updateAsync(entity: Location, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: Location):Int
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
@@ -58,25 +54,24 @@ abstract class LocationDao : BaseDao<Location> {
     abstract fun findByUid(uid: Long): Location
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<Location>)
+    abstract suspend fun findByUidAsync(uid: Long): Location
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Location>
 
     @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND locationActive = 1")
-    abstract fun findTopLocationsAsync(resultList: UmCallback<List<Location>>)
+    abstract suspend fun findTopLocationsAsync(): List<Location>
 
     @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND locationActive = 1")
-    abstract fun findAllChildLocationsForUidAsync(uid: Long,
-                                                  resultList: UmCallback<List<Location>>)
+    abstract suspend fun findAllChildLocationsForUidAsync(uid: Long) : List<Location>
 
     @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND locationActive = 1" +
             " AND Location.locationUid != :suid ")
-    abstract fun findAllChildLocationsForUidExceptSelectedUidAsync(uid: Long, suid: Long,
-                                                                   resultList: UmCallback<List<Location>>)
+    abstract suspend fun findAllChildLocationsForUidExceptSelectedUidAsync(uid: Long, suid: Long)
+            : List<Location>
 
     @Query("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
-    abstract fun findByTitleAsync(name: String, resultList: UmCallback<List<Location>>)
+    abstract suspend fun findByTitleAsync(name: String):List<Location>
 
     @Query("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     abstract fun findByTitle(name: String): List<Location>
@@ -92,7 +87,7 @@ abstract class LocationDao : BaseDao<Location> {
 
 
     @Query("UPDATE Location SET locationActive = 0 WHERE locationUid = :uid")
-    abstract fun inactivateLocationAsync(uid: Long, resultObject: UmCallback<Int>)
+    abstract suspend fun inactivateLocationAsync(uid: Long):Int
 
 
 }

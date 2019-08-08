@@ -9,6 +9,8 @@ import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView.Companion.ARG_CUSTOM_FIELD_VALUE_OPTION_UID
 import com.ustadmobile.core.view.CustomFieldDetailView.Companion.ARG_CUSTOM_FIELD_UID
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -45,29 +47,19 @@ class AddCustomFieldOptionDialogPresenter(context: Any, arguments:Map<String, St
 
 
         if (optionUid != 0L) {
-            optionDao.findByUidAsync(optionUid, object : UmCallback<CustomFieldValueOption> {
-                override fun onSuccess(result: CustomFieldValueOption?) {
-                    initFromOption(result)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-
-                }
-            })
+            GlobalScope.launch {
+                val result = optionDao.findByUidAsync(optionUid)
+                initFromOption(result)
+            }
         } else {
             val option = CustomFieldValueOption()
-            optionDao.insertAsync(option, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    if (result != 0) {
-                        option.customFieldValueOptionUid = result
-                        initFromOption(option)
-                    }
+            GlobalScope.launch {
+                val resl = optionDao.insertAsync(option)
+                if (resl != 0) {
+                    option.customFieldValueOptionUid = result
+                    initFromOption(option)
                 }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            }
         }
 
     }

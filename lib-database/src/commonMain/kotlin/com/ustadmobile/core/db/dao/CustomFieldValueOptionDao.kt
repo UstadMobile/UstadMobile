@@ -3,7 +3,6 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
@@ -21,16 +20,17 @@ abstract class CustomFieldValueOptionDao : BaseDao<CustomFieldValueOption> {
     @Query("SELECT * FROM CustomFieldValueOption " +
             " WHERE customFieldValueOptionFieldUid = :customFieldUid " +
             " AND customFieldValueOptionActive = 1")
-    abstract fun findAllOptionsForFieldAsync(customFieldUid: Long, optionsCallback: UmCallback<List<CustomFieldValueOption>>)
+    abstract suspend fun findAllOptionsForFieldAsync(customFieldUid: Long):
+            List<CustomFieldValueOption>
 
     @Query("UPDATE CustomFieldValueOption SET customFieldValueOptionActive = 0 WHERE" + 
             " customFieldValueOptionUid = :uid")
-    abstract fun deleteOption(uid: Long, resultObjecT: UmCallback<Int>)
+    abstract suspend fun deleteOption(uid: Long): Int
 
 
     @Update
-    abstract fun updateAsync(entity: CustomFieldValueOption, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: CustomFieldValueOption) : Int
 
     @Query("SELECT * FROM CustomFieldValueOption WHERE customFieldValueOptionUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<CustomFieldValueOption>)
+    abstract suspend fun findByUidAsync(uid: Long) : CustomFieldValueOption
 }

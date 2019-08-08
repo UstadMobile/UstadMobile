@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmUpdate
@@ -18,27 +17,20 @@ abstract class SelQuestionOptionDao : BaseDao<SelQuestionOption> {
     @Insert
     abstract override fun insert(entity: SelQuestionOption): Long
 
-    @Insert
-    abstract fun insertAsync(entity: SelQuestionOption,
-                             resultObject: UmCallback<Long>)
-
     @UmUpdate
     abstract override fun update(entity: SelQuestionOption)
 
     @UmUpdate
-    abstract fun updateAsync(entity: SelQuestionOption,
-                             resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SelQuestionOption) : Int
 
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionUid = :uid")
     abstract fun findByUid(uid: Long): SelQuestionOption
 
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionUid = :uid")
-    abstract fun findByUidAsync(uid: Long,
-                                resultObject: UmCallback<SelQuestionOption>)
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionOption
 
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionQuestionUid = :questionUid")
-    abstract fun findAllOptionsByQuestionUid(questionUid: Long,
-                                             resultList: UmCallback<List<SelQuestionOption>>)
+    abstract suspend fun findAllOptionsByQuestionUid(questionUid: Long) : List<SelQuestionOption>
 
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionQuestionUid = :questionUid")
     abstract fun findAllOptionsByQuestionUidProvider(questionUid: Long): DataSource.Factory<Int, SelQuestionOption>

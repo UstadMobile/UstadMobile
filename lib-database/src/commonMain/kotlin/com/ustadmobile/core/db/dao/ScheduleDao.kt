@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.DateRange
@@ -27,9 +26,6 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Update
     abstract fun update(entity: Schedule?)
 
-    @Insert
-    abstract fun insertAsync(entity: Schedule, resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM Schedule")
     abstract fun findAllSchedules(): DataSource.Factory<Int, Schedule>
 
@@ -37,13 +33,13 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     abstract fun findAllSchedulesAsList(): List<Schedule>
 
     @Update
-    abstract fun updateAsync(entity: Schedule, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: Schedule) : Int
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     abstract fun findByUid(uid: Long): Schedule
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<Schedule>)
+    abstract suspend fun findByUidAsync(uid: Long) : Schedule
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
     abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DataSource.Factory<Int, Schedule>
@@ -51,17 +47,11 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
     abstract fun findAllSchedulesByClazzUidAsList(clazzUid: Long): List<Schedule>
 
-    fun disableSchedule(scheduleUid: Long) {
-        findByUidAsync(scheduleUid, object : UmCallback<Schedule> {
-            override fun onSuccess(result: Schedule?) {
-                result!!.isScheduleActive = false
-                update(result)
-            }
+    suspend fun disableSchedule(scheduleUid: Long) {
+        val result = findByUidAsync(scheduleUid)
+        result!!.isScheduleActive = false
+        update(result)
 
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
     }
 
     @Query("SELECT * FROM DateRange " +

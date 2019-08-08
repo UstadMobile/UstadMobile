@@ -1,12 +1,11 @@
 package com.ustadmobile.core.scheduler
 
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter.absentFrequencyHigh
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter.absentFrequencyLow
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter.feedAlertPerentageHigh
-import com.ustadmobile.core.controller.ClazzLogDetailPresenter.tardyFrequency
+import com.ustadmobile.core.controller.ClazzLogDetailPresenter.Companion.absentFrequencyHigh
+import com.ustadmobile.core.controller.ClazzLogDetailPresenter.Companion.absentFrequencyLow
+import com.ustadmobile.core.controller.ClazzLogDetailPresenter.Companion.feedAlertPerentageHigh
+import com.ustadmobile.core.controller.ClazzLogDetailPresenter.Companion.tardyFrequency
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.FeedEntryDao
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ClassDetailView
@@ -15,7 +14,9 @@ import com.ustadmobile.core.view.ClassLogDetailView.Companion.ARG_MOST_RECENT_BY
 import com.ustadmobile.core.view.ClazzListView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 
 class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
@@ -123,55 +124,49 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
 
                 //If condition meets:
                 val finalOfficers = officers
-                dbRepository.clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
-                        ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyLow,
-                        currentClazzLog.clazzLogClazzUid, object : UmCallback<List<PersonNameWithClazzName>> {
-                    override fun onSuccess(theseGuys: List<PersonNameWithClazzName>?) {
-                        //Create feed entries for this user for every teacher
-                        val newFeedEntries = ArrayList<FeedEntry>()
-                        val updateFeedEntries = ArrayList<FeedEntry>()
-                        for (each in theseGuys!!) {
+                GlobalScope.launch {
+                    val theseGuys = dbRepository.clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
+                            ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyLow,
+                            currentClazzLog.clazzLogClazzUid)
+                    //Create feed entries for this user for every teacher
+                    val newFeedEntries = ArrayList<FeedEntry>()
+                    val updateFeedEntries = ArrayList<FeedEntry>()
+                    for (each in theseGuys!!) {
 
-                            val feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
-                                    PersonDetailView.ARG_PERSON_UID + "=" +
-                                    each.personUid.toString()
+                        val feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                PersonDetailView.ARG_PERSON_UID + "=" +
+                                each.personUid.toString()
 
-                            //Send to Officer as well.
-                            for (officer in finalOfficers) {
+                        //Send to Officer as well.
+                        for (officer in finalOfficers) {
 
-                                val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                        officer.personUid, currentClazzLog.clazzLogUid,
-                                        ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER, feedLinkViewPerson)
+                            val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                    officer.personUid, currentClazzLog.clazzLogUid,
+                                    ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER, feedLinkViewPerson)
 
 
-                                val thisEntry = FeedEntry(
-                                        feedEntryUid,
-                                        "Absent behaviour",
-                                        "Student " + each.firstNames + " " +
-                                                each.lastName + " absent in Class " + clazzName
-                                                + " over " + tardyFrequency + " times",
-                                        feedLinkViewPerson,
-                                        clazzName,
-                                        officer.personUid)
+                            val thisEntry = FeedEntry(
+                                    feedEntryUid,
+                                    "Absent behaviour",
+                                    "Student " + each.firstNames + " " +
+                                            each.lastName + " absent in Class " + clazzName
+                                            + " over " + tardyFrequency + " times",
+                                    feedLinkViewPerson,
+                                    clazzName,
+                                    officer.personUid)
 
-                                val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
-                                if (existingEntry != null) {
-                                    updateFeedEntries.add(thisEntry)
-                                } else {
-                                    newFeedEntries.add(thisEntry)
-                                }
+                            val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
+                            if (existingEntry != null) {
+                                updateFeedEntries.add(thisEntry)
+                            } else {
+                                newFeedEntries.add(thisEntry)
                             }
                         }
-
-                        dbRepository.feedEntryDao.insertList(newFeedEntries)
-                        dbRepository.feedEntryDao.updateList(updateFeedEntries)
-
                     }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+                    dbRepository.feedEntryDao.insertList(newFeedEntries)
+                    dbRepository.feedEntryDao.updateList(updateFeedEntries)
+                }
             }
         }
 
@@ -194,55 +189,51 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
 
                 //9. MNE An alert when a student has not attended a single day in a month(dropout)
                 val finalMneofficers = mneofficers
-                dbRepository.clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
-                        ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyHigh,
-                        currentClazzLog.clazzLogClazzUid, object : UmCallback<List<PersonNameWithClazzName>> {
-                    override fun onSuccess(theseGuys: List<PersonNameWithClazzName>?) {
+                GlobalScope.launch {
+                    val theseGuys = dbRepository.clazzMemberDao
+                            .findAllMembersForAttendanceOverConsecutiveDays(
+                                    ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyHigh,
+                                    currentClazzLog.clazzLogClazzUid)
 
-                        //Create feed entries for this user for every teacher
-                        val newFeedEntries = ArrayList<FeedEntry>()
-                        val updateFeedEntries = ArrayList<FeedEntry>()
-                        for (each in theseGuys!!) {
+                    //Create feed entries for this user for every teacher
+                    val newFeedEntries = ArrayList<FeedEntry>()
+                    val updateFeedEntries = ArrayList<FeedEntry>()
+                    for (each in theseGuys!!) {
 
-                            //Feed link
-                            val feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
-                                    PersonDetailView.ARG_PERSON_UID + "=" +
-                                    each.personUid.toString()
+                        //Feed link
+                        val feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                PersonDetailView.ARG_PERSON_UID + "=" +
+                                each.personUid.toString()
 
-                            for (mne in finalMneofficers) {
-                                //Feed uid
-                                val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                        mne.personUid, currentClazzLog.clazzLogUid,
-                                        ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
-                                        feedLinkViewPerson)
+                        for (mne in finalMneofficers) {
+                            //Feed uid
+                            val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                    mne.personUid, currentClazzLog.clazzLogUid,
+                                    ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
+                                    feedLinkViewPerson)
 
-                                val thisEntry = FeedEntry(
-                                        feedEntryUid,
-                                        "Student dropout",
-                                        "Student " + each.firstNames + " " +
-                                                each.lastName + " absent in Class "
-                                                + clazzName + " over 30 days",
-                                        feedLinkViewPerson,
-                                        clazzName,
-                                        mne.personUid
-                                )
+                            val thisEntry = FeedEntry(
+                                    feedEntryUid,
+                                    "Student dropout",
+                                    "Student " + each.firstNames + " " +
+                                            each.lastName + " absent in Class "
+                                            + clazzName + " over 30 days",
+                                    feedLinkViewPerson,
+                                    clazzName,
+                                    mne.personUid
+                            )
 
-                                val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
-                                if (existingEntry != null) {
-                                    updateFeedEntries.add(thisEntry)
-                                } else {
-                                    newFeedEntries.add(thisEntry)
-                                }
+                            val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
+                            if (existingEntry != null) {
+                                updateFeedEntries.add(thisEntry)
+                            } else {
+                                newFeedEntries.add(thisEntry)
                             }
                         }
-                        dbRepository.feedEntryDao.insertList(newFeedEntries)
-                        dbRepository.feedEntryDao.updateList(updateFeedEntries)
                     }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+                    dbRepository.feedEntryDao.insertList(newFeedEntries)
+                    dbRepository.feedEntryDao.updateList(updateFeedEntries)
+                }
             }
         }
 

@@ -3,10 +3,11 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AddActivityChangeDialogView
 import com.ustadmobile.lib.db.entities.ClazzActivityChange
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -20,6 +21,7 @@ class AddActivityChangeDialogPresenter(context: Any, arguments: Map<String, Stri
 
     //The current Clazz Activity Change that this Clazz Activity will be assigned to.
     private var currentChange: ClazzActivityChange? = null
+
     //Map of all the measurement type options's uid AND its position. Useful when we know what
     //position from the view('s spinner) was selected so we can find the corresponding measurement
     // type.
@@ -62,16 +64,11 @@ class AddActivityChangeDialogPresenter(context: Any, arguments: Map<String, Stri
 
         val clazzActivityChangeDao = repository.clazzActivityChangeDao
         currentChange!!.isClazzActivityChangeActive = true //set active
-        clazzActivityChangeDao.insertAsync(currentChange!!, object : UmCallback<Long> {
-            override fun onSuccess(result: Long?) {
-                view.finish()
-            }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
-
+        GlobalScope.launch {
+            clazzActivityChangeDao.insertAsync(currentChange!!)
+            view.finish()
+        }
     }
 
     /**

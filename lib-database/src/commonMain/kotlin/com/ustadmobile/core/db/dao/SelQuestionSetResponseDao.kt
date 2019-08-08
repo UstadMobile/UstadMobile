@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Person
@@ -22,29 +21,23 @@ abstract class SelQuestionSetResponseDao : BaseDao<SelQuestionSetResponse> {
     @Update
     abstract override fun update(entity: SelQuestionSetResponse)
 
-    @Insert
-    abstract fun insertAsync(entity: SelQuestionSetResponse,
-                             resultObject: UmCallback<Long>)
-
     @Query("SELECT * FROM SelQuestionSetResponse")
     abstract fun findAllQuestionSetResponses(): DataSource.Factory<Int, SelQuestionSetResponse>
 
     @Update
-    abstract fun updateAsync(entity: SelQuestionSetResponse,
-                             resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SelQuestionSetResponse): Int
 
     @Query("SELECT * FROM SelQuestionSetResponse " + "where selQuestionSetResposeUid = :uid")
     abstract fun findByUid(uid: Long): SelQuestionSetResponse
 
     @Query("SELECT * FROM SelQuestionSetResponse " + "where selQuestionSetResposeUid = :uid")
-    abstract fun findByUidAsync(uid: Long,
-                                resultObject: UmCallback<SelQuestionSetResponse>)
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSetResponse
 
     @Query("SELECT * FROM SelQuestionSetResponse WHERE " +
             "selQuestionSetResponseClazzMemberUid = :uid AND " +
             "selQuestionSetResponseRecognitionPercentage > 0.8")
-    abstract fun findAllPassedRecognitionByPersonUid(uid: Long,
-                                                     resultList: UmCallback<List<SelQuestionSetResponse>>)
+    abstract suspend fun findAllPassedRecognitionByPersonUid(uid: Long) :
+            List<SelQuestionSetResponse>
 
     @Query("SELECT Person.*   from " +
             "ClazzMember INNER JOIN PERSON ON " +

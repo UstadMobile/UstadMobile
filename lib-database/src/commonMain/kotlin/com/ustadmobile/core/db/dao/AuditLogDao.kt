@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.AuditLog
@@ -20,20 +19,17 @@ abstract class AuditLogDao : BaseDao<AuditLog> {
     @Insert
     abstract override fun insert(entity: AuditLog): Long
 
-    @Insert
-    abstract fun insertAsync(entity: AuditLog, resultObject: UmCallback<Long>)
-
     @Update
     abstract override fun update(entity: AuditLog)
 
     @Update
-    abstract fun updateAsync(entity: AuditLog, resultObject: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: AuditLog):Int
 
     @Query("SELECT * FROM AuditLog WHERE auditLogUid = :uid")
     abstract fun findByUid(uid: Long): AuditLog
 
     @Query("SELECT * FROM AuditLog WHERE auditLogUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<AuditLog>)
+    abstract suspend fun findByUidAsync(uid: Long): AuditLog?
 
     @Query("SELECT * FROM AuditLog")
     abstract fun findAllAuditLogs(): DataSource.Factory<Int, AuditLog>
@@ -74,37 +70,38 @@ abstract class AuditLogDao : BaseDao<AuditLog> {
 
     /* AS LIST */
     @Query(FIND_ALL_NAME)
-    abstract fun findAllAuditLogsWithNameAsync(listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameAsync():List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_CLAZZ)
-    abstract fun findAllAuditLogsWithNameFilterByClazzAsync(fromTime: Long, toTime: Long,
-                            clazzes: List<Long>, listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByClazzAsync(fromTime: Long, toTime: Long,
+                            clazzes: List<Long>): List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_ACTOR)
-    abstract fun findAllAuditLogsWithNameFilterByActorsAsync(fromTime: Long, toTime: Long,
-                             actors: List<Long>, listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByActorsAsync(fromTime: Long, toTime: Long,
+                             actors: List<Long>):List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_PEOPLE)
-    abstract fun findAllAuditLogsWithNameFilterByPeopleAsync(
-            fromTime: Long, toTime: Long, people: List<Long>,
-            listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByPeopleAsync(
+            fromTime: Long, toTime: Long, people: List<Long>):List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_ACTOR_CLAZZ)
-    abstract fun findAllAuditLogsWithNameFilterByActorsAndClazzesAsync(fromTime: Long, toTime: Long,
-           actors: List<Long>, clazzes: List<Long>, listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByActorsAndClazzesAsync(fromTime: Long,
+        toTime: Long,actors: List<Long>, clazzes: List<Long>): List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_ACTOR_PEOPLE)
-    abstract fun findAllAuditLogsWithNameFilterByActorsAndPeopleAsync(fromTime: Long, toTime: Long,
-          actors: List<Long>, people: List<Long>, listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByActorsAndPeopleAsync(fromTime: Long,
+                                                                              toTime: Long,
+          actors: List<Long>, people: List<Long>): List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_PEOPLE_CLAZZ)
-    abstract fun findAllAuditLogsWithNameFilterByPeopleAndClazzesAsync(fromTime: Long, toTime: Long,
-        people: List<Long>, clazzes: List<Long>, listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByPeopleAndClazzesAsync(fromTime: Long,
+                                                                               toTime: Long,
+        people: List<Long>, clazzes: List<Long>): List<AuditLogWithNames>
 
     @Query(FIND_ALL_NAME_ACTOR_CLAZZ_PEOPLE)
-    abstract fun findAllAuditLogsWithNameFilterByActorsAndClazzesAndPeopleAsync(fromTime: Long,
-        toTime: Long, actors: List<Long>, clazzes: List<Long>, people: List<Long>,
-        listCallback: UmCallback<List<AuditLogWithNames>>)
+    abstract suspend fun findAllAuditLogsWithNameFilterByActorsAndClazzesAndPeopleAsync(
+            fromTime: Long,toTime: Long, actors: List<Long>,
+            clazzes: List<Long>, people: List<Long>) : List<AuditLogWithNames>
 
 
     fun findAllAuditLogsWithNameFilter(fromTime: Long, toTime: Long,
@@ -132,36 +129,35 @@ abstract class AuditLogDao : BaseDao<AuditLog> {
         } else {
             findAllAuditLogsWithName()
         }
-
     }
 
 
-    fun findAllAuditLogsWithNameFilterList(fromTime: Long, toTime: Long,
+    suspend fun findAllAuditLogsWithNameFilterList(fromTime: Long, toTime: Long,
                            locations: List<Long>, clazzes: List<Long>, people: List<Long>,
-                           actors: List<Long>, listCallback: UmCallback<List<AuditLogWithNames>>) {
+                           actors: List<Long>): List<AuditLogWithNames> {
 
         if (clazzes.isEmpty() && people.isEmpty() && actors.isEmpty()) {
-            findAllAuditLogsWithNameAsync(listCallback)
+            return findAllAuditLogsWithNameAsync()
         } else if (!clazzes.isEmpty() && !people.isEmpty() && !actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByActorsAndClazzesAndPeopleAsync(fromTime, toTime,
-                    actors, clazzes, people, listCallback)
+            return findAllAuditLogsWithNameFilterByActorsAndClazzesAndPeopleAsync(fromTime, toTime,
+                    actors, clazzes, people)
         } else if (!clazzes.isEmpty() && !people.isEmpty() && actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByPeopleAndClazzesAsync(fromTime, toTime, people,
-                    clazzes, listCallback)
+            return findAllAuditLogsWithNameFilterByPeopleAndClazzesAsync(fromTime, toTime, people,
+                    clazzes)
         } else if (clazzes.isEmpty() && !people.isEmpty() && !actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByActorsAndPeopleAsync(fromTime, toTime, actors,
-                    people, listCallback)
+            return findAllAuditLogsWithNameFilterByActorsAndPeopleAsync(fromTime, toTime, actors,
+                    people)
         } else if (!clazzes.isEmpty() && people.isEmpty() && !actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByActorsAndClazzesAsync(fromTime, toTime, actors,
-                    clazzes, listCallback)
+            return findAllAuditLogsWithNameFilterByActorsAndClazzesAsync(fromTime, toTime, actors,
+                    clazzes)
         } else if (clazzes.isEmpty() && people.isEmpty() && !actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByActorsAsync(fromTime, toTime, actors, listCallback)
+            return findAllAuditLogsWithNameFilterByActorsAsync(fromTime, toTime, actors)
         } else if (clazzes.isEmpty() && !people.isEmpty() && actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByPeopleAsync(fromTime, toTime, people, listCallback)
+            return findAllAuditLogsWithNameFilterByPeopleAsync(fromTime, toTime, people)
         } else if (!clazzes.isEmpty() && people.isEmpty() && actors.isEmpty()) {
-            findAllAuditLogsWithNameFilterByClazzAsync(fromTime, toTime, clazzes, listCallback)
+            return findAllAuditLogsWithNameFilterByClazzAsync(fromTime, toTime, clazzes)
         } else {
-            findAllAuditLogsWithNameAsync(listCallback)
+            return findAllAuditLogsWithNameAsync()
         }
 
     }

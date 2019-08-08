@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmUpdate
@@ -21,16 +20,11 @@ abstract class SelQuestionResponseDao : BaseDao<SelQuestionResponse> {
     @UmUpdate
     abstract override fun update(entity: SelQuestionResponse)
 
-    @Insert
-    abstract fun insertAsync(entity: SelQuestionResponse,
-                             result: UmCallback<Long>)
-
     @Query("SELECT * FROM SelQuestionResponse")
     abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestionResponse>
 
     @UmUpdate
-    abstract fun updateAsync(entity: SelQuestionResponse,
-                             result: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SelQuestionResponse) : Int 
 
     @Query("SELECT * FROM SelQuestionResponse " + "WHERE selQuestionResponseUid = :uid")
     abstract fun findByUid(uid: Long): SelQuestionResponse

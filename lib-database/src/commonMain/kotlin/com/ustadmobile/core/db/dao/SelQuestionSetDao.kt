@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -23,17 +22,14 @@ abstract class SelQuestionSetDao : BaseDao<SelQuestionSet> {
     @Update
     abstract override fun update(entity: SelQuestionSet)
 
-    @Insert
-    abstract fun insertAsync(entity: SelQuestionSet, result: UmCallback<Long>)
-
     @Update
-    abstract fun updateAsync(entity: SelQuestionSet, result: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SelQuestionSet) : Int
 
     @Query("SELECT * FROM SelQuestionSet WHERE selQuestionSetUid = :uid")
     abstract fun findByUid(uid: Long): SelQuestionSet
 
     @Query("SELECT * FROM SelQuestionSet WHERE selQuestionSetUid = :uid")
-    abstract fun findByUidAsync(uid: Long, resultObject: UmCallback<SelQuestionSet>)
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSet
 
     @Query("SELECT * FROM SelQuestionSet")
     abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestionSet>
@@ -50,8 +46,7 @@ abstract class SelQuestionSetDao : BaseDao<SelQuestionSet> {
     abstract fun findAllQuestionSetsLiveData(): DoorLiveData<List<SelQuestionSet>>
 
     @Query("SELECT * FROM SelQuestionSet")
-    abstract fun findAllQuestionsAsync(
-            results: UmCallback<List<SelQuestionSet>>)
+    abstract suspend fun findAllQuestionsAsync(): List<SelQuestionSet>
 
 
 }
