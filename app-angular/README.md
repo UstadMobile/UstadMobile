@@ -1,21 +1,17 @@
-# UstadMobile AppAngular App
-
-Ustad Mobile enables learners to access and share content offline. It uses peer-to-peer networking 
-(including WiFi Direct) to enable offline sharing between devices. It's open source __and__ 
-powered by open standards:  
-
-* [EPUB content](http://idpf.org/epub): Anything you can do with HTML5 can be in EPUB (video, interactive quizzes, etc).
-* [Experience API](http://www.tincanapi.com): The open widely adopted standard to record learning experiences.
-
-Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
+# app-angular
+This modules contains angular web application, based on kotlin multi-platform idea it uses packages delivered from kotlin based modules packaged as NPM packages.
 
 ## Prerequisites
-After acquiring a copy of this app, the first thing to do is to install [Node](https://nodejs.org/en/download/) v8 or above (Everything depends on it). After Node installation, install angular CLI. Finally,change working directory to app-angular and install all dependencies used in the project since node_modules directory is git ignored. 
+After acquiring a copy of this app, the first thing to do is to install [Node](https://nodejs.org/en/download/) v8 or above (Everything depends on it). After Node installation, install angular CLI. 
+Finally,change working directory to app-angular and install all dependencies used in the project since node_modules directory is git ignored. 
 
 * Installing Angular CLI
 ```
 npm install -g @angular/cli
 ```
+* Resolving EACCES Permission errors
+If using Linux or MacOS, you need to change your npm global directory as per [Resolving EACCES permissions errors when installing packages globally](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally) 
+otherwise you will have file permission errors on build.
 
 ## Development
 While you are still in app-angular , you can now build this module. It will create modules dependencies from core source ready to be installed.
