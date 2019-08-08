@@ -1,9 +1,10 @@
 import { UmAngularUtil } from './com/ustadmobile/util/UmAngularUtil';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
-import { Component, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
+import ktorclientserial from 'ktor-ktor-client-serialization';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class AppComponent extends UmBaseComponent{
   constructor(localeService: UmBaseService, router: Router,
               route: ActivatedRoute, private umDb: UmDbMockService){
     super(localeService, router, route, umDb);
+    const ktor = ktorclientserial
   }
 
   ngOnInit(): void {

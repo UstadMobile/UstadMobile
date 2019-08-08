@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <title>Ustadmobile Editor</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="language" content="english">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="src/css/UmEditorCore.css">
+    <link rel="stylesheet" href="lib/material-icon/material-icons.css">
+    <script src="lib/jquery/jquery3.3.1.min.js" type="text/javascript"></script>
+    <script src="lib/tinymce/js/tinymce.min.js" type="text/javascript"></script>
+    <script src="src/js/UmEditorCore.js" type="text/javascript"></script>
+    <script src="src/js/UmWidgetManager.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        window.onload = function() {
+            $(".um-editor").css("min-height",$(window).height());
+            UmEditorCore.onCreate("sw", "ltr", false);
+        };  
+        
+    </script>
+</head>
+<body>
+
+<div class="container-fluid row default-margin-top">
+
+    <button onclick="UmEditorCore.enableEditingMode()">Enable Editing</button>
+    <button onclick="UmEditorCore.selectAll()">Select All</button>
+    <button onclick="UmEditorCore.clearAll()">Clear All</button>
+    <button onclick="UmEditorCore.focusOnNextLink()">Focus Link</button>
+    <button onclick="UmEditorCore.disableEditingMode()">Disable Editing</button>
+    <button onclick="UmEditorCore.getLinkProperties()">Get Link</button>
+    <button onclick="UmEditorCore.insertMultipleChoiceWidget()">Insert MTC</button>
+    <button onclick="UmEditorCore.insertFillTheBlanksWidget()">Insert FIB</button>
+    <button onclick="UmEditorCore.removeLink()">Remove Link</button>
+    <button onclick="UmEditorCore.insertLink('https://ustadmobile.com','UstadMobile')">Insert Link</button>
+    <button onclick="UmEditorCore.insertMediaContent('http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4','video/mp4')">Video</button>
+    <button onclick="UmEditorCore.insertMediaContent('https://voicebunny.s3.amazonaws.com/assets/sound/home_eng.mp3','audio/mp3')">audio</button>
+    <button onclick="UmEditorCore.insertMediaContent('http://www.ccvcri.com/uploads/6/4/9/2/64929695/1053144_orig.jpg','image/jpg')">image</button>
+   
+
+    <div class="um-fit-screen um-editor" style="margin-top: 150px;">
+        <div data-um-widget="extra-content" class="um-row default-margin-top extra-content show-element" id="id-WUxnflWuZytUvpEJ" style="position: relative;" dir="ltr">
+            <p>Fyuffjgjvjgjg hiiuuhg&nbsp;</p>
+            <p></p>
+            <p></p>
+           </div>
+           <div data-um-widget="multi-choice" data-um-retry="false" class="um-row um-fit-screen default-margin-top default-theme question default-padding um-card" id="id-question-q5dLLqV4dSa26rwh"> 
+            <div class="um-row um-fit-screen um-align-end question-action-holder hide-element"> 
+             <span class="float-right"><i class="material-icons action-delete">delete</i></span> 
+             <span class="float-right"><i class="material-icons action-cut">content_cut</i></span> 
+            </div> 
+            <div class="question-body dont-remove um-fit-screen multi-choice default-theme default-margin-bottom no-left-padding preview-main default-margin-top" data-um-preview="main" id="id-us4Nu6mi4rH-Io4y" style="position: relative;" dir="ltr">
+             <p>Placeholder text for the question body</p>
+            </div> 
+            <div class="question-choice default-theme um-fit-screen um-alert alert-secondary choice-no-margin-top question-choice-pointer preview-support default-margin-top" data-um-correct="false" data-um-preview="support" id="id-choice-cc69OFmLmRmXKKQR"> 
+             <div class="choice-action">
+              <span class="float-right"><i class="material-icons action-delete-inner hide-element">delete</i></span>
+             </div> 
+             <div class="question-choice-body dont-remove" id="id-4hKxbY-V301P6Rfn" style="position: relative;" dir="ltr">
+              <p>Placeholder text for the choice body</p>
+             </div> 
+             <div class="question-choice-feedback dont-remove hide-element" id="id-09MRKXgHAe7b6WUa" style="position: relative;" dir="ltr">
+              <p>Feedback placeholder text</p>
+             </div> 
+             <div class="question-choice-answer select-option hide-element" id="id-_H9Ql9IYOZ4NddML">
+              <select class="question-choice-answer-select"> <option value="true">Yes</option> <option value="false" selected>No</option></select>
+             </div> 
+            </div>
+            <div class="question-choice um-fit-screen default-theme um-alert alert-secondary choice-no-margin-top question-choice-pointer preview-support default-margin-top" data-um-correct="false" data-um-preview="support" id="id-VDSZh8aZYgBqXmcC"> 
+             <div class="choice-action">
+              <span class="float-right"><i class="material-icons action-delete-inner hide-element">delete</i></span>
+             </div> 
+             <div class="question-choice-body dont-remove" id="mce_3" style="position: relative;" dir="ltr">
+              <p>Placeholder text for the answer body</p>
+             </div> 
+             <div class="question-choice-feedback dont-remove hide-element" id="mce_4" style="position: relative;" dir="ltr">
+              <p>Feedback placeholder text</p>
+             </div> 
+             <div class="question-choice-answer um-fit-screen select-option hide-element">
+              <select class="question-choice-answer-select"> <option value="true">Yes</option> <option value="false" selected>No</option></select>
+             </div> 
+            </div>
+            <div class="question-choice um-fit-screen default-theme um-alert alert-secondary choice-no-margin-top question-choice-pointer preview-support default-margin-top" data-um-correct="false" data-um-preview="support" id="id-60Hn_KyUlahalzR1"> 
+             <div class="choice-action">
+              <span class="float-right"><i class="material-icons action-delete-inner hide-element">delete</i></span>
+             </div> 
+             <div class="question-choice-body dont-remove" id="mce_5" style="position: relative;" dir="ltr">
+              <p>Placeholder text for the answer body</p>
+             </div> 
+             <div class="question-choice-feedback dont-remove hide-element" id="mce_6" style="position: relative;" dir="ltr">
+              <p>Feedback placeholder text</p>
+             </div> 
+             <div class="question-choice-answer um-fit-screen select-option hide-element">
+              <select class="question-choice-answer-select"> <option value="true">Yes</option> <option value="false" selected>No</option></select>
+             </div> 
+            </div> 
+            <div class="question-feedback-container um-fit-screen default-theme hide-element preview-alert default-margin-top" data-um-preview="alert" id="id-flMscfDBNrdfJWIm"> 
+             <div class="um-alert question-feedback-container-text preview-alert default-margin-top" role="alert" data-um-preview="alert"></div> 
+            </div> 
+            <div class="question-retry-holder um-fit-screen default-theme" id="id-aHhcvPQcXbtkvnvU"> 
+             <div class="question-retry-option select-option default-margin-bottom default-theme hide-element" id="id-AZPjzN6hG76_GdGF">
+              <select class="question-retry-option-select"> <option value="true">Yes</option> <option value="false" selected>No</option></select>
+             </div> 
+             <div class="question-retry-btn default-theme default-margin-top hide-element" id="id-J6tnEpJYSuSzsMtu">
+              <button class="float-right qn-retry extra-btn preview-support default-margin-top" data-um-preview="support">Try again</button>
+             </div> 
+            </div> 
+            <div class="question-add-choice um-fit-screen default-theme default-padding-top default-margin-bottom hide-element" id="id-BCo14Fugp-teLhBC"></div> 
+           </div>
+           <div data-um-widget="extra-content" class="um-row default-margin-top extra-content hide-element" id="id-c_CMnUOvAhMnk6Jc" style="position: relative;" dir="ltr">
+            <p></p>
+           </div>   
+    </div>
+</div>
+</body>
+</html>

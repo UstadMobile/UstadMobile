@@ -1,4 +1,5 @@
-import {com as core} from 'core';
+import ktorclientserial from 'ktor-ktor-client-serialization';
+import core from 'UstadMobile-core';
 import {Observable} from 'rxjs';
 
 export class UmAngularUtil {
@@ -15,8 +16,9 @@ export class UmAngularUtil {
    * Convert query parameters to a kotlin map to be used on presenters
    */
   static queryParamsToMap(queryParam ? : string, notFound? :boolean) {
+    const ktor = ktorclientserial 
     var paramString = queryParam || document.location.search + (notFound ? "":"&ref=null");
-    return core.ustadmobile.core.util.UMFileUtil
+    return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString);
   }
 
@@ -67,7 +69,6 @@ export class UmAngularUtil {
       view = "/NotFound/"
       args = UmAngularUtil.queryParamsToMap("", true)
     }
-    console.log("path", view)
     return {view: view, args: args};
   }
 }
