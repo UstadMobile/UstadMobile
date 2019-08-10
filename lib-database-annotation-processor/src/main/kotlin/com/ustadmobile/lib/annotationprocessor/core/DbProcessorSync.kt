@@ -53,6 +53,51 @@ class DbProcessorSync: AbstractDbProcessor() {
                 }
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
+        roundEnv.getElementsAnnotatedWith(SyncableEntity::class.java).map { it as TypeElement }.forEach {
+            val pkFieldTypeName = getEntityPrimaryKey(it)!!.asType().asTypeName()
+            val trackerFileSpec = FileSpec.builder(it.asClassName().packageName, "${it.simpleName}$TRACKER_SUFFIX")
+                    .addType(
+                            TypeSpec.classBuilder("${it.simpleName}_trk")
+                        .addProperties(listOf(
+                            PropertySpec.builder(TRACKER_PK_FIELDNAME, LONG)
+                                    .addAnnotation(AnnotationSpec.builder(PrimaryKey::class).addMember("autoGenerate = true").build())
+                                    .initializer(TRACKER_PK_FIELDNAME)
+                                    .build(),
+                            PropertySpec.builder(TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
+                                    .initializer(TRACKER_ENTITY_PK_FIELDNAME)
+                                    .build(),
+                            PropertySpec.builder(TRACKER_DESTID_FIELDNAME, INT)
+                                    .initializer(TRACKER_DESTID_FIELDNAME)
+                                    .build(),
+                            PropertySpec.builder(TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
+                                    .initializer(TRACKER_CHANGESEQNUM_FIELDNAME)
+                                    .build(),
+                            PropertySpec.builder(TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
+                                    .initializer(TRACKER_RECEIVED_FIELDNAME)
+                                    .build(),
+                            PropertySpec.builder(TRACKER_REQUESTID_FIELDNAME, INT)
+                                    .initializer(TRACKER_REQUESTID_FIELDNAME)
+                                    .build(),
+                            PropertySpec.builder(TRACKER_TIMESTAMP_FIELDNAME, LONG)
+                                    .initializer(TRACKER_TIMESTAMP_FIELDNAME)
+                                    .build()
+                        ))
+                    .addAnnotation(Entity::class)
+                    .primaryConstructor(FunSpec.constructorBuilder()
+                                .addParameter(TRACKER_PK_FIELDNAME, LONG)
+                                .addParameter(TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
+                                .addParameter(TRACKER_DESTID_FIELDNAME, INT)
+                                .addParameter(TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
+                                .addParameter(TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
+                                .addParameter(TRACKER_REQUESTID_FIELDNAME, INT)
+                                .addParameter(TRACKER_TIMESTAMP_FIELDNAME, LONG)
+                                .build())
+                    .addModifiers(KModifier.DATA)
+                    .build())
+
+            writeFileSpecToOutputDirs(trackerFileSpec.build(), AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+        }
+
         for(dbTypeEl in dbs) {
             messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: db: ${dbTypeEl.simpleName}")
             val (abstractFileSpec, implFileSpec, repoImplSpec) = generateSyncDaoInterfaceAndImpls(dbTypeEl as TypeElement)
@@ -458,6 +503,22 @@ class DbProcessorSync: AbstractDbProcessor() {
         const val SUFFIX_SYNCDAO_IMPL = "SyncDao_JdbcKt"
 
         const val SUFFIX_SYNC_ROUTE = "SyncDao_Route"
+
+        const val TRACKER_SUFFIX = "_trk"
+
+        const val TRACKER_PK_FIELDNAME = "pk"
+
+        const val TRACKER_ENTITY_PK_FIELDNAME = "epk"
+
+        const val TRACKER_DESTID_FIELDNAME = "clientId"
+
+        const val TRACKER_CHANGESEQNUM_FIELDNAME = "csn"
+
+        const val TRACKER_RECEIVED_FIELDNAME = "rx"
+
+        const val TRACKER_REQUESTID_FIELDNAME = "reqId"
+
+        const val TRACKER_TIMESTAMP_FIELDNAME = "ts"
     }
 
 }

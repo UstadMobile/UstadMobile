@@ -405,6 +405,10 @@ fun CodeBlock.Builder.addWithNullCheckIfNeeded(varName: String, typeName: TypeNa
     return this
 }
 
+fun getEntityPrimaryKey(entityEl: TypeElement) = entityEl.enclosedElements
+        .firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) != null}
+
+
 internal fun isSyncableDb(dbTypeEl: TypeElement, processingEnv: ProcessingEnvironment) =
         processingEnv.typeUtils.isAssignable(dbTypeEl.asType(),
                 processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())
@@ -1103,6 +1107,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             messager?.printMessage(kind, messageStr, element)
         }else {
             messager?.printMessage(kind, messageStr)
+        }
+    }
+
+    /**
+     * Write the given file spec to directories specified in the annotation processor argument. Paths
+     * should be separated by the path separator character (platform dependent - e.g. : on Unix, ; on Windows)
+     */
+    protected fun writeFileSpecToOutputDirs(fileSpec: FileSpec, argName: String) {
+        (processingEnv.options[argName]?.split(File.pathSeparator) ?: listOf(processingEnv.options["kapt.kotlin.generated"]!!)).forEach {
+            fileSpec.writeTo(File(it))
         }
     }
 }
