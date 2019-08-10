@@ -5,6 +5,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
@@ -48,4 +49,9 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
             "JOIN ContentEntryRecursive  AS outer_pcj ON outer_pcj.contentEntryUid = inner_pcj.cepcjParentContentEntryUid) " +
             " SELECT sum(ContentEntryRecursive.containerSize) as fileSize, count(*) as numEntries FROM ContentEntryRecursive WHERE containerSize != 0")
     abstract suspend fun getParentChildContainerRecursiveAsync(contentEntryUid: Long) : UmContentEntriesWithFileSize ?
+
+    @Query("SELECT ContentEntry.* FROM ContentEntry " +
+            "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid) " +
+            "AND EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjParentContentEntryUid = ContentEntry.contentEntryUid)")
+    abstract fun selectTopEntries(): List<ContentEntry>
 }

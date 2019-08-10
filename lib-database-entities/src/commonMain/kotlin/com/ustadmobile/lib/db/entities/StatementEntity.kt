@@ -35,9 +35,9 @@ class StatementEntity {
 
     var teamUid: Long = 0
 
-    var isResultCompletion: Boolean = false
+    var resultCompletion: Boolean = false
 
-    var isResultSuccess: Boolean = false
+    var resultSuccess: Byte = RESULT_UNSET
 
     var resultScoreScaled: Long = 0
 
@@ -75,5 +75,11 @@ class StatementEntity {
     companion object {
 
         const val TABLE_ID = 60
+
+        const val RESULT_UNSET = 0.toByte()
+
+        const val RESULT_SUCCESS = 1.toByte()
+
+        const val RESULT_FAILURE = 2.toByte()
     }
 }

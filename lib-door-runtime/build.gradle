@@ -97,6 +97,14 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
         }
+        androidTest{
+            dependencies{
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "junit:junit:$version_junit"
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+            }
+        }
     }
 }
 

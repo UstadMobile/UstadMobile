@@ -96,6 +96,13 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
+    abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
+
+
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE Person.personUid IN (:uidList)")
+    abstract suspend fun getAllPersonsInList(uidList: List<Long>): List<PersonNameAndUid>
+
 
     /**
      * Checks if a user has the given permission over a given person in the database
@@ -142,5 +149,12 @@ abstract class PersonDao : BaseDao<Person> {
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
+    }
+
+    data class PersonNameAndUid(var personUid: Long = 0L, var name: String = ""){
+
+        override fun toString(): String {
+            return name
+        }
     }
 }

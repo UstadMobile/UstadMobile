@@ -18,8 +18,10 @@ class ContentEntryParentChildJoin() {
     @PrimaryKey(autoGenerate = true)
     var cepcjUid: Long = 0
 
+    @UmIndexField
     var cepcjChildContentEntryUid: Long = 0
 
+    @UmIndexField
     var cepcjParentContentEntryUid: Long = 0
 
     var childIndex: Int = 0

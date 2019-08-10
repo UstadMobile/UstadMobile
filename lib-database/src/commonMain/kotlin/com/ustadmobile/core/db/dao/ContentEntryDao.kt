@@ -55,8 +55,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByParent")
-    abstract fun getChildrenByParent(parentUid: Long): List<ContentEntry>
+    @JsName("getChildrenByParentAsync")
+    abstract suspend fun getChildrenByParentAsync(parentUid: Long): List<ContentEntry>
 
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -132,4 +132,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
     abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>
+
+    @Query("SELECT contentEntryUid FROM ContentEntry WHERE entryId = :objectId LIMIT 1")
+    abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 }
