@@ -122,43 +122,28 @@ fun entityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment): 
  * @param getAutoIncLast if true, then always return any field that is auto increment at the very end
  * @return List of VariableElement representing the entity fields that are persisted
  */
-fun getEntityFieldElements(entityTypeElement: TypeElement,
-                           getAutoIncLast: Boolean): List<VariableElement> {
-    val entityFieldsList = mutableListOf<VariableElement>()
-    var pkAutoIncField: VariableElement? = null
-    for (subElement in entityTypeElement.enclosedElements) {
-        if (subElement.kind != ElementKind.FIELD || subElement.modifiers.contains(Modifier.STATIC))
-            continue
-
-        if (getAutoIncLast
-                && subElement.getAnnotation(PrimaryKey::class.java) != null
-                && subElement.getAnnotation(PrimaryKey::class.java).autoGenerate) {
-            pkAutoIncField = subElement as VariableElement
-        } else {
-            entityFieldsList.add(subElement as VariableElement)
+fun getEntityFieldElements(entityTypeSpec: TypeSpec,
+                           getAutoIncLast: Boolean): List<PropertySpec> {
+    val propertyList = entityTypeSpec.propertySpecs.toMutableList()
+    if(getAutoIncLast) {
+        val autoIncPropIdx = propertyList
+                .indexOfFirst { it.annotations.any { it.className == PrimaryKey::class.asClassName()
+                        && it.members.any { it.toString().contains("autoGenerate") }} }
+        if(autoIncPropIdx >= 0) {
+            val autoIncField = propertyList.removeAt(autoIncPropIdx)
+            propertyList.add(autoIncField)
         }
     }
 
-    if (pkAutoIncField != null)
-        entityFieldsList.add(pkAutoIncField)
-
-    return entityFieldsList
+    return propertyList
 }
 
-fun getFieldSqlType(fieldEl: VariableElement, processingEnv: ProcessingEnvironment, dbType: Int = 0): String {
-    when(fieldEl.asType().kind){
-        TypeKind.BOOLEAN -> return "BOOL"
-        TypeKind.INT -> return "INTEGER"
-        TypeKind.LONG -> return "BIGINT"
-        TypeKind.FLOAT -> return "FLOAT"
-        TypeKind.DECLARED -> {
-            val fieldClassName = (processingEnv.typeUtils.asElement(fieldEl.asType()) as TypeElement).qualifiedName.toString()
-            return if (fieldClassName == "java.lang.String") "TEXT" else "UNKNOWN"
+internal fun containsAutoGeneratePk(annotationList: List<AnnotationSpec>) =
+        annotationList.any {
+            it.className == PrimaryKey::class.asClassName()
+            && it.members.map { it.toString().trim() }
+            .any { it.startsWith("autoGenerate") && it.endsWith("true")}
         }
-    }
-
-    return "UNKNOWN"
-}
 
 //As per https://github.com/square/kotlinpoet/issues/236
 internal fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
@@ -654,18 +639,19 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             val dbEntityTypes = entityTypesOnDb(dbTypeElement, processingEnv)
             for(entityType in dbEntityTypes) {
-                codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(entityType,
-                        dbProductType))
+                codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
+                        entityType.asEntityTypeSpec(), dbProductType))
                 if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
                     codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
                             "_stmt.executeUpdate", dbProductType))
                 }
 
 
-                for(field in getEntityFieldElements(entityType, false)) {
-                    if(field.getAnnotation(ColumnInfo::class.java)?.index == true) {
+                for(field in getEntityFieldElements(entityType.asEntityTypeSpec(), false)) {
+                    if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
+                                    && it.members.findBooleanMemberValue("index") ?: false }) {
                         codeBlock.add("_stmt.executeUpdate(%S)\n",
-                                "CREATE INDEX index_${entityType.simpleName}_${field.simpleName} ON ${entityType.simpleName} (${field.simpleName})")
+                                "CREATE INDEX index_${entityType.simpleName}_${field.name} ON ${entityType.simpleName} (${field.name})")
                     }
                 }
             }

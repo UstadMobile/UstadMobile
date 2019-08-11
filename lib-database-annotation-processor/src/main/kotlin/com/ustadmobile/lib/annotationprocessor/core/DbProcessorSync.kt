@@ -34,6 +34,51 @@ fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment
     return annotationValue.value as TypeMirror
 }
 
+/**
+ * Generate a Tracker Entity for a Syncable Entity
+ */
+internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: ProcessingEnvironment) : TypeSpec {
+    val pkFieldTypeName = getEntityPrimaryKey(entityClass)!!.asType().asTypeName()
+    return TypeSpec.classBuilder("${entityClass.simpleName}_trk")
+            .addProperties(listOf(
+                    PropertySpec.builder(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
+                            .addAnnotation(AnnotationSpec.builder(PrimaryKey::class).addMember("autoGenerate = true").build())
+                            .initializer(DbProcessorSync.TRACKER_PK_FIELDNAME)
+                            .build(),
+                    PropertySpec.builder(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
+                            .initializer(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME)
+                            .build(),
+                    PropertySpec.builder(DbProcessorSync.TRACKER_DESTID_FIELDNAME, INT)
+                            .initializer(DbProcessorSync.TRACKER_DESTID_FIELDNAME)
+                            .build(),
+                    PropertySpec.builder(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
+                            .initializer(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME)
+                            .build(),
+                    PropertySpec.builder(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
+                            .initializer(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME)
+                            .build(),
+                    PropertySpec.builder(DbProcessorSync.TRACKER_REQUESTID_FIELDNAME, INT)
+                            .initializer(DbProcessorSync.TRACKER_REQUESTID_FIELDNAME)
+                            .build(),
+                    PropertySpec.builder(DbProcessorSync.TRACKER_TIMESTAMP_FIELDNAME, LONG)
+                            .initializer(DbProcessorSync.TRACKER_TIMESTAMP_FIELDNAME)
+                            .build()
+            ))
+            .addAnnotation(Entity::class)
+            .primaryConstructor(FunSpec.constructorBuilder()
+                    .addParameter(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
+                    .addParameter(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
+                    .addParameter(DbProcessorSync.TRACKER_DESTID_FIELDNAME, INT)
+                    .addParameter(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
+                    .addParameter(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
+                    .addParameter(DbProcessorSync.TRACKER_REQUESTID_FIELDNAME, INT)
+                    .addParameter(DbProcessorSync.TRACKER_TIMESTAMP_FIELDNAME, LONG)
+                    .build())
+            .addModifiers(KModifier.DATA)
+            .build()
+
+}
+
 class DbProcessorSync: AbstractDbProcessor() {
 
     data class OutputDirs(val abstractOutputArg: String?, val implOutputArg: String?,
@@ -54,46 +99,8 @@ class DbProcessorSync: AbstractDbProcessor() {
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         roundEnv.getElementsAnnotatedWith(SyncableEntity::class.java).map { it as TypeElement }.forEach {
-            val pkFieldTypeName = getEntityPrimaryKey(it)!!.asType().asTypeName()
             val trackerFileSpec = FileSpec.builder(it.asClassName().packageName, "${it.simpleName}$TRACKER_SUFFIX")
-                    .addType(
-                            TypeSpec.classBuilder("${it.simpleName}_trk")
-                        .addProperties(listOf(
-                            PropertySpec.builder(TRACKER_PK_FIELDNAME, LONG)
-                                    .addAnnotation(AnnotationSpec.builder(PrimaryKey::class).addMember("autoGenerate = true").build())
-                                    .initializer(TRACKER_PK_FIELDNAME)
-                                    .build(),
-                            PropertySpec.builder(TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
-                                    .initializer(TRACKER_ENTITY_PK_FIELDNAME)
-                                    .build(),
-                            PropertySpec.builder(TRACKER_DESTID_FIELDNAME, INT)
-                                    .initializer(TRACKER_DESTID_FIELDNAME)
-                                    .build(),
-                            PropertySpec.builder(TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
-                                    .initializer(TRACKER_CHANGESEQNUM_FIELDNAME)
-                                    .build(),
-                            PropertySpec.builder(TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
-                                    .initializer(TRACKER_RECEIVED_FIELDNAME)
-                                    .build(),
-                            PropertySpec.builder(TRACKER_REQUESTID_FIELDNAME, INT)
-                                    .initializer(TRACKER_REQUESTID_FIELDNAME)
-                                    .build(),
-                            PropertySpec.builder(TRACKER_TIMESTAMP_FIELDNAME, LONG)
-                                    .initializer(TRACKER_TIMESTAMP_FIELDNAME)
-                                    .build()
-                        ))
-                    .addAnnotation(Entity::class)
-                    .primaryConstructor(FunSpec.constructorBuilder()
-                                .addParameter(TRACKER_PK_FIELDNAME, LONG)
-                                .addParameter(TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
-                                .addParameter(TRACKER_DESTID_FIELDNAME, INT)
-                                .addParameter(TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
-                                .addParameter(TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
-                                .addParameter(TRACKER_REQUESTID_FIELDNAME, INT)
-                                .addParameter(TRACKER_TIMESTAMP_FIELDNAME, LONG)
-                                .build())
-                    .addModifiers(KModifier.DATA)
-                    .build())
+                    .addType(generateTrackerEntity(it, processingEnv))
 
             writeFileSpecToOutputDirs(trackerFileSpec.build(), AnnotationProcessorWrapper.OPTION_JVM_DIRS)
         }

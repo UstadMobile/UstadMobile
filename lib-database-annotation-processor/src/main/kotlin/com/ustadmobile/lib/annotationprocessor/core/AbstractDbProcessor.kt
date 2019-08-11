@@ -18,10 +18,15 @@ import io.ktor.client.response.HttpResponse
 import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.*
 import com.ustadmobile.door.DoorLiveData
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.PreparedStatementArrayProxy
+import com.ustadmobile.door.EntityInsertionAdapter
+import com.ustadmobile.door.SyncableDoorDatabase
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -413,13 +418,18 @@ internal fun isSyncableDb(dbTypeEl: TypeElement, processingEnv: ProcessingEnviro
         processingEnv.typeUtils.isAssignable(dbTypeEl.asType(),
                 processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())
 
+
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected lateinit var messager: Messager
 
     protected var dbConnection: Connection? = null
 
-    protected val allKnownEntities = mutableListOf<TypeElement>()
+    /**
+     * When we generate the code for a Query annotation function that performs an update or delete,
+     * we use this so that we can match the case of the table name.
+     */
+    protected val allKnownEntityNames = mutableListOf<String>()
 
     override fun init(p0: ProcessingEnvironment) {
         super.init(p0)
@@ -451,29 +461,32 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }
 
             val stmt = dbConnection!!.createStatement()
-            stmt.execute(makeCreateTableStatement(it, DoorDbType.SQLITE))
-            allKnownEntities.add(it)
+            val typeEntitySpec = it.asEntityTypeSpec()
+            stmt.execute(makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE))
+            allKnownEntityNames.add(typeEntitySpec.name!!)
         }
     }
 
-    protected fun makeCreateTableStatement(entitySpec: TypeElement, dbType: Int): String {
-        var sql = "CREATE TABLE IF NOT EXISTS ${entitySpec.simpleName} ("
+    protected fun makeCreateTableStatement(entitySpec: TypeSpec, dbType: Int): String {
+        var sql = "CREATE TABLE IF NOT EXISTS ${entitySpec.name} ("
         var commaNeeded = false
         for (fieldEl in getEntityFieldElements(entitySpec, true)) {
-            sql += """${if(commaNeeded) "," else " "} ${fieldEl.simpleName} """
-            val pkAnnotation = fieldEl.getAnnotation(PrimaryKey::class.java)
-            if(pkAnnotation != null && pkAnnotation.autoGenerate) {
+            sql += """${if(commaNeeded) "," else " "} ${fieldEl.name} """
+            val pkAutoGenerate = fieldEl.annotations
+                    .firstOrNull { it.className == PrimaryKey::class.asClassName() }
+                    ?.members?.findBooleanMemberValue("autoGenerate") ?: false
+            if(pkAutoGenerate) {
                 when(dbType) {
                     DoorDbType.SQLITE -> sql += " INTEGER "
                     DoorDbType.POSTGRES -> sql += " SERIAL "
                 }
             }else {
-                sql += " ${getFieldSqlType(fieldEl, processingEnv)} "
+                sql += " ${fieldEl.type.toSqlType(dbType)} "
             }
 
-            if(pkAnnotation != null) {
+            if(fieldEl.annotations.any { it.className == PrimaryKey::class.asClassName()} ) {
                 sql += " PRIMARY KEY "
-                if(pkAnnotation.autoGenerate && dbType == DoorDbType.SQLITE)
+                if(pkAutoGenerate && dbType == DoorDbType.SQLITE)
                     sql += " AUTOINCREMENT "
 
                 sql += " NOT NULL "
@@ -674,10 +687,10 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                  * as the entity, so we look it up from the list of known entities to find the correct
                  * case to use.
                  */
-                val entityModified = allKnownEntities.first {it.simpleName.toString().equals(tableName, ignoreCase = true)}
+                val entityModified = allKnownEntityNames.first {it.equals(tableName,  ignoreCase = true)}
 
                 codeBlock.beginControlFlow("if(_numUpdates > 0)")
-                        .add("_db.handleTableChanged(listOf(%S))\n", entityModified.simpleName.toString())
+                        .add("_db.handleTableChanged(listOf(%S))\n", entityModified)
                         .endControlFlow()
 
                 if(resultType != UNIT) {
