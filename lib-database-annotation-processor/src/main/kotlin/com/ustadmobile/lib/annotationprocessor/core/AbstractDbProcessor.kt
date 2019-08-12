@@ -448,22 +448,29 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         messager!!.printMessage(Diagnostic.Kind.NOTE, "Annotation processor db tmp file: ${dbTmpFile.absolutePath}")
 
         dbConnection = dataSource.connection
-        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {
-            if(it.getAnnotation(Entity::class.java) == null) {
+        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {entity ->
+            if(entity.getAnnotation(Entity::class.java) == null) {
                 logMessage(Diagnostic.Kind.ERROR,
-                        "Class used as entity on database does not have @Entity annotation",
-                        it)
+                        "Class ${entity.simpleName} used as entity on database does not have @Entity annotation",
+                        entity)
             }
 
-            if(!it.enclosedElements.any { it.getAnnotation(PrimaryKey::class.java) != null }) {
+            if(!entity.enclosedElements.any { it.getAnnotation(PrimaryKey::class.java) != null }) {
                 logMessage(Diagnostic.Kind.ERROR,
-                        "Class used as entity does not have a field annotated @PrimaryKey")
+                        "Class ${entity.simpleName} used as entity does not have a field annotated @PrimaryKey")
             }
 
             val stmt = dbConnection!!.createStatement()
-            val typeEntitySpec = it.asEntityTypeSpec()
-            stmt.execute(makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE))
-            allKnownEntityNames.add(typeEntitySpec.name!!)
+            stmt.use {
+                val typeEntitySpec = entity.asEntityTypeSpec()
+                stmt.execute(makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE))
+                allKnownEntityNames.add(typeEntitySpec.name!!)
+                if(entity.getAnnotation(SyncableEntity::class.java) != null) {
+                    val trackerEntitySpec = generateTrackerEntity(entity, processingEnv)
+                    stmt.execute(makeCreateTableStatement(trackerEntitySpec, DoorDbType.SQLITE))
+                    allKnownEntityNames.add(trackerEntitySpec.name!!)
+                }
+            }
         }
     }
 
@@ -816,6 +823,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * return type will match the given returnType
      */
     fun generateInsertCodeBlock(parameterSpec: ParameterSpec, returnType: TypeName,
+                                   entityTypeSpec: TypeSpec,
                                    daoTypeBuilder: TypeSpec.Builder,
                                    upsertMode: Boolean = false,
                                    addReturnStmt: Boolean = true): CodeBlock {
@@ -832,27 +840,27 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             paramType as ClassName
         }
 
-        val entityTypeEl = processingEnv.elementUtils.getTypeElement(entityClassName.canonicalName)
 
-        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""}"
+        val entityInserterPropName = "_insertAdapter${entityTypeSpec.name}_${if(upsertMode) "upsert" else ""}"
         if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
             val fieldNames = mutableListOf<String>()
             val parameterHolders = mutableListOf<String>()
 
             val bindCodeBlock = CodeBlock.builder()
             var fieldIndex = 1
-            fieldsOnEntity(entityTypeEl).forEach {subEl ->
-                fieldNames.add(subEl.simpleName.toString())
-                val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
-                val setterMethodName = getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())
-                if(pkAnnotation != null && pkAnnotation.autoGenerate) {
-                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
-                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ ${defaultVal(subEl.asType().asTypeName())} " +
+
+            entityTypeSpec.propertySpecs.forEach { prop ->
+                fieldNames.add(prop.name)
+                val pkAnnotation = prop.annotations.firstOrNull { it.className == PrimaryKey::class.asClassName() }
+                val setterMethodName = getPreparedStatementSetterGetterTypeName(prop.type)
+                if(pkAnnotation != null && pkAnnotation.members.findBooleanMemberValue("autoGenerate") ?: false) {
+                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeSpec.name}'))\" else -> \"?\"} }")
+                    bindCodeBlock.add("when(entity.${prop.name}){ ${defaultVal(prop.type)} " +
                             "-> stmt.setObject(${fieldIndex}, null) " +
-                            "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})  }\n")
+                            "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${prop.name})  }\n")
                 }else {
                     parameterHolders.add("?")
-                    bindCodeBlock.add("stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})\n")
+                    bindCodeBlock.add("stmt.set$setterMethodName(${fieldIndex++}, entity.${prop.name})\n")
                 }
             }
 
@@ -863,10 +871,12 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }
 
             val upsertSuffix = if(upsertMode) {
-                val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
-                val nonPkFieldPairs = nonPkFields.map { "${it.simpleName}·=·excluded.${it.simpleName}" }
-                val pkField = entityTypeEl.enclosedElements.firstOrNull { it.getAnnotation(PrimaryKey::class.java) != null }
-                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.simpleName})·" +
+                val nonPkFields = entityTypeSpec.propertySpecs
+                        .filter { ! it.annotations.any { it.className == PrimaryKey::class.asClassName() } }
+                val nonPkFieldPairs = nonPkFields.map { "${it.name}·=·excluded.${it.name}" }
+                val pkField = entityTypeSpec.propertySpecs
+                        .firstOrNull { it.annotations.any { it.className == PrimaryKey::class.asClassName()}}
+                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.name})·" +
                         "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
                         "else -> \"·\" } } "
             } else {
@@ -874,7 +884,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }
 
             val sql = """
-                $statementClause INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
+                $statementClause INTO ${entityTypeSpec.name} (${fieldNames.joinToString()})
                 VALUES (${parameterHolders.joinToString()})
                 $upsertSuffix
                 """.trimIndent()
@@ -919,7 +929,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         codeBlock.add("\n")
 
-        codeBlock.add("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
+        codeBlock.add("_db.handleTableChanged(listOf(%S))\n", entityTypeSpec.name)
 
         if(addReturnStmt) {
             if(returnType != UNIT) {

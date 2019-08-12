@@ -1,10 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.PrimaryKey
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.asClassName
-import com.squareup.kotlinpoet.asTypeName
+import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
@@ -61,34 +58,23 @@ class SyncableEntityInfo {
                 entityLastModifiedField.asType().asTypeName()).build()
 
 
-        val syncableEntityTracker = getEntitySyncTracker(syncableEntityEl, processingEnv)
-        val syncableEntityTrackerEl = processingEnv.typeUtils.asElement(syncableEntityTracker) as TypeElement
-        tracker = syncableEntityTrackerEl.asClassName()
+        tracker = ClassName(syncableEntityParam.packageName,
+                "${syncableEntityParam.simpleName}${DbProcessorSync.TRACKER_SUFFIX}")
 
-        val trackerCsnFieldEl = syncableEntityTrackerEl.enclosedElements
-                .first { it.getAnnotation(TrackerChangeSeqNum::class.java) != null }
-        trackerCsnField = PropertySpec.builder("${trackerCsnFieldEl.simpleName}",
-                trackerCsnFieldEl.asType().asTypeName()).build()
+        trackerCsnField = PropertySpec.builder(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME,
+                LONG).build()
 
-        val trackerPkFieldEl = syncableEntityTrackerEl.enclosedElements
-                .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
-        trackerPkField = PropertySpec.builder("${trackerPkFieldEl.simpleName}",
-                trackerPkFieldEl.asType().asTypeName()).build()
+        trackerPkField = PropertySpec.builder(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                entityPkField.type).build()
 
-        val trackerDestFieldEl = syncableEntityTrackerEl.enclosedElements
-                .first {it.getAnnotation(TrackDestId::class.java) != null}
-        trackerDestField = PropertySpec.builder("${trackerDestFieldEl.simpleName}",
-                trackerDestFieldEl.asType().asTypeName()).build()
+        trackerDestField = PropertySpec.builder(DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                INT).build()
 
-        val trackerReceivedFieldEl = syncableEntityTrackerEl.enclosedElements
-                .first {it.getAnnotation(TrackerReceived::class.java) != null}
-        trackerReceivedField = PropertySpec.builder("${trackerReceivedFieldEl.simpleName}",
-                trackerReceivedFieldEl.asType().asTypeName()).build()
+        trackerReceivedField = PropertySpec.builder(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
+                BOOLEAN).build()
 
-        val trackerReqIdFieldEl = syncableEntityTrackerEl.enclosedElements
-                .first {it.getAnnotation(TrackerRequestId::class.java) != null}
-        trackerReqIdField = PropertySpec.builder("${trackerReqIdFieldEl.simpleName}",
-                trackerReqIdFieldEl.asType().asTypeName()).build()
+        trackerReqIdField = PropertySpec.builder(DbProcessorSync.TRACKER_REQUESTID_FIELDNAME,
+                INT).build()
     }
 
 

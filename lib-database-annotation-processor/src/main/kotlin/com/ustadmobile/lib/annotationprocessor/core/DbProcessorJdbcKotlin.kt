@@ -639,20 +639,24 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             val dbEntityTypes = entityTypesOnDb(dbTypeElement, processingEnv)
             for(entityType in dbEntityTypes) {
+                val entityTypeSpec = entityType.asEntityTypeSpec()
                 codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
-                        entityType.asEntityTypeSpec(), dbProductType))
-                if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
-                    codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
-                            "_stmt.executeUpdate", dbProductType))
-                }
+                        entityTypeSpec, dbProductType))
 
-
-                for(field in getEntityFieldElements(entityType.asEntityTypeSpec(), false)) {
+                for(field in getEntityFieldElements(entityTypeSpec, false)) {
                     if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
                                     && it.members.findBooleanMemberValue("index") ?: false }) {
                         codeBlock.add("_stmt.executeUpdate(%S)\n",
                                 "CREATE INDEX index_${entityType.simpleName}_${field.name} ON ${entityType.simpleName} (${field.name})")
                     }
+                }
+
+                if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
+                    codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
+                            "_stmt.executeUpdate", dbProductType))
+
+                    codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
+                            generateTrackerEntity(entityType, processingEnv), dbProductType))
                 }
             }
 
@@ -735,7 +739,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
         insertFun.addCode(generateInsertCodeBlock(
                 insertFun.parameters[0],
-                resolvedReturnType, daoTypeBuilder, upsertMode))
+                resolvedReturnType, entityTypeEl.asEntityTypeSpec(),
+                daoTypeBuilder, upsertMode))
         return insertFun.build()
     }
 

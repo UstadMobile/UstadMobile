@@ -108,7 +108,7 @@ class TestDbRoute  {
         }
         val reqId = firstGetListResponse.headers.get("X-reqid")!!.toInt()
         val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
-        httpClient.get<Unit>("http://localhost:8089/ExampleSyncableDao/_updateExampleSyncableEntityTrackerReceived?reqId=$reqId")
+        httpClient.get<Unit>("http://localhost:8089/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=$reqId")
 
         val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleSyncableDao/findAll") {
             header("X-nid", 1)

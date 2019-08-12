@@ -23,17 +23,6 @@ import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorDatabase
 import kotlin.reflect.KClass
 
-fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
-    val syncEntityAnnotationIndex = entityEl.annotationMirrors.map {processingEnv.typeUtils.asElement(it.annotationType) as TypeElement }
-            .indexOfFirst { it.qualifiedName.toString() == "com.ustadmobile.door.annotation.SyncableEntity" }
-    if(syncEntityAnnotationIndex == -1)
-        return null
-
-    val annotationValue = entityEl.annotationMirrors[syncEntityAnnotationIndex].elementValues
-            .filter { it.key.simpleName.toString() == "syncTrackerEntity" }.values.toList()[0]
-    return annotationValue.value as TypeMirror
-}
-
 /**
  * Generate a Tracker Entity for a Syncable Entity
  */
@@ -51,7 +40,7 @@ internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: Proc
                     PropertySpec.builder(DbProcessorSync.TRACKER_DESTID_FIELDNAME, INT)
                             .initializer(DbProcessorSync.TRACKER_DESTID_FIELDNAME)
                             .build(),
-                    PropertySpec.builder(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
+                    PropertySpec.builder(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME, INT)
                             .initializer(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME)
                             .build(),
                     PropertySpec.builder(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
@@ -66,13 +55,20 @@ internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: Proc
             ))
             .addAnnotation(Entity::class)
             .primaryConstructor(FunSpec.constructorBuilder()
-                    .addParameter(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
-                    .addParameter(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME, pkFieldTypeName)
-                    .addParameter(DbProcessorSync.TRACKER_DESTID_FIELDNAME, INT)
-                    .addParameter(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME, LONG)
-                    .addParameter(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME, BOOLEAN)
-                    .addParameter(DbProcessorSync.TRACKER_REQUESTID_FIELDNAME, INT)
-                    .addParameter(DbProcessorSync.TRACKER_TIMESTAMP_FIELDNAME, LONG)
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
+                            .defaultValue("0L").build())
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                            pkFieldTypeName).defaultValue("0L").build())
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                            INT).defaultValue("0").build())
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME,
+                            INT).defaultValue("0").build())
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
+                            BOOLEAN).defaultValue("false").build())
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_REQUESTID_FIELDNAME,
+                            INT).defaultValue("0").build())
+                    .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_TIMESTAMP_FIELDNAME,
+                            LONG).defaultValue("0L").build())
                     .build())
             .addModifiers(KModifier.DATA)
             .build()
@@ -146,19 +142,18 @@ class DbProcessorSync: AbstractDbProcessor() {
                             .addParameter("entityList", List::class.asClassName().parameterizedBy(it))
                             .addModifiers(KModifier.ABSTRACT)
                             .build())
-            val entitySyncTracker = getEntitySyncTracker(
-                    processingEnv.elementUtils.getTypeElement(it.canonicalName), processingEnv)
-            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker)
 
+            val entitySyncTrackerClassName = ClassName(it.packageName,
+                    "${it.simpleName}$TRACKER_SUFFIX")
             syncHelperInterface.addFunction(
-                    FunSpec.builder("_replace${entitySyncTrackerEl.simpleName}")
+                    FunSpec.builder("_replace${entitySyncTrackerClassName.simpleName}")
                             .addParameter("entityTrackerList",
-                                    List::class.asClassName().parameterizedBy(entitySyncTrackerEl.asType().asTypeName()))
+                                    List::class.asClassName().parameterizedBy(entitySyncTrackerClassName))
                             .addModifiers(KModifier.ABSTRACT)
                             .build())
 
             syncHelperInterface.addFunction(
-                    FunSpec.builder("_update${entitySyncTrackerEl.simpleName}Received")
+                    FunSpec.builder("_update${entitySyncTrackerClassName.simpleName}Received")
                             .addParameter("status", BOOLEAN)
                             .addParameter("requestId", INT)
                             .addModifiers(KModifier.ABSTRACT)
@@ -397,6 +392,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                 generateAbstractAndImplUpsertFuns(
                     "_replace${entityType.simpleName}",
                     ParameterSpec.builder("_entities", entityListClassName).build(),
+                    entityType.asEntityTypeSpec(),
                     implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertEntityFun)
             abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertEntityFun)
@@ -406,6 +402,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                     generateAbstractAndImplUpsertFuns(
                     "_replace${syncableEntityInfo.tracker.simpleName}",
                     ParameterSpec.builder("_entities", entitySyncTrackerListClassName).build(),
+                    generateTrackerEntity(entityType, processingEnv),
                     implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
             implDaoTypeSpec.addFunction(implInsertTrackerFun)
@@ -439,6 +436,7 @@ class DbProcessorSync: AbstractDbProcessor() {
     data class AbstractImplAndInterfaceFunSpecs(val abstractFunSpec: FunSpec, val implFunSpec: FunSpec,
                                                 val interfaceFunSpec: FunSpec)
     private fun generateAbstractAndImplUpsertFuns(funName: String, paramSpec: ParameterSpec,
+                                                  entityTypeSpec: TypeSpec,
                                                   daoTypeBuilder: TypeSpec.Builder,
                                                   abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
         val funBuilders = (0..2).map {
@@ -457,8 +455,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addMember("onConflict = %T.REPLACE", OnConflictStrategy::class).build())
 
         funBuilders[1].addModifiers(KModifier.OVERRIDE)
-        funBuilders[1].addCode(generateInsertCodeBlock(paramSpec, UNIT, daoTypeBuilder,
-                true))
+        funBuilders[1].addCode(generateInsertCodeBlock(paramSpec, UNIT, entityTypeSpec,
+                daoTypeBuilder,true))
 
         return AbstractImplAndInterfaceFunSpecs(funBuilders[0].build(), funBuilders[1].build(),
                 funBuilders[2].build())
