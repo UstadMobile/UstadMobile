@@ -39,6 +39,9 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
         return Result.success()
     }
 
+
+
+
     companion object {
 
         val TAG = "UmAppDbSync"
@@ -53,6 +56,19 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
                     .setConstraints(workConstraint)
                     .build()
             WorkManager.getInstance().enqueue(request)
+        }
+
+        fun queueSyncWorkerWithPolicy(delay: Long, timeUnit: TimeUnit,
+                                      policy: ExistingWorkPolicy) {
+            val workConstraint = Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            val request = OneTimeWorkRequest.Builder(UmAppDatabaseSyncWorker::class.java)
+                    .setInitialDelay(delay, timeUnit)
+                    .addTag(TAG)
+                    .setConstraints(workConstraint)
+                    .build()
+            WorkManager.getInstance().enqueueUniqueWork(TAG, policy, request)
         }
     }
 }

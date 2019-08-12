@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:padding="@dimen/dimen_12dp"
+    android:background="@android:color/white"
+    >
+
+    <ImageView
+        android:src="@drawable/tmp_entryicon"
+        android:scaleType="centerCrop"
+        android:id="@+id/item_catalog_entry_see_also_imageview"
+        android:layout_width="@dimen/catalog_entry_see_also_icon_size"
+        android:layout_height="@dimen/catalog_entry_see_also_icon_size" />
+
+    <TextView
+        android:text="Item"
+        android:textColor="@color/primary_dark"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
+        android:id="@+id/item_catalog_entry_see_also_title"
+        android:layout_width="@dimen/catalog_entry_see_also_icon_size"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>

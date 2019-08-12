@@ -2,8 +2,6 @@ package com.ustadmobile.core.view
 
 interface BulkUploadMasterView : UstadView {
 
-    val allErrors: List<String>
-
     /**
      * Set time zone as list to the activity.
      *

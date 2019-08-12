@@ -22,7 +22,7 @@ abstract class ScheduledCheckDao : BaseDao<ScheduledCheck> {
     @Query("SELECT ScheduledCheck.* FROM ScheduledCheck WHERE checkUuid IS NULL")
     abstract fun findAllChecksWhereCheckUuidIsNull(): List<ScheduledCheck>
 
-    @Query("UPDATE ScheduledCheck SET checkUuid = :checkUuid " + " WHERE scheduledCheckId = :scheduledCheckId")
+    @Query("UPDATE ScheduledCheck SET checkUuid = :checkUuid " + " WHERE scheduledCheckUid = :scheduledCheckUid")
     abstract fun updateCheckUuid(scheduledCheckId: Long, checkUuid: String)
 
     @Query("SELECT ClazzLog.* FROM ClazzLog " +
@@ -30,6 +30,9 @@ abstract class ScheduledCheckDao : BaseDao<ScheduledCheck> {
             " scClazzLogUid = ClazzLog.clazzLogUid AND ScheduledCheck.checkType = :checkType) " +
             " AND ClazzLog.logDate >= :fromDate")
     abstract fun findPendingLogsWithoutScheduledCheck(checkType: Int, fromDate: Long): List<ClazzLog>
+
+    @Query("SELECT * FROM ScheduledCheck WHERE scheduledCheckUid = :uid")
+    abstract fun findByUid(uid:Long):ScheduledCheck?
 
     fun findPendingLogsWithoutScheduledCheck(checkType: Int): List<ClazzLog> {
 

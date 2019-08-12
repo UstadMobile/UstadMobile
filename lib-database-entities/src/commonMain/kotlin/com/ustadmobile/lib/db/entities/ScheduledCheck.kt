@@ -10,7 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmIndex
 class ScheduledCheck {
 
     @PrimaryKey(autoGenerate = true)
-    var scheduledCheckId: Long = 0
+    var scheduledCheckUid: Long = 0
 
     var checkTime: Long = 0
 
