@@ -9,8 +9,8 @@ import com.ustadmobile.door.SyncNode
 @Database(version = 1, entities = [ExampleEntity2::class, ExampleLinkEntity::class,
     ExampleEntityPkInt::class, DoorDatabaseSyncInfo::class,
     SyncNode::class,
-    ExampleSyncableEntity::class, ExampleSyncableEntityTracker::class,
-    OtherSyncableEntity::class, OtherSyncableEntityTracker::class])
+    ExampleSyncableEntity::class,
+    OtherSyncableEntity::class])
 abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {
 
     abstract fun exampleSyncableDao(): ExampleSyncableDao
