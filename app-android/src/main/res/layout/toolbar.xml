@@ -5,7 +5,6 @@
     android:id="@+id/catalog_toolbar"
     android:layout_width="match_parent"
     android:layout_height="54dp"
-    android:layout_alignParentLeft="true"
     android:layout_alignParentStart="true"
     android:layout_alignParentTop="true"
     android:background="?attr/colorPrimary"

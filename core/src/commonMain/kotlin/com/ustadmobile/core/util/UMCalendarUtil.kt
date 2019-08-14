@@ -78,4 +78,8 @@ object UMCalendarUtil {
         }
     }
 
+    fun setDate(year: Int, month: Int, dayOfMonth: Int): DateTime {
+        return DateTime(year, month, dayOfMonth)
+    }
+
 }
