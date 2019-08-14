@@ -41,27 +41,32 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, v
     fun handleContentCreation(contentType: Int, newContent: Boolean) {
         val args = HashMap<String, String?>()
         args.putAll(arguments)
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (if (newContent) 0
+        else contentEntryUid).toString()
         args[ContentEditorView.CONTENT_ENTRY_UID] = (if (newContent) 0
         else contentEntryUid).toString()
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
         args[ContentEntryEditView.CONTENT_TYPE] = contentType.toString()
 
-        when (contentType) {
-            CONTENT_CREATE_FOLDER -> {
-                args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-                view.runOnUiThread(Runnable { view.createNewFolder(args) })
-            }
+        view.runOnUiThread(Runnable {
+            when (contentType) {
+                CONTENT_CREATE_FOLDER -> {
+                    args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+                    view.createNewFolder(args)
+                }
 
-            CONTENT_IMPORT_FILE -> {
-                view.runOnUiThread(Runnable { view.startFileBrowser(args) })
-            }
+                CONTENT_IMPORT_FILE -> {
+                    view.startFileBrowser(args)
+                }
 
-            CONTENT_CREATE_CONTENT -> {
-                view.runOnUiThread(Runnable { view.createNewContent(args) })
+                CONTENT_CREATE_CONTENT -> {
+                   view.createNewContent(args)
+                }
+                CONTENT_IMPORT_LINK -> {
+                    view.importContentFromLink(args)
+                }
             }
-            CONTENT_IMPORT_LINK -> {
-                impl.go(ContentEntryImportLinkView.VIEW_NAME, args, context)
-            }
-        }
+        })
+
     }
 }
