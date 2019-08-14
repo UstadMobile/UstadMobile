@@ -106,7 +106,7 @@ tasks.whenTaskAdded { task ->
         task.dependsOn(copyTestResources)
     }
 
-    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble") || task.name.endsWith("Jar") || task.name.startsWith("build")) {
         task.dependsOn(prepareLocale)
     }
 }
