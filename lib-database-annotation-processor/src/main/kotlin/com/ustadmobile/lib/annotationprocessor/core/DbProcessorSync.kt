@@ -82,38 +82,35 @@ class DbProcessorSync: AbstractDbProcessor() {
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
         messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: Process")
-        val (abstractOutputArg, implOutputArg, syncKtorRouteOutputArg) = OutputDirs(processingEnv.options[OPTION_ABSTRACT_OUTPUT_DIR],
-                processingEnv.options[OPTION_IMPL_OUTPUT_DIR], processingEnv.options[OPTION_KTOR_OUTPUT])
-        val (abstractOutputDir, implOutputDir, syncKtorRouteOutputDir) = listOf(abstractOutputArg, implOutputArg, syncKtorRouteOutputArg)
-                .map {
-                    if (it == null || it == "filer") {
-                        processingEnv.options["kapt.kotlin.generated"]!!
-                    } else {
-                        implOutputArg!!
-                    }
-                }
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         roundEnv.getElementsAnnotatedWith(SyncableEntity::class.java).map { it as TypeElement }.forEach {
             val trackerFileSpec = FileSpec.builder(it.asClassName().packageName, "${it.simpleName}$TRACKER_SUFFIX")
-                    .addType(generateTrackerEntity(it, processingEnv))
+                    .addType(generateTrackerEntity(it, processingEnv)).build()
 
-            writeFileSpecToOutputDirs(trackerFileSpec.build(), AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
+                    useFilerAsDefault = false)
         }
 
         for(dbTypeEl in dbs) {
             messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: db: ${dbTypeEl.simpleName}")
             val (abstractFileSpec, implFileSpec, repoImplSpec) = generateSyncDaoInterfaceAndImpls(dbTypeEl as TypeElement)
 
-            abstractFileSpec.writeTo(File(abstractOutputDir))
-            implFileSpec.writeTo(File(implOutputDir))
+            writeFileSpecToOutputDirs(abstractFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(abstractFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
+                    useFilerAsDefault = false)
+            writeFileSpecToOutputDirs(implFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(implFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
+                    useFilerAsDefault = false)
 
             val syncRepoFileSpec = generateSyncRepository(dbTypeEl)
-            syncRepoFileSpec.writeTo(File(implOutputDir))
+            writeFileSpecToOutputDirs(syncRepoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(syncRepoFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
+                    useFilerAsDefault = false)
 
-            //TODO: use the normal ktor generator for this - it will refactor the query and do the required inserts
             val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-            syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
+            writeFileSpecToOutputDirs(syncRouteFileSpec, AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -121,7 +118,9 @@ class DbProcessorSync: AbstractDbProcessor() {
             messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: DAO: ${daoElement.simpleName}")
             val daoTypeEl = daoElement as TypeElement
             val daoFileSpec = generateDaoSyncHelperInterface(daoTypeEl)
-            daoFileSpec.writeTo(File(abstractOutputDir))
+            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
+                    useFilerAsDefault = false)
         }
 
 
@@ -498,10 +497,6 @@ class DbProcessorSync: AbstractDbProcessor() {
 
 
     companion object {
-
-        const val OPTION_IMPL_OUTPUT_DIR = "door_sync_impl_output"
-
-        const val OPTION_ABSTRACT_OUTPUT_DIR = "door_sync_interface_output"
 
         const val SUFFIX_SYNCDAO_ABSTRACT = "SyncDao"
 

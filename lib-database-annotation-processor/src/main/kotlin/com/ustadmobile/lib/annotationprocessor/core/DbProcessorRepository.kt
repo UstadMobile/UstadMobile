@@ -57,13 +57,13 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
-        val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
-        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"]!! else outputArg
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         for(dbTypeEl in dbs) {
-            val dbFileSpec = generateDbRepositoryClass(dbTypeEl as TypeElement)
-            dbFileSpec.writeTo(File(outputDir))
+            writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
+                    syncDaoMode = REPO_SYNCABLE_DAO_CONSTRUCT), AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
+                    syncDaoMode = REPO_SYNCABLE_DAO_FROMDB), AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -71,7 +71,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
             val daoFileSpec = generateDaoRepositoryClass(daoTypeEl)
-            daoFileSpec.writeTo(File(outputDir))
+            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
         return true
@@ -120,7 +121,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 syncDaoProperty.delegate("lazy {%T(_db) }",
                         ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                                 "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+            }else if(syncDaoMode == REPO_SYNCABLE_DAO_FROMDB) {
+                syncDaoProperty.delegate("lazy {_db._syncDao() }")
             }
+
             dbRepoType.addProperty(syncDaoProperty.build())
 
             dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
@@ -297,8 +301,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
     companion object {
         const val SUFFIX_REPOSITORY = "Repo"
-
-        const val OPTION_OUTPUT_DIR = "door_repo_output"
 
         /**
          * When creating a repository, the Syncable DAO is constructed (JDBC). This is because

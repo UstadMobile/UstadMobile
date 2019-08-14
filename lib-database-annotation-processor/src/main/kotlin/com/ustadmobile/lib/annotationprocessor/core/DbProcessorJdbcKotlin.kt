@@ -3,7 +3,6 @@ package com.ustadmobile.lib.annotationprocessor.core
 import android.arch.persistence.room.ColumnInfo
 import androidx.room.*
 import com.squareup.kotlinpoet.*
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.OPTION_OUTPUT_DIR
 import java.io.File
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
@@ -499,15 +498,11 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
-
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
-        val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
-        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
-        messager?.printMessage(Diagnostic.Kind.NOTE, "DbProcessorJdbcKotlin: output to ${File(outputDir).absolutePath}")
 
         for(dbTypeEl in dbs) {
             val dbFileSpec = generateDbImplClass(dbTypeEl as TypeElement)
-            dbFileSpec.writeTo(File(outputDir))
+            writeFileSpecToOutputDirs(dbFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
         }
 
 
@@ -516,7 +511,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
             val daoFileSpec = generateDaoImplClass(daoTypeEl)
-            daoFileSpec.writeTo(File(outputDir))
+            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
         }
 
         return true
@@ -979,8 +974,6 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
     fun makeLogPrefix(enclosing: TypeElement, method: ExecutableElement) = "DoorDb: ${enclosing.qualifiedName}. ${method.simpleName} "
 
     companion object {
-
-        const val OPTION_OUTPUT_DIR = "door_jdbc_kt_out"
 
         const val SUFFIX_JDBC_KT = "JdbcKt"
 
