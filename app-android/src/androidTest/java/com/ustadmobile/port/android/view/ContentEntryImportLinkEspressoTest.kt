@@ -11,10 +11,16 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.GsonBuilder
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.db.entities.H5PImportData
 import com.ustadmobile.util.test.AbstractImportLinkTest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -31,7 +37,9 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
     private var context = InstrumentationRegistry.getInstrumentation().context
 
-    private lateinit var db: UmAppDatabase
+    private lateinit var serverDb: UmAppDatabase
+
+    private lateinit var defaultDb: UmAppDatabase
 
     private lateinit var repo: UmAppDatabase
 
@@ -43,11 +51,15 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
     @Throws(IOException::class)
     fun setup() {
 
-        db = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context)
-        repo = db //db!!.getRepository("http://localhost/dummy/", "")
-        db.clearAllTables()
+        serverDb = UmAppDatabase.getInstance(context, "serverdb")
+        defaultDb = UmAppDatabase.getInstance(context)
 
-        createDb(db)
+        repo = defaultDb //db!!.getRepository("http://localhost/dummy/", "")
+        defaultDb.clearAllTables()
+        serverDb.clearAllTables()
+
+        createDb(defaultDb)
+        createDb(serverDb)
     }
 
     @Test
@@ -116,7 +128,33 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.start()
 
-        h5pServer.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val entryDao = serverDb.contentEntryDao
+        val parentChildJoinDao = serverDb.contentEntryParentChildJoinDao
+        val containerDao = serverDb.containerDao
+
+        val contentEntry = ContentEntry()
+        contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+
+        val parentChildJoin = ContentEntryParentChildJoin()
+        parentChildJoin.cepcjParentContentEntryUid = -101
+        parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
+        parentChildJoinDao.insert(parentChildJoin)
+
+        val container = Container(contentEntry)
+        container.containerUid = containerDao.insert(container)
+
+        val import = H5PImportData(contentEntry, container, parentChildJoin)
+
+        val gson = GsonBuilder().create()
+        val importJson = gson.toJson(import)
+
+        var mockResponse = MockResponse()
+        mockResponse.addHeader("Content-Type", "application/json")
+        mockResponse.setBody(importJson)
+        mockResponse.setResponseCode(200)
+
+        h5pServer.enqueue(mockResponse)
+        h5pServer.enqueue(mockResponse)
         h5pServer.start()
 
         var urlString = mockWebServer.url("/somehp5here").toString()
@@ -133,6 +171,8 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         runBlocking {
 
             onView(withId(R.id.import_link_done)).perform(click())
+            delay(500)
+            Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
         }
     }
 

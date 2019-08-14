@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.stopServerOnCancellation
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -16,13 +17,14 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
     private lateinit var context: Any
 
-    private lateinit var clientDb: UmAppDatabase
+    private lateinit var serverdb: UmAppDatabase
 
     private lateinit var defaultDb: UmAppDatabase
 
@@ -42,25 +44,24 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
         context = Any()
         try {
-            clientDb = UmAppDatabase.getInstance(context, "clientdb")
+            serverdb = UmAppDatabase.getInstance(context, "serverdb")
             defaultDb = UmAppDatabase.getInstance(context)
-            repo = clientDb//.getRepository("http://localhost/dummy/", "")
-            clientDb.clearAllTables()
+            repo = serverdb//.getRepository("http://localhost/dummy/", "")
+            serverdb.clearAllTables()
             defaultDb.clearAllTables()
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        server = createServer(clientDb, counter)
-        createDb(clientDb)
+        server = createServer(serverdb, counter)
+        createDb(serverdb)
         createDb(defaultDb)
 
         val args = Hashtable<String, String>()
-        args.put(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
         presenter = ContentEntryImportLinkPresenter(context,
                 args, mockView, "http://localhost:8096")
         presenter.onCreate(args)
-
 
     }
 
@@ -74,6 +75,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @After
     fun after() {
         mockWebServer.shutdown()
+        server.stop(1, 5, TimeUnit.SECONDS)
     }
 
 
@@ -136,6 +138,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             presenter.handleClickImport()
 
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
+            Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertEquals("Func for h5p download called", 1, count)
 
 
