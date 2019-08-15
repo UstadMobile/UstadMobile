@@ -35,6 +35,8 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
 
     companion object {
 
+        const val OPTION_SOURCE_PATH = "doordb_source_path"
+
         const val OPTION_JVM_DIRS = "doordb_jvm_out"
 
         const val OPTION_ANDROID_OUTPUT = "doordb_android_out"

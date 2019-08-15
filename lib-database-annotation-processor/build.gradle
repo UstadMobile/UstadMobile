@@ -17,6 +17,7 @@ kapt {
     correctErrorTypes = true
     arguments {
         arg("doordb_android_out", "$buildDir/generated/source/doordb-android")
+        arg("doordb_source_path", "$projectDir/src/test/kotlin")
     }
 }
 
