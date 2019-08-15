@@ -9,7 +9,9 @@ import javax.lang.model.element.TypeElement
 
 internal fun TypeElement.asEntityTypeSpecBuilder(): TypeSpec.Builder {
     val typeSpecBuilder = TypeSpec.classBuilder(this.simpleName.toString())
-    this.enclosedElements.filter { it.kind == ElementKind.FIELD }.forEach {
+    this.enclosedElements
+            .filter { it.kind == ElementKind.FIELD && it.simpleName.toString() != "Companion"}
+            .forEach {
         val propSpec = PropertySpec.builder(it.simpleName.toString(),
                 it.asType().asTypeName().javaToKotlinType())
         propSpec.addAnnotations( it.annotationMirrors.map { AnnotationSpec.get(it) })

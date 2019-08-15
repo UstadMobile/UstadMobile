@@ -463,7 +463,14 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             val stmt = dbConnection!!.createStatement()
             stmt.use {
                 val typeEntitySpec = entity.asEntityTypeSpec()
-                stmt.execute(makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE))
+                val createTableSql = makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE)
+                try {
+                    stmt.execute(createTableSql)
+                }catch(sqle: SQLException) {
+                    messager.printMessage(Diagnostic.Kind.ERROR, "SQLException creating table for:" +
+                            "${entity.simpleName} : ${sqle.message}. SQL was \"$createTableSql\"")
+                }
+
                 allKnownEntityNames.add(typeEntitySpec.name!!)
                 if(entity.getAnnotation(SyncableEntity::class.java) != null) {
                     val trackerEntitySpec = generateTrackerEntity(entity, processingEnv)
