@@ -11,10 +11,8 @@ import android.widget.ExpandableListView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BaseReportPresenter;
 import com.ustadmobile.core.view.BaseReportView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
