@@ -32,7 +32,7 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     @JsName("getFileSizeOfMostRecentContainerForContentEntry")
-    abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long?
+    abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long
 
 
     @Query("SELECT * FROM Container WHERE containerUid = :uid")
@@ -85,7 +85,7 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerUid = :containerUid " +
             "AND (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries")
     @JsName("findLocalAvailabilityByUid")
-    abstract fun findLocalAvailabilityByUid(containerUid: Long): Long?
+    abstract fun findLocalAvailabilityByUid(containerUid: Long): Long
 
     @Query("SELECT * FROM Container WHERE Container.containerUid = :containerUid")
     @JsName("findAllWithId")

@@ -5,12 +5,15 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
 internal fun TypeElement.asEntityTypeSpecBuilder(): TypeSpec.Builder {
     val typeSpecBuilder = TypeSpec.classBuilder(this.simpleName.toString())
     this.enclosedElements
-            .filter { it.kind == ElementKind.FIELD && it.simpleName.toString() != "Companion"}
+            .filter { it.kind == ElementKind.FIELD
+                    && it.simpleName.toString() != "Companion"
+                    && Modifier.STATIC !in it.modifiers }
             .forEach {
         val propSpec = PropertySpec.builder(it.simpleName.toString(),
                 it.asType().asTypeName().javaToKotlinType())

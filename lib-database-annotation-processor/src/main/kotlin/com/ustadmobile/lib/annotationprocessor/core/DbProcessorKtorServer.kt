@@ -126,11 +126,11 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         setupDb(roundEnv)
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
-        val outputArg = processingEnv.options[OPTION_KTOR_OUTPUT]
-        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
 
-        daos.forEach { generateDaoImplClass(it as TypeElement).writeTo(File(outputDir!!)) }
-
+        daos.forEach {
+            writeFileSpecToOutputDirs(generateDaoImplClass(it as TypeElement),
+                    AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+        }
 
         return true
     }

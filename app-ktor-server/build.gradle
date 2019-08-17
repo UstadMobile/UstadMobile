@@ -40,6 +40,7 @@ dependencies {
     servletRuntime "io.ktor:ktor-server-servlet:$version_ktor"
     implementation "io.ktor:ktor-jackson:$version_ktor"
     implementation "io.ktor:ktor-gson:$version_ktor"
+    implementation "com.google.code.gson:gson:$version_gson"
 
     implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(":lib-database")

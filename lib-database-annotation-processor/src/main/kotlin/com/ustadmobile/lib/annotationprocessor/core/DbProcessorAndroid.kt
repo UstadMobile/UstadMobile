@@ -52,8 +52,10 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                             .joinToString(prefix = ",") { "${it.simpleName}_trk::class" }
                     lineOut += "\n//End of generated section: add tracker entities to room database\n"
                 } else if(line.contains("//#DOORDB_SYNCDAO")) {
-                    lineOut = "fun _syncDao(): ${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}"
-                } else {
+                    lineOut = "abstract fun _syncDao(): ${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}"
+                }else if(line.contains("@JsName") || line.contains("kotlin.js.JsName"))
+                    lineOut = ""
+                else {
                     lineOut = line
                 }
 
@@ -68,6 +70,9 @@ class DbProcessorAndroid: AbstractDbProcessor() {
             it.flush()
             it.close()
         }
+
+        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorAndroid: wrote adjusted version of" +
+                " ${dbTypeEl.simpleName} to ${outDirs.joinToString()}")
     }
 
     override fun process(elements: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -107,8 +112,30 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                                     parentDirFile.mkdirs()
                                 }
 
-                                Files.copy(srcFilePath, it, StandardCopyOption.REPLACE_EXISTING)
-                                messager.printMessage(Diagnostic.Kind.NOTE, "Copy: $srcFilePath -> $it")
+                                var srcFileIn = null as BufferedReader?
+                                var fileOut = null as BufferedWriter?
+
+                                try {
+                                    srcFileIn = BufferedReader(FileReader(srcFilePath.toFile()))
+                                    fileOut = BufferedWriter(FileWriter(it.toFile()))
+
+
+                                    for(line in srcFileIn.lines()) {
+                                        if(!line.contains("@JsName") && !line.contains("kotlin.js.JsName"))
+                                            fileOut.write(line)
+
+                                        fileOut.newLine()
+                                    }
+                                }catch(e: IOException) {
+                                    messager.printMessage(Diagnostic.Kind.ERROR, "IOException " +
+                                            "copying db source file$srcFilePath to $it : $e")
+                                }finally {
+                                    srcFileIn?.close()
+                                    fileOut?.flush()
+                                    fileOut?.close()
+                                }
+
+                                messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorAndroid: Copy: $srcFilePath -> $it")
                             }
                         }
                     }

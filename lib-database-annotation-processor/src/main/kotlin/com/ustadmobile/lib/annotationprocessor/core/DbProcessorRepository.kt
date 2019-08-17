@@ -63,7 +63,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
             writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
                     syncDaoMode = REPO_SYNCABLE_DAO_CONSTRUCT), AnnotationProcessorWrapper.OPTION_JVM_DIRS)
             writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
-                    syncDaoMode = REPO_SYNCABLE_DAO_FROMDB), AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+                    syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
+                    overrideSyncDao = true, overrideOpenHelper = true),
+                    AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -80,7 +82,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
 
     fun generateDbRepositoryClass(dbTypeElement: TypeElement,
-                                  syncDaoMode: Int = REPO_SYNCABLE_DAO_CONSTRUCT): FileSpec {
+                                  syncDaoMode: Int = REPO_SYNCABLE_DAO_CONSTRUCT,
+                                  overrideClearAllTables: Boolean = false,
+                                  overrideSyncDao: Boolean = false,
+                                  overrideOpenHelper: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
 
@@ -107,10 +112,37 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
                         .build())
-                .addFunction(FunSpec.builder("createAllTables")
-                        .addModifiers(KModifier.OVERRIDE)
-                        .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to createAllTables!")
-                        .build())
+
+        if(overrideClearAllTables) {
+            dbRepoType.addFunction(FunSpec.builder("createAllTables")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to createAllTables!")
+                    .build())
+        }
+
+        if(overrideSyncDao) {
+            val dbTypeClassName = dbTypeElement.asClassName()
+            dbRepoType.addFunction(FunSpec.builder("_syncDao")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addCode("return _db._syncDao()")
+                    .returns(ClassName(dbTypeClassName.packageName,
+                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"))
+                    .build())
+        }
+
+        if(overrideOpenHelper) {
+            dbRepoType.addFunction(FunSpec.builder("createOpenHelper")
+                    .addParameter("config", ClassName("androidx.room", "DatabaseConfiguration"))
+                    .returns(ClassName("androidx.sqlite.db", "SupportSQLiteOpenHelper"))
+                    .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
+                    .addCode("throw IllegalAccessException(%S)\n", "Cannot use open helper on repository")
+                    .build())
+            dbRepoType.addFunction(FunSpec.builder("createInvalidationTracker")
+                    .returns(ClassName("androidx.room", "InvalidationTracker"))
+                    .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
+                    .addCode("throw IllegalAccessException(%S)\n", "Cannot use invalidationtracker on repository")
+                    .build())
+        }
 
 
         if(isSyncableDb(dbTypeElement, processingEnv)) {
@@ -164,7 +196,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 daoFromDbGetter += "${it.simpleName}()"
             }
 
-            val repoImplClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
+            val repoImplClassName = ClassName(pkgNameOfElement(daoTypeEl, processingEnv),
                     "${daoTypeEl.simpleName}_$SUFFIX_REPOSITORY")
             val syncDaoParam = if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
                 ", _syncDao"

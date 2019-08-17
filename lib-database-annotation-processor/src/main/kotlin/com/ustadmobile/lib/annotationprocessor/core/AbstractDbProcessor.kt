@@ -26,6 +26,7 @@ import com.ustadmobile.door.PreparedStatementArrayProxy
 import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import org.apache.commons.text.StringEscapeUtils
 
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
@@ -797,7 +798,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 codeBlock.endControlFlow()
             }
         }catch(e: SQLException) {
-            logMessage(Diagnostic.Kind.ERROR, "Exception running query SQL '$execStmtSql' : ${e.message}",
+            logMessage(Diagnostic.Kind.ERROR,
+                    "Exception running query SQL '$execStmtSql' : ${e.message}",
                     enclosing = enclosing, element = method,
                     annotation = method?.annotationMirrors?.firstOrNull {it.annotationType.asTypeName() == Query::class.asTypeName()})
         }
@@ -993,7 +995,19 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         var querySql = daoMethod.annotations.first { it.className == Query::class.asClassName() }
                 .members.first { it.toString().trim().startsWith("value") || it.toString().trim().startsWith("\"") }.toString()
-        querySql = querySql.removeSurrounding("\"")
+
+
+        if(querySql.endsWith("trimMargin()")) {
+            querySql = querySql.removeSuffix(".trimMargin()")
+                    .removeSurrounding("\"\"\"").trimMargin()
+        }else {
+            querySql = querySql.removeSurrounding("\"")
+        }
+
+        querySql = StringEscapeUtils.unescapeJava(querySql)
+
+
+
 
         val componentEntityType = resolveEntityFromResultType(resultType)
         val syncableEntitiesList = if(componentEntityType is ClassName) {

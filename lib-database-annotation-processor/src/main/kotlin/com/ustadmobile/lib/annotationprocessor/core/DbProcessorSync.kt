@@ -101,8 +101,6 @@ class DbProcessorSync: AbstractDbProcessor() {
             writeFileSpecToOutputDirs(abstractFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
                     useFilerAsDefault = false)
             writeFileSpecToOutputDirs(implFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-            writeFileSpecToOutputDirs(implFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
-                    useFilerAsDefault = false)
 
             val syncRepoFileSpec = generateSyncRepository(dbTypeEl)
             writeFileSpecToOutputDirs(syncRepoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
