@@ -107,7 +107,7 @@ class AuditLogListActivity : UstadBaseActivity(), AuditLogListView, PopupMenu.On
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, AuditLogWithNames>) {
-        val recyclerAdapter = AuditLogListRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+        val recyclerAdapter = AuditLogListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
         // get the provider, set , observe, etc.
