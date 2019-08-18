@@ -25,8 +25,8 @@ fun Application.umRestApplication() {
 
     install(Routing) {
         ContainerDownload(_restApplicationDb)
-        H5PImportRoute(_restApplicationDb) { url: String, entryUid: Long, urlContent: String->
-            downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent)
+        H5PImportRoute(_restApplicationDb) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
+            downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
     }
 }

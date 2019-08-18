@@ -41,8 +41,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, v
     fun handleContentCreation(contentType: Int, newContent: Boolean) {
         val args = HashMap<String, String?>()
         args.putAll(arguments)
-        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (if (newContent) 0
-        else contentEntryUid).toString()
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = contentEntryUid.toString()
         args[ContentEditorView.CONTENT_ENTRY_UID] = (if (newContent) 0
         else contentEntryUid).toString()
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()

@@ -86,6 +86,10 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         }
     }
 
+    override fun returnResult() {
+        finish()
+    }
+
 
     private var textWatcher = object : TextWatcher {
 

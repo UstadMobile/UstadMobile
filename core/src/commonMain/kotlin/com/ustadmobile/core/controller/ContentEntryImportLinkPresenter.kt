@@ -12,6 +12,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
+import kotlinx.coroutines.Runnable
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
@@ -19,8 +20,6 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     private var parentContentEntryUid: Long = 0
 
     private var hp5Url: String = ""
-
-    val systemImpl = UstadMobileSystemImpl.instance
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -62,9 +61,13 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
             val content = response.receive<H5PImportData>()
             val db = UmAppDatabase.getInstance(context)
-            db.contentEntryDao.insert(content.contentEntry)
-            db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
-            db.containerDao.insert(content.container)
+            val contentEntryUid = db.contentEntryDao.insert(content.contentEntry)
+            val parentChildUid = db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
+            val containerUid = db.containerDao.insert(content.container)
+
+            view.runOnUiThread(Runnable{
+                view.returnResult()
+            })
 
         }
 

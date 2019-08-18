@@ -16,7 +16,7 @@ import io.ktor.server.netty.Netty
 
 abstract class AbstractImportLinkTest {
 
-    fun createServer(db: UmAppDatabase, h5pDownloadFn: (String, Long, String) -> Unit): ApplicationEngine {
+    fun createServer(db: UmAppDatabase, h5pDownloadFn: (String, Long, String, Long) -> Unit): ApplicationEngine {
 
         return embeddedServer(Netty, port = 8096) {
             install(ContentNegotiation) {

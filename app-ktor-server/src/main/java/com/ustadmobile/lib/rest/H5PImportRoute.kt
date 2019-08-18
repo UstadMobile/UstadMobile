@@ -44,11 +44,11 @@ import java.util.regex.Pattern
 import javax.naming.InitialContext
 import kotlin.collections.set
 
-fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String) -> Unit) {
+fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String, Long) -> Unit) {
 
     route("ImportH5P") {
         get("importUrl") {
-            val urlString = call.request.queryParameters["hp5Url"]?.toString() ?: ""
+            val urlString = call.request.queryParameters["hp5Url"] ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
             val content = checkIfH5PValidAndReturnItsContent(urlString)
             val isValid = content?.contains("H5PIntegration")
@@ -61,6 +61,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     val containerDao = db.containerDao
 
                     val contentEntry = ContentEntry()
+                    contentEntry.leaf = true
                     contentEntry.contentEntryUid = entryDao.insert(contentEntry)
 
                     val parentChildJoin = ContentEntryParentChildJoin()
@@ -69,10 +70,12 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     parentChildJoinDao.insert(parentChildJoin)
 
                     val container = Container(contentEntry)
+                    container.containerContentEntryUid = contentEntry.contentEntryUid
+                    container.fileSize = 1
                     container.containerUid = containerDao.insert(container)
 
                     call.respond(H5PImportData(contentEntry, container, parentChildJoin))
-                    h5pDownloadFn(urlString, contentEntry.contentEntryUid, content)
+                    h5pDownloadFn(urlString, contentEntry.contentEntryUid, content, container.containerUid)
 
                 }
                 !isValid -> call.respond(HttpStatusCode.UnsupportedMediaType, "Content not supported")
@@ -82,7 +85,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
     }
 }
 
-fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, parentDir: File, h5pContentUrl: String?) {
+fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, parentDir: File, h5pContentUrl: String?, containerUid: Long) {
 
     try {
         runBlocking {
@@ -191,7 +194,8 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
             container.lastModified = parentDir.lastModified()
             container.containerContentEntryUid = contentEntryUid
             container.mobileOptimized = true
-            container.containerUid = db.containerDao.insert(container)
+            container.containerUid = containerUid
+            db.containerDao.update(container)
 
             val fileMap = HashMap<File, String>()
             createContainerFromDirectory(parentDir, fileMap)

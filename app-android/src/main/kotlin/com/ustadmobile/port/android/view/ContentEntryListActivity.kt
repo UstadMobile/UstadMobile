@@ -36,8 +36,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     lateinit var managerBle: NetworkManagerBle
 
-    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+    private var showControls = false
 
 
     private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
@@ -55,6 +54,9 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
+
+        showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
 
         presenter = ContentEntryListPresenter(getContext(),
                 UMAndroidUtil.bundleToMap(intent.extras), this)

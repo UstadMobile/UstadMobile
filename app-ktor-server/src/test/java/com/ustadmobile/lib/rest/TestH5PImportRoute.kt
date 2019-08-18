@@ -99,7 +99,7 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
     }
 
     var count = 0
-    val counter = { value: String, uid: Long, content: String ->
+    val counter = { value: String, uid: Long, content: String, cUid: Long ->
         Unit
         count++
         Unit

@@ -66,7 +66,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     }
 
     var count = 0
-    val counter = { value: String, uid: Long, content: String ->
+    val counter = { value: String, uid: Long, content: String, containerUid: Long ->
         count++
         Unit
     }
