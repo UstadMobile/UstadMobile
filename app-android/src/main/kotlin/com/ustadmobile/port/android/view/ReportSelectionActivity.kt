@@ -57,12 +57,12 @@ class ReportSelectionActivity : UstadBaseActivity(), ReportSelectionView {
         expandableListView.setOnGroupClickListener { parent, v, groupPosition, id ->
 
             val groupItem = expandableListDataReportsHashMap[expandableListTitle[groupPosition]]!!
-            if (groupItem.children.size() === 0 && !groupItem.reportLink.isEmpty()) {
+            if (groupItem.children.size === 0 && !groupItem.reportLink!!.isEmpty()) {
 
-                mPresenter!!.goToReport(groupItem.name, groupItem.desc, groupItem.reportLink,
-                        groupItem.showThreshold, groupItem.showRadioGroup,
-                        groupItem.showGenderDisaggregate, groupItem.showClazzes,
-                        groupItem.showLocations)
+                mPresenter!!.goToReport(groupItem.name!!, groupItem.desc!!, groupItem.reportLink!!,
+                        groupItem.showThreshold!!, groupItem.showRadioGroup!!,
+                        groupItem.showGenderDisaggregate!!, groupItem.showClazzes!!,
+                        groupItem.showLocations!!)
             }
 
             false
@@ -72,12 +72,12 @@ class ReportSelectionActivity : UstadBaseActivity(), ReportSelectionView {
         expandableListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
 
 
-            val report = expandableListDataReportsHashMap[expandableListTitle[groupPosition]].children
+            val report = expandableListDataReportsHashMap[expandableListTitle[groupPosition]]!!.children
                     .get(childPosition)
 
-            mPresenter!!.goToReport(report.name, report.desc, report.reportLink, report.showThreshold,
-                    report.showRadioGroup, report.showGenderDisaggregate, report.showClazzes,
-                    report.showLocations)
+            mPresenter!!.goToReport(report.name!!, report.desc!!, report.reportLink!!,
+                    report.showThreshold!!, report.showRadioGroup!!, report.showGenderDisaggregate!!,
+                    report.showClazzes!!, report.showLocations!!)
             false
         }
 

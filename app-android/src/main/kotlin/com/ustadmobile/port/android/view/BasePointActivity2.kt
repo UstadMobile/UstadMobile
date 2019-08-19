@@ -132,7 +132,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW)
 
         //Click listeners for the items.
-        bottomNavigation.setOnTabSelectedListener({ position, wasSelected ->
+        bottomNavigation.setOnTabSelectedListener({ position: Int, wasSelected:Boolean ->
 
             if (!wasSelected) {
                 //mPagerAdapter.notifyDataSetChanged();
@@ -273,7 +273,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(1000, TimeUnit.MILLISECONDS,
                 ExistingWorkPolicy.KEEP)
         syncing = true
-        sendToast("Sync started")
+        sendToast(applicationContext,"Sync started", 42)
         updateSyncing()
 
     }
@@ -283,7 +283,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
                 this, { workInfos ->
             for (wi in workInfos) {
                 if (wi.getState().isFinished()) {
-                    lastSyncTime = System.currentTimeMillis()
+                    lastSyncTime = System.currentTimeMillis()m
                     syncing = false
                     checkSyncFinished()
                 } else {
@@ -357,8 +357,8 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         searchView.setMaxWidth(Integer.MAX_VALUE)
 
         // listening to search query text change
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener() {
-            fun onQueryTextSubmit(query: String): Boolean {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
                 // filter recycler view when query submitted
                 when (mPager!!.getCurrentItem()) {
                     VIEW_POSITION_POSITION_FEED -> {
@@ -374,7 +374,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
                 return false
             }
 
-            fun onQueryTextChange(query: String): Boolean {
+            override fun onQueryTextChange(query: String): Boolean {
                 // filter recycler view when text is changed
 
                 // filter recycler view when query submitted
@@ -393,7 +393,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         })
 
 
-        searchView.setOnCloseListener({
+        searchView.setOnCloseListener{
 
             // filter recycler view when query submitted
             when (mPager!!.getCurrentItem()) {
@@ -407,7 +407,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
                 }
             }
             false
-        })
+        }
         return true
     }
 
@@ -426,10 +426,10 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         builder.setPositiveButton(R.string.share, null)
         builder.setNegativeButton(R.string.cancel, null)
         shareAppDialog = builder.create()
-        shareAppDialog!!.setOnShowListener({ dialogInterface ->
+        shareAppDialog!!.setOnShowListener{ dialogInterface ->
             val okButton = shareAppDialog!!.getButton(AlertDialog.BUTTON_POSITIVE)
             okButton.setOnClickListener({ v -> mPresenter!!.handleConfirmShareApp() })
-        })
+        }
         shareAppDialog!!.show()
     }
 
@@ -443,12 +443,15 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
      */
     private inner class BasePointViewPagerAdapter//Constructor creates the adapter
     internal constructor(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+        override fun getCount(): Int {
+            return 4
+        }
 
         //Map of position and fragment
         internal var positionMap: WeakHashMap<Int, UstadBaseFragment>
 
         //return positionMap.size();
-        val count: Int
+        val getCount: Int
             get() = 4
 
         init {
@@ -461,7 +464,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
          * @param position  position of item
          * @return  the fragment
          */
-        fun getItem(position: Int): Fragment? {
+        override fun getItem(position: Int): Fragment? {
             val thisFragment = positionMap[position]
             return thisFragment ?: when (position) {
                 0 -> {

@@ -11,19 +11,14 @@ import android.widget.AdapterView
 import android.widget.DatePicker
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectTwoDatesDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectTwoDatesDialogView
-
-import java.util.Calendar
-import java.util.Locale
-import java.util.Objects
-
 import io.reactivex.annotations.NonNull
+import java.util.*
 
 /**
  * SelectTwoDatesDialogFragment Android fragment extends UstadBaseFragment

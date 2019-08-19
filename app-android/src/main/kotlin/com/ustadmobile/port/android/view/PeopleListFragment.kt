@@ -15,20 +15,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PeopleListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 /**
  * PeopleListFragment responsible for showing people list on the people bottom navigation
@@ -112,8 +108,8 @@ class PeopleListFragment : UstadBaseFragment(), PeopleListView {
 
     override fun setPeopleListProvider(factory : DataSource.Factory<Int, PersonWithEnrollment>) {
 
-        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, context,
-                this, mPresenter, false, false)
+        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, context!!,
+                this, mPresenter!!, false, false)
         //A warning is expected
         val data = LivePagedListBuilder(factory, 20).build()
 

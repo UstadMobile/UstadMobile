@@ -9,17 +9,14 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AddCustomFieldOptionDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.port.android.view.UstadDialogFragment
-
-import java.util.Objects
-
 import io.reactivex.annotations.NonNull
+import java.util.*
 
 class AddCustomFieldOptionDialogFragment : UstadDialogFragment(),
         AddCustomFieldOptionDialogView, AdapterView.OnItemSelectedListener,

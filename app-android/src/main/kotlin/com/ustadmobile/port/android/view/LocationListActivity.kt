@@ -11,21 +11,16 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LocationListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.LocationListView
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 class LocationListActivity : UstadBaseActivity(), LocationListView {
 

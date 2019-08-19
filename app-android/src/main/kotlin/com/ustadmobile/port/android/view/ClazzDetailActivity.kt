@@ -11,17 +11,12 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClassDetailView
-
-import java.util.HashMap
-import java.util.Objects
-import java.util.WeakHashMap
-
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
+import java.util.*
 
 /**
  * The ClassDetail activity.
@@ -30,12 +25,12 @@ import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
  */
 class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTabSelectedListener {
 
-    private var mPager: ViewPager? = null
-    private var mPagerAdapter: ClassDetailViewPagerAdapter? = null
-    private var toolbar: Toolbar? = null
-    private var mTabLayout: TabLayout? = null
-    private var mPresenter: ClazzDetailPresenter? = null
-    internal var currentClazzUid: Long? = null
+    private lateinit var mPager: ViewPager
+    private lateinit var mPagerAdapter: ClassDetailViewPagerAdapter
+    private lateinit var toolbar: Toolbar
+    private lateinit var mTabLayout: TabLayout
+    private lateinit var mPresenter: ClazzDetailPresenter
+    internal var currentClazzUid: Long = 0
     private var attendanceVisibility: Boolean = false
     private var activityVisibility: Boolean = false
     private var selVisibility: Boolean = false
@@ -53,29 +48,29 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
             mPager = findViewById(R.id.class_detail_view_pager_container)
             mPagerAdapter = ClassDetailViewPagerAdapter(supportFragmentManager)
             var fragCount = 0
-            mPagerAdapter!!.addFragments(fragCount, ClazzStudentListFragment.newInstance(currentClazzUid))
-            fragPosMap[fragCount++] = ClazzStudentListFragment::class.java!!
+            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(currentClazzUid))
+            fragPosMap[fragCount++] = ClazzStudentListFragment::class.java
 
             if (attendanceVisibility) {
-                mPagerAdapter!!.addFragments(fragCount, ClazzLogListFragment.newInstance(currentClazzUid!!))
+                mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(currentClazzUid))
                 fragPosMap[fragCount++] = ClazzLogListFragment::class.java
             }
 
             if (activityVisibility) {
-                mPagerAdapter!!.addFragments(fragCount, ClazzActivityListFragment.newInstance(currentClazzUid!!))
+                mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(currentClazzUid))
                 fragPosMap[fragCount++] = ClazzActivityListFragment::class.java
             }
 
             if (selVisibility) {
-                mPagerAdapter!!.addFragments(fragCount, SELAnswerListFragment.newInstance(currentClazzUid))
+                mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(currentClazzUid))
                 fragPosMap[fragCount++] = SELAnswerListFragment::class.java!!
             }
 
-            mPager!!.setAdapter(mPagerAdapter)
+            mPager.setAdapter(mPagerAdapter)
 
             mTabLayout = findViewById(R.id.activity_class_detail_tablayout)
-            mTabLayout!!.setTabGravity(TabLayout.GRAVITY_FILL)
-            mTabLayout!!.setupWithViewPager(mPager)
+            mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL)
+            mTabLayout.setupWithViewPager(mPager)
 
         }
 
@@ -129,7 +124,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
 
         val settingsGearMenuItem = menu!!.findItem(R.id.menu_clazzdetail_gear)
         val gearIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_settings_white_24dp)
-        gearIcon.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
+        gearIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
         settingsGearMenuItem!!.setIcon(gearIcon)
 
         if (menu != null) {
@@ -207,18 +202,14 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
     /**
      * ClassDetailView's view pager adapter
      */
-    private inner class ClassDetailViewPagerAdapter//Constructor creates the adapter
-    (fm: FragmentManager) : FragmentPagerAdapter(fm) {
+    private inner class ClassDetailViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+        override fun getCount(): Int {
+            return positionMap.size
+        }
 
         //Map of position and fragment
         internal var positionMap: WeakHashMap<Int, UstadBaseFragment>
 
-        /**
-         * Gets count of tabs
-         * @return void
-         */
-        val count: Int
-            get() = positionMap.size
 
         init {
             positionMap = WeakHashMap()
@@ -234,7 +225,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
          * @param position The position of the fragment to generate
          * @return void
          */
-        fun getItem(position: Int): Fragment? {
+        override fun getItem(position: Int): Fragment? {
             val thisFragment = positionMap[position]
             if (thisFragment != null) {
                 return thisFragment
@@ -260,7 +251,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
          * @param position the position of the tab
          * @return void
          */
-        fun getPageTitle(position: Int): CharSequence {
+        override fun getPageTitle(position: Int): CharSequence {
             val fragClass = fragPosMap[position]!!
             return if (fragClass == ClazzStudentListFragment::class.java) {
                 (getText(R.string.students_literal) as String).toUpperCase()

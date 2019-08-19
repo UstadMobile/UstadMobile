@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
-
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -12,23 +11,19 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzDetailEnrollStudentPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON_TYPE
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
-
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 /**
  * Clazz detail Enroll Student - Enrollment activity.
@@ -133,7 +128,7 @@ class ClazzDetailEnrollStudentActivity : UstadBaseActivity(), ClazzDetailEnrollS
     override fun setStudentsProvider(factory: DataSource.Factory<Int, PersonWithEnrollment>) {
 
         val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK, applicationContext,
-                this, mPresenter, true, true, groupEnrollment)
+                this, mPresenter!!, true, true, groupEnrollment)
 
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:

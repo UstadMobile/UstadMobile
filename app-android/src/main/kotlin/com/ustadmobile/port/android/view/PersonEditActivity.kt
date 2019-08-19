@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+
 import android.Manifest
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -34,11 +35,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
-
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonEditPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -50,18 +49,14 @@ import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_QUALITY
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.port.android.generated.MessageIDMap
-
-
-import id.zelory.compressor.Compressor
-
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_DATE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_DROPDOWN
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_FIELD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
-import com.ustadmobile.port.android.view.ClazzEditActivity.Companion.dpToPx
+import com.ustadmobile.port.android.generated.MessageIDMap
+import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

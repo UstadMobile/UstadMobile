@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CustomFieldDetailPresenter
 import com.ustadmobile.core.controller.CustomFieldListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.CustomFieldDetailView
 import com.ustadmobile.lib.db.entities.Clazz
@@ -172,7 +171,7 @@ class CustomFieldDetailActivity : UstadBaseActivity(), CustomFieldDetailView {
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, CustomFieldValueOption>) {
-        val recyclerAdapter = CustomFieldDetailRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+        val recyclerAdapter = CustomFieldDetailRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
         // get the provider, set , observe, etc.

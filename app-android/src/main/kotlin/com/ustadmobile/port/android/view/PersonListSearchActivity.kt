@@ -16,7 +16,6 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarChangeListener
 import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarFinalValueListener
 import com.crystal.crystalrangeseekbar.interfaces.OnSeekbarChangeListener
@@ -30,8 +29,7 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-import java.util.Objects
+import java.util.*
 
 class PersonListSearchActivity : UstadBaseActivity(), PersonListSearchView {
 

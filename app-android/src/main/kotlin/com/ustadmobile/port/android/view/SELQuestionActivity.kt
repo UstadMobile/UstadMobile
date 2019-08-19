@@ -4,19 +4,15 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.TextView
-
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SELQuestionPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SELQuestionView
-
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 
 /**

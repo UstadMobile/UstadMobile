@@ -7,16 +7,13 @@ import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonAuthDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonAuthDetailView
-
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 class PersonAuthDetailActivity : UstadBaseActivity(), PersonAuthDetailView {
 

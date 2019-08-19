@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.MenuItem
-
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -11,21 +10,16 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.RoleListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.RoleListView
-import com.ustadmobile.lib.db.entities.AuditLogWithNames
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 class RoleListActivity : UstadBaseActivity(), RoleListView {
 

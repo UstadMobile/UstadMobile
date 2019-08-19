@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
-
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -23,10 +22,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzEditPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzEditView
@@ -36,12 +33,8 @@ import com.ustadmobile.lib.db.entities.Schedule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-import java.util.Calendar
-import java.util.Locale
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 
 /**
@@ -263,7 +256,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     override fun setClazzScheduleProvider(factory : DataSource.Factory<Int, Schedule>) {
 
         val scheduleListRecyclerAdapter = ScheduleRecyclerAdapter(SCHEDULE_DIFF_CALLBACK, applicationContext,
-                this, mPresenter)
+                this, mPresenter!!)
 
         //Unchecked warning is expected.
         val data = LivePagedListBuilder(factory, 20).build()
@@ -457,11 +450,11 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         customFieldsLL!!.removeAllViews()
     }
 
-    fun onSelectClazzesFeaturesResult(clazz: Clazz) {
+    override fun onSelectClazzesFeaturesResult(clazz: Clazz?) {
         featuresTextView!!.text = ""
         var featuresText = ""
 
-        if (clazz.isAttendanceFeature) {
+        if (clazz!!.isAttendanceFeature) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","
@@ -495,7 +488,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             }
 
             override fun areContentsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
-                return oldItem == newItem
+                return oldItem.scheduleUid == newItem.scheduleUid
             }
         }
 

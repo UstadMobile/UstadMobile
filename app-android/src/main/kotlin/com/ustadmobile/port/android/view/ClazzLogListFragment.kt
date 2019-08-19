@@ -18,7 +18,6 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -30,7 +29,6 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzLogListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClassLogListView
@@ -44,19 +42,13 @@ import com.ustadmobile.core.view.ClassLogListView.Companion.ATTENDANCE_LINE_LABE
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_MONTH
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_WEEK
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_YEAR
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
-
-import java.util.ArrayList
-import java.util.LinkedHashMap
-import java.util.Objects
-
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
-
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 /**
  * ClazzLogListFragment Android fragment extends UstadBaseFragment

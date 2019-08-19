@@ -7,17 +7,14 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-
 import androidx.fragment.app.Fragment
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectPeopleDialogPresenter
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-
-import java.util.ArrayList
+import java.util.*
 
 class PersonListReturnSelectedRecyclerAdapter internal constructor(
         diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, internal var theContext: Context, private val theFragment: Fragment,

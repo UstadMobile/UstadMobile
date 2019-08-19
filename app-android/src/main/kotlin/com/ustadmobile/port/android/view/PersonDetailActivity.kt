@@ -30,7 +30,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonDetailPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -47,8 +46,8 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_FIELD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
-import com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_ICON
-import com.ustadmobile.port.android.view.PersonEditActivity.dpToPx
+import com.ustadmobile.port.android.view.PersonEditActivity.Companion.ADD_PERSON_ICON
+import com.ustadmobile.port.android.view.PersonEditActivity.Companion.dpToPx
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -248,7 +247,8 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    mPresenter!!.handleCompressedImage(imageFile)
+                    //TODO: Check this KMP. Changed File to file path
+                    mPresenter!!.handleCompressedImage(imageFile.absolutePath)
                 }
             }
         }
@@ -358,90 +358,91 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 if (messageLabel == MessageID.field_fullname) {
                     val name = findViewById<TextView>(R.id.activity_person_detail_student_name)
                     name.text = value.toString()
-                    break
+                    //TODO: KMP Check this flow replaced break with else and block.
+                    //break
+                }else{
+
+                    val hll = LinearLayout(this)
+                    hll.orientation = LinearLayout.HORIZONTAL
+                    hll.setPadding(16, 16, 16, 16)
+
+
+                    var iconName = field.iconName
+
+                    if (iconName == null || iconName.length == 0) {
+                        iconName = ADD_PERSON_ICON
+                    }
+
+                    val iconResId = getResourceId(iconName, "drawable", packageName)
+                    val icon = AppCompatImageView(this)
+                    icon.setImageResource(iconResId)
+                    if (iconName == ADD_PERSON_ICON) icon.setAlpha(0)
+                    icon.setPadding(16, 0, 4, 0)
+                    hll.addView(icon)
+
+
+                    val vll = LinearLayout(this)
+                    vll.orientation = LinearLayout.VERTICAL
+                    vll.setPadding(16, 0, 0, 0)
+
+                    val fieldValue = TextView(this)
+                    if (value.toString() === "") {
+                        value = "-"
+                    }
+                    fieldValue.text = value.toString()
+                    fieldValue.setPadding(16, 4, 4, 0)
+                    vll.addView(fieldValue)
+
+                    if (label != null) {
+                        val fieldLabel = TextView(this)
+                        fieldLabel.textSize = 10f
+                        fieldLabel.text = label
+                        fieldLabel.setPadding(16, 0, 4, 4)
+                        vll.addView(fieldLabel)
+                    }
+
+
+                    //Add call and text buttons to father and mother detail
+                    if (field.actionParam != null && field.actionParam!!.length > 0) {
+                        val textIcon = AppCompatImageView(this)
+                        textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
+                                "drawable", packageName))
+                        //textIcon.setPadding(8,16, 32,16);
+                        textIcon.setOnClickListener({ v -> mPresenter!!.handleClickText(field.actionParam!!) })
+
+                        val callIcon = AppCompatImageView(this)
+                        callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
+                                "drawable", packageName))
+                        callIcon.setPadding(32, 0, 0, 0)
+                        callIcon.setOnClickListener({ v -> mPresenter!!.handleClickCall(field.actionParam!!) })
+
+                        val heavyLayout = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                1.0f
+                        )
+                        val fillIt = View(this)
+                        fillIt.layoutParams = heavyLayout
+
+
+                        vll.layoutParams = heavyLayout
+                        hll.addView(vll)
+
+                        val talkToMe = LinearLayout(this)
+                        talkToMe.orientation = LinearLayout.HORIZONTAL
+                        talkToMe.gravity = Gravity.RIGHT
+                        talkToMe.weightSum = 2f
+                        textIcon.setLayoutParams(heavyLayout)
+                        callIcon.setLayoutParams(heavyLayout)
+                        talkToMe.addView(textIcon)
+                        talkToMe.addView(callIcon)
+                        hll.addView(talkToMe)
+
+                    } else {
+                        hll.addView(vll)
+                    }
+                    mLinearLayout!!.addView(hll)
                 }
-
-                val hll = LinearLayout(this)
-                hll.orientation = LinearLayout.HORIZONTAL
-                hll.setPadding(16, 16, 16, 16)
-
-
-                var iconName = field.iconName
-
-                if (iconName == null || iconName.length == 0) {
-                    iconName = ADD_PERSON_ICON
-                }
-
-                val iconResId = getResourceId(iconName, "drawable", packageName)
-                val icon = AppCompatImageView(this)
-                icon.setImageResource(iconResId)
-                if (iconName == ADD_PERSON_ICON) icon.setAlpha(0)
-                icon.setPadding(16, 0, 4, 0)
-                hll.addView(icon)
-
-
-                val vll = LinearLayout(this)
-                vll.orientation = LinearLayout.VERTICAL
-                vll.setPadding(16, 0, 0, 0)
-
-                val fieldValue = TextView(this)
-                if (value.toString() === "") {
-                    value = "-"
-                }
-                fieldValue.text = value.toString()
-                fieldValue.setPadding(16, 4, 4, 0)
-                vll.addView(fieldValue)
-
-                if (label != null) {
-                    val fieldLabel = TextView(this)
-                    fieldLabel.textSize = 10f
-                    fieldLabel.text = label
-                    fieldLabel.setPadding(16, 0, 4, 4)
-                    vll.addView(fieldLabel)
-                }
-
-
-                //Add call and text buttons to father and mother detail
-                if (field.actionParam != null && field.actionParam!!.length > 0) {
-                    val textIcon = AppCompatImageView(this)
-                    textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
-                            "drawable", packageName))
-                    //textIcon.setPadding(8,16, 32,16);
-                    textIcon.setOnClickListener({ v -> mPresenter!!.handleClickText(field.actionParam) })
-
-                    val callIcon = AppCompatImageView(this)
-                    callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
-                            "drawable", packageName))
-                    callIcon.setPadding(32, 0, 0, 0)
-                    callIcon.setOnClickListener({ v -> mPresenter!!.handleClickCall(field.actionParam) })
-
-                    val heavyLayout = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            1.0f
-                    )
-                    val fillIt = View(this)
-                    fillIt.layoutParams = heavyLayout
-
-
-                    vll.layoutParams = heavyLayout
-                    hll.addView(vll)
-
-                    val talkToMe = LinearLayout(this)
-                    talkToMe.orientation = LinearLayout.HORIZONTAL
-                    talkToMe.gravity = Gravity.RIGHT
-                    talkToMe.weightSum = 2f
-                    textIcon.setLayoutParams(heavyLayout)
-                    callIcon.setLayoutParams(heavyLayout)
-                    talkToMe.addView(textIcon)
-                    talkToMe.addView(callIcon)
-                    hll.addView(talkToMe)
-
-                } else {
-                    hll.addView(vll)
-                }
-
-                mLinearLayout!!.addView(hll)
             }
             FIELD_TYPE_DROPDOWN -> {
             }

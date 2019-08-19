@@ -114,7 +114,7 @@ class ClazzListFragment : UstadBaseFragment(), ClazzListView {
      */
     override fun setClazzListProvider(factory : DataSource.Factory<Int, ClazzWithNumStudents>) {
         val recyclerAdapter = ClazzListRecyclerAdapter(DIFF_CALLBACK,
-                context, this, mPresenter)
+                context!!, this, mPresenter!!)
 
         // a warning is expected.
         val data = LivePagedListBuilder(factory, 20).build()

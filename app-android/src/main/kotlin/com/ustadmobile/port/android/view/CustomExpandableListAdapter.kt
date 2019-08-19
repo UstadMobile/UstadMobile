@@ -7,10 +7,8 @@ import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.toughra.ustadmobile.R
-
-import java.util.HashMap
+import java.util.*
 
 class CustomExpandableListAdapter(private val context: Context,
                                   internal var detailAndMore: HashMap<String, ExpandableListDataReports>,

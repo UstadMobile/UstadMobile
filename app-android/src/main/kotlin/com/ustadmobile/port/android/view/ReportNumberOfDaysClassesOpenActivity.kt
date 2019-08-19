@@ -4,9 +4,7 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.TableLayout
@@ -15,7 +13,6 @@ import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
-
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.data.BarData
@@ -29,8 +26,6 @@ import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView.Companion.BAR_CHART_BAR_COLOR
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView.Companion.BAR_CHART_HEIGHT
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView.Companion.BAR_LABEL
-
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
 import java.io.FileWriter

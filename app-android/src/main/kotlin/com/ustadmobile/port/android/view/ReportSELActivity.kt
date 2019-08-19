@@ -1,36 +1,26 @@
 package com.ustadmobile.port.android.view
 
+
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.HorizontalScrollView
-import android.widget.LinearLayout
-import android.widget.PopupMenu
-import android.widget.TableLayout
-import android.widget.TableRow
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportSELPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ReportSELView
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import com.ustadmobile.port.android.view.ClazzEditActivity.Companion.dpToPx
-
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
 import java.io.FileWriter

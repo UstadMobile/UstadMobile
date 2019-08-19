@@ -22,9 +22,10 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Query("SELECT * FROM PersonDetailPresenterField ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFields() : List<PersonDetailPresenterField>
 
+    //TODO: KMP Check MutableList return type.
     @Query("SELECT * FROM PersonDetailPresenterField WHERE viewModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsViewMode() :
-            List<PersonDetailPresenterField>
+            MutableList<PersonDetailPresenterField>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsEditMode() :

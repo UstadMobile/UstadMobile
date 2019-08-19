@@ -11,7 +11,6 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -83,7 +82,9 @@ import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
-        ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback, UmEditorActionView.OnQuickActionMenuItemClicked, UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
+        ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback,
+        UmEditorActionView.OnQuickActionMenuItemClicked,
+        UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
 
     private lateinit var presenter: ContentEditorPresenter
 

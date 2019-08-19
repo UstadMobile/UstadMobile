@@ -5,19 +5,16 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-
+import androidx.lifecycle.Observer
+import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Login2Presenter
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
-
-import java.util.concurrent.TimeUnit
-
-import androidx.work.ExistingWorkPolicy
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.ustadmobile.core.impl.UMAndroidUtil
 import org.acra.util.ToastSender.sendToast
+import java.util.concurrent.TimeUnit
 
 class Login2Activity : UstadBaseActivity(), Login2View {
 
@@ -97,7 +94,7 @@ class Login2Activity : UstadBaseActivity(), Login2View {
                 ExistingWorkPolicy.APPEND)
         sendToast(applicationContext, "Sync started", 42)
         WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
-                this, { workInfos ->
+                this, Observer{ workInfos ->
                                 for (wi in workInfos) {
                                     if (wi.getState().isFinished()) {
                                         sendToast(applicationContext,"Sync finished", 42)

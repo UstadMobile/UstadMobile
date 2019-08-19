@@ -17,10 +17,8 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
@@ -28,11 +26,8 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-import java.util.Locale
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 /**
  * The ClassLogDetail activity.
@@ -133,7 +128,7 @@ class ClazzLogDetailActivity : UstadBaseActivity(), ClassLogDetailView {
             factory: DataSource.Factory<Int, ClazzLogAttendanceRecordWithPerson>) {
 
         val recyclerAdapter = ClazzLogDetailRecyclerAdapter(DIFF_CALLBACK, applicationContext,
-                this, mPresenter)
+                this, mPresenter!!)
 
         val data = LivePagedListBuilder(factory, 20).build()
 
@@ -177,15 +172,16 @@ class ClazzLogDetailActivity : UstadBaseActivity(), ClassLogDetailView {
     companion object {
 
         // Diff callback.
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> = object : DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
-            fun areItemsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson,
-                                newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson> = object
+            : DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
+            override fun areItemsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson,
+                                         newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
                 return oldItem.clazzLogAttendanceRecordUid == newItem.clazzLogAttendanceRecordUid
             }
 
-            fun areContentsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson,
-                                   newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
-                return oldItem == newItem
+            override fun areContentsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson,
+                                            newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
+                return oldItem.clazzLogAttendanceRecordUid == newItem.clazzLogAttendanceRecordUid
             }
         }
     }

@@ -14,10 +14,13 @@ import android.widget.Spinner
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.lifecycle.Observer
+import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -32,16 +35,13 @@ import com.ustadmobile.core.view.ClazzActivityListView.Companion.ACTIVITY_BAR_LA
 import com.ustadmobile.core.view.ClazzActivityListView.Companion.CHART_DURATION_LAST_MONTH
 import com.ustadmobile.core.view.ClazzActivityListView.Companion.CHART_DURATION_LAST_WEEK
 import com.ustadmobile.core.view.ClazzActivityListView.Companion.CHART_DURATION_LAST_YEAR
-import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle
-
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.LinkedHashMap
-import java.util.Objects
-
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
-
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
+import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 
 /**
@@ -49,21 +49,23 @@ import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
  * Clazz.
  */
 class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
+    override val viewContext: Any
+        get() = context!!
 
-    internal var rootContainer: View ?= null
-    private var mRecyclerView: RecyclerView? = null
+    internal lateinit var rootContainer: View
+    private lateinit var mRecyclerView: RecyclerView
 
-    private var mPresenter: ClazzActivityListPresenter? = null
-    internal var barChart: BarChart ? = null
+    private lateinit var mPresenter: ClazzActivityListPresenter
+    internal lateinit var barChart: BarChart
 
-    internal var changesPresets: Array<String> ? = null
-    internal var activityChangesSpinner: Spinner ? = null
-    internal var negativeValue: HashMap<Float, Boolean>? = null
-    private var lastWeekButton: Button? = null
-    private var lastMonthButton: Button? = null
-    private var lastYearButton: Button? = null
+    internal lateinit var changesPresets: Array<String>
+    internal lateinit var activityChangesSpinner: Spinner
+    internal lateinit var negativeValue: HashMap<Float, Boolean>
+    private lateinit var lastWeekButton: Button
+    private lateinit var lastMonthButton: Button
+    private lateinit var lastYearButton: Button
 
-    internal var fab: FloatingTextButton ? = null
+    internal lateinit var fab: FloatingTextButton
 
     fun hideEverythingInBarChart(barChart: BarChart): BarChart {
 
@@ -128,19 +130,19 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
         dataSetBar1.setColors(ContextCompat.getColor(Objects.requireNonNull(context),
                 R.color.traffic_green),
-                ContextCompat.getColor(context, R.color.traffic_orange),
-                ContextCompat.getColor(context, R.color.traffic_red))
+                ContextCompat.getColor(context!!, R.color.traffic_orange),
+                ContextCompat.getColor(context!!, R.color.traffic_red))
 
 
         val barData = BarData(dataSetBar1)
 
-        runOnUiThread {
+        runOnUiThread (Runnable{
             setUpCharts()
             barChart.setData(barData)
             barChart.setFitBars(true)
             barChart.invalidate()
             barChart.setDrawValueAboveBar(false)
-        }
+        })
 
     }
 
@@ -181,14 +183,14 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
         mRecyclerView = rootContainer.findViewById(R.id.fragment_clazz_activity_list_recyclerview)
         val mRecyclerLayoutManager = LinearLayoutManager(context)
-        mRecyclerView!!.setLayoutManager(mRecyclerLayoutManager)
+        mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
 
         //Separated out Chart initialisation
         setUpCharts()
 
         //Record attendance FAB
         fab = rootContainer.findViewById(R.id.fragment_clazz_log_record_attendance_fab)
-        fab.setOnClickListener { v -> mPresenter!!.goToNewClazzActivityEditActivity() }
+        fab.setOnClickListener { v -> mPresenter.goToNewClazzActivityEditActivity() }
 
         //Buttons
         lastWeekButton = rootContainer.findViewById(
@@ -198,17 +200,17 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         lastYearButton = rootContainer.findViewById(
                 R.id.fragment_clazz_activity_list_bar_chart_selector_button_lastyear)
 
-        lastWeekButton!!.setOnClickListener { v ->
-            mPresenter!!.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_WEEK)
-            getTintedDrawable(lastWeekButton!!.background, R.color.primary)
+        lastWeekButton.setOnClickListener { v ->
+            mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_WEEK)
+            getTintedDrawable(lastWeekButton.background, R.color.primary)
         }
-        lastMonthButton!!.setOnClickListener { v ->
-            mPresenter!!.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_MONTH)
-            getTintedDrawable(lastMonthButton!!.background, R.color.primary)
+        lastMonthButton.setOnClickListener { v ->
+            mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_MONTH)
+            getTintedDrawable(lastMonthButton.background, R.color.primary)
         }
-        lastYearButton!!.setOnClickListener { v ->
-            mPresenter!!.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_YEAR)
-            getTintedDrawable(lastYearButton!!.background, R.color.primary)
+        lastYearButton.setOnClickListener { v ->
+            mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_YEAR)
+            getTintedDrawable(lastYearButton.background, R.color.primary)
         }
 
         activityChangesSpinner = rootContainer.findViewById(R.id.fragment_clazz_activity_list_bar_chart_spinner)
@@ -216,15 +218,14 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         //Create the presenter and call its onCreate
         mPresenter = ClazzActivityListPresenter(this,
                 UMAndroidUtil.bundleToMap(arguments), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-
-        activityChangesSpinner!!.onItemSelectedListener = object : AdapterView
+        activityChangesSpinner.onItemSelectedListener = object : AdapterView
         .OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                mPresenter!!.setClazzActivityChangeUid(id)
+                mPresenter.setClazzActivityChangeUid(id)
                 //Default start to Last Week's data:
-                lastWeekButton!!.callOnClick()
+                lastWeekButton.callOnClick()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -232,7 +233,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
             }
         }
 
-        lastWeekButton!!.callOnClick()
+        lastWeekButton.callOnClick()
 
         //return container
         return rootContainer
@@ -250,23 +251,28 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
      * Removes background color from View's report button
      */
     override fun resetReportButtons() {
-        runOnUiThread {
-            getTintedDrawable(lastWeekButton!!.background, R.color.color_gray)
-            getTintedDrawable(lastMonthButton!!.background, R.color.color_gray)
-            getTintedDrawable(lastYearButton!!.background, R.color.color_gray)
-        }
+        runOnUiThread (Runnable{
+            getTintedDrawable(lastWeekButton.background, R.color.color_gray)
+            getTintedDrawable(lastMonthButton.background, R.color.color_gray)
+            getTintedDrawable(lastYearButton.background, R.color.color_gray)
+        })
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, ClazzActivityWithChangeTitle>) {
 
         //Create a recycler adapter to set on the Recycler View.
         val recyclerAdapter = ClazzActivityListRecyclerAdapter(
-                DIFF_CALLBACK, context, this, mPresenter, true)
+                DIFF_CALLBACK, context!!, this, mPresenter, true)
 
 
         val data = LivePagedListBuilder(factory, 20).build()
 
-        data.observe(this, ???({ recyclerAdapter.submitList() }))
+        //Observe the data:
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP,
+                    Observer<PagedList<ClazzActivityWithChangeTitle>> { recyclerAdapter.submitList(it) })
+        }
 
         mRecyclerView!!.setAdapter(recyclerAdapter)
     }
@@ -299,15 +305,17 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         }
 
         // ClassLogList's DIFF callback
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzActivityWithChangeTitle> = object : DiffUtil.ItemCallback<ClazzActivityWithChangeTitle>() {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzActivityWithChangeTitle> =
+                object : DiffUtil.ItemCallback<ClazzActivityWithChangeTitle>() {
 
-            fun areItemsTheSame(oldItem: ClazzActivityWithChangeTitle, newItem: ClazzActivityWithChangeTitle): Boolean {
+            override fun areItemsTheSame(oldItem: ClazzActivityWithChangeTitle,
+                                         newItem: ClazzActivityWithChangeTitle): Boolean {
                 return oldItem.clazzActivityUid == newItem.clazzActivityUid
             }
 
-            fun areContentsTheSame(oldItem: ClazzActivityWithChangeTitle,
-                                   newItem: ClazzActivityWithChangeTitle): Boolean {
-                return oldItem == newItem
+            override fun areContentsTheSame(oldItem: ClazzActivityWithChangeTitle,
+                                            newItem: ClazzActivityWithChangeTitle): Boolean {
+                return oldItem.clazzActivityUid == newItem.clazzActivityUid
             }
         }
     }

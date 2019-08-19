@@ -1,11 +1,10 @@
 package com.ustadmobile.port.android.view
 
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-
-
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
@@ -16,23 +15,19 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AuditLogListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AuditLogListView
 import com.ustadmobile.lib.db.entities.AuditLogWithNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
+import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
-import java.util.Objects
-
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 class AuditLogListActivity : UstadBaseActivity(), AuditLogListView, PopupMenu.OnMenuItemClickListener {
 

@@ -9,18 +9,16 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.NumberPicker
 import androidx.appcompat.app.AlertDialog
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportAttendanceGroupedByThresholdsPresenter
 import com.ustadmobile.core.view.DismissableDialog
-import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView
-
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_THRESHOLD_HIGH
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_THRESHOLD_LOW
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_THRESHOLD_MID
 import com.ustadmobile.core.view.ReportEditView.Companion.THRESHOLD_HIGH_DEFAULT
 import com.ustadmobile.core.view.ReportEditView.Companion.THRESHOLD_LOW_DEFAULT
 import com.ustadmobile.core.view.ReportEditView.Companion.THRESHOLD_MED_DEFAULT
+import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView
 
 /**
  * SelectAttendanceThresholdsDialogFragment Android fragment extends UstadBaseFragment

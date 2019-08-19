@@ -6,14 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ExpandableListAdapter
 import android.widget.ExpandableListView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.BaseReportPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.BaseReportView
-
-import java.util.ArrayList
-import java.util.Objects
+import java.util.*
 
 class ReportSelectionFragment : UstadBaseFragment(), BaseReportView {
     override val viewContext: Any

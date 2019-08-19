@@ -1,17 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
-
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.view.ReportAtRiskStudentsView
-import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView
-import com.ustadmobile.core.view.ReportMasterView
-import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView
-import com.ustadmobile.core.view.ReportOverallAttendanceView
-import com.ustadmobile.core.view.ReportSELView
-
-import java.util.ArrayList
-import java.util.HashMap
+import com.ustadmobile.core.view.*
+import java.util.*
 
 /**
  * A POJO representing a Report item. It is also responsible for returning the default set of
@@ -31,9 +23,7 @@ class ExpandableListDataReports {
     var showLocations: Boolean? = null
     var desc: String? = null
 
-    private constructor() {
-
-    }
+    private constructor()
 
     private constructor(name: String, icon: Int?, reportLink: String, showThreshold: Boolean,
                         showRadioGroup: Boolean, showGenderDisaggregate: Boolean,

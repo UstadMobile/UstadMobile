@@ -101,8 +101,49 @@ object UMCalendarUtil {
         return cal.format(format)
     }
 
+    fun getPrettyTimeFromLong(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("HH:mm")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    /**
+     * Gets pretty looking date (eg: Mon, 23/Jan/1989) from a long date specified.
+     *
+     * @param thisDate The date in long for which we want a pretty date
+     * @return  The pretty date for the long date specified as string.
+     */
+    fun getPrettyDateFromLong(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("EEEE, dd/MMMM/yyyy")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+
+    /**
+     * Gets simple day only (eg: Mon) from a long date specified.
+     *
+     * @param thisDate  The date in long for which we want the day for.
+     * @return  The day for the long date specified as string.
+     */
+    fun getSimpleDayFromLongDate(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("EEEE")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
     fun getPrettyDateSuperSimpleFromLong(thisDate: Long, locale: Any?):String{
         return getPrettyDateSuperSimpleFromLong(thisDate)
+    }
+
+    fun getPrettyDateSimpleWithoutYearFromLong(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("dd/MMM")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    fun getPrettySuperSimpleDateSimpleWithoutYearFromLong(thisDate: Long): String {
+        return getPrettyDateSimpleWithoutYearFromLong(thisDate, null)
     }
 
     /***

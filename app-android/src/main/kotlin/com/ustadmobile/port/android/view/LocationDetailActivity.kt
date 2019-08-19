@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -10,33 +11,24 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LocationDetailPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.LocationDetailView
 import com.ustadmobile.lib.db.entities.Location
-
-
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.HashMap
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import tellh.com.recyclertreeview_lib.TreeNode
 import tellh.com.recyclertreeview_lib.TreeViewAdapter
 import tellh.com.recyclertreeview_lib.TreeViewBinder
+import java.util.*
 
 class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
 
@@ -87,7 +79,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
         val mRecyclerLayoutManager = LinearLayoutManager(this)
         mRecyclerView!!.setLayoutManager(mRecyclerLayoutManager)
 
-        val repository = UmAccountManager.getRepositoryForActiveAccount(context!!)
+        val repository = UmAccountManager.getRepositoryForActiveAccount(applicationContext!!)
         locationDao = repository.locationDao
 
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)

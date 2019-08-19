@@ -1,21 +1,18 @@
 package com.ustadmobile.port.android.view
 
+import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.app.Activity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.PopupMenu
 import androidx.paging.PagedListAdapter
-
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LocationListPresenter
-
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount
 
 class LocationListRecyclerAdapter(

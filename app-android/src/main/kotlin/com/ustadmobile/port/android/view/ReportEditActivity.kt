@@ -4,15 +4,8 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.CheckBox
-import android.widget.RadioGroup
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.widget.Toolbar
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportAttendanceGroupedByThresholdsPresenter
 import com.ustadmobile.core.controller.ReportEditPresenter
@@ -21,8 +14,6 @@ import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.ReportEditView.Companion.THRESHOLD_HIGH_DEFAULT
 import com.ustadmobile.core.view.ReportEditView.Companion.THRESHOLD_LOW_DEFAULT
 import com.ustadmobile.core.view.ReportEditView.Companion.THRESHOLD_MED_DEFAULT
-
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 
@@ -37,6 +28,8 @@ class ReportEditActivity : UstadBaseActivity(), ReportEditView,
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
         SelectAttendanceThresholdsDialogFragment.ThresholdsSelectedDialogListener,
         SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
+
+
 
     private lateinit var locationsTextView: TextView
     private lateinit var locationsHeadingTextView: TextView
@@ -218,9 +211,9 @@ class ReportEditActivity : UstadBaseActivity(), ReportEditView,
     }
 
 
-    fun onSelectClazzesResult(selectedClazzes: HashMap<String, Long>) {
+    override fun onSelectClazzesResult(selectedClazzes: HashMap<String, Long>?) {
         val classesSelectedString = StringBuilder()
-        val selectedClazzesNameIterator = selectedClazzes.keys.iterator()
+        val selectedClazzesNameIterator = selectedClazzes!!.keys.iterator()
         while (selectedClazzesNameIterator.hasNext()) {
             classesSelectedString.append(selectedClazzesNameIterator.next())
             if (selectedClazzesNameIterator.hasNext()) {
@@ -233,7 +226,7 @@ class ReportEditActivity : UstadBaseActivity(), ReportEditView,
         updateClazzesSelected(classesSelectedString.toString())
     }
 
-    fun onLocationResult(selectedLocations: HashMap<String, Long>) {
+    override fun onLocationResult(selectedLocations: HashMap<String, Long>) {
         val selectedLocationsNameIterator = selectedLocations.keys.iterator()
         val locationsSelectedString = StringBuilder()
         while (selectedLocationsNameIterator.hasNext()) {
@@ -260,9 +253,10 @@ class ReportEditActivity : UstadBaseActivity(), ReportEditView,
         onThresholdResult(defaultValue)
     }
 
-    override fun onThresholdResult(values: ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues) {
-        val thresholdString = values.low.toString() + "%, " + values.med + "%, " + values.high + "%"
-        mPresenter.setThresholdValues(values)
+    override fun onThresholdResult(values: ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues?) {
+        val thresholdString = values!!.low.toString() + "%, " + values.med + "%, " +
+                values.high +"%"
+        mPresenter.setThresholdValues(values!!)
         updateThresholdSelected(thresholdString)
     }
 

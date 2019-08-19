@@ -69,12 +69,10 @@ class AuditLogListRecyclerAdapter(
 
             popup.setOnMenuItemClickListener { item ->
                 val i = item.itemId
-                if (i == R.id.edit) {
-                    true
-                } else if (i == R.id.delete) {
-                    true
-                } else {
-                    false
+                when (i) {
+                    R.id.edit -> true
+                    R.id.delete -> true
+                    else -> false
                 }
             }
             //inflating menu from xml resource
