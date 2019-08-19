@@ -34,9 +34,9 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
         mWebView = findViewById(R.id.activity_webchunk_webview)
         mWebView!!.settings.javaScriptEnabled = true
         mWebView!!.settings.domStorageEnabled = true
-        mWebView!!.settings.domStorageEnabled = true
         mWebView!!.settings.allowUniversalAccessFromFileURLs = true
         mWebView!!.settings.allowFileAccessFromFileURLs = true
+        mWebView!!.settings.mediaPlaybackRequiresUserGesture = false
 
         mPresenter = WebChunkPresenter(this,
                 bundleToMap(intent.extras), this)

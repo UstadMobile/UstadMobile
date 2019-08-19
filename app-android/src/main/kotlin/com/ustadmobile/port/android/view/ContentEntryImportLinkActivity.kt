@@ -42,6 +42,12 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
                 ?: UmAccountManager.getActiveEndpoint(viewContext)!!
 
         webView = findViewById(R.id.import_link_preview_webview)
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.settings.allowUniversalAccessFromFileURLs = true
+        webView.settings.allowFileAccessFromFileURLs = true
+        webView.settings.mediaPlaybackRequiresUserGesture = false
+
         textInput = findViewById(R.id.entry_import_link_textInput)
         editText = findViewById(R.id.entry_import_link_editText)
 

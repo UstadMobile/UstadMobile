@@ -90,7 +90,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
     @Test
     fun endToEnd() {
 
-        var urlString = "https://h5p.org/image-hotspots"
+        var urlString = "https://h5p.org/h5p/embed/4651"
 
         onView(withId(R.id.create_new_content)).perform(click())
         Thread.sleep(100)
