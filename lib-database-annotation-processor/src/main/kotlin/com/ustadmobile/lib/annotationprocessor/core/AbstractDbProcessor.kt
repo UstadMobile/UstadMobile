@@ -332,10 +332,17 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
             codeBlock.beginControlFlow("if($varName != null)")
         }
 
+        val entityCsnField = sEntityInfo.entityMasterCsnField
+        val entityCsnSuffix = if(entityCsnField.type != INT) {
+            ".toInt()"
+        }else {
+            ""
+        }
+
         codeBlock.add("""$syncHelperDaoVarName._replace${sEntityInfo.tracker.simpleName}( ${wrapperFnName.first} %T(
                              |${sEntityInfo.trackerPkField.name} = $varName.${sEntityInfo.entityPkField.name},
                              |${sEntityInfo.trackerDestField.name} = $clientIdVarName,
-                             |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name},
+                             |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name}$entityCsnSuffix,
                              |${sEntityInfo.trackerReqIdField.name} = $reqIdVarName
                              |) ${wrapperFnName.second} )
                              |""".trimMargin(), sEntityInfo.tracker)
@@ -516,6 +523,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected fun generateSyncTriggersCodeBlock(entityClass: ClassName, execSqlFn: String, dbType: Int): CodeBlock {
         val codeBlock = CodeBlock.builder()
+        messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
         when(dbType){
             DoorDbType.SQLITE -> {
@@ -555,6 +563,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
             }
         }
+
+        messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: finish generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
 
         return codeBlock.build()
     }

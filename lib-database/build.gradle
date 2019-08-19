@@ -89,7 +89,7 @@ kapt {
     arguments {
         arg("doordb_android_out", rootProject.file("lib-database-android/build/generated/source/door").absolutePath)
         arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
-        arg("doordb_ktor_out", rootProject.file("lib-ktor-server/build/generated/source/door").absolutePath)
+        arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
         arg("doordb_source_path", project.file("src/commonMain/kotlin"))
     }
 }

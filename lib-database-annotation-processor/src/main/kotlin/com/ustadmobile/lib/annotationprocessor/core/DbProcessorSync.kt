@@ -259,9 +259,9 @@ class DbProcessorSync: AbstractDbProcessor() {
 
             repoTypeSpec.addFunction(FunSpec.builder("_replace${syncableEntityInfo.tracker.simpleName}")
                     .addModifiers(KModifier.OVERRIDE)
-                    .addParameter("_entities",
+                    .addParameter("entities",
                             List::class.asClassName().parameterizedBy(syncableEntityInfo.tracker))
-                    .addCode("_dao._replace${syncableEntityInfo.tracker.simpleName}(_entities)\n")
+                    .addCode("_dao._replace${syncableEntityInfo.tracker.simpleName}(entities)\n")
                     .build())
 
             repoTypeSpec.addFunction(FunSpec.builder("_findLocalUnsent${entityType.simpleName}")
@@ -394,7 +394,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             val (abstractInsertEntityFun, implInsertEntityFun, abstractInterfaceInsertEntityFun) =
                 generateAbstractAndImplUpsertFuns(
                     "_replace${entityType.simpleName}",
-                    ParameterSpec.builder("_entities", entityListClassName).build(),
+                    ParameterSpec.builder("entities", entityListClassName).build(),
                     entityType.asEntityTypeSpec(),
                     implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertEntityFun)
@@ -404,7 +404,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             val (abstractInsertTrackerFun, implInsertTrackerFun, abstractInterfaceInsertTrackerFun) =
                     generateAbstractAndImplUpsertFuns(
                     "_replace${syncableEntityInfo.tracker.simpleName}",
-                    ParameterSpec.builder("_entities", entitySyncTrackerListClassName).build(),
+                    ParameterSpec.builder("entities", entitySyncTrackerListClassName).build(),
                     generateTrackerEntity(entityType, processingEnv),
                     implDaoTypeSpec, abstractFunIsOverride = true)
             abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
