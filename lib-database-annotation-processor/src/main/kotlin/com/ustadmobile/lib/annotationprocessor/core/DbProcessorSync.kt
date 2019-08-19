@@ -84,14 +84,20 @@ class DbProcessorSync: AbstractDbProcessor() {
         messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: Process")
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
-        roundEnv.getElementsAnnotatedWith(SyncableEntity::class.java).map { it as TypeElement }.forEach {
-            val trackerFileSpec = FileSpec.builder(it.asClassName().packageName, "${it.simpleName}$TRACKER_SUFFIX")
-                    .addType(generateTrackerEntity(it, processingEnv)).build()
+        //For all databases that are being compiled now, find those entities that require tracker entities
+        // to be generated. Filter out any for which the entity was already generated.
+        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }
+                .filter { it.getAnnotation(SyncableEntity::class.java) != null
+                        && processingEnv.elementUtils
+                        .getTypeElement("${it.asClassName().packageName}.${it.simpleName}$TRACKER_SUFFIX") == null}
+                .forEach {
+                    val trackerFileSpec = FileSpec.builder(it.asClassName().packageName, "${it.simpleName}$TRACKER_SUFFIX")
+                            .addType(generateTrackerEntity(it, processingEnv)).build()
 
-            writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-            writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
-                    useFilerAsDefault = false)
-        }
+                    writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                    writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
+                            useFilerAsDefault = false)
+                }
 
         for(dbTypeEl in dbs) {
             messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: db: ${dbTypeEl.simpleName}")

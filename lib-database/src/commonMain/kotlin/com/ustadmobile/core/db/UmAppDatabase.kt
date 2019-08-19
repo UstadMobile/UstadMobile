@@ -25,6 +25,9 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class
+
+    //#DOORDB_TRACKER_ENTITIES
+
 ], version = 24)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
