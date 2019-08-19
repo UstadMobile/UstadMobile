@@ -2,19 +2,17 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.annotation.SyncablePrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 open class Clazz() {
 
-    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var clazzUid: Long = 0
 
@@ -22,13 +20,13 @@ open class Clazz() {
 
     var attendanceAverage: Float = 0.toFloat()
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var clazzMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var clazzLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var clazzLastChangedBy: Int = 0
 
     var clazzLocationUid: Long = 0

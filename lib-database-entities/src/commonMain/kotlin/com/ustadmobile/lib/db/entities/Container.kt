@@ -4,29 +4,31 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 51 ,indices = arrayOf(UmIndex(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
+@SyncableEntity(tableId = 51)
 open class Container() {
 
     @PrimaryKey(autoGenerate = true)
     var containerUid: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var cntLocalCsn: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var cntMasterCsn: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var cntLastModBy: Int = 0
 
     var fileSize: Long = 0
 
     var containerContentEntryUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var lastModified: Long = 0
 

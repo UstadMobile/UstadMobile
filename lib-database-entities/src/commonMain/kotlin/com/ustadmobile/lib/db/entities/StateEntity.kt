@@ -2,14 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.StateEntity.Companion.TABLE_ID
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 class StateEntity {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey(autoGenerate = true)
     var stateUid: Long = 0
 
@@ -25,13 +27,13 @@ class StateEntity {
 
     var timestamp: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var stateMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var stateLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var stateLastChangedBy: Int = 0
 
     constructor(activityId: String?, agentUid: Long, registration: String?, stateId: String?, isActive: Boolean, timestamp: Long) {

@@ -9,11 +9,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * Represents one session (e.g. day) in the class log book. This is related to attendance records, but
  * could also be related to behavior logs etc. in the future.
  */
-@UmEntity
+//TODO: check with Varuna
 @Entity
-class ClazzLog() : SyncableEntity {
+class ClazzLog() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var clazzLogUid: Long = 0
 
@@ -23,7 +22,4 @@ class ClazzLog() : SyncableEntity {
 
     var timeRecorded: Long = 0
 
-    override var masterChangeSeqNum: Long = 0
-
-    override var localChangeSeqNum: Long = 0
 }

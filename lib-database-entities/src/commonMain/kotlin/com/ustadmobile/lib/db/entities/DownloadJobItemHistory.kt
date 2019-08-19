@@ -10,11 +10,9 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * to track the performance of different peers, and inform the selection of peers when attempting to
  * download items in the future.
  */
-@UmEntity
 @Entity
 class DownloadJobItemHistory() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
 

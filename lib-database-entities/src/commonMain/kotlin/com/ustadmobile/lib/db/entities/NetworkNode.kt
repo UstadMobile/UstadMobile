@@ -3,18 +3,14 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 /**
  * Created by mike on 1/29/18.
  */
-@UmEntity
 @Entity
 class NetworkNode() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var nodeId: Long = 0
 
@@ -26,7 +22,6 @@ class NetworkNode() {
      * Method which is used to set NetworkNode's Bluetooth address
      * @param bluetoothMacAddress Device bluetooth address
      */
-    @UmIndexField
     @ColumnInfo(index = true)
     var bluetoothMacAddress: String? = null
 
@@ -141,8 +136,44 @@ class NetworkNode() {
         this.lastUpdateTimeStamp = lastUpdateTimeStamp
     }
 
+
+
+    override fun hashCode(): Int {
+        var result = nodeId.hashCode()
+        result = 31 * result + (bluetoothMacAddress?.hashCode() ?: 0)
+        result = 31 * result + (ipAddress?.hashCode() ?: 0)
+        result = 31 * result + (wifiDirectMacAddress?.hashCode() ?: 0)
+        result = 31 * result + (deviceWifiDirectName?.hashCode() ?: 0)
+        result = 31 * result + (endpointUrl?.hashCode() ?: 0)
+        result = 31 * result + lastUpdateTimeStamp.hashCode()
+        result = 31 * result + networkServiceLastUpdated.hashCode()
+        result = 31 * result + (nsdServiceName?.hashCode() ?: 0)
+        result = 31 * result + port
+        result = 31 * result + numFailureCount
+        result = 31 * result + wifiDirectDeviceStatus
+        result = 31 * result + (groupSsid?.hashCode() ?: 0)
+        return result
+    }
+
     override fun equals(other: Any?): Boolean {
-        return other is NetworkNode && (wifiDirectMacAddress != null && wifiDirectMacAddress == wifiDirectMacAddress || ipAddress != null && ipAddress == ipAddress)
+        if (this === other) return true
+        if (other !is NetworkNode) return false
+
+        if (nodeId != other.nodeId) return false
+        if (bluetoothMacAddress != other.bluetoothMacAddress) return false
+        if (ipAddress != other.ipAddress) return false
+        if (wifiDirectMacAddress != other.wifiDirectMacAddress) return false
+        if (deviceWifiDirectName != other.deviceWifiDirectName) return false
+        if (endpointUrl != other.endpointUrl) return false
+        if (lastUpdateTimeStamp != other.lastUpdateTimeStamp) return false
+        if (networkServiceLastUpdated != other.networkServiceLastUpdated) return false
+        if (nsdServiceName != other.nsdServiceName) return false
+        if (port != other.port) return false
+        if (numFailureCount != other.numFailureCount) return false
+        if (wifiDirectDeviceStatus != other.wifiDirectDeviceStatus) return false
+        if (groupSsid != other.groupSsid) return false
+
+        return true
     }
 
     companion object {
