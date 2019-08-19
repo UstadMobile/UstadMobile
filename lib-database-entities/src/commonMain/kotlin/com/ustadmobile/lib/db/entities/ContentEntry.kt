@@ -3,7 +3,10 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TABLE_ID
 
 /**
@@ -13,8 +16,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TABLE_ID
  * 2. A navigation directory (e.g. a category as it is scraped from another site, etc), in which case
  * there should be the appropriate ContentEntryParentChildJoin entities present.
  */
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 open class ContentEntry() {
 
 
@@ -70,7 +73,6 @@ open class ContentEntry() {
     var lastModified: Long = 0
 
     //TODO: Migration : add to migration
-    @UmIndexField
     @ColumnInfo(index = true)
     var primaryLanguageUid: Long = 0
 
@@ -94,13 +96,13 @@ open class ContentEntry() {
 
     var contentTypeFlag: Int = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var contentEntryLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var contentEntryMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var contentEntryLastChangedBy: Int = 0
 
     constructor(title: String, description: String, leaf: Boolean, publik: Boolean) : this() {

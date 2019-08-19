@@ -7,9 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 @UmEntity
 @Entity
-class DiscussionMessage() : SyncableEntity {
+class DiscussionMessage() {
 
-    @UmPrimaryKey
     @PrimaryKey
     var discussionMessageUid: Long = 0
 
@@ -17,7 +16,4 @@ class DiscussionMessage() : SyncableEntity {
 
     var message: String? = null
 
-    override var masterChangeSeqNum: Long = 0
-
-    override var localChangeSeqNum: Long = 0
 }

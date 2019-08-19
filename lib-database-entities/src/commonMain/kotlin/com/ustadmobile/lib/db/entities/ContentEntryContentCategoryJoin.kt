@@ -3,33 +3,35 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin.Companion.TABLE_ID
 
 
 /**
  * Join entity to link ContentEntry many:many with ContentCategory
  */
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 class ContentEntryContentCategoryJoin() {
 
     @PrimaryKey(autoGenerate = true)
     var ceccjUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var ceccjContentEntryUid: Long = 0
 
     var ceccjContentCategoryUid: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var ceccjLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var ceccjMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var ceccjLastChangedBy: Int = 0
 
     override fun equals(other: Any?): Boolean {

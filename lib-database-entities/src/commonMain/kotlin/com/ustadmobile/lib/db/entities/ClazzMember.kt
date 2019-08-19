@@ -3,15 +3,18 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
  * or a student. Each member has a joining date, and a leaving date.
  */
-@UmEntity(tableId = 11)
 @Entity
-class ClazzMember() : SyncableEntity {
+@SyncableEntity(tableId = 11)
+class ClazzMember()  {
 
     /**
      * The personUid field of the related Person entity
@@ -21,11 +24,9 @@ class ClazzMember() : SyncableEntity {
     @PrimaryKey(autoGenerate = true)
     var clazzMemberUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var clazzMemberPersonUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var clazzMemberClazzUid: Long = 0
 
@@ -35,17 +36,13 @@ class ClazzMember() : SyncableEntity {
 
     var role: Int = 0
 
-    override var masterChangeSeqNum: Long = 0
-
-    override var localChangeSeqNum: Long = 0
-
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var clazzMemberLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var clazzMemberMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var clazzMemberLastChangedBy: Int = 0
 
     constructor(clazzUid: Long, personUid: Long) : this() {
