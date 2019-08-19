@@ -61,11 +61,11 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
             val content = response.receive<H5PImportData>()
             val db = UmAppDatabase.getInstance(context)
-            val contentEntryUid = db.contentEntryDao.insert(content.contentEntry)
-            val parentChildUid = db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
-            val containerUid = db.containerDao.insert(content.container)
+            db.contentEntryDao.insert(content.contentEntry)
+            db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
+            db.containerDao.insert(content.container)
 
-            view.runOnUiThread(Runnable{
+            view.runOnUiThread(Runnable {
                 view.returnResult()
             })
 

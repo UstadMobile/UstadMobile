@@ -17,7 +17,7 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
+           // "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     @JsName("getMostRecentDownloadedContainerForContentEntryAsync")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?

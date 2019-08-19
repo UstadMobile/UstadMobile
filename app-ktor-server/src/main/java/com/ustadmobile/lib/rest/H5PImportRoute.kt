@@ -62,6 +62,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                     val contentEntry = ContentEntry()
                     contentEntry.leaf = true
+                    contentEntry.title = Jsoup.parse(content).title()
                     contentEntry.contentEntryUid = entryDao.insert(contentEntry)
 
                     val parentChildJoin = ContentEntryParentChildJoin()
@@ -72,6 +73,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     val container = Container(contentEntry)
                     container.containerContentEntryUid = contentEntry.contentEntryUid
                     container.fileSize = 1
+                    container.mimeType = "application/webchunk+zip"
                     container.containerUid = containerDao.insert(container)
 
                     call.respond(H5PImportData(contentEntry, container, parentChildJoin))
@@ -97,6 +99,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
 
+
             val json = Json(JsonConfiguration.Stable.copy(strictMode = false))
             val http = defaultHttpClient()
 
@@ -107,12 +110,48 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
             try {
 
+
+                // open browser and download all links
+                logs.map { json.parse(LogResponse.serializer(), it.message) }
+                        .filter { (RESPONSE_RECEIVED == it.message!!.method) }
+                        .forEach { log ->
+                            val mimeType = log.message!!.params!!.response!!.mimeType
+                            val urlString = log.message.params!!.response!!.url!!
+
+                            try {
+
+                                val url = URL(urlString)
+                                val urlDirectory = File(parentDir, getNameFromUrl(url))
+                                urlDirectory.mkdirs()
+
+                                val response = getResponseFromUrl(http, urlString, log.message.params.response?.requestHeaders)
+                                val h5pFile = downloadFileFromLogIndex(response, urlString, urlDirectory)
+                                val logIndex = createIndexFromLog(urlString,
+                                        mimeType
+                                                ?: response.contentType()?.contentType, urlDirectory,
+                                        h5pFile, log.message.params.response?.headers
+                                        ?: response.headers.toMap().entries.associate { it.key to it.value[0] })
+                                indexList.add(logIndex)
+
+                            } catch (e: Exception) {
+                                print(e.message)
+                            }
+
+                        }
+
+
                 // download h5P integration
                 val htmlContent = Jsoup.parse(h5pContentUrl)
 
-                val contentId = htmlContent.selectFirst("div.h5p-content").attr("data-content-id")
+                var h5pcontentIdLocation = htmlContent.selectFirst("div.h5p-content")
+                if (h5pcontentIdLocation == null) {
+                    h5pcontentIdLocation = htmlContent.selectFirst("iframe.h5p-iframe")
+                }
 
-                val dataList = htmlContent.body().select("script").filter { it.data().contains("H5PIntegration") }
+                val contentId = h5pcontentIdLocation.attr("data-content-id")
+
+
+                val dataList = htmlContent.select("script").filter { it.data().contains("H5PIntegration") }
                 dataList.map { it.data() }
                         .forEach {
 
@@ -152,33 +191,6 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
                 println(e.stackTrace)
             }
 
-
-            // open browser and download all links
-            logs.map { json.parse(LogResponse.serializer(), it.message) }
-                    .filter { (RESPONSE_RECEIVED == it.message!!.method) }
-                    .forEach { log ->
-                        val mimeType = log.message!!.params!!.response!!.mimeType
-                        val urlString = log.message.params!!.response!!.url!!
-
-                        try {
-
-                            val url = URL(urlString)
-                            val urlDirectory = File(parentDir, getNameFromUrl(url))
-                            urlDirectory.mkdirs()
-
-                            val response = getResponseFromUrl(http, urlString, log.message.params.response?.requestHeaders)
-                            val h5pFile = downloadFileFromLogIndex(response, urlString, urlDirectory)
-                            val logIndex = createIndexFromLog(urlString,
-                                    mimeType ?: response.contentType()?.contentType, urlDirectory,
-                                    h5pFile, log.message.params.response?.headers
-                                    ?: response.headers.toMap().entries.associate { it.key to it.value[0] })
-                            indexList.add(logIndex)
-
-                        } catch (e: Exception) {
-                            print(e.message)
-                        }
-
-                    }
 
             val index = LogIndex()
             index.title = driver.title
