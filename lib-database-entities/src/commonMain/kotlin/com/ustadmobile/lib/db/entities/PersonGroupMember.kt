@@ -3,30 +3,31 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 44)
 @Entity
+@SyncableEntity(tableId = 44)
 class PersonGroupMember() {
 
 
     @PrimaryKey(autoGenerate = true)
     var groupMemberUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var groupMemberPersonUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var groupMemberGroupUid: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var groupMemberMasterCsn: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var groupMemberLocalCsn: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var groupMemberLastChangedBy: Int = 0
 }

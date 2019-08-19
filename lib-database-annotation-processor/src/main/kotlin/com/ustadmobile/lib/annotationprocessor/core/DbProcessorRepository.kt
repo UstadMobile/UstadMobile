@@ -83,7 +83,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
     fun generateDbRepositoryClass(dbTypeElement: TypeElement,
                                   syncDaoMode: Int = REPO_SYNCABLE_DAO_CONSTRUCT,
-                                  overrideClearAllTables: Boolean = false,
+                                  overrideClearAllTables: Boolean = true,
                                   overrideSyncDao: Boolean = false,
                                   overrideOpenHelper: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),

@@ -2,7 +2,10 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * This is a 1:1 relationship with Person. It avoids synchronizing login credentials with any other
@@ -15,8 +18,8 @@ import com.ustadmobile.lib.database.annotation.*
  *
  * Currently, as PersonAuthDao does not extend syncable dao, it will not sync
  */
-@UmEntity(tableId = 30)
 @Entity
+@SyncableEntity(tableId = 30)
 class PersonAuth() {
 
     @PrimaryKey(autoGenerate = true)
@@ -24,13 +27,13 @@ class PersonAuth() {
 
     var passwordHash: String? = null
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var personAuthLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var personAuthMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var lastChangedBy: Int = 0
 
     constructor(personAuthUid: Long, passwordHash: String) : this() {

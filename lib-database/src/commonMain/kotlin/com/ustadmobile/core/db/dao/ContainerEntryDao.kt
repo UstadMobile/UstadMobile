@@ -55,4 +55,7 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
     @Query("DELETE FROM ContainerEntry WHERE ceUid = :containerEntryUid")
     abstract fun deleteByContainerEntryUid(containerEntryUid: Long)
+
+    @Delete
+    abstract fun deleteList(entries: List<ContainerEntry>)
 }

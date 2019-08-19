@@ -3,7 +3,6 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import com.ustadmobile.lib.database.annotation.UmEntity
 
-@UmEntity
 @Entity
 class UidTracker() {
 

@@ -14,4 +14,8 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         throw Exception("Not implemented on JS yet")
     }
 
+    actual fun addCallback(callback: DoorDatabaseCallback){
+        //do nothing
+    }
+
 }

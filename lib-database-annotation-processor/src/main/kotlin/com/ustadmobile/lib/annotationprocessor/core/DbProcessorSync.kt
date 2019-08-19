@@ -4,20 +4,11 @@ import androidx.room.*
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.*
-import java.io.File
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.TypeMirror
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.OPTION_KTOR_OUTPUT
 import io.ktor.routing.Route
-import com.ustadmobile.door.*
-import java.util.*
-import javax.lang.model.element.ElementKind
-import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.ExecutableType
 import javax.tools.Diagnostic
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorDatabase
@@ -286,22 +277,27 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .addAnnotation(AnnotationSpec.builder(Query::class)
                             .addMember(CodeBlock.of("%S", "SELECT * FROM ${entityType.simpleName}")).build())
 
-            syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
-                    entityType)
-                    .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
-                            syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
-                    .add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
-                    .beginControlFlow("if(!_entities.isEmpty())")
-                    .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
-                            daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
-                            httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
-                            httpResultType = UNIT, params = replaceEntitiesFn.parameters))
-                    .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
-                            entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
-                            reqIdVarName = "0", processingEnv = processingEnv))
-                    .endControlFlow()
-                    .endControlFlow()
+            val entitySyncFn = FunSpec.builder("sync${entityType.simpleName}")
+                    .addModifiers(KModifier.SUSPEND, KModifier.PRIVATE)
+                    .addCode(CodeBlock.builder()
 
+                            .add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                            .beginControlFlow("if(!_entities.isEmpty())")
+                            .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
+                                    daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
+                                    httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
+                                    httpResultType = UNIT, params = replaceEntitiesFn.parameters))
+                            .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
+                                    entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
+                                    reqIdVarName = "0", processingEnv = processingEnv))
+                            .endControlFlow()
+                            .build())
+
+            syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
+                            entityType)
+                    .add("sync${entityType.simpleName}()\n")
+                    .endControlFlow()
+            repoTypeSpec.addFunction(entitySyncFn.build())
         }
 
 
