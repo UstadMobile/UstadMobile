@@ -90,7 +90,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
     @Test
     fun endToEnd() {
 
-        var urlString = "https://h5p.org/h5p/embed/4651"
+        var urlString = "https://h5p.org/interactive-video"
 
         onView(withId(R.id.create_new_content)).perform(click())
         Thread.sleep(100)
@@ -105,6 +105,26 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
 
     }
+
+    @Test
+    fun videoEndToEnd() {
+
+        var urlString = "https://www.ustadmobile.com/files/vso/cleansurroundings.mp4"
+
+        onView(withId(R.id.create_new_content)).perform(click())
+        Thread.sleep(100)
+        onView(withId(R.id.content_import_link)).perform(click())
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString))
+
+        Thread.sleep(1000)
+
+        onView(withId(R.id.import_link_done)).perform(click())
+
+
+    }
+
 
 
 }

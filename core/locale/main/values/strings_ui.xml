@@ -331,6 +331,7 @@
 
     <string name="activity_preview_xapi">Preview</string>
     <string name="add_to_dashboard">Add to Dashboard</string>
+    <string name="activity_import_link">Import Link</string>
 
     <string name="xapi_hours">Hrs</string>
     <string name="xapi_minutes">Mins</string>

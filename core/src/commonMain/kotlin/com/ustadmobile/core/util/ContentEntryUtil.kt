@@ -57,7 +57,7 @@ object ContentEntryUtil {
                     args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     viewName = XapiPackageContentView.VIEW_NAME
                 }
-                "video/mp4" -> {
+                "video/mp4", "application/khan-video+zip" -> {
 
                     args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
@@ -73,12 +73,6 @@ object ContentEntryUtil {
 
                     args[EpubContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     viewName = EpubContentView.VIEW_NAME
-                }
-                "application/khan-video+zip" -> {
-
-                    args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                    args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                    viewName = VideoPlayerView.VIEW_NAME
                 }
 
                 "application/h5p+zip" -> {

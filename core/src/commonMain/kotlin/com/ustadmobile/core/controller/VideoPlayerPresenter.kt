@@ -99,7 +99,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
             })
 
             srtLangList.add(0, "No Subtitles")
-            srtLangList.add(1, defaultLangName)
+            if(defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
             view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioInput, srtLangList, srtMap) })
         }

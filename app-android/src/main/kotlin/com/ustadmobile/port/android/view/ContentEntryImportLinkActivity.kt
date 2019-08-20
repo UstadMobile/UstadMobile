@@ -36,7 +36,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
-        umToolbar.title = "Report Options"
+        umToolbar.title = getString(R.string.activity_import_link)
 
         val endpoint = intent.getStringExtra(ContentEntryImportLinkView.END_POINT_URL)
                 ?: UmAccountManager.getActiveEndpoint(viewContext)!!
@@ -106,7 +106,6 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         override fun afterTextChanged(s: Editable?) {
             string = s
             handler.removeCallbacks(myRunnable)
-            handler = Handler()
             handler.postDelayed(myRunnable, DELAY)
         }
 

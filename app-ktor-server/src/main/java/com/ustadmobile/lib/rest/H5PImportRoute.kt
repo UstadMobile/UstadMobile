@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.common.collect.Lists
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
 import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
@@ -13,15 +14,18 @@ import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
+import io.ktor.client.request.head
 import io.ktor.client.request.header
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.request.header
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.util.toMap
+import io.ktor.util.url
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
@@ -85,8 +89,78 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
             }
 
         }
+
+        get("importVideo") {
+
+            val urlString = call.request.queryParameters["hp5Url"] ?: ""
+            val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
+
+            val headers = defaultHttpClient().head<HttpResponse>(urlString).headers
+
+            if (headers["Content-Type"]?.startsWith("video/") == true) {
+
+                if (headers["Content-Length"]?.toInt() ?: FILE_SIZE >= FILE_SIZE) {
+                    call.respond(HttpStatusCode.BadRequest, "File size too big")
+                    return@get
+                }
+
+                val entryDao = db.contentEntryDao
+                val parentChildJoinDao = db.contentEntryParentChildJoinDao
+                val containerDao = db.containerDao
+
+                val contentEntry = ContentEntry()
+                contentEntry.leaf = true
+                contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+
+                val parentChildJoin = ContentEntryParentChildJoin()
+                parentChildJoin.cepcjParentContentEntryUid = parentUid
+                parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
+                parentChildJoinDao.insert(parentChildJoin)
+
+                val container = Container(contentEntry)
+                container.containerContentEntryUid = contentEntry.contentEntryUid
+                container.fileSize = 1
+                container.mimeType = headers["Content-Type"]!!
+                container.containerUid = containerDao.insert(container)
+
+                call.respond(H5PImportData(contentEntry, container, parentChildJoin))
+
+                val http = defaultHttpClient()
+                val iContext = InitialContext()
+                val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+                val containerDir = File(containerDirPath)
+                containerDir.mkdirs()
+
+                val parentDir = Files.createTempDirectory("video").toFile()
+                val videoFile = File(parentDir, FilenameUtils.getName(urlString))
+                val input = http.get<InputStream>(urlString)
+                FileUtils.copyInputStreamToFile(input, videoFile)
+
+                container.lastModified = parentDir.lastModified()
+                container.mobileOptimized = true
+                db.containerDao.update(container)
+                val manager = ContainerManager(container, db,
+                        db, containerDir.absolutePath)
+
+                manager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
+
+                println("done")
+
+
+            } else {
+                call.respond(HttpStatusCode.BadRequest, "Invalid URL")
+            }
+        }
+
+
     }
 }
+
+fun downloadVideo(db: UmAppDatabase, contentEntryUid: Long, parentDir: File, containerUid: Long) {
+
+
+}
+
 
 fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, parentDir: File, h5pContentUrl: String?, containerUid: Long) {
 
@@ -183,10 +257,6 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
                                 }
                             }
                         }
-
-
-
-
 
 
             } catch (e: java.lang.Exception) {
