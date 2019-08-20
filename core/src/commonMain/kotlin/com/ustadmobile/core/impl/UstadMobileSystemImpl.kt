@@ -41,7 +41,7 @@ import kotlin.jvm.JvmStatic
  *
  * @author mike, kileha3
  */
-expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
+expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
 
 
     /**
@@ -71,6 +71,8 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
 
     override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
 
+    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
+
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *
@@ -83,6 +85,12 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
      *
      */
     fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>)
+
+
+    /**
+     * Get asset as an input stream asynchronously
+     */
+    suspend fun getAssetInputStreamAsync(context: Any, path: String) : InputStream
 
     /**
      * Get a preference for the app
@@ -107,7 +115,7 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
      * @param key preference that is being set
      * @param value value to be set
      */
-    fun setAppPref(key: String, value: String?, context: Any)
+    override fun setAppPref(key: String, value: String?, context: Any)
 
 
     /**

@@ -3,7 +3,6 @@ package com.ustadmobile.test.port.android.view
 import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -13,14 +12,15 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.ContentEntryListActivity
-import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import org.hamcrest.Matchers
 import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.IsEqual.equalTo
@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ContentEntryListEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(ContentEntryListActivity::class.java, false, false)
 
     @Before
@@ -49,10 +49,10 @@ class ContentEntryListEspressoTest {
     }
 
     fun initDb() {
-        val context = InstrumentationRegistry.getTargetContext()
+        val context = InstrumentationRegistry.getInstrumentation().context
         val db = UmAppDatabase.getInstance(context)
         db.clearAllTables()
-        val repo = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())// db.getRepository("https://localhost", "")
+        val repo = db// db.getRepository("https://localhost", "")
 
         val contentDao = repo.contentEntryDao
         val pcjdao = repo.contentEntryParentChildJoinDao
@@ -515,7 +515,7 @@ class ContentEntryListEspressoTest {
 
     companion object {
 
-        val ROOT_CONTENT_ENTRY_UID = 1L
+        const val ROOT_CONTENT_ENTRY_UID = 1L
     }
 
 

@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         maven {
@@ -6,15 +5,19 @@ buildscript {
         }
 
         mavenCentral()
+        maven {
+            url "https://kotlin.bintray.com/kotlinx"
+        }
     }
-
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+        classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$version_atomicfu"
     }
 }
 
 apply plugin: "kotlin-multiplatform"
+apply plugin: "kotlinx-atomicfu"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
@@ -35,20 +38,41 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+        }
+    }
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
 
 kotlin {
-    targets {
-        fromPreset(presets.jvm, 'jvm')
-        fromPreset(presets.android, 'android')
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
     }
+
+    android()
+
 
     jvm {
         compilations.main.kotlinOptions {
@@ -67,6 +91,8 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
 
 
@@ -77,14 +103,29 @@ kotlin {
             }
         }
 
+        commonJvmMain {
+            dependencies {
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
+            }
+        }
+
         /*
          Normally we would add a sourceSet and then use dependsOn. Unfortunately this does not
          work when running unit tests in the IDE.
          */
         androidMain {
-            kotlin.srcDir("src/commonJvmMain/kotlin")
+            dependsOn commonJvmMain
+            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
 
             dependencies {
+                implementation project(":lib-database-android")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
@@ -92,45 +133,111 @@ kotlin {
                 implementation project(":lib-database-android")
 
                 implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+
+                implementation "android.arch.work:work-runtime:$version_android_workmanager"
+
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
 
 
                 //Begin SharedSE Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
                 //end SharedSE Android and JVM dependencies
             }
         }
 
+
         jvmMain {
-            kotlin.srcDir("src/commonJvmMain/kotlin")
+            dependsOn commonJvmMain
 
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
 
                 //Begin Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
                 //end Android and JVM dependencies
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-common")
+
+                implementation "com.github.aakira:napier:$version_napier"
+                implementation "com.soywiz:klock-metadata:$version_klock"
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "com.soywiz:klock-jvm:$version_klock"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":lib-database-annotations")
+                api project(":lib-database-mpp")
+
+            }
+
+        }
+        androidTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "androidx.test:rules:$version_android_junit_runner"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":core")
+                api project(":lib-database-annotations")
+                api project(":lib-database-android")
+                api project(":lib-door-runtime")
+                api project(":lib-database-mpp")
+
+                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+
             }
         }
 
@@ -139,6 +246,76 @@ kotlin {
 
 }
 
+/*
+ * This might be required to be able to run unit tests via the IDE.
+ */
+task copyTestResources(type: Copy) {
+    outputs.upToDateWhen {
+        project.file("build/local.env.properties").exists()
+    }
+
+    from project.file("src/commonTest/resources")
+    into rootProject.file("build/classes/test/sharedse_jvmTest")
+
+    doFirst {
+        println("Dump sharedse local.env.properties")
+        if (!project.file("build").exists())
+            project.file("build").mkdir()
+
+        def outWriter = new FileWriter(project.file("build/local.env.properties"))
+        System.getProperties().store(outWriter, "System properties for use with running unit tests in IDE")
+        outWriter.flush()
+        outWriter.close()
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "compileTestKotlinJvm") {
+        println("Add task to jvmTest")
+        task.dependsOn(copyTestResources)
+    }
+}
+jvmTest.dependsOn(copyTestResources)
+
+jacoco {
+    toolVersion = "$version_jacoco_tool"
+}
+
+/**
+ * Create a Jacocco task for reporting test coverage - as per:
+ * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
+ */
+project.afterEvaluate {
+    def testTaskName = "jvmTest"
+
+    // Create gradle task
+    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
+        group = "Reporting"
+        description = "Generate Jacoco coverage reports on the common module build."
+
+        def excludes = [
+                '**/*Test*.*'
+        ]
+
+        classDirectories = fileTree(
+                dir: "${project.buildDir}/classes/kotlin/jvm/",
+                excludes: excludes
+        )
+
+        def coverageSourceDirs = [
+                "src/commonMain/kotlin"
+        ]
+
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+}
 
 publishing {
     publications {

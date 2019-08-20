@@ -4,7 +4,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import kotlin.js.JsName
 
-interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
+interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier {
 
     val allKnowAvailabilityStatus: Set<Long>
 
@@ -36,6 +36,9 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
     @JsName("showFileOpenWithMimeTypeError")
     fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String)
 
+    @JsName("showEditButton")
+    fun showEditButton(show: Boolean)
+
     @JsName("showFileOpenError")
     fun showFileOpenError(message: String)
 
@@ -62,6 +65,8 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
     @JsName("showDownloadOptionsDialog")
     fun showDownloadOptionsDialog(map: HashMap<String, String>)
+
+    fun stopForeGroundService(jobId: Long,cancel: Boolean)
 
     companion object {
 

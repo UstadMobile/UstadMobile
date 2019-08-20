@@ -194,6 +194,7 @@ public class ScraperConstants {
     public static final String MP3_EXT = ".mp3";
     public static final String WEBM_EXT = ".webm";
     public static final String OPUS_EXT = ".opus";
+    public static final String SRT_EXT = ".srt";
 
     public static final List<String> IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg");
     public static final List<String> VIDEO_EXTENSIONS = Arrays.asList("mp4");
@@ -203,7 +204,7 @@ public class ScraperConstants {
     public static final String VIDEO_FILENAME_MP4 = "video.mp4";
     public static final String VIDEO_FILENAME_WEBM = "video.webm";
     public static final String TINCAN_FILENAME = "tincan.xml";
-    public static final String SUBTITLE_FILENAME = "subtitle.srt";
+    public static final String SUBTITLE_FILENAME = "subtitle";
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";
@@ -215,6 +216,8 @@ public class ScraperConstants {
     public static final String KHAN = "Khan Academy";
 
     public static final int TIME_OUT_SELENIUM = 500;
+
+    public static final int HUGE_FILE_SIZE = 440401920;
 
 
     public enum QUESTION_TYPE {

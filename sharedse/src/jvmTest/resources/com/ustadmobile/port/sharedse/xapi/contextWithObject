@@ -1,0 +1,28 @@
+{
+  "id": "6690e6c9-3ef0-4ed3-8b37-7f3964730bee",
+  "actor": {
+    "name": "Sally Glider",
+    "mbox": "mailto:sally@example.com"
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/experienced",
+    "display": {"en-US": "experienced"}
+  },
+  "object": {
+    "id": "http://example.com/activities/solo-hang-gliding",
+      "definition": {
+        "type": "http://adlnet.gov/expapi/activities/course",
+        "name": { "en-US": "Solo Hang Gliding" }
+      }
+  },
+  "context": {
+    "instructor": {
+      "name": "Irene Instructor",
+      "mbox": "mailto:irene@example.com"
+    },
+    "contextActivities":{
+      "parent": { "id": "http://example.com/activities/hang-gliding-class-a" },
+      "grouping": { "id": "http://example.com/activities/hang-gliding-school" }
+    }
+  }
+}

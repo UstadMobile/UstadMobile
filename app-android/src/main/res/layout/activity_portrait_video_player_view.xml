@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <include
@@ -13,7 +14,9 @@
     <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/activity_video_player_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:controller_layout_id="@layout/view_custom_exo_playback_control"
+        app:use_controller="true"/>
 
     <TextView
         android:id="@+id/activity_video_player_description"

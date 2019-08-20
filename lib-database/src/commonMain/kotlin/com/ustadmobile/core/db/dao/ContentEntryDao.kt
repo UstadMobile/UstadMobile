@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
@@ -54,8 +55,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    @JsName("getChildrenByParent")
-    abstract fun getChildrenByParent(parentUid: Long): List<ContentEntry>
+    @JsName("getChildrenByParentAsync")
+    abstract suspend fun getChildrenByParentAsync(parentUid: Long): List<ContentEntry>
 
     @Query("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -129,4 +130,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
     @JsName("getChildrenByParentUidWithCategoryFilter")
     abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
+
+    @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
+    abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>
+
+    @Query("SELECT contentEntryUid FROM ContentEntry WHERE entryId = :objectId LIMIT 1")
+    abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 }

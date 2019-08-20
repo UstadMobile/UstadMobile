@@ -5,6 +5,7 @@ import android.os.SystemClock
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -25,7 +26,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.UmViewActions
 import org.hamcrest.CoreMatchers.*
@@ -82,9 +84,7 @@ class EpubContentActivityEspressoTest {
 
         epubContainerManager = ContainerManager(epubContainer!!, db!!, repo!!,
                 containerTmpDir!!.absolutePath)
-        val zipFile = ZipFile(epubTmpFile)
-        epubContainerManager!!.addEntriesFromZip(zipFile, ContainerManager.OPTION_COPY)
-        zipFile.close()
+        addEntriesFromZipToContainer(epubTmpFile!!.absolutePath, epubContainerManager!!)
 
         val opfIn = epubContainerManager!!.getInputStream(
                 epubContainerManager!!.getEntry("OEBPS/package.opf")!!)
@@ -121,7 +121,7 @@ class EpubContentActivityEspressoTest {
         //Ensure that Espresso can see the progress bar - so it waits for this to be idle
         SystemClock.sleep(1000)
 
-        onView(allOf<View>(instanceOf<View>(TextView::class.java), withParent(withId(R.id.um_toolbar))))
+        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
                 .check(matches(withText(opfDocument!!.title)))
         onView(withId(R.id.container_drawer_layout)).perform(DrawerActions.open(Gravity.END))
 
@@ -154,7 +154,7 @@ class EpubContentActivityEspressoTest {
 
         //Ensure that Espresso can see the progress bar - so it waits for this to be idle
         SystemClock.sleep(1000)
-        onView(allOf<View>(instanceOf<View>(TextView::class.java), withParent(withId(R.id.um_toolbar))))
+        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
                 .check(matches(withText(opfDocument!!.title)))
 
         //When we single tap on the content, the toolbar should go away
@@ -162,7 +162,7 @@ class EpubContentActivityEspressoTest {
                 .perform(UmViewActions.singleTap(200f, 200f))
 
         SystemClock.sleep(1000)
-        onView(allOf<View>(instanceOf<View>(TextView::class.java), withParent(withId(R.id.um_toolbar))))
+        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
                 .check(matches(not<View>(isDisplayed())))
 
         //When we single tap again, the toolbar should come back
@@ -171,7 +171,7 @@ class EpubContentActivityEspressoTest {
                 .perform(UmViewActions.singleTap(200f, 200f))
 
         SystemClock.sleep(1000)
-        onView(allOf<View>(instanceOf<View>(TextView::class.java), withParent(withId(R.id.um_toolbar))))
+        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
                 .check(matches(isDisplayed()))
 
     }

@@ -2,27 +2,29 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 48)
 @Entity
+@SyncableEntity(tableId = 48)
 class PersonLocationJoin() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personLocationUid: Long = 0
 
     var personLocationPersonUid: Long = 0
 
     var personLocationLocationUid: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var plMasterCsn: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var plLocalCsn: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var plLastChangedBy: Int = 0
 
     constructor(person: Person, location: Location) : this() {

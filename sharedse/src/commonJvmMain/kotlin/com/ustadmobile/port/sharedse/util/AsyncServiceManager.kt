@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.util
 
-import kotlinx.coroutines.Runnable
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -19,8 +18,6 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
     var state: Int = 0
         private set
 
-    //private var delayedExecutor: DelayedExecutor? = null
-
     private val lock = ReentrantLock()
 
     private val stateChangeListeners = ArrayList<OnStateChangeListener>()
@@ -33,14 +30,14 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
         fun stopWaiting(newState: Int): Boolean
     }
 
-//    constructor(initialState: Int, delayedExecutor: (Runnable) -> Unit) {
+//    constructor(initialState: Int, delayedExecutor: (Runnable, Long) -> Unit) : this(){
 //        state = initialState
 //        targetState = initialState
 //        this.delayedExecutor = delayedExecutor
 //    }
 
     //Blank constructor required for mocking for tests
-    constructor(): this(0, {runnable, i ->  })
+    internal constructor(): this(0, {runnable, i ->  })
 
     fun setEnabled(enabled: Boolean) {
         try {
@@ -104,7 +101,7 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
         stateChangeListeners.remove(listener)
     }
 
-    fun await(checker: (Int) -> Boolean, timeout: Long, timeoutUnit: TimeUnit) {
+    fun await(checker: (Int) -> Boolean, timeout: Long) {
         if (checker.invoke(state))
             return
 
@@ -117,7 +114,7 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
         }
         addOnStateChangeListener(listener)
         try {
-            latch.await(timeout, timeoutUnit)
+            latch.await(timeout, TimeUnit.MILLISECONDS)
         } catch (e: InterruptedException) { /*should not happen*/
         }
 
@@ -131,13 +128,13 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
 
     companion object {
 
-        val STATE_STOPPED = 0
+        const val STATE_STOPPED = 0
 
-        val STATE_STARTING = 1
+        const val STATE_STARTING = 1
 
-        val STATE_STARTED = 2
+        const val STATE_STARTED = 2
 
-        val STATE_STOPPING = 3
+        const val STATE_STOPPING = 3
     }
 
 

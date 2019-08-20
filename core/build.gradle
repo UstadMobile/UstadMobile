@@ -4,25 +4,16 @@ import java.util.concurrent.atomic.AtomicInteger
  * Core module build script : see buildconfig.core.default.gradle for configuration
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
-    }
-}
 
+group rootProject.group
+version rootProject.version
 
 apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
+apply plugin: "jacoco"
+apply plugin: 'com.github.johnrengelman.shadow'
 
 
 android {
@@ -45,10 +36,13 @@ targetCompatibility = '1.8'
 /*
  * This might be required to be able to run unit tests via the IDE.
  */
-task dumpEnvProperties {
+task copyTestResources(type: Copy) {
     outputs.upToDateWhen {
         project.file("build/local.env.properties").exists()
     }
+
+    from project.file("src/commonTest/resources")
+    into rootProject.file("build/classes/test/core_jvmTest")
 
     doFirst {
         if(!project.file("build").exists())
@@ -60,53 +54,103 @@ task dumpEnvProperties {
         outWriter.close()
     }
 }
+/*
+ * Generate a class with constant integer flags for each string message ID. See localization docs
+ * for further information.
+ */
+task prepareLocale {
+    inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
+    File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+    if(!outFile.parentFile.exists()) {
+        outFile.parentFile.mkdirs()
+    }
+    outFile.text = ''
+    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
+    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+    outFile << 'object MessageID{\n\n'
+
+    Map<String, Integer> messageIds = new HashMap<>()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+
+    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
+        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        xmlDoc.string.each() { str ->
+            String msgName = str.@name
+
+            if (!messageIds.containsKey(msgName)) {
+                Integer value;
+                if (str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                } else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+
+                messageIds.put(msgName, value)
+            }
+        }
+    }
+
+    Iterator<String> nameIterator = messageIds.keySet().iterator()
+
+    while (nameIterator.hasNext()) {
+        String strName = nameIterator.next()
+        Integer value = messageIds.get(strName)
+        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+    }
+    outFile << '}'
+}
+
 
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
-        task.dependsOn(dumpEnvProperties)
+        task.dependsOn(copyTestResources)
+    }
+
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble") || task.name.endsWith("Jar") || task.name.startsWith("build")) {
+        task.dependsOn(prepareLocale)
     }
 }
 
+
 kotlin {
 
-
-    targets {
-        fromPreset(presets.jvm, 'jvm') {
-            compilations.main.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
-
-            compilations.test.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
 
-        fromPreset(presets.android, 'android')
-        fromPreset(presets.js, 'js') {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
-        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
-        // the project to avoid it being seen as an extra jvm variant
-        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
+
+    android()
+
+    js("js") {
+        nodejs()
+
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
 
     sourceSets {
         commonMain {
+            kotlin.srcDirs += "build/generated/source/umlocale/"
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-metadata:$version_klock"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
@@ -117,6 +161,7 @@ kotlin {
                 implementation project(":lib-util")
             }
         }
+
         commonJvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
@@ -125,6 +170,10 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                compileOnly project(':lib-database')
+                compileOnly project(':lib-database-entities')
 
             }
         }
@@ -143,6 +192,7 @@ kotlin {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
+                implementation project(":lib-test-common")
             }
         }
 
@@ -150,6 +200,7 @@ kotlin {
             dependencies {
                 implementation "junit:junit:$version_junit"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -194,10 +245,47 @@ kotlin {
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation project(":lib-database-android")
+                implementation "org.jsoup:jsoup:$version_jsoup"
+                //Image loading library
+                implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
             }
             dependsOn commonJvmMain
         }
+
+        androidTest{
+            dependencies{
+                implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "androidx.test:rules:$version_android_junit_runner"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":core")
+                api project(":lib-database-annotations")
+                api project(":lib-database-android")
+                api project(":lib-door-runtime")
+                api project(":lib-database-mpp")
+
+                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+            }
+        }
+
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -206,18 +294,53 @@ kotlin {
                 implementation "com.soywiz:klock-js:$version_klock"
                 implementation "com.github.aakira:napier-js:$version_napier"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-
-
             }
         }
 
     }
 }
 
+jacoco {
+    toolVersion = "$version_jacoco_tool"
+}
 
-def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
-Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
+/**
+ * Create a Jacocco task for reporting test coverage - as per:
+ * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
+ */
+project.afterEvaluate {
+    def testTaskName = "jvmTest"
+
+    // Create gradle task
+    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
+        group = "Reporting"
+        description = "Generate Jacoco coverage reports on the common module build."
+
+        def excludes = [
+                '**/*Test*.*'
+        ]
+
+        classDirectories = fileTree(
+                dir: "${project.buildDir}/classes/kotlin/jvm/",
+                excludes: excludes
+        )
+
+        def coverageSourceDirs = [
+                "src/commonMain/kotlin"
+        ]
+
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+}
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
@@ -229,178 +352,6 @@ ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig
 if (rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
-
-/*
- * Generate a class with constant integer flags for each string message ID. See localization docs
- * for further information.
- */
-task prepareLocale {
-    inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("src/commonMain/kotlin/com/ustadmobile/core/generated/locale/MessageID.kt")
-    outFile.text = ''
-    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
-    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-    outFile << 'object MessageID{\n\n'
-
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-
-    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
-
-            if (!messageIds.containsKey(msgName)) {
-                Integer value;
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
-                }
-
-                messageIds.put(msgName, value)
-            }
-        }
-    }
-
-    Iterator<String> nameIterator = messageIds.keySet().iterator()
-
-    while (nameIterator.hasNext()) {
-        String strName = nameIterator.next()
-        Integer value = messageIds.get(strName)
-        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
-    }
-    outFile << '}'
-}
-
-/**
- * Generate locale json files which maps code to actual string and list of supported language
- */
-task prepareWebLocale{
-    File localeOutFile = null
-    File languagesOutFile = null
-    if(!file(translationsOutPath).exists()){
-        file(translationsOutPath).mkdirs()
-    }
-
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-    def languageCounter = 0
-    File languageTmpFile = project.file("${rootDir.absolutePath}/app-angular/src/assets/languages.json")
-    def localeCode = "en"
-    def terminator = ","
-    def languageFileContent =  "{\n\n"
-
-    if(languageTmpFile.exists()){
-        languageTmpFile.delete()
-    }
-    languagesOutFile = languageTmpFile
-
-    ConfigurableFileTree files = rootProject.fileTree(dir: "core/locale/main")
-
-    files.each() { File file ->
-
-        System.out.println("Found file "+file.getAbsolutePath())
-        Map<String, String> idToTranslationMap = new HashMap<>()
-
-        if(file.absolutePath.split("-").size() > 1){
-            localeCode = file.absolutePath.split("-")[1].split("/")[0]
-        }
-
-        def languageName = ""
-
-        switch (localeCode){
-            case "en":
-                languageName = "English"
-                break
-            case "ps":
-                languageName = "Pashto"
-                break
-            case "fa":
-                languageName = "Farsi"
-                break
-        }
-
-        if(languageCounter == files.size() -1){
-            terminator = ""
-        }else{
-            terminator = ","
-        }
-
-        languageFileContent <<= '    "' + localeCode + '" : "'+languageName+'"'+"${terminator}\n\n"
-        languageCounter++
-
-
-        File localeTmpFile = project.file("${translationsOutPath}locale.${localeCode}.json")
-        if(localeTmpFile.exists()){
-            localeTmpFile.delete()
-        }
-
-        localeOutFile = localeTmpFile
-
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        def localeFileContent = "{\n\n"
-        def value = 0
-        def counter = 0
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
-            String msgValue = str
-            if (!messageIds.containsKey(msgName)) {
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
-                }
-                messageIds.put(msgName, value as Integer)
-            }else{
-                value = messageIds.get(msgName)
-            }
-
-            if(counter == xmlDoc.string.size() -1){
-                terminator = ""
-            }else{
-                terminator = ","
-            }
-
-            msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
-            localeFileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
-
-            idToTranslationMap.put(msgName,msgValue)
-            languageMapOfMaps.put(localeCode, idToTranslationMap)
-
-            counter++
-        }
-
-        localeFileContent <<=  '}'
-        localeFileContent <<= ""
-        localeOutFile << localeFileContent
-    }
-
-    languageFileContent <<=  '}'
-    languageFileContent <<= ""
-    languagesOutFile << languageFileContent
-
-}
-
-/**
- * Generate default XLF file to be used for other translation
- */
-task generateDefaultLocaleXlf(type: Exec){
-    def angularModulePath = "${rootDir.absolutePath}/app-angular"
-    commandLine 'npm', '--prefix', angularModulePath, 'run','um-translate'
-}
-generateDefaultLocaleXlf.dependsOn(prepareWebLocale)
-
-/**
- * Generate the rest of the all supported languages
- */
-task generateOtherLocaleXlf{
-    rootProject.fileTree(dir: translationsOutPath,include: "*.xlf").each() { File file ->
-       def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.toString()
-    }
-}
-generateOtherLocaleXlf.dependsOn(generateDefaultLocaleXlf)
 
 
 publishing {

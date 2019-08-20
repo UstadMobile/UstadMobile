@@ -1,10 +1,10 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
@@ -26,7 +26,7 @@ import java.util.*
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(context), private val repository: UmAppDatabase = UmAppDatabase.getInstance(context) /* appDatabase.getRepository("http://localhost/dummy/", "") */) : RouterNanoHTTPD(portNum) {
+open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any, private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(context), private val repository: UmAppDatabase = UmAppDatabase.getInstance(context) /* appDatabase.getRepository("http://localhost/dummy/", "") */) : RouterNanoHTTPD(portNum) {
 
     private val id: Int
 
@@ -74,6 +74,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
         addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder::class.java, appDatabase)
         addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
                 ContainerEntryListResponder::class.java, appDatabase)
+        addRoute("/xapi/statements(.*)+", XapiStatementResponder::class.java, repository)
+        addRoute("/xapi/activities/state(.*)+", XapiStateResponder::class.java, repository)
     }
 
 
@@ -141,7 +143,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
     fun mountContainer(containerUid: Long, mountPath: String?,
                        filters: List<MountedContainerResponder.MountedContainerFilter> = ArrayList()): String? {
         val container = repository.containerDao.findByUid(containerUid) ?: return null
-
         val containerManager = ContainerManager(container, appDatabase, repository)
         return mountContainer(containerManager, mountPath, filters)
     }
@@ -155,7 +156,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
         }
 
         addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
-                MountedContainerResponder::class.java, containerManager, filters)
+                MountedContainerResponder::class.java, context, filters)
 
         return mountPath
     }
@@ -264,7 +265,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
 
         var idCounter = 0
 
-        val PREFIX_MOUNT = "/mount/"
+        const val PREFIX_MOUNT = "/mount/"
 
         /**
          * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE

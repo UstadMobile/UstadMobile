@@ -1,23 +1,28 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Html
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.squareup.picasso.Picasso
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
@@ -27,16 +32,18 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
-import java.util.*
-
-class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener, LocalAvailabilityMonitor, LocalAvailabilityListener {
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
-    private var entryDetailPresenter: ContentEntryDetailPresenter? = null
+class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
+        ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
+        LocalAvailabilityMonitor, LocalAvailabilityListener , DownloadProgressView.OnStopDownloadListener {
 
-    private var managerAndroidBle: NetworkManagerAndroidBle? = null
+    private var presenter: ContentEntryDetailPresenter? = null
+
+    private lateinit var managerAndroidBle: NetworkManagerBle
 
     private var localAvailabilityStatusText: TextView? = null
 
@@ -54,32 +61,40 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     private var localAvailabilityStatusIcon: ImageView? = null
 
+    private lateinit var editButton: FloatingActionButton
+
     private var flexBox: RecyclerView? = null
 
-    private var downloadButton: Button? = null
+    private lateinit var downloadButton: Button
 
     private var downloadProgress: DownloadProgressView? = null
 
     private var fileStatusIcon = HashMap<Int, Int>()
 
+    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+
+
     override val allKnowAvailabilityStatus: Set<Long>
-        get() = managerAndroidBle!!.getLocallyAvailableContainerUids()
+        get() = managerAndroidBle.getLocallyAvailableContainerUids()
 
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow) {
-            downloadButton!!.setBackgroundResource(
+        if (networkManagerBle.isVersionKitKatOrBelow) {
+            downloadButton.setBackgroundResource(
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
-        managerAndroidBle = networkManagerBle as NetworkManagerAndroidBle?
-        entryDetailPresenter = ContentEntryDetailPresenter(this,
+        managerAndroidBle = networkManagerBle
+        presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
                 this, networkManagerBle)
-        entryDetailPresenter!!.onCreate(bundleToMap(Bundle()))
-        entryDetailPresenter!!.onStart()
-        managerAndroidBle!!.addLocalAvailabilityListener(this)
+        presenter!!.onCreate(bundleToMap(Bundle()))
+
+        presenter!!.onStart()
+        managerAndroidBle.addLocalAvailabilityListener(this)
+        presenter!!.handleShowEditButton(showControls)
 
     }
 
@@ -89,7 +104,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
         localAvailabilityStatusText = findViewById(R.id.content_status_text)
         localAvailabilityStatusIcon = findViewById(R.id.content_status_icon)
-        downloadButton = findViewById(R.id.entry_detail_button)
+        downloadButton = findViewById(R.id.entry_download_open_button)
         downloadProgress = findViewById(R.id.entry_detail_progress)
         entryDetailsTitle = findViewById(R.id.entry_detail_title)
         entryDetailsDesc = findViewById(R.id.entry_detail_description)
@@ -98,6 +113,8 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         downloadSize = findViewById(R.id.entry_detail_content_size)
         translationAvailableLabel = findViewById(R.id.entry_detail_available_label)
         flexBox = findViewById(R.id.entry_detail_flex)
+        coordinatorLayout = findViewById(R.id.coordinationLayout)
+        editButton = findViewById(R.id.edit_content)
 
         fileStatusIcon[LOCALLY_AVAILABLE_ICON] = R.drawable.ic_nearby_black_24px
         fileStatusIcon[LOCALLY_NOT_AVAILABLE_ICON] = R.drawable.ic_cloud_download_black_24dp
@@ -106,6 +123,32 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
+        downloadProgress!!.setOnStopDownloadListener(this)
+
+        findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
+            if(showControls){
+                if (scrollY > oldScrollY) {
+                    editButton.hide()
+                } else {
+                    editButton.show()
+                }
+            }
+        }
+
+        editButton.setOnClickListener {
+            presenter!!.handleStartEditingContent()
+        }
+        downloadButton.setOnClickListener {
+            presenter!!.handleDownloadButtonClick()
+        }
+
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun showEditButton(show: Boolean) {
+       if(::editButton.isInitialized){
+           editButton.visibility = if(show) View.VISIBLE else View.GONE
+       }
     }
 
 
@@ -122,25 +165,20 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     private fun clickUpNavigation() {
         runOnUiThread {
-            if (entryDetailPresenter != null) {
-                entryDetailPresenter!!.handleUpNavigation()
+            if (presenter != null) {
+                presenter!!.handleUpNavigation()
             }
         }
-
-
     }
 
     override fun setContentEntry(contentEntry: ContentEntry) {
         entryDetailsTitle!!.text = contentEntry.title
         supportActionBar!!.title = contentEntry.title
-        entryDetailsDesc!!.text = contentEntry.description
+        entryDetailsDesc!!.text = Html.fromHtml(contentEntry.description)
         entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
 
-        if(contentEntry.thumbnailUrl != null){
-            Picasso.get()
-                    .load(contentEntry.thumbnailUrl)
-                    .into(findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
-        }
+        UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
+                findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
     }
 
 
@@ -149,7 +187,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
     }
 
     override fun setDetailsButtonEnabled(enabled: Boolean) {
-        downloadButton!!.isEnabled = enabled
+        downloadButton.isEnabled = enabled
     }
 
     override fun setDownloadSize(fileSize: Long) {
@@ -162,13 +200,13 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
     }
 
     override fun setDownloadButtonVisible(visible: Boolean) {
-        downloadButton!!.visibility = if (visible) View.VISIBLE else View.GONE
+        downloadButton.visibility = if (visible) View.VISIBLE else View.GONE
 
     }
 
 
     override fun setButtonTextLabel(textLabel: String) {
-        downloadButton!!.text = textLabel
+        downloadButton.text = textLabel
     }
 
     override fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String) {
@@ -219,41 +257,40 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
     }
 
     override fun setDownloadButtonClickableListener(isDownloadComplete: Boolean) {
-        downloadButton!!.setOnClickListener { _ ->
-            entryDetailPresenter!!.handleDownloadButtonClick(isDownloadComplete,
-                    entryDetailPresenter!!.entryUuid)
-        }
+
     }
 
     override fun showDownloadOptionsDialog(map: HashMap<String, String>) {
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable { impl.go("DownloadDialog", map, this) },
                 impl.getString(MessageID.download_storage_permission_title, this),
                 impl.getString(MessageID.download_storage_permission_message, this))
     }
 
     override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
-        entryDetailPresenter!!.handleClickTranslatedEntry(contentEntryUid)
+        presenter!!.handleClickTranslatedEntry(contentEntryUid)
     }
 
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        managerAndroidBle!!.startMonitoringAvailability(monitor, entryUidsToMonitor)
+        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
     }
 
     override fun stopMonitoringAvailability(monitor: Any) {
-        managerAndroidBle!!.stopMonitoringAvailability(monitor)
+        managerAndroidBle.stopMonitoringAvailability(monitor)
     }
 
     override fun onDestroy() {
-        entryDetailPresenter!!.onDestroy()
-        networkManagerBle?.removeLocalAvailabilityListener(this)
+        if(presenter != null){
+            presenter!!.onDestroy()
+            managerAndroidBle.removeLocalAvailabilityListener(this)
+        }
         super.onDestroy()
     }
 
     override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
-        entryDetailPresenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
+        presenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
     }
 
     override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long) {
@@ -264,5 +301,11 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         val adapter = ContentEntryDetailLanguageAdapter(result,
                 this, entryUuid)
         flexBox!!.adapter = adapter
+    }
+
+    override fun onClickStopDownload(view: DownloadProgressView) {
+        GlobalScope.launch {
+            presenter!!.handleCancelDownload()
+        }
     }
 }

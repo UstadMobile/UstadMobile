@@ -2418,7 +2418,7 @@ window.addEventListener("load", function(event) {
       "wrapper_r099eg"
     ]
   }
-})<script>$LAB.queueScript('https://cdn.kastatic.org/genwebpack/prod/en/wonder-blocks.13c614d10514c2026f1f.js')</script>
+  })<script>$LAB.queueScript('https://cdn.kastatic.org/genwebpack/prod/en/wonder-blocks.13c614d10514c2026f1f.js')</script>
 <script>$LAB.queueScript('https://cdn.kastatic.org/genwebpack/prod/en/c1e04bfbef3bccf34113e2a746e0dd09.ef51420c086ffd939a75.js')</script>
 <script>$LAB.queueScript('https://cdn.kastatic.org/genwebpack/prod/en/f5f622369cbae9bfbf50db3e50925b7d.220422db96881f6d2393.js')</script>
 <script>$LAB.queueScript('https://cdn.kastatic.org/genwebpack/prod/en/05724d58d7a08496bef44cba1af99f92.49f8d1d5f82ea5ae4f38.js')</script>

@@ -58,6 +58,7 @@ object ContentEntryUtil {
                     viewName = XapiPackageContentView.VIEW_NAME
                 }
                 "video/mp4" -> {
+
                     args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
                     viewName = VideoPlayerView.VIEW_NAME
@@ -78,6 +79,11 @@ object ContentEntryUtil {
                     args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
                     viewName = VideoPlayerView.VIEW_NAME
+                }
+
+                "application/h5p+zip" -> {
+                    args[UstadView.ARG_CONTAINER_UID] = result.containerUid.toString()
+                    viewName = H5PContentView.VIEW_NAME
                 }
                 else -> {
                     val container = dbRepo.containerEntryDao.findByContainerAsync(result.containerUid)

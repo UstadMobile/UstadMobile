@@ -2,16 +2,19 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.LanguageVariant.Companion.TABLE_ID
 
 
-@UmEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID)
 @Entity
 class LanguageVariant() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+
+    @PrimaryKey(autoGenerate = true)
     var langVariantUid: Long = 0
 
     var langUid: Long = 0
@@ -20,13 +23,13 @@ class LanguageVariant() {
 
     var name: String? = null
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var langVariantLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var langVariantMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var langVariantLastChangedBy: Int = 0
 
     override fun equals(other: Any?): Boolean {

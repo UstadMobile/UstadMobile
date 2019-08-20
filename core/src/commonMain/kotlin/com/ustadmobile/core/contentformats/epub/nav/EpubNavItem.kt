@@ -54,7 +54,7 @@ class EpubNavItem(
 
     constructor(parent: EpubNavItem?, depth: Int) : this(null, null, parent, depth) {}
 
-    fun getChildren(): List<EpubNavItem>? {
+    fun getChildren(): MutableList<EpubNavItem>? {
         return children
     }
 

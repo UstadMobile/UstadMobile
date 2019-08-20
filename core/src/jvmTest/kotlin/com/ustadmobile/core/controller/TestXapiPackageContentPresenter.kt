@@ -1,41 +1,28 @@
 package com.ustadmobile.core.controller
 
+//import org.mockito.ArgumentMatchers.any
 import com.nhaarman.mockitokotlin2.any
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-
+import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
+import kotlinx.coroutines.Runnable
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import com.ustadmobile.test.core.util.checkJndiSetup
-import com.ustadmobile.test.core.util.extractTestResourceToFile
-import kotlinx.coroutines.Runnable
-
+import org.mockito.Mockito.*
 import java.io.File
-import java.io.IOException
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.zip.ZipFile
-
-//import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.timeout
-import org.mockito.Mockito.verify
-import java.io.FileReader
-import java.nio.file.Paths
-import java.util.*
 
 
 class TestXapiPackageContentPresenter {
@@ -72,7 +59,7 @@ class TestXapiPackageContentPresenter {
             db = UmAppDatabase.getInstance(context)
             repo = db//.getRepository("http://localhost/dummy/", "")
             db.clearAllTables()
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -89,9 +76,7 @@ class TestXapiPackageContentPresenter {
                 "containerDirTmp")
         val containerManager = ContainerManager(xapiContainer, db, repo,
                 containerDirTmp!!.absolutePath)
-        val xapiZipFile = ZipFile(xapiTmpFile)
-        containerManager.addEntriesFromZip(xapiZipFile, ContainerManager.OPTION_COPY or ContainerManager.OPTION_UPDATE_TOTALS)
-        xapiZipFile.close()
+        addEntriesFromZipToContainer(xapiTmpFile.absolutePath, containerManager)
 
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
@@ -114,7 +99,7 @@ class TestXapiPackageContentPresenter {
     @Test
     @Throws(InterruptedException::class)
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
-        val args = Hashtable<String,String>()
+        val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
         args.put(XapiPackageContentView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
 
@@ -122,7 +107,7 @@ class TestXapiPackageContentPresenter {
                 context, args, mockXapiPackageContentView!!) {
             val mountedPath = httpd!!.mountContainer(it, null)
             lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                mountedPath!!)
+                    mountedPath!!)
             mountLatch.countDown()
             lastMountedUrl!!
         }

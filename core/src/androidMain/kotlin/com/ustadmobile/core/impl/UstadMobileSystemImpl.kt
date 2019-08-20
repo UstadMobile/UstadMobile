@@ -65,7 +65,7 @@ import java.util.zip.ZipOutputStream
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private var appConfig: Properties? = null
 
@@ -83,11 +83,18 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     private val viewNameToAndroidImplMap = mapOf<String,Any>(
             "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
             VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
+            ContentEditorView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorActivity"),
+            ContentEditorPageListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorPageListFragment"),
+            ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
+            ContentEntryEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryEditFragment"),
+            SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
+            SelectMultipleEntriesTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleEntriesTreeDialogFragment"),
+            XapiReportDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportDetailActivity"),
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
-            Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
+            LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}LoginActivity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
             AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
@@ -249,7 +256,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * Get a string for use in the UI
      */
     actual fun getString(messageCode: Int, context: Any): String{
-        val androidId = messageIdMap.get(messageCode)
+        val androidId = messageIdMap[messageCode]
         return if (androidId != null) {
             (context as Context).resources.getString(androidId)
         } else {
@@ -284,19 +291,42 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.phone_memory, context), true,
-                    true, false, canWriteFileInDir(umDir.absolutePath)))
+                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
 
             if (storageOptions.size > 1) {
                 val sdCardStorage = storageOptions[sdCardStorageIndex]
                 umDir = File(sdCardStorage, contentDirName)
                 if (!umDir.exists()) umDir.mkdirs()
                 dirList.add(UMStorageDir(umDir.absolutePath,
-                        getString(MessageID.memory_card, context), true,
-                        true, false, canWriteFileInDir(umDir.absolutePath)))
+                        getString(MessageID.memory_card, context), removableMedia = true,
+                        isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
             }
 
             callback.onDone(dirList)
         }.start()
+    }
+
+
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
+        val dirList = ArrayList<UMStorageDir>()
+        val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
+        val contentDirName = getContentDirName(context)
+
+        var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
+        if (!umDir.exists()) umDir.mkdirs()
+        dirList.add(UMStorageDir(umDir.absolutePath,
+                getString(MessageID.phone_memory, context), true,
+                isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
+
+        if (storageOptions.size > 1) {
+            val sdCardStorage = storageOptions[sdCardStorageIndex]
+            umDir = File(sdCardStorage, contentDirName)
+            if (!umDir.exists()) umDir.mkdirs()
+            dirList.add(UMStorageDir(umDir.absolutePath,
+                    getString(MessageID.memory_card, context), true,
+                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
+        }
+        return dirList
     }
 
     /**
@@ -334,7 +364,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual fun setAppPref(key: String, value: String?, context: Any){
+    override actual fun setAppPref(key: String, value: String?, context: Any){
         val prefs = getAppSharedPreferences(context as Context)
         val editor = prefs.edit()
         if (value != null) {
@@ -542,8 +572,6 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
-        const val ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change"
-
         /**
          * Get an instance of the system implementation - relies on the platform
          * specific factory method
@@ -563,5 +591,17 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
     }
+
+    /**
+     * Get asset as an input stream asynchronously
+     */
+    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
+        var mPath = path
+        if (path.startsWith("/")) {
+            mPath = path.substring(1)
+        }
+       return (context as Context).assets.open(mPath);
+    }
+
 
 }

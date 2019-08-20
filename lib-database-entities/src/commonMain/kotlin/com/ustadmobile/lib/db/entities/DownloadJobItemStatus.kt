@@ -63,4 +63,6 @@ class DownloadJobItemStatus() {
     override fun equals(other: Any?): Boolean {
         return other != null && other is DownloadJobItemStatus && other.jobItemUid == this.jobItemUid
     }
+
+    override fun toString() = "DownloadJobItemStatus DjiUid $jobItemUid ( $bytesSoFar / $totalBytes bytes) Status = $status"
 }

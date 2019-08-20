@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    android:elevation="@dimen/dimen_16dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_multimedia_source_sheet_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/icons"
+    android:clipToPadding="true"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="0dp"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+    <LinearLayout
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/dimen_16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_toStartOf="@+id/action_close_tab_multimedia_options"
+                android:textSize="17sp"
+                android:textColor="@color/text_primary"
+                android:text="@string/content_type_multimedia"
+                android:padding="@dimen/dimen_16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/action_close_tab_multimedia_options"
+                android:tint="@color/secondary_text"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:src="@drawable/ic_expand_more_black_24dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                android:layout_gravity="center_vertical"
+                android:layout_width="@dimen/dimen_30dp"
+                android:layout_height="@dimen/dimen_30dp" />
+        </RelativeLayout>
+        <View
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            android:background="@color/divider_faint"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
+        <RelativeLayout
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:focusable="true"
+            android:id="@+id/multimedia_from_camera"
+            android:padding="@dimen/dimen_16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:tint="@color/text_secondary"
+                android:src="@drawable/ic_photo_camera_black_24dp"
+                android:id="@+id/multiple_choice"
+                android:layout_centerVertical="true"
+                android:layout_width="@dimen/dimen_20dp"
+                android:layout_height="@dimen/dimen_20dp" />
+
+            <TextView
+                android:text="@string/content_source_camera"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/multiple_choice"
+                android:textSize="15sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:focusable="true"
+            android:id="@+id/multimedia_from_device"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:padding="@dimen/dimen_16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:tint="@color/text_secondary"
+                android:id="@+id/device_image"
+                android:src="@drawable/ic_perm_media_black_24dp"
+                android:layout_centerVertical="true"
+                android:layout_width="@dimen/dimen_20dp"
+                android:layout_height="@dimen/dimen_20dp" />
+
+            <TextView
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/device_image"
+                android:textSize="15sp"
+                android:text="@string/content_source_device"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
+</androidx.core.widget.NestedScrollView>

@@ -82,23 +82,27 @@ abstract class DownloadJobDao {
     abstract fun getJobsLive(jobStatus: Int): DoorLiveData<List<DownloadJob>>
 
     @Query("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
-    abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int?
+    abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int
 
     @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
-    abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int?
+    abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int
 
 
     @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
     abstract fun update(djUid: Int, djStatus: Int)
 
 
+    @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
+    abstract suspend fun updateAsync(djUid: Int, djStatus: Int)
+
+
     @Query("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " + "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
-    abstract fun updateJobItems(djUid: Int, djiStatus: Int, jobStatusFrom: Int,
+    abstract suspend fun updateJobItems(djUid: Int, djiStatus: Int, jobStatusFrom: Int,
                                 jobStatusTo: Int)
 
     @Transaction
-    open fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
-                          completeJobItemStatus: Int) {
+    open suspend fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
+                          completeJobItemStatus: Int = -1) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
         if (activeJobItemsStatus != -1)
@@ -107,11 +111,7 @@ abstract class DownloadJobDao {
         if (completeJobItemStatus != -1)
             updateJobItems(djUid, completeJobItemStatus, JobStatus.COMPLETE_MIN, JobStatus.COMPLETE_MAX)
 
-        update(djUid, djStatus)
-    }
-
-    fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int) {
-        updateJobAndItems(djUid, djStatus, activeJobItemsStatus, -1)
+        updateAsync(djUid, djStatus)
     }
 
     @Query("UPDATE DownloadJob SET bytesDownloadedSoFar = " +

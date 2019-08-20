@@ -40,7 +40,8 @@
         android:required="false" />
 
     <application android:supportsRtl="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.UstadTheme">
         <activity
             android:theme="@style/ThemeOnboarding"
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
@@ -48,7 +49,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -59,13 +60,11 @@
         <activity
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
@@ -76,63 +75,49 @@
         <activity
             android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
             android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label=""/>
         <activity
             android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
             android:configChanges="keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.HomeActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label=""/>
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
-            android:name="com.ustadmobile.port.android.view.Login2Activity"
+            android:name="com.ustadmobile.port.android.view.LoginActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/login"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/login" />
 
         <activity android:name="com.ustadmobile.port.android.view.Register2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/register"
-            android:theme="@style/Theme.UstadTheme"
-            />
+            android:label="@string/register"/>
 
-        <service android:name="com.ustadmobile.port.android.netwokmanager.DownloadNotificationService"
-            android:enabled="true"
-            android:exported="true"/>
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
+
+        <activity android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
+
+        <activity android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
-            android:enabled="true"
-            android:exported="true"/>
+            android:enabled="true"/>
 
-        <service
-            android:name="com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService"
-            android:enabled="true"
-            android:exported="true"/>
-
-        <service
-            android:name="com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService"
-            android:enabled="true"
-            android:exported="true"/>
 
     </application>
 

@@ -3,10 +3,11 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import org.junit.Assert
 import org.junit.Before
@@ -14,7 +15,6 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.util.concurrent.TimeUnit
-import java.util.zip.ZipFile
 
 class H5PContentActivityEspressoTest {
 
@@ -29,7 +29,7 @@ class H5PContentActivityEspressoTest {
     private var repo: UmAppDatabase? = null
 
     @JvmField
-    @Rule
+    @get:Rule
     val mActivityRule = IntentsTestRule(H5PContentActivity::class.java, false, false)
 
     @Before
@@ -47,10 +47,7 @@ class H5PContentActivityEspressoTest {
         val containerManager = ContainerManager(h5pContainer!!, db!!, repo!!, containerTmpDir?.absolutePath!!)
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/android/view/H5P-true-false.h5p",
                 h5PTmpFile!!)
-        val zipFile = ZipFile(h5PTmpFile)
-
-        containerManager.addEntriesFromZip(zipFile,
-                ContainerManager.OPTION_COPY or ContainerManager.OPTION_UPDATE_TOTALS)
+        addEntriesFromZipToContainer(h5PTmpFile!!.absolutePath, containerManager)
     }
 
     @Test

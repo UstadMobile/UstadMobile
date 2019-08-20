@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
+import com.ustadmobile.sharedse.network.WiFiDirectGroupBle
+
 /**
  * Interface for listening WiFi Direct group creation and removal
  *

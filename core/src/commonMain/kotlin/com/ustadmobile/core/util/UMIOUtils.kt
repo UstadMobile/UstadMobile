@@ -32,7 +32,6 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.IOException
 import kotlinx.io.InputStream
