@@ -9,7 +9,6 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
-import { ReportDetailsComponent } from './com/utadmobile/view/report-details/report-details.component';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -23,7 +22,7 @@ const routes: Routes = [
           {path: "webChunk", component: XapiContentComponent},
           {path: "Container", component: XapiContentComponent},
           {path: "Reports", component: ReportDashboardComponent},
-          {path: "ReportDetails", component: ReportDetailsComponent}
+          {path: "ReportDetails", component: ReportDashboardComponent}
         ],
         canActivate: [AuthGuard],
         runGuardsAndResolvers: "always"
