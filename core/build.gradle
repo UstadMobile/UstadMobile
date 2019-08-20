@@ -210,6 +210,9 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+
                 /*
                   For this to work in the IDE, these need to be API instead of implementation
                  */
@@ -217,6 +220,8 @@ kotlin {
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
                 api project(":lib-database-mpp")
+                api project(":lib-test-common")
+                api project(":app-ktor-server")
 
                 // 5/June/2019 - Unfortunately, Android Studio won't load these depnendencies
                 // of sharedse when running tests in the IDE, which is why we have them here too.
@@ -259,7 +264,7 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"

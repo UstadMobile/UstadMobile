@@ -164,7 +164,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
             val mediaSource = buildMediaSource(uri)
 
             val subtitles = findViewById<ImageButton>(R.id.exo_subtitle_button)
-            if (srtLangList.isNotEmpty()) {
+            if (srtLangList.size > 1) {
 
                 subtitles.visibility = VISIBLE
                 val arrayAdapter = ArrayAdapter(viewContext as Context,

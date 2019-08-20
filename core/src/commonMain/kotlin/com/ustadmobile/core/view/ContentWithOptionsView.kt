@@ -13,4 +13,7 @@ interface ContentWithOptionsView : UstadView {
 
     @JsName("createNewContent")
     fun createNewContent(arguments: HashMap<String, String?>)
+
+    @JsName("importContentFromLink")
+    fun importContentFromLink(arguments: HashMap<String, String?>)
 }

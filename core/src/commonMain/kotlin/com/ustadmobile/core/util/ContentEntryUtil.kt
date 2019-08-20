@@ -52,12 +52,17 @@ object ContentEntryUtil {
                     ?: throw IllegalArgumentException("No file found")
             val args = HashMap<String, String>()
             var viewName: String? = null
+
+            if (result.mimeType?.startsWith("video/") == true) {
+                result.mimeType = "video/mp4"
+            }
+
             when (result.mimeType) {
                 "application/zip", "application/tincan+zip" -> {
                     args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     viewName = XapiPackageContentView.VIEW_NAME
                 }
-                "video/mp4" -> {
+                "video/mp4", "application/khan-video+zip" -> {
 
                     args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
@@ -74,18 +79,13 @@ object ContentEntryUtil {
                     args[EpubContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     viewName = EpubContentView.VIEW_NAME
                 }
-                "application/khan-video+zip" -> {
-
-                    args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                    args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                    viewName = VideoPlayerView.VIEW_NAME
-                }
 
                 "application/h5p+zip" -> {
                     args[UstadView.ARG_CONTAINER_UID] = result.containerUid.toString()
                     viewName = H5PContentView.VIEW_NAME
                 }
                 else -> {
+
                     val container = dbRepo.containerEntryDao.findByContainerAsync(result.containerUid)
                     if (container.isEmpty()) {
                         throw IllegalArgumentException("No file found")

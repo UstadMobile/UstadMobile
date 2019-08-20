@@ -174,8 +174,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun setContentEntry(contentEntry: ContentEntry) {
         entryDetailsTitle!!.text = contentEntry.title
         supportActionBar!!.title = contentEntry.title
-        entryDetailsDesc!!.text = Html.fromHtml(contentEntry.description)
-        entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
+        entryDetailsDesc!!.text = if(!contentEntry.description.isNullOrBlank()) Html.fromHtml(contentEntry.description) else ""
+        entryDetailsAuthor!!.text = contentEntry.author
 
         UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
                 findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
