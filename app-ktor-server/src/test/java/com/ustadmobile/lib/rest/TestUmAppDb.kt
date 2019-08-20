@@ -21,12 +21,11 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-
-
-
+import java.util.concurrent.TimeUnit
 
 
 class TestUmAppDb {
@@ -54,6 +53,11 @@ class TestUmAppDb {
         }.start(wait = false)
     }
 
+    @After
+    fun tearDown() {
+        server.stop(0, 5, TimeUnit.SECONDS)
+    }
+
     @Test
     fun testSubDaoRoute() {
         val httpClient = HttpClient()
@@ -61,15 +65,6 @@ class TestUmAppDb {
             val helloStr = httpClient.get<String>("http://localhost:8097/Db/SubDao/hello")
             Assert.assertEquals("Hello", helloStr)
         }
-    }
-
-    fun testModule() {
-        val db = UmAppDatabase.getInstance(Any())
-        db.clearAllTables()
-        val contentEntry = ContentEntry("Blah", "blah", true, false)
-        contentEntry.contentEntryUid = 42L
-        db.contentEntryDao.insert(contentEntry)
-        embeddedServer(Netty, 8088, module = { UmAppDatabaseModule(db) }).start(wait = true)
     }
 
 }

@@ -19,22 +19,12 @@ import com.ustadmobile.door.annotation.SyncableEntity
  * Currently, as PersonAuthDao does not extend syncable dao, it will not sync
  */
 @Entity
-@SyncableEntity(tableId = 30)
 class PersonAuth() {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     var personAuthUid: Long = 0
 
     var passwordHash: String? = null
-
-    @LocalChangeSeqNum
-    var personAuthLocalChangeSeqNum: Long = 0
-
-    @MasterChangeSeqNum
-    var personAuthMasterChangeSeqNum: Long = 0
-
-    @LastChangedBy
-    var lastChangedBy: Int = 0
 
     constructor(personAuthUid: Long, passwordHash: String) : this() {
         this.personAuthUid = personAuthUid

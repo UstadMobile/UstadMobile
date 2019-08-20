@@ -14,7 +14,7 @@ import io.ktor.routing.Routing
 import java.io.File
 import java.nio.file.Files
 
-internal val _restApplicationDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
+private val _restApplicationDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
         "UmAppDatabase").build()
 
 fun Application.umRestApplication() {
@@ -31,6 +31,7 @@ fun Application.umRestApplication() {
             downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
 
+        LoginRoute(_restApplicationDb)
         UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
     }
 }
