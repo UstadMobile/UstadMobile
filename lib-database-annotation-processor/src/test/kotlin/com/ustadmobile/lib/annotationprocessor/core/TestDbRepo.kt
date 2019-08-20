@@ -13,8 +13,7 @@ import org.junit.Test
 import com.ustadmobile.door.DatabaseBuilder
 import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
-import db2.ExampleSyncableDaoRoute
-import db2.ExampleDatabase2SyncDao_Route
+import db2.ExampleDatabase2_KtorRoute
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -49,8 +48,9 @@ class TestDbRepo {
         val syncDao = ExampleDatabase2SyncDao_JdbcKt(db)
         val gson = Gson()
         install(Routing) {
-            ExampleSyncableDaoRoute(db.exampleSyncableDao(), db, gson, syncDao)
-            ExampleDatabase2SyncDao_Route(syncDao, db, gson)
+//            ExampleSyncableDaoRoute(db.exampleSyncableDao(), db, gson, syncDao)
+//            ExampleDatabase2SyncDao_Route(syncDao, db, gson)
+            ExampleDatabase2_KtorRoute(db, gson)
         }
     }
 
@@ -98,11 +98,11 @@ class TestDbRepo {
 
         val clientNodeId = 5
         val repo = ExampleSyncableDao_Repo(db.exampleSyncableDao(), httpClient, clientNodeId,
-                mockServer.url("/").toString(), dbSyncDao)
+                mockServer.url("/").toString(), "ExampleDatabase2", dbSyncDao)
         val repoResult = repo.findAll()
 
         val firstRequest = mockServer.takeRequest()
-        Assert.assertEquals("First http call was to get list", "/ExampleSyncableDao/findAll",
+        Assert.assertEquals("First http call was to get list", "/ExampleDatabase2/ExampleSyncableDao/findAll",
                 firstRequest.path)
         Assert.assertEquals("After list was received from server, it was inserted into local db",
                 firstResponseList[0].esNumber,
@@ -112,7 +112,7 @@ class TestDbRepo {
 
         val secondRequest = mockServer.takeRequest()
         Assert.assertEquals("Repo made request to acknowledge receipt of entities",
-                "/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=50",
+                "/ExampleDatabase2/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=50",
                 secondRequest.path)
     }
 

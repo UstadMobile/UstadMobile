@@ -158,7 +158,9 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val codeBlock = CodeBlock.builder()
                 .add("val _gson = %T()\n", Gson::class)
 
-        if(isSyncableDb(dbTypeElement, processingEnv)){
+        val isSyncableDb = isSyncableDb(dbTypeElement, processingEnv)
+
+        if(isSyncableDb){
             codeBlock.add("val _syncHelperDao = %T(_db)\n",
                     ClassName(dbTypeClassName.packageName,
                             "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
@@ -166,6 +168,13 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
                 dbTypeClassName.simpleName)
+
+        if(isSyncableDb) {
+            codeBlock.add("%M(_syncHelperDao, _db, _gson)\n",
+                    MemberName(dbTypeClassName.packageName,
+                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}_$SUFFIX_KTOR_ROUTE"))
+        }
+
         methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
         .filter{ it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
             var daoFromDbGetter = ""

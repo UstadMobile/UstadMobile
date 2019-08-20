@@ -15,11 +15,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import io.ktor.routing.Route
 import com.ustadmobile.door.*
-import db2.ExampleDao2Route
+import db2.ExampleDao2_KtorRoute
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
 import db2.ExampleDatabase2SyncDao_JdbcKt
-import db2.ExampleSyncableDaoRoute
+import db2.ExampleSyncableDao_KtorRoute
 import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -60,8 +60,8 @@ class TestDbRoute  {
 
             val syncDao = ExampleDatabase2SyncDao_JdbcKt(exampleDb)
             install(Routing) {
-                ExampleDao2Route(exampleDb.exampleDao2(), exampleDb, gson)
-                ExampleSyncableDaoRoute(exampleDb.exampleSyncableDao(), exampleDb, gson, syncDao)
+                ExampleDao2_KtorRoute(exampleDb.exampleDao2(), exampleDb, gson)
+                ExampleSyncableDao_KtorRoute(exampleDb.exampleSyncableDao(), exampleDb, gson, syncDao)
             }
         }
 

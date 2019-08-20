@@ -25,8 +25,9 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.PreparedStatementArrayProxy
 import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import org.apache.commons.text.StringEscapeUtils
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+
 
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
@@ -232,10 +233,11 @@ internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "rec
 
 /**
  * Generates a CodeBlock that will make KTOR HTTP Client Request for a DAO method. It will set
- * the correct URL (e.g. endpoint/DaoName/methodName and parameters (including the request body
+ * the correct URL (e.g. endpoint/DatabaseName/DaoName/methodName and parameters (including the request body
  * if required). It will decide between using get or post based on the parameters.
  *
  * @param httpEndpointVarName the variable name that contains the base http endpoint to start with for the url
+ * @param dbPathVarName the variable name that contains the name of the database
  * @param daoName the DAO name (e.g. simple class name of the DAO class)
  * @param methodName the name of the method that is being queried
  * @param httpResponseVarName the variable name that will be added to the codeblock that will contain
@@ -245,6 +247,7 @@ internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "rec
  * @param params a list of the parameters (e.g. from the method signature) that need to be sent
  */
 internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String = "_endpoint",
+                                                   dbPathVarName: String,
                                                    daoName: String,
                                                    methodName: String,
                                                    httpResponseVarName: String = "_httpResponse",
@@ -259,7 +262,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                     HttpResponse::class)
             .beginControlFlow("url")
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
-            .add("path(%S, %S)\n", daoName, methodName)
+            .add("path($dbPathVarName, %S, %S)\n", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
 
@@ -1110,6 +1113,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         codeBlock.add(generateKtorRequestCodeBlockForMethod(
                 daoName = daoName,
+                dbPathVarName = "_dbPath",
                 methodName = daoFunSpec.name,
                 httpResultType = resultType,
                 requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
@@ -1125,7 +1129,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             CLIENT_GET_MEMBER_NAME)
                             .beginControlFlow("url")
                             .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
-                            .add("path(%S, %S)\n", daoName,
+                            .add("path(_dbPath, %S, %S)\n", daoName,
                                     "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
                             .endControlFlow()
                             .add("%M(%S, _requestId)\n",
