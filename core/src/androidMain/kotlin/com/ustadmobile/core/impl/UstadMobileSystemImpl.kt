@@ -100,6 +100,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
             ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
             H5PContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}H5PContentActivity"),
+            UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
             ContentEntryListFragmentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
             ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"))
 
