@@ -38,6 +38,8 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation project(":lib-database")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-door-runtime")
@@ -54,6 +56,8 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation project(":lib-room-annotations")
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
             }
         }
 
@@ -61,6 +65,8 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
             }
         }
     }

@@ -81,7 +81,7 @@ abstract class DownloadJobItemDao {
             "djiStatus = :djiStatus, downloadedSoFar = :downloadedSoFar, " +
             "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
             " WHERE djiUid = :djiUid")
-    protected abstract fun updateDownloadJobItemStatusIm(djiUid: Long, djiStatus: Int,
+    abstract fun updateDownloadJobItemStatusIm(djiUid: Long, djiStatus: Int,
                                                          downloadedSoFar: Long, downloadLength: Long,
                                                          currentSpeed: Long)
 
@@ -102,7 +102,7 @@ abstract class DownloadJobItemDao {
 
 
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
-    protected abstract fun updateItemStatusInt(djiUid: Int, status: Int)
+    abstract fun updateItemStatusInt(djiUid: Int, status: Int)
 
     @Transaction
     open fun updateStatus(djiUid: Int, status: Int) {

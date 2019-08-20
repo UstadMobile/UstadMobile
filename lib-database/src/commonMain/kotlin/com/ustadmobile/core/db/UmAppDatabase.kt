@@ -4,6 +4,8 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
@@ -21,12 +23,18 @@ import kotlin.jvm.Volatile
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
-    StateEntity::class, StateContentEntity::class, XLangMapEntry::class], version = 24)
-abstract class UmAppDatabase : DoorDatabase() {
+    StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
+    SyncNode::class
 
-    var isMaster: Boolean = false
+    //#DOORDB_TRACKER_ENTITIES
+
+], version = 24)
+abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
+
+    override val master: Boolean
+        get() = false
 
     abstract val networkNodeDao: NetworkNodeDao
 
@@ -118,28 +126,9 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
+    //#DOORDB_SYNCDAO
+
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
-
-    // val deviceBits: Int
-    //     get() = syncablePrimaryKeyDao.getDeviceBits()
-
-    //@UmRepository
-    //abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
-
-    // @UmSyncOutgoing
-    // abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
-
-
-    fun validateAuth(personUid: Long, auth: String): Boolean {
-        return if (personUid == 0L) true else accessTokenDao.isValidToken(personUid, auth)//Anonymous or guest access
-    }
-
-    // fun invalidateDeviceBits() {
-    //     syncablePrimaryKeyDao.invalidateDeviceBits()
-    // }
-
-    // @UmSyncCountLocalPendingChanges
-    // abstract fun countPendingLocalChanges(accountUid: Long, deviceId: Int): Int
 
     companion object {
 

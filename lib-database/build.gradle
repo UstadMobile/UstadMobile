@@ -87,8 +87,10 @@ configurations {
 
 kapt {
     arguments {
-        arg("door_jdbc_kt_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
-        arg("door_ktor_server_out", rootProject.file("lib-ktor-server/build/generated/source/door").absolutePath)
+        arg("doordb_android_out", rootProject.file("lib-database-android/build/generated/source/door").absolutePath)
+        arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
+        arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
+        arg("doordb_source_path", project.file("src/commonMain/kotlin"))
     }
 }
 
@@ -104,6 +106,10 @@ dependencies {
     kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     kapt "io.ktor:ktor-server-netty:$version_ktor"
     kapt "org.apache.commons:commons-text:$version_apache_commons_text"
+    kapt "com.google.code.gson:gson:$version_gson"
+    kapt "io.ktor:ktor-client-core:$version_ktor"
+    kapt "io.ktor:ktor-client-json:$version_ktor"
+    kapt "io.ktor:ktor-client-okhttp:$version_ktor"
 }
 
 compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

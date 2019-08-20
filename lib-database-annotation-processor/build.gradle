@@ -13,13 +13,22 @@ task fatJar(type: Jar) {
     with jar
 }
 
-
 kapt {
+    correctErrorTypes = true
     arguments {
-        arg("door_jdbc_kt_out", "filer")
-        arg("door_ktor_server_out", "filer")
+        arg("doordb_android_out", "$buildDir/generated/source/doordb-android")
+        arg("doordb_source_path", "$projectDir/src/test/kotlin")
     }
 }
+
+compileKotlin{
+    kotlinOptions.jvmTarget = "$version_kotlin_jvmTarget"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "$version_kotlin_jvmTarget"
+}
+
 
 dependencies {
     implementation project(":lib-database-annotations")
@@ -38,6 +47,7 @@ dependencies {
     implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     implementation "org.apache.commons:commons-text:$version_apache_commons_text"
 
+    implementation "com.google.code.gson:gson:$version_gson"
 
     //SQLite dependencies
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
@@ -58,6 +68,8 @@ dependencies {
     kaptTest files("build/libs/lib-database-annotation-processor.jar")
     testImplementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
     testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+    testImplementation "com.google.code.gson:gson:$version_gson"
 }
 
 sourceCompatibility = "1.8"

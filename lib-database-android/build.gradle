@@ -46,23 +46,6 @@ android {
 
 }
 
-/**
- * The Android Kotlin must not have the @JsName annotation that is present in the lib-database
- * project.
- */
-task copyLibDatabase(type: Copy) {
-    from "../lib-database/src/commonMain/kotlin"
-    into "build/generated/source/door"
-    include "**/*.kt"
-    filter {line -> line.trim().startsWith("@JsName") || (line.trim().startsWith("import")  && line.contains("kotlin.js.JsName")) ? "" : line }
-}
-
-afterEvaluate {
-    android.libraryVariants.all { variant ->
-        variant.javaCompileProvider.get().dependsOn(copyLibDatabase)
-    }
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -73,6 +56,13 @@ dependencies {
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+
+    //Repository dependencies
+    implementation "io.ktor:ktor-client-core:$version_ktor"
+    implementation "io.ktor:ktor-client-json:$version_ktor"
+    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-gson:$version_ktor"
+
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"

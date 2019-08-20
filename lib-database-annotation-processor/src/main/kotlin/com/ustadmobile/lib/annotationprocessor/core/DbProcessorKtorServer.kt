@@ -2,24 +2,19 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
 import java.io.File
-import javax.annotation.processing.Messager
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.*
-
-fun isQueryParam(typeName: TypeName) =
-    if(QUERY_SINGULAR_TYPES.contains(typeName)) {
-        true
-    }else {
-        typeName is ParameterizedTypeName && typeName.typeArguments[0] in QUERY_SINGULAR_TYPES
-    }
+import com.ustadmobile.door.DoorDatabase
+import com.google.gson.reflect.TypeToken
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -30,12 +25,14 @@ fun isQueryParam(typeName: TypeName) =
  */
 fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
                                          declareVariableName: String? = null,
-                                         declareVariableType: String = "val"): CodeBlock {
+                                         declareVariableType: String = "val",
+                                         gsonVarName: String = "_gson"): CodeBlock {
     val codeBlock = CodeBlock.builder()
-
-    if(declareVariableName != null){
+    if(declareVariableName != null) {
         codeBlock.add("%L %L =", declareVariableType, declareVariableName)
     }
+
+    val precedingCodeblock = CodeBlock.builder()
 
     if(isQueryParam(typeName)) {
         if(typeName in QUERY_SINGULAR_TYPES) {
@@ -55,16 +52,17 @@ fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
             codeBlock.add(" ?: listOf()\n")
         }
     }else {
-        codeBlock.add("%M.%M<%T>()", DbProcessorKtorServer.CALL_MEMBER,
-                MemberName("io.ktor.request", "receive"),
-                removeTypeProjection(typeName))
+        codeBlock.add("$gsonVarName.fromJson(%M.%M<String>(), object: %T() {}.type)",
+                    DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request", "receiveOrNull"),
+                    TypeToken::class.asClassName().parameterizedBy(removeTypeProjection(typeName)))
     }
 
     if(declareVariableName != null){
         codeBlock.add("\n")
     }
 
-    return codeBlock.build()
+    return precedingCodeblock.add(codeBlock.build()).build()
 }
 
 /**
@@ -97,7 +95,7 @@ fun generateRespondCall(returnType: TypeName, varName: String): CodeBlock{
                 DbProcessorKtorServer.RESPOND_MEMBER)
 
         else -> codeBlock.beginControlFlow("if($varName != null)")
-                .add("%M.%M($varName)\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER)
+                .add("%M.%M($varName!!)\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER)
                 .nextControlFlow("else")
                 .add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
                         DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
@@ -107,17 +105,32 @@ fun generateRespondCall(returnType: TypeName, varName: String): CodeBlock{
     return codeBlock.build()
 }
 
+internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper") =
+    CodeBlock.builder()
+            .beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_update${trackerClassName.simpleName}Received")
+            .add("val _clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                    DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request","header"),
+                    "X-nid")
+            .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId"))
+            //TODO: Add the clientId to this query (to prevent other clients interfering)
+            .add("$syncHelperVarName._update${trackerClassName.simpleName}Received(true, _requestId)\n")
+            .add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER,
+                    HttpStatusCode::class)
+            .endControlFlow()
+            .build()
+
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
-        val outputArg = processingEnv.options[OPTION_KTOR_OUTPUT]
-        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
 
-        daos.forEach { generateDaoImplClass(it as TypeElement).writeTo(File(outputDir!!)) }
-
+        daos.forEach {
+            writeFileSpecToOutputDirs(generateDaoImplClass(it as TypeElement),
+                    AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+        }
 
         return true
     }
@@ -126,23 +139,31 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val daoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_KTOR_ROUTE}")
         daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
+        daoImplFile.addImport("io.ktor.response", "header")
 
         val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}Route")
                 .receiver(Route::class)
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
                 .addParameter("_db", DoorDatabase::class)
+                .addParameter("_gson", Gson::class)
+
+        if(syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).isNotEmpty()) {
+            daoRouteFn.addParameter("_syncHelper",
+                    ClassName(pkgNameOfElement(daoTypeElement, processingEnv),
+                            "${daoTypeElement.simpleName}_SyncHelper"))
+        }
+
         val codeBlock = CodeBlock.builder()
 
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
                 "${daoTypeElement.simpleName}")
+
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
             val daoMethodEl = daoSubEl as ExecutableElement
             val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                     daoMethodEl) as ExecutableType
 
-            val numNonQueryParams =  daoMethodEl.parameters
-                    .map { it.asType().asTypeName().javaToKotlinType() }
-                    .count { !isContinuationParam(it) && !isQueryParam(it) }
+            val numNonQueryParams = getHttpBodyParams(daoMethodEl, daoMethodResolved).size
 
             val memberFn = if(numNonQueryParams == 1){
                 POST_MEMBER
@@ -153,16 +174,33 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
             codeBlock.beginControlFlow("%M(%S)", memberFn, daoSubEl.simpleName)
 
-            if(daoSubEl.getAnnotation(Query::class.java) != null) {
-                codeBlock.add(generateSelectCodeBlock(daoMethodResolved, daoMethodEl,
+            val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
+                    .returns(resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType())
+            daoMethodEl.parameters
+                    .filter { !isContinuationParam(it.asType().asTypeName()) }
+                    .forEachIndexed { index, paramEl ->
+                funSpec.addParameter(paramEl.simpleName.toString(),
+                        daoMethodResolved.parameterTypes[index].asTypeName().javaToKotlinType())
+            }
+
+            val queryAnnotation = daoSubEl.getAnnotation(Query::class.java)
+            if(queryAnnotation != null) {
+                funSpec.addAnnotation(AnnotationSpec.builder(Query::class.asClassName())
+                        .addMember(CodeBlock.of("%S", queryAnnotation.value)).build())
+                codeBlock.add(generateKtorRouteSelectCodeBlock(funSpec.build(),
                         daoTypeElement))
             }else {
-                codeBlock.add(generatePassToDaoCodeBlock(daoMethodResolved, daoMethodEl))
+                codeBlock.add(generateKtorPassToDaoCodeBlock(funSpec.build()))
             }
 
             codeBlock.endControlFlow()
-
         }
+
+        syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).forEach {
+            val syncableEntityinfo = SyncableEntityInfo(it, processingEnv)
+            codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityinfo.tracker))
+        }
+
         codeBlock.endControlFlow()
         daoRouteFn.addCode(codeBlock.build())
         daoImplFile.addFunction(daoRouteFn.build())
@@ -170,65 +208,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         return daoImplFile.build()
     }
 
-    fun generateSelectCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement,
-                                daoTypeEl: TypeElement) : CodeBlock {
-        val codeBlock = CodeBlock.builder()
-        val returnType = resolveQueryResultType(resolveReturnTypeIfSuspended(daoMethodResolved))
 
-        daoMethodResolved.parameterTypes.map { it.asTypeName() }.filter { !isContinuationParam(it) }
-                .forEachIndexed { index, paramType ->
-
-            val paramName = daoMethodEl.parameters[index].simpleName.toString()
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramType,
-                    paramName, declareVariableName = paramName, declareVariableType = "val"))
-
-        }
-
-        val queryVarsMap = daoMethodResolved.parameterTypes.mapIndexed { index, typeMirror ->
-            daoMethodEl.parameters[index].simpleName.toString() to typeMirror.asTypeName().javaToKotlinType()
-        }.filter {
-            !isContinuationParam(it.second)
-        }.toMap()
-
-        val querySql = daoMethodEl.getAnnotation(Query::class.java).value
-
-        codeBlock.add(generateQueryCodeBlock(returnType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
-        codeBlock.add(generateRespondCall(returnType, "_result!!"))
-
-        return codeBlock.build()
-    }
-
-    /**
-     * Generates a Codeblock that will call the DAO method, and then call.respond with the result
-     */
-    fun generatePassToDaoCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement): CodeBlock {
-        val codeBlock = CodeBlock.builder()
-        val returnType = resolveReturnTypeIfSuspended(daoMethodResolved)
-        if(returnType != UNIT) {
-            codeBlock.add("val _result = ")
-        }
-
-        codeBlock.add("_dao.${daoMethodEl.simpleName}(")
-        var paramOutCount = 0
-        daoMethodEl.parameters.forEachIndexed {index, el ->
-            val paramTypeName = daoMethodResolved.parameterTypes[index].asTypeName().javaToKotlinType()
-            if(isContinuationParam(paramTypeName))
-                return@forEachIndexed
-
-            if(paramOutCount > 0)
-                codeBlock.add(",")
-
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, el.simpleName.toString()))
-
-            paramOutCount++
-        }
-
-        codeBlock.add(")\n")
-
-        codeBlock.add(generateRespondCall(returnType, "_result"))
-
-        return codeBlock.build()
-    }
 
     companion object {
 
@@ -243,5 +223,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val CALL_MEMBER = MemberName("io.ktor.application", "call")
 
         val RESPOND_MEMBER = MemberName("io.ktor.response", "respond")
+
+        val RESPONSE_HEADER = MemberName("io.ktor.response", "header")
     }
 }

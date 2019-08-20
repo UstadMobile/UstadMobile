@@ -2,19 +2,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 /**
  * DownloadJobItemHistory represents one attempt to download a given DownloadJobItem. It is used
  * to track the performance of different peers, and inform the selection of peers when attempting to
  * download items in the future.
  */
-@UmEntity
 @Entity
 class DownloadJobItemHistory() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0
 
