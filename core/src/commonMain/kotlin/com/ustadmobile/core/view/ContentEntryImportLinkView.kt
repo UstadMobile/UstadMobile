@@ -8,6 +8,12 @@ interface ContentEntryImportLinkView : UstadView {
 
     fun returnResult()
 
+    fun showHideVideoTitle(showTitle: Boolean)
+
+    fun showNoTitleEntered(errorText: String)
+
+    fun showProgress(showProgress: Boolean)
+
     companion object {
 
         const val CONTENT_ENTRY_PARENT_UID = "ContentEntryParentUid"

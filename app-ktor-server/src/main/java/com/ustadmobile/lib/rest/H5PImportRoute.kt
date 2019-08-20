@@ -94,6 +94,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             val urlString = call.request.queryParameters["hp5Url"] ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
+            val videoTitle = call.request.queryParameters["title"]?: ""
 
             val headers = defaultHttpClient().head<HttpResponse>(urlString).headers
 
@@ -110,6 +111,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                 val contentEntry = ContentEntry()
                 contentEntry.leaf = true
+                contentEntry.title = videoTitle
                 contentEntry.contentEntryUid = entryDao.insert(contentEntry)
 
                 val parentChildJoin = ContentEntryParentChildJoin()
@@ -119,11 +121,9 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                 val container = Container(contentEntry)
                 container.containerContentEntryUid = contentEntry.contentEntryUid
-                container.fileSize = 1
-                container.mimeType = headers["Content-Type"]!!
-                container.containerUid = containerDao.insert(container)
 
-                call.respond(H5PImportData(contentEntry, container, parentChildJoin))
+                container.mimeType = headers["Content-Type"]!!
+
 
                 val http = defaultHttpClient()
                 val iContext = InitialContext()
@@ -136,15 +136,17 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 val input = http.get<InputStream>(urlString)
                 FileUtils.copyInputStreamToFile(input, videoFile)
 
+                container.fileSize = videoFile.length()
                 container.lastModified = parentDir.lastModified()
                 container.mobileOptimized = true
-                db.containerDao.update(container)
+                container.containerUid = containerDao.insert(container)
+
                 val manager = ContainerManager(container, db,
                         db, containerDir.absolutePath)
 
                 manager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
 
-                println("done")
+                call.respond(H5PImportData(contentEntry, container, parentChildJoin))
 
 
             } else {

@@ -343,6 +343,8 @@
     <string name="xapi_when_header">When</string>
 
     <string name="xapi_score">Score (%)</string>
+    <string name="import_link_video">Title</string>
+    <string name="import_title_not_entered">Title not entered</string>
 
 
     <string name="no_account">Don\'t have an account?</string>

@@ -6,8 +6,11 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.webkit.WebView
 import android.widget.EditText
+import android.widget.ProgressBar
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
@@ -20,6 +23,7 @@ import java.util.*
 
 class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLinkView {
 
+
     private lateinit var presenter: ContentEntryImportLinkPresenter
 
     private lateinit var webView: WebView
@@ -27,6 +31,12 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
     private lateinit var textInput: TextInputLayout
 
     private lateinit var editText: EditText
+
+    private lateinit var titleInput: TextInputLayout
+
+    private lateinit var titleEdiText: EditText
+
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(saved: Bundle?) {
         super.onCreate(saved)
@@ -51,7 +61,13 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         textInput = findViewById(R.id.entry_import_link_textInput)
         editText = findViewById(R.id.entry_import_link_editText)
 
+        titleInput = findViewById(R.id.entry_import_link_titleInput)
+        titleEdiText = findViewById(R.id.entry_import_link_title_editText)
+
         editText.addTextChangedListener(textWatcher)
+        titleEdiText.addTextChangedListener(titleWatcher)
+
+        progressBar = findViewById(R.id.import_link_progress)
 
         presenter = ContentEntryImportLinkPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -96,6 +112,24 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         finish()
     }
 
+    override fun showHideVideoTitle(showTitle: Boolean) {
+        runOnUiThread {
+            titleInput.visibility = if(showTitle) VISIBLE else GONE
+        }
+    }
+
+    override fun showProgress(showProgress: Boolean) {
+        runOnUiThread {
+            progressBar.visibility = if(showProgress) VISIBLE else GONE
+        }
+    }
+
+    override fun showNoTitleEntered(errorText: String) {
+        runOnUiThread {
+            titleInput.error = errorText
+        }
+    }
+
 
     private var textWatcher = object : TextWatcher {
 
@@ -113,6 +147,22 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
             GlobalScope.launch {
                 presenter.handleUrlTextUpdated(string.toString())
             }
+        }
+
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+        }
+    }
+
+    private var titleWatcher = object : TextWatcher {
+
+
+        override fun afterTextChanged(s: Editable?) {
+            presenter.handleTitleChanged(s.toString())
         }
 
 
