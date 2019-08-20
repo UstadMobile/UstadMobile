@@ -98,6 +98,10 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                 }
             })
 
+            if(videoPath.isNullOrEmpty() && result.isNotEmpty()){
+                videoPath = result[0].containerEntryFile?.cefPath
+            }
+
             srtLangList.add(0, "No Subtitles")
             if(defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
