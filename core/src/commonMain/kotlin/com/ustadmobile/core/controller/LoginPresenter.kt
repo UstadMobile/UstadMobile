@@ -5,9 +5,17 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
+import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.client.call.receive
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.response.HttpResponse
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.takeFrom
 import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -46,28 +54,32 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
         view.setErrorMessage("")
-        val loginRepoDb = UmAppDatabase.getInstance(context)//.getRepository(serverUrl, "")
-        val systemImpl = UstadMobileSystemImpl.instance
         GlobalScope.launch {
             try {
-                val result = loginRepoDb.personDao.loginAsync(username, password)
-                if (result != null) {
-                    result.endpointUrl = serverUrl
+                val loginResponse = defaultHttpClient().get<HttpResponse>() {
+                    url {
+                        takeFrom(serverUrl)
+                        path("Login", "login")
+                    }
+                    parameter("username", username)
+                    parameter("password", password)
+                }
+
+                if(loginResponse.status == HttpStatusCode.OK) {
+                    val account = loginResponse.receive<UmAccount>()
+                    account.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
-                    UmAccountManager.setActiveAccount(result, context)
-                    systemImpl.go(mNextDest, context)
-                } else {
-                    view.runOnUiThread(Runnable {
-                        view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
+                    UmAccountManager.setActiveAccount(account, context)
+                    impl.go(mNextDest, context)
+                }else {
+                    view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
                                 context))
                         view.setPassword("")
                         view.setInProgress(false)
-                    })
                 }
-
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.setErrorMessage(systemImpl.getString(
+                    view.setErrorMessage(impl.getString(
                             MessageID.login_network_error, context))
                     view.setInProgress(false)
                 })

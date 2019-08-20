@@ -1,8 +1,16 @@
 package com.ustadmobile.core.controller
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.lib.db.entities.UmAccount
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -17,11 +25,25 @@ class LoginPresenterTest {
 
     private val context = Any()
 
+    private lateinit var mockWebServer: MockWebServer
+
     @Before
     fun setUp(){
-        view = mock()
+        view = mock {
+            on { runOnUiThread(any()) }.doAnswer {
+                Thread(it.getArgument<Any>(0) as Runnable).start()
+                Unit
+            }
+        }
         impl = mock ()
-        presenter = LoginPresenter(context, mapOf(),view, impl)
+        presenter = LoginPresenter(context, mapOf(), view, impl)
+        mockWebServer = MockWebServer()
+        mockWebServer.start()
+    }
+
+    @After
+    fun tearDown() {
+        mockWebServer.shutdown()
     }
 
 
@@ -63,100 +85,72 @@ class LoginPresenterTest {
 
     }
 
-
-//    private var server: HttpServer? = null
-//
-//    private var db: UmAppDatabase? = null
-//
-//    private var repo: UmAppDatabase? = null
-
-
-    /*@Before
-    fun setUp() {
-        mainImpl = UstadMobileSystemImpl.instance
-        impl = Mockito.spy(mainImpl)
-        UstadMobileSystemImpl.setMainInstance(impl)
-        server = startServer()
-
-        db = UmAppDatabase.getInstance(Any())
-        repo = db//db!!.getRepository(TEST_URI, "")
-
-        db!!.clearAllTables()
-        val testPerson = Person()
-        testPerson.username = VALID_USER
-        val personUid = repo!!.personDao.insert(testPerson)
-
-        val testPersonAuth = PersonAuth(personUid,
-                PersonAuthDao.ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(VALID_PASS))
-        repo!!.personAuthDao.insert(testPersonAuth)
-
-        view = Mockito.mock(LoginView::class.java)
-        doAnswer {
-            Thread(it.getArgument<Any>(0) as Runnable).start()
-            null
-        }.`when`<LoginView>(view).runOnUiThread(any())
-    }
-
-    @After
-    fun tearDown() {
-        UstadMobileSystemImpl.setMainInstance(mainImpl)
-        impl = null
-        server!!.shutdownNow()
-    }
-
     @Test
-    fun givenValidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSystemImplGo() {
-        val args = Hashtable<String,String>()
-        args.put(LoginPresenter.ARG_NEXT, "somewhere")
+    fun givenValidUsernameAndPassword_whenClicked_shouldCallSystemImplGo() {
+        mockWebServer.enqueue(MockResponse()
+                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", null)))
+                .setHeader("Content-Type", "application/json"))
 
-        val presenter = LoginPresenter(Any(),
-                args, view!!)
-        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI)
+        val httpUrl = mockWebServer.url("/").toString()
 
+        val presenter = LoginPresenter(context,
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl,
+                        LoginPresenter.ARG_NEXT to "somewhere"), view, impl)
 
-        verify<UstadMobileSystemImpl>(impl, timeout(5000)).go("somewhere",
-                Any())
+        presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
 
-        val activeAccount = UmAccountManager.getActiveAccount(
-                Any())
+        verify<UstadMobileSystemImpl>(impl, timeout(5000 )).go("somewhere",
+                context)
+
+        val activeAccount = UmAccountManager.getActiveAccount(context)
         Assert.assertNotNull(activeAccount)
+
+        val requestMade = mockWebServer.takeRequest()
+        Assert.assertEquals("/Login/login?username=$VALID_USER&password=$VALID_PASS",
+                requestMade.path)
     }
 
     @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        val args = Hashtable<String , String>()
-
-        val presenter = LoginPresenter(Any(),
-                args, view!!)
-        presenter.handleClickLogin(VALID_USER, "wrongpassword", TEST_URI)
+        mockWebServer.enqueue(MockResponse().setResponseCode(403))
+        val httpUrl = mockWebServer.url("/").toString()
+        val presenter = LoginPresenter(context,
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+        presenter.handleClickLogin(VALID_USER, "wrongpassword", httpUrl)
 
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-                MessageID.wrong_user_pass_combo, Any())
+                MessageID.wrong_user_pass_combo, context)
 
         verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
+        verify(impl, timeout(5000)).getString(MessageID.wrong_user_pass_combo, context)
         verify<LoginView>(view, timeout(5000)).setPassword("")
+
+        val requestMade = mockWebServer.takeRequest()
+        Assert.assertEquals("/Login/login?username=$VALID_USER&password=wrongpassword",
+                requestMade.path)
     }
 
 
     @Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        val args = Hashtable<String , String>()
-        server!!.shutdownNow()
-
-        val presenter = LoginPresenter(PlatformTestUtil.targetContext,
-                args, view!!)
-        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI)
+        mockWebServer.shutdown()
+        val httpUrl = mockWebServer.url("/").toString()
+        val presenter = LoginPresenter(context,
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+        presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
                 MessageID.login_network_error, Any())
         verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
+        verify(impl, timeout(5000)).getString(MessageID.login_network_error, context)
     }
+
 
     companion object {
 
-        private val VALID_USER = "testuser"
+        private val VALID_USER = "bobjones"
 
         private val VALID_PASS = "secret"
-    }*/
+    }
 
 
 }
