@@ -256,7 +256,7 @@ task generateCoreStringToAndroidResMap {
     }
 }
 tasks.whenTaskAdded { task ->
-    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+    if (task.name.startsWith("compile") || task.name.startsWith("assemble")) {
         task.dependsOn(generateCoreStringToAndroidResMap)
     }
 }
@@ -288,6 +288,8 @@ dependencies {
     implementation project(':lib-util')
 
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"

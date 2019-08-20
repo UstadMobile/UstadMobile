@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
@@ -195,8 +196,9 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.create_new_content).isVisible = showOptions
-        menu.findItem(R.id.edit_category_content).isVisible = showOptions
+        val account = UmAccountManager.getActiveAccount(this)
+        menu.findItem(R.id.create_new_content).isVisible = showOptions && account != null && account.personUid != 0L
+        menu.findItem(R.id.edit_category_content).isVisible = showOptions && account != null && account.personUid != 0L
         return super.onPrepareOptionsMenu(menu)
     }
 
