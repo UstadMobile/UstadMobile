@@ -13,7 +13,7 @@ import kotlin.js.JsName
 abstract class ContainerDao : BaseDao<Container> {
 
     @Insert
-    abstract fun insert(containerList: List<Container>): Array<Long>
+    abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +

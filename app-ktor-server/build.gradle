@@ -24,6 +24,9 @@ shadowJar {
     configurations += [project.configurations.standaloneRuntime]
 }
 
+sourceSets {
+    main.java.srcDirs += ["$buildDir/generated/source/door"]
+}
 
 war {
     classpath configurations.servletRuntime

@@ -154,7 +154,7 @@ class DownloadJobItemRunnerTest {
         networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.lastUpdateTimeStamp = System.currentTimeMillis()
-        networkNode.nodeId = clientDb.networkNodeDao.insert(networkNode)
+        networkNode.nodeId = clientDb.networkNodeDao.replace(networkNode)
 
         serverDb = UmAppDatabase.getInstance(context)
         serverDb.clearAllTables()

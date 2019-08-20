@@ -34,10 +34,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("downloadedRootItems")
     abstract fun downloadedRootItems(): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 
-    @Insert
-    @JsName("insert")
-    abstract fun insert(contentEntries: List<ContentEntry>): Array<Long>
-
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
     @JsName("findByEntryId")
     abstract fun findByEntryId(entryUuid: Long): ContentEntry?
