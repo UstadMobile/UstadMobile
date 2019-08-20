@@ -21,7 +21,7 @@ interface ClazzListView : UstadView {
      *
      * @param presets A String array String[] of the presets available.
      */
-    fun updateSortSpinner(presets: Array<String>)
+    fun updateSortSpinner(presets: Array<String?>)
 
 
     fun showAddClassButton(show: Boolean)

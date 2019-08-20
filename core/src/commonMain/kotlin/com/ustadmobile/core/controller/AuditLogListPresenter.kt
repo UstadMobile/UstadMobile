@@ -1,12 +1,11 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.AuditLogDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AuditLogListView
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_ACTOR_LIST
@@ -18,6 +17,8 @@ import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_TO
 import com.ustadmobile.lib.db.entities.AuditLogWithNames
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Presenter for AuditLogList view
@@ -26,7 +27,7 @@ class AuditLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 AuditLogListView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<AuditLogListView>(context, arguments!!, view) {
 
-    private var umProvider: UmProvider<AuditLogWithNames>? = null
+    private var umProvider: DataSource.Factory<Int, AuditLogWithNames>? = null
     internal var repository: UmAppDatabase
     private val providerDao: AuditLogDao
     private var fromDate: Long = 0
@@ -49,12 +50,13 @@ AuditLogListView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.insta
         providerDao = repository.auditLogDao
 
         if (arguments!!.containsKey(ARG_AUDITLOG_FROM_TIME)) {
-            fromDate = arguments!!.get(ARG_AUDITLOG_FROM_TIME)
+            fromDate = arguments!!.get(ARG_AUDITLOG_FROM_TIME)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_AUDITLOG_TO_TIME)) {
-            toDate = arguments!!.get(ARG_AUDITLOG_TO_TIME)
+            toDate = arguments!!.get(ARG_AUDITLOG_TO_TIME)!!.toLong()
         }
 
+        //TODO: Chcek if can cast to LongArray Just like that. It should be parsed BACK
         if (arguments!!.containsKey(ARG_AUDITLOG_LOCATION_LIST)) {
             val locations = arguments!!.get(ARG_AUDITLOG_LOCATION_LIST) as LongArray
             locationList = convertLongArray(locations)
@@ -95,38 +97,33 @@ AuditLogListView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.insta
         val clazzType = impl.getString(MessageID.clazz, context)
         val personType = impl.getString(MessageID.person, context)
 
-        providerDao.findAllAuditLogsWithNameFilterList(fromDate, toDate, locationList!!,
-                clazzesList!!, peopleList!!, actorList!!, object : UmCallback<List<AuditLogWithNames>> {
-            override fun onSuccess(result: List<AuditLogWithNames>?) {
-                for (entity in result!!) {
-                    //"Actor changed Entity Type Entity Name at Time"
-                    var entityType = ""
-                    var entityName: String? = ""
-                    when (entity.auditLogTableUid) {
-                        Clazz.TABLE_ID -> {
-                            entityType = clazzType
-                            entityName = entity.clazzName
-                        }
-                        Person.TABLE_ID -> {
-                            entityType = personType
-                            entityName = entity.personName
-                        }
-                        else -> {
-                        }
+        GlobalScope.launch {
+            val result = providerDao.findAllAuditLogsWithNameFilterList(fromDate, toDate,
+                    locationList!!, clazzesList!!, peopleList!!, actorList!!)
+            for (entity in result!!) {
+                //"Actor changed Entity Type Entity Name at Time"
+                var entityType = ""
+                var entityName: String? = ""
+                when (entity.auditLogTableUid) {
+                    Clazz.TABLE_ID -> {
+                        entityType = clazzType
+                        entityName = entity.clazzName
                     }
-                    val logString = entity.actorName + " " + changedString + " " +
-                            entityType + " " + entityName
-                    val a = arrayOf(logString)
-                    data.add(a)
-
+                    Person.TABLE_ID -> {
+                        entityType = personType
+                        entityName = entity.personName
+                    }
+                    else -> {
+                    }
                 }
-                view.generateCSVReport(data)
-            }
+                val logString = entity.actorName + " " + changedString + " " +
+                        entityType + " " + entityName
+                val a = arrayOf(logString)
+                data.add(a)
 
-            override fun onFailure(exception: Throwable?) {
-
             }
-        })
+            view.generateCSVReport(data)
+        }
 
 
     }

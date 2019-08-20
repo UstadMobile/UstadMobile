@@ -27,7 +27,7 @@ interface ClazzActivityListView : UstadView {
 
     fun updateActivityBarChart(dataMap: LinkedHashMap<Float, Float>)
 
-    fun setClazzActivityChangesDropdownPresets(presets: Array<String>)
+    fun setClazzActivityChangesDropdownPresets(presets: Array<String?>)
 
     /**
      * Resets the report buttons

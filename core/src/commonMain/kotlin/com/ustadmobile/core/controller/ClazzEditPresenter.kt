@@ -1,33 +1,25 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.CustomFieldDao
 import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
-import com.ustadmobile.core.db.dao.ScheduleDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.ClazzEditView
-import com.ustadmobile.core.view.SelectClazzFeaturesView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.CustomFieldValue
-import com.ustadmobile.lib.db.entities.CustomFieldValueOption
-import com.ustadmobile.lib.db.entities.Location
-import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.UMCalendar
-
 import com.ustadmobile.core.view.ClazzEditView.Companion.ARG_SCHEDULE_UID
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
+import com.ustadmobile.core.view.SelectClazzFeaturesView
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ACTIVITY_ENABLED
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ATTENDANCE_ENABLED
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_CLAZZUID
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 
 /**
@@ -46,9 +38,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     private var tempClazzLocationUid: Long = 0
 
-    private var clazzScheduleLiveData: UmProvider<Schedule>? = null
-    private var holidaysLiveData: UmLiveData<List<UMCalendar>>? = null
-    private var locationsLiveData: UmLiveData<List<Location>>? = null
+    private var clazzScheduleLiveData: DataSource.Factory<Int, Schedule>? = null
+    private var holidaysLiveData: DoorLiveData<List<UMCalendar>>? = null
+    private var locationsLiveData: DoorLiveData<List<Location>>? = null
 
     private var loggedInPersonUid = 0L
 
@@ -60,10 +52,10 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     private val customFieldValueDao: CustomFieldValueDao
     private val customFieldValueOptionDao: CustomFieldValueOptionDao
 
-    internal var holidayCalendarUidToPosition: HashMap<Long, Int>
+    internal var holidayCalendarUidToPosition: HashMap<Long, Int>?= null
     internal var positionToHolidayCalendarUid: HashMap<Int, Long>? = null
 
-    internal var locationUidToPosition: HashMap<Long, Int>
+    internal var locationUidToPosition: HashMap<Long, Int>? = null
     internal var positionToLocationUid: HashMap<Int, Long>? = null
 
     init {
@@ -80,71 +72,51 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     private fun getAllClazzCustomFields() {
         //0. Clear all added custom fields on view.
-        view.runOnUiThread({ view.clearAllCustomFields() })
+        view.runOnUiThread(Runnable{ view.clearAllCustomFields() })
 
         //1. Get all custom fields
-        customFieldDao.findAllCustomFieldsProviderForEntityAsync(Clazz.TABLE_ID,
-                object : UmCallback<List<CustomField>> {
-                    override fun onSuccess(result: List<CustomField>?) {
-                        for (c in result!!) {
+        GlobalScope.launch {
+            val result = customFieldDao.findAllCustomFieldsProviderForEntityAsync(Clazz.TABLE_ID)
+            for (c in result!!) {
 
-                            //Get value as well
-                            customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
-                                    c.customFieldUid, mUpdatedClazz!!.clazzUid,
-                                    object : UmCallback<CustomFieldValue> {
-                                        override fun onSuccess(result: CustomFieldValue?) {
-                                            var valueString: String? = ""
-                                            var valueSelection = 0
+                //Get value as well
+                val result2 = customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                        c.customFieldUid, mUpdatedClazz!!.clazzUid)
+                var valueString: String? = ""
+                var valueSelection = 0
 
+                if (c.customFieldType == CustomField.FIELD_TYPE_TEXT) {
 
+                    if (result2 != null) {
+                        valueString = result2.customFieldValueValue
+                    }
+                    val finalValueString = valueString
+                    view.runOnUiThread(Runnable{ view.addCustomFieldText(c,
+                            finalValueString!!) })
 
-                                            if (c.customFieldType == CustomField.FIELD_TYPE_TEXT) {
+                } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
+                    if (result2 != null) {
+                        valueSelection = result2.customFieldValueValue!!.toInt()
+                    }
+                    val finalValueSelection = valueSelection
+                    val result3 = customFieldValueOptionDao.findAllOptionsForFieldAsync(
+                            c.customFieldUid)
+                    val options = ArrayList<String>()
 
-                                                if (result != null) {
-                                                    valueString = result.customFieldValueValue
-                                                }
-                                                val finalValueString = valueString
-                                                view.runOnUiThread({ view.addCustomFieldText(c, finalValueString!!) })
-
-                                            } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
-                                                if (result != null) {
-                                                    valueSelection = Integer.valueOf(result.customFieldValueValue!!)
-                                                }
-                                                val finalValueSelection = valueSelection
-                                                customFieldValueOptionDao.findAllOptionsForFieldAsync(c.customFieldUid,
-                                                        object : UmCallback<List<CustomFieldValueOption>> {
-                                                            override fun onSuccess(result: List<CustomFieldValueOption>?) {
-                                                                val options = ArrayList<String>()
-
-                                                                for (o in result!!) {
-                                                                    options.add(o.customFieldValueOptionName)
-                                                                }
-
-                                                                view.runOnUiThread({
-                                                                    view.addCustomFieldDropdown(c,
-                                                                            options.toTypedArray<String>(),
-                                                                            finalValueSelection)
-                                                                })
-                                                            }
-
-                                                            override fun onFailure(exception: Throwable?) {
-                                                                print(exception!!.message)
-                                                            }
-                                                        })
-                                            }
-                                        }
-
-                                        override fun onFailure(exception: Throwable?) {
-                                            print(exception!!.message)
-                                        }
-                                    })
-                        }
+                    for (o in result3!!) {
+                        options.add(o.customFieldValueOptionName!!)
                     }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+                    view.runOnUiThread(Runnable{
+                        view.addCustomFieldDropdown(c,
+                                options.toTypedArray<String>(),
+                                finalValueSelection)
+                    })
+
+                }
+
+            }
+        }
     }
 
     /**
@@ -162,33 +134,23 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
 
-        if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
+        if (arguments.containsKey(ARG_CLAZZ_UID)) {
+            currentClazzUid = arguments.get(ARG_CLAZZ_UID)!!.toLong()
             initFromClazz(currentClazzUid)
         } else if (arguments!!.containsKey(ClazzEditView.ARG_NEW)) {
-            repository.locationDao.insertAsync(Location("Temp Location",
-                    "Temp location",
-                    TimeZone.getDefault().getID()), object : UmCallback<Long> {
-                override fun onSuccess(newLocationUid: Long?) {
+            GlobalScope.launch {
+                val timeZoneString : String = ""
+                //TODO: KMP: TimeZone alternative
+                timeZoneString = TimeZone.getDefault().getID()
+                val newLocationUid = repository.locationDao.insertAsync(Location("Temp Location",
+                        "Temp location", timeZoneString))
 
-                    tempClazzLocationUid = newLocationUid!!
+                tempClazzLocationUid = newLocationUid!!
 
-                    clazzDao.insertAsync(Clazz("", newLocationUid),
-                            object : UmCallback<Long> {
-                                override fun onSuccess(result: Long?) {
-                                    initFromClazz(result!!)
-                                }
+                val clazzUid = clazzDao.insertAsync(Clazz("", newLocationUid))
+                initFromClazz(clazzUid!!)
 
-                                override fun onFailure(exception: Throwable?) {
-                                    print(exception!!.message)
-                                }
-                            })
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            }
         }
     }
 
@@ -199,37 +161,31 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         //Get person live data and observe
         val clazzLiveData = clazzDao.findByUidLive(currentClazzUid)
         //Observe the live data
-        clazzLiveData.observe(this@ClazzEditPresenter,
-                UmObserver<Clazz> { this@ClazzEditPresenter.handleClazzValueChanged(it) })
+        clazzLiveData.observe(this, this::handleClazzValueChanged)
 
-        clazzDao.findByUidAsync(currentClazzUid, object : UmCallback<Clazz> {
-            override fun onSuccess(result: Clazz?) {
-                mUpdatedClazz = result
-                currentClazzUid = mUpdatedClazz!!.clazzUid
-                view.runOnUiThread({ view.updateClazzEditView(result!!) })
+        var thisP = this
+        GlobalScope.launch {
+            val result = clazzDao.findByUidAsync(currentClazzUid)
 
-                //Holidays
-                holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData()
-                holidaysLiveData!!.observe(this@ClazzEditPresenter,
-                        UmObserver<List<UMCalendar>> { this@ClazzEditPresenter.handleAllHolidaysChanged(it) })
+            mUpdatedClazz = result
+            currentClazzUid = mUpdatedClazz!!.clazzUid
+            view.runOnUiThread(Runnable{ view.updateClazzEditView(result!!) })
 
-                //Locations
-                locationsLiveData = repository.locationDao.findAllActiveLocationsLive()
-                locationsLiveData!!.observe(this@ClazzEditPresenter,
-                        UmObserver<List<Location>> { this@ClazzEditPresenter.handleAllLocationsChanged(it) })
+            //Holidays
+            holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
+            holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
 
-                getAllClazzCustomFields()
 
-            }
+            //Locations
+            locationsLiveData = repository.locationDao.findAllActiveLocationsLive()
+            locationsLiveData!!.observe(thisP, thisP::handleAllLocationsChanged)
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+            getAllClazzCustomFields()
+
+        }
 
         //Set Schedule live data:
-        clazzScheduleLiveData = repository.scheduleDao
-                .findAllSchedulesByClazzUid(currentClazzUid)
+        clazzScheduleLiveData = repository.scheduleDao.findAllSchedulesByClazzUid(currentClazzUid)
         updateViewWithProvider()
     }
 
@@ -248,7 +204,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      *
      * @param umCalendar The list of UMCalendar holidays
      */
-    private fun handleAllHolidaysChanged(umCalendar: List<UMCalendar>) {
+    private fun handleAllHolidaysChanged(umCalendar: List<UMCalendar>?) {
         var selectedPosition = 0
 
         holidayCalendarUidToPosition = HashMap()
@@ -256,23 +212,22 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         val holidayList = ArrayList<String>()
         var pos = 0
-        for (ec in umCalendar) {
-            holidayList.add(ec.umCalendarName)
-            holidayCalendarUidToPosition[ec.umCalendarUid] = pos
+        for (ec in umCalendar!!) {
+            holidayList.add(ec.umCalendarName!!)
+            holidayCalendarUidToPosition!![ec.umCalendarUid] = pos
             positionToHolidayCalendarUid!![pos] = ec.umCalendarUid
             pos++
         }
-        var holidayPreset = arrayOfNulls<String>(holidayList.size)
-        holidayPreset = holidayList.toTypedArray<String>()
+        val holidayPreset = holidayList.toTypedArray<String>()
 
         if (mOriginalClazz == null) {
             mOriginalClazz = Clazz()
         }
 
         if (mOriginalClazz!!.clazzHolidayUMCalendarUid != 0L) {
-            if (holidayCalendarUidToPosition.containsKey(
+            if (holidayCalendarUidToPosition!!.containsKey(
                             mOriginalClazz!!.clazzHolidayUMCalendarUid))
-                selectedPosition = holidayCalendarUidToPosition[mOriginalClazz!!.clazzHolidayUMCalendarUid]!!
+                selectedPosition = holidayCalendarUidToPosition!![mOriginalClazz!!.clazzHolidayUMCalendarUid]!!
         }
 
         view.setHolidayPresets(holidayPreset, selectedPosition)
@@ -283,7 +238,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      *
      * @param locations The list of Locations available.
      */
-    private fun handleAllLocationsChanged(locations: List<Location>) {
+    private fun handleAllLocationsChanged(locations: List<Location>?) {
         var selectedPosition = 0
 
         locationUidToPosition = HashMap()
@@ -291,22 +246,21 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         val locationList = ArrayList<String>()
         var pos = 0
-        for (el in locations) {
-            locationList.add(el.title)
-            locationUidToPosition[el.locationUid] = pos
+        for (el in locations!!) {
+            locationList.add(el.title!!)
+            locationUidToPosition!![el.locationUid] = pos
             positionToLocationUid!![pos] = el.locationUid
             pos++
         }
-        var locationPreset = arrayOfNulls<String>(locationList.size)
-        locationPreset = locationList.toTypedArray<String>()
+        val locationPreset = locationList.toTypedArray<String>()
 
         if (mOriginalClazz == null) {
             mOriginalClazz = Clazz()
         }
 
         if (mOriginalClazz!!.clazzLocationUid != 0L) {
-            if (locationUidToPosition.containsKey(mOriginalClazz!!.clazzLocationUid))
-                selectedPosition = locationUidToPosition[mOriginalClazz!!.clazzLocationUid]!!
+            if (locationUidToPosition!!.containsKey(mOriginalClazz!!.clazzLocationUid))
+                selectedPosition = locationUidToPosition!![mOriginalClazz!!.clazzLocationUid]!!
         }
 
         view.setLocationPresets(locationPreset, selectedPosition)
@@ -387,7 +341,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      */
     fun handleClickAddSchedule() {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid)
+        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
         impl.go(AddScheduleDialogView.VIEW_NAME, args, context)
     }
 
@@ -407,27 +361,22 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
             }
             if (valueString != null && !valueString.isEmpty()) {
                 val finalValueString = valueString
-                customFieldValueDao.findValueByCustomFieldUidAndEntityUid(customFieldUid,
-                        currentClazzUid, object : UmCallback<CustomFieldValue> {
-                    override fun onSuccess(result: CustomFieldValue?) {
-                        val customFieldValue: CustomFieldValue?
-                        if (result == null) {
-                            customFieldValue = CustomFieldValue()
-                            customFieldValue.customFieldValueEntityUid = mUpdatedClazz!!.clazzUid
-                            customFieldValue.customFieldValueFieldUid = customFieldUid
-                            customFieldValue.customFieldValueValue = finalValueString
-                            customFieldValueDao.insert(customFieldValue)
-                        } else {
-                            customFieldValue = result
-                            customFieldValue.customFieldValueValue = finalValueString
-                            customFieldValueDao.update(customFieldValue)
-                        }
+                GlobalScope.launch {
+                    val result = customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                            customFieldUid, currentClazzUid)
+                    val customFieldValue: CustomFieldValue?
+                    if (result == null) {
+                        customFieldValue = CustomFieldValue()
+                        customFieldValue.customFieldValueEntityUid = mUpdatedClazz!!.clazzUid
+                        customFieldValue.customFieldValueFieldUid = customFieldUid
+                        customFieldValue.customFieldValueValue = finalValueString
+                        customFieldValueDao.insert(customFieldValue)
+                    } else {
+                        customFieldValue = result
+                        customFieldValue.customFieldValueValue = finalValueString
+                        customFieldValueDao.update(customFieldValue)
                     }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+                }
             }
         }
     }
@@ -440,32 +389,20 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      */
     fun handleClickDone() {
         mUpdatedClazz!!.isClazzActive = true
-        repository.locationDao.findByUidAsync(mUpdatedClazz!!.clazzLocationUid,
-                object : UmCallback<Location> {
-                    override fun onSuccess(result: Location?) {
-                        if (result!!.locationUid == tempClazzLocationUid) {
-                            result.title = mUpdatedClazz!!.clazzName!! + "'s default location"
-                            result.setLocationActive(true)
-                            repository.locationDao.update(result)
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
-
-
-        clazzDao.updateClazzAsync(mUpdatedClazz!!, loggedInPersonUid, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                //Close the activity.
-                view.finish()
+        GlobalScope.launch {
+            val result = repository.locationDao.findByUidAsync(mUpdatedClazz!!.clazzLocationUid)
+            if (result!!.locationUid == tempClazzLocationUid) {
+                result.title = mUpdatedClazz!!.clazzName!! + "'s default location"
+                result.locationActive = (true)
+                repository.locationDao.update(result)
             }
+        }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            clazzDao.updateClazzAsync(mUpdatedClazz!!, loggedInPersonUid)
+            //Close the activity.
+            view.finish()
+        }
     }
 
 
@@ -479,8 +416,8 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     override fun handleCommonPressed(arg: Any) {
         // To edit the schedule assigned to clazz
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid)
-        args.put(ARG_SCHEDULE_UID, arg)
+        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+        args.put(ARG_SCHEDULE_UID, arg.toString())
         impl.go(AddScheduleDialogView.VIEW_NAME, args, context)
     }
 
@@ -494,12 +431,14 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     override fun handleSecondaryPressed(arg: Any) {
         //To delete schedule assigned to clazz
         val scheduleDao = repository.scheduleDao
-        scheduleDao.disableSchedule(arg as Long)
+        GlobalScope.launch {
+            scheduleDao.disableSchedule(arg as Long)
+        }
     }
 
     fun handleClickFeaturesSelection() {
         val args = HashMap<String, String>()
-        args.put(CLAZZ_FEATURE_CLAZZUID, currentClazzUid)
+        args.put(CLAZZ_FEATURE_CLAZZUID, currentClazzUid.toString())
         args.put(CLAZZ_FEATURE_ATTENDANCE_ENABLED, if (mUpdatedClazz!!.isAttendanceFeature) "yes" else "no")
         args.put(CLAZZ_FEATURE_ACTIVITY_ENABLED, if (mUpdatedClazz!!.isActivityFeature) "yes" else "no")
         args.put(CLAZZ_FEATURE_SEL_ENABLED, if (mUpdatedClazz!!.isSelFeature) "yes" else "no")

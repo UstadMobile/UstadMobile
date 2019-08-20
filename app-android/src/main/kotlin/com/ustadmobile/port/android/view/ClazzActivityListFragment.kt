@@ -146,7 +146,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
     }
 
-    override fun setClazzActivityChangesDropdownPresets(presets: Array<String>) {
+    override fun setClazzActivityChangesDropdownPresets(presets: Array<String?>) {
         this.changesPresets = presets
         val adapter = ArrayAdapter(Objects.requireNonNull(context),
                 android.R.layout.simple_spinner_item, changesPresets)

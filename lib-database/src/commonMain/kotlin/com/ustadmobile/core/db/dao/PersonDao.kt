@@ -160,11 +160,56 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun findAllAdminsAsList(): List<Person>
 
 
+    @Query("SELECT Person.* , (0) AS clazzUid, " +
+            " (0) AS attendancePercentage, " +
+            " (0) AS clazzMemberRole, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+            " DESC LIMIT 1) AS personPictureUid, " +
+            " CASE WHEN EXISTS " +
+            " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
+            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND PersonGroupMember.groupMemberActive = 1) " +
+            "   THEN 1 " +
+            "   ELSE 0 " +
+            " END AS enrolled " +
+            "  FROM Person WHERE Person.active = 1 ORDER BY Person.firstNames ASC")
+    abstract fun findAllPeopleWithEnrollmentInGroup(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
+
     @Insert
     abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long
 
     @Insert
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
+
+
+    /**
+     * Creates actual person and assigns it to a group for permissions' sake. Use this
+     * instead of direct insert.
+     *
+     * @param person    The person entity
+     * @param callback  The callback.
+     */
+    suspend fun createPersonAsync(person: Person):Long  {
+        val personUid = insertAsync(person)
+        person.personUid = personUid
+
+        val personGroup = PersonGroup()
+        personGroup.groupName = if (person.firstNames != null)
+            person.firstNames
+        else
+            "" + "'s group"
+        val personGroupUid = insertPersonGroup(personGroup)
+        personGroup.groupUid = personGroupUid
+
+        val personGroupMember = PersonGroupMember()
+        personGroupMember.groupMemberPersonUid = personUid
+        personGroupMember.groupMemberGroupUid = personGroupUid
+        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
+
+        personGroupMember.groupMemberUid = personGroupMemberUid
+        return personUid
+    }
+
 
     suspend fun createPersonAndGroup(person:Person):Long{
         //1. Insert the person if unique
@@ -194,6 +239,43 @@ abstract class PersonDao : BaseDao<Person> {
             e.message
             return 0L
         }
+    }
+
+
+    inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
+
+    /**
+     * Insert the person given and create a PersonGroup for it and set it to individual.
+     * Note: this does not check if the person exists. The given person must not exist.
+     *
+     * @param person    The person object to persist. Must not already exist.
+     * @param callback  The callback that returns PersonWithGroup pojo object - basically
+     * Person Uids and PersonGroup Uids
+     */
+    suspend fun createPersonWithGroupAsync(person: Person): PersonWithGroup {
+        val personUid = insertAsync(person)
+
+        person.personUid = personUid
+
+        val personGroup = PersonGroup()
+        personGroup.groupName = if (person.firstNames != null)
+            person.firstNames!! + "'s individual group"
+        else
+            "Person individual group"
+        personGroup.groupPersonUid = personUid
+        val personGroupUid = insertPersonGroup(personGroup)
+
+        personGroup.groupUid = personGroupUid
+
+        val personGroupMember = PersonGroupMember()
+        personGroupMember.groupMemberPersonUid = personUid
+        personGroupMember.groupMemberGroupUid = personGroupUid
+        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
+
+        personGroupMember.groupMemberUid = personGroupMemberUid
+        val personWithGroup = PersonWithGroup(personUid!!, personGroupUid!!)
+        return personWithGroup
+
     }
 
     companion object {

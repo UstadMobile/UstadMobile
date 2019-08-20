@@ -26,6 +26,7 @@ import java.util.*
 
 class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
 
+
     private var filePathFromFilePicker: String? = null
     private var mPresenter: BulkUploadMasterPresenter? = null
     private var mProgressBar: ProgressBar? = null
@@ -117,6 +118,10 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
             val value = line * 100 / nlines
             mProgressBar!!.progress = value
         }
+    }
+
+    override fun getAllErrors(): MutableList<String>? {
+        return allErrors
     }
 
     override fun addError(message: String, error: Boolean) {

@@ -20,20 +20,20 @@ class PersonCustomFieldValue() {
     var personCustomFieldValueUid: Long = 0
 
     //The Custom field's uid
-    val personCustomFieldValuePersonCustomFieldUid: Long = 0
+    var personCustomFieldValuePersonCustomFieldUid: Long = 0
 
     //The person associated uid
-    val personCustomFieldValuePersonUid: Long = 0
+    var personCustomFieldValuePersonUid: Long = 0
 
     //The value itself
-    val fieldValue: String? = null
+    var fieldValue: String? = null
 
     @UmSyncMasterChangeSeqNum
-    val personCustomFieldValueMasterChangeSeqNum: Long = 0
+    var personCustomFieldValueMasterChangeSeqNum: Long = 0
 
     @UmSyncLocalChangeSeqNum
-    val personCustomFieldValueLocalChangeSeqNum: Long = 0
+    var personCustomFieldValueLocalChangeSeqNum: Long = 0
 
     @UmSyncLastChangedBy
-    val personCustomFieldValueLastChangedBy: Int = 0
+    var personCustomFieldValueLastChangedBy: Int = 0
 }

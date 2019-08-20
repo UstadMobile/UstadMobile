@@ -47,6 +47,8 @@ interface BulkUploadMasterView : UstadView {
 
     fun setErrorHeading(messageId: Int)
 
+    fun getAllErrors(): MutableList<String>?
+
     companion object {
 
         val VIEW_NAME = "BulkUploadMaster"

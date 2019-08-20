@@ -46,8 +46,8 @@ class BasePointActivity2Presenter
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
         val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
-        personLive.observe(this@BasePointActivity2Presenter,
-                UmObserver<Person> { this@BasePointActivity2Presenter.handlePersonValueChanged(it) })
+        personLive.observe(this, this::handlePersonValueChanged)
+
     }
 
     /**
@@ -126,9 +126,9 @@ class BasePointActivity2Presenter
     fun handleConfirmShareApp() {
 
         //Get setup file
-        impl.getAppSetupFile(context, false, object : UmCallback {
 
-            override fun onSuccess(result: Any?) {
+        impl.getAppSetupFile(context, false, object : UmCallback<String> {
+            override fun onSuccess(result: String?) {
                 //Share it on the view
                 view.shareAppSetupFile(result!!.toString())
             }

@@ -74,7 +74,7 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
      * Generates the time period options. Generates the hashmap and sends it to the view.
      */
     private fun updateTimePeriod() {
-        val timePeriodOptions = LinkedHashMap<Int, String>()
+        val timePeriodOptions = HashMap<Int, String>()
         timePeriodOptions[TIME_PERIOD_LAST_WEEK] = impl.getString(MessageID.last_week, context)
         timePeriodOptions[TIME_PERIOD_LAST_TWO_WEEK] = impl.getString(MessageID.last_two_weeks, context)
         timePeriodOptions[TIME_PERIOD_LAST_MONTH] = impl.getString(MessageID.last_month, context)

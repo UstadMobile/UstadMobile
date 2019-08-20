@@ -13,7 +13,7 @@ class PersonGroupMember() {
     @PrimaryKey(autoGenerate = true)
     var groupMemberUid: Long = 0
 
-    private val groupMemberActive: Boolean = false
+    var groupMemberActive: Boolean = false
 
     @UmIndexField
     @ColumnInfo(index = true)

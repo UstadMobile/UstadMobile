@@ -1,30 +1,20 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzMemberDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao
-import com.ustadmobile.core.db.dao.PersonDao
-import com.ustadmobile.core.db.dao.PersonGroupMemberDao
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonCustomFieldValue
-import com.ustadmobile.lib.db.entities.PersonField
-import com.ustadmobile.lib.db.entities.PersonGroupMember
-import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON_TYPE
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * The ClazzDetailEnrollStudent's presenter - responsible for the logic of Enrolling a student
@@ -41,7 +31,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
 
     private var currentClazzUid: Long = 0
     private var currentRole = 0
-    private var personWithEnrollmentUmProvider: UmProvider<PersonWithEnrollment>? = null
+    private var personWithEnrollmentUmProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
     //PersonGroup enrollment
     private var groupUid: Long = 0
@@ -53,15 +43,15 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
 
         //Set current Clazz being enrolled.
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
+            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
 
         if (arguments!!.containsKey(ARG_NEW_PERSON_TYPE)) {
-            currentRole = arguments!!.get(ARG_NEW_PERSON_TYPE)
+            currentRole = arguments!!.get(ARG_NEW_PERSON_TYPE)!!.toInt()
         }
 
         if (arguments!!.containsKey(GROUP_UID)) {
-            groupUid = arguments!!.get(GROUP_UID)
+            groupUid = arguments!!.get(GROUP_UID)!!.toLong()
         }
     }
 
@@ -76,6 +66,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
         super.onCreate(savedState)
 
         if (currentRole == ClazzMember.ROLE_TEACHER) {
+
             personWithEnrollmentUmProvider = repository.clazzMemberDao
                     .findAllEligibleTeachersWithEnrollmentForClassUid(currentClazzUid)
         } else if (currentRole == ClazzMember.ROLE_STUDENT) {
@@ -111,42 +102,27 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
         val personDao = repository.personDao
         val personFieldDao = repository.personCustomFieldDao
         val customFieldValueDao = repository.personCustomFieldValueDao
+        GlobalScope.launch {
+            val result = personDao.createPersonAsync(newPerson)
+            //Also create null Custom Field values so it shows up in the Edit screen.
 
-        personDao.createPersonAsync(newPerson, object : UmCallback<Long> {
+            val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
 
-            override fun onSuccess(result: Long?) {
-
-                //Also create null Custom Field values so it shows up in the Edit screen.
-                personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
-                        object : UmCallback<List<PersonField>> {
-                            override fun onSuccess(allCustomFields: List<PersonField>?) {
-
-                                for (everyCustomField in allCustomFields!!) {
-                                    val cfv = PersonCustomFieldValue()
-                                    cfv.setPersonCustomFieldValuePersonCustomFieldUid(
-                                            everyCustomField.personCustomFieldUid)
-                                    cfv.setPersonCustomFieldValuePersonUid(result)
-                                    cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
-                                }
-
-                                val args = HashMap<String, String>()
-                                args.put(ARG_CLAZZ_UID, currentClazzUid)
-                                args.put(ARG_PERSON_UID, result)
-                                args.put(ARG_NEW_PERSON_TYPE, currentRole)
-                                args.put(ARG_NEW_PERSON, "true")
-                                impl.go(PersonEditView.VIEW_NAME, args, view.getContext())
-                            }
-
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
+            for (everyCustomField in allCustomFields) {
+                val cfv = PersonCustomFieldValue()
+                cfv.personCustomFieldValuePersonCustomFieldUid = everyCustomField.personCustomFieldUid
+                cfv.personCustomFieldValuePersonUid = result!!
+                cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
             }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+            val args = HashMap<String, String>()
+            args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+            args.put(ARG_PERSON_UID, result.toString())
+            args.put(ARG_NEW_PERSON_TYPE, currentRole.toString())
+            args.put(ARG_NEW_PERSON, "true")
+            impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
+
+        }
 
 
     }
@@ -168,7 +144,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
     override fun handleSecondaryPressed(arg: Any) {
 
         //The Unchecked cast warning is expected. We are making a personal assumption from the View.
-        val argument = arg as Entry<PersonWithEnrollment, Boolean>
+        val argument = arg as Map.Entry<PersonWithEnrollment, Boolean>
 
         handleEnrollChanged(argument.key, argument.value)
     }
@@ -187,101 +163,77 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             //PersonGroup enrollment.
             val groupMemberDao = repository.personGroupMemberDao
 
-            groupMemberDao.findMemberByGroupAndPersonAsync(groupUid, person.personUid,
-                    object : UmCallback<PersonGroupMember> {
-                        override fun onSuccess(existingGroupMember: PersonGroupMember?) {
+            GlobalScope.launch {
+                val existingGroupMember = groupMemberDao.findMemberByGroupAndPersonAsync(groupUid,
+                        person.personUid)
 
 
-                            if (enrolled) {
-                                if (existingGroupMember == null) {
-                                    //Create the PersonGroupMember
-                                    val newGroupMember = PersonGroupMember()
-                                    newGroupMember.groupMemberGroupUid = groupUid
-                                    newGroupMember.groupMemberPersonUid = person.personUid
-                                    newGroupMember.setGroupMemberActive(true)
-                                    groupMemberDao.insertAsync(newGroupMember, object : UmCallback<Long> {
-                                        override fun onSuccess(result: Long?) {
-                                            newGroupMember.groupMemberUid = result
-                                        }
+                if (enrolled) {
+                    if (existingGroupMember == null) {
+                        //Create the PersonGroupMember
+                        val newGroupMember = PersonGroupMember()
+                        newGroupMember.groupMemberGroupUid = groupUid
+                        newGroupMember.groupMemberPersonUid = person.personUid
+                        newGroupMember.groupMemberActive = (true)
+                        val result = groupMemberDao.insertAsync(newGroupMember)
+                        newGroupMember.groupMemberUid = result
 
-                                        override fun onFailure(exception: Throwable?) {
-                                            print(exception!!.message)
-                                        }
-                                    })
-
-                                } else {
-                                    if (!existingGroupMember.isGroupMemberActive()) {
-                                        existingGroupMember.setGroupMemberActive(true)
-                                        groupMemberDao.update(existingGroupMember)
-                                    }
-                                    //else let it be
-                                }
-
-                            } else {
-                                //if already enrolled, disable ClazzMember.
-                                if (existingGroupMember != null) {
-                                    existingGroupMember.setGroupMemberActive(false)
-                                    groupMemberDao.update(existingGroupMember)
-                                }
-                            }
+                    } else {
+                        if (!existingGroupMember.groupMemberActive) {
+                            existingGroupMember.groupMemberActive = (true)
+                            groupMemberDao.update(existingGroupMember)
                         }
+                        //else let it be
+                    }
 
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+                } else {
+                    //if already enrolled, disable ClazzMember.
+                    if (existingGroupMember != null) {
+                        existingGroupMember.groupMemberActive = (false)
+                        groupMemberDao.update(existingGroupMember)
+                    }
+                }
+            }
 
             return
         }
 
-        clazzMemberDao.findByPersonUidAndClazzUidAsync(person.personUid, currentClazzUid,
-                object : UmCallback<ClazzMember> {
+        GlobalScope.launch {
+            val existingClazzMember = clazzMemberDao.findByPersonUidAndClazzUidAsync(person.personUid,
+                    currentClazzUid)
 
-                    override fun onSuccess(existingClazzMember: ClazzMember?) {
-
-                        if (enrolled) {
-                            if (existingClazzMember == null) {
-                                //Create the ClazzMember
-                                val newClazzMember = ClazzMember()
-                                newClazzMember.clazzMemberClazzUid = currentClazzUid
-                                if (currentRole == ClazzMember.ROLE_TEACHER) {
-                                    newClazzMember.setRole(ClazzMember.ROLE_TEACHER)
-                                } else {
-                                    newClazzMember.setRole(ClazzMember.ROLE_STUDENT)
-                                }
-                                newClazzMember.clazzMemberPersonUid = person.personUid
-                                newClazzMember.setDateJoined(System.currentTimeMillis())
-                                newClazzMember.clazzMemberActive = true
-                                clazzMemberDao.insertAsync(newClazzMember, object : UmCallback<Long> {
-                                    override fun onSuccess(result: Long?) {
-                                        newClazzMember.clazzMemberUid = result
-                                    }
-
-                                    override fun onFailure(exception: Throwable?) {
-                                        print(exception!!.message)
-                                    }
-                                })
-                            } else {
-                                if (!existingClazzMember.isClazzMemberActive()) {
-                                    existingClazzMember.clazzMemberActive = true
-                                    clazzMemberDao.update(existingClazzMember)
-                                }
-                                //else let it be
-                            }
-
-                        } else {
-                            //if already enrolled, disable ClazzMember.
-                            if (existingClazzMember != null) {
-                                existingClazzMember.clazzMemberActive = false
-                                clazzMemberDao.update(existingClazzMember)
-                            }
-                        }
+            if (enrolled) {
+                if (existingClazzMember == null) {
+                    //Create the ClazzMember
+                    val newClazzMember = ClazzMember()
+                    newClazzMember.clazzMemberClazzUid = currentClazzUid
+                    if (currentRole == ClazzMember.ROLE_TEACHER) {
+                        newClazzMember.clazzMemberRole = (ClazzMember.ROLE_TEACHER)
+                    } else {
+                        newClazzMember.clazzMemberRole = (ClazzMember.ROLE_STUDENT)
                     }
+                    newClazzMember.clazzMemberPersonUid = person.personUid
+                    newClazzMember.clazzMemberDateJoined = UMCalendarUtil.getDateInMilliPlusDays(0)
+                    newClazzMember.clazzMemberActive = true
+                    val result = clazzMemberDao.insertAsync(newClazzMember)
+                    newClazzMember.clazzMemberUid = result
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
+                } else {
+                    if (!existingClazzMember.clazzMemberActive) {
+                        existingClazzMember.clazzMemberActive = true
+                        clazzMemberDao.update(existingClazzMember)
                     }
-                })
+                    //else let it be
+                }
+
+            } else {
+                //if already enrolled, disable ClazzMember.
+                if (existingClazzMember != null) {
+                    existingClazzMember.clazzMemberActive = false
+                    clazzMemberDao.update(existingClazzMember)
+                }
+            }
+        }
     }
 
     /**

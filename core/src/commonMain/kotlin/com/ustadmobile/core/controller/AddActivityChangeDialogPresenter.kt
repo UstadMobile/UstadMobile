@@ -49,8 +49,7 @@ class AddActivityChangeDialogPresenter(context: Any, arguments: Map<String, Stri
         measurementTypes.add(impl.getString(MessageID.yes_no, context))
         measurementToUOM!![2] = ClazzActivityChange.UOM_BINARY
 
-        var measurementTypesArray = arrayOfNulls<String>(measurementTypes.size)
-        measurementTypesArray = measurementTypes.toTypedArray<String>()
+        var measurementTypesArray = measurementTypes.toTypedArray<String>()
 
         //.. and set them on the view.
         view.setMeasurementDropdownPresets(measurementTypesArray)

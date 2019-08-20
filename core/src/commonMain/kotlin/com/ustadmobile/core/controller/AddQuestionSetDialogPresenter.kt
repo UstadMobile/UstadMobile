@@ -5,6 +5,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.AddQuestionSetDialogView
 import com.ustadmobile.lib.db.entities.SelQuestionSet
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class AddQuestionSetDialogPresenter(context: Any, arguments:Map<String, String>?,
@@ -31,15 +33,9 @@ class AddQuestionSetDialogPresenter(context: Any, arguments:Map<String, String>?
     fun handleAddQuestionSet(title: String) {
         questionSet = SelQuestionSet()
         questionSet!!.title = title
-        selQuestionSetDao.insertAsync(questionSet!!, object : UmCallback<Long> {
-            override fun onSuccess(result: Long?) {
-                //Do nothing
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            selQuestionSetDao.insertAsync(questionSet!!)
+        }
     }
 
     /**

@@ -31,6 +31,9 @@ import com.ustadmobile.lib.db.entities.ScheduledCheck
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 
 /**
@@ -69,6 +72,10 @@ class ClazzLogDetailPresenter(context: Any,
     private val scheduleDao = repository.scheduleDao
 
     private val setupFromClazzLogCallback = object : UmCallback<ClazzLog> {
+        override fun onFailure(exception: Throwable?) {
+           print(exception!!.message)
+        }
+
         override fun onSuccess(clazzLog: ClazzLog?) {
             if (clazzLog != null) {
                 currentClazzLog = clazzLog
@@ -77,8 +84,13 @@ class ClazzLogDetailPresenter(context: Any,
                 checkPermissions()
 
                 if (title == null) {
-                    repository.clazzDao.getClazzNameAsync(clazzLog.clazzLogClazzUid,
-                            setTitleCallback)
+                    GlobalScope.launch {
+                        val result = repository.clazzDao.getClazzNameAsync(clazzLog
+                                .clazzLogClazzUid)
+                        title = "$result " + UstadMobileSystemImpl.instance.getString(
+                                MessageID.attendance, context)
+                        view.runOnUiThread(Runnable{ view.updateToolbarTitle(title!!) })
+                    }
                 }
 
                 //Get clazzlog schedule
@@ -92,26 +104,24 @@ class ClazzLogDetailPresenter(context: Any,
                 val clazzDao = repository.clazzDao
                 clazzName = clazzDao.findByUid(currentClazzLog!!.clazzLogClazzUid).clazzName
 
-                view.runOnUiThread({ updateViewDateHeading() })
+                view.runOnUiThread(Runnable{ updateViewDateHeading() })
             }
 
         }
 
-        override fun onFailure(exception: Throwable) {
-            exception.printStackTrace()
-        }
     }
 
     private val setTitleCallback = object : UmCallback<String> {
+        override fun onFailure(exception: Throwable?) {
+            print(exception!!.message)
+        }
+
         override fun onSuccess(result: String?) {
             title = "$result " + UstadMobileSystemImpl.instance.getString(
                     MessageID.attendance, context)
-            view.runOnUiThread({ view.updateToolbarTitle(title!!) })
+            view.runOnUiThread(Runnable{ view.updateToolbarTitle(title!!) })
         }
 
-        override fun onFailure(exception: Throwable) {
-            exception.printStackTrace()
-        }
     }
 
     /**
@@ -136,11 +146,17 @@ class ClazzLogDetailPresenter(context: Any,
 
         //Get clazz uid and set it
         if (arguments!!.containsKey(ClassLogDetailView.ARG_CLAZZ_LOG_UID)) {
-            val clazzLogUid = java.lang.Long.parseLong(arguments[ClassLogDetailView.ARG_CLAZZ_LOG_UID]!!.toString())
-            repository.clazzLogDao.findByUidAsync(clazzLogUid, setupFromClazzLogCallback)
+            val clazzLogUid = arguments[ClassLogDetailView.ARG_CLAZZ_LOG_UID]!!.toLong()
+            GlobalScope.launch {
+                val clazzLog = repository.clazzLogDao.findByUidAsync(clazzLogUid)
+                setupFromClazzLogCallback.onSuccess(clazzLog)
+            }
         } else if (arguments!!.containsKey(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID)) {
-            val clazzUid = java.lang.Long.parseLong(arguments[ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID]!!.toString())
-            repository.clazzLogDao.findMostRecentByClazzUid(clazzUid, setupFromClazzLogCallback)
+            val clazzUid = arguments[ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID]!!.toLong()
+            GlobalScope.launch {
+                val clazzLog = repository.clazzLogDao.findMostRecentByClazzUid(clazzUid)
+                setupFromClazzLogCallback.onSuccess(clazzLog)
+            }
         }
 
     }
@@ -150,23 +166,15 @@ class ClazzLogDetailPresenter(context: Any,
      */
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
-
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzLog!!.clazzLogClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        isHasEditPermissions = result
-                        view.showMarkAllButtons(result!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                }))
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid,
+                    currentClazzLog!!.clazzLogClazzUid, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
+            isHasEditPermissions = result
+            view.showMarkAllButtons(result!!)
+        }
     }
 
-    private fun loadClazzLogListForClazz() {
-        repository.clazzLogDao.getListOfClazzLogUidsAndDatesForClazz(
+    private fun loadClazzLogListForClazz() { repository.clazzLogDao.getListOfClazzLogUidsAndDatesForClazz(
                 currentClazzLog!!.clazzLogClazzUid,
                 object : UmCallback<List<ClazzLogDao.ClazzLogUidAndDate>> {
                     override fun onSuccess(result: List<ClazzLogDao.ClazzLogUidAndDate>?) {

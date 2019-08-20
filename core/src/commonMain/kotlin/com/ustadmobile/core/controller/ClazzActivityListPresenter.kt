@@ -2,10 +2,7 @@ package com.ustadmobile.core.controller
 
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_MONTH
@@ -16,11 +13,11 @@ import com.ustadmobile.core.view.ClazzActivityEditView.Companion.ARG_CLAZZACTIVI
 import com.ustadmobile.core.view.ClazzActivityEditView.Companion.ARG_CLAZZACTIVITY_UID
 import com.ustadmobile.core.view.ClazzActivityListView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.lib.db.entities.ClazzActivityChange
 import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle
-import com.ustadmobile.lib.db.entities.DailyActivityNumbers
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 
 /**
@@ -67,31 +64,25 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
      */
     private fun updateChangeOptions() {
 
-        activityChangeDao.findAllClazzActivityChangesAsync(
-                object : UmCallback<List<ClazzActivityChange>> {
-                    override fun onSuccess(result: List<ClazzActivityChange>?) {
-                        changeToIdMap = HashMap()
-                        val presetAL = ArrayList<String>()
-                        var i = 0f
-                        for (everyChange in result!!) {
-                            presetAL.add(everyChange.clazzActivityChangeTitle!!)
+        GlobalScope.launch {
+            val result = activityChangeDao.findAllClazzActivityChangesAsync()
+            changeToIdMap = HashMap()
+            val presetAL = ArrayList<String>()
+            var i = 0f
+            for (everyChange in result!!) {
+                presetAL.add(everyChange.clazzActivityChangeTitle!!)
 
-                            // Save mapping of position and activity change's uid to handle it.
-                            changeToIdMap!![i] = everyChange.clazzActivityChangeUid
-                            i++
-                        }
-                        val objectArr = presetAL.toTypedArray()
-                        val strArr = arrayOfNulls<String>(objectArr.size)
-                        for (j in objectArr.indices) {
-                            strArr[j] = objectArr[j]
-                        }
-                        view.runOnUiThread(Runnable{ view.setClazzActivityChangesDropdownPresets(strArr) })
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+                // Save mapping of position and activity change's uid to handle it.
+                changeToIdMap!![i] = everyChange.clazzActivityChangeUid
+                i++
+            }
+            val objectArr = presetAL.toTypedArray()
+            val strArr = arrayOfNulls<String?>(objectArr.size)
+            for (j in objectArr.indices) {
+                strArr[j] = objectArr[j]
+            }
+            view.runOnUiThread(Runnable { view.setClazzActivityChangesDropdownPresets(strArr) })
+        }
     }
 
     /**
@@ -121,18 +112,12 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
 
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        isCanEdit = result!!
-                        view.setFABVisibility(result)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-
-                    }
-                }))
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                    Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT)
+            isCanEdit = result
+            view.setFABVisibility(result)
+        }
     }
 
     private fun setProviderOnView() {
@@ -210,67 +195,62 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
 
         //Get aggregate daily data about Clazz Activity.
         val finalGroupOffset = groupOffset
-        clazzActivityDao.getDailyAggregateFeedbackByActivityChange(currentClazzUid, fromDate!!,
-                toDate, clazzActivityChangeUid, object : UmCallback<List<DailyActivityNumbers>> {
-            override fun onSuccess(result: List<DailyActivityNumbers>?) {
+        GlobalScope.launch {
+            val result = clazzActivityDao.getDailyAggregateFeedbackByActivityChange(currentClazzUid,
+                    fromDate!!, toDate, clazzActivityChangeUid)
 
-                val barDataMapGrouped = LinkedHashMap<Float, Float>()
+            val barDataMapGrouped = LinkedHashMap<Float, Float>()
 
-                barMapWithOGDateTimes = HashMap()
-                var f = 0f
-                var h = 1f
-                var g = 0f
+            barMapWithOGDateTimes = HashMap()
+            var f = 0f
+            var h = 1f
+            var g = 0f
 
-                var goodGrouped = 0
-                var badGrouped = 0
+            var goodGrouped = 0
+            var badGrouped = 0
 
-                for (everyDayAttendance in result!!) {
+            for (everyDayAttendance in result!!) {
 
-                    f++
-                    //h++;
+                f++
+                //h++;
 
-                    val good = everyDayAttendance.good
-                    val bad = everyDayAttendance.bad
-                    val thisDate = everyDayAttendance.dayDate
+                val good = everyDayAttendance.good
+                val bad = everyDayAttendance.bad
+                val thisDate = everyDayAttendance.dayDate
 
-                    barMapWithOGDateTimes!![f] = thisDate
+                barMapWithOGDateTimes!![f] = thisDate
 
-                    //Sum up the good and bad for the day
-                    if (good > bad) {
-                        barDataMap[f] = good.toFloat()
-                    } else {
-                        barDataMap[f] = -bad.toFloat()
-                    }
-
-                    if (h <= finalGroupOffset) {
-                        goodGrouped = goodGrouped + good
-                        badGrouped = badGrouped + bad
-
-                        h++
-                        if (h > finalGroupOffset) {
-                            g++
-
-                            if (goodGrouped > badGrouped) {
-                                barDataMapGrouped[g] = goodGrouped.toFloat()
-                            } else {
-                                barDataMapGrouped[g] = (-badGrouped).toFloat()
-                            }
-
-                            h = 1f
-                            goodGrouped = 0
-                            badGrouped = 0
-                        }
-                    }
+                //Sum up the good and bad for the day
+                if (good > bad) {
+                    barDataMap[f] = good.toFloat()
+                } else {
+                    barDataMap[f] = -bad.toFloat()
                 }
 
-                //view.updateActivityBarChart(barDataMap);
-                view.updateActivityBarChart(barDataMapGrouped)
+                if (h <= finalGroupOffset) {
+                    goodGrouped = goodGrouped + good
+                    badGrouped = badGrouped + bad
+
+                    h++
+                    if (h > finalGroupOffset) {
+                        g++
+
+                        if (goodGrouped > badGrouped) {
+                            barDataMapGrouped[g] = goodGrouped.toFloat()
+                        } else {
+                            barDataMapGrouped[g] = (-badGrouped).toFloat()
+                        }
+
+                        h = 1f
+                        goodGrouped = 0
+                        badGrouped = 0
+                    }
+                }
             }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+            //view.updateActivityBarChart(barDataMap);
+            view.updateActivityBarChart(barDataMapGrouped)
+        }
     }
 
 }

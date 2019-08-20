@@ -3,8 +3,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.AddActivityChangeDialogView
@@ -18,6 +16,8 @@ import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzActivity
 import com.ustadmobile.lib.db.entities.ClazzActivityChange
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -97,17 +97,11 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      * Checks permission and updates view accordingly
      */
     fun checkPermissions() {
-        clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        setActivityEditable(result!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                }))
+        GlobalScope.launch {
+            val result = clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                    Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT)
+            setActivityEditable(result!!)
+        }
 
     }
 
@@ -118,35 +112,22 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
         //Find Activity first by activity id. If it is not valid, find by clazz uid and log date.
 
         //If activity uid given , find the ClazzActivity:
-        if (currentClazzActivityUid != 0L)
-            clazzActivityDao.findByUidAsync(currentClazzActivityUid,
-                    object : UmCallback<ClazzActivity> {
-                        //success doesn't mean it exists
-                        override fun onSuccess(result: ClazzActivity?) {
-                            currentClazzUid = result!!.clazzActivityClazzUid
-                            currentLogDate = result.clazzActivityLogDate
+        if (currentClazzActivityUid != 0L) {
+            GlobalScope.launch {
+                val result = clazzActivityDao.findByUidAsync(currentClazzActivityUid)
+                currentClazzUid = result!!.clazzActivityClazzUid
+                currentLogDate = result.clazzActivityLogDate
 
-                            //Check if ClazzActivity exists. If it doesn't, create it (It ought to exist)
-                            checkActivityCreateIfNotExist(result)
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
-        else {
-            clazzActivityDao.findByClazzAndDateAsync(currentClazzUid, currentLogDate,
-                    object : UmCallback<ClazzActivity> {
-                        //success doesn't mean it exists.
-                        override fun onSuccess(result: ClazzActivity?) {
-                            //Check if activity given exists or not - create if it doesn't.
-                            checkActivityCreateIfNotExist(result)
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+                //Check if ClazzActivity exists. If it doesn't, create it (It ought to exist)
+                checkActivityCreateIfNotExist(result)
+            }
+        }else {
+            GlobalScope.launch {
+                val result = clazzActivityDao.findByClazzAndDateAsync(currentClazzUid,
+                        currentLogDate )
+                //Check if activity given exists or not - create if it doesn't.
+                checkActivityCreateIfNotExist(result)
+            }
         }//Else find by Clazz uid and Log date given:
     }
 
@@ -170,20 +151,14 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
                 + impl.getString(MessageID.activity, context))
 
         //Create one anyway given ClazzActivity doesn't exist (is null)
-        if (result == null)
-            clazzActivityDao.createClazzActivityForDate(currentClazzUid, currentLogDate,
-                    object : UmCallback<Long> {
-                        override fun onSuccess(result: Long?) {
-                            currentClazzActivityUid = result!!
-                            currentClazzActivity = clazzActivityDao.findByUid(result)
-                            view.setThumbs(THUMB_OFF)
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
-        else {
+        if (result == null) {
+            GlobalScope.launch {
+                val result = clazzActivityDao.createClazzActivityForDate(currentClazzUid, currentLogDate)
+                currentClazzActivityUid = result!!
+                currentClazzActivity = clazzActivityDao.findByUid(result)
+                view.setThumbs(THUMB_OFF)
+            }
+        }else {
 
             currentClazzActivity = result
 
@@ -214,7 +189,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      */
     private fun handleClickAddNewActivityChange() {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid)
+        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
         impl.go(AddActivityChangeDialogView.VIEW_NAME, args, context)
     }
 
@@ -242,21 +217,18 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
             //Get the ClazzActivityChange object, set the unit of measure as well.
         } else if (chosenId >= CHANGEUIDMAPSTART) {
             view.setMeasureBitVisibility(true)
-            currentClazzActivity!!.clazzActivityClazzActivityChangeUid = newChangeUid
+            currentClazzActivity!!.clazzActivityClazzActivityChangeUid = newChangeUid!!
 
             val clazzActivityChangeDao = repository.clazzActivityChangeDao
-            clazzActivityChangeDao.findByUidAsync(newChangeUid!!,
-                    object : UmCallback<ClazzActivityChange> {
-                        override fun onSuccess(result: ClazzActivityChange?) {
-                            if (result != null) {
-                                //Set the unit of measure for this ClazzActivityChange
-                                view.setUnitOfMeasureType(result.clazzActivityUnitOfMeasure.toLong())
-                                changeSelected = true
-                            }
-                        }
 
-                        override fun onFailure(exception: Throwable?) {}
-                    })
+            GlobalScope.launch {
+                val result = clazzActivityChangeDao.findByUidAsync(newChangeUid)
+                if (result != null) {
+                    //Set the unit of measure for this ClazzActivityChange
+                    view.setUnitOfMeasureType(result.clazzActivityUnitOfMeasure.toLong())
+                    changeSelected = true
+                }
+            }
         }//If add new activity selected
 
     }
@@ -302,9 +274,23 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
     }
 
     /**
+     * Finds all Activity Changes available for a clazz and gives it to the view to render.
+     * Also saves the mapping to the Presenter such that we can handle what Activity change was
+     * selected.
+     *
+     */
+    private fun updateChangeOptions() {
+
+        //Get activity change list live data
+        val activityChangeLiveData = activityChangeDao.findAllClazzActivityChangesAsyncLive()
+        //Observing it
+        activityChangeLiveData.observe(this, this::updateActivityChangesOnView)
+
+    }
+    /**
      * Updates the activity changes given to it to the view.
      */
-    private fun updateActivityChangesOnView(result: List<ClazzActivityChange>) {
+    private fun updateActivityChangesOnView(result: List<ClazzActivityChange>?) {
         changeToIdMap = HashMap()
         val idToChangeMap = HashMap<Long, Long>()
         val presetAL = ArrayList<String>()
@@ -322,7 +308,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
         //Add all other options starting from CHANGEUIDMAPSTART
         var i = CHANGEUIDMAPSTART
-        for (everyChange in result) {
+        for (everyChange in result!!) {
 
             presetAL.add(everyChange.clazzActivityChangeTitle!!)
 
@@ -334,8 +320,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
         }
 
         //set the presets to the view's activity change drop down (spinner)
-        var presetsArray = arrayOfNulls<String>(presetAL.size)
-        presetsArray = presetAL.toTypedArray<String>()
+        val presetsArray = presetAL.toTypedArray<String>()
         view.setClazzActivityChangesDropdownPresets(presetsArray)
 
         if (currentClazzActivityChangeUid != 0L) {
@@ -344,20 +329,6 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
     }
 
-    /**
-     * Finds all Activity Changes available for a clazz and gives it to the view to render.
-     * Also saves the mapping to the Presenter such that we can handle what Activity change was
-     * selected.
-     *
-     */
-    private fun updateChangeOptions() {
-
-        //Get activity change list live data
-        val activityChangeLiveData = activityChangeDao.findAllClazzActivityChangesAsyncLive()
-        //Observing it
-        activityChangeLiveData.observe(this@ClazzActivityEditPresenter,
-                UmObserver<List<ClazzActivityChange>> { this@ClazzActivityEditPresenter.updateActivityChangesOnView(it) })
-    }
 
     /**
      * Handles primary action button in the Clazz Activity Edit View. Here it is the Done button.
@@ -370,15 +341,10 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
         if (changeSelected && measurementEntered) {
             currentClazzActivity!!.isClazzActivityDone = true
-            clazzActivityDao.updateAsync(currentClazzActivity!!, object : UmCallback<Int> {
-                override fun onSuccess(result: Int?) {
-                    view.finish()
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                val result = clazzActivityDao.updateAsync(currentClazzActivity!!)
+                view.finish()
+            }
         }
         //else maybe alert/nodd the user that you need to select and fill everything.
     }
@@ -397,9 +363,8 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      * Goes forward in date and updates the view.
      */
     fun handleClickGoForwardDate() {
-        val currentLogDateDate = Date(currentLogDate)
 
-        if (!UMCalendarUtil.isToday(currentLogDateDate)) {
+        if (!UMCalendarUtil.isToday(currentLogDate)) {
             val currentTime = UMCalendarUtil.getDateInMilliPlusDays(0)
             if (currentLogDate < currentTime) {
                 //Go to next day's
@@ -411,15 +376,14 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
     }
 
     private fun updateViewDateHeading() {
-        val currentLogDateDate = Date(currentLogDate)
         var prettyDate = ""
-        if (UMCalendarUtil.isToday(currentLogDateDate)) {
+        if (UMCalendarUtil.isToday(currentLogDate)) {
             prettyDate = impl.getString(MessageID.today, context)
         }
 
-        val currentLocale = Locale.getDefault()
-
-        prettyDate += " (" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate, currentLocale) + ")"
+        //TODO: Locale substitute for KMP
+        //val currentLocale = Locale.getDefault()
+        prettyDate += " (" + UMCalendarUtil.getPrettyDateFromLong(currentLogDate, null) + ")"
 
         view.updateDateHeading(prettyDate)
     }

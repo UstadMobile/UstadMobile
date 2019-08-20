@@ -3,10 +3,11 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.BulkUploadMasterView
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
@@ -55,6 +56,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
         super.onCreate(savedState)
 
         //Set all timezones to view
+        //TODO: KMP Timezone availability ?
         allTZ = Arrays.asList(*TimeZone.getAvailableIDs())
         view.setTimeZonesList(allTZ!!)
         //Get default timezone
@@ -93,7 +95,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
 
         if (currentPosition >= lines!!.size) {
             //If at the end of the line, finish the activity.
-            if (view.allErrors.size > 0) {
+            if (view.getAllErrors()!!.size > 0) {
                 //Don't finish activity yet. Remain to show errors.
                 if (thereWasAnError) {
                     view.setErrorHeading(MessageID.please_review_errors)
@@ -138,7 +140,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
 
         val locationGovernorate = Location()
         locationGovernorate.title = locationGovernorateTitle
-        locationGovernorate.setTimeZone(chosenTZ)
+        locationGovernorate.timeZone = (chosenTZ)
 
         val locationDistrict = Location()
         locationDistrict.title = locationDistrictTitle
@@ -152,103 +154,98 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
         locationLeaf.title = locationLeafTitle
         locationLeaf.timeZone = (chosenTZ)
 
-        locationDao.findByTitleAsync(locationGovernorateTitle, object : UmCallback<List<Location>> {
-            override fun onSuccess(location1s: List<Location>?) {
+        GlobalScope.launch {
+            val location1s = locationDao.findByTitleAsync(locationGovernorateTitle)
 
-                var move = false
-                if (location1s!!.size == 0) {
+            var move = false
+            if (location1s!!.size == 0) {
+                //Location not created. Create it.
+                locationGovernorate.locationUid = locationDao.insert(locationGovernorate)
+                move = true
+            } else if (location1s.size == 1) {
+                //Location already exists. Getting uid.
+                locationGovernorate.locationUid = location1s[0].locationUid
+                move = true
+            } else {
+                view.addError("WARNING: More than one instances of " + locationGovernorateTitle +
+                        " location. Please delete duplicate Locations.",
+                        false)
+                locationGovernorate.locationUid = location1s[0].locationUid
+                move = true
+            }
+
+            if (move) {
+                val location2s = locationDao.findByTitle(locationDistrictTitle)
+                var move2 = false
+                if (location2s.size == 0) {
+                    move2 = true
                     //Location not created. Create it.
-                    locationGovernorate.locationUid = locationDao.insert(locationGovernorate)
-                    move = true
-                } else if (location1s.size == 1) {
+                    locationDistrict.parentLocationUid = locationGovernorate.locationUid
+                    locationDistrict.locationUid = locationDao.insert(locationDistrict)
+                } else if (location2s.size == 1) {
+                    move2 = true
                     //Location already exists. Getting uid.
-                    locationGovernorate.locationUid = location1s[0].locationUid
-                    move = true
+                    locationDistrict.locationUid = location2s[0].locationUid
                 } else {
-                    view.addError("WARNING: More than one instances of " + locationGovernorateTitle +
+                    view.addError("WARNING: More than one instances of " + locationDistrictTitle +
                             " location. Please delete duplicate Locations.",
                             false)
-                    locationGovernorate.locationUid = location1s[0].locationUid
-                    move = true
+                    move2 = true
+                    //Location already exists. Getting uid.
+                    locationDistrict.locationUid = location2s[0].locationUid
+
                 }
 
-                if (move) {
-                    val location2s = locationDao.findByTitle(locationDistrictTitle)
-                    var move2 = false
-                    if (location2s.size == 0) {
-                        move2 = true
-                        //Location not created. Create it.
-                        locationDistrict.parentLocationUid = locationGovernorate.locationUid
-                        locationDistrict.locationUid = locationDao.insert(locationDistrict)
-                    } else if (location2s.size == 1) {
-                        move2 = true
-                        //Location already exists. Getting uid.
-                        locationDistrict.locationUid = location2s[0].locationUid
+                if (move2) {
+                    val location3s = locationDao.findByTitle(locationTownTitle)
+                    var move3 = false
+                    if (location3s.size == 0) {
+                        move3 = true
+                        locationTown.parentLocationUid = locationDistrict.locationUid
+                        locationTown.locationUid = locationDao.insert(locationTown)
+                    } else if (location3s.size == 1) {
+                        move3 = true
+                        locationTown.locationUid = location3s[0].locationUid
                     } else {
-                        view.addError("WARNING: More than one instances of " + locationDistrictTitle +
+                        view.addError("WARNING: More than one instances of " + locationTownTitle +
                                 " location. Please delete duplicate Locations.",
                                 false)
-                        move2 = true
-                        //Location already exists. Getting uid.
-                        locationDistrict.locationUid = location2s[0].locationUid
-
+                        move3 = true
+                        locationTown.locationUid = location3s[0].locationUid
                     }
 
-                    if (move2) {
-                        val location3s = locationDao.findByTitle(locationTownTitle)
-                        var move3 = false
-                        if (location3s.size == 0) {
-                            move3 = true
-                            locationTown.parentLocationUid = locationDistrict.locationUid
-                            locationTown.locationUid = locationDao.insert(locationTown)
-                        } else if (location3s.size == 1) {
-                            move3 = true
-                            locationTown.locationUid = location3s[0].locationUid
+                    if (move3) {
+                        //Move on the the leaf level
+                        val locationLeafs = locationDao.findByTitle(locationLeafTitle)
+
+                        var moveOn = false
+                        if (locationLeafs.size == 0) {
+                            //Location leaf not created. Setting parent and
+                            //persisting to get uid.
+                            locationLeaf.parentLocationUid = locationTown.locationUid
+                            locationLeaf.locationUid = locationDao.insert(locationLeaf)
+                            moveOn = true
+
+                        } else if (locationLeafs.size == 1) {
+                            //Location leaf already exists. Getting uid
+                            locationLeaf.locationUid = locationLeafs[0].locationUid
+                            moveOn = true
                         } else {
-                            view.addError("WARNING: More than one instances of " + locationTownTitle +
+                            view.addError("WARNING: More than one instances of " + locationLeafTitle +
                                     " location. Please delete duplicate Locations.",
                                     false)
-                            move3 = true
-                            locationTown.locationUid = location3s[0].locationUid
+                            locationLeaf.locationUid = locationLeafs[0].locationUid
+                            moveOn = true
                         }
 
-                        if (move3) {
-                            //Move on the the leaf level
-                            val locationLeafs = locationDao.findByTitle(locationLeafTitle)
-
-                            var moveOn = false
-                            if (locationLeafs.size == 0) {
-                                //Location leaf not created. Setting parent and
-                                //persisting to get uid.
-                                locationLeaf.parentLocationUid = locationTown.locationUid
-                                locationLeaf.locationUid = locationDao.insert(locationLeaf)
-                                moveOn = true
-
-                            } else if (locationLeafs.size == 1) {
-                                //Location leaf already exists. Getting uid
-                                locationLeaf.locationUid = locationLeafs[0].locationUid
-                                moveOn = true
-                            } else {
-                                view.addError("WARNING: More than one instances of " + locationLeafTitle +
-                                        " location. Please delete duplicate Locations.",
-                                        false)
-                                locationLeaf.locationUid = locationLeafs[0].locationUid
-                                moveOn = true
-                            }
-
-                            //Moving forward
-                            if (moveOn) {
-                                processClazz(bulkLine, locationLeaf)
-                            }
+                        //Moving forward
+                        if (moveOn) {
+                            processClazz(bulkLine, locationLeaf)
                         }
                     }
                 }
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
     }
 
     private fun processClazz(bulkLine: BulkUploadLine, locationLeaf: Location) {
@@ -393,9 +390,9 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
                     person.motherNum = (studentMotherNum)
                 }
                 if (!studentFatherName.isEmpty())
-                    person.faterName = (studentFatherName)
+                    person.fatherName = (studentFatherName)
                 if (!studentFatherNum.isEmpty())
-                    person.fatherNum = (studentFatherNum)
+                    person.fatherNumber = (studentFatherNum)
                 if (!studentAddress.isEmpty())
                     person.address = (studentAddress)
                 person.phoneNum = studentPhoneNo
@@ -409,96 +406,90 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
 
             person.active = true
 
-            personDao.createPersonWithGroupAsync(person,
-                    object : UmCallback<PersonDao.PersonWithGroup> {
-                        override fun onSuccess(personWithGroup: PersonDao.PersonWithGroup?) {
-                            val personPersonUid = personWithGroup!!.getPersonUid()
-                            val personGroupUid = personWithGroup!!.getPersonGroupUid()
+            GlobalScope.launch {
+                val personWithGroup = personDao.createPersonWithGroupAsync(person)
+                val personPersonUid = personWithGroup.personUid
+                val personGroupUid = personWithGroup.personGroupUid
 
 
-                            //Creating custom fields (new way)
-                            if (role == ClazzMember.ROLE_STUDENT) {
+                //Creating custom fields (new way)
+                if (role == ClazzMember.ROLE_STUDENT) {
 
-                                //Student Custom field
-                                val studentCustomIterator = bulkLine.studentCustomFieldToIndex.entries.iterator()
-                                while (studentCustomIterator.hasNext()) {
-                                    val customFieldAndColMap = studentCustomIterator.next()
-                                    val customFieldUid = customFieldAndColMap.key
-                                    val colIndex = customFieldAndColMap.value
-                                    val value = bulkLine.data!![colIndex]
-                                    if (value != null && !value.isEmpty()) {
-                                        persistCustomFieldSync(customFieldUid, person.personUid, value)
-                                    }
-                                }
+                    //Student Custom field
+                    val studentCustomIterator = bulkLine.studentCustomFieldToIndex.entries.iterator()
+                    while (studentCustomIterator.hasNext()) {
+                        val customFieldAndColMap = studentCustomIterator.next()
+                        val customFieldUid = customFieldAndColMap.key
+                        val colIndex = customFieldAndColMap.value
+                        val value = bulkLine.data!![colIndex]
+                        if (value != null && !value.isEmpty()) {
+                            persistCustomFieldSync(customFieldUid, person.personUid, value)
+                        }
+                    }
 
-                            } else if (role == ClazzMember.ROLE_TEACHER) {
-                                //Teacher Custom field
-                                val teacherCustomIterator = bulkLine.teacherCustomFieldToIndex.entries.iterator()
-                                while (teacherCustomIterator.hasNext()) {
-                                    val customFieldAndColMap = teacherCustomIterator.next()
-                                    val customFieldUid = customFieldAndColMap.key
-                                    val colIndex = customFieldAndColMap.value
-                                    val value = bulkLine.data!![colIndex]
-                                    if (value != null && !value.isEmpty()) {
-                                        persistCustomFieldSync(customFieldUid, person.personUid, value)
-                                    }
-                                }
+                } else if (role == ClazzMember.ROLE_TEACHER) {
+                    //Teacher Custom field
+                    val teacherCustomIterator = bulkLine.teacherCustomFieldToIndex.entries.iterator()
+                    while (teacherCustomIterator.hasNext()) {
+                        val customFieldAndColMap = teacherCustomIterator.next()
+                        val customFieldUid = customFieldAndColMap.key
+                        val colIndex = customFieldAndColMap.value
+                        val value = bulkLine.data!![colIndex]
+                        if (value != null && !value.isEmpty()) {
+                            persistCustomFieldSync(customFieldUid, person.personUid, value)
+                        }
+                    }
 
-                            }
+                }
 
-                            if (personPersonUid != null && personGroupUid != null) {
-                                //Done teachers person - create clazzMember
+                if (personPersonUid != null && personGroupUid != null) {
+                    //Done teachers person - create clazzMember
 
-                                if (role == ClazzMember.ROLE_TEACHER) {
+                    if (role == ClazzMember.ROLE_TEACHER) {
 
-                                    //Create EntityRole
-                                    val entityRole = EntityRole()
-                                    entityRole.erTableId = Clazz.TABLE_ID
-                                    entityRole.erEntityUid = thisClazz.clazzUid
-                                    entityRole.erRoleUid = teacherRoleUid
+                        //Create EntityRole
+                        val entityRole = EntityRole()
+                        entityRole.erTableId = Clazz.TABLE_ID
+                        entityRole.erEntityUid = thisClazz.clazzUid
+                        entityRole.erRoleUid = teacherRoleUid
 
-                                    val entityRoleUid = entityRoleDao.insert(entityRole)
+                        val entityRoleUid = entityRoleDao.insert(entityRole)
 
-                                    if (entityRoleUid != null) {
+                        if (entityRoleUid != null) {
 
-                                        //For a specific clazz
-                                        val newEntityClazzSpecific = EntityRole()
-                                        newEntityClazzSpecific.erGroupUid = personGroupUid
-                                        newEntityClazzSpecific.erRoleUid = teacherRoleUid
-                                        newEntityClazzSpecific.erTableId = Clazz.TABLE_ID
-                                        newEntityClazzSpecific.erEntityUid = thisClazz.clazzUid
+                            //For a specific clazz
+                            val newEntityClazzSpecific = EntityRole()
+                            newEntityClazzSpecific.erGroupUid = personGroupUid
+                            newEntityClazzSpecific.erRoleUid = teacherRoleUid
+                            newEntityClazzSpecific.erTableId = Clazz.TABLE_ID
+                            newEntityClazzSpecific.erEntityUid = thisClazz.clazzUid
 
-                                        val entityRoleDaoUid = entityRoleDao.insert(newEntityClazzSpecific)
+                            val entityRoleDaoUid = entityRoleDao.insert(newEntityClazzSpecific)
 
-                                        if (entityRoleDaoUid != null) {
-                                            checkClazzMember(thisClazz, bulkLine,
-                                                    personPersonUid!!, role)
-                                        } else {
-                                            view.addError("Something went wrong in clazz entity roles", true)
-                                            thereWasAnError = true
-                                        }
-
-                                    } else {
-                                        view.addError("Unable to persist EntityRole ", true)
-                                        thereWasAnError = true
-                                    }
-
-                                } else {
-                                    //Create ClazzMember
-                                    checkClazzMember(thisClazz, bulkLine,
-                                            personPersonUid!!, role)
-                                }
-
+                            if (entityRoleDaoUid != null) {
+                                checkClazzMember(thisClazz, bulkLine,
+                                        personPersonUid!!, role)
                             } else {
-                                view.addError("ERROR: UNABLE TO PERSIST PERSON!", true)
+                                view.addError("Something went wrong in clazz entity roles", true)
                                 thereWasAnError = true
                             }
+
+                        } else {
+                            view.addError("Unable to persist EntityRole ", true)
+                            thereWasAnError = true
                         }
 
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+                    } else {
+                        //Create ClazzMember
+                        checkClazzMember(thisClazz, bulkLine,
+                                personPersonUid!!, role)
+                    }
+
+                } else {
+                    view.addError("ERROR: UNABLE TO PERSIST PERSON!", true)
+                    thereWasAnError = true
+                }
+            }
         }
 
     }
@@ -604,25 +595,21 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
 
     private fun getRole() {
 
-        roleDao.findByName(Role.ROLE_NAME_TEACHER, object : UmCallback<Role> {
-            override fun onSuccess(teacherRole: Role?) {
-                if (teacherRole != null) {
-                    teacherRoleUid = teacherRole.roleUid
-                } else {
-                    view.showMessage("Please wait until the app syncs and try again.")
-                }
+        GlobalScope.launch {
+            val teacherRole = roleDao.findByName(Role.ROLE_NAME_TEACHER)
+            if (teacherRole != null) {
+                teacherRoleUid = teacherRole.roleUid
+            } else {
+                view.showMessage("Please wait until the app syncs and try again.")
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
     }
 
     private fun getDOBFromString(dateString: String): Long {
-        val currentLocale = Locale.getDefault()
+
+        //TODO: KMP Make it aware of Locale
         return UMCalendarUtil.getLongDateFromStringAndFormat(
-                dateString, "dd/MM/yyyy", currentLocale)
+                dateString, "dd/MM/yyyy", null)
     }
 
     fun setCurrentPosition(currentPosition: Int) {
@@ -919,37 +906,28 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
         internal fun findCustomField(fieldName: String, entity: Int, colIndex: Int, type: Int) {
             //Convert name to space name
 
-            customFieldDao.findByFieldNameAndEntityTypeAsync(fieldName, entity,
-                    object : UmCallback<List<CustomField>> {
-                        override fun onSuccess(result: List<CustomField>?) {
-                            val cf: CustomField
-                            if (result != null && result.size > 0) {
-                                cf = result[0]
-                                when (type) {
-                                    CUSTOM_FIELD_STUDENT -> studentCustomFieldToIndex[cf.customFieldUid] = colIndex
-                                    CUSTOM_FIELD_TEACHER -> teacherCustomFieldToIndex[cf.customFieldUid] = colIndex
-                                    CUSTOM_FIELD_CLASS -> classCustomFieldToIndex[cf.customFieldUid] = colIndex
-                                }
-                            } else {
-                                var typeString = ""
-                                when (type) {
-                                    CUSTOM_FIELD_STUDENT -> typeString = "Student"
-                                    CUSTOM_FIELD_TEACHER -> typeString = "Teacher"
-                                    CUSTOM_FIELD_CLASS -> typeString = "Class"
-                                }
-                                view.addError("Cannot process " + typeString + " custom field : " +
-                                        fieldName, false)
-                            }
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+            GlobalScope.launch {
+                val result = customFieldDao.findByFieldNameAndEntityTypeAsync(fieldName, entity)
+                val cf: CustomField
+                if (result != null && result.size > 0) {
+                    cf = result[0]
+                    when (type) {
+                        CUSTOM_FIELD_STUDENT -> studentCustomFieldToIndex[cf.customFieldUid] = colIndex
+                        CUSTOM_FIELD_TEACHER -> teacherCustomFieldToIndex[cf.customFieldUid] = colIndex
+                        CUSTOM_FIELD_CLASS -> classCustomFieldToIndex[cf.customFieldUid] = colIndex
+                    }
+                } else {
+                    var typeString = ""
+                    when (type) {
+                        CUSTOM_FIELD_STUDENT -> typeString = "Student"
+                        CUSTOM_FIELD_TEACHER -> typeString = "Teacher"
+                        CUSTOM_FIELD_CLASS -> typeString = "Class"
+                    }
+                    view.addError("Cannot process " + typeString + " custom field : " +
+                            fieldName, false)
+                }
+            }
         }
-
-
-
 
     }
 

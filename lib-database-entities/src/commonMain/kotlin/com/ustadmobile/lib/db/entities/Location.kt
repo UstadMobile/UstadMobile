@@ -41,6 +41,13 @@ open class Location() {
         this.locationActive = true
     }
 
+    constructor(title: String, description: String, timeZone: String) : this() {
+        this.title = title
+        this.description = description
+        this.locationActive = true
+        this.timeZone = timeZone
+    }
+
     companion object {
 
        const val TABLE_ID = 29

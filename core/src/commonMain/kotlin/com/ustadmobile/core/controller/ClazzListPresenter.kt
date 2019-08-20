@@ -1,28 +1,23 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
+import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClassDetailView
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.core.view.ClazzEditView
 import com.ustadmobile.core.view.ClazzListView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
-
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_ATTENDANCE_ASC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_ATTENDANCE_DESC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_ASC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_DESC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_TEACHER_ASC
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
+import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * The ClazzList's Presenter - responsible for the logic of listing the relevant classes on the
@@ -32,9 +27,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                          val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<ClazzListView>(context, arguments!!, view) {
 
-    private var clazzListProvider: UmProvider<ClazzWithNumStudents>? = null
+    private var clazzListProvider: DataSource.Factory<Int, ClazzWithNumStudents>? = null
 
-    private var idToOrderInteger: Hashtable<Long, Int>? = null
+    private var idToOrderInteger: HashMap<Long, Int>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -53,7 +48,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      * @param presetAL The array list of string type
      * @return  String array
      */
-    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String> {
+    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
         val objectArr = presetAL.toTypedArray()
         val strArr = arrayOfNulls<String>(objectArr.size)
         for (j in objectArr.indices) {
@@ -77,7 +72,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         if (activeAccount != null) {
 
             loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
-            idToOrderInteger = Hashtable<Long, Int>()
+            idToOrderInteger = HashMap<Long, Int>()
 
             //Update Sorting options drop down options. This will also trigger the default
             // sort hence attaching the provider to the view.
@@ -101,30 +96,20 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      * Checks permission and updates the view accordingly
      */
     fun checkPermissions() {
-        clazzDao.personHasPermission(loggedInPersonUid!!, Role.PERMISSION_CLAZZ_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        view.showAddClassButton(result!!)
-                        view.showAllClazzSettingsButton(result)
-                    }
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid!!, Role
+                    .PERMISSION_CLAZZ_INSERT)
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
-        )
+            view.showAddClassButton(result)
+            view.showAllClazzSettingsButton(result)
+        }
 
-        clazzDao.personHasPermission(loggedInPersonUid!!, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        recordAttendanceVisibility = result
-                    }
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid!!, Role
+                    .PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
+            recordAttendanceVisibility = result
+        }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
-        )
     }
 
     /**
@@ -142,7 +127,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     private fun updateSortSpinnerPreset() {
         val presetAL = ArrayList<String>()
 
-        idToOrderInteger = Hashtable<Long, Int>()
+        idToOrderInteger = HashMap<Long, Int>()
 
         presetAL.add(impl.getString(MessageID.namesb, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_NAME_ASC)
@@ -193,9 +178,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     fun handleClickClazz(clazz: Clazz) {
         val args = HashMap<String, String>()
         val clazzUid = clazz.clazzUid
-        args.put(ClazzListView.ARG_CLAZZ_UID, clazzUid)
+        args.put(ClazzListView.ARG_CLAZZ_UID, clazzUid.toString())
 
-        impl.go(ClassDetailView.VIEW_NAME, args, view.getContext())
+        impl.go(ClassDetailView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -206,23 +191,17 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      */
     fun handleClickClazzRecordAttendance(clazz: Clazz) {
 
-        repository.clazzLogDao.findMostRecentByClazzUid(clazz.clazzUid,
-                object : UmCallback<ClazzLog> {
-                    override fun onSuccess(result: ClazzLog?) {
-                        if (result == null) {
-                            view.showMessage(MessageID.no_schedule_message)
-                        } else {
-                            val args = HashMap<String, String>()
-                            val clazzUid = clazz.clazzUid
-                            args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, clazzUid.toString())
-                            impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext())
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+        GlobalScope.launch {
+            val result = repository.clazzLogDao.findMostRecentByClazzUid(clazz.clazzUid)
+            if (result == null) {
+                view.showMessage(MessageID.no_schedule_message)
+            } else {
+                val args = HashMap<String, String>()
+                val clazzUid = clazz.clazzUid
+                args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, clazzUid.toString())
+                impl.go(ClassLogDetailView.VIEW_NAME, args, view.viewContext)
+            }
+        }
 
     }
 

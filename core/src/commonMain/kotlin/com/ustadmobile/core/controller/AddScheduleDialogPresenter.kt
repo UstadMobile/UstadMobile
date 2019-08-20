@@ -4,7 +4,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScheduleDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.AddScheduleDialogView
@@ -12,7 +11,9 @@ import com.ustadmobile.core.view.AddScheduleDialogView.Companion.EVERY_DAY_SCHED
 import com.ustadmobile.core.view.ClazzEditView.Companion.ARG_SCHEDULE_UID
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 
 class AddScheduleDialogPresenter
@@ -50,16 +51,11 @@ class AddScheduleDialogPresenter
         }
 
         if (currentScheduleUid > 0) {
-            scheduleDao.findByUidAsync(currentScheduleUid, object : UmCallback<Schedule> {
-                override fun onSuccess(result: Schedule?) {
-                    currentSchedule = result
-                    view.updateFields(result!!)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                val result = scheduleDao.findByUidAsync(currentScheduleUid)
+                currentSchedule = result
+                view.updateFields(result!!)
+            }
         } else {
             currentSchedule = Schedule()
         }
@@ -93,29 +89,18 @@ class AddScheduleDialogPresenter
         }
 
         if (currentSchedule!!.scheduleUid == 0L) {
-            scheduleDao.insertAsync(currentSchedule!!, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    runAfterInsertOrUpdate.run()
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                scheduleDao.insertAsync(currentSchedule!!)
+                runAfterInsertOrUpdate.run()
+            }
         } else {
-            scheduleDao.updateAsync(currentSchedule!!, object : UmCallback<Int> {
-                override fun onSuccess(result: Int?) {
-
-                    val currentTime = UMCalendarUtil.getDateInMilliPlusDays(0)
-                    appDatabaseRepo.clazzLogDao.cancelFutureInstances(
-                            currentScheduleUid, currentTime, true)
-                    runAfterInsertOrUpdate.run()
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                scheduleDao.updateAsync(currentSchedule!!)
+                val currentTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+                appDatabaseRepo.clazzLogDao.cancelFutureInstances(
+                        currentScheduleUid, currentTime, true)
+                runAfterInsertOrUpdate.run()
+            }
         }
     }
 

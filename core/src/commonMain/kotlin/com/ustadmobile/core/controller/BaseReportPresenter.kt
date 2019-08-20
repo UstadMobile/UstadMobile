@@ -39,6 +39,7 @@ class BaseReportPresenter(context: Any, arguments: Map<String, String>?, view: B
         args.put(ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE, showGenderDisaggregate.toString())
         //TODO: KMP flatten out list to CSVs
         args.put(ReportEditView.ARG_SHOW_CLAZZES, showClazzes)
+        //TODO: KMP flatten out list to CSVs
         args.put(ReportEditView.ARG_SHOW_LOCATIONS, showLocations)
         impl.go(ReportEditView.VIEW_NAME, args, context)
     }

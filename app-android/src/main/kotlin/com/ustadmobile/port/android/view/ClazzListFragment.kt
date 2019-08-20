@@ -133,7 +133,7 @@ class ClazzListFragment : UstadBaseFragment(), ClazzListView {
      *
      * @param presets A String array String[] of the presets available.
      */
-    override fun updateSortSpinner(presets: Array<String>) {
+    override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(Objects.requireNonNull(context),
                 R.layout.spinner_item, sortSpinnerPresets)

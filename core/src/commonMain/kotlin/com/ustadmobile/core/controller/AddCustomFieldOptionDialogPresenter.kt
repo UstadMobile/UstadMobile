@@ -4,7 +4,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView.Companion.ARG_CUSTOM_FIELD_VALUE_OPTION_UID
 import com.ustadmobile.core.view.CustomFieldDetailView.Companion.ARG_CUSTOM_FIELD_UID
@@ -55,8 +54,8 @@ class AddCustomFieldOptionDialogPresenter(context: Any, arguments:Map<String, St
             val option = CustomFieldValueOption()
             GlobalScope.launch {
                 val resl = optionDao.insertAsync(option)
-                if (resl != 0) {
-                    option.customFieldValueOptionUid = result
+                if (resl != 0L) {
+                    option.customFieldValueOptionUid = resl
                     initFromOption(option)
                 }
             }
@@ -81,16 +80,10 @@ class AddCustomFieldOptionDialogPresenter(context: Any, arguments:Map<String, St
         currentOption!!.customFieldValueOptionFieldUid = customfieldUid
         currentOption!!.isCustomFieldValueOptionActive = true
 
-        optionDao.updateAsync(currentOption!!, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                view.finish()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
-
+        GlobalScope.launch {
+            optionDao.updateAsync(currentOption!!)
+            view.finish()
+        }
     }
 
 

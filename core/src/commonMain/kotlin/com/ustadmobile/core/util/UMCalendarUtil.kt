@@ -89,6 +89,55 @@ object UMCalendarUtil {
     }
 
     /**
+     *
+     * @param dateString
+     * @param format
+     * @param locale
+     * @return
+     */
+    fun getLongDateFromStringAndFormat(dateString: String,
+                                       format: String,
+                                       locale: Any?): Long {
+
+        val formatted : DateFormat = DateFormat(format)
+        val date = formatted.parse(dateString)
+        return date.local.unixMillis.toLong()
+
+    }
+
+
+    /**
+     * Get date in long w.r.t plus/minus the days specified from a specified date
+     * @param dateLong  The specified date (in long) where the days to be calculated.
+     * @param days  The days (positive or negative) off from the dateLong specified
+     * @return  The date in long
+     */
+    fun getDateInMilliPlusDaysRelativeTo(dateLong: Long, days: Int): Long {
+        // get a calendar instance, which defaults to "now"
+        val givenCal = DateTime(dateLong)
+        val duration = days.days
+        val then = givenCal + duration
+        return then.unixMillisLong
+
+    }
+
+    /**
+     * Checks if a given long date is today or not.
+     *
+     * @param date  The Date object which we want to check if its a today date.
+     *
+     * @return  true if given date is today, false if it isn't
+     */
+    fun isToday(dateLong: Long): Boolean {
+
+        val givenCal = DateTime(dateLong)
+        val todayCal = DateTime.now()
+        return (givenCal.dayOfYear == todayCal.dayOfYear && givenCal.dayOfMonth == todayCal.dayOfMonth
+                && givenCal.dayOfWeekInt == todayCal.dayOfWeekInt)
+
+    }
+
+    /**
      * Gets simple pretty looking date (eg; 23/Jan/89) from a long date specified.
      *
      * @param thisDate  The date in long for which we want a pretty simple date.

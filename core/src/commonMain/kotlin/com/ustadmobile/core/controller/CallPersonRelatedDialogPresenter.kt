@@ -3,12 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.CallPersonRelatedDialogView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, String>?,
                                        view: CallPersonRelatedDialogView,
@@ -29,12 +30,12 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
     init {
 
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
-            personUid = arguments!!.get(ARG_PERSON_UID).toLong()
+            personUid = arguments!!.get(ARG_PERSON_UID)!!.toLong()
         } else {
             personUid = 0
         }
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            clazzUid = arguments!!.get(ARG_CLAZZ_UID).toLong()
+            clazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         } else {
             clazzUid = 0
         }
@@ -52,7 +53,7 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
         putThisMap[NUMBER_TEACHER] = NameWithNumber(impl.getString(MessageID.teacher, context) +
                 "(" + teacherToCall.person!!.firstNames + " " +
                 teacherToCall.person!!.lastName + ")",
-                teacherToCall.person!!.phoneNum)
+                teacherToCall.person!!.phoneNum!!)
 
 
         if (mainOfficer != null) {
@@ -72,20 +73,13 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
 
         val personDao = repository.personDao
 
-
-        personDao.findByUidAsync(personUid, object : UmCallback<Person> {
-            override fun onSuccess(result: Person?) {
-                if (result != null) {
-                    currentPerson = result
-                    getRelatedPeople()
-                }
+        GlobalScope.launch {
+            val result = personDao.findByUidAsync(personUid)
+            if (result != null) {
+                currentPerson = result
+                getRelatedPeople()
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
-
+        }
     }
 
     private fun getRelatedPeople() {
@@ -93,31 +87,26 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
         val entityRoleDao = repository.entityRoleDao
         val roleDao = repository.roleDao
         val groupMemberDao = repository.personGroupMemberDao
-        clazzMemberDao.findClazzMemberWithPersonByRoleForClazzUid(clazzUid,
-                ClazzMember.ROLE_TEACHER, object : UmCallback<List<ClazzMemberWithPerson>> {
-            override fun onSuccess(result: List<ClazzMemberWithPerson>?) {
-                val mainTeacher: ClazzMemberWithPerson
-                var mainOfficer: Person? = null
-                if (!result!!.isEmpty()) {
-                    mainTeacher = result[0]
+        GlobalScope.launch {
+            val result = clazzMemberDao.findClazzMemberWithPersonByRoleForClazzUid(clazzUid,
+                    ClazzMember.ROLE_TEACHER)
+            val mainTeacher: ClazzMemberWithPerson
+            var mainOfficer: Person? = null
+            if (!result!!.isEmpty()) {
+                mainTeacher = result[0]
 
-                    val officerRole = roleDao.findByNameSync(Role.ROLE_NAME_OFFICER)
-                    val officerEntityRoles = entityRoleDao.findGroupByRoleAndEntityTypeAndUidSync(Clazz.TABLE_ID,
-                            clazzUid, officerRole.roleUid)
-                    if (officerEntityRoles.size > 0) {
-                        val mainOfficerGroupUid = officerEntityRoles[0].erGroupUid
-                        val officers = groupMemberDao.findPersonByGroupUid(mainOfficerGroupUid)
-                        mainOfficer = officers[0]
-                    }
-
-                    generateCallingMap(currentPerson!!, mainTeacher, mainOfficer)
+                val officerRole = roleDao.findByNameSync(Role.ROLE_NAME_OFFICER)
+                val officerEntityRoles = entityRoleDao.findGroupByRoleAndEntityTypeAndUidSync(Clazz.TABLE_ID,
+                        clazzUid, officerRole.roleUid)
+                if (officerEntityRoles.size > 0) {
+                    val mainOfficerGroupUid = officerEntityRoles[0].erGroupUid
+                    val officers = groupMemberDao.findPersonByGroupUid(mainOfficerGroupUid)
+                    mainOfficer = officers[0]
                 }
-            }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
+                generateCallingMap(currentPerson!!, mainTeacher, mainOfficer)
             }
-        })
+        }
     }
 
     companion object {

@@ -4,11 +4,12 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SelQuestionOptionDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.AddQuestionOptionDialogView
 import com.ustadmobile.core.view.SELQuestionDetail2View.Companion.ARG_QUESTION_OPTION_UID
 import com.ustadmobile.core.view.SELQuestionDetail2View.Companion.ARG_QUESTION_UID_QUESTION_DETAIL
 import com.ustadmobile.lib.db.entities.SelQuestionOption
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class AddQuestionOptionDialogPresenter (context: Any, arguments: Map<String, String>?,
                                         view: AddQuestionOptionDialogView)
@@ -38,25 +39,19 @@ class AddQuestionOptionDialogPresenter (context: Any, arguments: Map<String, Str
     fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        //Get the question from database or create a new one and set it to the view
-        questionOptionDao.findByUidAsync(currentQuestionOptionUid,
-                object : UmCallback<SelQuestionOption> {
-                    override fun onSuccess(result: SelQuestionOption?) {
-                        if (result == null) {
-                            currentOption = SelQuestionOption()
-                            currentOption!!.selQuestionOptionQuestionUid = currentQuestionUid
-                            currentOption!!.optionText = ""
-                        } else {
-                            currentOption = result
-                        }
+        GlobalScope.launch {
+            //Get the question from database or create a new one and set it to the view
+            val result = questionOptionDao.findByUidAsync(currentQuestionOptionUid)
+            if (result == null) {
+                currentOption = SelQuestionOption()
+                currentOption!!.selQuestionOptionQuestionUid = currentQuestionUid
+                currentOption!!.optionText = ""
+            } else {
+                currentOption = result
+            }
 
-                        view.setOptionText(currentOption!!.optionText!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+            view.setOptionText(currentOption!!.optionText!!)
+        }
 
     }
 
@@ -74,37 +69,19 @@ class AddQuestionOptionDialogPresenter (context: Any, arguments: Map<String, Str
     fun handleAddQuestionOption(newTitle: String) {
         currentOption!!.optionText = newTitle
         currentOption!!.isOptionActive = true
-        questionOptionDao.findByUidAsync(currentOption!!.selQuestionOptionUid,
-                object : UmCallback<SelQuestionOption> {
-                    override fun onSuccess(result: SelQuestionOption?) {
-                        if (result != null) {
-                            //exists. update
-                            questionOptionDao.updateAsync(currentOption!!, object : UmCallback<Int> {
-                                override fun onSuccess(result: Int?) {
-                                    view.finish()
-                                }
+        GlobalScope.launch {
+            val result = questionOptionDao.findByUidAsync(currentOption!!.selQuestionOptionUid)
+            if (result != null) {
+                //exists. update
+                questionOptionDao.updateAsync(currentOption!!)
+                view.finish()
 
-                                override fun onFailure(exception: Throwable?) {
-                                    print(exception!!.message)
-                                }
-                            })
-                        } else {
-                            //new. insert
-                            questionOptionDao.insertAsync(currentOption!!, object : UmCallback<Long> {
-                                override fun onSuccess(result: Long?) {
-                                    view.finish()
-                                }
+            } else {
+                //new. insert
+                questionOptionDao.insertAsync(currentOption!!)
+                view.finish()
 
-                                override fun onFailure(exception: Throwable?) {
-                                    print(exception!!.message)
-                                }
-                            })
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+            }
+        }
     }
 }

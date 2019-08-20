@@ -4,11 +4,12 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DateRangeDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.AddDateRangeDialogView
 import com.ustadmobile.core.view.AddDateRangeDialogView.Companion.DATERANGE_UID
 import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
 import com.ustadmobile.lib.db.entities.DateRange
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class AddDateRangeDialogPresenter(context: Any, arguments: Map<String, String>?,
@@ -38,16 +39,11 @@ class AddDateRangeDialogPresenter(context: Any, arguments: Map<String, String>?,
         }
 
         if (currentDateRangeUid > 0) {
-            dateRangeDao.findByUidAsync(currentDateRangeUid, object : UmCallback<DateRange> {
-                override fun onSuccess(result: DateRange?) {
-                    currentDateRange = result
-                    view.updateFields(result!!)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-
-                }
-            })
+            GlobalScope.launch {
+                val result = dateRangeDao.findByUidAsync(currentDateRangeUid)
+                currentDateRange = result
+                view.updateFields(result)
+            }
         } else {
             currentDateRange = DateRange()
         }
@@ -72,21 +68,13 @@ class AddDateRangeDialogPresenter(context: Any, arguments: Map<String, String>?,
         currentDateRange!!.dateRangeUMCalendarUid = currentCalendarUid
 
         if (currentDateRange!!.dateRangeUid == 0L) { //Not persisted. Insert it.
-            dateRangeDao.insertAsync(currentDateRange!!, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {}
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                dateRangeDao.insertAsync(currentDateRange!!)
+            }
         } else { //Update it.
-            dateRangeDao.updateAsync(currentDateRange!!, object : UmCallback<Int> {
-                override fun onSuccess(result: Int?) {}
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                dateRangeDao.updateAsync(currentDateRange!!)
+            }
         }
     }
 

@@ -1,21 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzDao
+
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClassDetailView
 import com.ustadmobile.core.view.ClazzEditView
+import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonListSearchView
+import com.ustadmobile.core.view.PersonListSearchView.Companion.ARGUMENT_CURRNET_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
-
-
-
-import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.core.view.PersonListSearchView.Companion.ARGUMENT_CURRNET_CLAZZ_UID
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -38,11 +34,7 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
         //Get Clazz Uid and set them.
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            if (arguments!!.get(ARG_CLAZZ_UID) is String) {
-                currentClazzUid = java.lang.Long.valueOf(arguments!!.get(ARG_CLAZZ_UID) as String)
-            } else {
-                currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
-            }
+            currentClazzUid = arguments.get(ARG_CLAZZ_UID)!!.toLong()
         }
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
@@ -67,62 +59,25 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
     fun checkPermissions() {
 
-        clazzDao.findByUidAsync(currentClazzUid, object : UmCallback<Clazz> {
-            override fun onSuccess(result: Clazz?) {
-                currentClazz = result
-                clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
-                        Role.PERMISSION_CLAZZ_UPDATE,
-                        UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                            override fun onSuccess(result: Boolean?) {
-                                view.setSettingsVisibility(result!!)
-                                clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                                        Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, UmCallbackWithDefaultValue(false,
-                                        object : UmCallback<Boolean> {
-                                            override fun onSuccess(result: Boolean?) {
-                                                view.setAttendanceVisibility(if (currentClazz!!.isAttendanceFeature) result else false)
+        GlobalScope.launch {
+            val result = clazzDao.findByUidAsync(currentClazzUid)
+            currentClazz = result
+            val result2 = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
+                    Role.PERMISSION_CLAZZ_UPDATE)
+            view.setSettingsVisibility(result2!!)
+            val result3 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
+            view.setAttendanceVisibility(if (currentClazz!!.isAttendanceFeature) result3 else false)
 
-                                                clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                                                        Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT, UmCallbackWithDefaultValue(false,
-                                                        object : UmCallback<Boolean> {
-                                                            override fun onSuccess(result: Boolean?) {
-                                                                view.setSELVisibility(if (currentClazz!!.isSelFeature) result else false)
-                                                                clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                                                                        Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT, UmCallbackWithDefaultValue(false,
-                                                                        object : UmCallback<Boolean> {
-                                                                            override fun onSuccess(result: Boolean?) {
-                                                                                view.setActivityVisibility(if (currentClazz!!.isActivityFeature) result else false)
-                                                                                //Setup view pager after all permissions
-                                                                                view.setupViewPager()
-                                                                            }
+            val result4 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
+            view.setSELVisibility(if (currentClazz!!.isSelFeature) result4 else false)
+            val result5 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                    Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT)
+            view.setActivityVisibility(if (currentClazz!!.isActivityFeature) result5 else false)
+            //Setup view pager after all permissions
+            view.setupViewPager()
 
-                                                                            override fun onFailure(exception: Throwable?) {
-                                                                                print(exception!!.message)
-                                                                            }
-                                                                        }))
-                                                            }
-
-                                                            override fun onFailure(exception: Throwable?) {
-                                                                print(exception!!.message)
-                                                            }
-                                                        }))
-                                            }
-
-                                            override fun onFailure(exception: Throwable?) {
-                                                print(exception!!.message)
-                                            }
-                                        }))
-                            }
-
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        }))
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
 
 
     }
@@ -131,16 +86,10 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
      * Updates the title of the Clazz after finding it from the database.
      */
     fun updateToolbarTitle() {
-
-        clazzDao.findByUidAsync(currentClazzUid, object : UmCallback<Clazz> {
-            override fun onSuccess(result: Clazz?) {
-                view.setToolbarTitle(result!!.clazzName!!)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            val result = clazzDao.findByUidAsync(currentClazzUid)
+            view.setToolbarTitle(result!!.clazzName!!)
+        }
     }
 
     /**
@@ -148,16 +97,16 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
      */
     fun handleClickClazzEdit() {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid)
-        impl.go(ClazzEditView.VIEW_NAME, args, view.getContext())
+        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+        impl.go(ClazzEditView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
      * Opens the search view for Clazz Members
      */
     fun handleClickSearch() {
-        val args = Hashtable<String, Long>()
-        args.put(ARGUMENT_CURRNET_CLAZZ_UID, currentClazzUid)
+        val args = HashMap<String, String>()
+        args.put(ARGUMENT_CURRNET_CLAZZ_UID, currentClazzUid.toString())
         impl.go(PersonListSearchView.VIEW_NAME, args, context)
     }
 
