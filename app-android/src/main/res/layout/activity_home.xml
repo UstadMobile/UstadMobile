@@ -64,6 +64,7 @@
                         android:textSize="@dimen/text_title"
                         android:layout_toEndOf="@+id/profile_image"
                         android:layout_marginStart="@dimen/dimen_16dp"
+                        android:textStyle="bold"
                         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
                 </RelativeLayout>
