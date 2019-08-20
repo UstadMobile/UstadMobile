@@ -12,9 +12,11 @@ import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
+import io.ktor.client.response.discardRemaining
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
 import kotlinx.coroutines.Runnable
+import kotlinx.io.IOException
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
@@ -25,33 +27,41 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     private var contentType = -1
 
-    private lateinit var httpClient: HttpClient
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
-
-        httpClient = HttpClient()
     }
 
 
     suspend fun handleUrlTextUpdated(url: String) {
-
-        val response = httpClient.head<HttpResponse>(url)
+        var response: HttpResponse? = null
+        try {
+            response = defaultHttpClient().head<HttpResponse>(url)
+        } catch (e: IOException) {
+            view.showUrlStatus(false, "Invalid Url")
+        }
 
         contentType = -1
 
-        if (response.status.value != 200) {
+        if (response?.status?.value != 200) {
             view.showUrlStatus(false, "Invalid Url")
             return
         }
 
-        val contentTypeHeader = response.headers["Content-Type"]
+        var contentTypeHeader = response.headers["Content-Type"]
+        if (contentTypeHeader?.contains(";") == true) {
+            contentTypeHeader = contentTypeHeader.split(";")[0]
+        }
+
+        val length = response.headers["Content-Length"]?.toInt() ?: FILE_SIZE
+
+        response.discardRemaining()
+        response.close()
 
         if (contentTypeHeader?.startsWith("video/") == true) {
 
-            if (response.headers["Content-Length"]?.toInt() ?: FILE_SIZE >= FILE_SIZE) {
+            if (length >= FILE_SIZE) {
                 view.showUrlStatus(false, "File size too big")
                 return
             }
@@ -85,7 +95,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
 
     suspend fun handleClickImport() {
-        val client = httpClient
+        val client = defaultHttpClient()
         var response: HttpResponse? = null
 
         when (contentType) {
@@ -122,11 +132,6 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         }
 
 
-    }
-
-    override fun onDestroy() {
-        httpClient.close()
-        super.onDestroy()
     }
 
     companion object {
