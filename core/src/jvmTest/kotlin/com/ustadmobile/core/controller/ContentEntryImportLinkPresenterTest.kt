@@ -104,7 +104,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
     }
 
-    @Test
+    //20/Aug/2019: This test needs to be reworked after H5P and video import is live
+    //@Test
     fun givenWhenHandleUrlTextUpdated_whenHp5_showValidAndNoMessage() {
 
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
@@ -122,7 +123,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
     }
 
-    @Test
+    //20/Aug/2019: This test needs to be reworked after H5P and video import is live
+    //@Test
     fun givenUserClicksDone_whenH5PLinkIsValid_thenDownloadContent() {
 
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
