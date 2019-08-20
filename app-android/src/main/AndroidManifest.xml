@@ -118,6 +118,9 @@
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true"/>
 
+        <activity android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+
 
     </application>
 

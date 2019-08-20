@@ -1,6 +1,7 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.io.*
 import io.ktor.client.HttpClient
@@ -35,7 +36,7 @@ import kotlin.coroutines.coroutineContext
  * beginning.
  */
 class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000,
-                         private val calcMd5: Boolean = true, val httpClient: HttpClient = HttpClient()) {
+                         private val calcMd5: Boolean = true, val httpClient: HttpClient = defaultHttpClient()) {
 
     private var md5SumBytes: ByteArray? = null
 
@@ -202,18 +203,18 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
         /**
          * Extension of the file which carry file information
          */
-        val DLINFO_EXTENSION = ".dlinfo"
+        const val DLINFO_EXTENSION = ".dlinfo"
 
         /**
          * Extension of the partially downloaded file.
          */
-        val DLPART_EXTENSION = ".dlpart"
+        const val DLPART_EXTENSION = ".dlpart"
 
-        private val HTTP_HEADER_LAST_MODIFIED = "last-modified"
+        private const val HTTP_HEADER_LAST_MODIFIED = "last-modified"
 
-        private val HTTP_HEADER_ETAG = "etag"
+        private const val HTTP_HEADER_ETAG = "etag"
 
-        private val HTTP_HEADER_CONTENT_RANGE = "content-range"
+        private const val HTTP_HEADER_CONTENT_RANGE = "content-range"
 
         /**
          * HTTP header accepted encoding type.
