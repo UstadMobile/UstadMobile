@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -30,7 +31,6 @@ import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LE
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.GlobalScope
@@ -55,7 +55,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         coordinatorLayout = findViewById(R.id.coordinationLayout)
         profileImage = findViewById(R.id.profile_image)
         setSupportActionBar(toolbar)
-        supportActionBar!!.setTitle(R.string.app_name)
+        findViewById<TextView>(R.id.toolBarTitle).setText(R.string.app_name)
 
         val viewPager = findViewById<ViewPager>(R.id.library_viewpager)
         viewPager.adapter = LibraryPagerAdapter(supportFragmentManager, this)
