@@ -1,12 +1,12 @@
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
 import { UmDbMockService, ContentEntryDao} from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { com as core } from 'core';
-import { com as db } from 'lib-database';
-import { com as util } from 'lib-util';
+import core from 'UstadMobile-core';
+import db from 'UstadMobile-lib-database';
+import util from 'UstadMobile-lib-util';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -17,16 +17,16 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   styleUrls: ['./content-entry-list.component.css']
 })
 export class ContentEntryListComponent extends UmBaseComponent implements 
-core.ustadmobile.core.view.ContentEntryListFragmentView {
+core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   
-  entries : db.ustadmobile.lib.db.entities.ContentEntry[] = [];
+  entries : db.com.ustadmobile.lib.db.entities.ContentEntry[] = [];
   env = environment;
   label_language_options : string = "";
   label_reading_level : string = "";
   private entryListObservable: Observable<any[]> = null
-  private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
-  languages : db.ustadmobile.lib.db.entities.Language[]
-  categories: db.ustadmobile.lib.db.entities.DistinctCategorySchema[];
+  private presenter: core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
+  languages : db.com.ustadmobile.lib.db.entities.Language[]
+  categories: db.com.ustadmobile.lib.db.entities.DistinctCategorySchema[];
   categoryMap : any[][] = [];
   umFormLanguage : FormGroup;
   umFormCategories: FormGroup;
@@ -52,7 +52,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
       'category': ['-1', Validators.required]
     });
 
-    this.presenter = new core.ustadmobile.core.controller
+    this.presenter = new core.com.ustadmobile.core.controller
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
@@ -108,17 +108,17 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     })
   }
 
-  openEntry(entry : db.ustadmobile.lib.db.entities.ContentEntry) {
+  openEntry(entry : db.com.ustadmobile.lib.db.entities.ContentEntry) {
     this.presenter.handleContentEntryClicked(entry);
   }
 
   setLanguageOptions(languages){
-    const languageList = util.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(languages);
+    const languageList = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(languages);
     this.languages = languageList.splice(1,languageList.length);
   }
 
   setCategorySchemaSpinner(categories){
-    const categoriesMap: any[] = util.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(categories);
+    const categoriesMap: any[] = util.com.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(categories);
     var counter = 0;
     categoriesMap.forEach(categoryList =>{  
       this.categoryMap[counter] = categoryList.splice(2,3)

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { Subscription } from 'rxjs';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -36,13 +36,13 @@ export class LoginComponent extends UmBaseComponent implements core.com.ustadmob
     });
 
     this.umFormLogin.valueChanges.subscribe(
-      (form: any) => { 
+      () => { 
           this.formValidated = this.umFormLogin.status == "VALID";
       }
       );
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe((event:NavigationEnd) => {
+    .subscribe(() => {
       this.presenter = new core.com.ustadmobile.core.controller
         .Login2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);

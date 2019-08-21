@@ -5,7 +5,7 @@ import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
-import { com as core } from 'core';
+import core from 'UstadMobile-core';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 
 @Component({
@@ -17,7 +17,7 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 
 export class XapiContentComponent extends UmBaseComponent {
 
-  private presenter: core.ustadmobile.core.controller.XapiPackageContentPresenter;
+  private presenter: core.com.ustadmobile.core.controller.XapiPackageContentPresenter;
   navigationSubscription: Subscription;
   urlToLoad: string = "https://www.ustadmobile.com/files/s4s/2-coverletter/en/EPUB/main.html";
   
@@ -28,7 +28,7 @@ export class XapiContentComponent extends UmBaseComponent {
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe(() => {
-      this.presenter = new core.ustadmobile.core.controller
+      this.presenter = new core.com.ustadmobile.core.controller
         .XapiPackageContentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
     });

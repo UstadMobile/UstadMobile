@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { com as util} from 'lib-util';
-import { com as db } from 'lib-database';
-import { com as door } from 'lib-door-runtime';
+import util from 'UstadMobile-lib-util';
+import db from 'UstadMobile-lib-database';
+import door from 'UstadMobile-lib-door-runtime';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
 
 @Injectable({
   providedIn: 'root'
 })
-export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
+export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
   
   ROOT_UID = 1311236;
   private initialized: boolean = false;
@@ -18,7 +18,7 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
     super()
     if (!this.initialized) {
       this.initialized = true;
-      db.ustadmobile.core.db.UmAppDatabase.Companion.setInstance(this);
+      //db.com.ustadmobile.core.db.UmAppDatabase.Companion.setInstance(this);
     }
   }
 
@@ -63,7 +63,7 @@ export class ContentEntryDao {
   }
 
   findUniqueLanguagesInListAsync(entryUid) {
-    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(languages[entryUid]);
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(languages[entryUid]);
   }
 
   findByUidAsync(entryUid) {
@@ -92,13 +92,13 @@ export class ContentEntryDao {
         schemaName: "Schema"
       }
     ];
-    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schemas])
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schemas])
   }
 }
 
 class ContainerDao{
   findFilesByContentEntryUid(entryUid){
-    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([]);
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([]);
   }
 
   getMostRecentDownloadedContainerForContentEntryAsync(entryUid){
@@ -108,7 +108,7 @@ class ContainerDao{
       fileSize: 8989898
     }
 
-    return container as db.ustadmobile.lib.db.entities.Container;
+    return container as db.com.ustadmobile.lib.db.entities.Container;
   }
 
 }
@@ -117,7 +117,7 @@ class NetworkNodeDao{}
 
 class ContentEntryStatusDao{
   constructor() {}
-  findContentEntryStatusByUid(entryUid) : door.ustadmobile.door.DoorLiveData {
+  findContentEntryStatusByUid(entryUid) : door.com.ustadmobile.door.DoorLiveData {
     return UmAngularUtil.createObserver(0) 
   }
 }
@@ -132,7 +132,7 @@ class ContentEntryRelatedEntryJoinDao{
         languageName: "Sample1"
       }
     ];
-  return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(relatedEntries);
+  return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(relatedEntries);
 }
 }
 

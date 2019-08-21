@@ -1,5 +1,5 @@
-import { com as core} from 'core';
-import { com as db } from 'lib-database';
+import core from 'UstadMobile-core';
+import db from 'UstadMobile-lib-database';
 import {Observable} from 'rxjs';
 
 export const appRountes = {
@@ -25,7 +25,7 @@ export class UmAngularUtil {
    */
   static queryParamsToMap(queryParam ? : string, notFound? :boolean) {
     var paramString = queryParam || document.location.search + (notFound ? "":"&ref=null");
-    return core.ustadmobile.core.util.UMFileUtil
+    return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString);
   }
 
@@ -52,7 +52,7 @@ export class UmAngularUtil {
         return;
       }
     });
-    return foundEntry as db.ustadmobile.lib.db.entities.ContentEntry;
+    return foundEntry as db.com.ustadmobile.lib.db.entities.ContentEntry;
   }
 
   static findChildrenByParentUid(joins: any[], entries: any[], parentEntryUid) {

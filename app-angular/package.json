@@ -36,6 +36,7 @@
     "UstadMobile-lib-test-common": "file:../build/js/node_modules/UstadMobile-lib-test-common/UstadMobile-lib-test-common-0.2.8.tgz",
     "UstadMobile-lib-test-common-test": "file:../build/js/node_modules/UstadMobile-lib-test-common-test/UstadMobile-lib-test-common-test-0.2.8.tgz",
     "UstadMobile-lib-util": "file:../build/js/node_modules/UstadMobile-lib-util/UstadMobile-lib-util-0.2.8.tgz",
+    "angular-google-charts": "^0.1.6",
     "core-js": "^2.5.4",
     "i18n": "^0.8.3",
     "klock": "file:../build/js/node_modules/klock/klock-1.4.0.tgz",

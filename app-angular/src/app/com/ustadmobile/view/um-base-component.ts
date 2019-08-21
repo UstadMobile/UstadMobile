@@ -4,9 +4,10 @@ import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
 import { OnInit, OnDestroy } from '@angular/core';
-import { com } from 'core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import core from 'UstadMobile-core';
+
 export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   public env = environment;
@@ -20,8 +21,8 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   protected constructor(protected umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
      protected mockedUmDb: UmDbMockService){
-    this.systemImpl = com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
-    this.MessageID = com.ustadmobile.core.generated.locale.MessageID;
+    this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
+    this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
     this.viewContext = this.context; 
