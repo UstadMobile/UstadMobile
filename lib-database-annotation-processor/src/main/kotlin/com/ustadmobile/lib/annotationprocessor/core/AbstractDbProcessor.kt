@@ -27,7 +27,7 @@ import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
 import org.apache.commons.text.StringEscapeUtils
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-
+import io.ktor.http.HttpStatusCode
 
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
@@ -283,8 +283,20 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
 
     codeBlock.endControlFlow()
 
-    codeBlock.add("val $httpResultVarName = $httpResponseVarName.%M<%T>()\n",
-            CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+    val receiveCodeBlock = CodeBlock.of("$httpResponseVarName.%M<%T>()\n",
+        CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+    if(httpResultType.isNullable) {
+        codeBlock.beginControlFlow("val $httpResultVarName = if(${httpResponseVarName}.status == %T.NoContent)",
+            HttpStatusCode::class)
+                .add("null\n")
+                .nextControlFlow("else")
+                .add(receiveCodeBlock)
+                .endControlFlow()
+    }else {
+        codeBlock.add("val $httpResultVarName = ")
+        codeBlock.add(receiveCodeBlock)
+    }
+
 
     return codeBlock.build()
 }
