@@ -63,7 +63,6 @@ ngOnInit() {
       window.open(window.location.origin + "/" + form.language + "/", "_self")
     }
   });
-
 }
 
 onCreate(){
@@ -71,14 +70,14 @@ onCreate(){
 }
 
 goBack() {
-  if(!window.location.search.includes(this.mockedUmDb.ROOT_UID + "")){
+  if(!window.location.search.includes(this.umDatabase.ROOT_UID + "")){
     this.location.back();
   }
 }
 
 navigateTo(route) {
   const args = route != this.routes.list ? UmAngularUtil.queryParamsToMap("?") :
-    UmAngularUtil.queryParamsToMap("?entryid=" + this.mockedUmDb.ROOT_UID);
+    UmAngularUtil.queryParamsToMap("?entryid=" + this.umDatabase.ROOT_UID);
   this.systemImpl.go(route, args, this.context);
 }
 

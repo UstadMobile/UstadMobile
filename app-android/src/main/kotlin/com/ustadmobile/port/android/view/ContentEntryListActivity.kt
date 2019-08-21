@@ -57,7 +57,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
         presenter = ContentEntryListPresenter(getContext(),
                 UMAndroidUtil.bundleToMap(intent.extras),   this)
-        presenter!!.handleShowContentEditorOptios(showControls)
+        presenter!!.handleShowContentEditorOptions(showControls)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
 

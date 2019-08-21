@@ -22,7 +22,7 @@ class ContentEntryListPresenter (context: Any, arguments: Map<String, String>?, 
         contentEntryUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
     }
 
-    fun handleShowContentEditorOptios(show: Boolean){
+    fun handleShowContentEditorOptions(show: Boolean){
         view.runOnUiThread(Runnable{
             view.showCreateContentOption(show)
         })

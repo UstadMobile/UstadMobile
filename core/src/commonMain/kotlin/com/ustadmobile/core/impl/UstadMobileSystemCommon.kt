@@ -218,6 +218,7 @@ open abstract class UstadMobileSystemCommon {
     /**
      * Get list of all UI supported languages
      */
+    @JsName("getAllUiLanguage")
     open fun getAllUiLanguage(context: Any): Map<String,String>{
         val languageList = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
                 "",context)!!.split(",")

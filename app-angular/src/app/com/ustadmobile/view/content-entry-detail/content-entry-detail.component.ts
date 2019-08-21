@@ -15,7 +15,8 @@ import 'rxjs/add/operator/filter';
   styleUrls: ['./content-entry-detail.component.css']
 })
 export class ContentEntryDetailComponent extends UmBaseComponent implements
- core.com.ustadmobile.core.view.ContentEntryDetailView {
+ core.com.ustadmobile.core.view.ContentEntryDetailView, 
+ core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor {
 env = environment;
 contentEntryUid = "";
 entryTitle = "";
@@ -33,18 +34,21 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umD
   super(umService, router, route, umDb);
   this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left";
   this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
-  this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
-    UmAngularUtil.queryParamsToMap(), this);
+
   this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe(_ => {
-      if (this.mockedUmDb.contentEntryDao) {
+      if (this.umDatabase.contentEntryDao) {
         this.onCreate();
       }
     });
 }
 
 onCreate() {
-  this.presenter.onCreate(null);
+  if(this.umDatabase.contentEntryDao){
+    this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
+      UmAngularUtil.queryParamsToMap(), this,this,this,this.umDatabase);
+    this.presenter.onCreate(null);
+  }
 }
 
 ngOnInit() {
@@ -111,6 +115,10 @@ setDownloadProgressLabel() {}
 setDownloadButtonClickableListener() {}
 
 showDownloadOptionsDialog() {}
+
+startMonitoringAvailability(monitor, entryUidsToMonitor){}
+
+stopMonitoringAvailability(monitor){}
 
 ngOnDestroy() {
   super.ngOnDestroy()

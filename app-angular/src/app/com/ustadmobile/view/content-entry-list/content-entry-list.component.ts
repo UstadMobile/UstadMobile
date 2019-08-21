@@ -51,20 +51,21 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     this.umFormCategories = formBuilder.group({
       'category': ['-1', Validators.required]
     });
-
-    this.presenter = new core.com.ustadmobile.core.controller
-        .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
-      this.entries = [];
-      if(this.mockedUmDb.contentEntryDao){
+      this.entries = []; 
+      if(this.umDatabase.contentEntryDao){
         this.onCreate()
       }
     }); 
   }
 
   private onCreate(){
-    this.presenter.onCreate(null);
+    if(this.umDatabase.contentEntryDao){
+      this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
+        this.context, UmAngularUtil.queryParamsToMap(), this,this.umDatabase.contentEntryDao);
+      this.presenter.onCreate(null);
+    }
   }
 
   ngOnInit() {
@@ -74,7 +75,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
       this.umService.loadEntries(),
       this.umService.loadEntryJoins()
     ]).subscribe(responses => {
-      this.mockedUmDb.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
+      this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.onCreate() 
     })
 

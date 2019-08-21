@@ -46,7 +46,7 @@ export class AppComponent extends UmBaseComponent {
     combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins(),this.umService.loadLanguages(),
       this.umService.loadStrings(systemLocale),
     ]).subscribe(responses => {
-      this.mockedUmDb.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
+      this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.umService.supportedLanguages = responses[2]
       this.systemImpl.setLocaleStrings(responses[3])
       this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(

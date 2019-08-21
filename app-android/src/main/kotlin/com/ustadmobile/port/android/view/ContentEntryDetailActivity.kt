@@ -69,8 +69,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private lateinit var downloadButton: Button
 
-    private val umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(this)
-
     private val umAppRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(this)
 
     private var downloadProgress: DownloadProgressView? = null

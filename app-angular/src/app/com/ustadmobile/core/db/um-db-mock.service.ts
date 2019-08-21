@@ -18,15 +18,14 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
     super()
     if (!this.initialized) {
       this.initialized = true;
-      //db.com.ustadmobile.core.db.UmAppDatabase.Companion.setInstance(this);
     }
   }
 
-  contentEntryDao;
-  contentEntryStatusDao = new ContentEntryStatusDao();
-  contentEntryRelatedEntryJoinDao = new ContentEntryRelatedEntryJoinDao();
-  containerDao = new ContainerDao();
-  networkNodeDao = new NetworkNodeDao();
+  public contentEntryDao;
+  public contentEntryStatusDao = new ContentEntryStatusDao();
+  public contentEntryRelatedEntryJoinDao = new ContentEntryRelatedEntryJoinDao();
+  public containerDao = new ContainerDao();
+  public networkNodeDao = new NetworkNodeDao();
 
   getData(entryUid) {
     return this.entries[entryUid];
@@ -34,10 +33,13 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
 }
 
 /**DAO */
-export class ContentEntryDao {
+ export class ContentEntryDao{
+  constructor(private entries, private joins) { }
 
-  constructor(private entries, private joins) {}
-
+  findLiveContentEntry(entryUid){
+    const entry = UmAngularUtil.findEntry(this.entries, entryUid);
+    return UmAngularUtil.createObserver(entry);
+  }
 
   findByUidWithContentEntryStatusAsync(entryUid){
     const entry: any = UmAngularUtil.findEntry(this.entries, entryUid);
@@ -45,7 +47,7 @@ export class ContentEntryDao {
     return entry;
   }
 
-  getChildrenByParentUidWithCategoryFilter(entryUid, language, category): any {
+  getChildrenByParentUidWithCategoryFilter(entryUid, language, category) {
     var entries = UmAngularUtil.findChildrenByParentUid(this.joins, this.entries, entryUid);
     if(language != 0){
       entries = entries.splice(0,entries.length - 2);
