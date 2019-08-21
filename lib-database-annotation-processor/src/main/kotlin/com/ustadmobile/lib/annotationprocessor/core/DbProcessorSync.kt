@@ -280,7 +280,6 @@ class DbProcessorSync: AbstractDbProcessor() {
             val entitySyncFn = FunSpec.builder("sync${entityType.simpleName}")
                     .addModifiers(KModifier.SUSPEND, KModifier.PRIVATE)
                     .addCode(CodeBlock.builder()
-                            .add("println(%S)\n", "Sync: begin sync of ${entityType.simpleName}")
                             .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
                                     syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
                             .add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
@@ -294,7 +293,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                                     entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
                                     reqIdVarName = "0", processingEnv = processingEnv))
                             .endControlFlow()
-                            .add("println(%S)\n", "Sync: end sync of ${entityType.simpleName}")
                             .build())
 
             syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
