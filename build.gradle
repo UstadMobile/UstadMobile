@@ -164,7 +164,7 @@ def dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"kmpxmlpu
                      "klock-js":"klock","":"kotlin-test","kotlinx-coroutines-core-js":"kotlinx-coroutines-core",
                      "kotlinx-serialization-runtime-js":"kotlinx-serialization-runtime-js",
                      "ktor-client-js":"ktor-ktor-client-js","ktor-client-serialization-js":"ktor-ktor-client-serialization",
-                     "napier-js":"napier"]
+                     "napier-js":"napier","lib-room-annotations":"UstadMobile-lib-room-annotations"]
 def prepareModuleTasks = []
 subprojects { project ->
     afterEvaluate{
@@ -186,7 +186,6 @@ subprojects { project ->
                                 it.allDependencies.each{ dep ->
                                     dependencies.put(dependencyMap[dep.name],dep.version)
                                 }
-
                                 jsonObj.put("dependencies",dependencies)
                             }
                         }

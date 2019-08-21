@@ -1,4 +1,3 @@
-import ktorclientserial from 'ktor-ktor-client-serialization';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { UmAngularUtil } from './com/ustadmobile/util/UmAngularUtil';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
@@ -30,18 +29,17 @@ export class AppComponent extends UmBaseComponent {
   constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService, router: Router,
     route: ActivatedRoute, private umDb: UmDbMockService) {
     super(localeService, router, route, umDb);
-    const ktor = ktorclientserial
-    /* if (this.locale.startsWith('en')) {
+    if (this.locale.startsWith('en')) {
       this.dir = "ltr";
     } else {
       this.dir = "rtl";
     }
-    this.umService.setSystemDirectionality(this.dir); */
+    this.umService.setSystemDirectionality(this.dir);
   }
 
   ngOnInit(): void {
     super.ngOnInit();
-    /* const systemLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
+    const systemLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
     this.showLoading = window.location.search == "";
 
     //Load all resources async
@@ -56,7 +54,7 @@ export class AppComponent extends UmBaseComponent {
         if(UmAngularUtil.showSplashScreen()){ 
           window.setTimeout(this.splashScreenTimeout, 3500)
         }
-    }) */
+    })
   }
 
   ngOnDestroy(): void {

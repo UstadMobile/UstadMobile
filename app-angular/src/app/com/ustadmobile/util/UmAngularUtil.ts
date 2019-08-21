@@ -1,3 +1,4 @@
+import ktorclientserial from 'ktor-ktor-client-serialization';
 import core from 'UstadMobile-core';
 import db from 'UstadMobile-lib-database';
 import {Observable} from 'rxjs';
@@ -9,6 +10,9 @@ export const appRountes = {
 }
 
 export class UmAngularUtil {
+  constructor(){
+    const ktor = ktorclientserial 
+  }
 
   /**
    * Content dispatch keys - communication btn components
