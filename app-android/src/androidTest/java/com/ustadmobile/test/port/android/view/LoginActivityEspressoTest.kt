@@ -35,14 +35,14 @@ class LoginActivityEspressoTest {
         mockRestServer.setDispatcher(object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 val url = request.requestUrl
-                if (TEST_VALID_USERNAME == url.queryParameter("user") && TEST_VALID_PASSWORD == url.queryParameter("password")) {
+                return if (TEST_VALID_USERNAME == url.queryParameter("user") && TEST_VALID_PASSWORD == url.queryParameter("password")) {
                     val account = UmAccount(1, TEST_VALID_USERNAME,
                             TEST_VALID_AUTH_TOKEN, "")
-                    return MockResponse()
+                    MockResponse()
                             .setHeader("Content-Type", "application/json")
                             .setBody(Gson().toJson(account))
                 } else {
-                    return MockResponse().setResponseCode(204)
+                    MockResponse().setResponseCode(204)
                 }
             }
         })

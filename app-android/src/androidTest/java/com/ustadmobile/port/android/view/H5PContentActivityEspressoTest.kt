@@ -35,7 +35,7 @@ class H5PContentActivityEspressoTest {
     @Before
     fun setup() {
         db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
-        repo =  UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext()) //db?.getRepository("http://localhost/dummy/", "")
+        repo =  UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext()) //db?.getUmRepository("http://localhost/dummy/", "")
         db?.clearAllTables()
 
         h5PTmpFile = File.createTempFile("H5pContentActivityEspressoTest", "h5p-true-false.h5p")

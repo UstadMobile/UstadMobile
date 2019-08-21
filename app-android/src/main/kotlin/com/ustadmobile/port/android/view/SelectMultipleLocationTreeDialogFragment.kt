@@ -97,7 +97,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
 
         //Presenter
         mPresenter = SelectMultipleLocationTreeDialogPresenter(context!!,
-                bundleToMap(arguments), this)
+                bundleToMap(arguments), this, repository.locationDao)
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
         //Get any locations from given Uids (from previous activity)

@@ -20,10 +20,12 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
@@ -67,6 +69,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private lateinit var downloadButton: Button
 
+    private val umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(this)
+
+    private val umAppRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(this)
+
     private var downloadProgress: DownloadProgressView? = null
 
     private var fileStatusIcon = HashMap<Int, Int>()
@@ -89,7 +95,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
-                this, networkManagerBle)
+                this, networkManagerBle, umAppRepository)
         presenter!!.onCreate(bundleToMap(Bundle()))
 
         presenter!!.onStart()

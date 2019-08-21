@@ -62,7 +62,7 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
     fun setup() {
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         db = UmAppDatabase.getInstance(context)
-        repo = db //db!!.getRepository("http://localhost/dummy/", "")
+        repo = db //db!!.getUmRepository("http://localhost/dummy/", "")
         db.clearAllTables()
 
         insertXapi(db)

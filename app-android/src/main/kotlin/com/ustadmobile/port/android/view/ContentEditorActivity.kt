@@ -161,7 +161,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
         embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
         presenter = ContentEditorPresenter(this, args!!, this,
-                args!![CONTENT_STORAGE_OPTION]) {
+                args!![CONTENT_STORAGE_OPTION], UmAppDatabase.getInstance(this),
+                UmAccountManager.getRepositoryForActiveAccount(this)) {
 
             val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
             val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
