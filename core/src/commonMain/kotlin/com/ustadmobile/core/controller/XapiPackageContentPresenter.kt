@@ -12,7 +12,6 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
-import kotlin.js.JsName
 
 /**
  * Created by mike on 9/13/17.
@@ -27,7 +26,7 @@ import kotlin.js.JsName
  *
  */
 class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  @JsName("containerMounter") private val containerMounter: suspend (Long) -> String)
+                                  private val containerMounter: suspend (Long) -> String)
     : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
     private var mountedPath: String? = null
@@ -43,7 +42,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
-        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID] ?: error("")).toLong()
+        val containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()
         GlobalScope.launch {
             mountedPath = containerMounter(containerUid)
 

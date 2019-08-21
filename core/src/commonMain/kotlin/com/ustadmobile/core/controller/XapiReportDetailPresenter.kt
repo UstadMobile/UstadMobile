@@ -9,10 +9,9 @@ import com.ustadmobile.core.controller.XapiReportOptions.Companion.GENDER
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.MONTH
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.SCORE
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.WEEK
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
+import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportDetailView.Companion.ARG_REPORT_OPTIONS
@@ -27,24 +26,23 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
-class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, view: XapiReportDetailView, val impl: UstadMobileSystemImpl)
+class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
+                                view: XapiReportDetailView, val impl: UstadMobileSystemImpl,
+                                private val statementDao: StatementDao,
+                                private val xLangMapEntryDao: XLangMapEntryDao)
     : UstadBaseController<XapiReportDetailView>(context, arguments!!, view) {
-
-    private lateinit var db: UmAppDatabase
 
     private lateinit var reportOptions: XapiReportOptions
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        db = UmAccountManager.getRepositoryForActiveAccount(context)
-
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments.getValue(ARG_REPORT_OPTIONS)!!
         reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
         GlobalScope.launch {
             val sql = reportOptions.toSql()
-            var data = db.statementDao.getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
+            var data = statementDao.getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
             var time = SECS
             if (reportOptions.yAxis == DURATION || reportOptions.yAxis == AVG_DURATION) {
                 time = getMeasureTime(data)
@@ -57,7 +55,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
                 view.setChartData(data, reportOptions, xAxisLabel, subgroupLabel)
                 view.setChartYAxisLabel(yAxisLabel)
             })
-            val results = db.statementDao.getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
+            val results = statementDao.getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
             view.runOnUiThread(Runnable {
                 view.setReportListData(results)
             })
@@ -120,7 +118,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
 
             }
             CONTENT_ENTRY -> {
-                val valueList = db.xLangMapEntryDao.getValuesWithListOfId(list.map { it.toInt() })
+                val valueList = xLangMapEntryDao.getValuesWithListOfId(list.map { it.toInt() })
                 valueList.forEach {
                     mutableMap[it.objectLangMapUid.toString()] = it.valueLangMap
                 }

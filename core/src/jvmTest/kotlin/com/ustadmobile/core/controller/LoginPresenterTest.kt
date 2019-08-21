@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 import org.junit.Before
@@ -17,11 +19,13 @@ class LoginPresenterTest {
 
     private val context = Any()
 
+
     @Before
     fun setUp(){
         view = mock()
         impl = mock ()
-        presenter = LoginPresenter(context, mapOf(),view, impl)
+        val umRepo = UmAccountManager.getRepositoryForActiveAccount(context)
+        presenter = LoginPresenter(context, mapOf(),view, impl, umRepo.personDao)
     }
 
 
@@ -79,7 +83,7 @@ class LoginPresenterTest {
         server = startServer()
 
         db = UmAppDatabase.getInstance(Any())
-        repo = db//db!!.getRepository(TEST_URI, "")
+        repo = db//db!!.getUmRepository(TEST_URI, "")
 
         db!!.clearAllTables()
         val testPerson = Person()

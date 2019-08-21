@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.XapiPackageContentView.Companion.ARG_CONTAINER_UID
 import kotlinx.io.InputStream
 import kotlin.browser.localStorage
 import kotlin.browser.window
@@ -39,7 +38,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        umContext.router.navigate(arrayOf("/${HomeView.VIEW_NAME}/" + viewName), mapToRouterParams(args))
+        val basePath = if(args.containsKey(ARG_CONTENT_ENTRY_UID)) "/${HomeView.VIEW_NAME}/" else "/"
+        umContext.router.navigate(arrayOf(basePath + viewName), mapToRouterParams(args))
     }
 
     private fun mapToRouterParams(args: Map<String, String?>): Any{

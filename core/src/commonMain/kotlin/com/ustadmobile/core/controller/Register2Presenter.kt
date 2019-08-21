@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
@@ -12,14 +12,11 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View)
+class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View,
+                         private val personDao: PersonDao)
     : UstadBaseController<Register2View>(context, arguments, view) {
 
     private var mNextDest: String? = null
-
-    private var umAppDatabase: UmAppDatabase? = null
-
-    private var repo: UmAppDatabase? = null
 
     init {
         if (arguments.containsKey(ARG_NEXT)) {
@@ -38,15 +35,6 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
         }
     }
 
-    //only for testing
-    fun setClientDb(database: UmAppDatabase) {
-        this.umAppDatabase = database
-    }
-
-    fun setRepo(repo: UmAppDatabase) {
-        this.repo = repo
-    }
-
     /**
      * Registering new user's account
      * @param person Person object to be registered
@@ -58,21 +46,14 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
         view.runOnUiThread(Runnable { view.setInProgress(true) })
 
         val systemImpl = UstadMobileSystemImpl.instance
-        if (umAppDatabase === null) {
-            umAppDatabase = UmAppDatabase.getInstance(context)//.getRepository(serverUrl, "")
-        }
-
-        if (repo === null) {
-            repo = UmAccountManager.getRepositoryForActiveAccount(context)
-        }
 
         GlobalScope.launch {
 
             try {
-                val result = repo!!.personDao.registerAsync(person, password)
+                val result = personDao.registerAsync(person, password)
                 if (result != null) {
                     person.personUid = result.personUid
-                    umAppDatabase!!.personDao.insertAsync(person)
+                    personDao.insertAsync(person)
                     result.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(result, context)

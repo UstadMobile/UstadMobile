@@ -2,8 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
@@ -29,7 +27,8 @@ import kotlin.js.JsName
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
                                   private val monitor: LocalAvailabilityMonitor,
-                                  private val statusProvider: DownloadJobItemStatusProvider?)
+                                  private val statusProvider: DownloadJobItemStatusProvider?,
+                                  private val appRepo: UmAppDatabase)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
         OnDownloadJobItemChangeListener {
 
@@ -39,10 +38,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         private set
 
     private var containerUid: Long? = 0L
-
-    private var networkNodeDao: NetworkNodeDao? = null
-
-    private var containerDao: ContainerDao? = null
 
     private val monitorStatus = atomic(false)
 
@@ -56,29 +51,21 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var entryLiveData: DoorLiveData<ContentEntry?>? = null
 
-    private val appdb = UmAppDatabase.getInstance(context)
-
     private var isDownloadComplete: Boolean = false
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-        val contentRelatedEntryDao = repoAppDatabase.contentEntryRelatedEntryJoinDao
-        val contentEntryDao = repoAppDatabase.contentEntryDao
-        val contentEntryStatusDao = appdb.contentEntryStatusDao
-        containerDao = repoAppDatabase.containerDao
-        networkNodeDao = appdb.networkNodeDao
 
 
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
 
-        entryLiveData = contentEntryDao.findLiveContentEntry(entryUuid)
+        entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
         entryLiveData!!.observe(this, this::onEntryChanged)
 
         GlobalScope.launch {
-            val result = containerDao!!.findFilesByContentEntryUid(entryUuid)
+            val result = appRepo.containerDao.findFilesByContentEntryUid(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setDetailsButtonEnabled(result.isNotEmpty())
                 if (result.isNotEmpty()) {
@@ -89,7 +76,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         GlobalScope.launch {
-            val result = contentRelatedEntryDao.findAllTranslationsForContentEntryAsync(entryUuid)
+            val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsForContentEntryAsync(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setTranslationLabelVisible(result.isNotEmpty())
                 view.setFlexBoxVisible(result.isNotEmpty())
@@ -97,7 +84,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             })
         }
 
-        statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
+        statusUmLiveData = appRepo.contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
 
@@ -188,10 +175,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
             GlobalScope.launch {
 
-                val container = containerDao!!.getMostRecentContainerForContentEntry(entryUuid)
+                val container = appRepo.containerDao.getMostRecentContainerForContentEntry(entryUuid)
                 if (container != null) {
                     containerUid = container.containerUid
-                    val localNetworkNode = networkNodeDao!!.findLocalActiveNodeByContainerUid(
+                    val localNetworkNode = appRepo.networkNodeDao.findLocalActiveNodeByContainerUid(
                             containerUid!!, minLastSeen, BAD_NODE_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
 
                     if (localNetworkNode == null && !monitorStatus.value) {
@@ -244,7 +231,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     fun handleDownloadButtonClick() {
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
 
             val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
@@ -253,7 +239,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             if(loginFirst){
                 impl.go(LoginView.VIEW_NAME, args, view.viewContext)
             }else{
-                ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
+                ContentEntryUtil.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
                         context, object : UmCallback<Any> {
 
                     override fun onSuccess(result: Any?) {}
@@ -308,10 +294,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     suspend fun handleCancelDownload(){
-        val currentJobId = appdb.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
-        appdb.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
+        val currentJobId = appRepo.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
+                appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
                         JobStatus.CANCELLING)
-        appdb.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+                        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
         view.stopForeGroundService(currentJobId.toLong(), true)
     }
@@ -320,7 +306,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     fun handleStartEditingContent() {
 
         GlobalScope.launch {
-            val entry = appdb.contentEntryDao.findByEntryId(entryUuid)
+            val entry = appRepo.contentEntryDao.findByEntryId(entryUuid)
 
             if (entry != null) {
                 args.putAll(arguments)

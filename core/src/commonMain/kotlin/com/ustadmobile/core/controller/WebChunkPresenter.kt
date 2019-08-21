@@ -1,8 +1,12 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.impl.UmCallback
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -15,7 +19,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView)
+class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView,
+                        private val appRepo: UmAppDatabase)
     : UstadBaseController<WebChunkView>(context, arguments, view) {
 
     lateinit var cs: ContentEntry
@@ -23,9 +28,6 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-        val contentEntryDao = repoAppDatabase.contentEntryDao
-        val containerDao = repoAppDatabase.containerDao
 
         val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
         val containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
@@ -35,7 +37,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
         GlobalScope.launch {
             try {
-                val result = contentEntryDao.getContentByUuidAsync(entryUuid)
+                val result = appRepo.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.runOnUiThread(Runnable {
                     val resultTitle = result?.title
                     if (resultTitle != null)
@@ -50,7 +52,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
         }
 
         GlobalScope.launch {
-            val result = containerDao.findByUidAsync(containerUid)
+            val result = appRepo.containerDao.findByUidAsync(containerUid)
             view.mountChunk(result!!, object : UmCallback<String> {
                 override fun onSuccess(result: String?) {
                     if (result != null) {
@@ -70,11 +72,10 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
         val impl = UstadMobileSystemImpl.instance
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
 
         ContentEntryUtil.goToContentEntryByViewDestination(
                 sourceUrl,
-                repoAppDatabase, impl,
+                appRepo, impl,
                 true,
                 context, object : UmCallback<Any> {
             override fun onSuccess(result: Any?) {

@@ -57,7 +57,7 @@ class TestEpubContentPresenter {
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
         db = UmAppDatabase.getInstance(Any())
-        repo = db //db!!.getRepository("http://localhost/dummy/", "")
+        repo = db //db!!.getUmRepository("http://localhost/dummy/", "")
         db!!.clearAllTables()
 
         epubContainer = Container()

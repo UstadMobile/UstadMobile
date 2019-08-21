@@ -4,6 +4,9 @@ import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONT
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
+import com.ustadmobile.core.db.dao.ContentEntryStatusDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
@@ -23,12 +26,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryEditView)
+class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>,
+                                view: ContentEntryEditView, private val contentEntryDao: ContentEntryDao,
+                                private val contentEntryStatusDao: ContentEntryStatusDao,
+                                private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao)
     : UstadBaseController<ContentEntryEditView>(context, arguments, view) {
 
     val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance
-
-    private val appDb : UmAppDatabase = UmAppDatabase.getInstance(context)
 
     private var contentEntry: ContentEntry = ContentEntry()
 
@@ -51,7 +55,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             ContentEntry.LICENSE_TYPE_CC_BY_SA_NC, ContentEntry.LICENSE_TYPE_CC_BY_NC, ContentEntry.ALL_RIGHTS_RESERVED,
             ContentEntry.LICESNE_TYPE_CC_BY_NC_SA, ContentEntry.PUBLIC_DOMAIN,LICENSE_TYPE_OTHER)
 
-    val contentType = arguments.getValue(ContentEntryEditView.CONTENT_TYPE)?.toInt()
+    private val contentType = arguments.getValue(ContentEntryEditView.CONTENT_TYPE)?.toInt()
 
     private var isImportedContent: Boolean = contentType == CONTENT_IMPORT_FILE
 
@@ -59,8 +63,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         super.onCreate(savedState)
 
         GlobalScope.launch {
-            val entry = appDb.contentEntryDao.findByEntryId(arguments.getValue(
-                    ContentEditorView.CONTENT_ENTRY_UID)!!.toLong())
+            val entry = contentEntryDao.findByEntryId(arguments.getValue(
+                    CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
@@ -125,22 +129,22 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
             if(isNewContent){
                 contentEntry.leaf = isLeaf
-                contentEntry.contentEntryUid = appDb.contentEntryDao.insert(contentEntry)
+                contentEntry.contentEntryUid = contentEntryDao.insert(contentEntry)
 
                 val contentEntryJoin = ContentEntryParentChildJoin()
                 contentEntryJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
                 contentEntryJoin.cepcjParentContentEntryUid =
                         arguments[ARG_CONTENT_ENTRY_UID]?.toLong()!!
                 contentEntryJoin.cepcjUid =
-                        appDb.contentEntryParentChildJoinDao.insert(contentEntryJoin)
+                        contentEntryParentChildJoinDao.insert(contentEntryJoin)
 
                 val status =  ContentEntryStatus(contentEntry.contentEntryUid, true, 0)
                 status.downloadStatus = JobStatus.COMPLETE
                 status.cesLeaf = isLeaf
-                status.cesUid = appDb.contentEntryStatusDao.insert(status)
+                status.cesUid = contentEntryStatusDao.insert(status)
             }else{
                 contentEntry.contentEntryUid = contentEntry.contentEntryUid
-                appDb.contentEntryDao.update(contentEntry)
+                contentEntryDao.update(contentEntry)
             }
 
             when(contentType){
@@ -192,16 +196,16 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             contentJoin.cepcjChildContentEntryUid = newContentEntry.contentEntryUid
 
             if(isNewContent)
-                appDb.contentEntryParentChildJoinDao.insert(contentJoin)
+                contentEntryParentChildJoinDao.insert(contentJoin)
             else
-                appDb.contentEntryParentChildJoinDao.update(contentJoin)
+                contentEntryParentChildJoinDao.update(contentJoin)
         }
 
         val status =  ContentEntryStatus(newContentEntry?.contentEntryUid!!,
                 true, fileSize)
         status.downloadStatus = JobStatus.COMPLETE
         status.cesLeaf = true
-        appDb.contentEntryStatusDao.update(status)
+        contentEntryStatusDao.update(status)
 
         view.runOnUiThread(Runnable {
             view.showMessageAndDismissDialog(message, false)})
