@@ -10,20 +10,31 @@ actual class DatabaseBuilder<T: DoorDatabase>(private val roomBuilder: RoomDatab
 
     actual companion object {
         actual fun <T : DoorDatabase> databaseBuilder(context: Any, dbClass: KClass<T>, dbName: String): DatabaseBuilder<T> {
-            return DatabaseBuilder(Room.databaseBuilder(context as Context, dbClass.java, dbName))
+            val builder = DatabaseBuilder(Room.databaseBuilder(context as Context, dbClass.java, dbName))
+
+            val callbackClassName = "${dbClass.java.canonicalName}_SyncCallback"
+            println("Attempt to load callback $callbackClassName")
+
+            val callbackClass = Class.forName(callbackClassName).newInstance() as DoorDatabaseCallback
+
+            builder.addCallback(callbackClass)
+
+            return builder
         }
     }
 
 
 
-    actual fun build(): T = roomBuilder.build()
+    actual fun build(): T = roomBuilder.allowMainThreadQueries().build()
 
-    actual fun addCallback(callback: DoorDatabaseCallback) {
+    actual fun addCallback(callback: DoorDatabaseCallback) : DatabaseBuilder<T> {
         roomBuilder.addCallback(object: RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase)  = callback.onCreate(db)
 
             override fun onOpen(db: SupportSQLiteDatabase) = callback.onOpen(db)
         })
+
+        return this
     }
 
 }

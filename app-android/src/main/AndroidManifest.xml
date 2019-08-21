@@ -3,49 +3,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.toughra.ustadmobile">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Required for BLE peer-to-peer GATT server -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Required for BLE peer-to-peer GATT server -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-    <!-- Required for saving files to external SD -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Required for saving files to external SD -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Used for content editing when a user wants to add pictures/video from camera -->
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <!-- Required for peer-to-peer connecting using WiFi direct -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Used for content editing when a user wants to add pictures/video from camera -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- Required for peer-to-peer connecting using WiFi direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <!-- Required to use BLE scanning for peer devices -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- Required for Android WorkManager to run jobs -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- To obtain wifi lock to avoid wifi powering down during download-->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!--To show download progress indicator-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Required to use BLE scanning for peer devices -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Required for Android WorkManager to run jobs -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- To show download progress indicator -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <application android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.UstadTheme">
+    <application
+        android:supportsRtl="true"
+        android:theme="@style/Theme.UstadTheme"
+        android:usesCleartextTraffic="true">
+        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"></activity>
         <activity
-            android:theme="@style/ThemeOnboarding"
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:noHistory="true"/>
+            android:noHistory="true"
+            android:theme="@style/ThemeOnboarding" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -79,7 +64,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""/>
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
             android:configChanges="keyboardHidden|keyboard|screenSize"
@@ -91,7 +76,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""/>
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
@@ -100,25 +85,24 @@
             android:name="com.ustadmobile.port.android.view.LoginActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login" />
-
-        <activity android:name="com.ustadmobile.port.android.view.Register2Activity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/register"/>
-
         <activity
-            android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
-
-        <activity android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
-
-        <activity android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
+            android:name="com.ustadmobile.port.android.view.Register2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register" />
+        <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true"/>
 
-
+        <activity android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
     </application>
 
 </manifest>

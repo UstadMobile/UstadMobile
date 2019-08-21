@@ -458,20 +458,20 @@ fun fieldsOnEntity(entityType: TypeElement) = entityType.enclosedElements.filter
 }
 
 internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
-                                     stmtVarName: String = "_stmt",
+                                     execSqlFunName: String = "_stmt.executeUpdate",
                                      processingEnv: ProcessingEnvironment,
                                      isUpdate: Boolean = false): CodeBlock {
     val codeBlock = CodeBlock.builder()
     codeBlock.add("val _nodeId = %T.nextInt(1, %T.MAX_VALUE)\n",
             Random::class, Int::class)
             .add("println(\"Setting SyncNode nodeClientId = \$_nodeId\")\n")
-            .add("$stmtVarName.executeUpdate(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES·(\$_nodeId,\${if(master) 1 else 0})\")\n")
+            .add("$execSqlFunName(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES·(\$_nodeId,\${if(master) 1 else 0})\")\n")
     syncableEntityTypesOnDb(dbType, processingEnv).forEach {
         if(isUpdate) {
-            codeBlock.add("$stmtVarName.executeUpdate(%S)\n",
+            codeBlock.add("$execSqlFunName(%S)\n",
                     "UPDATE sqlite_sequence SET seq = ((SELECT nodeClientId FROM SyncNode) << 32) WHERE name = '${it.simpleName}'")
         }else {
-            codeBlock.add("$stmtVarName.executeUpdate(%S)\n",
+            codeBlock.add("$execSqlFunName(%S)\n",
                     "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
         }
     }
@@ -657,7 +657,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             if(processingEnv.typeUtils.isAssignable(dbTypeElement.asType(),
                             processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())){
-                codeBlock.add(generateInsertNodeIdFun(dbTypeElement, dbProductType, "_stmt",
+                codeBlock.add(generateInsertNodeIdFun(dbTypeElement, dbProductType, "_stmt.executeUpdate",
                         processingEnv))
             }
 
@@ -688,7 +688,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         dropFunSpec.beginControlFlow("when(jdbcDbType)")
         DoorDbType.SUPPORTED_TYPES.forEach {
             dropFunSpec.beginControlFlow("$it -> ")
-                    .addCode(generateInsertNodeIdFun(dbTypeElement, it, "_stmt", processingEnv,
+                    .addCode(generateInsertNodeIdFun(dbTypeElement, it, "_stmt.executeUpdate", processingEnv,
                             isUpdate = true))
                     .endControlFlow()
         }

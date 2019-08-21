@@ -13,11 +13,11 @@ import kotlin.js.JsName
 abstract class ContainerDao : BaseDao<Container> {
 
     @Insert
-    abstract fun insert(containerList: List<Container>): Array<Long>
+    abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
+           // "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     @JsName("getMostRecentDownloadedContainerForContentEntryAsync")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?

@@ -21,6 +21,7 @@ import com.ustadmobile.door.annotation.Repository
 import kotlinx.coroutines.GlobalScope
 import kotlin.reflect.KClass
 
+
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
             .addProperty(PropertySpec.builder("_dao",
@@ -31,6 +32,8 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
                     .initializer("_clientId").build())
             .addProperty(PropertySpec.builder("_endpoint", String::class)
                     .initializer("_endpoint").build())
+            .addProperty(PropertySpec.builder("_dbPath", String::class)
+                    .initializer("_dbPath").build())
             .superclass(daoType)
 
     val primaryConstructorFn = FunSpec.constructorBuilder()
@@ -38,6 +41,7 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addParameter("_httpClient", HttpClient::class)
             .addParameter("_clientId", Int::class)
             .addParameter("_endpoint", String::class)
+            .addParameter("_dbPath", String::class)
 
     if(addSyncHelperParam) {
         val syncHelperClassName = ClassName(daoType.packageName,
@@ -112,6 +116,13 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
                         .build())
+                .addType(TypeSpec.companionObjectBuilder()
+                        .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
+                                .addModifiers(KModifier.CONST)
+                                .initializer("%S", dbTypeElement.simpleName)
+                                .mutable(false).build())
+                        .build())
+
 
         if(overrideClearAllTables) {
             dbRepoType.addFunction(FunSpec.builder("createAllTables")
@@ -131,6 +142,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
         }
 
         if(overrideOpenHelper) {
+            val invalidationTrackerClassName = ClassName("androidx.room", "InvalidationTracker")
             dbRepoType.addFunction(FunSpec.builder("createOpenHelper")
                     .addParameter("config", ClassName("androidx.room", "DatabaseConfiguration"))
                     .returns(ClassName("androidx.sqlite.db", "SupportSQLiteOpenHelper"))
@@ -138,9 +150,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .addCode("throw IllegalAccessException(%S)\n", "Cannot use open helper on repository")
                     .build())
             dbRepoType.addFunction(FunSpec.builder("createInvalidationTracker")
-                    .returns(ClassName("androidx.room", "InvalidationTracker"))
+                    .returns(invalidationTrackerClassName)
                     .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
-                    .addCode("throw IllegalAccessException(%S)\n", "Cannot use invalidationtracker on repository")
+                    .addCode("return %T.createDummyInvalidationTracker(this)\n",
+                            ClassName("com.ustadmobile.door","DummyInvalidationTracker"))
                     .build())
         }
 
@@ -171,7 +184,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
-                    .delegate("lazy { %T(_syncDao, _httpClient, _clientId, _endpoint) }", repoImplClassName).build())
+                    .delegate("lazy { %T(_syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) }", repoImplClassName).build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
             dbRepoType.addFunction(FunSpec.builder("sync")
                     .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
@@ -205,7 +218,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             }
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  daoTypeEl.asType().asTypeName())
-                    .delegate("lazy { %T(_db.$daoFromDbGetter, _httpClient, _clientId, _endpoint $syncDaoParam) }",
+                    .delegate("lazy { %T(_db.$daoFromDbGetter, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
                             repoImplClassName).build())
 
             if(it.simpleName.toString().startsWith("get")) {
@@ -347,6 +360,13 @@ class DbProcessorRepository: AbstractDbProcessor() {
          * from the database object
          */
         const val REPO_SYNCABLE_DAO_FROMDB = 2
+
+        /**
+         * A static string which is generated for the database name part of the http path, which is
+         * passed from the database repository to the DAO repository so it can use the correct http
+         * path e.g. endpoint/dbname/daoname
+         */
+        const val DB_NAME_VAR = "_DB_NAME"
 
     }
 

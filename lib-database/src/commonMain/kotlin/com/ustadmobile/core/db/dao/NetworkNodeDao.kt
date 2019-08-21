@@ -25,13 +25,13 @@ abstract class NetworkNodeDao {
     abstract fun findNodeByBluetoothAddress(bluetoothAddress: String): NetworkNode?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(node: NetworkNode): Long
+    abstract fun replace(node: NetworkNode): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertAsync(node: NetworkNode): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(nodeList: List<NetworkNode>): Array<Long>
+    abstract fun insertList(nodeList: List<NetworkNode>): Array<Long>
 
     @Update
     abstract fun update(node: NetworkNode)

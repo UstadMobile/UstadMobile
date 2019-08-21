@@ -33,6 +33,7 @@ kotlin {
             jvmTarget = "$version_kotlin_jvmTarget"
         }
     }
+   // jvm("commonJvm")
 
     android()
 
@@ -67,8 +68,21 @@ kotlin {
                 implementation "com.soywiz:klock-js:$version_klock"
             }
         }
+        commonJvmMain {
+            dependencies {
+                implementation "io.ktor:ktor-server-servlet:$version_ktor"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+                compileOnly project(":app-ktor-server")
+                compileOnly project(":lib-database-entities")
+                compileOnly project(":lib-database")
+                compileOnly project(":lib-door-runtime")
+                compileOnly project(":lib-util")
+            }
+        }
 
         jvmMain {
+            dependsOn commonJvmMain
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
@@ -77,6 +91,8 @@ kotlin {
         }
 
         androidMain {
+            dependsOn commonJvmMain
+            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"

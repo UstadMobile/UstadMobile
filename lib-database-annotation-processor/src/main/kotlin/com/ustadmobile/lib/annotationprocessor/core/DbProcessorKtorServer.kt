@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Dao
+import androidx.room.Database
 import androidx.room.Query
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
@@ -15,6 +16,8 @@ import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.DoorDatabase
 import com.google.gson.reflect.TypeToken
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import java.util.*
+import javax.lang.model.element.ElementKind
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -132,7 +135,76 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
         }
 
+        roundEnv.getElementsAnnotatedWith(Database::class.java).forEach {
+            writeFileSpecToOutputDirs(generateDbRoute(it as TypeElement),
+                    AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+        }
+
         return true
+    }
+
+    fun generateDbRoute(dbTypeElement: TypeElement): FileSpec {
+        val dbTypeClassName = dbTypeElement.asClassName()
+        val dbRouteFileSpec = FileSpec.builder(dbTypeElement.asClassName().packageName,
+                "${dbTypeElement.simpleName}_${SUFFIX_KTOR_ROUTE}")
+            .addImport("com.ustadmobile.door", "DoorDbType")
+            .addImport("io.ktor.response", "header")
+
+        val dbRouteFn = FunSpec.builder("${dbTypeElement.simpleName}_${SUFFIX_KTOR_ROUTE}")
+                .receiver(Route::class)
+                .addParameter("_db", dbTypeElement.asClassName())
+                .addParameter("_gson", Gson::class)
+
+        val codeBlock = CodeBlock.builder()
+                .add("val _gson = %T()\n", Gson::class)
+
+        val isSyncableDb = isSyncableDb(dbTypeElement, processingEnv)
+
+        if(isSyncableDb){
+            codeBlock.add("val _syncHelperDao = %T(_db)\n",
+                    ClassName(dbTypeClassName.packageName,
+                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+        }
+
+        codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
+                dbTypeClassName.simpleName)
+
+        if(isSyncableDb) {
+            codeBlock.add("%M(_syncHelperDao, _db, _gson)\n",
+                    MemberName(dbTypeClassName.packageName,
+                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}_$SUFFIX_KTOR_ROUTE"))
+        }
+
+        methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
+        .filter{ it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
+            var daoFromDbGetter = ""
+            val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
+            if(daoTypeEl == null) {
+                return@forEach
+            }
+            val daoTypeClassName = daoTypeEl.asClassName()
+
+            if(it.simpleName.toString().startsWith("get")) {
+                daoFromDbGetter += it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
+            }else {
+                daoFromDbGetter += "${it.simpleName}()"
+            }
+
+            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson", MemberName(daoTypeClassName.packageName,
+                    "${daoTypeEl.simpleName}_$SUFFIX_KTOR_ROUTE"))
+            if(syncableEntitiesOnDao(daoTypeClassName, processingEnv).isNotEmpty()) {
+                codeBlock.add(", _syncHelperDao")
+            }
+            codeBlock.add(")\n")
+        }
+        codeBlock.endControlFlow()
+
+        dbRouteFn.addCode(codeBlock.build())
+        dbRouteFileSpec.addFunction(dbRouteFn.build())
+
+        return dbRouteFileSpec.build()
+
+
     }
 
     fun generateDaoImplClass(daoTypeElement: TypeElement): FileSpec {
@@ -141,7 +213,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
         daoImplFile.addImport("io.ktor.response", "header")
 
-        val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}Route")
+        val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}_$SUFFIX_KTOR_ROUTE")
                 .receiver(Route::class)
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
                 .addParameter("_db", DoorDatabase::class)

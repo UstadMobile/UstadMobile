@@ -2,10 +2,10 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.core.view.UstadView
-import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -40,7 +40,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
                 view.setContentHtml(h5pMountUrl2, subHtmlStr)
             })
 
-            val client = HttpClient()
+            val client = defaultHttpClient()
 
             val h5PJsonUrl = UMFileUtil.joinPaths(h5pMountUrl2, "h5p.json")
             var h5pTitle = ""

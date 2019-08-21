@@ -80,7 +80,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     var messageIdMap: Map<Int, Int> = mapOf()
 
 
-    private val viewNameToAndroidImplMap = mapOf<String,Any>(
+    private val viewNameToAndroidImplMap = mapOf<String, Any>(
             "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
             VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
             ContentEditorView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorActivity"),
@@ -100,9 +100,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
             ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
             H5PContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}H5PContentActivity"),
+            UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
             ContentEntryListFragmentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
-            ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"))
-
+            ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
+            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"))
 
 
     private abstract class UmCallbackAsyncTask<A, P, R>
@@ -131,7 +132,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
      */
-    private class GetSetupFileAsyncTask (doneCallback: UmCallback<*>, private val context: Context)
+    private class GetSetupFileAsyncTask(doneCallback: UmCallback<*>, private val context: Context)
         : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback as UmCallback<String>) {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
@@ -195,7 +196,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int){
+    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val androidImplClass = viewNameToAndroidImplMap[viewName]
         val ctx = context as Context
         val argsBundle = UMAndroidUtil.mapToBundle(args)
@@ -251,16 +252,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-
     /**
      * Get a string for use in the UI
      */
-    actual fun getString(messageCode: Int, context: Any): String{
+    actual fun getString(messageCode: Int, context: Any): String {
         val androidId = messageIdMap[messageCode]
         return if (androidId != null) {
             (context as Context).resources.getString(androidId)
         } else {
-           return ""
+            return ""
         }
     }
 
@@ -269,7 +269,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return System locale
      */
-    actual override fun getSystemLocale(context: Any): String{
+    actual override fun getSystemLocale(context: Any): String {
         return Locale.getDefault().toString()
     }
 
@@ -281,7 +281,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param callback Storage dir list callback
      */
 
-    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>){
+    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
         Thread {
             val dirList = ArrayList<UMStorageDir>()
             val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
@@ -333,7 +333,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * Get an asset (from files that are in core/src/flavorName/assets)
      *
      */
-    actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>){
+    actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>) {
         var mPath = path
         if (path.startsWith("/")) {
             mPath = path.substring(1)
@@ -354,7 +354,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference key as a string
      * @return value of that preference
      */
-    actual override fun getAppPref(key: String, context: Any): String?{
+    actual override fun getAppPref(key: String, context: Any): String? {
         return getAppSharedPreferences(context as Context).getString(key, null)
     }
 
@@ -364,7 +364,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    override actual fun setAppPref(key: String, value: String?, context: Any){
+    override actual fun setAppPref(key: String, value: String?, context: Any) {
         val prefs = getAppSharedPreferences(context as Context)
         val editor = prefs.edit()
         if (value != null) {
@@ -381,7 +381,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return String with version number
      */
-    actual fun getVersion(context: Any): String{
+    actual fun getVersion(context: Any): String {
         val ctx = context as Context
         var versionInfo: String? = null
         try {
@@ -401,13 +401,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return Build timestamp in ms since epoch
      */
-    actual fun getBuildTimestamp(context: Any): Long{
-        val ctx  = context as Context
+    actual fun getBuildTimestamp(context: Any): Long {
+        val ctx = context as Context
         try {
             val pInfo = ctx.packageManager.getPackageInfo(context.packageName, 0)
             return pInfo.lastUpdateTime
         } catch (e: PackageManager.NameNotFoundException) {
-           UMLog.l(UMLog.ERROR, 90, null, e)
+            UMLog.l(UMLog.ERROR, 90, null, e)
         }
         return 0
     }
@@ -419,7 +419,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param zip if true, the app setup file should be delivered within a zip.
      * @param callback callback to call when complete or if any error occurs.
      */
-    actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>){
+    actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>) {
         val setupFileAsyncTask = GetSetupFileAsyncTask(callback,
                 context as Context)
         setupFileAsyncTask.execute(zip)
@@ -437,7 +437,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return The value of the manifest preference key if found, null otherwise
      */
-    actual override fun getManifestPreference(key: String, context: Any): String?{
+    actual override fun getManifestPreference(key: String, context: Any): String? {
         try {
             val ctx = context as Context
             val ai2 = ctx.packageManager.getApplicationInfo(ctx.packageName,
@@ -463,7 +463,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
+    actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
                     "/com/ustadmobile/core/appconfig.properties", context)
@@ -485,7 +485,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
 
     actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                         callback: UmCallback<Any>){
+                                       callback: UmCallback<Any>) {
         var mMimeType = mimeType;
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
@@ -514,7 +514,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     @Throws(IOException::class)
-    actual fun getAssetSync(context: Any, path: String): InputStream{
+    actual fun getAssetSync(context: Any, path: String): InputStream {
         var mPath = path
         if (path.startsWith("/")) {
             mPath = path.substring(1)
@@ -527,7 +527,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return
      */
-    actual fun getSystemBaseDir(context: Any): String{
+    actual fun getSystemBaseDir(context: Any): String {
         return File(Environment.getExternalStorageDirectory(), getContentDirName(context))
                 .absolutePath
     }
@@ -559,7 +559,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
         return canWriteFiles
     }
-
 
 
     actual companion object {
@@ -600,7 +599,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         if (path.startsWith("/")) {
             mPath = path.substring(1)
         }
-       return (context as Context).assets.open(mPath);
+        return (context as Context).assets.open(mPath);
     }
 
 

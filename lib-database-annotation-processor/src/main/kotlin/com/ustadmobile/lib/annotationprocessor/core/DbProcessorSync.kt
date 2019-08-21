@@ -280,10 +280,12 @@ class DbProcessorSync: AbstractDbProcessor() {
             val entitySyncFn = FunSpec.builder("sync${entityType.simpleName}")
                     .addModifiers(KModifier.SUSPEND, KModifier.PRIVATE)
                     .addCode(CodeBlock.builder()
-
+                            .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
+                                    syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
                             .add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
                             .beginControlFlow("if(!_entities.isEmpty())")
                             .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
+                                    dbPathVarName = "_dbPath",
                                     daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
                                     httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
                                     httpResultType = UNIT, params = replaceEntitiesFn.parameters))
@@ -502,7 +504,7 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         const val SUFFIX_SYNCDAO_IMPL = "SyncDao_JdbcKt"
 
-        const val SUFFIX_SYNC_ROUTE = "SyncDao_Route"
+        const val SUFFIX_SYNC_ROUTE = "SyncDao_KtorRoute"
 
         const val TRACKER_SUFFIX = "_trk"
 

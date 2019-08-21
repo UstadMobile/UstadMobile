@@ -96,8 +96,12 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                 }
             })
 
+            if(videoPath.isNullOrEmpty() && result.isNotEmpty()){
+                videoPath = result[0].containerEntryFile?.cefPath
+            }
+
             srtLangList.add(0, "No Subtitles")
-            srtLangList.add(1, defaultLangName)
+            if(defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
             view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioInput, srtLangList, srtMap) })
         }

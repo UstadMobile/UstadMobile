@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/activity_user_profile_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <include
+            layout="@layout/toolbar_with_progress"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/activity_user_profile_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="165dp"
+        android:layout_marginTop="116dp"
+        android:background="?android:attr/selectableItemBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/activity_user_profile_user_image"
+        app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+    <ImageView
+        android:id="@+id/activity_user_profile_user_image"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:tint="@color/text_secondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_appbar"
+        app:srcCompat="@drawable/ic_account_circle_white_24dp" />
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/activity_user_profile_change_password_ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view5">
+
+        <ImageView
+            android:id="@+id/activity_user_profile_change_password_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/ic_lock_black_24dp"
+            tools:layout_editor_absoluteY="243dp" />
+
+        <TextView
+            android:layout_toEndOf="@+id/activity_user_profile_change_password_icon"
+            android:id="@+id/activity_user_profile_change_password_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/activity_user_profile_change_password_icon"
+            tools:layout_editor_absoluteY="257dp" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:background="?android:attr/selectableItemBackground"
+        android:id="@+id/activity_user_profile_my_women_entrepreneurs_ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_change_password_ll">
+
+
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/activity_user_profile_language_ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_my_women_entrepreneurs_ll">
+
+        <ImageView
+            android:id="@+id/language_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/ic_language_black_24dp"
+            tools:layout_editor_absoluteY="243dp" />
+
+        <LinearLayout
+            android:layout_toEndOf="@+id/language_logo"
+            android:id="@+id/language_title_and_selection_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/language_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/language"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon" />
+
+            <TextView
+                android:id="@+id/activity_user_profile_language_selection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon" />
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/activity_user_profile_logout_ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_language_ll">
+
+        <ImageView
+            android:id="@+id/activity_user_profile_logout_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/ic_exit_to_app_black_24dp"
+            tools:layout_editor_absoluteY="243dp" />
+
+        <TextView
+            android:layout_toEndOf="@+id/activity_user_profile_logout_icon"
+            android:id="@+id/activity_user_profile_logout_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/logout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon"
+            tools:layout_editor_absoluteY="257dp" />
+
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/view5"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_user_image" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

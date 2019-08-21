@@ -25,14 +25,6 @@ abstract class DownloadJobItemDao {
     }
 
 
-    /**
-     * Insert a list of DownloadJobItems
-     *
-     * @param jobRunItems List of DownloadJobItem to insert
-     */
-    @Insert
-    abstract fun insert(jobRunItems: List<DownloadJobItem>)
-
     @Transaction
     open fun insertListAndSetIds(jobItems: List<DownloadJobItem>) {
         for (item in jobItems) {
