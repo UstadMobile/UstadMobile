@@ -21,6 +21,7 @@ import com.ustadmobile.door.annotation.Repository
 import kotlinx.coroutines.GlobalScope
 import kotlin.reflect.KClass
 
+
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
             .addProperty(PropertySpec.builder("_dao",
@@ -141,6 +142,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
         }
 
         if(overrideOpenHelper) {
+            val invalidationTrackerClassName = ClassName("androidx.room", "InvalidationTracker")
             dbRepoType.addFunction(FunSpec.builder("createOpenHelper")
                     .addParameter("config", ClassName("androidx.room", "DatabaseConfiguration"))
                     .returns(ClassName("androidx.sqlite.db", "SupportSQLiteOpenHelper"))
@@ -148,9 +150,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .addCode("throw IllegalAccessException(%S)\n", "Cannot use open helper on repository")
                     .build())
             dbRepoType.addFunction(FunSpec.builder("createInvalidationTracker")
-                    .returns(ClassName("androidx.room", "InvalidationTracker"))
+                    .returns(invalidationTrackerClassName)
                     .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
-                    .addCode("throw IllegalAccessException(%S)\n", "Cannot use invalidationtracker on repository")
+                    .addCode("return %T.createDummyInvalidationTracker(this)\n",
+                            ClassName("com.ustadmobile.door","DummyInvalidationTracker"))
                     .build())
         }
 
