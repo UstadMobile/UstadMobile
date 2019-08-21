@@ -89,10 +89,10 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
     }
 
     override fun preloadData() {
-        val dbWork = OneTimeWorkRequest.Builder(
-                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
-                .build()
-        WorkManager.getInstance().enqueue(dbWork)
+//        val dbWork = OneTimeWorkRequest.Builder(
+//                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
+//                .build()
+//        WorkManager.getInstance().enqueue(dbWork)
     }
 
     override fun animateOrganisationIcon(animate: Boolean, delay: Boolean) {

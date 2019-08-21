@@ -72,10 +72,12 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     UmAccountManager.setActiveAccount(account, context)
                     impl.go(mNextDest, context)
                 }else {
-                    view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
+                    view.runOnUiThread(Runnable {
+                        view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
                                 context))
                         view.setPassword("")
                         view.setInProgress(false)
+                    })
                 }
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {

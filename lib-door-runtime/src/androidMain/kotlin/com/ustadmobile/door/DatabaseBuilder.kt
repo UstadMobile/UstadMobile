@@ -18,12 +18,14 @@ actual class DatabaseBuilder<T: DoorDatabase>(private val roomBuilder: RoomDatab
 
     actual fun build(): T = roomBuilder.build()
 
-    actual fun addCallback(callback: DoorDatabaseCallback) {
+    actual fun addCallback(callback: DoorDatabaseCallback) : DatabaseBuilder<T> {
         roomBuilder.addCallback(object: RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase)  = callback.onCreate(db)
 
             override fun onOpen(db: SupportSQLiteDatabase) = callback.onOpen(db)
         })
+
+        return this
     }
 
 }

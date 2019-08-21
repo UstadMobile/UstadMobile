@@ -12,7 +12,7 @@ expect class DatabaseBuilder<T: DoorDatabase> {
 
     }
 
-    fun addCallback(callback: DoorDatabaseCallback)
+    fun addCallback(callback: DoorDatabaseCallback): DatabaseBuilder<T>
 
     fun build() : T
 

@@ -47,8 +47,10 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         return doorDb
     }
 
-    actual fun addCallback(callback: DoorDatabaseCallback) {
+    actual fun addCallback(callback: DoorDatabaseCallback) : DatabaseBuilder<T>{
         callbacks.add(callback)
+
+        return this
     }
 
 }
