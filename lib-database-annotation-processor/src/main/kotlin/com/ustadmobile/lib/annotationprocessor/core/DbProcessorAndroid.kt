@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Database
+import com.squareup.kotlinpoet.*
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_SOURCE_PATH
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
@@ -12,6 +13,8 @@ import java.nio.file.StandardCopyOption
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
+import com.ustadmobile.door.DoorDatabaseCallback
+import com.ustadmobile.door.DoorDbType
 
 class DbProcessorAndroid: AbstractDbProcessor() {
 
@@ -151,9 +154,50 @@ class DbProcessorAndroid: AbstractDbProcessor() {
             if(sourceFile != null) {
                 adjustDbFile(dbEl, sourceFile, outDirs)
             }
+
+            if(isSyncableDb(dbEl, processingEnv)) {
+                writeFileSpecToOutputDirs(generateSyncSetupCallback(dbEl), OPTION_ANDROID_OUTPUT, false)
+            }
         }
 
 
         return true
     }
+
+    fun generateSyncSetupCallback(dbTypeEl: TypeElement) : FileSpec {
+        val dbTypeclassName = dbTypeEl.asClassName()
+        val callbackFileSpec = FileSpec.builder(dbTypeclassName.packageName,
+                "${dbTypeclassName.simpleName}$SUFFIX_SYNCCALLBACK")
+        val callbackTypeSpec = TypeSpec.classBuilder("${dbTypeclassName.simpleName}$SUFFIX_SYNCCALLBACK")
+                .addFunction(FunSpec.builder("onOpen")
+                        .addParameter("db", ClassName("com.ustadmobile.door", "DoorSqlDatabase"))
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
+                .addProperty(PropertySpec.builder("master", BOOLEAN).initializer("false").build())
+                .addSuperinterface(DoorDatabaseCallback::class)
+
+        val onCreateFunSpec = FunSpec.builder("onCreate")
+                .addParameter("db", ClassName("com.ustadmobile.door", "DoorSqlDatabase"))
+                .addModifiers(KModifier.OVERRIDE)
+        val codeBlock = CodeBlock.builder()
+
+        syncableEntityTypesOnDb(dbTypeEl, processingEnv).forEach {
+            codeBlock.add(generateSyncTriggersCodeBlock(it.asClassName(), "db.execSQL",
+                    DoorDbType.SQLITE))
+        }
+
+        codeBlock.add(generateInsertNodeIdFun(dbTypeEl, DoorDbType.SQLITE, "db.execSQL",
+                processingEnv))
+
+        onCreateFunSpec.addCode(codeBlock.build())
+        callbackTypeSpec.addFunction(onCreateFunSpec.build())
+        callbackFileSpec.addType(callbackTypeSpec.build())
+
+        return callbackFileSpec.build()
+    }
+
+    companion object{
+        const val SUFFIX_SYNCCALLBACK = "_SyncCallback"
+    }
+
 }
