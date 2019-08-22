@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.anyArray
+import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
@@ -34,22 +35,23 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
+import kotlinx.coroutines.runBlocking
 
 class TestEpubContentPresenter {
 
-    private var db: UmAppDatabase? = null
+    private lateinit var db: UmAppDatabase
 
-    private var repo: UmAppDatabase? = null
+    private lateinit var repo: UmAppDatabase
 
     private var epubTmpFile: File? = null
 
     private var containerDirTmp: File? = null
 
-    private var mockEpubView: EpubContentView? = mock()
+    private lateinit var mockEpubView: EpubContentView
 
     private var epubContainer: Container? = null
 
-    private var httpd: EmbeddedHTTPD? = null
+    private lateinit var httpd: EmbeddedHTTPD
 
     private var opf: OpfDocument? = null
 
@@ -57,11 +59,11 @@ class TestEpubContentPresenter {
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
         db = UmAppDatabase.getInstance(Any())
-        repo = db //db!!.getRepository("http://localhost/dummy/", "")
-        db!!.clearAllTables()
+        repo = db
+        db.clearAllTables()
 
         epubContainer = Container()
-        epubContainer!!.containerUid = repo!!.containerDao.insert(epubContainer!!)
+        epubContainer!!.containerUid = repo.containerDao.insert(epubContainer!!)
 
         epubTmpFile = File.createTempFile("testepubcontentpresenter", "epubTmpFile")
 
@@ -69,30 +71,29 @@ class TestEpubContentPresenter {
                 epubTmpFile!!)
 
         containerDirTmp = UmFileUtilSe.makeTempDir("testpubcontentpresenter", "containerDirTmp")
-        val containerManager = ContainerManager(epubContainer!!, db!!, repo!!,
+        val containerManager = ContainerManager(epubContainer!!, db, repo,
                 containerDirTmp!!.absolutePath)
 
         val epubZipFile = ZipFile(epubTmpFile!!)
         addEntriesFromZipToContainer(epubTmpFile!!.absolutePath, containerManager)
         epubZipFile.close()
 
-        httpd = EmbeddedHTTPD(0, Any(), db!!, repo!!)
-        httpd!!.start()
+        httpd = EmbeddedHTTPD(0, Any(), db, repo)
+        httpd.start()
 
-        doAnswer {
-            Thread {
-                val mountedUrl = joinPaths(httpd!!.localHttpUrl,
-                        httpd!!.mountContainer(it.getArgument(0),null)!!)
+        mockEpubView = mock {
+            on { mountContainer(eq(epubContainer!!.containerUid), any()) }.doAnswer {
+                val mountedUrl = joinPaths(httpd.localHttpUrl,
+                        httpd.mountContainer(it.getArgument(0),null)!!)
                 UmCallbackUtil.onSuccessIfNotNull(it.getArgument<UmCallback<String>>(1), mountedUrl)
-            }.start()
-            null
-        }.`when`(mockEpubView)?.mountContainer(eq(epubContainer!!.containerUid), any())
+                Unit
+            }
 
-
-        doAnswer { invocation ->
-            Thread(invocation.getArgument<Any>(0) as Runnable).start()
-            null!!
-        }.`when`<EpubContentView>(mockEpubView).runOnUiThread(any<Runnable>())
+            on { runOnUiThread(any()) }.doAnswer {invocation ->
+                Thread(invocation.getArgument<Any>(0) as Runnable).start()
+                Unit
+            }
+        }
 
         //Used for verification purposes
         val opfIn = containerManager.getInputStream(containerManager.getEntry("OEBPS/package.opf")!!)
@@ -117,7 +118,7 @@ class TestEpubContentPresenter {
 
         doAnswer {
             hrefListReference.set(it.getArgument(0))
-            null!!
+            Unit
         }.`when`(mockEpubView)?.setSpineUrls(anyArray(), eq(0))
 
         val presenter = EpubContentPresenter(Any(),
@@ -131,19 +132,19 @@ class TestEpubContentPresenter {
         verify<EpubContentView>(mockEpubView, timeout(15000)).setSpineUrls(any(), eq(0))
 
         val linearSpineUrls = hrefListReference.get() as Array<String>
-        for (i in linearSpineUrls.indices) {
-            Assert.assertTrue("Spine itemk $i ends with expected url",
-                    linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
-            //val response = UstadMobileSystemImpl.instance.makeRequestSync(
-              //      UmHttpRequest(Any(), linearSpineUrls[i]))
-            val client = HttpClient()
-            GlobalScope.launch {
+        val client = HttpClient()
+        runBlocking {
+            for (i in linearSpineUrls.indices) {
+                Assert.assertTrue("Spine itemk $i ends with expected url",
+                        linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
+
                 val response = client.get<HttpResponse>(linearSpineUrls[i])
                 Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
                         response.status.value)
             }
-
         }
+
+        client.close()
 
     }
 
