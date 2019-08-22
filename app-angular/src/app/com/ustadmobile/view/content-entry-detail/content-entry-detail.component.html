@@ -1,0 +1,32 @@
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-left">
+  <div class="col s5">
+    <img class="responsive-img img-margin-top" src="{{entryThumbnail}}"/>
+  </div>
+
+  <div class="col s7">
+    <p class="entry-title">{{entryTitle}}</p>
+    <p  *ngIf="entryAuthor" class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author"> Author</span>: {{entryAuthor}}</p>
+    <label *ngIf="entryLicence" i18n="@@entry_details_license">License</label>
+    <p *ngIf="entryLicence" class="entry-content">{{entryLicence}}</p> 
+    <label *ngIf="entryDescription" i18n="@@entry_details_description">Description</label>
+    <p *ngIf="entryDescription" class="entry-content">{{entryDescription}}</p>
+    <div class="divider default-margin-bottom"></div>
+    <label *ngIf="translations.length > 0" i18n="@@also_available_in">Also available in: </label>
+    <div  *ngIf="translations.length > 0"  class="row default-padding-top">
+        
+      <mz-chip class="open-content" *ngFor="let translation of translations" (click)="openTranslation(translation)">
+      {{translation.languageName}}
+      </mz-chip>
+    </div>
+
+    <div class="row default-padding-top right default-margin-right">
+          <div class="fixed-action-btn">
+              <button mz-button class="orange darken-2" i18n="@@open">
+                  OPEN
+                </button>
+            </div>
+    </div>
+  
+
+  </div>
+</div>

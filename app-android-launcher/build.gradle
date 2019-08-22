@@ -1,11 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: "kotlin-multiplatform"
 apply plugin: "jacoco"
-
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.default.properties")))
-if (project.file("../app-android/buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.local.properties")))
-}
 
 //See:
 // https://developer.android.com/studio/projects/android-library.html
@@ -13,9 +8,16 @@ if (project.file("../app-android/buildconfig.local.properties").exists()) {
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
 def keystoreProperties = new Properties()
+def baseAppId = "com.toughra.ustadmobile"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+}
+
+kotlin {
+    targets {
+        fromPreset(presets.android, 'android')
+    }
 }
 
 
@@ -28,7 +30,9 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/INDEX.LIST'
+        // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
+        // use kotlin reflection, which we don't.
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata"]
     }
 
     compileOptions {
@@ -37,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.toughra.ustadmobile.launcher"
+        applicationId "${baseAppId}.launcher"
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
@@ -46,7 +50,7 @@ android {
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -75,32 +79,55 @@ android {
          */
         vanilla {
             dimension "config"
-            applicationId "com.toughra.ustadmobile"
-            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            applicationId "${baseAppId}"
+            testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
         }
 
         vanillamultidex {
             dimension "config"
             minSdkVersion 18
-            applicationId "com.toughra.ustadmobile"
-            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            applicationId "${baseAppId}"
+            testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/ktor-http.kotlin_module"
+                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
+                exclude 'META-INF/kotlinx-io.kotlin_module'
+                exclude 'META-INF/atomicfu.kotlin_module'
+                exclude 'META-INF/ktor-utils.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+                exclude 'META-INF/ktor-http-cio.kotlin_module'
+                exclude 'META-INF/ktor-*'
+
+
+
+
             }
         }
 
         devMinApi21 {
             dimension "config"
-            minSdkVersion 23
-            applicationId "com.toughra.ustadmobile"
-            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            minSdkVersion 21
+            applicationId "${baseAppId}"
+            testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/ktor-http.kotlin_module"
+                exclude 'META-INF/KMPXmlPullParser.kotlin_module'
+                exclude 'META-INF/kotlinx-io.kotlin_module'
+                exclude 'META-INF/atomicfu.kotlin_module'
+                exclude 'META-INF/ktor-utils.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+                exclude 'META-INF/ktor-http-cio.kotlin_module'
+                exclude 'META-INF/ktor-*'
+
             }
         }
     }
@@ -113,7 +140,8 @@ android {
         release {
             testCoverageEnabled = false
             debuggable false
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -144,21 +172,18 @@ dependencies {
 
     api project(":app-android")
 
-    implementation project(":lib-database")
-    implementation project(":lib-database-runtime")
+    implementation project(":lib-door-runtime")
+
+    vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
 
     //Crash reporting
-
     implementation "ch.acra:acra-http:$version_android_acra"
     implementation "ch.acra:acra-dialog:$version_android_acra"
 
 
-    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
-
-
     api fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
-    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.0'
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"

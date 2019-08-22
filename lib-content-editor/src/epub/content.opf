@@ -1,0 +1,19 @@
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <dc:identifier id="pub-id"> </dc:identifier>
+        <meta property="dcterms:modified">
+        </meta>
+        <dc:title> </dc:title>
+    </metadata>
+    <manifest>
+        <item id="nav" href="nav.xhtml" properties="nav" media-type="application/xhtml+xml" />
+        <item id="UmWidgetManager.min.js" href="UmWidgetManager.min.js" properties="" media-type="application/javascript" />
+        <item id="jquery3.3.1.min.js" href="jquery3.3.1.min.js" properties="" media-type="application/javascript" />
+        <item id="UmEditorCore.min.css" href="UmEditorCore.min.css" properties="" media-type="text/css" />
+        <item id="UmEditorCore.min.js" href="UmEditorCore.min.css" properties="" media-type="text/css" />
+    </manifest>
+    <spine>
+        <itemref idref="nav" linear="false" />
+
+    </spine>
+</package>

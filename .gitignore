@@ -7,17 +7,8 @@
 
 # Android studio IML file
 *.iml
+.idea/
 
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/libraries
-.idea/markdown-navigator
-.idea/markdown-navigator.xml
-.idea/caches/build_file_checksums.ser
-.idea/caches/gradle_models.ser
-.idea/modules.xml
-.idea/caches/
-.idea/encodings.xml
 
 # Java class files
 *.class
@@ -32,6 +23,9 @@ gen/
 # Gradle files
 .gradle/
 build/
+
+# Android Studio classes generated when running unit tests in the Ide
+classes/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -194,7 +188,6 @@ core/src/localconfig
 core/locale/localconfig
 
 
-
 #localconfig copied into Android assets by Gradle
 app-android/src/main/assets/locale
 
@@ -206,17 +199,14 @@ app-android/src/main/assets/locale
 testres/p2p/*
 !testres/p2p/startTestsTask.sh
 
-#Generated model
-ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/generated/model/*
-
 #Assets
 app-android/src/main/assets/cache
-
-#GWT (moved to gwtdev branch)
-app-gwt/*
 
 #Eclipse gradle plugin files
 .project
 .classpath
 .settings
 
+build/
+build/
+.vscode/

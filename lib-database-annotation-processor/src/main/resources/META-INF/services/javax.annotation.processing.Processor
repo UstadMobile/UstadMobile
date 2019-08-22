@@ -1,1 +1,3 @@
-com.ustadmobile.lib.annotationprocessor.core.DbProcessorCore
+com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper
+
+
