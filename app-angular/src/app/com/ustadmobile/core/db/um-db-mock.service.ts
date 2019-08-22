@@ -26,6 +26,9 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
   public contentEntryRelatedEntryJoinDao = new ContentEntryRelatedEntryJoinDao();
   public containerDao = new ContainerDao();
   public networkNodeDao = new NetworkNodeDao();
+  public xObjectDao = new XObjectDao();
+  public xLangMapEntryDao = new XLangMapEntryDao();
+  public personDao = new PersonDao();
 
   getData(entryUid) {
     return this.entries[entryUid];
@@ -33,6 +36,19 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
 }
 
 /**DAO */
+
+export class XObjectDao{
+
+}
+
+export class XLangMapEntryDao{
+
+}
+
+export class PersonDao{
+  
+}
+
  export class ContentEntryDao{
   constructor(private entries, private joins) { }
 

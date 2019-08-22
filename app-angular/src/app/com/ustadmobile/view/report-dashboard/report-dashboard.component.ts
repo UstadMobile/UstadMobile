@@ -2,15 +2,17 @@ import { UmAngularUtil } from './../../util/UmAngularUtil';
 import { Component, Renderer2, ElementRef } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
+import core from 'UstadMobile-core';
 
 @Component({
   selector: 'app-report-dashboard',
   templateUrl: './report-dashboard.component.html',
   styleUrls: ['./report-dashboard.component.css']
 })
-export class ReportDashboardComponent extends UmBaseComponent {
+export class ReportDashboardComponent extends UmBaseComponent implements
+ core.com.ustadmobile.core.view.XapiReportOptionsView {
 
   tagList = ["All Tags","Session","Perfomance", "Session","Performance","Session","Perfomance","20+ More"]
   title = '';
@@ -35,10 +37,28 @@ export class ReportDashboardComponent extends UmBaseComponent {
     startingTop: '100%',
     endingTop: '10%'
   };
-   
+
+  presenter: core.com.ustadmobile.core.controller.XapiReportOptionsPresenter;
+  private navigationSubscription;
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
     umDb: UmDbMockService, private renderer:Renderer2, private elem: ElementRef) { 
       super(umService, router, route, umDb);
+
+      this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+      .subscribe( _ => {
+      if(this.umDatabase.xObjectDao){
+        this.onCreate()
+      }
+    }); 
+    }
+
+    private onCreate(){
+      if(this.umDatabase.xObjectDao){
+        this.presenter = new core.com.ustadmobile.core.controller.XapiReportOptionsPresenter(
+          this.context, UmAngularUtil.queryParamsToMap(), this.umDatabase.personDao,
+          this.umDatabase.xObjectDao, this.umDatabase.xLangMapEntryDao);
+        this.presenter.onCreate(null);
+      }
     }
 
 
@@ -62,6 +82,42 @@ export class ReportDashboardComponent extends UmBaseComponent {
       const args = UmAngularUtil.queryParamsToMap("?reportId=" + reportId)
       this.systemImpl.go("/ReportDetails", args, this.context, 0)
       console.log(args)
+    }
+
+    fillVisualChartType(translatedGraphList){}
+    
+    fillYAxisData(translatedYAxisList){}
+
+    fillXAxisAndSubGroupData(translatedXAxisList){}
+
+    updateWhoDataAdapter(whoList){}
+
+    updateDidDataAdapter(didList){}
+
+    updateFromDialogText(fromDate){}
+
+    updateToDialogText(toDate){}
+
+    updateWhenRangeText(rangeText){}
+
+    updateChartTypeSelected(indexChart){}
+
+    updateYAxisTypeSelected(indexYAxis){}
+
+    updateXAxisTypeSelected(indexXAxis){}
+
+    updateSubgroupTypeSelected(indexSubgroup){}
+
+    updateWhoListSelected(personList){}
+
+    updateDidListSelected(verbs){}
+
+    ngOnDestroy(){
+      super.ngOnDestroy()
+      this.presenter.onDestroy();
+      if (this.navigationSubscription) {  
+        this.navigationSubscription.unsubscribe();
+      }
     }
 
 }
