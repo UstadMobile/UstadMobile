@@ -149,6 +149,26 @@ ext {
     version_js_yarn="1.13.0"
 }
 
+/*
+ * Look for a command. If a variable in buildconfig specifies the path, and the file exists, then
+ * use the variable value. Otherwise search the system path.
+ */
+ext.findCommand = {String command, String buildConfigVarName ->
+    if(ext.buildConfigProperties.containsKey(buildConfigVarName) && rootProject.file(ext.buildConfigProperties.getProperty(buildConfigVarName)).exists()) {
+        return ext.buildConfigProperties.getProperty(buildConfigVarName)
+    }else {
+        def pathDirs = System.getenv("PATH").split(File.pathSeparator)
+        for(path in pathDirs) {
+            if(file("$path/$command").exists()) {
+                return "$path/$command"
+            }
+        }
+    }
+
+    return "PATHNOTFOUND"
+}
+
+
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
 if(project.file("buildconfig.local.properties").exists()) {
