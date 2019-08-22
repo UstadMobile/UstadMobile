@@ -76,8 +76,9 @@ goBack() {
 }
 
 navigateTo(route) {
-  const args = route != this.routes.list ? UmAngularUtil.queryParamsToMap("?") :
-    UmAngularUtil.queryParamsToMap("?entryid=" + this.umDatabase.ROOT_UID);
+  const queryParams  = "?entryid=" + this.umDatabase.ROOT_UID+"&path=true";
+  const args = route != this.routes.list &&  route != this.routes.report ? UmAngularUtil.queryParamsToMap("?") :
+    UmAngularUtil.queryParamsToMap(queryParams);
   this.systemImpl.go(route, args, this.context);
 }
 
