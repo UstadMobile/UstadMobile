@@ -1,16 +1,30 @@
-import { AppPage } from './app.po';
+import {HomePage, ElementUtils } from './app.po';
 import { browser, logging } from 'protractor';
 
-describe('workspace-project App', () => {
-  let page: AppPage;
+describe('App behaviours', () => {
+  let pageHome: HomePage;
+  let elementUtils: ElementUtils;
+  browser.ignoreSynchronization = true
 
   beforeEach(() => {
-    page = new AppPage();
+    pageHome = new HomePage();
+    elementUtils = new ElementUtils();
   });
 
-  it('should display welcome message', () => {
-    page.navigateTo();
-    expect(page.getTitleText()).toEqual('Welcome to app-angular!');
+  it('giveApplicationLaunched_whenNavigateToHome_shouldShowApplicationTitle ', () => {
+    pageHome.launch();
+    expect(pageHome.getTitle()).toEqual('Ustad Mobile');
+  });
+
+  it('givenApplication_whenLaunched_shouldShowTwoSideMenus', () => {
+    pageHome.launch();
+    expect(elementUtils.getPageElts().appHomeMenu.count()).toEqual(2);
+  });
+
+  it('givenApplication_whenLaunchedAndMenuShown_shouldShowRightLabels', () => {
+    pageHome.launch();
+    expect(elementUtils.getPageElts().appHomeMenu.get(0).getText()).toEqual(pageHome.menus[0]);
+    expect(elementUtils.getPageElts().appHomeMenu.get(1).getText()).toEqual(pageHome.menus[1]);
   });
 
   afterEach(async () => {
