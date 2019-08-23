@@ -14,6 +14,8 @@ import java.util.Hashtable
 
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -26,6 +28,10 @@ class TestContentEntryDetailPresenter {
     private var mockView: ContentEntryDetailView? = null
     private var monitor: LocalAvailabilityMonitor? = null
     private var statusProvider: DownloadJobItemStatusProvider? = null
+
+    private lateinit var umAppDatabase: UmAppDatabase
+
+    private lateinit var umAppRepository: UmAppDatabase
 
     private val context = object: DoorLifecycleOwner {
         override fun addObserver(observer: DoorLifecycleObserver) {
@@ -47,6 +53,8 @@ class TestContentEntryDetailPresenter {
         mockView = Mockito.mock(ContentEntryDetailView::class.java)
         monitor = spy(LocalAvailabilityMonitor::class.java)
         statusProvider = Mockito.mock(DownloadJobItemStatusProvider::class.java)
+        umAppDatabase = UmAppDatabase.getInstance(context)
+        umAppRepository = UmAccountManager.getRepositoryForActiveAccount(context)
     }
 
 
@@ -54,15 +62,15 @@ class TestContentEntryDetailPresenter {
     fun givenUserIsInDetailViewFromListView_WhenUpNavigationCalled_thenShouldReturnToListView() {
 
         val args = Hashtable<String,String>()
-        args.put(ARG_CONTENT_ENTRY_UID, 43L.toString())
-        args.put(UstadMobileSystemCommon.ARG_REFERRER, REFERRER_FULL_PATH)
+        args[ARG_CONTENT_ENTRY_UID] = 43L.toString()
+        args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_FULL_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!, monitor!!, statusProvider!!)
+                args, mockView!!, monitor!!, statusProvider!!,umAppRepository)
         presenter.onCreate(args)
 
         val argsresult = Hashtable<String,String>()
-        argsresult.put(ARG_CONTENT_ENTRY_UID, 42L.toString())
+        argsresult[ARG_CONTENT_ENTRY_UID] = 42L.toString()
 
         presenter.handleUpNavigation()
 
@@ -77,11 +85,11 @@ class TestContentEntryDetailPresenter {
     fun givenUserIsInDetailViewFromNavigation_WhenUpNavigationCalled_thenShouldReturnToDummyView() {
 
         val args = Hashtable<String,String>()
-        args.put(ARG_CONTENT_ENTRY_UID, 42L.toString())
-        args.put(UstadMobileSystemCommon.ARG_REFERRER, REFERRER_NO_PATH)
+        args[ARG_CONTENT_ENTRY_UID] = 42L.toString()
+        args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_NO_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!, monitor!!, statusProvider!!)
+                args, mockView!!, monitor!!, statusProvider!!,umAppRepository)
         presenter.onCreate(args)
 
         args.remove(UstadMobileSystemCommon.ARG_REFERRER)
@@ -95,9 +103,9 @@ class TestContentEntryDetailPresenter {
 
     companion object {
 
-        private val REFERRER_FULL_PATH = "/DummyView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43"
-        private val REFERRER_NO_PATH = ""
-        private val flags = UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP
+        private const val REFERRER_FULL_PATH = "/DummyView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43"
+        private const val REFERRER_NO_PATH = ""
+        private const val flags = UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP
     }
 
 }

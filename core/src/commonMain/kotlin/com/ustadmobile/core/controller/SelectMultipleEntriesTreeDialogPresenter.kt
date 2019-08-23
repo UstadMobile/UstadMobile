@@ -1,19 +1,19 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
-import com.ustadmobile.core.view.UstadView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<String, String?>, view: SelectMultipleEntriesTreeDialogView): CommonEntityHandlerPresenter<SelectMultipleEntriesTreeDialogView>(context, arguments, view) {
+class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
+                                               view: SelectMultipleEntriesTreeDialogView,
+                                               private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao):
+        CommonEntityHandlerPresenter<SelectMultipleEntriesTreeDialogView>(context, arguments, view) {
 
     var selectedEntriesList: List<Long> = listOf()
 
     var selectedOptions = mutableMapOf<String, Long>()
-
-    var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     init {
         val entryArray = arguments.getValue(SelectMultipleEntriesTreeDialogView.ARG_CONTENT_ENTRY_SET)
@@ -25,7 +25,7 @@ class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<Stri
 
     private fun getTopEntries() {
         GlobalScope.launch {
-            val entriesList = repository.contentEntryParentChildJoinDao.selectTopEntries()
+            val entriesList = contentEntryParentChildJoinDao.selectTopEntries()
             view.runOnUiThread(Runnable {
                 view.populateTopEntries(entriesList)
             })

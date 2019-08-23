@@ -21,7 +21,7 @@
 //
 //    private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(PlatformTestUtil.targetContext)
 //
-//    private val appDatabaseRepo: UmAppDatabase = appDatabase.getRepository("http://localhost/dummy/",
+//    private val appDatabaseRepo: UmAppDatabase = appDatabase.getUmRepository("http://localhost/dummy/",
 //            "")
 //
 //    private var downloadJob1: DownloadJob? = null

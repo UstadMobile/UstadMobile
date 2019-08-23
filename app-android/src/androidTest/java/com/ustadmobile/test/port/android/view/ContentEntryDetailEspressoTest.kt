@@ -57,7 +57,7 @@ class ContentEntryDetailEspressoTest {
             context = InstrumentationRegistry.getInstrumentation().context
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
-            return  UmAppDatabase.getInstance(context)// db.getRepository("https://localhost", "")
+            return  UmAppDatabase.getInstance(context)// db.getUmRepository("https://localhost", "")
         }
 
     @Throws(IOException::class)

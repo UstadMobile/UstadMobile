@@ -1,21 +1,21 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
-import com.ustadmobile.core.view.UstadView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
-class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>, view: SelectMultipleLocationTreeDialogView) : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
+class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
+                                                view: SelectMultipleLocationTreeDialogView,
+                                                private val locationDao: LocationDao)
+    : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
 
     var selectedLocationsList: List<Long> = listOf()
 
     var selectedOptions = mutableMapOf<String, Long>()
-
-    var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     init {
         val locationsArray = arguments.getValue(ARG_LOCATIONS_SET)
@@ -38,7 +38,7 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
      */
     private fun getTopLocations() {
         GlobalScope.launch {
-            val locationList = repository.locationDao.findTopLocationsAsync()
+            val locationList = locationDao.findTopLocationsAsync()
             view.runOnUiThread(Runnable {
                 view.populateTopLocation(locationList)
             })

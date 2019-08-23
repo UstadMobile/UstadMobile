@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryEditPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
@@ -67,6 +68,10 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
     private var isDoneBtnDisabled = false
 
     private var mProgress: ProgressDialog? = null
+
+    private val umDatabase: UmAppDatabase = UmAppDatabase.getInstance(activity!!)
+
+    private val umRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(activity!!)
 
 
     interface EntryCreationActionListener {
@@ -125,14 +130,15 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         val addThumbnail = rootView!!.findViewById<View>(R.id.add_folder_thumbnail)
 
 
-        toolbar!!.setNavigationOnClickListener { v -> dismiss() }
+        toolbar!!.setNavigationOnClickListener { dismiss() }
 
         toolbar!!.inflateMenu(R.menu.menu_content_entry_fragment_top)
 
         impl = UstadMobileSystemImpl.instance
 
         presenter = ContentEntryEditPresenter(activity!!,
-                UMAndroidUtil.bundleToMap(arguments), this)
+                UMAndroidUtil.bundleToMap(arguments), this,umRepository.contentEntryDao,
+                umDatabase.contentEntryStatusDao, umRepository.contentEntryParentChildJoinDao)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         selectFileBtn!!.setOnClickListener { v ->

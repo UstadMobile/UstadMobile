@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEditorView
@@ -13,11 +14,9 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String>,
-                                     view: ContentEditorPageListView,
+                                     view: ContentEditorPageListView, val contentEntryDao: ContentEntryDao,
                                      private val pageActionDelegate: ContentEditorPageActionDelegate)
     : UstadBaseController<ContentEditorPageListView>(context, arguments, view) {
-
-    private val appDb: UmAppDatabase = UmAppDatabase.getInstance(context)
 
     private val entryUuid = arguments.getValue(ContentEditorView.CONTENT_ENTRY_UID).toLong()
 
@@ -28,7 +27,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        entryLiveData  = appDb.contentEntryDao.findLiveContentEntry(entryUuid)
+        entryLiveData  = contentEntryDao.findLiveContentEntry(entryUuid)
         entryLiveData!!.observe(this, this::onEntryValueChanged)
     }
 

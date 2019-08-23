@@ -1,8 +1,8 @@
-import { UmDbMockService } from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
+import { UmDbMockService } from '../../core/db/um-db-mock.service';
 
 @Component({
   selector: 'app-not-found',
@@ -12,6 +12,7 @@ import { UmBaseService } from '../../service/um-base.service';
 export class NotFoundComponent extends UmBaseComponent {
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
+    
     super(umService, router, route, umDb);
   }
 

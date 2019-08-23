@@ -66,7 +66,7 @@
 //
 //    public void setupDb() {
 //        db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
-//        repo = db.getRepository("http://localhost/dummy/", "");
+//        repo = db.getUmRepository("http://localhost/dummy/", "");
 //        db.clearAllTables();
 //
 //        ContentEntryDao entryDao = repo.getContentEntryDao();
@@ -176,7 +176,7 @@
 //        manager.commit((aVoid) -> latch.countDown());
 //        latch.await(5, TimeUnit.SECONDS);
 //
-//        Assert.assertEquals("Download root item size in database matches expected size",
+//        Assert.assertEquals("Download root item size in umDatabase matches expected size",
 //                subLeafContainer.getFileSize(),
 //                db.getDownloadJobItemDao().findByContentEntryUid2(parentEntry.getContentEntryUid())
 //                        .getDownloadLength());

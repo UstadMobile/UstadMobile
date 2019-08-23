@@ -1,15 +1,33 @@
-.user-view{
+  .user-view{
     background: url('../../../../../assets/images/top_header_bg.jpg')
   }
  
-  .header-title-label {
-    font-size: 1.5em;
-    margin-top: 14px;
-    margin-left: 70px !important;
-    min-width: 600px !important;
-    text-decoration: none;
-    color: white;
-    background: transparent;
-    border: 0px solid transparent;
-    cursor: default
+
+  .icon-left-spacing{
+    padding-left: 30px !important;
+  }
+
+  .icon-right-spacing{
+    padding-right: 30px !important;
+  }
+
+
+  .brand-logo{
+    min-width: 600px;
+    margin-left: 1% !important;
+    margin-right: 1% !important;
+    font-size: 1.5em !important;
+  }
+
+  .drawer-menu-rtl{
+    margin: 2% 0% 0 2% !important;
+
+  }
+
+  .drawer-menu-ltr{
+    margin: 2% 1% 0 2% !important;
+  }
+
+  .language{
+    margin: 4% !important;
   }

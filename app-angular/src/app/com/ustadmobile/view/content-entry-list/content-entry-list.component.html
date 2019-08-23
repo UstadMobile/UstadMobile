@@ -1,22 +1,21 @@
-
-
 <div class="row white" (close)="ngOnDestroy()" >
   
-      <div class="col s12 l3 m3 right default-content-padding-right default-margin-top" *ngIf="categoryMap.length > 0">
-          <form>
-              <mz-select-container *ngFor="let map of categoryMap">
-                  <select mz-select
-                    [formControl]="umFormCategories.controls['category']"
-                    id="language-select"
-                    [label]="[label_reading_level]" >
-                    <option *ngFor="let category of map[0]"  value="{{category.contentCategoryUid}}">{{category.categoryName}}</option>
-                  </select>
-                </mz-select-container>
-          </form>
-      </div> 
+      <div class="row">
 
-      <div class="row" *ngIf="languages">
-          <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
+          <div class="col s12 l3 m3 {{entry_options_class}} default-content-padding-right default-margin-top" *ngIf="categoryMap && entries">
+              <form>
+                  <mz-select-container *ngFor="let map of categoryMap">
+                      <select mz-select
+                        [formControl]="umFormCategories.controls['category']"
+                        id="language-select"
+                        [label]="[label_reading_level]" >
+                        <option *ngFor="let category of map[0]"  value="{{category.contentCategoryUid}}">{{category.categoryName}}</option>
+                      </select>
+                    </mz-select-container>
+              </form>
+          </div> 
+
+          <div  class="col s12 l3 m3 {{entry_options_class}} default-content-padding-right default-margin-top" *ngIf="entries && languages">
               <form>
               <mz-select-container>
                   <select mz-select
@@ -30,13 +29,13 @@
           </div>
 
     </div>
-    <ul *ngIf="entries" class="collection default-padding-top">
+    <ul *ngIf="entries" class="collection default-padding-top {{entry_collection_class}}">
           <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="openEntry(entry)">
             <div class="row">
-              <div class="col s2 l2">
+              <div class="col s4 l2 {{entry_thumbnail_class}}">
                   <img src="{{entry.thumbnailUrl}}" alt="" class="responsive-img entry-image">
               </div>
-              <div class="col s10 l10"> 
+              <div class="col s8 l10 {{entry_summary_class}}"> 
                   <p class="entry-title {{env.colorTextPrimary}}">{{entry.title}}</p>
                   <p class="entry-description {{env.colorTextSecondary}}">{{entry.description}}</p>
                   <p class="entry-licence {{env.colorTextSubSecondary}}">

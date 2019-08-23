@@ -85,7 +85,9 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         }
 
         mPresenter = VideoPlayerPresenter(this,
-                Objects.requireNonNull(bundleToMap(intent.extras)), this)
+                Objects.requireNonNull(bundleToMap(intent.extras)), this,
+                UmAppDatabase.getInstance(this),
+                UmAccountManager.getRepositoryForActiveAccount(this))
         mPresenter.onCreate(bundleToMap(savedInstanceState))
     }
 

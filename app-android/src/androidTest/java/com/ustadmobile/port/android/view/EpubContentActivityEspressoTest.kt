@@ -66,7 +66,7 @@ class EpubContentActivityEspressoTest {
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
         db = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context)
-        repo = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context) //db!!.getRepository("http://localhost/dummy/", "")
+        repo = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context) //db!!.getUmRepository("http://localhost/dummy/", "")
         db!!.clearAllTables()
 
         val context = InstrumentationRegistry.getInstrumentation().context
