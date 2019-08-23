@@ -1123,6 +1123,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
 
+        codeBlock.beginControlFlow("try")
         codeBlock.add(generateKtorRequestCodeBlockForMethod(
                 daoName = daoName,
                 dbPathVarName = "_dbPath",
@@ -1153,6 +1154,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 resultType = resultType, processingEnv = processingEnv,
                 syncHelperDaoVarName = syncHelperDaoVarName))
 
+        codeBlock.nextControlFlow("catch(e: Exception)")
+                .add("e.printStackTrace()\n")
+                .endControlFlow()
         if(KModifier.SUSPEND !in daoFunSpec.modifiers) {
             codeBlock.endControlFlow()
         }

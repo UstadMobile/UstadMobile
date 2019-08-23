@@ -60,44 +60,48 @@ task copyTestResources(type: Copy) {
  */
 task prepareLocale {
     inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
-    if(!outFile.parentFile.exists()) {
-        outFile.parentFile.mkdirs()
-    }
-    outFile.text = ''
-    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
-    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-    outFile << 'object MessageID{\n\n'
 
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
 
-    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
+    doFirst {
+        File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+        if(!outFile.parentFile.exists()) {
+            outFile.parentFile.mkdirs()
+        }
+        outFile.text = ''
+        outFile << 'package com.ustadmobile.core.generated.locale\n\n'
+        outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+        outFile << 'object MessageID{\n\n'
 
-            if (!messageIds.containsKey(msgName)) {
-                Integer value;
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
+        Map<String, Integer> messageIds = new HashMap<>()
+        AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+
+        rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+            xmlDoc.string.each() { str ->
+                String msgName = str.@name
+
+                if (!messageIds.containsKey(msgName)) {
+                    Integer value;
+                    if (str.attributes().get("value") != null) {
+                        value = new Integer(str.attributes().get("value"))
+                    } else {
+                        value = new Integer(messageIdGenerator.getAndIncrement())
+                    }
+
+                    messageIds.put(msgName, value)
                 }
-
-                messageIds.put(msgName, value)
             }
         }
-    }
 
-    Iterator<String> nameIterator = messageIds.keySet().iterator()
+        Iterator<String> nameIterator = messageIds.keySet().iterator()
 
-    while (nameIterator.hasNext()) {
-        String strName = nameIterator.next()
-        Integer value = messageIds.get(strName)
-        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+        while (nameIterator.hasNext()) {
+            String strName = nameIterator.next()
+            Integer value = messageIds.get(strName)
+            outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+        }
+        outFile << '}'
     }
-    outFile << '}'
 }
 
 
@@ -110,6 +114,11 @@ tasks.whenTaskAdded { task ->
         task.dependsOn(prepareLocale)
     }
 }
+
+gradle.projectsEvaluated {
+    preBuild.dependsOn(prepareLocale)
+}
+
 
 
 kotlin {
@@ -233,10 +242,6 @@ kotlin {
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
                 //end SharedSE Android and JVM dependencies
             }
         }

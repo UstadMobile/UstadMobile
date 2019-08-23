@@ -7,7 +7,6 @@
 
 # Android studio IML file
 *.iml
-
 .idea/
 
 
@@ -189,7 +188,6 @@ core/src/localconfig
 core/locale/localconfig
 
 
-
 #localconfig copied into Android assets by Gradle
 app-android/src/main/assets/locale
 
@@ -201,14 +199,8 @@ app-android/src/main/assets/locale
 testres/p2p/*
 !testres/p2p/startTestsTask.sh
 
-#Generated model
-ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/generated/model/*
-
 #Assets
 app-android/src/main/assets/cache
-
-#GWT (moved to gwtdev branch)
-app-gwt/*
 
 #Eclipse gradle plugin files
 .project

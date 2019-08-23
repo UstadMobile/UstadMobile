@@ -73,7 +73,7 @@ new File(rootPath + "src/js").eachFile { def file ->
     def dynamicTaskName = "taskMinifyJs${umJsTaskIndex}"
     def jsDistDir =  "${rootPath}dist/js/"
     File jsDistFile = new File(jsDistDir)
-    File commandDir = new File(rootProject.ext.buildConfigProperties["editor.uglifyjs"])
+    File commandDir = new File(findCommand("uglifyjs", "editor.uglifyjs"))
 
     if(commandDir.exists()){
         task "${dynamicTaskName}"(type: Exec) {
@@ -104,7 +104,7 @@ new File(rootPath +"src/css").eachFile { def file ->
     def dynamicTaskName = "taskMinifyCss${umCssTaskIndex}"
     def cssDistDir =  "${rootPath}dist/css/"
     File cssDistFile = new File(cssDistDir)
-    File commandDir = new File(rootProject.ext.buildConfigProperties["editor.cleancss"])
+    File commandDir = new File(findCommand("cleancss", "editor.cleancss"))
     if(commandDir.exists()){
         task "${dynamicTaskName}"(type: Exec) {
             cssDistFile.mkdirs()
