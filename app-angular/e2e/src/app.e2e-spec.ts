@@ -1,7 +1,7 @@
 import {HomePage, ElementUtils } from './app.po';
 import { browser, logging } from 'protractor';
 
-describe('App behaviours', () => {
+describe('Default App behaviours', () => {
   let pageHome: HomePage;
   let elementUtils: ElementUtils;
   browser.ignoreSynchronization = true
