@@ -215,13 +215,11 @@ class TestDownloadJobItemManager {
             val manager2 = DownloadJobItemManager(db, downloadJob!!.djUid,
                     newSingleThreadContext("TestDownloadJobItemManager2"))
 
-            val latch3 = CountDownLatch(1)
-            val statusRef = AtomicReference<DownloadJobItemStatus>()
-            statusRef.set(manager2.findStatusByContentEntryUid(parentEntry.contentEntryUid))
+            val manager2ContentEntryStatus = manager2
+                    .findStatusByContentEntryUid(parentEntry.contentEntryUid)!!
 
             Assert.assertEquals("Parent entry total size is set as before",
-                    subLeafContainer.fileSize,
-                    statusRef.get().totalBytes)
+                    subLeafContainer.fileSize, manager2ContentEntryStatus.totalBytes)
         }
     }
 

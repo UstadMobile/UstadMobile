@@ -536,6 +536,22 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return sql
     }
 
+    protected fun makeCreateIndexStatements(indexes: Array<Index>, tableName: String,
+                                            dbType: Int, execSqlFnName: String): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        indexes.forEach {
+            val indexName = if(it.name != "") {
+                it.name
+            }else {
+                "index_${tableName}_${it.value.joinToString(separator = "_", postfix = "", prefix = "")}"
+            }
+
+
+        }
+
+        return codeBlock.build()
+    }
+
     protected fun generateSyncTriggersCodeBlock(entityClass: ClassName, execSqlFn: String, dbType: Int): CodeBlock {
         val codeBlock = CodeBlock.builder()
         messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
