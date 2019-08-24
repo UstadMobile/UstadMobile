@@ -536,8 +536,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return sql
     }
 
-    protected fun makeCreateIndexStatements(indexes: Array<Index>, tableName: String,
-                                            dbType: Int, execSqlFnName: String): CodeBlock {
+    protected fun generateCreateIndicesCodeBlock(indexes: Array<Index>, tableName: String,
+                                            execSqlFnName: String): CodeBlock {
         val codeBlock = CodeBlock.builder()
         indexes.forEach {
             val indexName = if(it.name != "") {
@@ -546,7 +546,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 "index_${tableName}_${it.value.joinToString(separator = "_", postfix = "", prefix = "")}"
             }
 
-
+            codeBlock.add("$execSqlFnName(%S)\n", """CREATE 
+                |${if(it.unique){ "UNIQUE" } else { "" } } INDEX $indexName 
+                |ON $tableName (${it.value.joinToString()})""".trimMargin())
         }
 
         return codeBlock.build()
