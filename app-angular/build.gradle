@@ -121,19 +121,27 @@ task generateOtherXliff{}
 generateOtherXliff.dependsOn(generateDefaultLocaleXlf)
 
 /**
- * Remove node_modules directory from app-angular
+ * Remove all temp directory and files (node_modules and package-lock.json) from app-angular
  */
-task deleteNodeModulesDirectory{
+task deleteAllTempFileAndDirs{
   doLast{
+    def currentDir = rootProject.file("app-angular/").path
     if(project.file("node_modules").exists()){
       exec {
-        workingDir rootProject.file("app-angular/").path
+        workingDir currentDir
         commandLine 'rm', '-r',project.file("node_modules").path
+      }
+    }
+
+    if(project.file("package-lock.json").exists()){
+      exec {
+        workingDir currentDir
+        commandLine 'rm',project.file("package-lock.json").path
       }
     }
   }
 }
-clean.dependsOn(deleteNodeModulesDirectory)
+clean.dependsOn(deleteAllTempFileAndDirs)
 
 /**
  * Install all offline and other dependencies from project package.json
@@ -142,12 +150,14 @@ task installDependencies{
   doLast{
     exec {
       workingDir rootProject.file("app-angular/").path
-      commandLine 'npm', 'install'
+      commandLine 'npm', 'install','--prefer-offline'
     }
   }
 }
 
-
+/**
+ * Start angular end to end test
+ */
 task startEnd2EndTest{
   doLast{
     exec {
@@ -160,7 +170,7 @@ task startEnd2EndTest{
 startEnd2EndTest.dependsOn(build)
 
 build.dependsOn(installDependencies)
-installDependencies.dependsOn(":packPreparedModules")
+installDependencies.dependsOn(":packPreparedModules",deleteAllTempFileAndDirs)
 generateOtherXliff.shouldRunAfter(installDependencies)
 
 
