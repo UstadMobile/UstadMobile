@@ -69,14 +69,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private lateinit var downloadButton: Button
 
-    private val umAppRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(this)
+    private lateinit var umAppRepository: UmAppDatabase
 
     private var downloadProgress: DownloadProgressView? = null
 
     private var fileStatusIcon = HashMap<Int, Int>()
 
-    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+    private var showControls : Boolean = false
 
 
     override val allKnowAvailabilityStatus: Set<Long>
@@ -104,6 +103,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        umAppRepository = UmAccountManager.getRepositoryForActiveAccount(this)
+        showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, "false", this)!!.toBoolean()
         setContentView(R.layout.activity_entry_detail)
 
         localAvailabilityStatusText = findViewById(R.id.content_status_text)

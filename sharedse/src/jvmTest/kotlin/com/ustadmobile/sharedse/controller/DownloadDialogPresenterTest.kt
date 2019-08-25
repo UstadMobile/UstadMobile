@@ -25,6 +25,7 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 class DownloadDialogPresenterTest {
 
@@ -48,7 +49,7 @@ class DownloadDialogPresenterTest {
 
     private var totalBytesToDownload = 0L
 
-    private val MAX_LATCH_WAITING_TIME = 15
+    private val MAX_LATCH_WAITING_TIME = 15000L
 
     private val MAX_THREAD_SLEEP_TIME = 2
 
@@ -199,7 +200,7 @@ class DownloadDialogPresenterTest {
             val viewReadyLatch = CountDownLatch(1)
             doAnswer {
                 viewReadyLatch.countDown()
-                null
+                Unit
             }.`when`(mockedDialogView).setWifiOnlyOptionVisible(true)
 
             val args = HashMap<String, String>()
@@ -215,9 +216,10 @@ class DownloadDialogPresenterTest {
             waitForLiveData(umAppDatabase.downloadJobDao.lastJobLive(), 6000) {
                 dj -> dj != null }
 
+            val lastJobRef = AtomicReference<DownloadJob?>(null)
             waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId),
-                    MAX_LATCH_WAITING_TIME.toLong()) {
-                it != null && it.djStatus == JobStatus.QUEUED
+                    MAX_LATCH_WAITING_TIME) {
+                job -> job != null && job.djStatus == JobStatus.QUEUED
             }
 
             val queuedJob = umAppDatabase.downloadJobDao.findByUid(presenter.currentJobId)
@@ -254,7 +256,7 @@ class DownloadDialogPresenterTest {
             val viewReadyLatch = CountDownLatch(1)
             doAnswer {
                 viewReadyLatch.countDown()
-                null
+                Unit
             }.`when`(mockedDialogView).setWifiOnlyOptionVisible(true)
 
             val args = HashMap<String, String>()
@@ -265,12 +267,12 @@ class DownloadDialogPresenterTest {
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
-            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+            viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.MILLISECONDS)
 
             presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
 
             waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId),
-                    MAX_LATCH_WAITING_TIME.toLong()) {
+                    MAX_LATCH_WAITING_TIME) {
                 it != null && it.djStatus == JobStatus.PAUSED
             }
 
@@ -300,12 +302,12 @@ class DownloadDialogPresenterTest {
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
-            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+            viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.MILLISECONDS)
 
             presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL)
 
             waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId),
-                    MAX_LATCH_WAITING_TIME.toLong()) {
+                    MAX_LATCH_WAITING_TIME) {
                 it != null && it.djStatus == JobStatus.CANCELLING
             }
 
