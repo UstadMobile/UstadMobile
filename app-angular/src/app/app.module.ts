@@ -10,7 +10,6 @@ import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entr
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import {NgProgressInterceptor, NgProgressModule } from 'ngx-progressbar';
 import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -52,7 +51,6 @@ import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboar
     MzProgressModule,
     MzDropdownModule,
     ReactiveFormsModule,
-    InfiniteScrollModule,
     GoogleChartsModule
   ],
   providers: [
