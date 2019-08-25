@@ -60,8 +60,7 @@ class DownloadJobItemRunner
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
  private val numConcurrentEntryDownloads: Int = 4) {
 
-    //TODO: This should be converted to use openDownloadJobItemManager
-    private val downloadJobItemManager: DownloadJobItemManager = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)!!
+    private lateinit var downloadJobItemManager: DownloadJobItemManager
 
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
@@ -230,6 +229,7 @@ class DownloadJobItemRunner
 
 
     suspend fun download() {
+        downloadJobItemManager = networkManager.openDownloadJobItemManager(downloadItem.djiDjUid)!!
         println("Download started for  ${downloadItem.djiDjUid}")
         runnerStatus.value = JobStatus.RUNNING
         updateItemStatus(JobStatus.RUNNING)
