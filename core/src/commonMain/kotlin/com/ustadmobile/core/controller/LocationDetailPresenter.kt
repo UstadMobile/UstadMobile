@@ -1,15 +1,14 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
 import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.LocationDetailView
-import com.ustadmobile.lib.db.entities.Location
-
 import com.ustadmobile.core.view.LocationDetailView.Companion.LOCATIONS_SET
 import com.ustadmobile.core.view.LocationDetailView.Companion.LOCATION_UID
+import com.ustadmobile.lib.db.entities.Location
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -41,7 +40,7 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         }
 
         if (arguments!!.containsKey(LOCATION_UID)) {
-            currentLocationUid = arguments!!.get(LOCATION_UID)
+            currentLocationUid = arguments!!.get(LOCATION_UID)!!.toLong()
         }
 
         selectedOptions = HashMap()
@@ -51,15 +50,10 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
     private fun getTopLocations() {
         val locationDao = repository.locationDao
-        locationDao.findTopLocationsAsync(object : UmCallback<List<Location>> {
-            override fun onSuccess(result: List<Location>?) {
-                view.populateTopLocation(result!!)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
+        GlobalScope.launch {
+            val result = locationDao.findTopLocationsAsync()
+            view.populateTopLocation(result!!)
+        }
     }
 
     fun onCreate(savedState: Map<String, String>?) {
@@ -68,17 +62,12 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         if (currentLocationUid == 0L) {
             currentLocation = Location()
             currentLocation!!.title = ""
-            currentLocation!!.setLocationActive(false)
+            currentLocation!!.locationActive = (false)
 
-            locationDao.insertAsync(currentLocation!!, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    initFromLocation(result!!)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                val result = locationDao.insertAsync(currentLocation!!)
+                initFromLocation(result!!)
+            }
         } else {
             initFromLocation(currentLocationUid)
         }
@@ -88,23 +77,17 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         this.currentLocationUid = locationUid
 
         val locationUmLiveData = locationDao.findByUidLive(currentLocationUid)
-        locationUmLiveData.observe(this@LocationDetailPresenter,
-                UmObserver<Location> { this@LocationDetailPresenter.handleLocationChanged(it) })
+        locationUmLiveData.observe(this, this::handleLocationChanged)
 
-        locationDao.findByUidAsync(locationUid, object : UmCallback<Location> {
-            override fun onSuccess(result: Location?) {
-                updatedLocation = result
-                view.updateLocationOnView(updatedLocation!!)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            val result = locationDao.findByUidAsync(locationUid)
+            updatedLocation = result
+            view.updateLocationOnView(updatedLocation!!)
+        }
 
     }
 
-    private fun handleLocationChanged(changedLocation: Location) {
+    private fun handleLocationChanged(changedLocation: Location?) {
         if (currentLocation == null) {
             currentLocation = changedLocation
         }
@@ -129,21 +112,16 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         if (!selectedLocationsList!!.isEmpty()) {
             firstLocation = selectedLocationsList!![0]
         }
-        updatedLocation!!.parentLocationUid = firstLocation
-        updatedLocation!!.setLocationActive(true)
+        updatedLocation!!.parentLocationUid = firstLocation!!
+        updatedLocation!!.locationActive = (true)
 
-        locationDao.updateAsync(updatedLocation!!, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                view.finish()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            locationDao.updateAsync(updatedLocation!!)
+            view.finish()
+        }
     }
 
-    fun getSelectedLocationsList(): List<Long> {
+    fun getSelectedLocationsList(): MutableList<Long>? {
         return if (selectedLocationsList == null) {
             ArrayList()
         } else selectedLocationsList
@@ -155,7 +133,7 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
     override fun locationChecked(locationName: String, locationUid: Long?, checked: Boolean) {
         if (checked) {
-            selectedOptions[locationName] = locationUid
+            selectedOptions[locationName] = locationUid!!
         } else {
             if (selectedOptions.containsKey(locationName)) {
                 selectedOptions.remove(locationName)

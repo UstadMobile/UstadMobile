@@ -1,13 +1,10 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.view.SelectMultipleTreeDialogView
-import com.ustadmobile.lib.db.entities.Location
-
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
+import com.ustadmobile.core.view.SelectMultipleTreeDialogView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -41,15 +38,10 @@ class SelectMultipleTreeDialogPresenter(context: Any, arguments: Map<String, Str
 
     fun getTopLocations() {
         val locationDao = repository.locationDao
-        locationDao.findTopLocationsAsync(object : UmCallback<List<Location>> {
-            override fun onSuccess(result: List<Location>?) {
-                view.populateTopLocation(result!!)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
+        GlobalScope.launch {
+            val result = locationDao.findTopLocationsAsync()
+            view.populateTopLocation(result!!)
+        }
     }
 
     fun onCreate(savedState: Map<String, String>?) {
@@ -63,7 +55,7 @@ class SelectMultipleTreeDialogPresenter(context: Any, arguments: Map<String, Str
 
     override fun locationChecked(locationName: String, locationUid: Long?, checked: Boolean) {
         if (checked) {
-            selectedOptions[locationName] = locationUid
+            selectedOptions[locationName] = locationUid!!
         } else {
             if (selectedOptions.containsKey(locationName)) {
                 selectedOptions.remove(locationName)

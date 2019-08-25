@@ -3,12 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView
-import com.ustadmobile.core.view.SelectClazzesDialogView
-import com.ustadmobile.core.view.SelectMultipleTreeDialogView
-import com.ustadmobile.core.view.SelectTwoDatesDialogView
-
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
@@ -77,11 +72,11 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
     init {
 
         if (arguments!!.containsKey(ARG_REPORT_NAME)) {
-            reportName = arguments!!.get(ARG_REPORT_NAME)
+            reportName = arguments!!.get(ARG_REPORT_NAME)!!.toString()
         }
 
         if (arguments!!.containsKey(ARG_REPORT_DESC)) {
-            reportDesc = arguments!!.get(ARG_REPORT_DESC)
+            reportDesc = arguments!!.get(ARG_REPORT_DESC)!!.toString()
         }
 
         if (arguments!!.containsKey(ARG_REPORT_LINK)) {
@@ -89,19 +84,24 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
         }
 
         if (arguments!!.containsKey(ARG_SHOW_THERSHOLD)) {
-            showThreshold = arguments!!.get(ARG_SHOW_THERSHOLD)
+            //TODO: Check Kotlin arg to boolean conversion
+            showThreshold = arguments!!.get(ARG_SHOW_THERSHOLD)!!.toBoolean()
         }
         if (arguments!!.containsKey(ARG_SHOW_RADIO_GROUP)) {
-            showRadioGroup = arguments!!.get(ARG_SHOW_RADIO_GROUP)
+            //TODO: Check Kotlin arg to boolean conversion
+            showRadioGroup = arguments!!.get(ARG_SHOW_RADIO_GROUP)!!.toBoolean()
         }
         if (arguments!!.containsKey(ARG_SHOW_GENDER_DISAGGREGATE)) {
-            showGenderDisaggregated = arguments!!.get(ARG_SHOW_GENDER_DISAGGREGATE)
+            //TODO: Check Kotlin arg to boolean conversion
+            showGenderDisaggregated = arguments!!.get(ARG_SHOW_GENDER_DISAGGREGATE)!!.toBoolean()
         }
         if (arguments!!.containsKey(ARG_SHOW_CLAZZES)) {
-            showClazzes = arguments!!.get(ARG_SHOW_CLAZZES)
+            //TODO: Check Kotlin arg to boolean conversion
+            showClazzes = arguments!!.get(ARG_SHOW_CLAZZES)!!.toBoolean()
         }
         if (arguments!!.containsKey(ARG_SHOW_LOCATIONS)) {
-            showLocations = arguments!!.get(ARG_SHOW_LOCATIONS)
+            //TODO: Check Kotlin arg to boolean conversion
+            showLocations = arguments!!.get(ARG_SHOW_LOCATIONS)!!.toBoolean()
         }
 
     }
@@ -132,7 +132,7 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
      * Generates the time period options. Generates the hashmap and sends it to the view.
      */
     private fun updateTimePeriod() {
-        val timePeriodOptions = LinkedHashMap<Int, String>()
+        val timePeriodOptions = HashMap<Int, String>()
         timePeriodOptions[TIME_PERIOD_LAST_WEEK] = impl.getString(MessageID.last_week, context)
         timePeriodOptions[TIME_PERIOD_LAST_TWO_WEEK] = impl.getString(MessageID.last_two_weeks, context)
         timePeriodOptions[TIME_PERIOD_LAST_MONTH] = impl.getString(MessageID.last_month, context)
@@ -153,7 +153,7 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
      */
     fun handleTimePeriodSelected(selected: Int) {
         var selected = selected
-        toTime = System.currentTimeMillis()
+        toTime = UMCalendarUtil.getDateInMilliPlusDays(0)
         selected++
         when (selected) {
             TIME_PERIOD_LAST_WEEK -> fromTime = UMCalendarUtil.getDateInMilliPlusDays(-7)
@@ -182,6 +182,7 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         if (selectedLocations != null && !selectedLocations!!.isEmpty()) {
             val selectedLocationsArray = ReportOverallAttendancePresenter.convertLongList(selectedLocations!!)
+            //TODO: Flatted Array to String CSV.
             args.put(ARG_LOCATIONS_SET, selectedLocationsArray)
         }
 
@@ -194,11 +195,13 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         if (selectedLocations != null && !selectedLocations!!.isEmpty()) {
             val selectedLocationsArray = ReportOverallAttendancePresenter.convertLongList(selectedLocations!!)
+            //TODO: Flatted Array to String CSV.
             args.put(ARG_LOCATIONS_SET, selectedLocationsArray)
         }
 
         if (selectedClasses != null && !selectedClasses!!.isEmpty()) {
             val selectedClassesArray = ReportOverallAttendancePresenter.convertLongList(selectedClasses!!)
+            //TODO: Flatted Array to String CSV.
             args.put(ARG_CLASSES_SET, selectedClassesArray)
         }
         impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
@@ -207,9 +210,9 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
     fun goToSelectAttendanceThresholdsDialog() {
         val args = HashMap<String, String>()
         if (thresholdValues != null) {
-            args.put(ARG_THRESHOLD_LOW, thresholdValues!!.low)
-            args.put(ARG_THRESHOLD_MID, thresholdValues!!.med)
-            args.put(ARG_THRESHOLD_HIGH, thresholdValues!!.high)
+            args.put(ARG_THRESHOLD_LOW, thresholdValues!!.low.toString())
+            args.put(ARG_THRESHOLD_MID, thresholdValues!!.med.toString())
+            args.put(ARG_THRESHOLD_HIGH, thresholdValues!!.high.toString())
         }
         impl.go(SelectAttendanceThresholdsDialogView.VIEW_NAME, args, context)
     }
@@ -223,35 +226,35 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
         //Create arguments
         val args = HashMap<String, String>()
         args.put(ARG_REPORT_NAME, reportName)
-        args.put(ARG_FROM_DATE, fromTime)
-        args.put(ARG_TO_DATE, toTime)
+        args.put(ARG_FROM_DATE, fromTime.toString())
+        args.put(ARG_TO_DATE, toTime.toString())
 
         if (selectedClasses != null && !selectedClasses!!.isEmpty()) {
             val classesArray = arrayOfNulls<Long>(selectedClasses!!.size)
             selectedClasses!!.toTypedArray()
-            args.put(ARG_CLAZZ_LIST, classesArray)
+            args.put(ARG_CLAZZ_LIST, classesArray.toString())
         }
 
         if (selectedLocations != null && !selectedLocations!!.isEmpty()) {
             val locationsArray = arrayOfNulls<Long>(selectedLocations!!.size)
             selectedLocations!!.toTypedArray()
-            args.put(ARG_LOCATION_LIST, locationsArray)
+            args.put(ARG_LOCATION_LIST, locationsArray.toString())
         }
 
         if (thresholdValues != null) {
-            args.put(ARG_THRESHOLD_LOW, thresholdValues!!.low)
-            args.put(ARG_THRESHOLD_MID, thresholdValues!!.med)
-            args.put(ARG_THRESHOLD_HIGH, thresholdValues!!.high)
+            args.put(ARG_THRESHOLD_LOW, thresholdValues!!.low.toString())
+            args.put(ARG_THRESHOLD_MID, thresholdValues!!.med.toString())
+            args.put(ARG_THRESHOLD_HIGH, thresholdValues!!.high.toString())
         }
 
-        args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregated)
+        args.put(ARG_GENDER_DISAGGREGATE, genderDisaggregated.toString())
 
-        args.put(ARG_STUDENT_IDENTIFIER_NUMBER, studentNumbers)
-        args.put(ARG_STUDENT_IDENTIFIER_PERCENTAGE, studentPercentages)
+        args.put(ARG_STUDENT_IDENTIFIER_NUMBER, studentNumbers.toString())
+        args.put(ARG_STUDENT_IDENTIFIER_PERCENTAGE, studentPercentages.toString())
 
         //Go to report with those arguments / Generate report
         val linkViewName = reportLink!!.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-        impl.go(linkViewName, args, view.getContext())
+        impl.go(linkViewName, args, view.viewContext)
 
     }
 

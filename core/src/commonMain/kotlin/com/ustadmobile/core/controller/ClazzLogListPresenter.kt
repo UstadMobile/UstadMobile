@@ -1,30 +1,23 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao
-import com.ustadmobile.core.db.dao.ClazzMemberDao
-import com.ustadmobile.core.db.dao.ThresholdResult
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.core.view.ClassLogListView
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
-import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers
-import com.ustadmobile.lib.db.entities.Role
-
-
-import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_MONTH
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_WEEK
 import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_YEAR
+import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
+import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
+import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * The Presenter/Controller for ClazzLogListFragment. This is responsible for the logic behind
@@ -37,7 +30,8 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private var currentClazzUid = 0L
 
-    private var clazzLogListProvider: UmProvider<ClazzLogWithScheduleStartEndTimes>? = null
+    private var clazzLogListProvider: DataSource.Factory<Int, ClazzLogWithScheduleStartEndTimes>? =
+            null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val loggedInPersonUid: Long?
@@ -46,7 +40,7 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
         //Get clazz uid and set it
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
+            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
@@ -60,17 +54,11 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
-        clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        view.setFABVisibility(result!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                }))
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
+                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
+            view.setFABVisibility(result!!)
+        }
     }
 
     /**
@@ -86,9 +74,11 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-        clazzLogListProvider = repository.clazzLogDao.findByClazzUidNotCancelledWithSchedule(currentClazzUid)
-        setProviderToView()
+        GlobalScope.launch {
+            clazzLogListProvider =
+                    repository.clazzLogDao.findByClazzUidNotCancelledWithSchedule(currentClazzUid)
+            setProviderToView()
+        }
 
     }
 
@@ -110,7 +100,7 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
         val args = HashMap<String, String>()
         args.put(ClassLogDetailView.ARG_CLAZZ_LOG_UID, clazzLog.clazzLogUid.toString())
-        impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext())
+        impl.go(ClassLogDetailView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -118,22 +108,18 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     fun goToNewClazzLogDetailActivity() {
 
-        repository.clazzLogDao.findMostRecentByClazzUid(currentClazzUid, object : UmCallback<ClazzLog> {
-            override fun onSuccess(result: ClazzLog?) {
-                if (result == null) {
-                    view.showMessage(MessageID.no_schedule_message)
-                } else {
-                    val args = HashMap<String, String>()
-                    args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID,
-                            currentClazzUid.toString())
-                    impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext())
-                }
-            }
+        GlobalScope.launch {
+            val result = repository.clazzLogDao.findMostRecentByClazzUid(currentClazzUid)
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
+            if (result == null) {
+                view.showMessage(MessageID.no_schedule_message)
+            } else {
+                val args = HashMap<String, String>()
+                args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID,
+                        currentClazzUid.toString())
+                impl.go(ClassLogDetailView.VIEW_NAME, args, view.viewContext)
             }
-        })
+        }
 
     }
 
@@ -151,7 +137,7 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
         val lineDataMap = LinkedHashMap<Float, Float>()
         val barDataMap = LinkedHashMap<Float, Float>()
-        val toDate = System.currentTimeMillis()
+        val toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         var fromDate = toDate
 
         when (duration) {
@@ -182,58 +168,51 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
         //Calculate daily attendance numbers from the database for the line chart.
         val attendanceRecordDao = repository.clazzLogAttendanceRecordDao
-        attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync(currentClazzUid, fromDate,
-                toDate, object : UmCallback<List<DailyAttendanceNumbers>> {
-            override fun onSuccess(result: List<DailyAttendanceNumbers>?) {
+        GlobalScope.launch {
+            val result =
+                    attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync(currentClazzUid,
+                            fromDate, toDate)
 
-                for (everyDayAttendance in result!!) {
-                    val dd = everyDayAttendance.logDate
-                    val calendar = Calendar.instance
-                    calendar.setTimeInMillis(dd)
-                    calendar.set(Calendar.HOUR_OF_DAY, 0)
-                    calendar.set(Calendar.MINUTE, 0)
-                    calendar.set(Calendar.SECOND, 0)
-                    calendar.set(Calendar.MILLISECOND, 0)
-                    val d = calendar.getTimeInMillis()
-                    val a = everyDayAttendance.attendancePercentage
-                    lineDataMap[d.toFloat() / 1000] = a
-
-                }
-
-                //Remove messy date keys
-                val ldpi = lineDataMap.entries.iterator()
-                val lineDataMapFixedX = LinkedHashMap<Float, Float>()
-                var l = 0f
-                while (ldpi.hasNext()) {
-                    l++
-                    lineDataMapFixedX[l] = ldpi.next().value
-                }
-
-                view.updateAttendanceLineChart(lineDataMapFixedX)
+            //TODO: KMP Manipulate this on UMCalendar side and fix this.
+            for (everyDayAttendance in result!!) {
+                val dd = everyDayAttendance.logDate
+                val calendar = Calendar.instance
+                calendar.setTimeInMillis(dd)
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                val d = calendar.getTimeInMillis()
+                val a = everyDayAttendance.attendancePercentage
+                lineDataMap[d.toFloat() / 1000] = a
 
             }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
+            //Remove messy date keys
+            val ldpi = lineDataMap.entries.iterator()
+            val lineDataMapFixedX = LinkedHashMap<Float, Float>()
+            var l = 0f
+            while (ldpi.hasNext()) {
+                l++
+                lineDataMapFixedX[l] = ldpi.next().value
             }
-        })
+
+            view.updateAttendanceLineChart(lineDataMapFixedX)
+
+        }
 
         //Calculate attendance average numbers for the bar chart.
         val clazzMemberDao = repository.clazzMemberDao
 
-        clazzMemberDao.findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(STATUS_ATTENDED,
-                currentClazzUid, fromDate, toDate, object : UmCallback<ThresholdResult> {
-            override fun onSuccess(result: ThresholdResult?) {
-                barDataMap[3f] = result!!.high / 100
-                barDataMap[2f] = result.mid / 100
-                barDataMap[1f] = result.low / 100
-                view.updateAttendanceBarChart(barDataMap)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            val result =
+                    clazzMemberDao.findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(
+                            STATUS_ATTENDED, currentClazzUid, fromDate, toDate)
+            barDataMap[3f] = result!!.high / 100
+            barDataMap[2f] = result.mid / 100
+            barDataMap[1f] = result.low / 100
+            view.updateAttendanceBarChart(barDataMap)
+        }
 
     }
 }

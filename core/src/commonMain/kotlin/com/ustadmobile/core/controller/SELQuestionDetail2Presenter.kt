@@ -1,22 +1,22 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SelQuestionDao
 import com.ustadmobile.core.db.dao.SelQuestionOptionDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AddQuestionOptionDialogView
 import com.ustadmobile.core.view.SELQuestionDetail2View
-import com.ustadmobile.lib.db.entities.SelQuestion
-import com.ustadmobile.lib.db.entities.SelQuestionOption
-
 import com.ustadmobile.core.view.SELQuestionDetail2View.Companion.ARG_QUESTION_OPTION_UID
 import com.ustadmobile.core.view.SELQuestionDetail2View.Companion.ARG_QUESTION_UID_QUESTION_DETAIL
 import com.ustadmobile.core.view.SELQuestionSetDetailView.Companion.ARG_SEL_QUESTION_SET_UID
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.SelQuestion
+import com.ustadmobile.lib.db.entities.SelQuestionOption
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
                                   view: SELQuestionDetail2View,
@@ -25,16 +25,16 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
 
 
     //Provider
-    private var providerList: UmProvider<SelQuestionOption>? = null
-    internal var repository: UmAppDatabase
+    private var providerList: DataSource.Factory<Int, SelQuestionOption>? = null
+    internal lateinit var repository: UmAppDatabase
     private var currentQuestionUid: Long = 0
     private var currentQuestionSetUid: Long = 0
-    internal var questionUmLiveData: UmLiveData<SelQuestion>
+    internal lateinit var questionUmLiveData: DoorLiveData<SelQuestion>
 
     private var mOriginalQuestion: SelQuestion? = null
     private var mUpdatedQuestion: SelQuestion? = null
-    internal var questionDao: SelQuestionDao
-    internal var questionOptionDao: SelQuestionOptionDao
+    internal lateinit var questionDao: SelQuestionDao
+    internal lateinit var questionOptionDao: SelQuestionOptionDao
 
     private var questionTypePresets: Array<String>? = null
 
@@ -42,11 +42,11 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
 
 
         if (arguments!!.containsKey(ARG_SEL_QUESTION_SET_UID)) {
-            currentQuestionSetUid = arguments!!.get(ARG_SEL_QUESTION_SET_UID)
+            currentQuestionSetUid = arguments!!.get(ARG_SEL_QUESTION_SET_UID)!!.toLong()
 
         }
         if (arguments!!.containsKey(ARG_QUESTION_UID_QUESTION_DETAIL)) {
-            currentQuestionUid = arguments!!.get(ARG_QUESTION_UID_QUESTION_DETAIL)
+            currentQuestionUid = arguments!!.get(ARG_QUESTION_UID_QUESTION_DETAIL)!!.toLong()
         }
     }
 
@@ -54,63 +54,51 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
         super.onCreate(savedState)
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        questionDao = repository.getSocialNominationQuestionDao()
-        questionOptionDao = repository.getSELQuestionOptionDao()
+        questionDao = repository.selQuestionDao
+        questionOptionDao = repository.selQuestionOptionDao
 
-        providerList = repository.getSELQuestionOptionDao()
-                .findAllActiveOptionsByQuestionUidProvider(currentQuestionUid)
+        providerList = questionOptionDao.findAllActiveOptionsByQuestionUidProvider(currentQuestionUid)
 
 
         //Set questionType preset
-        questionTypePresets = arrayOf(impl.getString(MessageID.sel_question_type_nomination, context), impl.getString(MessageID.sel_question_type_multiple_choise, context), impl.getString(MessageID.sel_question_type_free_text, context))
+        questionTypePresets =
+                arrayOf(impl.getString(MessageID.sel_question_type_nomination, context),
+                impl.getString(MessageID.sel_question_type_multiple_choise, context),
+                impl.getString(MessageID.sel_question_type_free_text, context))
 
         //Set to view
         view.setQuestionTypePresets(questionTypePresets!!)
 
         //Create / Get question
-        questionUmLiveData = repository.getSocialNominationQuestionDao().findByUidLive(currentQuestionUid)
+        questionUmLiveData = questionDao.findByUidLive(currentQuestionUid)
 
         //Observe the live data :
-        questionUmLiveData.observe(this@SELQuestionDetail2Presenter,
-                UmObserver<SelQuestion> { this@SELQuestionDetail2Presenter.handleSELQuestionValueChanged(it) })
+        questionUmLiveData.observe(this, this::handleSELQuestionValueChanged)
 
-        val selQuestionDao = repository.getSocialNominationQuestionDao()
-        selQuestionDao.findByUidAsync(currentQuestionUid,
-                object : UmCallback<SelQuestion> {
-                    override fun onSuccess(selQuestion: SelQuestion?) {
-                        if (selQuestion != null) {
-                            mUpdatedQuestion = selQuestion
-                            view.setQuestionOnView(mUpdatedQuestion!!)
-                        } else {
+        GlobalScope.launch {
+            val selQuestion = questionDao.findByUidAsync(currentQuestionUid)
+            if (selQuestion != null) {
+                mUpdatedQuestion = selQuestion
+                view.setQuestionOnView(mUpdatedQuestion!!)
+            } else {
 
-                            //Set index
-                            selQuestionDao.getMaxIndexByQuestionSetAsync(currentQuestionSetUid,
-                                    object : UmCallback<Int> {
-                                        override fun onSuccess(result: Int?) {
-                                            //Create a new one
-                                            val newSELQuestion = SelQuestion()
-                                            newSELQuestion.selQuestionSelQuestionSetUid = currentQuestionSetUid
-                                            newSELQuestion.questionIndex = result!! + 1
-                                            mUpdatedQuestion = newSELQuestion
+                //Set index
+                val result = questionDao.getMaxIndexByQuestionSetAsync(currentQuestionSetUid)
 
-                                            if (mOriginalQuestion == null) {
-                                                mOriginalQuestion = mUpdatedQuestion
-                                            }
+                //Create a new one
+                val newSELQuestion = SelQuestion()
+                newSELQuestion.selQuestionSelQuestionSetUid = currentQuestionSetUid
+                newSELQuestion.questionIndex = result!! + 1
+                mUpdatedQuestion = newSELQuestion
 
-                                            view.setQuestionOnView(mUpdatedQuestion!!)
-                                        }
+                if (mOriginalQuestion == null) {
+                    mOriginalQuestion = mUpdatedQuestion
+                }
 
-                                        override fun onFailure(exception: Throwable?) {
-                                            print(exception!!.message)
-                                        }
-                                    })
-                        }
-                    }
+                view.setQuestionOnView(mUpdatedQuestion!!)
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+            }
+        }
 
         //Set provider
         view.setQuestionOptionsProvider(providerList!!)
@@ -152,7 +140,7 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
 
     fun handleClickAddOption() {
         val args = HashMap<String, String>()
-        args.put(ARG_QUESTION_UID_QUESTION_DETAIL, currentQuestionUid)
+        args.put(ARG_QUESTION_UID_QUESTION_DETAIL, currentQuestionUid.toString())
 
         impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, context)
     }
@@ -161,77 +149,41 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
 
         mUpdatedQuestion!!.isQuestionActive = true
         mUpdatedQuestion!!.selQuestionSelQuestionSetUid = currentQuestionSetUid
-        questionDao.findByUidAsync(mUpdatedQuestion!!.selQuestionUid, object : UmCallback<SelQuestion> {
-            override fun onSuccess(questionInDB: SelQuestion?) {
-                if (questionInDB != null) {
-                    questionDao.updateAsync(mUpdatedQuestion!!, object : UmCallback<Int> {
-                        override fun onSuccess(result: Int?) {
-                            view.finish()
-                        }
+        GlobalScope.launch {
+            val questionInDB = questionDao.findByUidAsync(mUpdatedQuestion!!.selQuestionUid)
+            if (questionInDB != null) {
+                questionDao.updateAsync(mUpdatedQuestion!!)
+                view.finish()
 
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
-                } else {
-                    questionDao.insertAsync(mUpdatedQuestion!!, object : UmCallback<Long> {
-                        override fun onSuccess(result: Long?) {
-                            view.finish()
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-
-                        }
-                    })
-                }
+            } else {
+                questionDao.insertAsync(mUpdatedQuestion!!)
+                view.finish()
             }
-
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
+        }
 
     }
 
     fun handleQuestionOptionEdit(questionOptionUid: Long) {
-        questionOptionDao.findByUidAsync(questionOptionUid, object : UmCallback<SelQuestionOption> {
-            override fun onSuccess(result: SelQuestionOption?) {
-                if (result != null) {
-                    val args = HashMap<String, String>()
-                    args.put(ARG_QUESTION_UID_QUESTION_DETAIL, result.selQuestionOptionQuestionUid)
-                    args.put(ARG_QUESTION_OPTION_UID, result.selQuestionOptionUid)
-                    impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, context)
+        GlobalScope.launch {
+            val result = questionOptionDao.findByUidAsync(questionOptionUid)
+            if (result != null) {
+                val args = HashMap<String, String>()
+                args.put(ARG_QUESTION_UID_QUESTION_DETAIL, result.selQuestionOptionQuestionUid.toString())
+                args.put(ARG_QUESTION_OPTION_UID, result.selQuestionOptionUid.toString())
+                impl.go(AddQuestionOptionDialogView.VIEW_NAME, args, context)
 
-                }
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
     }
 
     fun handleQuestionOptionDelete(questionOptionUid: Long) {
-        questionOptionDao.findByUidAsync(questionOptionUid, object : UmCallback<SelQuestionOption> {
-            override fun onSuccess(result: SelQuestionOption?) {
-                if (result != null) {
-                    result.isOptionActive = false
-                    questionOptionDao.updateAsync(result, object : UmCallback<Int> {
-                        override fun onSuccess(result: Int?) {
-
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
-                }
+        GlobalScope.launch {
+            val result = questionOptionDao.findByUidAsync(questionOptionUid)
+            if (result != null) {
+                result.isOptionActive = false
+                questionOptionDao.updateAsync(result)
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
     }
 
 }

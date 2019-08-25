@@ -1,18 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView
-import com.ustadmobile.core.xlsx.UmSheet
-import com.ustadmobile.core.xlsx.UmXLSX
-import com.ustadmobile.core.xlsx.ZipUtil
-
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATION_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
+import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView
+import com.ustadmobile.core.xlsx.UmSheet
+import com.ustadmobile.core.xlsx.UmXLSX
+import com.ustadmobile.core.xlsx.ZipUtil
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.io.IOException
 
 
 /**
@@ -38,16 +37,18 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
         locationList = ArrayList()
 
         if (arguments!!.containsKey(ARG_FROM_DATE)) {
-            fromDate = arguments!!.get(ARG_FROM_DATE)
+            fromDate = arguments!!.get(ARG_FROM_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_TO_DATE)) {
-            toDate = arguments!!.get(ARG_TO_DATE)
+            toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_LOCATION_LIST)) {
+            //TODO: String CSV to List
             locations = arguments!!.get(ARG_LOCATION_LIST)
             locationList = convertLongArray(locations!!)
         }
         if (arguments!!.containsKey(ARG_CLAZZ_LIST)) {
+            //TODO: String CSV to List
             clazzes = arguments!!.get(ARG_CLAZZ_LIST)
             clazzList = convertLongArray(clazzes!!)
         }
@@ -67,22 +68,15 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
     private fun getNumberOfDaysOpenDataAndUpdateCharts() {
 
         val dataMap = LinkedHashMap<Float, Float>()
-
-        repository.clazzLogDao.getNumberOfClassesOpenForDateClazzes(fromDate, toDate,
-                clazzList!!, locationList!!,
-                object : UmCallback<List<ClazzLogDao.NumberOfDaysClazzesOpen>> {
-                    override fun onSuccess(resultList: List<ClazzLogDao.NumberOfDaysClazzesOpen>?) {
-                        for (everyResult in resultList!!) {
-                            dataMap[everyResult.date / 1000f] = everyResult.number.toFloat()
-                        }
-                        //Update the report data on the view:
-                        view.updateBarChart(dataMap)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+        GlobalScope.launch {
+            val resultList = repository.clazzLogDao.getNumberOfClassesOpenForDateClazzes(fromDate,
+                    toDate, clazzList!!, locationList!!)
+            for (everyResult in resultList!!) {
+                dataMap[everyResult.date / 1000f] = everyResult.number.toFloat()
+            }
+            //Update the report data on the view:
+            view.updateBarChart(dataMap)
+        }
     }
 
 
@@ -128,7 +122,7 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
             view.generateXLSXReport(xlsxReportPath)
 
         } catch (e: IOException) {
-            e.printStackTrace()
+            print(e.message)
         }
 
     }

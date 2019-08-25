@@ -1,23 +1,19 @@
 package com.ustadmobile.core.controller
 
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.FeedEntryDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.FeedListView
+import com.ustadmobile.core.view.ReportEditView.Companion.ARG_REPORT_NAME
 import com.ustadmobile.core.view.ReportSelectionView
 import com.ustadmobile.lib.db.entities.ClazzAverage
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.lib.db.entities.Role
-
-
-
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_REPORT_NAME
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 /**
  * The FeedList's Presenter - responsible for the logic to display all feeds and action on opening
@@ -31,7 +27,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
 
     private var loggedInPersonUid = 0L
 
-    private var feedEntryUmProvider: UmProvider<FeedEntry>? = null
+    private var feedEntryUmProvider: DataSource.Factory<Int, FeedEntry>? = null
 
     private var repository: UmAppDatabase? = null
 
@@ -46,14 +42,13 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
-        repository = UmAppDatabase.getInstance(view.getContext())
+        repository = UmAppDatabase.getInstance(view.viewContext)
 
         updateFeedEntries()
 
         //All clazz's average live data
         val averageLiveData = repository!!.clazzDao.clazzSummaryLiveData
-        averageLiveData.observe(this@FeedListPresenter,
-                UmObserver<ClazzAverage> { this@FeedListPresenter.handleAveragesChanged(it) })
+        averageLiveData.observe(this, this::handleAveragesChanged)
 
         //Check permissions
         checkPermissions()
@@ -68,9 +63,9 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * Handles what happens when averages changes. Usually called on live data's onObserve.
      * @param average   The ClazzAverage POJO that changed.
      */
-    private fun handleAveragesChanged(average: ClazzAverage) {
-        val attendanceAverage = Math.round(average.attendanceAverage * 100)
-        view.updateAttendancePercentage(attendanceAverage)
+    private fun handleAveragesChanged(average: ClazzAverage?) {
+        val attendanceAverage = kotlin.math.round(average!!.attendanceAverage * 100)
+        view.updateAttendancePercentage(attendanceAverage.toInt())
         view.updateNumClasses(average.numClazzes)
         view.updateNumStudents(average.numStudents)
         //TODOne: Update with attendance trend.
@@ -85,17 +80,12 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      */
     fun checkPermissions() {
         val clazzDao = repository!!.clazzDao
-        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_REPORTS_VIEW,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        view.showReportOptionsOnSummaryCard(result!!)
-                    }
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid, Role
+                    .PERMISSION_REPORTS_VIEW)
+            view.showReportOptionsOnSummaryCard(result!!)
+        }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
-        )
     }
 
     /**
@@ -104,19 +94,14 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      */
     fun markFeedAsDone(feedUid: Long) {
         val feedEntryDao = repository!!.feedEntryDao
-        feedEntryDao.findByUidAsync(feedUid, object : UmCallback<FeedEntry> {
-            override fun onSuccess(thisFeed: FeedEntry?) {
-                if (thisFeed != null) {
-                    thisFeed.isFeedEntryDone = true
-                    feedEntryDao.update(thisFeed)
-                    updateFeedEntries()
-                }
+        GlobalScope.launch {
+            val thisFeed = feedEntryDao.findByUidAsync(feedUid)
+            if (thisFeed != null) {
+                thisFeed.isFeedEntryDone = true
+                feedEntryDao.update(thisFeed)
+                updateFeedEntries()
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
 
     }
 
@@ -124,7 +109,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * Updates the View with the feed provider set on the Presenter
      */
     private fun updateFeedProviderToView() {
-        view.runOnUiThread({ view.setFeedEntryProvider(feedEntryUmProvider!!) })
+        view.runOnUiThread(Runnable{ view.setFeedEntryProvider(feedEntryUmProvider!!) })
     }
 
     /**
@@ -134,7 +119,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * @return  A hash table all the query
      */
     private fun splitQuery(query: String): Map<String, String>? {
-        val query_pairs = Hashtable<String, String>()
+        val query_pairs = HashMap<String, String>()
 
         val pairs = query.split("&".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         for (pair in pairs) {
@@ -149,9 +134,9 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * Goes to Report selection
      */
     fun handleClickViewReports() {
-        val args = Hashtable<String, String>()
+        val args = HashMap<String, String>()
         args.put(ARG_REPORT_NAME, "Test Report")
-        impl.go(ReportSelectionView.VIEW_NAME, args, view.getContext())
+        impl.go(ReportSelectionView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -164,7 +149,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
         val feedLink = feedEntry.link
         val linkViewName = feedLink!!.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
         val args = splitQuery(feedLink.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1])
-        impl.go(linkViewName, args, view.getContext())
+        impl.go(linkViewName, args!!, view.viewContext)
 
     }
 

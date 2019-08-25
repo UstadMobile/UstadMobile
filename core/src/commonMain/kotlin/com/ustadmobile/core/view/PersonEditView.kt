@@ -61,7 +61,7 @@ interface PersonEditView : UstadView {
 
     fun addCustomFieldText(label: CustomField, value: String)
 
-    fun addCustomFieldDropdown(label: CustomField, options: Array<String>, selected: Int)
+    fun addCustomFieldDropdown(label: CustomField, options: Array<String?>, selected: Int)
 
     fun clearAllCustomFields()
 

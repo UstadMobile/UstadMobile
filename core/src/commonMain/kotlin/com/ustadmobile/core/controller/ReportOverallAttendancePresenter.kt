@@ -1,17 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.ReportOverallAttendanceView
-import com.ustadmobile.core.xlsx.UmSheet
-import com.ustadmobile.core.xlsx.UmXLSX
-import com.ustadmobile.core.xlsx.ZipUtil
-import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers
-
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_GENDER_DISAGGREGATE
@@ -19,9 +9,17 @@ import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATION_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_STUDENT_IDENTIFIER_NUMBER
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_STUDENT_IDENTIFIER_PERCENTAGE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
+import com.ustadmobile.core.view.ReportOverallAttendanceView
 import com.ustadmobile.core.view.ReportOverallAttendanceView.Companion.ATTENDANCE_LINE_AVERAGE_LABEL_DESC
 import com.ustadmobile.core.view.ReportOverallAttendanceView.Companion.ATTENDANCE_LINE_FEMALE_LABEL_DESC
 import com.ustadmobile.core.view.ReportOverallAttendanceView.Companion.ATTENDANCE_LINE_MALE_LABEL_DESC
+import com.ustadmobile.core.xlsx.UmSheet
+import com.ustadmobile.core.xlsx.UmXLSX
+import com.ustadmobile.core.xlsx.ZipUtil
+import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.io.IOException
 
 
 /**
@@ -40,7 +38,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
     var isGenderDisaggregate: Boolean = false
     var showPercentages: Boolean? = false
 
-    internal var dataMaps: LinkedHashMap<String, LinkedHashMap<Float, Float>>
+    internal lateinit var dataMaps: LinkedHashMap<String, LinkedHashMap<Float, Float>>
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -50,10 +48,10 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
         clazzesList = ArrayList()
 
         if (arguments!!.containsKey(ARG_FROM_DATE)) {
-            fromDate = arguments!!.get(ARG_FROM_DATE)
+            fromDate = arguments!!.get(ARG_FROM_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_TO_DATE)) {
-            toDate = arguments!!.get(ARG_TO_DATE)
+            toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_LOCATION_LIST)) {
             val locations = arguments!!.get(ARG_LOCATION_LIST) as LongArray
@@ -65,7 +63,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             clazzesList = convertLongArray(clazzes)
         }
         if (arguments!!.containsKey(ARG_GENDER_DISAGGREGATE)) {
-            isGenderDisaggregate = arguments!!.get(ARG_GENDER_DISAGGREGATE)
+            isGenderDisaggregate = arguments!!.get(ARG_GENDER_DISAGGREGATE)!!.toBoolean()
         }
 
         if (arguments!!.containsKey(ARG_STUDENT_IDENTIFIER_NUMBER)) {
@@ -103,6 +101,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             //Get date and time.
             val dd = everyDayAttendance.logDate
 
+            //TODO: Fix this or move it to UMCalendarUtil.
             //Remove time and just get date
             val calendar = Calendar.instance
             calendar.setTimeInMillis(dd)
@@ -145,18 +144,11 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
 
 
         val attendanceRecordDao = repository.clazzLogAttendanceRecordDao
-
-        attendanceRecordDao.findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate,
-                clazzesList!!, locationList!!, object : UmCallback<List<DailyAttendanceNumbers>> {
-
-            override fun onSuccess(result: List<DailyAttendanceNumbers>?) {
-                processDailyAttendanceNumbers(result!!)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            val result = attendanceRecordDao.findOverallDailyAttendanceNumbersByDateAndStuff(fromDate,
+                    toDate, clazzesList!!, locationList!!)
+            processDailyAttendanceNumbers(result!!)
+        }
 
     }
 
@@ -198,7 +190,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             view.generateXLSXReport(xlsxReportPath)
 
         } catch (e: IOException) {
-            e.printStackTrace()
+            print(e.message)
         }
 
     }
@@ -212,7 +204,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             return result
         }
 
-        fun convertLongList(list: List<Long>): Array<Long> {
+        fun convertLongList(list: List<Long>): Array<Long?> {
             val array = arrayOfNulls<Long>(list.size)
             var i = 0
             for (everyList in list) {

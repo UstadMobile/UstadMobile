@@ -1,33 +1,25 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao
-import com.ustadmobile.core.db.dao.PersonDao
+import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.PeopleListView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonCustomFieldValue
-import com.ustadmobile.lib.db.entities.PersonField
-import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
+import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_ASC
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_DESC
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_NAME_ASC
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_NAME_DESC
+import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonCustomFieldValue
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_PERSON_INSERT
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -40,14 +32,14 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         CommonHandlerPresenter<PeopleListView>(context, arguments!!, view) {
 
     //Provider
-    private var personWithEnrollmentUmProvider: UmProvider<PersonWithEnrollment>? = null
+    private var personWithEnrollmentUmProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     private var loggedInPersonUid: Long? = 0L
 
     private var queryParam = "%"
-    private var idToOrderInteger: Hashtable<Int, Int>? = null
+    private var idToOrderInteger: HashMap<Int, Int>? = null
 
     /**
      * In order:
@@ -58,11 +50,10 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
     fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        personWithEnrollmentUmProvider = repository.personDao
-                .findAllPeopleWithEnrollment()
+        personWithEnrollmentUmProvider = repository.personDao.findAllPeopleWithEnrollment()
         updateProviderToView()
 
-        idToOrderInteger = Hashtable<Int, Int>()
+        idToOrderInteger = HashMap<Int, Int>()
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
@@ -83,8 +74,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      */
     fun updateProviderWithSearch(searchValue: String) {
         queryParam = "%$searchValue%"
-        personWithEnrollmentUmProvider = repository.personDao
-                .findAllPeopleWithEnrollmentBySearch(queryParam)
+        personWithEnrollmentUmProvider = repository.personDao.findAllPeopleWithEnrollmentBySearch(queryParam)
         updateProviderToView()
     }
 
@@ -95,7 +85,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      * @param presetAL The array list of string type
      * @return  String array
      */
-    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String> {
+    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
         val objectArr = presetAL.toTypedArray()
         val strArr = arrayOfNulls<String>(objectArr.size)
         for (j in objectArr.indices) {
@@ -112,7 +102,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
     private fun updateSortSpinnerPreset() {
         val presetAL = ArrayList<String>()
 
-        idToOrderInteger = Hashtable<Int, Int>()
+        idToOrderInteger = HashMap<Int, Int>()
 
         presetAL.add(impl.getString(MessageID.sort_by_name_asc, context))
         idToOrderInteger!!.put(presetAL.size, SORT_ORDER_NAME_ASC)
@@ -131,8 +121,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
         val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
-        personLive.observe(this@PeopleListPresenter,
-                UmObserver<Person> { this@PeopleListPresenter.handlePersonValueChanged(it) })
+        personLive.observe(this, this::handlePersonValueChanged)
     }
 
     /**
@@ -142,7 +131,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      */
     private fun handlePersonValueChanged(loggedInPerson: Person?) {
         if (loggedInPerson != null)
-            view.showFAB(loggedInPerson.isAdmin())
+            view.showFAB(loggedInPerson.admin)
     }
 
     /**
@@ -150,16 +139,10 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      */
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
-        clazzDao.personHasPermission(loggedInPersonUid!!, PERMISSION_PERSON_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        view.showFAB(result!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                }))
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPersonUid!!, PERMISSION_PERSON_INSERT)
+            view.showFAB(result!!)
+        }
     }
 
     /**
@@ -182,43 +165,24 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         val personFieldDao = repository.personCustomFieldDao
         val customFieldValueDao = repository.personCustomFieldValueDao
 
-        personDao.insertPersonAsync(newPerson, loggedInPersonUid, object : UmCallback<Long> {
-            //personDao.createPersonAsync(newPerson, new UmCallback<Long>() {
-
-            override fun onSuccess(result: Long?) {
-
-                //Also create null Custom Field values so it shows up in the Edit screen.
-                personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
-                        object : UmCallback<List<PersonField>> {
-                            override fun onSuccess(allCustomFields: List<PersonField>?) {
-
-                                for (everyCustomField in allCustomFields!!) {
-                                    val cfv = PersonCustomFieldValue()
-                                    cfv.setPersonCustomFieldValuePersonCustomFieldUid(
-                                            everyCustomField.personCustomFieldUid)
-                                    cfv.setPersonCustomFieldValuePersonUid(result)
-                                    cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
-                                }
-
-                                val args = HashMap<String, String>()
-                                args.put(ARG_PERSON_UID, result)
-                                args.put(ARG_NEW_PERSON, "true")
-                                impl.go(PersonEditView.VIEW_NAME, args, view.getContext())
-                            }
-
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
+        GlobalScope.launch {
+            val result = personDao.insertPersonAsync(newPerson, loggedInPersonUid!!)
+            //Also create null Custom Field values so it shows up in the Edit screen.
+            val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
+            for (everyCustomField in allCustomFields!!) {
+                val cfv = PersonCustomFieldValue()
+                cfv.personCustomFieldValuePersonCustomFieldUid = (everyCustomField.personCustomFieldUid)
+                cfv.personCustomFieldValuePersonUid = (result)
+                cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
             }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+            val args = HashMap<String, String>()
+            args.put(ARG_PERSON_UID, result.toString())
+            args.put(ARG_NEW_PERSON, "true")
+            impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
 
+        }
     }
-
 
     /**
      * The primary action handler on the people list (for every item) is to open that Person's
@@ -228,8 +192,8 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      */
     override fun handleCommonPressed(arg: Any) {
         val args = HashMap<String, String>()
-        args.put(ARG_PERSON_UID, arg)
-        impl.go(PersonDetailView.VIEW_NAME, args, view.getContext())
+        args.put(ARG_PERSON_UID, arg.toString())
+        impl.go(PersonDetailView.VIEW_NAME, args, view.viewContext)
     }
 
     /**

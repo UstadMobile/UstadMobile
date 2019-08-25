@@ -1,20 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PersonListSearchView
-import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-
-
-
 import com.ustadmobile.core.view.PersonListSearchView.Companion.ARGUMENT_CURRNET_CLAZZ_UID
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 
 class PersonListSearchPresenter(context: Any, arguments: Map<String, String>?, view:
 PersonListSearchView) : CommonHandlerPresenter<PersonListSearchView>(context, arguments!!, view) {
 
     //Provider
-    private var personWithEnrollmentUmProvider: UmProvider<PersonWithEnrollment>? = null
+    private var personWithEnrollmentUmProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -23,7 +20,7 @@ PersonListSearchView) : CommonHandlerPresenter<PersonListSearchView>(context, ar
     init {
 
         if (arguments!!.containsKey(ARGUMENT_CURRNET_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARGUMENT_CURRNET_CLAZZ_UID)
+            currentClazzUid = arguments!!.get(ARGUMENT_CURRNET_CLAZZ_UID)!!.toLong()
         }
 
     }

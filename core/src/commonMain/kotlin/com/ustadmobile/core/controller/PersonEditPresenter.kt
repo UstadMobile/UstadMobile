@@ -1,44 +1,23 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.db.dao.CustomFieldDao
 import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.core.db.dao.FeedEntryDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao
-import com.ustadmobile.core.db.dao.PersonDao
-import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao
-import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView
 import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonDetailViewField
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.CustomFieldValue
-import com.ustadmobile.lib.db.entities.CustomFieldValueOption
-import com.ustadmobile.lib.db.entities.FeedEntry
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonCustomFieldValue
-import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
-import com.ustadmobile.lib.db.entities.PersonField
-import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.ScheduledCheck
-
-import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ATTENDANCE
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_BIRTHDAY
@@ -53,6 +32,9 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 /**
  * PersonEditPresenter : This is responsible for generating the Edit data along with its Custom
@@ -74,7 +56,7 @@ class PersonEditPresenter
     :UstadBaseController<PersonEditView>(context, arguments!!, view) {
 
 
-    private var personLiveData: UmLiveData<Person>? = null
+    private var personLiveData: DoorLiveData<Person?>? = null
 
     //Headers and Fields
     private var headersAndFields: List<PersonDetailPresenterField>? = null
@@ -86,7 +68,7 @@ class PersonEditPresenter
     //OG person before Done/Save/Discard clicked.
     private var mOriginalValuePerson: Person? = null
 
-    private var assignedClazzes: UmProvider<ClazzWithNumStudents>? = null
+    private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
 
     //The custom fields' values
     private val customFieldWithFieldValueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>? = null
@@ -138,87 +120,66 @@ class PersonEditPresenter
      */
     private fun getAllPersonCustomFields() {
         //0. Clear all added custom fields on view.
-        view.runOnUiThread({ view.clearAllCustomFields() })
+        view.runOnUiThread(Runnable{ view.clearAllCustomFields() })
 
-        //1. Get all custom fields
-        customFieldDao!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID,
-                object : UmCallback<List<CustomField>> {
-                    override fun onSuccess(result: List<CustomField>?) {
-                        for (c in result!!) {
-                            //Get value as well
-                            customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(
-                                    c.customFieldUid, personUid,
-                                    object : UmCallback<CustomFieldValue> {
-                                        override fun onSuccess(result: CustomFieldValue?) {
-                                            var valueString: String? = ""
-                                            var valueSelection = 0
+        GlobalScope.launch {
+            //1. Get all custom fields
+            val result = customFieldDao!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
+            for (c in result!!) {
+                //Get value as well
+                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(c.customFieldUid, personUid)
+                var valueString: String? = ""
+                var valueSelection = 0
 
-                                            if (c.customFieldType == CustomField.FIELD_TYPE_TEXT) {
+                if (c.customFieldType == CustomField.FIELD_TYPE_TEXT) {
 
-                                                if (result != null) {
-                                                    valueString = result.customFieldValueValue
-                                                }
-                                                val finalValueString = arrayOf<String>(valueString)
-                                                view.runOnUiThread({
+                    if (result2 != null) {
+                        valueString = result2.customFieldValueValue
+                    }
+                    val finalValueString = arrayOf<String>(valueString!!)
+                    view.runOnUiThread(Runnable{
 
-                                                    view.addCustomFieldText(c, finalValueString[0])
-                                                    //view.addComponent(finalValueString[0], c.getCustomFieldName());
-                                                })
+                        view.addCustomFieldText(c, finalValueString[0])
+                        //view.addComponent(finalValueString[0], c.getCustomFieldName());
+                    })
 
-                                            } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
-                                                if (result != null) {
-                                                    try {
-                                                        valueSelection = Integer.valueOf(result.customFieldValueValue!!)
-                                                    } catch (nfe: NumberFormatException) {
-                                                        valueSelection = 0
-                                                    }
-
-                                                }
-                                                val finalValueSelection = valueSelection
-                                                optionDao!!.findAllOptionsForFieldAsync(c.customFieldUid,
-                                                        object : UmCallback<List<CustomFieldValueOption>> {
-                                                            override fun onSuccess(result: List<CustomFieldValueOption>?) {
-                                                                val options = ArrayList<String>()
-
-                                                                for (o in result!!) {
-                                                                    options.add(o.customFieldValueOptionName)
-                                                                }
-                                                                //Get value
-                                                                var valueString = "-"
-                                                                if (finalValueSelection > 0) {
-                                                                    valueString = options[finalValueSelection]
-                                                                }
-                                                                val finalValueString = valueString
-
-                                                                customFieldDropDownOptions[c.customFieldUid] = options
-                                                                view.runOnUiThread({
-                                                                    //view.addComponent(finalValueString, c.getCustomFieldName());
-                                                                    val a = arrayOfNulls<String>(options.size)
-                                                                    options.toTypedArray()
-                                                                    view.addCustomFieldDropdown(c, a, finalValueSelection)
-                                                                    //view.addCustomFieldText(c, finalValueString);
-
-                                                                })
-                                                            }
-
-                                                            override fun onFailure(exception: Throwable?) {
-                                                                print(exception!!.message)
-                                                            }
-                                                        })
-                                            }
-                                        }
-
-                                        override fun onFailure(exception: Throwable?) {
-                                            print(exception!!.message)
-                                        }
-                                    })
+                } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
+                    if (result2 != null) {
+                        try {
+                            valueSelection = (result2.customFieldValueValue!!).toInt()
+                        } catch (nfe: NumberFormatException) {
+                            valueSelection = 0
                         }
-                    }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
                     }
-                })
+                    val finalValueSelection = valueSelection
+                    val result3 = optionDao!!.findAllOptionsForFieldAsync(c.customFieldUid)
+                    val options = ArrayList<String>()
+
+                    for (o in result3!!) {
+                        options.add(o.customFieldValueOptionName!!)
+                    }
+                    //Get value
+                    var valueString = "-"
+                    if (finalValueSelection > 0) {
+                        valueString = options[finalValueSelection]
+                    }
+                    val finalValueString = valueString
+
+                    customFieldDropDownOptions[c.customFieldUid] = options
+                    view.runOnUiThread(Runnable{
+                        //view.addComponent(finalValueString, c.getCustomFieldName());
+                        val a = arrayOfNulls<String>(options.size)
+                        options.toTypedArray()
+                        view.addCustomFieldDropdown(c, a, finalValueSelection)
+                        //view.addCustomFieldText(c, finalValueString);
+
+                    })
+
+                }
+
+            }
+        }
     }
 
     /**
@@ -243,95 +204,30 @@ class PersonEditPresenter
 
         getAllPersonCustomFields()
 
+        var thisP = this
         //Get all the currently set headers and fields:
-        personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditMode(
-                object : UmCallback<List<PersonDetailPresenterField>> {
-                    override fun onSuccess(result: List<PersonDetailPresenterField>?) {
+        GlobalScope.launch {
+            val result = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditMode()
 
-                        //Remove old custom fields
-                        val fieldsIterator = result!!.iterator()
-                        while (fieldsIterator.hasNext()) {
-                            val field = fieldsIterator.next()
-                            val fieldIndex = field.fieldIndex
-                            if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                                fieldsIterator.remove()
-                            }
-                        }
+            //Remove old custom fields
+            val fieldsIterator = result!!.iterator()
+            while (fieldsIterator.hasNext()) {
+                val field = fieldsIterator.next()
+                val fieldIndex = field.fieldIndex
+                if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
+                    //TODO: Remove from iterator in Kotlin
+                    fieldsIterator.remove()
+                }
+            }
 
-                        headersAndFields = result
+            headersAndFields = result
 
-                        //Get person live data and observe
-                        personLiveData = personDao.findByUidLive(personUid)
-                        //Observe the live data
-                        personLiveData!!.observe(this@PersonEditPresenter,
-                                UmObserver<Person> { this@PersonEditPresenter.handlePersonValueChanged(it) })
+            //Get person live data and observe
+            personLiveData = personDao.findByUidLive(personUid)
+            //Observe the live data
+            personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
 
-                        //                //Get all custom fields (if any) (old way)
-                        //                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
-                        //                        new UmCallback<List<PersonField>>() {
-                        //                    @Override
-                        //                    public void onSuccess(List<PersonField> customFields) {
-                        //                        //Create a list of every custom fields supposed to be and fill them with
-                        //                        //blank values that will be used to display empty fields. If those fields
-                        //                        //exists, then they will get replaced in the next Dao call.
-                        //                        customFieldWithFieldValueMap = new HashMap<>();
-                        //                        for(PersonField customField:customFields){
-                        //
-                        //                            //the blank custom field value.
-                        //                            PersonCustomFieldValue blankCustomValue = new PersonCustomFieldValue();
-                        //                            blankCustomValue.setFieldValue("");
-                        //
-                        //                            //Create a (custom field + custom value) map object
-                        //                            PersonCustomFieldWithPersonCustomFieldValue blankCustomMap =
-                        //                                    new PersonCustomFieldWithPersonCustomFieldValue();
-                        //                            blankCustomMap.setFieldName(customField.getFieldName());
-                        //                            blankCustomMap.setLabelMessageId(customField.getLabelMessageId());
-                        //                            blankCustomMap.setFieldIcon(customField.getFieldIcon());
-                        //                            blankCustomMap.setCustomFieldValue(blankCustomValue);
-                        //
-                        //                            //Set the custom field and the field+value object to the map.
-                        //                            customFieldWithFieldValueMap.put(customField.getPersonCustomFieldUid(),
-                        //                                    blankCustomMap);
-                        //                        }
-                        //
-                        //                        //Get all the custom fields and their values for this person (if applicable)
-                        //                        personCustomFieldValueDao.findByPersonUidAsync2(personUid,
-                        //                            new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
-                        //                                @Override
-                        //                                public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
-                        //
-                        //                                    //Store the values and fields in this Map
-                        //
-                        //                                    for (PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue : result) {
-                        //                                        customFieldWithFieldValueMap.put(
-                        //                                                fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
-                        //                                    }
-                        //
-                        //                                    //Get person live data and observe
-                        //                                    personLiveData = personDao.findByUidLive(personUid);
-                        //                                    //Observe the live data
-                        //                                    personLiveData.observe(PersonEditPresenter.this,
-                        //                                            PersonEditPresenter.this::handlePersonValueChanged);
-                        //                                }
-                        //
-                        //                                @Override
-                        //                                public void onFailure(Throwable exception) {exception.printStackTrace();}
-                        //                        });
-                        //
-                        //                    }
-                        //
-                        //                    @Override
-                        //                    public void onFailure(Throwable exception) {
-                        //                        exception.printStackTrace();
-                        //                    }
-                        //                });
-
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+        }
 
     }
 
@@ -342,43 +238,22 @@ class PersonEditPresenter
      */
     fun updatePersonPic(picPath: String) {
         //Find the person
-        personDao.findByUidAsync(personUid, object : UmCallback<Person> {
-            override fun onSuccess(personWithPic: Person?) {
+        GlobalScope.launch {
+            val personWithPic = personDao.findByUidAsync(personUid)
 
-                val personPictureDao = repository.personPictureDao
-                personPictureDao.findByPersonUidAsync(personWithPic!!.personUid,
-                        object : UmCallback<PersonPicture> {
-                            override fun onSuccess(personPicture: PersonPicture?) {
-                                if (personPicture != null) {
-                                    val picFile = File(picPath)
-                                    personPictureDao.setAttachmentFromTmpFile(
-                                            personPicture.personPictureUid, picFile)
-                                }
-                            }
+            val personPictureDao = repository.personPictureDao
+            val personPicture = personPictureDao.findByPersonUidAsync(personWithPic!!.personUid)
 
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
-
-                //Update personWithpic
-                personDao.updatePersonAsync(personWithPic, loggedInPersonUid, object : UmCallback<Int> {
-                    //personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
-
-                    override fun onSuccess(result: Int?) {
-                        generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+            if (personPicture != null) {
+                //TODO: KMP attachment :
+                //personPictureDao.setAttachmentFromTmpFile(personPicture.personPictureUid, picPath)
             }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+            //Update personWithpic
+            personDao.updatePersonAsync(personWithPic, loggedInPersonUid!!)
+            generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
+
+        }
     }
 
     /**
@@ -400,19 +275,15 @@ class PersonEditPresenter
 
     private fun updatePersonPic(thisPerson: Person) {
         val personPictureDao = repository.personPictureDao
-        personPictureDao.findByPersonUidAsync(thisPerson.personUid,
-                object : UmCallback<PersonPicture> {
-                    override fun onSuccess(personPicture: PersonPicture?) {
-                        if (personPicture != null) {
-                            view.updateImageOnView(personPictureDao.getAttachmentPath(
-                                    personPicture.personPictureUid))
-                        }
-                    }
+        GlobalScope.launch {
+            val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
+            if (personPicture != null) {
+                //TODO: KMP Atachment
+                view.updateImageOnView(personPictureDao.getAttachmentPath(
+                        personPicture.personPictureUid))
+            }
+        }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
     }
 
     /**
@@ -427,6 +298,7 @@ class PersonEditPresenter
                                 thisView: PersonEditView,
                                 valueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>?) {
 
+        //TODO: Locale on Kotlin Core
         val currnetLocale = Locale.getDefault()
 
         updatePersonPic(thisPerson)
@@ -475,44 +347,44 @@ class PersonEditPresenter
                                 field.labelMessageId, field.fieldIcon!!), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER.toLong()) {
-                thisValue = thisPerson.getFatherName() + " (" + thisPerson.getFatherNumber() + ")"
+                thisValue = thisPerson.fatherName + " (" + thisPerson.fatherNumber + ")"
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER.toLong()) {
-                thisValue = thisPerson.getMotherName() + " (" + thisPerson.getMotherNum() + ")"
+                thisValue = thisPerson.motherName + " (" + thisPerson.motherNum + ")"
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
-                thisValue = thisPerson.getFatherName()
+                thisValue = thisPerson.fatherName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME.toLong()) {
-                thisValue = thisPerson.getMotherName()
+                thisValue = thisPerson.motherName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NUMBER.toLong()) {
-                thisValue = thisPerson.getFatherNumber()
+                thisValue = thisPerson.fatherNumber
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NUMBER.toLong()) {
-                thisValue = thisPerson.getMotherNum()
+                thisValue = thisPerson.motherNum
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
             } else if (field.fieldUid == PERSON_FIELD_UID_ADDRESS.toLong()) {
-                thisValue = thisPerson.getAddress()
+                thisValue = thisPerson.address
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
                 thisValue = UMCalendarUtil.getPrettyDateFromLong(
-                        thisPerson.getDateOfBirth(), currnetLocale)
+                        thisPerson.dateOfBirth, currnetLocale)
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon!!), thisValue!!)
@@ -527,9 +399,9 @@ class PersonEditPresenter
                     if (valueMap[field.fieldUid]!!.fieldIcon != null) {
                         iconName = valueMap[field.fieldUid]!!.fieldIcon
                     }
-                    if (valueMap[field.fieldUid]!!.customFieldValue!!.getFieldValue() != null) {
+                    if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
                         fieldValue = valueMap[field.fieldUid]!!
-                                .customFieldValue!!.getFieldValue()
+                                .customFieldValue!!.fieldValue
                     }
                 }
                 thisView.setField(
@@ -566,50 +438,43 @@ class PersonEditPresenter
             personToUpdate!!.lastName = value as String
 
         } else if (fieldcode == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
-            personToUpdate!!.setFatherName(value as String)
+            personToUpdate!!.fatherName = (value as String)
 
         } else if (fieldcode == PERSON_FIELD_UID_FATHER_NUMBER.toLong()) {
-            personToUpdate!!.setFatherNumber(value as String)
+            personToUpdate!!.fatherNumber = (value as String)
 
         } else if (fieldcode == PERSON_FIELD_UID_MOTHER_NAME.toLong()) {
-            personToUpdate!!.setMotherName(value as String)
+            personToUpdate!!.motherName = (value as String)
 
         } else if (fieldcode == PERSON_FIELD_UID_MOTHER_NUMBER.toLong()) {
-            personToUpdate!!.setMotherNum(value as String)
+            personToUpdate!!.motherName = (value as String)
 
         } else if (fieldcode == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
-            personToUpdate!!.setDateOfBirth(value as Long)
+            personToUpdate!!.dateOfBirth = (value as Long)
 
         } else if (fieldcode == PERSON_FIELD_UID_ADDRESS.toLong()) {
-            personToUpdate!!.setAddress(value as String)
+            personToUpdate!!.address = (value as String)
 
         } else {
             //This is actually a custom field. (old)
-
-            personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode,
-                    personToUpdate!!.personUid, object : UmCallback<PersonCustomFieldValue> {
-                override fun onSuccess(result: PersonCustomFieldValue?) {
-                    if (result != null) {
-                        result.setFieldValue(value.toString())
-                        customFieldsToUpdate.add(result)
-                    } else {
-                        //Create the custom field
-                        val newCustomValue = PersonCustomFieldValue()
-                        newCustomValue.setPersonCustomFieldValuePersonUid(personToUpdate.personUid)
-                        newCustomValue.setPersonCustomFieldValuePersonCustomFieldUid(fieldcode)
-                        personCustomFieldValueDao.insert(newCustomValue)
-                        newCustomValue.setFieldValue(value.toString())
-                        customFieldsToUpdate.add(newCustomValue)
-                    }
+            GlobalScope.launch {
+                val result = personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode, personToUpdate!!.personUid)
+                if (result != null) {
+                    result.fieldValue = (value.toString())
+                    customFieldsToUpdate.add(result)
+                } else {
+                    //Create the custom field
+                    val newCustomValue = PersonCustomFieldValue()
+                    newCustomValue.personCustomFieldValuePersonUid = (personToUpdate.personUid)
+                    newCustomValue.personCustomFieldValuePersonCustomFieldUid = (fieldcode)
+                    personCustomFieldValueDao.insert(newCustomValue)
+                    newCustomValue.fieldValue = (value.toString())
+                    customFieldsToUpdate.add(newCustomValue)
                 }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            }
         }
 
-        return personToUpdate
+        return personToUpdate!!
 
     }
 
@@ -650,7 +515,7 @@ class PersonEditPresenter
      */
     fun handleClickAddNewClazz() {
         val args = HashMap<String, String>()
-        args.put(ARG_PERSON_UID, personUid)
+        args.put(ARG_PERSON_UID, personUid.toString())
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context)
     }
 
@@ -680,27 +545,21 @@ class PersonEditPresenter
 
             if (valueString != null && !valueString.isEmpty()) {
                 val finalValueString = valueString
-                customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(customFieldUid,
-                        personUid, object : UmCallback<CustomFieldValue> {
-                    override fun onSuccess(result: CustomFieldValue?) {
-                        val customFieldValue: CustomFieldValue?
-                        if (result == null) {
-                            customFieldValue = CustomFieldValue()
-                            customFieldValue.customFieldValueEntityUid = personUid
-                            customFieldValue.customFieldValueFieldUid = customFieldUid
-                            customFieldValue.customFieldValueValue = finalValueString
-                            customFieldValueDao!!.insert(customFieldValue)
-                        } else {
-                            customFieldValue = result
-                            customFieldValue.customFieldValueValue = finalValueString
-                            customFieldValueDao!!.update(customFieldValue)
-                        }
+                GlobalScope.launch {
+                    val result = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(customFieldUid, personUid)
+                    val customFieldValue: CustomFieldValue?
+                    if (result == null) {
+                        customFieldValue = CustomFieldValue()
+                        customFieldValue.customFieldValueEntityUid = personUid
+                        customFieldValue.customFieldValueFieldUid = customFieldUid
+                        customFieldValue.customFieldValueValue = finalValueString
+                        customFieldValueDao!!.insert(customFieldValue)
+                    } else {
+                        customFieldValue = result
+                        customFieldValue.customFieldValueValue = finalValueString
+                        customFieldValueDao!!.update(customFieldValue)
                     }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+                }
             }
 
         }
@@ -713,32 +572,19 @@ class PersonEditPresenter
      */
     fun handleClickDone() {
         mUpdatedPerson!!.active = true
-        personDao.updatePersonAsync(mUpdatedPerson, loggedInPersonUid, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
+        GlobalScope.launch {
+            val result = personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
 
-                //Update the custom fields
-                personCustomFieldValueDao.updateListAsync(customFieldsToUpdate,
-                        object : UmCallback<Int> {
-                            override fun onSuccess(result: Int?) {
+            //Update the custom fields
+            personCustomFieldValueDao.updateListAsync(customFieldsToUpdate)
+            //Start of feed generation
+            generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
 
-                                //Start of feed generation
-                                generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
+            //Close the activity.
+            view.finish()
 
-                                //Close the activity.
-                                view.finish()
-                            }
 
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
-
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
 
     }
 

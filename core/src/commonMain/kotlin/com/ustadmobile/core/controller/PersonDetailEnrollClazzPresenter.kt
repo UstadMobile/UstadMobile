@@ -1,18 +1,14 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.ClazzMemberDao
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView
+import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment
-
-
-
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * PersonDetailsEnrollClazz's Presenter - responsible for the logic of showing all classes a person
@@ -25,7 +21,7 @@ class PersonDetailEnrollClazzPresenter(context: Any,
 
     private var currentPersonUid = -1L
 
-    private var clazzWithEnrollmentUmProvider: UmProvider<ClazzWithEnrollment>? = null
+    private var clazzWithEnrollmentUmProvider: DataSource.Factory<Int, ClazzWithEnrollment>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -42,6 +38,7 @@ class PersonDetailEnrollClazzPresenter(context: Any,
 
         //Populate classes
         val clazzDao = repository.clazzDao
+
         clazzWithEnrollmentUmProvider = clazzDao.findAllClazzesWithEnrollmentByPersonUid(currentPersonUid)
 
         setClazzProviderToView()
@@ -78,30 +75,25 @@ class PersonDetailEnrollClazzPresenter(context: Any,
      */
     fun handleToggleClazzChecked(clazzUid: Long, personUid: Long, checked: Boolean) {
         val clazzMemberDao = repository.clazzMemberDao
-        clazzMemberDao.findByPersonUidAndClazzUidAsync(personUid, clazzUid, object : UmCallback<ClazzMember> {
-            override fun onSuccess(result: ClazzMember?) {
-                if (result != null) {
-                    result.clazzMemberActive = checked
-                    clazzMemberDao.update(result)
+        GlobalScope.launch {
+            val result = clazzMemberDao.findByPersonUidAndClazzUidAsync(personUid, clazzUid)
+            if (result != null) {
+                result.clazzMemberActive = checked
+                clazzMemberDao.update(result)
 
-                } else {
-                    if (checked) {
-                        //Create new
-                        val newClazzMember = ClazzMember()
-                        newClazzMember.clazzMemberClazzUid = clazzUid
-                        newClazzMember.clazzMemberPersonUid = personUid
-                        newClazzMember.clazzMemberActive = true
-                        clazzMemberDao.insert(newClazzMember)
-                    }
-                    //else Don't create. false anyway
-
+            } else {
+                if (checked) {
+                    //Create new
+                    val newClazzMember = ClazzMember()
+                    newClazzMember.clazzMemberClazzUid = clazzUid
+                    newClazzMember.clazzMemberPersonUid = personUid
+                    newClazzMember.clazzMemberActive = true
+                    clazzMemberDao.insert(newClazzMember)
                 }
-            }
+                //else Don't create. false anyway
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
             }
-        })
+        }
     }
 
 }

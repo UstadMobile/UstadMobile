@@ -1,18 +1,16 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
 import com.ustadmobile.core.view.SelectClazzFeaturesView
-import com.ustadmobile.lib.db.entities.Clazz
-
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ACTIVITY_ENABLED
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ATTENDANCE_ENABLED
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_CLAZZUID
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
+import com.ustadmobile.lib.db.entities.Clazz
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -40,7 +38,7 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
         clazzDao = repository.clazzDao
 
         if (arguments!!.containsKey(CLAZZ_FEATURE_CLAZZUID)) {
-            currentClazzUid = arguments!!.get(CLAZZ_FEATURE_CLAZZUID)
+            currentClazzUid = arguments!!.get(CLAZZ_FEATURE_CLAZZUID)!!.toLong()
         }
         if (arguments!!.containsKey(CLAZZ_FEATURE_ATTENDANCE_ENABLED)) {
             if (arguments!!.get(CLAZZ_FEATURE_ATTENDANCE_ENABLED) == "yes") {
@@ -60,27 +58,20 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
                 givenValues = true
             }
         }
-
     }
 
     fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if (currentClazzUid != 0L) {
-            clazzDao.findByUidAsync(currentClazzUid, object : UmCallback<Clazz> {
-                override fun onSuccess(result: Clazz?) {
-                    currentClazz = result
-                    if (givenValues) {
-                        view.updateFeaturesOnView(currentClazz!!)
-                    }
+            GlobalScope.launch {
+                val result = clazzDao.findByUidAsync(currentClazzUid)
+                currentClazz = result
+                if (givenValues) {
+                    view.updateFeaturesOnView(currentClazz!!)
                 }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            }
         }
-
     }
 
     fun updateAttendanceFeature(enabled: Boolean) {

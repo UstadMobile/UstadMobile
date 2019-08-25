@@ -1,30 +1,25 @@
 package com.ustadmobile.core.controller
 
+
+import androidx.paging.DataSource
+import com.ustadmobile.core.controller.CustomFieldListPresenter.Companion.ENTITY_TYPE_CLASS
+import com.ustadmobile.core.controller.CustomFieldListPresenter.Companion.ENTITY_TYPE_PERSON
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CustomFieldDao
+import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.db.UmLiveData
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-
-
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
+import com.ustadmobile.core.view.AddCustomFieldOptionDialogView.Companion.ARG_CUSTOM_FIELD_VALUE_OPTION_UID
 import com.ustadmobile.core.view.CustomFieldDetailView
-
-import com.ustadmobile.core.db.UmProvider
+import com.ustadmobile.core.view.CustomFieldDetailView.Companion.ARG_CUSTOM_FIELD_UID
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
-
-import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.lib.db.entities.Person
-
-import com.ustadmobile.core.controller.CustomFieldListPresenter.Companion.ENTITY_TYPE_CLASS
-import com.ustadmobile.core.controller.CustomFieldListPresenter.Companion.ENTITY_TYPE_PERSON
-import com.ustadmobile.core.view.AddCustomFieldOptionDialogView.Companion.ARG_CUSTOM_FIELD_VALUE_OPTION_UID
-import com.ustadmobile.core.view.CustomFieldDetailView.Companion.ARG_CUSTOM_FIELD_UID
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Presenter for CustomFieldDetail view
@@ -34,7 +29,7 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
                                  val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<CustomFieldDetailView>(context, arguments!!, view) {
 
-    private var optionProvider: UmProvider<CustomFieldValueOption>? = null
+    private var optionProvider: DataSource.Factory<Int, CustomFieldValueOption>? = null
     internal var repository: UmAppDatabase
 
     private val customFieldDao: CustomFieldDao
@@ -47,7 +42,6 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
     private var fieldTypePresets: Array<String>? = null
     private var entityTypePresets: Array<String>? = null
 
-
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -57,28 +51,21 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
         customFieldDao = repository.customFieldDao
 
         if (arguments!!.containsKey(ARG_CUSTOM_FIELD_UID)) {
-            customFieldUid = arguments!!.get(ARG_CUSTOM_FIELD_UID)
+            customFieldUid = arguments!!.get(ARG_CUSTOM_FIELD_UID)!!.toLong()
         }
-
 
     }
 
     fun initFromCustomField(uid: Long) {
         val currentFieldLive = customFieldDao.findByUidLive(uid)
-        currentFieldLive.observe(this@CustomFieldDetailPresenter,
-                UmObserver<CustomField> { this@CustomFieldDetailPresenter.handleCustomFieldChanged(it) })
-        customFieldDao.findByUidAsync(uid, object : UmCallback<CustomField> {
-            override fun onSuccess(result: CustomField?) {
-                updatedField = result
-                view.setCustomFieldOnView(updatedField!!)
+        currentFieldLive.observe(this, this::handleCustomFieldChanged)
+        GlobalScope.launch {
+            val result = customFieldDao.findByUidAsync(uid)
+            updatedField = result
+            view.setCustomFieldOnView(updatedField!!)
 
-                getSetOptionProvider()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+            getSetOptionProvider()
+        }
     }
 
     fun onCreate(savedState: Map<String, String>?) {
@@ -96,15 +83,10 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
             currentField!!.isCustomFieldActive = false
             currentField!!.customFieldEntityType = Clazz.TABLE_ID
             currentField!!.customFieldType = CustomField.FIELD_TYPE_TEXT
-            customFieldDao.insertAsync(currentField, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    initFromCustomField(result!!)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                val result = customFieldDao.insertAsync(currentField!!)
+                initFromCustomField(result!!)
+            }
         } else {
             initFromCustomField(customFieldUid)
         }
@@ -154,19 +136,21 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
     fun handleClickAddOption() {
 
         val args = HashMap<String, String>()
-        args.put(ARG_CUSTOM_FIELD_UID, updatedField!!.customFieldUid)
+        args.put(ARG_CUSTOM_FIELD_UID, updatedField!!.customFieldUid.toString())
         impl.go(AddCustomFieldOptionDialogView.VIEW_NAME, args, context)
     }
 
     fun handleClickOptionEdit(customFieldOptionUid: Long) {
         val args = HashMap<String, String>()
-        args.put(ARG_CUSTOM_FIELD_UID, updatedField!!.customFieldUid)
-        args.put(ARG_CUSTOM_FIELD_VALUE_OPTION_UID, customFieldOptionUid)
+        args.put(ARG_CUSTOM_FIELD_UID, updatedField!!.customFieldUid.toString())
+        args.put(ARG_CUSTOM_FIELD_VALUE_OPTION_UID, customFieldOptionUid.toString())
         impl.go(AddCustomFieldOptionDialogView.VIEW_NAME, args, context)
     }
 
     fun handleClickOptionDelete(customFieldOptionUid: Long) {
-        optionDao.deleteOption(customFieldOptionUid, null!!)
+        GlobalScope.launch {
+            optionDao.deleteOption(customFieldOptionUid)
+        }
     }
 
     private fun handleCustomFieldChanged(changedCustomField: CustomField?) {
@@ -186,21 +170,18 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     private fun getSetOptionProvider() {
-        optionProvider = optionDao.findAllOptionsForField(updatedField!!.customFieldUid)
-        view.setListProvider(optionProvider!!)
+        GlobalScope.launch {
+            optionProvider = optionDao.findAllOptionsForField(updatedField!!.customFieldUid)
+            view.setListProvider(optionProvider!!)
+        }
     }
 
     fun handleClickDone() {
         updatedField!!.isCustomFieldActive = true
-        customFieldDao.updateAsync(updatedField!!, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                view.finish()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            customFieldDao.updateAsync(updatedField!!)
+            view.finish()
+        }
     }
 
     companion object {

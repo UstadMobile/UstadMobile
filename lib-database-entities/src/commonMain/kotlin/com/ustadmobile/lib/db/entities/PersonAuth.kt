@@ -24,7 +24,7 @@ class PersonAuth() {
 
     var passwordHash: String? = null
 
-    private val personAuthStatus: Int = 0
+    var personAuthStatus: Int = 0
 
     @UmSyncLocalChangeSeqNum
     var personAuthLocalChangeSeqNum: Long = 0
@@ -38,5 +38,10 @@ class PersonAuth() {
     constructor(personAuthUid: Long, passwordHash: String) : this() {
         this.personAuthUid = personAuthUid
         this.passwordHash = passwordHash
+    }
+
+    companion object {
+        val STATUS_SENT = 1
+        val STATUS_NOT_SENT = 0
     }
 }

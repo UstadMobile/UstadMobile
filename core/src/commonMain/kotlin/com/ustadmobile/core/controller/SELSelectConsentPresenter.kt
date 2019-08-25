@@ -2,22 +2,10 @@ package com.ustadmobile.core.controller
 
 
 
-import com.ustadmobile.core.db.dao.SelQuestionDao
-import com.ustadmobile.core.db.dao.SelQuestionSetDao
-import com.ustadmobile.core.db.dao.SelQuestionSetResponseDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.view.SELQuestionView
-import com.ustadmobile.core.view.SELRecognitionView
-import com.ustadmobile.core.view.SELSelectConsentView
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.SelQuestion
-import com.ustadmobile.lib.db.entities.SelQuestionSet
-import com.ustadmobile.lib.db.entities.SelQuestionSetResponse
-
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_CLAZZMEMBER_UID
@@ -25,12 +13,18 @@ import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_INDEX_ID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_SET_RESPONSE_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_SET_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_UID
+import com.ustadmobile.core.view.SELQuestionView
 import com.ustadmobile.core.view.SELQuestionView.Companion.ARG_QUESTION_INDEX
 import com.ustadmobile.core.view.SELQuestionView.Companion.ARG_QUESTION_TEXT
 import com.ustadmobile.core.view.SELQuestionView.Companion.ARG_QUESTION_TOTAL
+import com.ustadmobile.core.view.SELRecognitionView
 import com.ustadmobile.core.view.SELRecognitionView.Companion.ARG_RECOGNITION_UID
+import com.ustadmobile.core.view.SELSelectConsentView
 import com.ustadmobile.core.view.SELSelectStudentView.Companion.ARG_DONE_CLAZZMEMBER_UIDS
 import com.ustadmobile.core.view.SELSelectStudentView.Companion.ARG_SELECTED_QUESTION_SET_UID
+import com.ustadmobile.lib.db.entities.SelQuestionSetResponse
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -56,21 +50,21 @@ SELSelectConsentView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.i
 
         //Get clazz uid and set them.
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
+            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
         //Get person uid
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
-            currentPersonUid = arguments!!.get(ARG_PERSON_UID)
+            currentPersonUid = arguments!!.get(ARG_PERSON_UID)!!.toLong()
         }
         //Get clazz member doing the sel
         if (arguments!!.containsKey(ARG_CLAZZMEMBER_UID)) {
-            currentClazzMemberUid = arguments!!.get(ARG_CLAZZMEMBER_UID)
+            currentClazzMemberUid = arguments!!.get(ARG_CLAZZMEMBER_UID)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_DONE_CLAZZMEMBER_UIDS)) {
-            doneClazzMemberUids = arguments!!.get(ARG_DONE_CLAZZMEMBER_UIDS)
+            doneClazzMemberUids = arguments!!.get(ARG_DONE_CLAZZMEMBER_UIDS)!!.toString()
         }
         if (arguments!!.containsKey(ARG_SELECTED_QUESTION_SET_UID)) {
-            currentQuestionSetUid = arguments!!.get(ARG_SELECTED_QUESTION_SET_UID)
+            currentQuestionSetUid = arguments!!.get(ARG_SELECTED_QUESTION_SET_UID)!!.toLong()
         }
 
     }
@@ -86,47 +80,41 @@ SELSelectConsentView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.i
      * @param consentGiven true if consent given. False if not.
      */
     fun handleClickPrimaryActionButton(consentGiven: Boolean) {
-        val selQuestionSetResponseDao = repository.getSocialNominationQuestionSetResponseDao()
+        val selQuestionSetResponseDao = repository.selQuestionSetResponseDao
 
         //Check selectedObject for consent given.
         if (consentGiven) {
+            GlobalScope.launch {
+                val listPassed = selQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
+                        currentClazzMemberUid)
 
-            selQuestionSetResponseDao.findAllPassedRecognitionByPersonUid(
-                    currentClazzMemberUid,
-                    object : UmCallback<List<SelQuestionSetResponse>> {
-                        override fun onSuccess(listPassed: List<SelQuestionSetResponse>?) {
+                if (listPassed.size > MIN_RECOGNITION_SUCCESSES) {
+                    //Go straight to the Questions
+                    goToNextQuestion()
 
-                            if (listPassed!!.size > MIN_RECOGNITION_SUCCESSES) {
-                                //Go straight to the Questions
-                                goToNextQuestion()
+                } else {
+                    //Go re-do/do the recognition activity.
+                    val newResponse = SelQuestionSetResponse()
+                    newResponse.selQuestionSetResponseStartTime = UMCalendarUtil
+                            .getDateInMilliPlusDays(0)
+                    newResponse.selQuestionSetResponseClazzMemberUid = currentClazzMemberUid
+                    newResponse.selQuestionSetResposeUid = selQuestionSetResponseDao.insert(newResponse)
 
-                            } else {
-                                //Go re-do/do the recognition activity.
-                                val newResponse = SelQuestionSetResponse()
-                                newResponse.selQuestionSetResponseStartTime = System.currentTimeMillis()
-                                newResponse.selQuestionSetResponseClazzMemberUid = currentClazzMemberUid
-                                newResponse.selQuestionSetResposeUid = selQuestionSetResponseDao.insert(newResponse)
+                    val args = HashMap<String, String>()
+                    args.put(ARG_RECOGNITION_UID, newResponse.selQuestionSetResposeUid.toString())
+                    args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+                    args.put(ARG_PERSON_UID, currentPersonUid.toString())
+                    args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid.toString())
+                    args.put(ARG_SELECTED_QUESTION_SET_UID, currentQuestionSetUid.toString())
+                    doneClazzMemberUids += ",$currentClazzMemberUid"
+                    args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids)
 
-                                val args = HashMap<String, String>()
-                                args.put(ARG_RECOGNITION_UID, newResponse.selQuestionSetResposeUid)
-                                args.put(ARG_CLAZZ_UID, currentClazzUid)
-                                args.put(ARG_PERSON_UID, currentPersonUid)
-                                args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid)
-                                args.put(ARG_SELECTED_QUESTION_SET_UID, currentQuestionSetUid)
-                                doneClazzMemberUids += ",$currentClazzMemberUid"
-                                args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids)
+                    view.finish()
 
-                                view.finish()
+                    impl.go(SELRecognitionView.VIEW_NAME, args, view.viewContext)
 
-                                impl.go(SELRecognitionView.VIEW_NAME, args, view.getContext())
-
-                            }
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+                }
+            }
         } else {
             //TODOne: Handle and think about what happens if the consent is NOT given.
             //UI: Maybe some toast?
@@ -140,82 +128,59 @@ SELSelectConsentView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.i
      */
     private fun goToNextQuestion() {
 
-        val selQuestionSetResponseDao = repository.getSocialNominationQuestionSetResponseDao()
-        val questionSetDao = repository
-                .getSocialNominationQuestionSetDao()
-        val questionDao = repository
-                .getSocialNominationQuestionDao()
+        val selQuestionSetResponseDao = repository.selQuestionSetResponseDao
+        val questionSetDao = repository.selQuestionSetDao
+        val questionDao = repository.selQuestionDao
 
-        //Loop through questions.
-        questionSetDao.findAllQuestionsAsync(object : UmCallback<List<SelQuestionSet>> {
-            override fun onSuccess(questionSets: List<SelQuestionSet>?) {
+        GlobalScope.launch {
+            //Loop through questions.
+            val questionSets = questionSetDao.findAllQuestionsAsync()
 
-                //Update: Sprint 5: Question Set will be selectable at the
-                // SELSelectStudentView screen.
-                //TODOne: Change this when we add more Question Sets to
-                // findNextQuestionSet like we did for findNextQuestion
-                for (questionSet in questionSets!!) {
+            //Update: Sprint 5: Question Set will be selectable at the
+            // SELSelectStudentView screen.
+            //TODOne: Change this when we add more Question Sets to
+            // findNextQuestionSet like we did for findNextQuestion
+            for (questionSet in questionSets!!) {
 
-                    //Find total number of questions as well.
-                    val totalSELQuestions = questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
-                            questionSet.selQuestionSetUid
-                    )
+                //Find total number of questions as well.
+                val totalSELQuestions = questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
+                        questionSet.selQuestionSetUid)
 
-                    questionDao.findNextQuestionByQuestionSetUidAsync(questionSet.selQuestionSetUid,
-                            BASE_INDEX_SEL_QUESTION, object : UmCallback<SelQuestion> {
-                        override fun onSuccess(nextQuestion: SelQuestion?) {
-                            if (nextQuestion != null) {
+                val nextQuestion = questionDao.findNextQuestionByQuestionSetUidAsync(
+                        questionSet.selQuestionSetUid,BASE_INDEX_SEL_QUESTION)
+                if (nextQuestion != null) {
 
-                                val newResponse = SelQuestionSetResponse()
-                                newResponse.selQuestionSetResponseStartTime = System.currentTimeMillis()
-                                newResponse.selQuestionSetResponseSelQuestionSetUid = questionSet.selQuestionSetUid
-                                newResponse.selQuestionSetResponseClazzMemberUid = currentClazzMemberUid
+                    val newResponse = SelQuestionSetResponse()
+                    newResponse.selQuestionSetResponseStartTime = UMCalendarUtil
+                            .getDateInMilliPlusDays(0)
+                    newResponse.selQuestionSetResponseSelQuestionSetUid = questionSet.selQuestionSetUid
+                    newResponse.selQuestionSetResponseClazzMemberUid = currentClazzMemberUid
 
-                                selQuestionSetResponseDao.insertAsync(newResponse, object : UmCallback<Long> {
-                                    override fun onSuccess(questionSetResponseUid: Long?) {
+                    val questionSetResponseUid = selQuestionSetResponseDao.insertAsync(newResponse)
+                    view.finish()
 
-                                        view.finish()
+                    //Create arguments
+                    val args = HashMap<String, String>()
+                    args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+                    args.put(ARG_PERSON_UID, currentPersonUid.toString())
+                    args.put(ARG_QUESTION_SET_UID, questionSet.selQuestionSetUid.toString())
+                    args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid.toString())
+                    args.put(ARG_QUESTION_UID, nextQuestion.selQuestionUid.toString())
+                    args.put(ARG_QUESTION_INDEX_ID, nextQuestion.questionIndex.toString())
+                    args.put(ARG_QUESTION_SET_RESPONSE_UID, questionSetResponseUid.toString())
+                    args.put(ARG_QUESTION_TEXT, nextQuestion.questionText.toString())
+                    args.put(ARG_QUESTION_INDEX, nextQuestion.questionIndex.toString())
+                    args.put(ARG_QUESTION_TOTAL, totalSELQuestions.toString())
 
-                                        //Create arguments
-                                        val args = HashMap<String, String>()
-                                        args.put(ARG_CLAZZ_UID, currentClazzUid)
-                                        args.put(ARG_PERSON_UID, currentPersonUid)
-                                        args.put(ARG_QUESTION_SET_UID, questionSet.selQuestionSetUid)
-                                        args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid)
-                                        args.put(ARG_QUESTION_UID, nextQuestion.selQuestionUid)
-                                        args.put(ARG_QUESTION_INDEX_ID, nextQuestion.questionIndex)
-                                        args.put(ARG_QUESTION_SET_RESPONSE_UID, questionSetResponseUid)
-                                        args.put(ARG_QUESTION_TEXT, nextQuestion.questionText)
-                                        args.put(ARG_QUESTION_INDEX, nextQuestion.questionIndex)
-                                        args.put(ARG_QUESTION_TOTAL, totalSELQuestions)
+                    impl.go(SELQuestionView.VIEW_NAME, args, view.viewContext)
 
-                                        impl.go(SELQuestionView.VIEW_NAME, args, view.getContext())
 
-                                    }
-
-                                    override fun onFailure(exception: Throwable?) {
-                                        print(exception!!.message)
-                                    }
-                                })
-
-                            } else {
-                                //End the SEL activities properly.
-                                view.finish()
-                            }
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+                } else {
+                    //End the SEL activities properly.
+                    view.finish()
                 }
-
             }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
     }
 
     companion object {

@@ -1,21 +1,23 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.view.ReportMasterView
-import com.ustadmobile.core.xlsx.UmSheet
-import com.ustadmobile.core.xlsx.UmXLSX
-import com.ustadmobile.core.xlsx.ZipUtil
-import com.ustadmobile.lib.db.entities.ReportMasterItem
-
 import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_GENDER_DISAGGREGATE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATION_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
+import com.ustadmobile.core.view.ReportMasterView
+import com.ustadmobile.core.xlsx.UmSheet
+import com.ustadmobile.core.xlsx.UmXLSX
+import com.ustadmobile.core.xlsx.ZipUtil
+import com.ustadmobile.lib.db.entities.ReportMasterItem
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
+import kotlinx.io.IOException
 
 class ReportMasterPresenter(context: Any, arguments: Map<String, String>?, view:
 ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, view) {
@@ -38,10 +40,10 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
         locationList = ArrayList()
 
         if (arguments!!.containsKey(ARG_FROM_DATE)) {
-            fromDate = arguments!!.get(ARG_FROM_DATE)
+            fromDate = arguments!!.get(ARG_FROM_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_TO_DATE)) {
-            toDate = arguments!!.get(ARG_TO_DATE)
+            toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
 
         if (arguments!!.containsKey(ARG_LOCATION_LIST)) {
@@ -54,7 +56,7 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
         }
 
         if (arguments!!.containsKey(ARG_GENDER_DISAGGREGATE)) {
-            genderDisaggregated = arguments!!.get(ARG_GENDER_DISAGGREGATE)
+            genderDisaggregated = arguments!!.get(ARG_GENDER_DISAGGREGATE)!!.toBoolean()
         }
 
     }
@@ -71,20 +73,14 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
      */
     private fun getDataAndUpdateTable() {
 
-        val currentTime = System.currentTimeMillis()
+        val currentTime = UMCalendarUtil.getDateInMilliPlusDays(0)
 
         val attendanceRecordDao = repository.clazzLogAttendanceRecordDao
 
-        attendanceRecordDao.findMasterReportDataForAllAsync(fromDate, toDate,
-                object : UmCallback<List<ReportMasterItem>> {
-                    override fun onSuccess(result: List<ReportMasterItem>?) {
-                        view.runOnUiThread({ view.updateTables(result!!) })
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-
-                    }
-                })
+        GlobalScope.launch {
+            val result = attendanceRecordDao.findMasterReportDataForAllAsync(fromDate, toDate)
+            view.runOnUiThread(Runnable{ view.updateTables(result!!) })
+        }
 
 
     }
@@ -132,7 +128,7 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
             view.generateXLSXReport(xlsxReportPath)
 
         } catch (e: IOException) {
-            e.printStackTrace()
+            print(e.message)
         }
 
     }

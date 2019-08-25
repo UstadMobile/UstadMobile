@@ -8,7 +8,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
-import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch

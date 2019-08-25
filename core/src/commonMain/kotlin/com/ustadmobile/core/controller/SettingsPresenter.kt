@@ -1,15 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AuditLogSelectionView
-import com.ustadmobile.core.view.CustomFieldListView
-import com.ustadmobile.core.view.GroupListView
-import com.ustadmobile.core.view.HolidayCalendarListView
-import com.ustadmobile.core.view.LocationListView
-import com.ustadmobile.core.view.RoleAssignmentListView
-import com.ustadmobile.core.view.RoleListView
-import com.ustadmobile.core.view.SELQuestionSetsView
-import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.core.view.*
 
 class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: SettingsView,
                         val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :

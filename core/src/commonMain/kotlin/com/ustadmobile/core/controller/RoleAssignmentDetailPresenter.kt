@@ -1,24 +1,14 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.EntityRoleDao
-import com.ustadmobile.core.db.dao.LocationDao
-import com.ustadmobile.core.db.dao.PersonDao
-import com.ustadmobile.core.db.dao.PersonGroupDao
-import com.ustadmobile.core.db.dao.RoleDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.RoleAssignmentDetailView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.EntityRole
-import com.ustadmobile.lib.db.entities.Location
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonGroup
-import com.ustadmobile.lib.db.entities.Role
-
 import com.ustadmobile.core.view.RoleAssignmentDetailView.Companion.ENTITYROLE_UID
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -34,11 +24,11 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
     private var originalEntityRole: EntityRole? = null
     private var updatedEntityRole: EntityRole? = null
 
-    private var groupUmLiveData: UmLiveData<List<PersonGroup>>? = null
-    private var roleUmLiveData: UmLiveData<List<Role>>? = null
-    private var locationUmLiveData: UmLiveData<List<Location>>? = null
-    private var clazzUmLiveData: UmLiveData<List<Clazz>>? = null
-    private var personUmLiveData: UmLiveData<List<Person>>? = null
+    private var groupUmLiveData: DoorLiveData<List<PersonGroup>>? = null
+    private var roleUmLiveData: DoorLiveData<List<Role>>? = null
+    private var locationUmLiveData: DoorLiveData<List<Location>>? = null
+    private var clazzUmLiveData: DoorLiveData<List<Clazz>>? = null
+    private var personUmLiveData: DoorLiveData<List<Person>>? = null
 
     private var groupIdToPosition: HashMap<Long, Int>? = null
     private val groupPositionToId: HashMap<Int, Long>
@@ -86,8 +76,8 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         peopleIdToPosition = HashMap()
         peoplePositionToId = HashMap()
 
-        if (arguments.containsKey(ENTITYROLE_UID)) {
-            currentEntityRoleUid = arguments!!.get(ENTITYROLE_UID)
+        if (arguments!!.containsKey(ENTITYROLE_UID)) {
+            currentEntityRoleUid = arguments!!.get(ENTITYROLE_UID)!!.toLong()
         }
     }
 
@@ -96,13 +86,11 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         if (individual) {
             //Update group
             groupUmLiveData = groupDao.findAllActivePersonPersonGroupLive()
-            groupUmLiveData!!.observe(this@RoleAssignmentDetailPresenter,
-                    UmObserver<List<PersonGroup>> { this@RoleAssignmentDetailPresenter.handleAllGroupsChanged(it) })
+            groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
         } else {
             //Update group
             groupUmLiveData = groupDao.findAllActiveGroupPersonGroupsLive()
-            groupUmLiveData!!.observe(this@RoleAssignmentDetailPresenter,
-                    UmObserver<List<PersonGroup>> { this@RoleAssignmentDetailPresenter.handleAllGroupsChanged(it) })
+            groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
         }
     }
 
@@ -112,15 +100,11 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         if (currentEntityRoleUid == 0L) {
             val newEntityRole = EntityRole()
             newEntityRole.erActive = false
-            entityRoleDao.insertAsync(newEntityRole, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    initFromEntityRole(result!!)
-                }
+            GlobalScope.launch {
+                val result = entityRoleDao.insertAsync(newEntityRole)
+                initFromEntityRole(result!!)
+            }
 
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
         } else {
             initFromEntityRole(currentEntityRoleUid)
         }
@@ -132,18 +116,15 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         when (tableId) {
             Clazz.TABLE_ID -> {
                 clazzUmLiveData = clazzDao.findAllLive()
-                clazzUmLiveData!!.observe(this@RoleAssignmentDetailPresenter,
-                        UmObserver<List<Clazz>> { this@RoleAssignmentDetailPresenter.handleAllClazzChanged(it) })
+                clazzUmLiveData!!.observe(this, this::handleAllClazzChanged)
             }
             Location.TABLE_ID -> {
                 locationUmLiveData = locationDao.findAllActiveLocationsLive()
-                locationUmLiveData!!.observe(this@RoleAssignmentDetailPresenter,
-                        UmObserver<List<Location>> { this@RoleAssignmentDetailPresenter.handleAllLocationsChanged(it) })
+                locationUmLiveData!!.observe(this, this::handleAllLocationsChanged)
             }
             Person.TABLE_ID -> {
                 personUmLiveData = personDao.findAllActiveLive()
-                personUmLiveData!!.observe(this@RoleAssignmentDetailPresenter,
-                        UmObserver<List<Person>> { this@RoleAssignmentDetailPresenter.handleAllPersonChanged(it) })
+                personUmLiveData!!.observe(this, this::handleAllPersonChanged)
             }
         }
 
@@ -153,70 +134,57 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         this.currentEntityRoleUid = uid
 
         val entityRoleLiveData = entityRoleDao.findByUidLive(currentEntityRoleUid)
-        entityRoleLiveData.observe(this@RoleAssignmentDetailPresenter,
-                UmObserver<EntityRole> { this@RoleAssignmentDetailPresenter.handleEntityRoleChanged(it) })
+        var thisP = this
+        entityRoleLiveData.observe(this, this::handleEntityRoleChanged)
 
-        entityRoleDao.findByUidAsync(uid, object : UmCallback<EntityRole> {
-            override fun onSuccess(result: EntityRole?) {
-                updatedEntityRole = result
+        GlobalScope.launch {
+            val result = entityRoleDao.findByUidAsync(uid)
+            updatedEntityRole = result
 
-                //Update roles
-                roleUmLiveData = roleDao.findAllActiveRolesLive()
-                roleUmLiveData!!.observe(this@RoleAssignmentDetailPresenter,
-                        UmObserver<List<Role>> { this@RoleAssignmentDetailPresenter.handleAllRolesChanged(it) })
+            //Update roles
+            roleUmLiveData = roleDao.findAllActiveRolesLive()
+            roleUmLiveData!!.observe(thisP, thisP::handleAllRolesChanged)
 
-                val groupUid = updatedEntityRole!!.erGroupUid
-                groupDao.findByUidAsync(groupUid, object : UmCallback<PersonGroup> {
-                    override fun onSuccess(result: PersonGroup?) {
-                        if (result != null && result.groupPersonUid != 0L) {
-                            view.individualClicked()
-                            updateGroupList(true)
-                        } else {
-                            view.groupClicked()
-                            updateGroupList(false)
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
-                val roleUid = updatedEntityRole!!.erRoleUid
-                var groupSelected = 0
-                var roleSelected = 0
-                if (groupUid != 0L && roleUid != 0L && groupIdToPosition != null
-                        && roleIdToPosition != null) {
-                    if (groupIdToPosition!!.containsKey(groupUid))
-                        groupSelected = groupIdToPosition!![groupUid]!!
-                    if (roleIdToPosition!!.containsKey(roleUid))
-                        roleSelected = roleIdToPosition!![roleUid]!!
-                }
-                //Update scope and assignee
-                view.updateRoleAssignmentOnView(updatedEntityRole!!, groupSelected,
-                        roleSelected)
-
+            val groupUid = updatedEntityRole!!.erGroupUid
+            val result2 = groupDao.findByUidAsync(groupUid)
+            if (result2 != null && result2.groupPersonUid != 0L) {
+                view.individualClicked()
+                updateGroupList(true)
+            } else {
+                view.groupClicked()
+                updateGroupList(false)
             }
 
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
+            val roleUid = updatedEntityRole!!.erRoleUid
+            var groupSelected = 0
+            var roleSelected = 0
+            if (groupUid != 0L && roleUid != 0L && groupIdToPosition != null
+                    && roleIdToPosition != null) {
+                if (groupIdToPosition!!.containsKey(groupUid))
+                    groupSelected = groupIdToPosition!![groupUid]!!
+                if (roleIdToPosition!!.containsKey(roleUid))
+                    roleSelected = roleIdToPosition!![roleUid]!!
             }
-        })
+            //Update scope and assignee
+            view.updateRoleAssignmentOnView(updatedEntityRole!!, groupSelected,
+                    roleSelected)
+        }
     }
 
 
-    private fun handleAllGroupsChanged(groups: List<PersonGroup>) {
+    private fun handleAllGroupsChanged(groups: List<PersonGroup>?) {
         var selectedPosition = 0
 
         val entityList = ArrayList<String>()
         groupIdToPosition = HashMap()
         var posIter = 0
-        for (everyEntity in groups) {
-            entityList.add(everyEntity.groupName)
+        for (everyEntity in groups!!) {
+            entityList.add(everyEntity.groupName!!)
             groupIdToPosition!![everyEntity.groupUid] = posIter
             groupPositionToId[posIter] = everyEntity.groupUid
             posIter++
         }
-        groupPresets = arrayOfNulls(entityList.size)
+        //groupPresets = arrayOfNulls(entityList.size)
         groupPresets = entityList.toTypedArray()
 
         if (originalEntityRole == null) {
@@ -232,19 +200,19 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         view.setGroupPresets(groupPresets!!, selectedPosition)
     }
 
-    private fun handleAllRolesChanged(roles: List<Role>) {
+    private fun handleAllRolesChanged(roles: List<Role>?) {
         var selectedPosition = 0
 
         val entityList = ArrayList<String>()
         roleIdToPosition = HashMap()
         var posIter = 0
-        for (everyEntity in roles) {
-            entityList.add(everyEntity.roleName)
+        for (everyEntity in roles!!) {
+            entityList.add(everyEntity.roleName!!)
             roleIdToPosition!![everyEntity.roleUid] = posIter
             rolePositionToId[posIter] = everyEntity.roleUid
             posIter++
         }
-        rolePresets = arrayOfNulls(entityList.size)
+        //rolePresets = arrayOfNulls(entityList.size)
         rolePresets = entityList.toTypedArray()
 
         if (originalEntityRole == null) {
@@ -264,19 +232,19 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         this.scopePresets = scopePresets
     }
 
-    private fun handleAllLocationsChanged(locations: List<Location>) {
+    private fun handleAllLocationsChanged(locations: List<Location>?) {
         var selectedPosition = 0
 
         val entityList = ArrayList<String>()
         locationIdToPosition = HashMap()
         var posIter = 0
-        for (everyEntity in locations) {
-            entityList.add(everyEntity.title)
+        for (everyEntity in locations!!) {
+            entityList.add(everyEntity.title!!)
             locationIdToPosition!![everyEntity.locationUid] = posIter
             locationPositionToId[posIter] = everyEntity.locationUid
             posIter++
         }
-        assigneePresets = arrayOfNulls(entityList.size)
+        //assigneePresets = arrayOfNulls(entityList.size)
         assigneePresets = entityList.toTypedArray()
         if (originalEntityRole == null) {
             originalEntityRole = EntityRole()
@@ -291,19 +259,19 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         view.setAssigneePresets(assigneePresets!!, selectedPosition)
     }
 
-    private fun handleAllClazzChanged(clazzes: List<Clazz>) {
+    private fun handleAllClazzChanged(clazzes: List<Clazz>?) {
         var selectedPosition = 0
 
         val entityList = ArrayList<String>()
         clazzIdToPosition = HashMap()
         var posIter = 0
-        for (everyEntity in clazzes) {
-            entityList.add(everyEntity.clazzName)
+        for (everyEntity in clazzes!!) {
+            entityList.add(everyEntity.clazzName!!)
             clazzIdToPosition!![everyEntity.clazzUid] = posIter
             clazzPositionToId[posIter] = everyEntity.clazzUid
             posIter++
         }
-        assigneePresets = arrayOfNulls(entityList.size)
+        //assigneePresets = arrayOfNulls(entityList.size)
         assigneePresets = entityList.toTypedArray()
 
         if (originalEntityRole == null) {
@@ -319,19 +287,19 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         view.setAssigneePresets(assigneePresets!!, selectedPosition)
     }
 
-    private fun handleAllPersonChanged(people: List<Person>) {
+    private fun handleAllPersonChanged(people: List<Person>?) {
         var selectedPosition = 0
 
         val entityList = ArrayList<String>()
         peopleIdToPosition = HashMap()
         var posIter = 0
-        for (everyEntity in people) {
+        for (everyEntity in people!!) {
             entityList.add(everyEntity.firstNames + " " + everyEntity.lastName)
             peopleIdToPosition!![everyEntity.personUid] = posIter
             peoplePositionToId[posIter] = everyEntity.personUid
             posIter++
         }
-        assigneePresets = arrayOfNulls(entityList.size)
+        //assigneePresets = arrayOfNulls(entityList.size)
         assigneePresets = entityList.toTypedArray()
 
         if (originalEntityRole == null) {
@@ -351,12 +319,12 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
     fun updateGroup(position: Int) {
 
         if (groupPositionToId.containsKey(position))
-            updatedEntityRole!!.erGroupUid = groupPositionToId[position]
+            updatedEntityRole!!.erGroupUid = groupPositionToId[position]!!
     }
 
     fun updateRole(position: Int) {
         if (rolePositionToId.containsKey(position))
-            updatedEntityRole!!.erRoleUid = rolePositionToId[position]
+            updatedEntityRole!!.erRoleUid = rolePositionToId[position]!!
     }
 
     fun updateScope(position: Int) {
@@ -393,7 +361,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         }
     }
 
-    private fun handleEntityRoleChanged(changedEntityRole: EntityRole) {
+    private fun handleEntityRoleChanged(changedEntityRole: EntityRole?) {
         //set the og person value
         if (originalEntityRole == null)
             originalEntityRole = changedEntityRole
@@ -409,15 +377,9 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
 
     fun handleClickDone() {
         updatedEntityRole!!.erActive = true
-        entityRoleDao.updateAsync(updatedEntityRole!!, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                view.finish()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
-
+        GlobalScope.launch {
+            entityRoleDao.updateAsync(updatedEntityRole!!)
+            view.finish()
+        }
     }
 }

@@ -1,20 +1,18 @@
 package com.ustadmobile.core.controller
 
+
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-
-
 import com.ustadmobile.core.view.PersonAuthDetailView
+import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
-
-import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
+import com.ustadmobile.lib.util.encryptPassword
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -40,7 +38,7 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
         personDao = repository.personDao
         personAuthDao = repository.personAuthDao
         if (arguments!!.containsKey(ARG_PERSONAUTH_PERSONUID)) {
-            currentPersonUid = arguments!!.get(ARG_PERSONAUTH_PERSONUID)
+            currentPersonUid = arguments!!.get(ARG_PERSONAUTH_PERSONUID)!!.toLong()
         }
 
     }
@@ -51,34 +49,23 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
         if (currentPersonUid != 0L) {
-            personDao.findByUidAsync(currentPersonUid, object : UmCallback<Person> {
-                override fun onSuccess(result: Person?) {
-                    currentPerson = result
-                    usernameSet = currentPerson!!.username
-                    if (usernameSet != null) {
-                        view.updateUsername(usernameSet!!)
-                    }
-
-                    personAuthDao.findByUidAsync(currentPersonUid, object : UmCallback<PersonAuth> {
-                        override fun onSuccess(result: PersonAuth?) {
-                            currentPersonAuth = result
-                            if (result == null) {
-                                currentPersonAuth = PersonAuth()
-                                currentPersonAuth!!.personAuthUid = currentPersonUid
-                                currentPersonAuth!!.setPersonAuthStatus(PersonAuth.STATUS_NOT_SENT)
-                            }
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            print(exception!!.message)
-                        }
-                    })
+            GlobalScope.launch {
+                val result = personDao.findByUidAsync(currentPersonUid)
+                currentPerson = result
+                usernameSet = currentPerson!!.username
+                if (usernameSet != null) {
+                    view.updateUsername(usernameSet!!)
                 }
 
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
+                val result2 = personAuthDao.findByUidAsync(currentPersonUid)
+                currentPersonAuth = result2
+                if (result == null) {
+                    currentPersonAuth = PersonAuth()
+                    currentPersonAuth!!.personAuthUid = currentPersonUid
+                    currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
                 }
-            })
+
+            }
         }
     }
 
@@ -91,39 +78,25 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
                 return
             }
             currentPerson!!.username = usernameSet
-            currentPersonAuth!!.passwordHash = PersonAuthDao.encryptPassword(passwordSet)
-            currentPersonAuth!!.setPersonAuthStatus(PersonAuth.STATUS_NOT_SENT)
-            personDao.updateAsync(currentPerson, null)
 
-            personAuthDao.updateAsync(currentPersonAuth!!, object : UmCallback<Int> {
-                override fun onSuccess(result: Int?) {
-                    personAuthDao.resetPassword(currentPersonUid, passwordSet,
-                            loggedInPersonUid, object : UmCallback<Int> {
-                        override fun onSuccess(result: Int?) {
-                            personAuthDao.updateAsync(currentPersonAuth!!, object : UmCallback<Int> {
-                                override fun onSuccess(result: Int?) {
-                                    view.finish()
-                                }
+            currentPersonAuth!!.passwordHash = encryptPassword(passwordSet!!)
+            currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
+            GlobalScope.launch {
+                personDao.updateAsync(currentPerson!!)
 
-                                override fun onFailure(exception: Throwable?) {
-                                    print(exception!!.message)
-                                    view.sendMessage(MessageID.unable_to_update_password)
-                                }
-                            })
-                        }
 
-                        override fun onFailure(exception: Throwable?) {
-                            view.sendMessage(MessageID.unable_to_update_password)
-                        }
-                    })
-                }
+                //TODO: KMP: Reset password when Ready ?
+                val result = personAuthDao.updateAsync(currentPersonAuth!!)
+                personAuthDao.resetPassword(currentPersonUid, passwordSet, loggedInPersonUid)
+                personAuthDao.updateAsync(currentPersonAuth!!)
+                view.finish()
 
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                    view.sendMessage(MessageID.unable_to_update_password)
-                }
-            })
+
+//                override fun onFailure(exception: Throwable?) {
+//                    print(exception!!.message)
+//                    view.sendMessage(MessageID.unable_to_update_password)
+//                }
+            }
         }
-
     }
 }

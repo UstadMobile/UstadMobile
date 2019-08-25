@@ -1,39 +1,32 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzMemberDao
-import com.ustadmobile.core.db.dao.SelQuestionDao
-import com.ustadmobile.core.db.dao.SelQuestionResponseDao
-import com.ustadmobile.core.db.dao.SelQuestionResponseNominationDao
-import com.ustadmobile.core.db.dao.SelQuestionSetResponseDao
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SELEditView
-import com.ustadmobile.core.view.SELQuestionView
-import com.ustadmobile.core.view.SELSelectStudentView
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.PersonWithPersonPicture
-import com.ustadmobile.lib.db.entities.SelQuestion
-import com.ustadmobile.lib.db.entities.SelQuestionResponse
-import com.ustadmobile.lib.db.entities.SelQuestionResponseNomination
-import com.ustadmobile.lib.db.entities.SelQuestionSetResponse
-
-
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.SELEditView
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_CLAZZMEMBER_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_INDEX_ID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_RESPONSE_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_SET_RESPONSE_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_SET_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_UID
+import com.ustadmobile.core.view.SELQuestionView
 import com.ustadmobile.core.view.SELQuestionView.Companion.ARG_QUESTION_INDEX
 import com.ustadmobile.core.view.SELQuestionView.Companion.ARG_QUESTION_TEXT
 import com.ustadmobile.core.view.SELQuestionView.Companion.ARG_QUESTION_TOTAL
+import com.ustadmobile.core.view.SELSelectStudentView
 import com.ustadmobile.core.view.SELSelectStudentView.Companion.ARG_DONE_CLAZZMEMBER_UIDS
 import com.ustadmobile.core.view.SELSelectStudentView.Companion.ARG_STUDENT_DONE
+import com.ustadmobile.lib.db.entities.PersonWithPersonPicture
+import com.ustadmobile.lib.db.entities.SelQuestionResponse
+import com.ustadmobile.lib.db.entities.SelQuestionResponseNomination
+import com.ustadmobile.lib.db.entities.SelQuestionSetResponse
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -58,37 +51,37 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     //Provider
-    private var providerList: UmProvider<PersonWithPersonPicture>? = null
+    private var providerList: DataSource.Factory<Int, PersonWithPersonPicture>? = null
 
     init {
 
         //Get current class and store it.
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
+            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
         //Get current person and store it.
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
-            currentPersonUid = arguments!!.get(ARG_PERSON_UID)
+            currentPersonUid = arguments!!.get(ARG_PERSON_UID)!!.toLong()
         }
         //Get current clazz member  and store it.
         if (arguments!!.containsKey(ARG_CLAZZMEMBER_UID)) {
-            currentClazzMemberUid = arguments!!.get(ARG_CLAZZMEMBER_UID)
+            currentClazzMemberUid = arguments!!.get(ARG_CLAZZMEMBER_UID)!!.toLong()
         }
         //Get current question set and store it.
         if (arguments!!.containsKey(ARG_QUESTION_SET_UID)) {
-            currentQuestionSetUid = arguments!!.get(ARG_QUESTION_SET_UID)
+            currentQuestionSetUid = arguments!!.get(ARG_QUESTION_SET_UID)!!.toLong()
         }
         //Get current question index and store it.
         if (arguments!!.containsKey(ARG_QUESTION_INDEX_ID)) {
-            currentQuestionIndexId = arguments!!.get(ARG_QUESTION_INDEX_ID)
+            currentQuestionIndexId = arguments!!.get(ARG_QUESTION_INDEX_ID)!!.toInt()
         }
         //Get current question set response uid and store it.
         if (arguments!!.containsKey(ARG_QUESTION_SET_RESPONSE_UID)) {
-            currentQuestionSetResponseUid = arguments!!.get(ARG_QUESTION_SET_RESPONSE_UID)
+            currentQuestionSetResponseUid = arguments!!.get(ARG_QUESTION_SET_RESPONSE_UID)!!.toLong()
         }
         //Get current question response uid and store it.
         if (arguments!!.containsKey(ARG_QUESTION_RESPONSE_UID)) {
-            currentQuestionResponseUid = arguments!!.get(ARG_QUESTION_RESPONSE_UID)
+            currentQuestionResponseUid = arguments!!.get(ARG_QUESTION_RESPONSE_UID)!!.toLong()
         }
         //Get current question text and update the heading.
         if (arguments!!.containsKey(ARG_QUESTION_TEXT)) {
@@ -143,110 +136,88 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
      *
      */
     fun handleClickPrimaryActionButton() {
-        val questionDao = repository.getSocialNominationQuestionDao()
-        val questionSetResponseDao = repository.getSocialNominationQuestionSetResponseDao()
-        val questionResponseDao = repository.getSocialNominationQuestionResponseDao()
+        val questionDao = repository.selQuestionDao
+        val questionSetResponseDao = repository.selQuestionSetResponseDao
+        val questionResponseDao = repository.selQuestionResponseDao
 
 
         //Before we go to the next one. We need to end the current one.
-        questionSetResponseDao.findByUidAsync(currentQuestionSetResponseUid,
-                object : UmCallback<SelQuestionSetResponse> {
-                    override fun onSuccess(currentQuestionSetResponse: SelQuestionSetResponse?) {
-                        currentQuestionSetResponse!!.selQuestionSetResponseFinishTime = System.currentTimeMillis()
+        GlobalScope.launch {
+            val currentQuestionSetResponse =
+                    questionSetResponseDao.findByUidAsync(currentQuestionSetResponseUid)
+            currentQuestionSetResponse!!.selQuestionSetResponseFinishTime =
+                    UMCalendarUtil.getDateInMilliPlusDays(0)
 
-                        questionSetResponseDao.updateAsync(currentQuestionSetResponse, object : UmCallback<Int> {
-                            override fun onSuccess(questionSetResponseUpdatedResult: Int?) {
+            val questionSetResponseUpdatedResult = questionSetResponseDao.updateAsync(currentQuestionSetResponse)
 
-                                //Find total number of questions as well.
-                                val totalSELQuestions = questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
-                                        currentQuestionSetResponse.selQuestionSetResponseSelQuestionSetUid
-                                )
+            //Find total number of questions as well.
+            val totalSELQuestions = questionDao.findTotalNumberOfActiveQuestionsInAQuestionSet(
+                    currentQuestionSetResponse.selQuestionSetResponseSelQuestionSetUid
+            )
 
 
-                                questionDao.findNextQuestionByQuestionSetUidAsync(currentQuestionSetUid,
-                                        currentQuestionIndexId, object : UmCallback<SelQuestion> {
-                                    override fun onSuccess(nextQuestion: SelQuestion?) {
+            val nextQuestion = questionDao.findNextQuestionByQuestionSetUidAsync(currentQuestionSetUid,
+                    currentQuestionIndexId)
 
-                                        if (nextQuestion != null) {
+            if (nextQuestion != null) {
 
-                                            val newResponse = SelQuestionSetResponse()
-                                            newResponse.selQuestionSetResponseStartTime = System.currentTimeMillis()
-                                            newResponse.selQuestionSetResponseSelQuestionSetUid = currentQuestionSetUid
-                                            newResponse.selQuestionSetResponseClazzMemberUid = currentClazzMemberUid
+                val newResponse = SelQuestionSetResponse()
+                newResponse.selQuestionSetResponseStartTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+                newResponse.selQuestionSetResponseSelQuestionSetUid = currentQuestionSetUid
+                newResponse.selQuestionSetResponseClazzMemberUid = currentClazzMemberUid
 
-                                            questionSetResponseDao.insertAsync(newResponse, object : UmCallback<Long> {
-                                                override fun onSuccess(result: Long?) {
+                val result = questionSetResponseDao.insertAsync(newResponse)
 
-                                                    view.finish()
+                view.finish()
 
-                                                    //Make a question response for the next Question for
-                                                    // this Response-Set instance.
-                                                    val questionResponse = SelQuestionResponse()
-                                                    questionResponse
-                                                            .selQuestionResponseSelQuestionSetResponseUid = currentQuestionSetResponseUid
-                                                    questionResponse
-                                                            .selQuestionResponseSelQuestionUid = nextQuestion.selQuestionUid
-                                                    questionResponse
-                                                            .selQuestionResponseUid = questionResponseDao.insert(questionResponse)
+                //Make a question response for the next Question for
+                // this Response-Set instance.
+                val questionResponse = SelQuestionResponse()
+                questionResponse
+                        .selQuestionResponseSelQuestionSetResponseUid = currentQuestionSetResponseUid
+                questionResponse
+                        .selQuestionResponseSelQuestionUid = nextQuestion.selQuestionUid
+                questionResponse
+                        .selQuestionResponseUid = questionResponseDao.insert(questionResponse)
 
-                                                    //Create arguments
-                                                    val args = HashMap<String, String>()
-                                                    args.put(ARG_CLAZZ_UID, currentClazzUid)
-                                                    args.put(ARG_PERSON_UID, currentPersonUid)
-                                                    args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid)
-                                                    args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid)
-                                                    args.put(ARG_QUESTION_UID, nextQuestion.selQuestionUid)
-                                                    args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid)
-                                                    args.put(ARG_QUESTION_INDEX_ID, nextQuestion.questionIndex)
-                                                    args.put(ARG_QUESTION_TEXT, nextQuestion.questionText)
-                                                    args.put(ARG_QUESTION_INDEX, nextQuestion.questionIndex)
-                                                    args.put(ARG_QUESTION_TOTAL, totalSELQuestions)
-                                                    args.put(ARG_QUESTION_RESPONSE_UID,
-                                                            questionResponse.selQuestionResponseUid)
-                                                    args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids)
+                //Create arguments
+                val args = HashMap<String, String>()
+                args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+                args.put(ARG_PERSON_UID, currentPersonUid.toString())
+                args.put(ARG_QUESTION_SET_UID, currentQuestionSetUid.toString())
+                args.put(ARG_CLAZZMEMBER_UID, currentClazzMemberUid.toString())
+                args.put(ARG_QUESTION_UID, nextQuestion.selQuestionUid.toString())
+                args.put(ARG_QUESTION_SET_RESPONSE_UID, currentQuestionSetResponseUid.toString())
+                args.put(ARG_QUESTION_INDEX_ID, nextQuestion.questionIndex.toString())
+                args.put(ARG_QUESTION_TEXT, nextQuestion.questionText.toString())
+                args.put(ARG_QUESTION_INDEX, nextQuestion.questionIndex.toString())
+                args.put(ARG_QUESTION_TOTAL, totalSELQuestions.toString())
+                args.put(ARG_QUESTION_RESPONSE_UID,
+                        questionResponse.selQuestionResponseUid.toString())
+                args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids.toString())
 
-                                                    impl.go(SELQuestionView.VIEW_NAME, args, view.getContext())
+                impl.go(SELQuestionView.VIEW_NAME, args, view.viewContext)
 
-                                                }
 
-                                                override fun onFailure(exception: Throwable?) {
-                                                    print(exception!!.message)
-                                                }
-                                            })
-                                        } else {
-                                            //All questions gone through OK.
-                                            val args = HashMap<String, String>()
-                                            args.put(ARG_STUDENT_DONE, currentPersonUid)
-                                            args.put(ARG_CLAZZ_UID, currentClazzUid)
-                                            if (doneClazzMemberUids != null) {
-                                                if (doneClazzMemberUids == "") {
-                                                    doneClazzMemberUids += currentClazzMemberUid
-                                                } else {
-                                                    doneClazzMemberUids += ",$currentClazzMemberUid"
-                                                }
-                                            }
-                                            args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids)
-                                            impl.go(SELSelectStudentView.VIEW_NAME, args, context)
-                                            view.finish()
-                                        }
-                                    }
-
-                                    override fun onFailure(exception: Throwable?) {
-                                        print(exception!!.message)
-                                    }
-                                })
-                            }
-
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
+            } else {
+                //All questions gone through OK.
+                val args = HashMap<String, String>()
+                args.put(ARG_STUDENT_DONE, currentPersonUid.toString())
+                args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+                if (doneClazzMemberUids != null) {
+                    if (doneClazzMemberUids == "") {
+                        doneClazzMemberUids += currentClazzMemberUid
+                    } else {
+                        doneClazzMemberUids += ",$currentClazzMemberUid"
                     }
+                }
+                args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids.toString())
+                impl.go(SELSelectStudentView.VIEW_NAME, args, context)
+                view.finish()
+            }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+        }
+
     }
 
 
@@ -260,46 +231,34 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
     override fun handleCommonPressed(arg: Any) {
         //Record nomination and highlight selected.
         val clazzMemberDao = repository.clazzMemberDao
-        val questionResponseNominationDao = repository.getSocialNominationQuestionResponseNominationDao()
+        val questionResponseNominationDao = repository.selQuestionResponseNominationDao
 
-        clazzMemberDao.findByPersonUidAndClazzUidAsync(arg as Long, currentClazzUid,
-                object : UmCallback<ClazzMember> {
-                    override fun onSuccess(result: ClazzMember?) {
+        GlobalScope.launch {
+            val result = clazzMemberDao.findByPersonUidAndClazzUidAsync(arg as Long,
+                    currentClazzUid)
 
-                        questionResponseNominationDao.findExistingNomination(result!!.clazzMemberUid,
-                                currentQuestionResponseUid, object : UmCallback<List<SelQuestionResponseNomination>> {
-                            override fun onSuccess(existingNominations: List<SelQuestionResponseNomination>?) {
-                                if (existingNominations != null && !existingNominations.isEmpty()) {
-                                    if (existingNominations.size == 1) {
-                                        val thisNomination = existingNominations[0]
+            val existingNominations = questionResponseNominationDao.findExistingNomination(
+                    result!!.clazzMemberUid,currentQuestionResponseUid)
+            if (existingNominations != null && !existingNominations.isEmpty()) {
+                if (existingNominations.size == 1) {
+                    val thisNomination = existingNominations[0]
 
-                                        thisNomination.isNominationActive = !thisNomination.isNominationActive
-                                        questionResponseNominationDao.update(thisNomination)
-                                    }
-                                } else {
-                                    //Create a new one.
-                                    val responseNomination = SelQuestionResponseNomination()
-                                    responseNomination
-                                            .selQuestionResponseNominationSelQuestionResponseUId = currentQuestionResponseUid
-                                    responseNomination
-                                            .selQuestionResponseNominationClazzMemberUid = result.clazzMemberUid
-                                    responseNomination.isNominationActive = true
+                    thisNomination.isNominationActive = !thisNomination.isNominationActive
+                    questionResponseNominationDao.update(thisNomination)
+                }
+            } else {
+                //Create a new one.
+                val responseNomination = SelQuestionResponseNomination()
+                responseNomination
+                        .selQuestionResponseNominationSelQuestionResponseUId = currentQuestionResponseUid
+                responseNomination
+                        .selQuestionResponseNominationClazzMemberUid = result.clazzMemberUid
+                responseNomination.isNominationActive = true
 
-                                    questionResponseNominationDao.insert(responseNomination)
-                                }
-                            }
+                questionResponseNominationDao.insert(responseNomination)
+            }
 
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
-
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                })
+        }
 
     }
 

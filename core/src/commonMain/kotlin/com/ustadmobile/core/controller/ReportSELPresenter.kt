@@ -1,22 +1,21 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzMemberDao
-import com.ustadmobile.core.db.dao.SelQuestionResponseNominationDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
+import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
+import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
+import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
 import com.ustadmobile.core.view.ReportSELView
 import com.ustadmobile.core.xlsx.UmSheet
 import com.ustadmobile.core.xlsx.UmXLSX
 import com.ustadmobile.core.xlsx.ZipUtil
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
-import com.ustadmobile.lib.db.entities.SELNominationItem
-
-import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
+import kotlinx.io.IOException
 
 class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: ReportSELView) :
         UstadBaseController<ReportSELView>(context, arguments!!, view) {
@@ -25,11 +24,12 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
     private var toDate: Long = 0
     private var clazzList: List<Long>? = null
     internal var repository: UmAppDatabase
-    internal var clazzMap: LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>>
-    internal var clazzToStudents: HashMap<String, List<ClazzMemberWithPerson>>
-    internal var clazzSheetTemplate: HashMap<String, UmSheet>
-    internal var nominatorToIdMap: HashMap<Long, Int>
-    internal var nomineeToIdMap: HashMap<Long, Int>
+    internal lateinit var clazzMap: LinkedHashMap<String, LinkedHashMap<String, HashMap<Long,
+            ArrayList<Long>>>>
+    internal lateinit var clazzToStudents: HashMap<String, List<ClazzMemberWithPerson>>
+    internal lateinit var clazzSheetTemplate: HashMap<String, UmSheet>
+    internal lateinit var nominatorToIdMap: HashMap<Long, Int>
+    internal lateinit var nomineeToIdMap: HashMap<Long, Int>
 
 
     init {
@@ -37,10 +37,10 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
         clazzList = ArrayList()
 
         if (arguments!!.containsKey(ARG_FROM_DATE)) {
-            fromDate = arguments!!.get(ARG_FROM_DATE)
+            fromDate = arguments!!.get(ARG_FROM_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_TO_DATE)) {
-            toDate = arguments!!.get(ARG_TO_DATE)
+            toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_CLAZZ_LIST)) {
             val clazzes = arguments!!.get(ARG_CLAZZ_LIST) as LongArray
@@ -79,96 +79,86 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
         clazzToStudents = HashMap()
         clazzMap = LinkedHashMap()
 
-        val nominationDao = repository.getSocialNominationQuestionResponseNominationDao()
+        val nominationDao = repository.selQuestionResponseNominationDao
 
         //Get all nominations
-        nominationDao.getAllNominationReportAsync(fromDate, toDate, clazzList,
-                object : UmCallback<List<SELNominationItem>> {
-                    override fun onSuccess(allNominations: List<SELNominationItem>?) {
+        GlobalScope.launch {
+            val allNominations = nominationDao.getAllNominationReportAsync(fromDate, toDate,
+                    clazzList)
 
-                        //TODO: Handle QuestionSet grouping ? (Not implemented in Prototypes)
-                        var index = 0
-                        for (everyNomination in allNominations!!) { //For every nomination / all
-                            index++
-                            val thisClazzUid = everyNomination.clazzUid
-                            val thisClazzName = everyNomination.clazzName
-                            val thisQuestionTitle = everyNomination.questionText
-                            val nomineeUid = everyNomination.nomineeUid
-                            val nominatorUid = everyNomination.nominatorUid
+            //TODO: Handle QuestionSet grouping ? (Not implemented in Prototypes)
+            var index = 0
+            for (everyNomination in allNominations!!) { //For every nomination / all
+                index++
+                val thisClazzUid = everyNomination.clazzUid
+                val thisClazzName = everyNomination.clazzName
+                val thisQuestionTitle = everyNomination.questionText
+                val nomineeUid = everyNomination.nomineeUid
+                val nominatorUid = everyNomination.nominatorUid
 
-                            val questionMap: LinkedHashMap<String, Map<Long, List<Long>>>?
-                            val nominationMap: MutableMap<Long, List<Long>>?
-                            val nominations: MutableList<Long>?
+                val questionMap: LinkedHashMap<String, HashMap<Long, ArrayList<Long>>>?
+                val nominationMap: HashMap<Long, ArrayList<Long>>?
+                val nominations: ArrayList<Long>?
 
-                            if (!clazzMap.containsKey(thisClazzName)) {
-                                //New Clazz starts. Add question Map and nominations map to every Question.
-                                questionMap = LinkedHashMap()
-                                nominationMap = HashMap()
-                                nominations = ArrayList()
+                if (!clazzMap.containsKey(thisClazzName)) {
+                    //New Clazz starts. Add question Map and nominations map to every Question.
+                    questionMap = LinkedHashMap()
+                    nominationMap = HashMap()
+                    nominations = ArrayList()
 
-                            } else {
-                                questionMap = clazzMap[thisClazzName]
+                } else {
+                    questionMap = clazzMap[thisClazzName]
 
-                                if (!questionMap!!.containsKey(thisQuestionTitle)) {
-                                    nominationMap = HashMap()
-                                    nominations = ArrayList()
-                                } else {
-                                    nominationMap = questionMap.get(thisQuestionTitle)
-                                    if (!nominationMap!!.containsKey(nominatorUid)) {
-                                        nominations = ArrayList()
-                                    } else {
-                                        nominations = nominationMap[nominatorUid]
-                                    }
-                                }
-                            }
-
-                            nominations!!.add(nomineeUid)
-                            nominationMap[nominatorUid] = nominations
-                            questionMap[thisQuestionTitle] = nominationMap
-
-                            clazzMap[thisClazzName] = questionMap
-
-                            //Build students map - Add students
-                            if (!clazzToStudents.containsKey(thisClazzName)) {
-
-                                val finalIndex = index
-                                clazzMemberDao.findClazzMemberWithPersonByRoleForClazzUid(thisClazzUid,
-                                        ClazzMember.ROLE_STUDENT, object : UmCallback<List<ClazzMemberWithPerson>> {
-                                    override fun onSuccess(result: List<ClazzMemberWithPerson>?) {
-                                        clazzToStudents[thisClazzName] = result
-
-                                        //If end of the loop
-                                        if (finalIndex >= allNominations.size) {
-                                            createTablesOnView()
-                                            createClassSheetTemplates()
-                                        }
-                                    }
-
-                                    override fun onFailure(exception: Throwable?) {
-                                        print(exception!!.message)
-                                    }
-                                })
-                            } else {
-                                //If end of the loop
-                                if (index >= allNominations.size) {
-                                    createTablesOnView()
-                                    createClassSheetTemplates()
-                                }
-                            }
+                    if (!questionMap!!.containsKey(thisQuestionTitle)) {
+                        nominationMap = HashMap()
+                        nominations = ArrayList()
+                    } else {
+                        nominationMap = questionMap.get(thisQuestionTitle)
+                        if (!nominationMap!!.containsKey(nominatorUid)) {
+                            nominations = ArrayList()
+                        } else {
+                            nominations = nominationMap[nominatorUid]
                         }
                     }
+                }
 
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
+                nominations!!.add(nomineeUid)
+                nominationMap[nominatorUid] = nominations
+                questionMap[thisQuestionTitle!!] = nominationMap
+
+                clazzMap[thisClazzName!!] = questionMap
+
+                //Build students map - Add students
+                if (!clazzToStudents.containsKey(thisClazzName)) {
+
+                    val finalIndex = index
+                    val result =
+                            clazzMemberDao.findClazzMemberWithPersonByRoleForClazzUid(thisClazzUid,
+                                    ClazzMember.ROLE_STUDENT)
+                    clazzToStudents[thisClazzName] = result
+
+                    //If end of the loop
+                    if (finalIndex >= allNominations.size) {
+                        createTablesOnView()
+                        createClassSheetTemplates()
                     }
-                })
+
+                } else {
+                    //If end of the loop
+                    if (index >= allNominations.size) {
+                        createTablesOnView()
+                        createClassSheetTemplates()
+                    }
+                }
+            }
+        }
     }
 
     /**
      * Send sel raw data to view for table updating.
      */
     private fun createTablesOnView() {
-        view.runOnUiThread({ view.createTables(clazzMap, clazzToStudents) })
+        view.runOnUiThread(Runnable{ view.createTables(clazzMap, clazzToStudents) })
     }
 
     private fun createClassSheetTemplates() {
@@ -267,7 +257,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
                     }
                     val sheetTitleShort = sheetTitle.replace('?', ' ')
 
-                    val newMap = LinkedHashMap(clazzSheet!!.getSheetMap())
+                    val newMap = LinkedHashMap(clazzSheet!!.sheetMap!!)
                     val newValues = ArrayList(clazzSheet!!.getSheetValues())
 
                     val clazzQuestionSheet = UmSheet(sheetTitleShort,
@@ -296,7 +286,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
             view.generateXLSReport(xlsxReportPath)
 
         } catch (e: IOException) {
-            e.printStackTrace()
+            print(e.message)
         }
 
     }

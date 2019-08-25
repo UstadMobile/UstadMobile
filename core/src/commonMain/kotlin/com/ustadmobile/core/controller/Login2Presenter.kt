@@ -7,9 +7,9 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.lib.db.entities.UmAccount
-
 import com.ustadmobile.core.view.Login2View.Companion.ARG_STARTSYNCING
+import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Runnable
 
 class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login2View,
                       val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
@@ -33,8 +33,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
         if (arguments != null && arguments!!.containsKey(ARG_SERVER_URL)) {
             view.setServerUrl(arguments[ARG_SERVER_URL]!!)
         } else {
-            view.setServerUrl(impl.getAppConfigString(
-                    AppConfig.KEY_API_URL, "http://localhost", context))
+            view.setServerUrl(impl.getAppConfigString(AppConfig.KEY_API_URL,
+                    "http://localhost", context)!!)
         }
 
         val version = impl.getVersion(context)
@@ -51,23 +51,24 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
         view.setErrorMessage("")
+        //TODO: KMP Login
         val loginRepoDb = UmAppDatabase.getInstance(context).getRepository(serverUrl,
                 "")
         loginRepoDb.personDao.login(username, password, object : UmCallback<UmAccount> {
             override fun onSuccess(result: UmAccount?) {
                 if (result != null) {
                     result.endpointUrl = serverUrl
-                    view.runOnUiThread({ view.setInProgress(false) })
+                    view.runOnUiThread(Runnable{ view.setInProgress(false) })
                     view.setFinishAfficinityOnView()
                     UmAccountManager.setActiveAccount(result, context)
 
                     view.forceSync()
-                    val args = Hashtable<String, String>()
+                    val args = HashMap<String, String>()
                     args.put(ARG_STARTSYNCING, "true")
-                    impl.go(mNextDest, args, context)
+                    impl.go(mNextDest!!, args, context)
                 } else {
-                    view.runOnUiThread({
-                        view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
+                    view.runOnUiThread(Runnable{
+                        view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
                                 context))
                         view.setPassword("")
                         view.setInProgress(false)
@@ -76,7 +77,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
             }
 
             override fun onFailure(exception: Throwable?) {
-                view.runOnUiThread({
+                view.runOnUiThread(Runnable{
                     view.setErrorMessage(impl.getString(
                             MessageID.login_network_error, context))
                     view.setInProgress(false)

@@ -4,7 +4,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashView
-import kotlinx.coroutines.Runnable
 
 class SplashPresenter(context: Any, arguments: Map<String, String?>, view: SplashView, val impl: UstadMobileSystemImpl)
     : UstadBaseController<SplashView>(context, arguments, view) {

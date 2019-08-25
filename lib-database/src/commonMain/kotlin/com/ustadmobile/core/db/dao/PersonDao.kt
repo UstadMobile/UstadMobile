@@ -182,6 +182,22 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
 
+    @Query(QUERY_FIND_ALL)
+    abstract fun findAllPeopleWithEnrollment(): DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query(QUERY_FIND_ALL + QUERY_SEARCH_BIT)
+    abstract fun findAllPeopleWithEnrollmentBySearch(searchQuery: String):
+            DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
+    abstract fun findAllPeopleWithEnrollmentSortNameDesc(): DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
+    abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query("SELECT * FROM Person where active = 1")
+    abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
+
     /**
      * Creates actual person and assigns it to a group for permissions' sake. Use this
      * instead of direct insert.
@@ -278,6 +294,29 @@ abstract class PersonDao : BaseDao<Person> {
 
     }
 
+    suspend fun insertPersonAsync(entity: Person, loggedInPersonUid: Long):Long {
+        val result = insertAsync(entity)
+        val personUid = result!!
+        createAuditLog(personUid, loggedInPersonUid)
+        return result
+    }
+
+    fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
+        val auditLog = AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid)
+        insertAuditLog(auditLog)
+    }
+
+    @Insert
+    abstract fun insertAuditLog(entity: AuditLog): Long
+
+    fun updatePersonAsync(entity: Person, loggedInPersonUid: Long): Int  {
+        val result = updateAsync(entity)
+        createAuditLog(entity.personUid, loggedInPersonUid)
+        return result
+    }
+
+
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
@@ -302,5 +341,19 @@ abstract class PersonDao : BaseDao<Person> {
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
+
+        const val QUERY_FIND_ALL = "SELECT Person.* , (0) AS clazzUid, " +
+                " (0) AS attendancePercentage, " +
+                " (0) AS clazzMemberRole, " +
+                " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+                " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+                " DESC LIMIT 1) AS personPictureUid, " +
+                " (0) AS enrolled FROM Person WHERE Person.active = 1 "
+
+        const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
+            ":searchQuery "
+
+        const val QUERY_SORT_BY_NAME_DESC = " ORDER BY Person.lastName DESC "
+        const val QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC "
     }
 }

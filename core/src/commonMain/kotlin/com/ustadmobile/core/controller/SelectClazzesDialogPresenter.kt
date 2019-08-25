@@ -1,16 +1,14 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.core.view.SelectClazzesDialogView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
+import com.ustadmobile.core.view.SelectClazzesDialogView
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -21,7 +19,7 @@ class SelectClazzesDialogPresenter(context: Any, arguments: Map<String, String>?
         UstadBaseController<SelectClazzesDialogView>(context, arguments!!, view) {
 
     //Any arguments stored as variables here
-    private var clazzWithEnrollmentUmProvider: UmProvider<ClazzWithNumStudents>? = null
+    private var clazzWithEnrollmentUmProvider: DataSource.Factory<Int, ClazzWithNumStudents>? = null
     private var locations: List<Long>? = null
     var clazzes: HashMap<String, Long>? = null
     var selectedClazzesList: List<Long>? = null
@@ -44,7 +42,7 @@ class SelectClazzesDialogPresenter(context: Any, arguments: Map<String, String>?
 
     fun addToClazzes(clazzUid: Clazz) {
         if (!clazzes!!.containsKey(clazzUid.clazzName)) {
-            clazzes!![clazzUid.clazzName] = clazzUid.clazzUid
+            clazzes!![clazzUid.clazzName!!] = clazzUid.clazzUid
         }
     }
 
@@ -61,8 +59,9 @@ class SelectClazzesDialogPresenter(context: Any, arguments: Map<String, String>?
 
         //Find the provider
         if (locations != null && !locations!!.isEmpty()) {
-            clazzWithEnrollmentUmProvider = repository.clazzDao
-                    .findAllClazzesInLocationList(locations!!)
+            GlobalScope.launch {
+                clazzWithEnrollmentUmProvider = repository.clazzDao.findAllClazzesInLocationList(locations!!)
+            }
         } else {
             clazzWithEnrollmentUmProvider = repository.clazzDao
                     .findAllClazzes()

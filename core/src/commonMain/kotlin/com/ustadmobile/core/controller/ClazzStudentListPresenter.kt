@@ -1,28 +1,25 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.ClazzDao
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackWithDefaultValue
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
-import com.ustadmobile.core.view.ClazzStudentListView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-import com.ustadmobile.lib.db.entities.Role
-
-
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON_TYPE
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_ATTENDANCE_ASC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_ATTENDANCE_DESC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_ASC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_DESC
+import com.ustadmobile.core.view.ClazzStudentListView
+import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment
+import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -38,9 +35,9 @@ class ClazzStudentListPresenter(context: Any,
         CommonHandlerPresenter<ClazzStudentListView>(context, arguments!!, view) {
 
     private var currentClazzId = -1L
-    private var clazzPersonListProvider: UmProvider<PersonWithEnrollment>? = null
+    private var clazzPersonListProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
-    private var idToOrderInteger: Hashtable<Long, Int>? = null
+    private var idToOrderInteger: HashMap<Long, Int>? = null
 
     var isTeachersEditable = false
         private set
@@ -58,7 +55,7 @@ class ClazzStudentListPresenter(context: Any,
 
         //Get Clazz Uid from argument and set it here to the Presenter
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzId = arguments!!.get(ARG_CLAZZ_UID)
+            currentClazzId = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
 
         loggedInPerson = UmAccountManager.getActiveAccount(context)!!.personUid
@@ -80,7 +77,7 @@ class ClazzStudentListPresenter(context: Any,
         this.isTeachersEditable = true
 
         //Initialise sort spinner data:
-        idToOrderInteger = Hashtable<Long, Int>()
+        idToOrderInteger = HashMap<Long, Int>()
         updateSortSpinnerPreset()
 
         checkPermissions()
@@ -88,17 +85,12 @@ class ClazzStudentListPresenter(context: Any,
 
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
-        clazzDao.personHasPermission(loggedInPerson, Role.PERMISSION_PERSON_INSERT,
-                UmCallbackWithDefaultValue(false, object : UmCallback<Boolean> {
-                    override fun onSuccess(result: Boolean?) {
-                        isCanAddStudents = result!!
-                        isCanAddTeachers = result
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        print(exception!!.message)
-                    }
-                }))
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPerson, Role
+                    .PERMISSION_PERSON_INSERT)
+            isCanAddStudents = result!!
+            isCanAddTeachers = result
+        }
     }
 
     /**
@@ -107,7 +99,7 @@ class ClazzStudentListPresenter(context: Any,
      * @param presetAL The array list of string type
      * @return  String array
      */
-    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String> {
+    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
         val objectArr = presetAL.toTypedArray()
         val strArr = arrayOfNulls<String>(objectArr.size)
         for (j in objectArr.indices) {
@@ -124,7 +116,7 @@ class ClazzStudentListPresenter(context: Any,
     private fun updateSortSpinnerPreset() {
         val presetAL = ArrayList<String>()
 
-        idToOrderInteger = Hashtable<Long, Int>()
+        idToOrderInteger = HashMap<Long, Int>()
 
         presetAL.add(impl.getString(MessageID.namesb, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_NAME_ASC)
@@ -145,9 +137,9 @@ class ClazzStudentListPresenter(context: Any,
      */
     private fun goToAddStudentFragment() {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzId)
-        args.put(ARG_NEW_PERSON_TYPE, ClazzMember.ROLE_STUDENT)
-        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.getContext())
+        args.put(ARG_CLAZZ_UID, currentClazzId.toString())
+        args.put(ARG_NEW_PERSON_TYPE, ClazzMember.ROLE_STUDENT.toString())
+        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -156,9 +148,9 @@ class ClazzStudentListPresenter(context: Any,
      */
     private fun handleAddTeacher() {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzId)
-        args.put(ARG_NEW_PERSON_TYPE, ClazzMember.ROLE_TEACHER)
-        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.getContext())
+        args.put(ARG_CLAZZ_UID, currentClazzId.toString())
+        args.put(ARG_NEW_PERSON_TYPE, ClazzMember.ROLE_TEACHER.toString())
+        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -169,9 +161,9 @@ class ClazzStudentListPresenter(context: Any,
      */
     private fun handleClickStudent(personUid: Long) {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzId)
-        args.put(ARG_PERSON_UID, personUid)
-        impl.go(PersonDetailView.VIEW_NAME, args, view.getContext())
+        args.put(ARG_CLAZZ_UID, currentClazzId.toString())
+        args.put(ARG_PERSON_UID, personUid.toString())
+        impl.go(PersonDetailView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -226,7 +218,7 @@ class ClazzStudentListPresenter(context: Any,
      */
     override fun handleCommonPressed(arg: Any) {
 
-        if (arg as Long == 0) {
+        if ((arg as Long) == 0L) {
             goToAddStudentFragment()
         } else {
             handleClickStudent(arg)
@@ -241,7 +233,7 @@ class ClazzStudentListPresenter(context: Any,
      */
     override fun handleSecondaryPressed(arg: Any) {
         //No secondary action here.
-        if (arg as Long<0) {
+        if ((arg as Long) < 0) {
             handleAddTeacher()
         }
     }

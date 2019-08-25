@@ -1,22 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmAccountManager
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-
-
-import com.ustadmobile.core.view.GroupListView
-import com.ustadmobile.core.view.GroupDetailView
-
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.lib.db.entities.GroupWithMemberCount
-import com.ustadmobile.lib.db.entities.PersonGroup
-
 import com.ustadmobile.core.db.dao.PersonGroupDao
-
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.GroupDetailView
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
+import com.ustadmobile.core.view.GroupListView
+import com.ustadmobile.lib.db.entities.GroupWithMemberCount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Presenter for GroupList view
@@ -25,7 +20,7 @@ class GroupListPresenter(context: Any, arguments: Map<String, String>?, view: Gr
                          val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<GroupListView>(context, arguments!!, view) {
 
-    private var umProvider: UmProvider<GroupWithMemberCount>? = null
+    private var umProvider: DataSource.Factory<Int, GroupWithMemberCount>? = null
     internal var repository: UmAppDatabase
     private val providerDao: PersonGroupDao
 
@@ -51,12 +46,14 @@ class GroupListPresenter(context: Any, arguments: Map<String, String>?, view: Gr
 
     fun handleEditGroup(uid: Long) {
         val args = HashMap<String, String>()
-        args.put(GROUP_UID, uid)
+        args.put(GROUP_UID, uid.toString())
         impl.go(GroupDetailView.VIEW_NAME, args, context)
     }
 
     fun handleDeleteGroup(uid: Long) {
-        providerDao.inactivateGroupAsync(uid, null!!)
+        GlobalScope.launch {
+            providerDao.inactivateGroupAsync(uid)
+        }
     }
 
     fun handleClickPrimaryActionButton() {

@@ -34,11 +34,11 @@ class ReportSelectionPresenter(context: Any, arguments: Map<String, String>?,
         args.put(ReportEditView.ARG_REPORT_NAME, reportName)
         args.put(ReportEditView.ARG_REPORT_DESC, reportDesc)
         args.put(ReportEditView.ARG_REPORT_LINK, reportLink)
-        args.put(ReportEditView.ARG_SHOW_THERSHOLD, showThreshold)
-        args.put(ReportEditView.ARG_SHOW_RADIO_GROUP, showRadioGroup)
-        args.put(ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE, showGenderDisaggregate)
-        args.put(ReportEditView.ARG_SHOW_CLAZZES, showClazzes)
-        args.put(ReportEditView.ARG_SHOW_LOCATIONS, showLocations)
+        args.put(ReportEditView.ARG_SHOW_THERSHOLD, showThreshold.toString())
+        args.put(ReportEditView.ARG_SHOW_RADIO_GROUP, showRadioGroup.toString())
+        args.put(ReportEditView.ARG_SHOW_GENDER_DISAGGREGATE, showGenderDisaggregate.toString())
+        args.put(ReportEditView.ARG_SHOW_CLAZZES, showClazzes.toString())
+        args.put(ReportEditView.ARG_SHOW_LOCATIONS, showLocations.toString())
         impl.go(ReportEditView.VIEW_NAME, args, context)
     }
 

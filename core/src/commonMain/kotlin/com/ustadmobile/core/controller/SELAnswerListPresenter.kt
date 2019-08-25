@@ -1,16 +1,13 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.SELAnswerListView
 import com.ustadmobile.core.view.SELSelectStudentView
 import com.ustadmobile.lib.db.entities.Person
-
-
-
-import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 
 /**
  * SELAnswerList's presenter - responsible for the logic of all SEL Answer list from the database
@@ -24,13 +21,13 @@ class SELAnswerListPresenter(context: Any, arguments: Map<String, String>?,
 
     private var currentClazzUid = -1L
 
-    private var selAnswersProvider: UmProvider<Person>? = null
+    private var selAnswersProvider: DataSource.Factory<Int,Person>? = null
 
     init {
 
         //Get the clazz uid and set it to the presenter.
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)
+            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
 
     }
@@ -50,8 +47,7 @@ class SELAnswerListPresenter(context: Any, arguments: Map<String, String>?,
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
-        selAnswersProvider = repository.getSocialNominationQuestionSetResponseDao()
-                .findAllDoneSNByClazzUid(currentClazzUid)
+        selAnswersProvider = repository.selQuestionSetResponseDao.findAllDoneSNByClazzUid(currentClazzUid)
         setSELAnswerProviderToView()
 
     }
@@ -70,9 +66,9 @@ class SELAnswerListPresenter(context: Any, arguments: Map<String, String>?,
     fun handleClickRecordSEL() {
 
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid)
+        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
 
-        impl.go(SELSelectStudentView.VIEW_NAME, args, view.getContext())
+        impl.go(SELSelectStudentView.VIEW_NAME, args, view.viewContext)
 
     }
 

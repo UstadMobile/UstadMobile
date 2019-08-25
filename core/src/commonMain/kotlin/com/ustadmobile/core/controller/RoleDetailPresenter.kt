@@ -1,20 +1,14 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmLiveData
+
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.RoleDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-
-
 import com.ustadmobile.core.view.RoleDetailView
-import com.ustadmobile.core.view.RoleListView
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UMCalendar
-
 import com.ustadmobile.core.view.RoleListView.Companion.ROLE_UID
+import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -25,7 +19,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
     internal var repository: UmAppDatabase
     private var currentRoleUid: Long = 0
-    private var currentRole: Role? = null
+    private lateinit var currentRole: Role
     private var updatedRole: Role? = null
     internal var roleDao: RoleDao
 
@@ -37,7 +31,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
         roleDao = repository.roleDao
 
         if (arguments!!.containsKey(ROLE_UID)) {
-            currentRoleUid = arguments!!.get(ROLE_UID)
+            currentRoleUid = arguments!!.get(ROLE_UID)!!.toLong()
         }
 
     }
@@ -47,27 +41,22 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         if (currentRoleUid == 0L) {
             currentRole = Role()
-            currentRole!!.roleName = ""
-            currentRole!!.isRoleActive = false
-            roleDao.insertAsync(currentRole, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    initFromRole(result!!)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    print(exception!!.message)
-                }
-            })
+            currentRole.roleName = ""
+            currentRole.isRoleActive = false
+            GlobalScope.launch {
+                val result = roleDao.insertAsync(currentRole)
+                initFromRole(result)
+            }
         } else {
             initFromRole(currentRoleUid)
         }
     }
 
-    fun handleRoleChanged(changedRole: Role) {
+    fun handleRoleChanged(changedRole: Role?) {
 
         //set the og person value
         if (currentRole == null)
-            currentRole = changedRole
+            currentRole = changedRole!!
 
         if (updatedRole == null || updatedRole != changedRole) {
             //update class edit views
@@ -82,20 +71,13 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         val roleUmLiveData = roleDao.findByUidLive(currentRoleUid)
         //Observe the live data
-        roleUmLiveData.observe(this@RoleDetailPresenter,
-                UmObserver<Role> { this@RoleDetailPresenter.handleRoleChanged(it) })
+        roleUmLiveData.observe(this, this::handleRoleChanged)
 
-
-        roleDao.findByUidAsync(roleUid, object : UmCallback<Role> {
-            override fun onSuccess(result: Role?) {
-                updatedRole = result
-                view.updateRoleOnView(updatedRole!!)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            val result = roleDao.findByUidAsync(roleUid)
+            updatedRole = result
+            view.updateRoleOnView(updatedRole!!)
+        }
     }
 
     fun updateRoleName(name: String) {
@@ -107,16 +89,10 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         updatedRole!!.isRoleActive = true
         updatedRole!!.rolePermissions = permissionField
-
-        roleDao.updateAsync(updatedRole!!, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                view.finish()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        GlobalScope.launch {
+            roleDao.updateAsync(updatedRole!!)
+            view.finish()
+        }
 
     }
 

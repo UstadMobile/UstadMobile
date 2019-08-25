@@ -30,8 +30,8 @@ interface ReportSELView : UstadView {
      * @param clazzToStudents   A map of every clazz and its clazz members for the view to construct
      * the report easily.
      */
-    fun createTables(clazzMap: LinkedHashMap<String, LinkedHashMap<String, Map<Long, List<Long>>>>,
-                     clazzToStudents: HashMap<String, List<ClazzMemberWithPerson>>)
+    fun createTables(clazzMap: LinkedHashMap<String, LinkedHashMap<String, HashMap<Long,
+            ArrayList<Long>>>>, clazzToStudents: HashMap<String, List<ClazzMemberWithPerson>>)
 
     companion object {
         val VIEW_NAME = "ReportSELView"

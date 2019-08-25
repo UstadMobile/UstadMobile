@@ -1,19 +1,17 @@
 package com.ustadmobile.core.controller
 
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.db.dao.DateRangeDao
 import com.ustadmobile.core.db.dao.UMCalendarDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HolidayCalendarDetailView
-import com.ustadmobile.core.view.HolidayCalendarListView
-import com.ustadmobile.lib.db.entities.UMCalendar
-import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries
-
-
-
 import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
+import com.ustadmobile.core.view.HolidayCalendarListView
+import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Presenter for HolidayCalendarList view
@@ -23,7 +21,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
                                    val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<HolidayCalendarListView>(context, arguments!!, view) {
 
-    private var umProvider: UmProvider<UMCalendarWithNumEntries>? = null
+    private var umProvider: DataSource.Factory<Int, UMCalendarWithNumEntries>? = null
     internal var repository: UmAppDatabase
     private val providerDao: UMCalendarDao
 
@@ -33,7 +31,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        providerDao = repository.getUMCalendarDao()
+        providerDao = repository.umCalendarDao
 
 
     }
@@ -54,12 +52,14 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
 
     fun handleEditCalendar(calendarUid: Long) {
         val args = HashMap<String, String>()
-        args.put(ARG_CALENDAR_UID, calendarUid)
+        args.put(ARG_CALENDAR_UID, calendarUid.toString())
         impl.go(HolidayCalendarDetailView.VIEW_NAME, args, context)
     }
 
     fun handleDeleteCalendar(calendarUid: Long) {
-        repository.getUMCalendarDao().inactivateCalendarAsync(calendarUid, null)
+        GlobalScope.launch {
+            repository.umCalendarDao.inactivateCalendarAsync(calendarUid)
+        }
     }
 
 }

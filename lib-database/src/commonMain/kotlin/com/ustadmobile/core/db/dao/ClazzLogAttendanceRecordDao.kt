@@ -281,7 +281,8 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Query(QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE)
     abstract suspend fun findDailyAttendanceByClazzUidAndDateAsync(clazzUid: Long, fromDate: Long,
-                                                           toDate: Long): List<DailyAttendanceNumbers>
+                                                           toDate: Long):
+            List<DailyAttendanceNumbers>?
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +

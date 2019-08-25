@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SelQuestionDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.SELQuestionEditView
 import com.ustadmobile.lib.db.entities.SelQuestion
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -24,7 +24,7 @@ SELQuestionEditView) : UstadBaseController<SELQuestionEditView>(context, argumen
     init {
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        selQuestionDao = repository.getSocialNominationQuestionDao()
+        selQuestionDao = repository.selQuestionDao
 
     }
 
@@ -43,31 +43,19 @@ SELQuestionEditView) : UstadBaseController<SELQuestionEditView>(context, argumen
      */
     fun handleClickDone(newQuestion: String, allClasses: Boolean, multiNominations: Boolean) {
 
-        selQuestionDao.getMaxIndexAsync(object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                val socialNominationQuestion = SelQuestion()
-                socialNominationQuestion.questionText = newQuestion
-                socialNominationQuestion.questionIndex = result
-                socialNominationQuestion.isAssignToAllClasses = allClasses
-                socialNominationQuestion.isMultiNominations = multiNominations
-                socialNominationQuestion.selQuestionSelQuestionSetUid = DEFAULT_QUESTION_SET_UID
+        GlobalScope.launch {
+            val result = selQuestionDao.getMaxIndexAsync()
+            val socialNominationQuestion = SelQuestion()
+            socialNominationQuestion.questionText = newQuestion
+            socialNominationQuestion.questionIndex = result
+            socialNominationQuestion.isAssignToAllClasses = allClasses
+            socialNominationQuestion.isMultiNominations = multiNominations
+            socialNominationQuestion.selQuestionSelQuestionSetUid = DEFAULT_QUESTION_SET_UID
 
-                selQuestionDao.insertAsync(socialNominationQuestion,
-                        object : UmCallback<Long> {
-                            override fun onSuccess(result: Long?) {
-                                view.finish()
-                            }
+            selQuestionDao.insertAsync(socialNominationQuestion)
+            view.finish()
 
-                            override fun onFailure(exception: Throwable?) {
-                                print(exception!!.message)
-                            }
-                        })
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                print(exception!!.message)
-            }
-        })
+        }
 
     }
 

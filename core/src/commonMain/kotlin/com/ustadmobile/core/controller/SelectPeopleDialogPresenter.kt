@@ -1,19 +1,12 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
+
+import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.SelectClazzesDialogView
 import com.ustadmobile.core.view.SelectPeopleDialogView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
+import com.ustadmobile.core.view.SelectPeopleDialogView.Companion.ARG_SELECTED_PEOPLE
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-
-
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
-import com.ustadmobile.core.view.SelectPeopleDialogView.Companion.ARG_SELECTED_PEOPLE
 
 
 /**
@@ -24,10 +17,10 @@ class SelectPeopleDialogPresenter(context: Any, arguments: Map<String, String>?,
         UstadBaseController<SelectPeopleDialogView>(context, arguments!!, view) {
 
     //Any arguments stored as variables here
-    private var personWithEnrollmentUmProvider: UmProvider<PersonWithEnrollment>? = null
+    private var personWithEnrollmentUmProvider: DataSource.Factory<Int, PersonWithEnrollment>?=null
     var selectedPeopleList: List<Long>? = null
 
-    var people: HashMap<String, Long>? = null
+    lateinit var people: HashMap<String, Long>
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -42,8 +35,8 @@ class SelectPeopleDialogPresenter(context: Any, arguments: Map<String, String>?,
     fun addToPeople(person: Person) {
         val personName = person.firstNames + " " +
                 person.lastName
-        if (!people!!.containsKey(person.personUid)) {
-            people!![personName] = person.personUid
+        if (!people.containsValue(person.personUid)) {
+            people[personName] = person.personUid
         }
     }
 

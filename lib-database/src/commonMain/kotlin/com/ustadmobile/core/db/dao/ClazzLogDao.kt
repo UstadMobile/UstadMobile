@@ -105,6 +105,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract suspend fun updateClazzAttendanceNumbersAsync(clazzLogUid: Long, numPresent: Int,
                                                    numAbsent: Int, numPartial: Int) : Any
 
+
     @Query("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
@@ -162,8 +163,10 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Query("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")
     abstract fun cancelFutureInstances(scheduleUid: Long, after: Long, canceled: Boolean)
 
+
     @Query("SELECT ClazzLog.clazzLogUid, ClazzLog.logDate FROM ClazzLog " + " WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate ASC")
-    abstract fun getListOfClazzLogUidsAndDatesForClazz( )
+    abstract suspend fun getListOfClazzLogUidsAndDatesForClazz(clazzUid: Long):
+            List<ClazzLogUidAndDate>
 
     companion object {
 
