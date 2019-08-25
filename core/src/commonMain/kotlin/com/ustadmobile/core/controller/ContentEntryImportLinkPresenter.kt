@@ -44,7 +44,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         var response: HttpResponse?
         try {
             response = defaultHttpClient().head<HttpResponse>(url)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
@@ -63,15 +63,16 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
         val length = response.headers["Content-Length"]?.toInt() ?: FILE_SIZE
 
-        if (length >= FILE_SIZE) {
-            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
-            return
-        }
-
         response.discardRemaining()
         response.close()
 
         if (contentTypeHeader?.startsWith("video/") == true) {
+
+            if (length >= FILE_SIZE) {
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+                return
+            }
+
             contentType = VIDEO
             this.hp5Url = url
             view.showUrlStatus(true, "")
