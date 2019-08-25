@@ -1,11 +1,12 @@
 package db2
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
 
 
-@Entity
+@Entity(indices = arrayOf(Index("otherFk", "otherNum", name="index_other_fk_to_num")))
 @SyncableEntity(tableId = 44)
 data class OtherSyncableEntity (@PrimaryKey var osUid: Long = 0,
                                 @LastChangedBy var osLcb: Int = 0,

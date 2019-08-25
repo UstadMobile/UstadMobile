@@ -69,9 +69,9 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     private var mProgress: ProgressDialog? = null
 
-    private val umDatabase: UmAppDatabase = UmAppDatabase.getInstance(activity!!)
+    private lateinit var umDatabase: UmAppDatabase
 
-    private val umRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(activity!!)
+    private lateinit var umRepository: UmAppDatabase
 
 
     interface EntryCreationActionListener {
@@ -111,6 +111,10 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         rootView = inflater.inflate(R.layout.fragment_content_entry,
                 container, false)
 
+        val fragmentContext = context!!
+        umDatabase = UmAppDatabase.getInstance(fragmentContext)
+        umRepository = UmAccountManager.getRepositoryForActiveAccount(fragmentContext)
+
         toolbar = rootView!!.findViewById(R.id.toolbar)
         toolbar!!.setNavigationIcon(if (getDirectionality(activity?.applicationContext!!) == "ltr")
             R.drawable.ic_arrow_back_white_24dp
@@ -137,8 +141,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         impl = UstadMobileSystemImpl.instance
 
         presenter = ContentEntryEditPresenter(activity!!,
-                UMAndroidUtil.bundleToMap(arguments), this,umRepository.contentEntryDao,
-                umDatabase.contentEntryStatusDao, umRepository.contentEntryParentChildJoinDao)
+                UMAndroidUtil.bundleToMap(arguments), this)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         selectFileBtn!!.setOnClickListener { v ->

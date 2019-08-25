@@ -45,8 +45,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         registerNow = findViewById(R.id.activity_register_now)
 
         mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getRepositoryForActiveAccount(this).personDao)
+                this, UstadMobileSystemImpl.instance)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
         mUsernameTextView = findViewById(R.id.activity_login_username)
         mPasswordTextView = findViewById(R.id.activity_login_password)
