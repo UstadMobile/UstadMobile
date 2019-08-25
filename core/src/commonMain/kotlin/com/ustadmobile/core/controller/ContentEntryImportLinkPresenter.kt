@@ -39,17 +39,19 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     suspend fun handleUrlTextUpdated(url: String) {
         view.showHideVideoTitle(false)
+        view.enableDisableDoneButton(false)
 
-        var response: HttpResponse? = null
+        var response: HttpResponse?
         try {
             response = defaultHttpClient().head<HttpResponse>(url)
         } catch (e: IOException) {
             view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+            return
         }
 
         contentType = -1
 
-        if (response?.status?.value != 200) {
+        if (response.status.value != 200) {
             view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
@@ -74,6 +76,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             this.hp5Url = url
             view.showUrlStatus(true, "")
             view.showHideVideoTitle(true)
+            view.enableDisableDoneButton(true)
             return
 
         } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
@@ -83,7 +86,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
         val content = checkIfH5PValidAndReturnItsContent(url)
 
-        if (content == null) {
+        if (content.isNullOrEmpty()) {
             view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
@@ -94,6 +97,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             this.hp5Url = url
             view.showUrlStatus(isValid, "")
             view.displayUrl(url)
+            view.enableDisableDoneButton(true)
         } else {
             view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
         }
@@ -104,12 +108,10 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         val client = defaultHttpClient()
         var response: HttpResponse? = null
         view.showProgress(true)
+        view.enableDisableEditText(false)
+        view.showHideErrorMessage(false)
 
         when (contentType) {
-            -1 -> {
-                view.showProgress(false)
-                return
-            }
             HTML -> {
 
                 response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
@@ -140,6 +142,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             val content = response.receive<H5PImportData>()
 
             view.showProgress(false)
+            view.enableDisableEditText(true)
+
             val db = UmAppDatabase.getInstance(context)
             db.contentEntryDao.insert(content.contentEntry)
             db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
@@ -148,6 +152,12 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             view.runOnUiThread(Runnable {
                 view.returnResult()
             })
+
+        } else {
+
+            view.showProgress(false)
+            view.enableDisableEditText(true)
+            view.showHideErrorMessage(true)
 
         }
 
