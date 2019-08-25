@@ -44,13 +44,13 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         try {
             response = defaultHttpClient().head<HttpResponse>(url)
         } catch (e: IOException) {
-            view.showUrlStatus(false, "Invalid Url")
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
         }
 
         contentType = -1
 
         if (response?.status?.value != 200) {
-            view.showUrlStatus(false, "Invalid Url")
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
 
@@ -61,15 +61,15 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
         val length = response.headers["Content-Length"]?.toInt() ?: FILE_SIZE
 
+        if (length >= FILE_SIZE) {
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+            return
+        }
+
         response.discardRemaining()
         response.close()
 
         if (contentTypeHeader?.startsWith("video/") == true) {
-
-            if (length >= FILE_SIZE) {
-                view.showUrlStatus(false, "File size too big")
-                return
-            }
             contentType = VIDEO
             this.hp5Url = url
             view.showUrlStatus(true, "")
@@ -77,14 +77,14 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             return
 
         } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
-            view.showUrlStatus(false, "Content not supported")
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
             return
         }
 
         val content = checkIfH5PValidAndReturnItsContent(url)
 
         if (content == null) {
-            view.showUrlStatus(false, "Invalid Url")
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
 
@@ -95,7 +95,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             view.showUrlStatus(isValid, "")
             view.displayUrl(url)
         } else {
-            view.showUrlStatus(isValid, "Content not supported")
+            view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
         }
     }
 
@@ -134,10 +134,12 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             }
         }
 
-        view.showProgress(false)
+
         if (response?.status?.value == 200) {
 
             val content = response.receive<H5PImportData>()
+
+            view.showProgress(false)
             val db = UmAppDatabase.getInstance(context)
             db.contentEntryDao.insert(content.contentEntry)
             db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
