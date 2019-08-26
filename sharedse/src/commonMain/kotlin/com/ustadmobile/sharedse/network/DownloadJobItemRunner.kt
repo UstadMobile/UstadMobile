@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
+import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
@@ -420,11 +421,13 @@ class DownloadJobItemRunner
                                         `is`?.close()
                                     }
 
+
                                     containerManager.addEntries(
                                             ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
                                                     dontUpdateTotals = true),
                                             DownloadedEntrySource(entry.cePath!!, destFile,
-                                                    resumableDownload.md5Sum, destFile.getAbsolutePath(), compression))
+                                                    Base64Coder.decodeToByteArray(entry.cefMd5!!),
+                                                    destFile.getAbsolutePath(), compression))
                                 } else {
                                     numFailures.incrementAndGet()
                                 }
