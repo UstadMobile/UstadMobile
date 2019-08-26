@@ -1,9 +1,9 @@
+import com.github.eerohele.SaxonXsltTask
 import groovy.json.JsonBuilder
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.json.simple.JSONObject
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.apache.tools.ant.taskdefs.condition.Os
-import com.github.eerohele.SaxonXsltTask
 
 plugins {
   id("com.github.eerohele.saxon-gradle") version "0.7.0"
@@ -18,7 +18,7 @@ Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
 /**
  * Generate locale json file which maps code to actual string
  */
-task prepareMessageIDMapJsonFiles{
+task prepareMessageIDMaps{
   File outFile = null
   if(!file(translationsOutPath).exists()){
     file(translationsOutPath).mkdirs()
@@ -28,7 +28,6 @@ task prepareMessageIDMapJsonFiles{
   AtomicInteger messageIdGenerator = new AtomicInteger(2000)
   def localeCode = "en"
   rootProject.fileTree(dir: "core/locale/main").each() { File file ->
-
     Map<String, String> idToTranslationMap = new HashMap<>()
     def jsonObj = new JSONObject()
 
@@ -72,7 +71,14 @@ task prepareMessageIDMapJsonFiles{
       languageMapOfMaps.put(localeCode, idToTranslationMap)
     }
 
-    outFile.write(new JsonBuilder(jsonObj).toPrettyString())
+    try {
+      FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+      jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
+      jsonFile.flush()
+
+    } catch (IOException e) {
+      e.printStackTrace()
+    }
   }
 
 }
@@ -117,7 +123,7 @@ new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
  * Generate XLF files based on default translation
  */
 task generateLocaleFiles{}
-generateLocaleFiles.dependsOn(generateMessageXlfTasks, prepareMessageIDMapJsonFiles)
+generateLocaleFiles.dependsOn(generateMessageXlfTasks, prepareMessageIDMaps)
 
 
 /**
