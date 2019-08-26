@@ -6,11 +6,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
@@ -22,7 +24,6 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLinkView {
-
 
     private lateinit var presenter: ContentEntryImportLinkPresenter
 
@@ -38,11 +39,13 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
     private lateinit var progressBar: ProgressBar
 
+    private lateinit var errorTextView: TextView
+
     override fun onCreate(saved: Bundle?) {
         super.onCreate(saved)
         setContentView(R.layout.activity_content_entry_import_link)
 
-        setUMToolbar(R.id.entry_import_link_toolbar)
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
@@ -64,10 +67,15 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         titleInput = findViewById(R.id.entry_import_link_titleInput)
         titleEdiText = findViewById(R.id.entry_import_link_title_editText)
 
+        errorTextView = findViewById(R.id.import_link_error_message)
+
         editText.addTextChangedListener(textWatcher)
         titleEdiText.addTextChangedListener(titleWatcher)
 
-        progressBar = findViewById(R.id.import_link_progress)
+        progressBar = findViewById(R.id.progressBar)
+        progressBar.isIndeterminate = true
+        progressBar.scaleY = 3f
+        showProgress(false)
 
         presenter = ContentEntryImportLinkPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -114,13 +122,13 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
     override fun showHideVideoTitle(showTitle: Boolean) {
         runOnUiThread {
-            titleInput.visibility = if(showTitle) VISIBLE else GONE
+            titleInput.visibility = if (showTitle) VISIBLE else GONE
         }
     }
 
     override fun showProgress(showProgress: Boolean) {
         runOnUiThread {
-            progressBar.visibility = if(showProgress) VISIBLE else GONE
+            progressBar.visibility = if (showProgress) VISIBLE else GONE
         }
     }
 
@@ -130,6 +138,24 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         }
     }
 
+    override fun enableDisableDoneButton(enable: Boolean) {
+        runOnUiThread {
+            findViewById<View>(R.id.import_link_done).isEnabled = enable
+        }
+    }
+
+    override fun enableDisableEditText(enable: Boolean) {
+        runOnUiThread {
+            titleInput.isEnabled = enable
+            textInput.isEnabled = enable
+        }
+    }
+
+    override fun showHideErrorMessage(show: Boolean) {
+        runOnUiThread {
+            errorTextView.visibility = if (show) VISIBLE else GONE
+        }
+    }
 
     private var textWatcher = object : TextWatcher {
 

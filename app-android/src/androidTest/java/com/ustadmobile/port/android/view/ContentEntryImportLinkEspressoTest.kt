@@ -14,11 +14,14 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.GsonBuilder
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.H5PImportData
+import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -50,7 +53,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
     @Before
     @Throws(IOException::class)
     fun setup() {
-
+        UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         serverDb = UmAppDatabase.getInstance(context, "serverdb")
         defaultDb = UmAppDatabase.getInstance(context)
 
@@ -72,7 +75,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText("hello"), ViewActions.closeSoftKeyboard())
 
-        onView(withId(R.id.textinput_error)).check(matches(withText("Invalid Url")))
+        onView(withId(R.id.textinput_error)).check(matches(withText(UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))))
 
     }
 
@@ -88,11 +91,10 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         mActivityRule.launchActivity(intent)
 
 
-
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(mockWebServer.url("/noh5p").toString()), ViewActions.closeSoftKeyboard())
 
-        onView(withId(R.id.textinput_error)).check(matches(withText("Content not supported")))
+        onView(withId(R.id.textinput_error)).check(matches(withText(UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))))
 
     }
 
