@@ -26,7 +26,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
         }
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
 

@@ -88,7 +88,7 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
 
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         //Update time period options.

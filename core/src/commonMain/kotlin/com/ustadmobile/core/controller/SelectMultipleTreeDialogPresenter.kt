@@ -44,7 +44,7 @@ class SelectMultipleTreeDialogPresenter(context: Any, arguments: Map<String, Str
         }
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
     }
 

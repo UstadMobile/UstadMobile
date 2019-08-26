@@ -60,7 +60,7 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
         }
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         if (currentClazzUid != 0L) {

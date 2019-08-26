@@ -91,7 +91,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      *
      * @param savedState    The state
      */
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         val personDao = repository.personDao

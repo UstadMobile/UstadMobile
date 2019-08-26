@@ -118,7 +118,7 @@ class ClazzLogDetailPresenter(context: Any,
      * @param savedState This is generally the state which Android resumes this app. This is not
      * the arguments. It will most likely be null in a normal application run.
      */
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid

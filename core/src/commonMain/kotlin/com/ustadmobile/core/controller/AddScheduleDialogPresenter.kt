@@ -62,7 +62,7 @@ class AddScheduleDialogPresenter
     }
 
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         if (currentSchedule == null) {
             currentSchedule = Schedule()

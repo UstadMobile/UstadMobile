@@ -78,7 +78,7 @@ AuditLogListView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.insta
 
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         //Get provider

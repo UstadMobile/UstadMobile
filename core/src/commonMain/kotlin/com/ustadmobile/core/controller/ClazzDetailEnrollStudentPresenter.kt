@@ -62,7 +62,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
      *
      * @param savedState The savedState
      */
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         if (currentRole == ClazzMember.ROLE_TEACHER) {

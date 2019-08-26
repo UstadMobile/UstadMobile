@@ -94,7 +94,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         }
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         if (currentEntityRoleUid == 0L) {

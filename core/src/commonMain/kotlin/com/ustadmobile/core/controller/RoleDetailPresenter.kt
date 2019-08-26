@@ -36,7 +36,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         if (currentRoleUid == 0L) {

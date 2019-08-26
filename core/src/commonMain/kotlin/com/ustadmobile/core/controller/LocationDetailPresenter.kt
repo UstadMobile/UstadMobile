@@ -56,7 +56,7 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         }
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         if (currentLocationUid == 0L) {

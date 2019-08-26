@@ -71,7 +71,7 @@ class ClazzStudentListPresenter(context: Any,
      *
      * @param savedState    The saved state
      */
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         this.isTeachersEditable = true

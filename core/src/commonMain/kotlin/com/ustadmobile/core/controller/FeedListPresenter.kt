@@ -37,7 +37,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      *
      * @param savedState    THE SAVED STATE
      */
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid

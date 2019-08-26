@@ -149,7 +149,7 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
 
     }
 
-    fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         getDataAndUpdateTable()
