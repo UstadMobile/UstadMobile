@@ -99,6 +99,8 @@ interface ReportEditView : UstadView {
         val ARG_REPORT_LINK = "ReportLink"
         val ARG_LOCATIONS_SET = "LocationsSelected"
         val ARG_CLASSES_SET = "ClassesSelected"
+        val ARG_ACTOR_SET = "ActorsSet"
+        val ARG_PEOPLE_SET = "PeopleSet"
 
         val ARG_SHOW_THERSHOLD = "ArgShowthreshold"
         val ARG_SHOW_RADIO_GROUP = "ArgShowRadioGroup"

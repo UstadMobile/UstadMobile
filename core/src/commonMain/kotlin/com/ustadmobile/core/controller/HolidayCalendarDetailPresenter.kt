@@ -51,7 +51,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
 
         if (currentCalendarUid == 0L) {
             currentCalendar = UMCalendar()
-            currentCalendar!!.isUmCalendarActive = false
+            currentCalendar!!.umCalendarActive = false
             GlobalScope.launch {
                 val result = umCalendarDao.insertAsync(currentCalendar!!)
                 initFromCalendar(result!!)
@@ -118,7 +118,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
         GlobalScope.launch {
             val result = repository.dateRangeDao.findByUidAsync(rangeUid)
             if (result != null) {
-                result.isDateRangeActive = false
+                result.dateRangeActive = false
             }
         }
     }
@@ -126,7 +126,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
 
     fun handleClickDone() {
 
-        updatedCalendar!!.isUmCalendarActive = true
+        updatedCalendar!!.umCalendarActive = true
         updatedCalendar!!.umCalendarCategory = UMCalendar.CATEGORY_HOLIDAY
         GlobalScope.launch {
             repository.umCalendarDao.updateAsync(updatedCalendar!!)

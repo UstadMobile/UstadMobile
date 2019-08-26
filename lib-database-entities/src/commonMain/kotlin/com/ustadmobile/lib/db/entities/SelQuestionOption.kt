@@ -27,5 +27,5 @@ class SelQuestionOption {
     @UmSyncLastChangedBy
     var selQuestionOptionLastChangedBy: Int = 0
 
-    var isOptionActive: Boolean = false
+    var optionActive: Boolean = false
 }

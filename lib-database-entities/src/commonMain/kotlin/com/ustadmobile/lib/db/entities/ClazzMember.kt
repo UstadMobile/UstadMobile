@@ -20,7 +20,6 @@ open class ClazzMember()  {
      *
      * @param clazzMemberUid
      */
-    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var clazzMemberUid: Long = 0
 

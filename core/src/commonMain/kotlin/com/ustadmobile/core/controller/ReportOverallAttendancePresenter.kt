@@ -101,24 +101,21 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             //Get date and time.
             val dd = everyDayAttendance.logDate
 
-            //TODO: Fix this or move it to UMCalendarUtil.
+            //TODOne: Fix this or move it to UMCalendarUtil.
             //Remove time and just get date
-            val calendar = Calendar.instance
-            calendar.setTimeInMillis(dd)
-            calendar.set(Calendar.HOUR_OF_DAY, 0)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
-            val d = calendar.getTimeInMillis()
+
+            val d = UMCalendarUtil.zeroOutTimeForGivenLongDate(dd)
 
             //Put just date and attendance value
             lineDataMap[d.toFloat() / 1000] = everyDayAttendance.attendancePercentage
             lineDataMapMale[d.toFloat() / 1000] = everyDayAttendance.maleAttendance
             lineDataMapFemale[d.toFloat() / 1000] = everyDayAttendance.femaleAttendance
 
-            tableDataAverage[UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US)] = everyDayAttendance.attendancePercentage * 100
-            tableDataMale[UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US)] = everyDayAttendance.maleAttendance * 100
-            tableDataFemale[UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, Locale.US)] = everyDayAttendance.femaleAttendance * 100
+            //TODO: KMP Locale replace.
+            val localeUS = "localUS"
+            tableDataAverage[UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, localeUS)] = everyDayAttendance.attendancePercentage * 100
+            tableDataMale[UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, localeUS)] = everyDayAttendance.maleAttendance * 100
+            tableDataFemale[UMCalendarUtil.getPrettyDateSuperSimpleFromLong(d, localeUS)] = everyDayAttendance.femaleAttendance * 100
 
         }
 

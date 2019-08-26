@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
+
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.annotation.SyncablePrimaryKey
 

@@ -64,7 +64,7 @@ class AddDateRangeDialogPresenter(context: Any, arguments: Map<String, String>?,
      */
     fun handleAddDateRange() {
 
-        currentDateRange!!.isDateRangeActive = true
+        currentDateRange!!.dateRangeActive = true
         currentDateRange!!.dateRangeUMCalendarUid = currentCalendarUid
 
         if (currentDateRange!!.dateRangeUid == 0L) { //Not persisted. Insert it.

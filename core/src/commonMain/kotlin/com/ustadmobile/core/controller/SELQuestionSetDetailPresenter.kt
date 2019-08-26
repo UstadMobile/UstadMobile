@@ -49,7 +49,7 @@ SELQuestionSetDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemIm
         GlobalScope.launch {
             val selQuestionObj = selQuestionDao.findByUidAsync(selQuestionUid)
             if (selQuestionObj != null) {
-                selQuestionObj.isQuestionActive = false
+                selQuestionObj.questionActive = false
                 selQuestionDao.updateAsync(selQuestionObj)
             }
         }

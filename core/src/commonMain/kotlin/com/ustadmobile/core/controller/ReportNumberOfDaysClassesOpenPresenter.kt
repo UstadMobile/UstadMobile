@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATION_LIST
@@ -23,8 +24,6 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
 
     private var fromDate: Long = 0
     private var toDate: Long = 0
-    private var locations: LongArray? = null
-    private var clazzes: LongArray? = null
     private var clazzList: List<Long>? = null
     private var locationList: List<Long>? = null
     var barChartTimestamps: List<Long>? = null
@@ -43,14 +42,15 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
             toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_LOCATION_LIST)) {
-            //TODO: String CSV to List
-            locations = arguments!!.get(ARG_LOCATION_LIST)
-            locationList = convertLongArray(locations!!)
+            //TODOne: String CSV to List
+            locationList = ArgumentUtil.convertCSVStringToLongList(
+                    arguments!!.get(ARG_LOCATION_LIST)!!.toString())
+
         }
         if (arguments!!.containsKey(ARG_CLAZZ_LIST)) {
-            //TODO: String CSV to List
-            clazzes = arguments!!.get(ARG_CLAZZ_LIST)
-            clazzList = convertLongArray(clazzes!!)
+            //TODOne: String CSV to List
+            clazzList = ArgumentUtil.convertCSVStringToLongList(
+                    arguments!!.get(ARG_CLAZZ_LIST)!!.toString())
         }
 
     }

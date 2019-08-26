@@ -3,7 +3,6 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
@@ -26,7 +25,7 @@ open class UMCalendar {
     var umCalendarCategory: Int = 0
 
     //active
-    var isUmCalendarActive: Boolean = false
+    var umCalendarActive: Boolean = false
 
     //Tester method- Please remove me later
     var isUmCalendarFlag: Boolean = false
@@ -43,7 +42,7 @@ open class UMCalendar {
     constructor(name: String, category: Int) {
         this.umCalendarName = name
         this.umCalendarCategory = category
-        this.isUmCalendarActive = true
+        this.umCalendarActive = true
     }
 
     constructor() {

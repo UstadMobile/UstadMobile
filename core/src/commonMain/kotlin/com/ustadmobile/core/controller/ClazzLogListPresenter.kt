@@ -173,16 +173,11 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
                     attendanceRecordDao.findDailyAttendanceByClazzUidAndDateAsync(currentClazzUid,
                             fromDate, toDate)
 
-            //TODO: KMP Manipulate this on UMCalendar side and fix this.
+            //TODOne: KMP Manipulate this on UMCalendar side and fix this.
             for (everyDayAttendance in result!!) {
+                //null time so that we're only working wiht the same day's group by
                 val dd = everyDayAttendance.logDate
-                val calendar = Calendar.instance
-                calendar.setTimeInMillis(dd)
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                calendar.set(Calendar.MILLISECOND, 0)
-                val d = calendar.getTimeInMillis()
+                val d = UMCalendarUtil.zeroOutTimeForGivenLongDate(dd)
                 val a = everyDayAttendance.attendancePercentage
                 lineDataMap[d.toFloat() / 1000] = a
 

@@ -52,38 +52,37 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
         view.setInProgress(true)
         view.setErrorMessage("")
         //TODO: KMP Login
-        val loginRepoDb = UmAppDatabase.getInstance(context).getRepository(serverUrl,
-                "")
-        loginRepoDb.personDao.login(username, password, object : UmCallback<UmAccount> {
-            override fun onSuccess(result: UmAccount?) {
-                if (result != null) {
-                    result.endpointUrl = serverUrl
-                    view.runOnUiThread(Runnable{ view.setInProgress(false) })
-                    view.setFinishAfficinityOnView()
-                    UmAccountManager.setActiveAccount(result, context)
-
-                    view.forceSync()
-                    val args = HashMap<String, String>()
-                    args.put(ARG_STARTSYNCING, "true")
-                    impl.go(mNextDest!!, args, context)
-                } else {
-                    view.runOnUiThread(Runnable{
-                        view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
-                                context))
-                        view.setPassword("")
-                        view.setInProgress(false)
-                    })
-                }
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                view.runOnUiThread(Runnable{
-                    view.setErrorMessage(impl.getString(
-                            MessageID.login_network_error, context))
-                    view.setInProgress(false)
-                })
-            }
-        })
+//        val loginRepoDb = UmAppDatabase.getInstance(context).getRepository(serverUrl,"")
+//        loginRepoDb.personDao.login(username, password, object : UmCallback<UmAccount> {
+//            override fun onSuccess(result: UmAccount?) {
+//                if (result != null) {
+//                    result.endpointUrl = serverUrl
+//                    view.runOnUiThread(Runnable{ view.setInProgress(false) })
+//                    view.setFinishAfficinityOnView()
+//                    UmAccountManager.setActiveAccount(result, context)
+//
+//                    view.forceSync()
+//                    val args = HashMap<String, String>()
+//                    args.put(ARG_STARTSYNCING, "true")
+//                    impl.go(mNextDest!!, args, context)
+//                } else {
+//                    view.runOnUiThread(Runnable{
+//                        view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
+//                                context))
+//                        view.setPassword("")
+//                        view.setInProgress(false)
+//                    })
+//                }
+//            }
+//
+//            override fun onFailure(exception: Throwable?) {
+//                view.runOnUiThread(Runnable{
+//                    view.setErrorMessage(impl.getString(
+//                            MessageID.login_network_error, context))
+//                    view.setInProgress(false)
+//                })
+//            }
+//        })
     }
 
     companion object {

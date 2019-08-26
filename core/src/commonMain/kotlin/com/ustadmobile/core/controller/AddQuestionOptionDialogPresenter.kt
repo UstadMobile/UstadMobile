@@ -68,7 +68,7 @@ class AddQuestionOptionDialogPresenter (context: Any, arguments: Map<String, Str
      */
     fun handleAddQuestionOption(newTitle: String) {
         currentOption!!.optionText = newTitle
-        currentOption!!.isOptionActive = true
+        currentOption!!.optionActive = true
         GlobalScope.launch {
             val result = questionOptionDao.findByUidAsync(currentOption!!.selQuestionOptionUid)
             if (result != null) {

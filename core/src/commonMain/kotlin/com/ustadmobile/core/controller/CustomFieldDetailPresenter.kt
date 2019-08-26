@@ -80,7 +80,7 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
 
         if (customFieldUid == 0L) {
             currentField = CustomField()
-            currentField!!.isCustomFieldActive = false
+            currentField!!.customFieldActive = false
             currentField!!.customFieldEntityType = Clazz.TABLE_ID
             currentField!!.customFieldType = CustomField.FIELD_TYPE_TEXT
             GlobalScope.launch {
@@ -177,7 +177,7 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     fun handleClickDone() {
-        updatedField!!.isCustomFieldActive = true
+        updatedField!!.customFieldActive = true
         GlobalScope.launch {
             customFieldDao.updateAsync(updatedField!!)
             view.finish()

@@ -139,9 +139,11 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
             initFromClazz(currentClazzUid)
         } else if (arguments!!.containsKey(ClazzEditView.ARG_NEW)) {
             GlobalScope.launch {
-                val timeZoneString : String = ""
+                var timeZoneString : String = ""
                 //TODO: KMP: TimeZone alternative
-                timeZoneString = TimeZone.getDefault().getID()
+//                timeZoneString = TimeZone.getDefault().getID()
+                timeZoneString = ""
+
                 val newLocationUid = repository.locationDao.insertAsync(Location("Temp Location",
                         "Temp location", timeZoneString))
 

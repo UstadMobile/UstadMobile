@@ -48,8 +48,8 @@ SELQuestionEditView) : UstadBaseController<SELQuestionEditView>(context, argumen
             val socialNominationQuestion = SelQuestion()
             socialNominationQuestion.questionText = newQuestion
             socialNominationQuestion.questionIndex = result
-            socialNominationQuestion.isAssignToAllClasses = allClasses
-            socialNominationQuestion.isMultiNominations = multiNominations
+            socialNominationQuestion.assignToAllClasses = allClasses
+            socialNominationQuestion.multiNominations = multiNominations
             socialNominationQuestion.selQuestionSelQuestionSetUid = DEFAULT_QUESTION_SET_UID
 
             selQuestionDao.insertAsync(socialNominationQuestion)

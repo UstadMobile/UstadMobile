@@ -49,23 +49,12 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                     //Add time to ClazzLog's date
                     val startTimeLong = lazzLogSchedule.sceduleStartTime
                     val endTimeLong = lazzLogSchedule.scheduleEndTime
-                    val formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
 
-                    //start time
-                    val startMins = startTimeLong / (1000 * 60)
-                    val cal = Calendar.getInstance()
-                    cal.set(Calendar.HOUR_OF_DAY, (startMins / 60).toInt())
-                    cal.set(Calendar.MINUTE, (startMins % 60).toInt())
-                    val startTime = formatter.format(cal.getTime())
+                    val startTime = UMCalendarUtil.showTimeForGivenLongDate(startTimeLong)
+                    val endTime = UMCalendarUtil.showTimeForGivenLongDate(endTimeLong)
 
-                    //end time
-                    val endMins = endTimeLong / (1000 * 60)
-                    cal.set(Calendar.HOUR_OF_DAY, (endMins / 60).toInt())
-                    cal.set(Calendar.MINUTE, (endMins % 60).toInt())
-                    val endTime = formatter.format(cal.getTime())
                     timeBit = ", $startTime - $endTime"
                 }
-
 
                 val teachers = dbRepository.clazzMemberDao
                         .findClazzMemberWithPersonByRoleForClazzUidSync(
@@ -87,7 +76,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
 
                     val thisEntry = FeedEntry(feedEntryUid, "Record attendance",
                             "Record attendance for class " + clazzName + " (" +
-                                    UMCalendarUtil.getPrettyDateSimpleFromLong(clazzLog.logDate)
+                                    UMCalendarUtil.getPrettyDateSimpleFromLong(clazzLog.logDate, "")
                                     + timeBit + ")",
                             feedLink,
                             clazzName,
@@ -277,20 +266,10 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                     //Add time to ClazzLog's date
                     val startTimeLong = clazzLogSchedule.sceduleStartTime
                     val endTimeLong = clazzLogSchedule.scheduleEndTime
-                    val formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
 
-                    //start time
-                    val startMins = startTimeLong / (1000 * 60)
-                    val cal = Calendar.getInstance()
-                    cal.set(Calendar.HOUR_OF_DAY, (startMins / 60).toInt())
-                    cal.set(Calendar.MINUTE, (startMins % 60).toInt())
-                    val startTime = formatter.format(cal.getTime())
+                    val startTime = UMCalendarUtil.showTimeForGivenLongDate(startTimeLong)
+                    val endTime = UMCalendarUtil.showTimeForGivenLongDate(endTimeLong)
 
-                    //end time
-                    val endMins = endTimeLong / (1000 * 60)
-                    cal.set(Calendar.HOUR_OF_DAY, (endMins / 60).toInt())
-                    cal.set(Calendar.MINUTE, (endMins % 60).toInt())
-                    val endTime = formatter.format(cal.getTime())
                     timeBit = ", $startTime - $endTime"
                 }
 
@@ -298,7 +277,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                         ClazzListView.ARG_CLAZZ_UID + "=" +
                         currentClazzLog.clazzLogClazzUid
                 val feedLinkDesc = ("No attendance recorded for class " + clazzName + " (" +
-                        UMCalendarUtil.getPrettyDateSimpleFromLong(currentClazzLog.logDate)
+                        UMCalendarUtil.getPrettyDateSimpleFromLong(currentClazzLog.logDate, "")
                         + timeBit + ")")
                 val feedLinkTitle = "Record attendance (overdue)"
 
@@ -401,7 +380,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
 
         if (scheduledCheck.checkType == ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH) {
 
-            val clazzLogUid = java.lang.Long.parseLong(params[ScheduledCheck.PARAM_CLAZZ_LOG_UID]!!)
+            val clazzLogUid = params[ScheduledCheck.PARAM_CLAZZ_LOG_UID]!!.toString().toLong()
             val currentClazzLog = dbRepository.clazzLogDao.findByUid(clazzLogUid)
             if (currentClazzLog != null) {
                 val currentClazz = dbRepository.clazzDao.findByUid(currentClazzLog.clazzLogClazzUid)

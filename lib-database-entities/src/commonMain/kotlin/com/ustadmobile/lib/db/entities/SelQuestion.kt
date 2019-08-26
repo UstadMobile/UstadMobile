@@ -28,14 +28,14 @@ class SelQuestion {
     var questionIndex: Int = 0
 
     //If this question is to be assigned to all classes. (if not - not handled / implemented yet).
-    var isAssignToAllClasses: Boolean = false
+    var assignToAllClasses: Boolean = false
 
     //If this question allows for multiple nominations.
-    var isMultiNominations: Boolean = false
+    var multiNominations: Boolean = false
 
     var questionType: Int = 0
 
-    var isQuestionActive: Boolean = false
+    var questionActive: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var selQuestionMasterChangeSeqNum: Long = 0

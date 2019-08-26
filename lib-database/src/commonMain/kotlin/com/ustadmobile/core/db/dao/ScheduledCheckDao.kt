@@ -23,7 +23,7 @@ abstract class ScheduledCheckDao : BaseDao<ScheduledCheck> {
     abstract fun findAllChecksWhereCheckUuidIsNull(): List<ScheduledCheck>
 
     @Query("UPDATE ScheduledCheck SET checkUuid = :checkUuid " + " WHERE scheduledCheckUid = :scheduledCheckUid")
-    abstract fun updateCheckUuid(scheduledCheckId: Long, checkUuid: String)
+    abstract fun updateCheckUuid(scheduledCheckUid: Long, checkUuid: String)
 
     @Query("SELECT ClazzLog.* FROM ClazzLog " +
             " WHERE NOT EXISTS(SELECT scClazzLogUid FROM ScheduledCheck WHERE " +

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
@@ -182,8 +183,9 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         if (selectedLocations != null && !selectedLocations!!.isEmpty()) {
             val selectedLocationsArray = ReportOverallAttendancePresenter.convertLongList(selectedLocations!!)
-            //TODO: Flatted Array to String CSV.
-            args.put(ARG_LOCATIONS_SET, selectedLocationsArray)
+            //TODOne: Flatted Array to String CSV.
+            val selectedLocationsCSV = ArgumentUtil.convertLongListToStringCSV(selectedLocations!!)
+            args.put(ARG_LOCATIONS_SET, selectedLocationsCSV)
         }
 
         impl.go(SelectMultipleTreeDialogView.VIEW_NAME, args, context)
@@ -195,14 +197,16 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         if (selectedLocations != null && !selectedLocations!!.isEmpty()) {
             val selectedLocationsArray = ReportOverallAttendancePresenter.convertLongList(selectedLocations!!)
-            //TODO: Flatted Array to String CSV.
-            args.put(ARG_LOCATIONS_SET, selectedLocationsArray)
+            //TODOne: Flatted Array to String CSV.
+            val selectedLocationsCSV = ArgumentUtil.convertLongListToStringCSV(selectedLocations!!)
+            args.put(ARG_LOCATIONS_SET, selectedLocationsCSV)
         }
 
         if (selectedClasses != null && !selectedClasses!!.isEmpty()) {
             val selectedClassesArray = ReportOverallAttendancePresenter.convertLongList(selectedClasses!!)
-            //TODO: Flatted Array to String CSV.
-            args.put(ARG_CLASSES_SET, selectedClassesArray)
+            //TODOne: Flatted Array to String CSV.
+            val selectedClassesCSV = ArgumentUtil.convertLongListToStringCSV(selectedClasses!!)
+            args.put(ARG_CLASSES_SET, selectedClassesCSV)
         }
         impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
     }

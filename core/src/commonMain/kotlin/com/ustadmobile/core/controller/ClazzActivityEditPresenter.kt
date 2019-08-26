@@ -340,7 +340,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
     fun handleClickPrimaryActionButton() {
 
         if (changeSelected && measurementEntered) {
-            currentClazzActivity!!.isClazzActivityDone = true
+            currentClazzActivity!!.clazzActivityDone = true
             GlobalScope.launch {
                 val result = clazzActivityDao.updateAsync(currentClazzActivity!!)
                 view.finish()

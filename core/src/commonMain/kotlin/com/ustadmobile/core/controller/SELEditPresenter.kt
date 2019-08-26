@@ -243,7 +243,7 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
                 if (existingNominations.size == 1) {
                     val thisNomination = existingNominations[0]
 
-                    thisNomination.isNominationActive = !thisNomination.isNominationActive
+                    thisNomination.nominationActive = !thisNomination.nominationActive
                     questionResponseNominationDao.update(thisNomination)
                 }
             } else {
@@ -253,7 +253,7 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
                         .selQuestionResponseNominationSelQuestionResponseUId = currentQuestionResponseUid
                 responseNomination
                         .selQuestionResponseNominationClazzMemberUid = result.clazzMemberUid
-                responseNomination.isNominationActive = true
+                responseNomination.nominationActive = true
 
                 questionResponseNominationDao.insert(responseNomination)
             }

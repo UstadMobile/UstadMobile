@@ -32,7 +32,7 @@ open class ClazzActivity {
     var clazzActivityClazzUid: Long = 0
 
     //is it done?
-    var isClazzActivityDone: Boolean = false
+    var clazzActivityDone: Boolean = false
 
     //the quantity of activity - from unit of measure (frequency, duration, binary)
     var clazzActivityQuantity: Long = 0

@@ -97,7 +97,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
         GlobalScope.launch {
             val thisFeed = feedEntryDao.findByUidAsync(feedUid)
             if (thisFeed != null) {
-                thisFeed.isFeedEntryDone = true
+                thisFeed.feedEntryDone = true
                 feedEntryDao.update(thisFeed)
                 updateFeedEntries()
             }

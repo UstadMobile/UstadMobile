@@ -58,9 +58,17 @@ class ZipUtil {
                 entry.setTime(sourceFile.lastModified()) // to keep modification time after unzipping
                 out.putNextEntry(entry)
                 var count: Int
-                while ((count = origin.read(data, 0, BUFFER)) != -1) {
+
+                while (true) {
+                    val count = origin.read(data, 0, BUFFER)
+                    if(count == -1){
+                        break
+                    }
                     out.write(data, 0, count)
                 }
+//                while ((count = origin.read(data, 0, BUFFER)) != -1) {
+//                    out.write(data, 0, count)
+//                }
             }
             out.close()
         } catch (e: Exception) {
@@ -99,9 +107,18 @@ class ZipUtil {
                 entry.setTime(currentFile.lastModified()) // to keep modification time after unzipping
                 out.putNextEntry(entry)
                 var count: Int
-                while ((count = origin.read(data, 0, BUFFER)) != -1) {
+
+                while (true) {
+                    val count = origin.read(data, 0, BUFFER)
+                    if(count == -1){
+                        break
+                    }
                     out.write(data, 0, count)
                 }
+
+//                while ((count = origin.read(data, 0, BUFFER)) != -1) {
+//                    out.write(data, 0, count)
+//                }
                 origin.close()
             }
         }
@@ -154,10 +171,19 @@ class ZipUtil {
                 val buffer = ByteArray(1024)
                 var len: Int
                 //copy the file to the zip
-                while ((len = input.read(buffer)) > 0) {
+                while (true) {
+                    val len = input.read(buffer)
+                    if(len < 0){
+                        break
+                    }
                     println(len)
                     zip.write(buffer, 0, len)
                 }
+
+//                while ((len = input.read(buffer)) > 0) {
+//                    println(len)
+//                    zip.write(buffer, 0, len)
+//                }
                 zip.closeEntry()
                 zip.flush()
                 input.close()
@@ -190,9 +216,18 @@ class ZipUtil {
                     val entry = ZipEntry(files[i].substring(files[i].lastIndexOf("/") + 1))
                     out.putNextEntry(entry)
                     var count: Int
-                    while ((count = origin.read(data, 0, BUFFER)) != -1) {
+
+                    while (true) {
+                        val count = origin.read(data, 0, BUFFER)
+                        if(count == -1){
+                            break
+                        }
                         out.write(data, 0, count)
                     }
+
+//                    while ((count = origin.read(data, 0, BUFFER)) != -1) {
+//                        out.write(data, 0, count)
+//                    }
                     origin.close()
                 }
 

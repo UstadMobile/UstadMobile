@@ -38,8 +38,8 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     abstract fun findByEntitiyAndPersonGroupSync(tableId: Int, entityUid: Long, groupUid: Long): List<EntityRole>
 
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erRoleUid = :roleUid")
-    abstract suspend fun findGroupByRoleAndEntityTypeAndUid(tableId: Int, entityUid: Long) :
-            List<EntityRole>
+    abstract suspend fun findGroupByRoleAndEntityTypeAndUid(tableId: Int, entityUid: Long,
+                                                            roleUid: Long) :List<EntityRole>
 
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erRoleUid = :roleUid")
     abstract fun findGroupByRoleAndEntityTypeAndUidSync(tableId: Int, entityUid: Long,

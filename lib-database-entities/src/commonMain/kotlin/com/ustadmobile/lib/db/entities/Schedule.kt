@@ -61,7 +61,7 @@ class Schedule {
     var scheduleLastChangedBy: Int = 0
 
     //active or removed
-    var isScheduleActive: Boolean = false
+    var scheduleActive: Boolean = false
 
     companion object {
 

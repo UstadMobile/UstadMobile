@@ -75,7 +75,7 @@ class AddScheduleDialogPresenter
      */
     fun handleAddSchedule() {
         currentSchedule!!.scheduleClazzUid = currentClazzUid
-        currentSchedule!!.isScheduleActive = true
+        currentSchedule!!.scheduleActive = true
 
         //Creates ClazzLogs for today (since ClazzLogs are automatically only created for tomorrow)
         val runAfterInsertOrUpdate = Runnable {

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_ACTOR_LIST
@@ -12,8 +13,10 @@ import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_FR
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_LOCATION_LIST
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_PEOPLE_LIST
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_TO_TIME
+import com.ustadmobile.core.view.ReportEditView.Companion.ARG_ACTOR_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
+import com.ustadmobile.core.view.ReportEditView.Companion.ARG_PEOPLE_SET
 import com.ustadmobile.core.view.SelectPeopleDialogView.Companion.ARG_SELECT_ACTOR
 
 
@@ -102,29 +105,33 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
         if (this.selectedClasses != null && !this.selectedClasses!!.isEmpty()) {
             val classesArray = arrayOfNulls<Long>(this.selectedClasses!!.size)
             this.selectedClasses!!.toTypedArray()
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_AUDITLOG_CLASS_LIST, classesArray)
+            //TODOne: KMP flatten out list to CSVs
+            val classesCSV = ArgumentUtil.convertLongListToStringCSV(selectedClasses!!)
+            args.put(ARG_AUDITLOG_CLASS_LIST, classesCSV)
         }
 
         if (this.selectedLocations != null && !this.selectedLocations!!.isEmpty()) {
             val locationsArray = arrayOfNulls<Long>(this.selectedLocations!!.size)
             this.selectedLocations!!.toTypedArray()
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_AUDITLOG_LOCATION_LIST, locationsArray)
+            //TODOne: KMP flatten out list to CSVs
+            val locationsCSV = ArgumentUtil.convertLongListToStringCSV(selectedLocations!!)
+            args.put(ARG_AUDITLOG_LOCATION_LIST, locationsCSV)
         }
 
         if (this.selectedPeople != null && !this.selectedPeople!!.isEmpty()) {
             val peopleArray = arrayOfNulls<Long>(this.selectedPeople!!.size)
             this.selectedPeople!!.toTypedArray()
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_AUDITLOG_PEOPLE_LIST, peopleArray)
+            //TODOne: KMP flatten out list to CSVs
+            val peopleCSV = ArgumentUtil.convertLongListToStringCSV(selectedPeople!!)
+            args.put(ARG_AUDITLOG_PEOPLE_LIST, peopleCSV)
         }
 
         if (this.selectedActors != null && !this.selectedActors!!.isEmpty()) {
             val actorArray = arrayOfNulls<Long>(this.selectedActors!!.size)
             this.selectedActors!!.toTypedArray()
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_AUDITLOG_ACTOR_LIST, actorArray)
+            //TODOne: KMP flatten out list to CSVs
+            val actorCSV = ArgumentUtil.convertLongListToStringCSV(selectedActors!!)
+            args.put(ARG_AUDITLOG_ACTOR_LIST, actorCSV)
         }
 
         impl.go(AuditLogListView.VIEW_NAME, args, context)
@@ -158,14 +165,16 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
 
         if (this.selectedLocations != null && !this.selectedLocations!!.isEmpty()) {
             val selectedLocationsArray = ReportOverallAttendancePresenter.convertLongList(this.selectedLocations!!)
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_LOCATIONS_SET, selectedLocationsArray)
+            //TODOne: KMP flatten out list to CSVs
+            val selectedLocationsCSV = ArgumentUtil.convertLongListToStringCSV(selectedLocations!!)
+            args.put(ARG_LOCATIONS_SET, selectedLocationsCSV)
         }
 
         if (this.selectedClasses != null && !this.selectedClasses!!.isEmpty()) {
             val selectedClassesArray = ReportOverallAttendancePresenter.convertLongList(this.selectedClasses!!)
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_CLASSES_SET, selectedClassesArray)
+            //TODOne: KMP flatten out list to CSVs
+            val selectedClassesCSV = ArgumentUtil.convertLongListToStringCSV(selectedClasses!!)
+            args.put(ARG_CLASSES_SET, selectedClassesCSV)
         }
         impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
     }
@@ -175,8 +184,9 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
 
         if (this.selectedLocations != null && !this.selectedLocations!!.isEmpty()) {
             val selectedLocationsArray = ReportOverallAttendancePresenter.convertLongList(this.selectedLocations!!)
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_LOCATIONS_SET, selectedLocationsArray)
+            //TODOne: KMP flatten out list to CSVs
+            val selectedLocationsCSV = ArgumentUtil.convertLongListToStringCSV(selectedLocations!!)
+            args.put(ARG_LOCATIONS_SET, selectedLocationsCSV)
         }
 
         impl.go(SelectMultipleTreeDialogView.VIEW_NAME, args, context)
@@ -188,8 +198,9 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
 
         if (this.selectedPeople != null && !this.selectedPeople!!.isEmpty()) {
             val selectedPeopleArray = ReportOverallAttendancePresenter.convertLongList(this.selectedPeople!!)
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_LOCATIONS_SET, selectedPeopleArray)
+            //TODOne: KMP flatten out list to CSVs
+            val selectedPeopleCSV = ArgumentUtil.convertLongListToStringCSV(selectedPeople!!)
+            args.put(ARG_PEOPLE_SET, selectedPeopleCSV)
         }
 
         impl.go(SelectPeopleDialogView.VIEW_NAME, args, context)
@@ -201,8 +212,9 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
 
         if (this.selectedActors != null && !this.selectedActors!!.isEmpty()) {
             val selectedPeopleArray = ReportOverallAttendancePresenter.convertLongList(this.selectedActors!!)
-            //TODO: KMP flatten out list to CSVs
-            args.put(ARG_LOCATIONS_SET, selectedPeopleArray)
+            //TODOne: KMP flatten out list to CSVs
+            val selectedActorCSV = ArgumentUtil.convertLongListToStringCSV(selectedActors!!)
+            args.put(ARG_ACTOR_SET, selectedActorCSV)
         }
         args.put(ARG_SELECT_ACTOR, "yes")
         impl.go(SelectPeopleDialogView.VIEW_NAME, args, context)

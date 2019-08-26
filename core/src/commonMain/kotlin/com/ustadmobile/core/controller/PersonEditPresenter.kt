@@ -204,23 +204,26 @@ class PersonEditPresenter
 
         getAllPersonCustomFields()
 
-        var thisP = this
+        val thisP = this
         //Get all the currently set headers and fields:
         GlobalScope.launch {
             val result = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditMode()
 
+            val cleanedResult = ArrayList<PersonDetailPresenterField>()
             //Remove old custom fields
-            val fieldsIterator = result!!.iterator()
+            val fieldsIterator = result.iterator()
             while (fieldsIterator.hasNext()) {
                 val field = fieldsIterator.next()
                 val fieldIndex = field.fieldIndex
                 if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                    //TODO: Remove from iterator in Kotlin
-                    fieldsIterator.remove()
+                    //TODOne: Remove from iterator in Kotlin
+                    //fieldsIterator.remove()
+                }else{
+                    cleanedResult.add(field)
                 }
             }
 
-            headersAndFields = result
+            headersAndFields = cleanedResult
 
             //Get person live data and observe
             personLiveData = personDao.findByUidLive(personUid)
@@ -279,8 +282,7 @@ class PersonEditPresenter
             val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
             if (personPicture != null) {
                 //TODO: KMP Atachment
-                view.updateImageOnView(personPictureDao.getAttachmentPath(
-                        personPicture.personPictureUid))
+                //view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture.personPictureUid))
             }
         }
 
@@ -299,7 +301,8 @@ class PersonEditPresenter
                                 valueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>?) {
 
         //TODO: Locale on Kotlin Core
-        val currnetLocale = Locale.getDefault()
+//        val currnetLocale = Locale.getDefault()
+        val currnetLocale = ""
 
         updatePersonPic(thisPerson)
 

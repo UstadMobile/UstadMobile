@@ -29,7 +29,7 @@ class CustomField {
     //Entity type table id (eg: Class or Person)
     var customFieldEntityType: Int = 0
     //if false it is considered not active and it wont show up in the app. effectively "deleted"
-    var isCustomFieldActive: Boolean = false
+    var customFieldActive: Boolean = false
     //Default value
     var customFieldDefaultValue: String? = null
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Embedded
 import com.ustadmobile.lib.database.annotation.UmEmbedded
 
 /**
@@ -8,5 +9,6 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded
 class ClazzMemberWithPerson : ClazzMember() {
 
     @UmEmbedded
+    @Embedded
     var person: Person? = null
 }

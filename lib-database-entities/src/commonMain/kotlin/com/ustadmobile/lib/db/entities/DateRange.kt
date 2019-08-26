@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.annotation.SyncablePrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
@@ -33,7 +32,7 @@ class DateRange {
 
     var dateRangeUMCalendarUid: Long = 0
 
-    var isDateRangeActive: Boolean = false
+    var dateRangeActive: Boolean = false
 
     var dateRangeName: String? = null
 
@@ -42,15 +41,15 @@ class DateRange {
     constructor(fromDate: Long, toDate: Long) {
         this.dateRangeFromDate = fromDate
         this.dateRangeToDate = toDate
-        this.isDateRangeActive = true
+        this.dateRangeActive = true
     }
 
     constructor(fromDate: Long) {
         this.dateRangeFromDate = fromDate
-        this.isDateRangeActive = true
+        this.dateRangeActive = true
     }
 
     constructor() {
-        this.isDateRangeActive = true
+        this.dateRangeActive = true
     }
 }

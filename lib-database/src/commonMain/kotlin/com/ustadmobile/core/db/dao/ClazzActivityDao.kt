@@ -70,8 +70,8 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
 
 
     @Query("SELECT  " +
-            " COUNT(CASE WHEN ClazzActivity.clazzActivityGoodFeedback THEN 1 END) as good, " +
-            " COUNT(CASE WHEN NOT ClazzActivity.clazzActivityGoodFeedback THEN 1 END) as bad, " +
+            " COUNT(CASE WHEN ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as good, " +
+            " COUNT(CASE WHEN NOT ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as bad, " +
             " (:clazzUid) as clazzUid, " +
             " ClazzActivity.clazzActivityLogDate as dayDate " +
             " FROM ClazzActivity " +
@@ -83,8 +83,8 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
                                                     : List<DailyActivityNumbers>
 
     @Query("SELECT  " +
-            " COUNT(CASE WHEN ClazzActivity.clazzActivityGoodFeedback THEN 1 END) as good, " +
-            " COUNT(CASE WHEN NOT ClazzActivity.clazzActivityGoodFeedback THEN 1 END) as bad, " +
+            " COUNT(CASE WHEN ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as good, " +
+            " COUNT(CASE WHEN NOT ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as bad, " +
             " (:clazzUid) as clazzUid, " +
             " ClazzActivity.clazzActivityLogDate as dayDate " +
             " FROM ClazzActivity " +
@@ -106,7 +106,7 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
             //Create one
             val newClazzActivity = ClazzActivity()
             newClazzActivity.clazzActivityLogDate = currentLogDate
-            newClazzActivity.isClazzActivityDone = false //should be set to true with done
+            newClazzActivity.clazzActivityDone = false //should be set to true with done
             newClazzActivity.clazzActivityClazzUid = currentClazzUid
 
             val res = insertAsync(newClazzActivity)

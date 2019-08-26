@@ -147,7 +147,7 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
 
     fun handleClickDone() {
 
-        mUpdatedQuestion!!.isQuestionActive = true
+        mUpdatedQuestion!!.questionActive = true
         mUpdatedQuestion!!.selQuestionSelQuestionSetUid = currentQuestionSetUid
         GlobalScope.launch {
             val questionInDB = questionDao.findByUidAsync(mUpdatedQuestion!!.selQuestionUid)
@@ -180,7 +180,7 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
         GlobalScope.launch {
             val result = questionOptionDao.findByUidAsync(questionOptionUid)
             if (result != null) {
-                result.isOptionActive = false
+                result.optionActive = false
                 questionOptionDao.updateAsync(result)
             }
         }

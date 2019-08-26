@@ -55,12 +55,15 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
     fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        //Set all timezones to view
-        //TODO: KMP Timezone availability ?
-        allTZ = Arrays.asList(*TimeZone.getAvailableIDs())
+        //TODO: KMP Fix when TimeZone is working
+        //Get all time zones as list of string and set it on the view.
+//        allTZ = Arrays.asList(*TimeZone.getAvailableIDs())
+        allTZ = emptyList()
         view.setTimeZonesList(allTZ!!)
-        //Get default timezone
-        chosenTZ = TimeZone.getDefault().getID()
+        //Set choosen Timezone as default timezone
+//        chosenTZ = TimeZone.getDefault().getID()
+        chosenTZ = ""
+
         //Get Teacher role
         getRole()
 

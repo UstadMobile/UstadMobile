@@ -49,12 +49,12 @@ abstract class ScheduleDao : BaseDao<Schedule> {
 
     suspend fun disableSchedule(scheduleUid: Long) {
         val result = findByUidAsync(scheduleUid)
-        result!!.isScheduleActive = false
+        result!!.scheduleActive = false
         update(result)
 
     }
 
-    @Query("SELECT * FROM DateRange " +
+    @Query("SELECT DateRange.* FROM DateRange " +
             " LEFT JOIN Clazz ON Clazz.clazzUid = :clazzUid " +
             " WHERE DateRange.dateRangeUMCalendarUid = Clazz.clazzHolidayUMCalendarUid ")
     abstract fun findAllHolidayDateRanges(clazzUid: Long): List<DateRange>

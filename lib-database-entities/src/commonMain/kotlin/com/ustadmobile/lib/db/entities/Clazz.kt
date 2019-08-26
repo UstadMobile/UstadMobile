@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 @Entity
 open class Clazz() {
 
-    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var clazzUid: Long = 0
 

@@ -87,7 +87,7 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
 
                 //TODO: KMP: Reset password when Ready ?
                 val result = personAuthDao.updateAsync(currentPersonAuth!!)
-                personAuthDao.resetPassword(currentPersonUid, passwordSet, loggedInPersonUid)
+                //personAuthDao.resetPassword(currentPersonUid, passwordSet, loggedInPersonUid)
                 personAuthDao.updateAsync(currentPersonAuth!!)
                 view.finish()
 

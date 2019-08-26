@@ -23,7 +23,7 @@ class SelQuestionResponseNomination {
     var selQuestionResponseNominationSelQuestionResponseUId: Long = 0
 
     //Added 31012019 sel
-    var isNominationActive: Boolean = false
+    var nominationActive: Boolean = false
 
     //Renamed:
     @UmSyncMasterChangeSeqNum

@@ -49,7 +49,7 @@ class FeedEntry()  {
      */
     var feedEntryHash: Long = 0
 
-    var isFeedEntryDone: Boolean = false
+    var feedEntryDone: Boolean = false
 
     var feedEntryClazzLogUid: Long = 0
 

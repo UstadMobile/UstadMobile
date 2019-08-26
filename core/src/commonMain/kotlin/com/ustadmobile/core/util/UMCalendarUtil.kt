@@ -150,6 +150,19 @@ object UMCalendarUtil {
         return cal.format(format)
     }
 
+    fun showTimeForGivenLongDate(thisDate:Long):String{
+        val format: DateFormat = DateFormat("HH:mmm")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    fun zeroOutTimeForGivenLongDate(thisDate: Long):Long{
+        val cal = DateTime(thisDate)
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfWeekInt, hour = 0,
+                minute = 0, second = 0, milliseconds = 0)
+        return ntcal.unixMillisLong
+    }
+
     fun getPrettyTimeFromLong(thisDate: Long, locale: Any?): String {
         val format: DateFormat = DateFormat("HH:mm")
         val cal = DateTime(thisDate)

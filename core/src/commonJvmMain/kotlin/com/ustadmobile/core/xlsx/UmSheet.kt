@@ -27,7 +27,9 @@ class UmSheet {
             return returnMe
         }
 
-    inner class TableValue internal constructor(internal var rowIndex: Int, internal var colIndex: Int, internal var value: String)
+    inner class TableValue internal constructor(internal var rowIndex: Int,
+                                                internal var colIndex: Int,
+                                                internal var value: String)
 
     constructor(newTitle: String) {
         this.title = newTitle

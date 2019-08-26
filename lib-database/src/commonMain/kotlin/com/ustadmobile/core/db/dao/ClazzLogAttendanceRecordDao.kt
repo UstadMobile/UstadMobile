@@ -264,13 +264,13 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +
-            "AND ClazzMember.role = 1")
+            "AND ClazzMember.clazzMemberRole = 1")
     abstract fun findAttendanceRecordsWithPersonByClassLogId(clazzLogUid: Long): DataSource.Factory<Int, ClazzLogAttendanceRecordWithPerson>
 
     @Query("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE " +
             " ClazzMember.clazzMemberClazzUid = :clazzId " +
             " AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT +
+            " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
             " AND ClazzMember.clazzMemberClazzUid " +
             " EXCEPT " +
             "SELECT clazzLogAttendanceRecordClazzMemberUid FROM ClazzLogAttendanceRecord " +
@@ -281,8 +281,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Query(QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE)
     abstract suspend fun findDailyAttendanceByClazzUidAndDateAsync(clazzUid: Long, fromDate: Long,
-                                                           toDate: Long):
-            List<DailyAttendanceNumbers>?
+                                   toDate: Long):List<DailyAttendanceNumbers>?
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
@@ -305,7 +304,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " LEFT JOIN ClazzMember ON " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLog.done = 1 " +
+            " WHERE ClazzLog.clazzLogDone = 1 " +
             " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
@@ -337,7 +336,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLog.done = 1 " +
+            " WHERE ClazzLog.clazzLogDone = 1 " +
             " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
             " AND Clazz.clazzLocationUid IN (:locations)  " +
             " AND ClazzLog.logDate > :fromDate " +
@@ -369,7 +368,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLog.done = 1 " +
+            " WHERE ClazzLog.clazzLogDone = 1 " +
             " AND Clazz.clazzLocationUid IN (:locations)  " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
@@ -382,16 +381,16 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
-            " then 1 else 0 end) * 0.5 / SUM(CASE WHEN clazzMember.role = 1 THEN 1 else 0 end) as attendancePercentage, " +
+            " then 1 else 0 end) * 0.5 / SUM(CASE WHEN clazzMember.clazzMemberRole = 1 THEN 1 else 0 end) as attendancePercentage, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
             " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
             " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
             " ClazzLog.clazzLogClazzUid as clazzUid, " +
             " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
-            " then 1 else 0 end) * 1.0 / SUM(CASE WHEN person.gender = 1 AND clazzMember.role = 1 THEN 1 else 0 end) as femaleAttendance, " +
+            " then 1 else 0 end) * 1.0 / SUM(CASE WHEN person.gender = 1 AND clazzMember.clazzMemberRole = 1 THEN 1 else 0 end) as femaleAttendance, " +
             " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
-            " then 1 else 0 end) * 1.0/ SUM(CASE WHEN person.gender = 2 AND clazzMember.role = 1 THEN 1 else 0 end) as maleAttendance, " +
+            " then 1 else 0 end) * 1.0/ SUM(CASE WHEN person.gender = 2 AND clazzMember.clazzMemberRole = 1 THEN 1 else 0 end) as maleAttendance, " +
             " ClazzLog.clazzLogUid as clazzLogUid " +
             " from ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON " +
@@ -400,7 +399,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " LEFT JOIN ClazzMember ON " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLog.done = 1 " +
+            " WHERE ClazzLog.clazzLogDone = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
@@ -469,8 +468,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT + " THEN 1 ELSE 0 END) as daysAbsent, " +
             " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL + " THEN 1 ELSE 0 END) as daysPartial, " +
             " COUNT(*) as clazzDays, " +
-            " ClazzMember.dateLeft, " +
-            " ClazzMember.clazzMemberActive,  " +
             " Person.gender, " +
             " Person.dateOfBirth " +
             " FROM ClazzLogAttendanceRecord " +
@@ -479,13 +476,12 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " LEFT JOIN ClazzLog ON ClazzLog.clazzLogUid = clazzLogAttendanceRecordClazzLogUid " +
             " LEFT JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid " +
             " WHERE " +
-            " ClazzLog.done = 1 " +
+            " ClazzLog.clazzLogDone = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             " GROUP BY clazzMemberUid " +
             " ORDER BY clazzName ")
-    abstract suspend fun findMasterReportDataForAllAsync(fromDate: Long, toDate: Long) :
-    List<ReportMasterItem>
+    abstract suspend fun findMasterReportDataForAllAsync(fromDate: Long, toDate: Long) :List<ReportMasterItem>
 
     @Query("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :attendanceStatus " +
             "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid AND " +
@@ -516,7 +512,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
 
         const val QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE = " SELECT " +
-                "  clazzlog.clazzloguid AS clazzLogUid, clazzlog.done, clazzlog.logdate, " +
+                "  clazzlog.clazzloguid AS clazzLogUid,  clazzlog.logdate, " +
                 "  (  SELECT ( SUM(CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = 1 THEN 1 ELSE 0 END) " +
                 "      *1.0/Count(*)   )  " +
                 "    FROM ClazzLogAttendanceRecord WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +

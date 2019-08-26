@@ -83,7 +83,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Query("SELECT * FROM ClazzLog")
     abstract fun findAll(): List<ClazzLog>
 
-    @Query("UPDATE ClazzLog SET done = 1 where clazzLogUid = :clazzLogUid ")
+    @Query("UPDATE ClazzLog SET clazzLogDone = 1 where clazzLogUid = :clazzLogUid ")
     abstract suspend fun updateDoneForClazzLogAsync(clazzLogUid: Long) : Int
 
     @Query("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
@@ -92,17 +92,19 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Query("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
     abstract fun findByClazzUidAsList(clazzUid: Long): List<ClazzLog>
 
-    @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT canceled")
+    @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT clazzLogCancelled")
     abstract fun findByClazzUidNotCanceled(clazzUid: Long): DataSource.Factory<Int, ClazzLog>
 
     @Query("SELECT ClazzLog.*, Schedule.sceduleStartTime, Schedule.scheduleEndTime, " +
             "Schedule.scheduleFrequency FROM ClazzLog " +
             "LEFT JOIN Schedule ON Schedule.scheduleUid = ClazzLog.clazzLogScheduleUid " +
-            "WHERE clazzLogClazzUid = :clazzUid AND NOT canceled ORDER BY logDate ASC")
+            "WHERE clazzLogClazzUid = :clazzUid AND NOT clazzLogCancelled ORDER BY logDate ASC")
     abstract fun findByClazzUidNotCancelledWithSchedule(clazzUid: Long): DataSource.Factory<Int, ClazzLogWithScheduleStartEndTimes>
 
-    @Query("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " + "numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
-    abstract suspend fun updateClazzAttendanceNumbersAsync(clazzLogUid: Long, numPresent: Int,
+    @Query("UPDATE ClazzLog SET clazzLogNumPresent = :clazzLogNumPresent,  " +
+            "clazzLogNumAbsent = :numAbsent, " + "clazzLogNumPartial = :numPartial " +
+            "WHERE clazzLogUid = :clazzLogUid")
+    abstract suspend fun updateClazzAttendanceNumbersAsync(clazzLogUid: Long, clazzLogNumPresent: Int,
                                                    numAbsent: Int, numPartial: Int) : Any
 
 
@@ -160,8 +162,8 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     }
 
-    @Query("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")
-    abstract fun cancelFutureInstances(scheduleUid: Long, after: Long, canceled: Boolean)
+    @Query("UPDATE ClazzLog SET clazzLogCancelled = :clazzLogCancelled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")
+    abstract fun cancelFutureInstances(scheduleUid: Long, after: Long, clazzLogCancelled: Boolean)
 
 
     @Query("SELECT ClazzLog.clazzLogUid, ClazzLog.logDate FROM ClazzLog " + " WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate ASC")

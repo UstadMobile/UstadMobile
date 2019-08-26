@@ -172,7 +172,8 @@ class ClazzLogDetailPresenter(context: Any,
             prettyDate = impl.getString(MessageID.today, context)
         }
         //TODO: KMP Locale
-        val currentLocale = Locale.getDefault()
+//        val currentLocale = Locale.getDefault()
+        val currentLocale = ""
         prettyDate += " (" +
                 UMCalendarUtil.getPrettyDateFromLong(currentClazzLog!!.logDate, currentLocale) + ")"
 
@@ -183,20 +184,10 @@ class ClazzLogDetailPresenter(context: Any,
         if (currentSchedule != null) {
             val startTimeLong = currentSchedule!!.sceduleStartTime
             val endTimeLong = currentSchedule!!.scheduleEndTime
-            val formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
 
-            //start time
-            val startMins = startTimeLong / (1000 * 60)
-            val cal = Calendar.instance
-            cal.set(Calendar.HOUR_OF_DAY, (startMins / 60).toInt())
-            cal.set(Calendar.MINUTE, (startMins % 60).toInt())
-            val startTime = formatter.format(cal.getTime())
+            val startTime = UMCalendarUtil.showTimeForGivenLongDate(startTimeLong)
+            val endTime = UMCalendarUtil.showTimeForGivenLongDate(endTimeLong)
 
-            //end time
-            val endMins = endTimeLong / (1000 * 60)
-            cal.set(Calendar.HOUR_OF_DAY, (endMins / 60).toInt())
-            cal.set(Calendar.MINUTE, (endMins % 60).toInt())
-            val endTime = formatter.format(cal.getTime())
             prettyDate = "$prettyDate($startTime - $endTime)"
         }
 

@@ -42,10 +42,10 @@ class PersonDetailPresenterField {
     var headerMessageId: Int = 0
 
     //If this presenter field is visible on PersonDetail
-    var isViewModeVisible: Boolean = false
+    var viewModeVisible: Boolean = false
 
     //If this presenter field is visible on PersonEdit/PersonNew
-    var isEditModeVisible: Boolean = false
+    var editModeVisible: Boolean = false
 
     //Set if its uneditable
     //sometimes we want to display a field but not be able to edit it. This is the flag for that.
