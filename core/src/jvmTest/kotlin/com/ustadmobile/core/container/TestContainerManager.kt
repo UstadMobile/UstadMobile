@@ -3,9 +3,9 @@ package com.ustadmobile.core.container
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
+import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -279,8 +279,61 @@ class TestContainerManager {
                     containerManager.getInputStream(containerEntry).readBytes())
 
         }
+    }
 
+    @Test
+    fun givenFileExistsInOtherContainer_whenLinkExistingItemsCalled_thenShouldCreateContentEntryAndReturnNonExistingItems() {
+        runBlocking {
+            val container1 = Container();
+            container1.containerUid = db.containerDao.insert(container1)
+            val container1Manager = ContainerManager(container1, db, repo, containerTmpDir.absolutePath)
+            container1Manager.addEntries(ContainerManager.FileEntrySource(testFiles[0], testFiles[0].name))
 
+            val container2 = Container()
+            container2.containerUid = db.containerDao.insert(container2)
+            val container2Manager = ContainerManager(container2, db, repo, containerTmpDir.absolutePath)
+            val container1Entry = container1Manager.getEntry(testFiles[0].name)!!
+            val entryToDownload1= ContainerEntryWithMd5(cefMd5 = container1Entry.containerEntryFile!!.cefMd5)
+            entryToDownload1.ceContainerUid = container2.containerUid
+            entryToDownload1.cePath = testFiles[0].name
+            val entriesToDownload = listOf(entryToDownload1)
+
+            val remainingEntriesToDownload = container2Manager.linkExistingItems(entriesToDownload)
+
+            Assert.assertEquals("After calling linkExistingItems with existing matching md5, entry created",
+                    1, container2Manager.allEntries.size)
+            Assert.assertEquals("1 Entry for container2 created in db", 1,
+                    db.containerEntryDao.findByContainer(container2.containerUid).size)
+            Assert.assertTrue("Given 1 already downloaded entry, remaining items to download is empty",
+                    remainingEntriesToDownload.isEmpty())
+        }
+    }
+
+    @Test
+    fun givenFileAlreadyInContainer_whenLinkExistingItemsCalled_thenShouldDoNothingAndReturnNonExistingItems() {
+        runBlocking {
+            val container1 = Container();
+            container1.containerUid = db.containerDao.insert(container1)
+            val container1Manager = ContainerManager(container1, db, repo, containerTmpDir.absolutePath)
+            container1Manager.addEntries(ContainerManager.FileEntrySource(testFiles[0], testFiles[0].name))
+            val numEntriesBefore = container1Manager.allEntries.size
+
+            val container1Entry = container1Manager.getEntry(testFiles[0].name)!!
+            val entryToDownload1 = ContainerEntryWithMd5(cefMd5 = container1Entry.containerEntryFile!!.cefMd5)
+            entryToDownload1.cePath = testFiles[0].name
+            entryToDownload1.ceContainerUid = container1.containerUid
+
+            val remainingEntriesToDownload = container1Manager.linkExistingItems(listOf(entryToDownload1))
+            Assert.assertEquals("After adding entry, before calling linkExistingItems, size is 1 entry",
+                    1, numEntriesBefore)
+            Assert.assertEquals("After calling linkExistingItems with existing matching md5, still has one entry",
+                    1, container1Manager.allEntries.size)
+            Assert.assertEquals("Db has one entry for container", 1,
+                    db.containerEntryDao.findByContainer(container1.containerUid).size)
+
+            Assert.assertTrue("Given 1 already downloaded entry, remaining items to download is empty",
+                    remainingEntriesToDownload.isEmpty())
+        }
     }
 
 

@@ -11,6 +11,7 @@
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
     <color name="secondary_text_light">#41727272</color>
+    <color name="red">#FF0000</color>
 
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>

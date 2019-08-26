@@ -3,19 +3,26 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
+import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.stopServerOnCancellation
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.toUtf8Bytes
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
+import okio.Okio
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import java.io.ByteArrayInputStream
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -78,16 +85,26 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         server.stop(1, 5, TimeUnit.SECONDS)
     }
 
-
     @Test
-    fun givenWhenHandleUrlTextUpdated_whenEmptyScreen_showInvalidUrlMessage() {
+    fun givenWhenHandleUrlTextUpdated_whenInvalidUrl_showInvalidUrlMessage() {
         runBlocking {
             presenter.handleUrlTextUpdated("hello")
-            verify(mockView).showUrlStatus(false, "Invalid Url")
+            verify(mockView).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
         }
-
-
     }
+
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenUrlRespondsWithError_showInvalidUrlMessage() {
+
+        mockWebServer.enqueue(MockResponse().setBody("no h5p here").setResponseCode(404))
+        mockWebServer.start()
+
+        runBlocking {
+            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+            verify(mockView).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+        }
+    }
+
 
     @Test
     fun givenWhenHandleUrlTextUpdated_whenNotHp5_showUnSupportedContent() {
@@ -97,18 +114,17 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
         runBlocking {
             presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
-
-            verify(mockView, timeout(15000)).showUrlStatus(false, "Content not supported")
+            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
         }
 
 
     }
 
-    //20/Aug/2019: This test needs to be reworked after H5P and video import is live
-    //@Test
-    fun givenWhenHandleUrlTextUpdated_whenHp5_showValidAndNoMessage() {
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenContentSupportedButNotH5P_showInvalidUrl() {
 
-        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody(""))
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
 
@@ -116,17 +132,100 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         runBlocking {
             presenter.handleUrlTextUpdated(url)
 
-            verify(mockView, timeout(15000)).showUrlStatus(true, "")
-            verify(mockView, timeout(15000)).displayUrl(url)
+            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
 
         }
 
     }
 
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenContentSupportedButNull_showInvalidUrl() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse())
+        mockWebServer.start()
+        val url = mockWebServer.url("/somehp5here").toString()
+
+
+        runBlocking {
+            presenter.handleUrlTextUpdated(url)
+            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+
+        }
+
+    }
+
+
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenContentIsNotH5P_showInvalidUrl() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("no h5p here"))
+        mockWebServer.start()
+        val url = mockWebServer.url("/somehp5here").toString()
+
+
+        runBlocking {
+            presenter.handleUrlTextUpdated(url)
+            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+
+        }
+
+    }
+
+
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenVideoSizeIsTooBig_showErrorMessageWithFileSize() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", FILE_SIZE).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.start()
+
+        runBlocking {
+            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+        }
+    }
+
+
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenValidVideo_showEditTitleToUser() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.start()
+
+        runBlocking {
+            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+            verify(mockView, timeout(1000)).showUrlStatus(true, "")
+            verify(mockView, timeout(1000)).showHideVideoTitle(true)
+        }
+    }
+
+
+    @Test
+    fun givenWhenHandleUrlTextUpdated_whenHp5_showValidAndNoMessage() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration"))
+        mockWebServer.start()
+        val url = mockWebServer.url("/somehp5here").toString()
+
+
+        runBlocking {
+            presenter.handleUrlTextUpdated(url)
+
+            verify(mockView, timeout(1000)).showUrlStatus(true, "")
+            verify(mockView, timeout(1000)).displayUrl(url)
+
+        }
+
+    }
+
+
     //20/Aug/2019: This test needs to be reworked after H5P and video import is live
-    //@Test
+    @Test
     fun givenUserClicksDone_whenH5PLinkIsValid_thenDownloadContent() {
 
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
@@ -138,9 +237,10 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
             presenter.handleUrlTextUpdated(url)
             presenter.handleClickImport()
-
+            verify(mockView, timeout(1000)).showProgress(true)
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
+            verify(mockView, timeout(1000)).showProgress(false)
             Assert.assertEquals("Func for h5p download called", 1, count)
 
 
@@ -148,6 +248,89 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
 
     }
+
+
+    @Test
+    fun givenUserClicksDone_whenVideoLinkValid_thenShowErrorIfUserDidntEnterTitle() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.start()
+        val url = mockWebServer.url("/somehp5here").toString()
+
+        runBlocking {
+
+            presenter.handleUrlTextUpdated(url)
+            presenter.handleClickImport()
+            verify(mockView, timeout(1000)).showProgress(true)
+            verify(mockView, timeout(1000)).showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
+            verify(mockView, timeout(1000)).showProgress(false)
+        }
+
+
+    }
+
+    @Test
+    fun givenUserClicksDone_whenVideoLinkValidAndTitleEntered_thenDownloadContent() {
+
+        mockWebServer.enqueue(MockResponse().addHeader("Content-Length", 11).addHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().addHeader("Content-Length", 11).addHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("data"))
+        mockWebServer.start()
+        val url = mockWebServer.url("/somehp5here").toString()
+
+        runBlocking {
+
+            presenter.handleUrlTextUpdated(url)
+            presenter.handleTitleChanged("Video Title")
+            presenter.handleClickImport()
+            verify(mockView, timeout(1000)).showProgress(true)
+            Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
+            Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
+            verify(mockView, timeout(1000)).showProgress(false)
+            Assert.assertEquals("Func for h5p not called", 0, count)
+
+        }
+
+
+    }
+
+    @Test
+    fun givenUserClicksDone_whenVideoLinkValidAndTitleEntered_thenImportFail() {
+
+
+        mockWebServer.enqueue(MockResponse().addHeader("Content-Length", 11).addHeader("Content-Type", "video/mp4").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("data").setResponseCode(404))
+        mockWebServer.start()
+
+        val args = Hashtable<String, String>()
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
+        presenter = ContentEntryImportLinkPresenter(context,
+                args, mockView, mockWebServer.url("").toString())
+        presenter.onCreate(args)
+
+
+        val url = mockWebServer.url("/somehp5here").toString()
+
+        runBlocking {
+
+            presenter.handleUrlTextUpdated(url)
+            presenter.handleTitleChanged("Video Title")
+            presenter.handleClickImport()
+            verify(mockView, timeout(1000)).showHideErrorMessage(false)
+            verify(mockView, timeout(1000)).showProgress(true)
+            verify(mockView, timeout(1000)).showProgress(false)
+            verify(mockView, timeout(1000)).enableDisableEditText(true)
+            verify(mockView, timeout(1000)).showHideErrorMessage(true)
+
+        }
+
+
+    }
+
 
 
 }
