@@ -32,8 +32,8 @@ exports.config = {
 
     jasmine.getEnv().addReporter(new JUnitXmlReporter({
         consolidateAll: true,
-        savePath: './build/test-results/',
-        filePrefix: 'results_xml'
+        savePath: './build/test-results/angular/',
+        filePrefix: 'index'
     }));
   },
   
@@ -50,16 +50,16 @@ exports.config = {
 
        testConfig = {
            reportTitle: 'Test Report',
-           outputPath: './build/test-results/',
-           outputFilename: 'results_html',
-           screenshotPath: './build/test-results/screenshots',
+           outputPath: './build/test-results/angular/',
+           outputFilename: 'index',
+           screenshotPath: './build/test-results/angular/screenshots',
            testBrowser: browserName,
            browserVersion: browserVersion,
            modifiedSuiteName: false,
-           screenshotsOnlyOnFailure: true,
+           screenshotsOnlyOnFailure: false,
            testPlatform: platform
        };
-       new HTMLReport().from('./build/test-results/results_xml.xml', testConfig);
+       new HTMLReport().from('./build/test-results/angular/index.xml', testConfig);
    });
 }
 };
