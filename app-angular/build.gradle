@@ -14,34 +14,11 @@ apply plugin: 'java'
 def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
 Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
 
-//Prepare dynamic task to generate XLF for each language locale
-def generateTranslationLocaleTasks = []
-new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
-
-  def langCode = ""
-  if(localeDir.name.contains("-")) {
-    langCode = localeDir.name.substring(localeDir.name.indexOf("-") + 1)
-  }else {
-    langCode = "en"
-  }
-  def taskName = "generateLocale_${langCode}"
-
-  task "${taskName}" (type: SaxonXsltTask){
-    stylesheet project.file("locale-transform.xsl")
-    input file(project.file("src/assets/locale/messages.xlf"))
-    output file(project.file("src/assets/locale/messages.${langCode}.xlf"))
-    parameters(
-      strings_src: "${localeDir.absolutePath}/strings_ui.xml)"
-    )
-  }
-  generateTranslationLocaleTasks.push(taskName)
-}
-
 
 /**
- * Generate locale json file whic maps code to actual string
+ * Generate locale json file which maps code to actual string
  */
-task prepareMessageIDMapJsonFilesForWeb{
+task prepareMessageIDMapJsonFiles{
   File outFile = null
   if(!file(translationsOutPath).exists()){
     file(translationsOutPath).mkdirs()
@@ -103,7 +80,7 @@ task prepareMessageIDMapJsonFilesForWeb{
 /**
  * Generate default XLF file to be used for other translation
  */
-task generateDefaultLocaleXlf{
+task generateMessageXlf{
   doLast{
     exec {
       workingDir rootProject.file("app-angular/").path
@@ -111,14 +88,37 @@ task generateDefaultLocaleXlf{
     }
   }
 }
-generateDefaultLocaleXlf.dependsOn(prepareMessageIDMapJsonFilesForWeb)
-generateDefaultLocaleXlf.finalizedBy(generateTranslationLocaleTasks)
+
+//Prepare dynamic task to generate XLF for each language locale
+def generateMessageXlfTasks = []
+new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
+
+  def langCode = ""
+  if(localeDir.name.contains("-")) {
+    langCode = localeDir.name.substring(localeDir.name.indexOf("-") + 1)
+  }else {
+    langCode = "en"
+  }
+  def generateMessageTask = "generateMessage_${langCode}"
+
+  task "${generateMessageTask}" (type: SaxonXsltTask){
+    stylesheet project.file("locale-transform.xsl")
+    input file(project.file("src/assets/locale/messages.xlf"))
+    output file(project.file("src/assets/locale/messages.${langCode}.xlf"))
+    parameters(
+      strings_src: "${localeDir.absolutePath}/strings_ui.xml)"
+    )
+  }
+  project.tasks.findByName(generateMessageTask).dependsOn(generateMessageXlf)
+  generateMessageXlfTasks.push(generateMessageTask)
+}
 
 /**
- * Generate other locale XLF files based on default translation
+ * Generate XLF files based on default translation
  */
-task generateOtherXliff{}
-generateOtherXliff.dependsOn(generateDefaultLocaleXlf)
+task generateLocaleFiles{}
+generateLocaleFiles.dependsOn(generateMessageXlfTasks, prepareMessageIDMapJsonFiles)
+
 
 /**
  * Remove all temp directory and files (node_modules and package-lock.json) from app-angular
@@ -167,10 +167,10 @@ task startEnd2EndTest{
   }
 }
 
+
 startEnd2EndTest.dependsOn(build)
 
-build.dependsOn(installDependencies)
+build.dependsOn(installDependencies, generateLocaleFiles)
 installDependencies.dependsOn(":packPreparedModules",deleteAllTempFileAndDirs)
-generateOtherXliff.shouldRunAfter(installDependencies)
 
 
