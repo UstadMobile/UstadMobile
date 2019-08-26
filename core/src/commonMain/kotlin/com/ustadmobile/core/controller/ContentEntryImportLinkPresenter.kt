@@ -7,7 +7,6 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.lib.db.entities.H5PImportData
-import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.head
@@ -17,7 +16,6 @@ import io.ktor.client.response.discardRemaining
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
 import kotlinx.coroutines.Runnable
-import kotlinx.io.IOException
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
@@ -30,6 +28,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     private var contentType = -1
 
+    var isDoneEnabled = false
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
@@ -39,7 +39,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     suspend fun handleUrlTextUpdated(url: String) {
         view.showHideVideoTitle(false)
-        view.enableDisableDoneButton(false)
+        isDoneEnabled = false
+        view.checkDoneButton()
 
         var response: HttpResponse?
         try {
@@ -77,7 +78,6 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             this.hp5Url = url
             view.showUrlStatus(true, "")
             view.showHideVideoTitle(true)
-            view.enableDisableDoneButton(true)
             return
 
         } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
@@ -98,7 +98,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             this.hp5Url = url
             view.showUrlStatus(isValid, "")
             view.displayUrl(url)
-            view.enableDisableDoneButton(true)
+            isDoneEnabled = true
+            view.checkDoneButton()
         } else {
             view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
         }
@@ -112,29 +113,33 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         view.enableDisableEditText(false)
         view.showHideErrorMessage(false)
 
-        when (contentType) {
-            HTML -> {
+        try {
+            when (contentType) {
+                HTML -> {
 
-                response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
-                    parameter("hp5Url", hp5Url)
-                    parameter("parentUid", parentContentEntryUid)
+                    response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
+                        parameter("hp5Url", hp5Url)
+                        parameter("parentUid", parentContentEntryUid)
+                    }
+
                 }
+                VIDEO -> {
 
+                    if (videoTitle.isNullOrEmpty()) {
+                        view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
+                        view.showProgress(false)
+                        return
+                    }
+
+                    response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
+                        parameter("hp5Url", hp5Url)
+                        parameter("parentUid", parentContentEntryUid)
+                        parameter("title", videoTitle)
+                    }
+                }
             }
-            VIDEO -> {
-
-                if (videoTitle.isNullOrEmpty()) {
-                    view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
-                    view.showProgress(false)
-                    return
-                }
-
-                response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
-                    parameter("hp5Url", hp5Url)
-                    parameter("parentUid", parentContentEntryUid)
-                    parameter("title", videoTitle)
-                }
-            }
+        } catch (e: Exception) {
+            response = null
         }
 
 
@@ -167,7 +172,11 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     fun handleTitleChanged(title: String) {
         this.videoTitle = title
-        view.showNoTitleEntered("")
+        if (title.isNotEmpty()) {
+            isDoneEnabled = true
+            view.checkDoneButton()
+            view.showNoTitleEntered("")
+        }
     }
 
     companion object {

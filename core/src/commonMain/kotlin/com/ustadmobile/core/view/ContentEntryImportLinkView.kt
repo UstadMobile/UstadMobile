@@ -14,7 +14,7 @@ interface ContentEntryImportLinkView : UstadView {
 
     fun showProgress(showProgress: Boolean)
 
-    fun enableDisableDoneButton(enable: Boolean)
+    fun checkDoneButton()
 
     fun enableDisableEditText(enable: Boolean)
 
