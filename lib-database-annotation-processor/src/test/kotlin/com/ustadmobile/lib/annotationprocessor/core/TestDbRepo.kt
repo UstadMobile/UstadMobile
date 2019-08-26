@@ -48,21 +48,25 @@ class TestDbRepo {
         val syncDao = ExampleDatabase2SyncDao_JdbcKt(db)
         val gson = Gson()
         install(Routing) {
-//            ExampleSyncableDaoRoute(db.exampleSyncableDao(), db, gson, syncDao)
-//            ExampleDatabase2SyncDao_Route(syncDao, db, gson)
             ExampleDatabase2_KtorRoute(db, gson)
         }
     }
 
     fun setupClientAndServerDb() {
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
-                .build() as ExampleDatabase2
-        clientDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1")
-                .build() as ExampleDatabase2
-        serverDb!!.clearAllTables()
-        clientDb!!.clearAllTables()
-        server = createSyncableDaoServer(serverDb!!)
-        server!!.start(wait = false)
+        try {
+            serverDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
+                    .build() as ExampleDatabase2
+            clientDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1")
+                    .build() as ExampleDatabase2
+            serverDb!!.clearAllTables()
+            clientDb!!.clearAllTables()
+            server = createSyncableDaoServer(serverDb!!)
+            server!!.start(wait = false)
+        }catch(e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
+
     }
 
     @Before

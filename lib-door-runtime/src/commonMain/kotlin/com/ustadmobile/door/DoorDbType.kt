@@ -13,7 +13,7 @@ class DoorDbType {
         val SUPPORTED_TYPES = listOf(SQLITE, POSTGRES)
 
         @JvmStatic
-        val PRODUCT_NAME_MAP = mapOf("POSTGRES" to SQLITE,
+        val PRODUCT_NAME_MAP = mapOf("PostgreSQL" to POSTGRES,
                 "SQLite" to SQLITE);
 
         fun typeIntFromProductName(productName: String) = PRODUCT_NAME_MAP[productName] ?: -1
