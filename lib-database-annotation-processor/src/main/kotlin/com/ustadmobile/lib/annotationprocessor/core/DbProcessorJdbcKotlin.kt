@@ -30,6 +30,7 @@ import javax.tools.Diagnostic
 import com.ustadmobile.door.SyncableDoorDatabase
 import kotlin.math.absoluteValue
 import kotlin.random.Random
+import com.ustadmobile.door.DoorDbType
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
@@ -457,6 +458,9 @@ fun fieldsOnEntity(entityType: TypeElement) = entityType.enclosedElements.filter
             && !it.modifiers.contains(Modifier.STATIC)
 }
 
+internal val masterDbVals = mapOf(DoorDbType.SQLITE to listOf("0", "1"),
+        DoorDbType.POSTGRES to listOf("false", "true"))
+
 internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
                                      execSqlFunName: String = "_stmt.executeUpdate",
                                      processingEnv: ProcessingEnvironment,
@@ -465,14 +469,29 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
     codeBlock.add("val _nodeId = %T.nextInt(1, %T.MAX_VALUE)\n",
             Random::class, Int::class)
             .add("println(\"Setting SyncNode nodeClientId = \$_nodeId\")\n")
-            .add("$execSqlFunName(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES·(\$_nodeId,\${if(master) 1 else 0})\")\n")
+            .add("$execSqlFunName(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES")
+
+    when(jdbcDbType) {
+        DoorDbType.SQLITE -> codeBlock.add("·(\$_nodeId,\${if(master)·1·else·0})")
+        DoorDbType.POSTGRES -> codeBlock.add("·(\$_nodeId,\$master)")
+    }
+
+    codeBlock.add("\")\n")
+
+
     syncableEntityTypesOnDb(dbType, processingEnv).forEach {
-        if(isUpdate) {
-            codeBlock.add("$execSqlFunName(%S)\n",
-                    "UPDATE sqlite_sequence SET seq = ((SELECT nodeClientId FROM SyncNode) << 32) WHERE name = '${it.simpleName}'")
-        }else {
-            codeBlock.add("$execSqlFunName(%S)\n",
-                    "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
+        val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
+        if(jdbcDbType == DoorDbType.SQLITE) {
+            if(isUpdate) {
+                codeBlock.add("$execSqlFunName(%S)\n",
+                        "UPDATE sqlite_sequence SET seq = ((SELECT nodeClientId FROM SyncNode) << 32) WHERE name = '${it.simpleName}'")
+            }else {
+                codeBlock.add("$execSqlFunName(%S)\n",
+                        "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
+            }
+        }else if(jdbcDbType == DoorDbType.POSTGRES){
+            codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
+                    "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
         }
     }
 
