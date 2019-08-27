@@ -7,7 +7,6 @@ import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
-import kotlin.random.Random
 
 @Database(entities = [NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
@@ -193,24 +192,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
-            builder.addMigrations(object : DoorMigration(20, 22) {
-                override fun migrate(db: DoorSqlDatabase) {
-
+            builder.addMigrations(object : DoorMigration(20, 24) {
+                override fun migrate(database: DoorSqlDatabase) {
 
                     // SyncNode
-                    db.execSQL("CREATE TABLE IF NOT EXISTS SyncNode (  nodeClientId  INTEGER  PRIMARY KEY  NOT NULL , master  BOOL )")
-                    db.execSQL("INSERT INTO SyncNode(nodeClientId,master) SELECT devicebits, master FROM syncdevicebits")
-                    db.execSQL("DROP TABLE syncdevicebits")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SyncNode (  nodeClientId  INTEGER  PRIMARY KEY  NOT NULL , master  BOOL )")
+                    database.execSQL("INSERT INTO SyncNode(nodeClientId,master) SELECT devicebits, master FROM syncdevicebits")
+                    database.execSQL("DROP TABLE syncdevicebits")
 
                     // Content Entry
-                    db.execSQL("ALTER TABLE ContentEntry ADD COLUMN imported BOOL")
+                    database.execSQL("ALTER TABLE ContentEntry ADD COLUMN imported BOOL")
 
 
                     // Agent Entity
-                    db.execSQL("CREATE TABLE IF NOT EXISTS AgentEntity (  agentMbox  TEXT , agentMbox_sha1sum  TEXT , agentOpenid  TEXT , agentAccountName  TEXT , agentHomePage  TEXT , agentPersonUid  BIGINT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , agentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS AgentEntity_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS AgentEntity_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS AgentEntity (  agentMbox  TEXT , agentMbox_sha1sum  TEXT , agentOpenid  TEXT , agentAccountName  TEXT , agentHomePage  TEXT , agentPersonUid  BIGINT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , agentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS AgentEntity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS AgentEntity_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_68_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -225,23 +223,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_68_trig 
                     |AFTER UPDATE OR INSERT ON AgentEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_68_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS AgentEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS AgentEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
 
                     // Clazz
-                    db.execSQL("ALTER TABLE Clazz ADD COLUMN clazzLocationUid  BIGINT")
+                    database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzLocationUid  BIGINT")
 
                     // CLazzMember
-                    db.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , dateJoined  BIGINT , dateLeft  BIGINT , role  INTEGER , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzMember_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzMember_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , dateJoined  BIGINT , dateLeft  BIGINT , role  INTEGER , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzMember_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzMember_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_11_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -256,19 +254,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_11_trig 
                     |AFTER UPDATE OR INSERT ON ClazzMember 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_11_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
                     // ContextXObjectStatementJoin
-                    db.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_66_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -283,19 +281,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_66_trig 
                     |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_66_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
                     // StateContentEntity
-                    db.execSQL("CREATE TABLE IF NOT EXISTS StateContentEntity (  stateContentStateUid  BIGINT , stateContentKey  TEXT , stateContentValue  TEXT , isIsactive  BOOL , stateContentMasterChangeSeqNum  BIGINT , stateContentLocalChangeSeqNum  BIGINT , stateContentLastChangedBy  INTEGER , stateContentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS StateContentEntity_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS StateContentEntity_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StateContentEntity (  stateContentStateUid  BIGINT , stateContentKey  TEXT , stateContentValue  TEXT , isIsactive  BOOL , stateContentMasterChangeSeqNum  BIGINT , stateContentLocalChangeSeqNum  BIGINT , stateContentLastChangedBy  INTEGER , stateContentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS StateContentEntity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS StateContentEntity_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_72_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -310,20 +308,20 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_72_trig 
                     |AFTER UPDATE OR INSERT ON StateContentEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_72_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS StateContentEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StateContentEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
 
                     // State Entity
-                    db.execSQL("CREATE TABLE IF NOT EXISTS StateEntity (  stateId  TEXT , agentUid  BIGINT , activityId  TEXT , registration  TEXT , isIsactive  BOOL , timestamp  BIGINT , stateMasterChangeSeqNum  BIGINT , stateLocalChangeSeqNum  BIGINT , stateLastChangedBy  INTEGER , stateUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS StateEntity_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS StateEntity_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StateEntity (  stateId  TEXT , agentUid  BIGINT , activityId  TEXT , registration  TEXT , isIsactive  BOOL , timestamp  BIGINT , stateMasterChangeSeqNum  BIGINT , stateLocalChangeSeqNum  BIGINT , stateLastChangedBy  INTEGER , stateUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS StateEntity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS StateEntity_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_70_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -338,20 +336,20 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_70_trig 
                     |AFTER UPDATE OR INSERT ON StateEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_70_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS StateEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StateEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
 
                     // Statement Entity
-                    db.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity (  statementId  TEXT , personUid  BIGINT , verbUid  BIGINT , xObjectUid  BIGINT , subStatementActorUid  BIGINT , substatementVerbUid  BIGINT , subStatementObjectUid  BIGINT , agentUid  BIGINT , instructorUid  BIGINT , authorityUid  BIGINT , teamUid  BIGINT , resultCompletion  BOOL , resultSuccess  TINYINT , resultScoreScaled  BIGINT , resultScoreRaw  BIGINT , resultScoreMin  BIGINT , resultScoreMax  BIGINT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT , stored  BIGINT , contextRegistration  TEXT , contextPlatform  TEXT , contextStatementId  TEXT , fullStatement  TEXT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , statementUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS StatementEntity_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS StatementEntity_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity (  statementId  TEXT , personUid  BIGINT , verbUid  BIGINT , xObjectUid  BIGINT , subStatementActorUid  BIGINT , substatementVerbUid  BIGINT , subStatementObjectUid  BIGINT , agentUid  BIGINT , instructorUid  BIGINT , authorityUid  BIGINT , teamUid  BIGINT , resultCompletion  BOOL , resultSuccess  TINYINT , resultScoreScaled  BIGINT , resultScoreRaw  BIGINT , resultScoreMin  BIGINT , resultScoreMax  BIGINT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT , stored  BIGINT , contextRegistration  TEXT , contextPlatform  TEXT , contextStatementId  TEXT , fullStatement  TEXT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , statementUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS StatementEntity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS StatementEntity_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_60_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -366,19 +364,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_60_trig 
                     |AFTER UPDATE OR INSERT ON StatementEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
 
                     // Verb Entity
-                    db.execSQL("CREATE TABLE IF NOT EXISTS VerbEntity (  urlId  TEXT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , verbUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS VerbEntity_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS VerbEntity_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS VerbEntity (  urlId  TEXT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , verbUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS VerbEntity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS VerbEntity_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_62_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -393,20 +391,20 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_62_trig 
                     |AFTER UPDATE OR INSERT ON VerbEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_62_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS VerbEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS VerbEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
 
                     // XLangMapEntry
-                    db.execSQL("CREATE TABLE IF NOT EXISTS XLangMapEntry (  verbLangMapUid  BIGINT , objectLangMapUid  BIGINT , languageLangMapUid  BIGINT , languageVariantLangMapUid  BIGINT , valueLangMap  TEXT , statementLangMapMasterCsn  INTEGER , statementLangMapLocalCsn  INTEGER , statementLangMapLcb  INTEGER , statementLangMapUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS XLangMapEntry_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS XLangMapEntry_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS XLangMapEntry (  verbLangMapUid  BIGINT , objectLangMapUid  BIGINT , languageLangMapUid  BIGINT , languageVariantLangMapUid  BIGINT , valueLangMap  TEXT , statementLangMapMasterCsn  INTEGER , statementLangMapLocalCsn  INTEGER , statementLangMapLcb  INTEGER , statementLangMapUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS XLangMapEntry_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS XLangMapEntry_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_74_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -421,19 +419,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_74_trig 
                     |AFTER UPDATE OR INSERT ON XLangMapEntry 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_74_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS XLangMapEntry_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS XLangMapEntry_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
                     // XObjectEntity
-                    db.execSQL("CREATE TABLE IF NOT EXISTS XObjectEntity (  objectType  TEXT , objectId  TEXT , definitionType  TEXT , interactionType  TEXT , correctResponsePattern  TEXT , objectContentEntryUid  BIGINT , xObjectMasterChangeSeqNum  BIGINT , xObjectocalChangeSeqNum  BIGINT , xObjectLastChangedBy  INTEGER , xObjectUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS XObjectEntity_mcsn_seq")
-                    db.execSQL("CREATE SEQUENCE IF NOT EXISTS XObjectEntity_lcsn_seq")
-                    db.execSQL("""
+                    database.execSQL("CREATE TABLE IF NOT EXISTS XObjectEntity (  objectType  TEXT , objectId  TEXT , definitionType  TEXT , interactionType  TEXT , correctResponsePattern  TEXT , objectContentEntryUid  BIGINT , xObjectMasterChangeSeqNum  BIGINT , xObjectocalChangeSeqNum  BIGINT , xObjectLastChangedBy  INTEGER , xObjectUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS XObjectEntity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS XObjectEntity_lcsn_seq")
+                    database.execSQL("""
                     |CREATE OR REPLACE FUNCTION 
                     | inc_csn_64_fn() RETURNS trigger AS ${'$'}${'$'}
                     | BEGIN  
@@ -448,34 +446,34 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
-                    db.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER inc_csn_64_trig 
                     |AFTER UPDATE OR INSERT ON XObjectEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inc_csn_64_fn()
                     """.trimMargin())
-                    db.execSQL("CREATE TABLE IF NOT EXISTS XObjectEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS XObjectEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
 
                     // DownloadJob
-                    db.execSQL("ALTER TABLE DownloadJob ADD COLUMN totalBytesToDownload BIGINT, ADD COLUMN bytesDownloadedSoFar BIGINT, ADD COLUMN djRootContentEntryUid  BIGINT, ADD COLUMN meteredNetworkAllowed  BOOL,ADD COLUMN djDestinationDir TEXT")
+                    database.execSQL("ALTER TABLE DownloadJob ADD COLUMN totalBytesToDownload BIGINT, ADD COLUMN bytesDownloadedSoFar BIGINT, ADD COLUMN djRootContentEntryUid  BIGINT, ADD COLUMN meteredNetworkAllowed  BOOL,ADD COLUMN djDestinationDir TEXT")
 
                     // DownloadJobItem
-                    db.execSQL("ALTER TABLE ADD COLUMN djiContainerUid  BIGINT , ADD COLUMN djiContentEntryUid  BIGINT")
-                    db.execSQL("ALTER TABLE DROP COLUMN djicontententryfileuid")
+                    database.execSQL("ALTER TABLE ADD COLUMN djiContainerUid  BIGINT , ADD COLUMN djiContentEntryUid  BIGINT")
+                    database.execSQL("ALTER TABLE DROP COLUMN djicontententryfileuid")
 
                     // DownloadSet
-                    db.execSQL("DROP TABLE DownloadSet")
-                    db.execSQL("DROP TABLE DownloadSetItem")
-                    db.execSQL("DROP SEQUENCE IF EXISTS downloadset_dsuid_seq")
-                    db.execSQL("DROP SEQUENCE IF EXISTS downloadsetitem_dsiuid_seq")
+                    database.execSQL("DROP TABLE DownloadSet")
+                    database.execSQL("DROP TABLE DownloadSetItem")
+                    database.execSQL("DROP SEQUENCE IF EXISTS downloadset_dsuid_seq")
+                    database.execSQL("DROP SEQUENCE IF EXISTS downloadsetitem_dsiuid_seq")
 
                     // PersonAuth
-                    db.execSQL("DROP TABLE PersonAuth")
-                    db.execSQL("DROP SEQUENCE IF EXISTS spk_seq_30")
-                    db.execSQL("DROP TRIGGER IF EXISTS inc_csn_30_trig ON PersonAuth")
-                    db.execSQL("DROP FUNCTION IF EXISTS inc_csn_30_fn")
-                    db.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth (  personAuthUid  BIGINT  PRIMARY KEY  NOT NULL , passwordHash  TEXT )")
+                    database.execSQL("DROP TABLE PersonAuth")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_30")
+                    database.execSQL("DROP TRIGGER IF EXISTS inc_csn_30_trig ON PersonAuth")
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_30_fn")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth (  personAuthUid  BIGINT  PRIMARY KEY  NOT NULL , passwordHash  TEXT )")
 
 
                 }
