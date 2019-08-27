@@ -652,8 +652,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
         for(dbProductType in DoorDbType.SUPPORTED_TYPES) {
             codeBlock.beginControlFlow("$dbProductType -> ")
-                    .add("// - create for this $dbProductType \n")
-
+                    .add("// - create for this ${DoorDbType.PRODUCT_INT_TO_NAME_MAP[dbProductType]} \n")
             codeBlock.add("_stmt.executeUpdate(\"CREATE·TABLE·IF·NOT·EXISTS·${DoorDatabase.DBINFO_TABLENAME}" +
                     "·(dbVersion·int·primary·key,·dbHash·varchar(255))\")\n")
             codeBlock.add("_stmt.executeUpdate(\"INSERT·INTO·${DoorDatabase.DBINFO_TABLENAME}·" +
@@ -662,15 +661,24 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
             val dbEntityTypes = entityTypesOnDb(dbTypeElement, processingEnv)
             for(entityType in dbEntityTypes) {
                 val entityTypeSpec = entityType.asEntityTypeSpec()
+                val fieldElements = getEntityFieldElements(entityTypeSpec, false)
+                val fieldListStr = fieldElements.joinToString { it.name }
+                codeBlock.add("/* MIGRATION: \n")
+                        .add("_stmt.executeUpdate(%S)\n", "ALTER TABLE ${entityTypeSpec.name} RENAME to ${entityTypeSpec.name}_OLD")
+                        .add("*/\n")
                 codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
                         entityTypeSpec, dbProductType))
+                codeBlock.add("/* MIGRATION: \n")
+                        .add("_stmt.executeUpdate(%S)\n", "INSERT INTO ${entityTypeSpec.name} ($fieldListStr) SELECT $fieldListStr FROM ${entityTypeSpec.name}_OLD")
+                        .add("_stmt.executeUpdate(%S)\n", "DROP TABLE ${entityTypeSpec.name}_OLD")
+                        .add("*/\n")
 
                 codeBlock.add(generateCreateIndicesCodeBlock(
                         entityType.getAnnotation(Entity::class.java)
                                 .indices.map { IndexMirror(it) }.toTypedArray(),
                         entityType.simpleName.toString(), "_stmt.executeUpdate"))
 
-                for(field in getEntityFieldElements(entityTypeSpec, false)) {
+                for(field in fieldElements) {
                     if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
                                     && it.members.findBooleanMemberValue("index") ?: false }) {
                         codeBlock.add("_stmt.executeUpdate(%S)\n",
