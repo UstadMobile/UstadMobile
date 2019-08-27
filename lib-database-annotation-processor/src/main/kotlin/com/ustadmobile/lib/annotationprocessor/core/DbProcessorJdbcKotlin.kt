@@ -361,6 +361,8 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
         INT -> codeBlock.add("0")
         LONG -> codeBlock.add("0L")
         BYTE -> codeBlock.add("0.toByte()")
+        FLOAT -> codeBlock.add("0.toFloat()")
+        DOUBLE -> codeBlock.add("0.toDouble()")
         BOOLEAN -> codeBlock.add("false")
         String::class.asTypeName() -> codeBlock.add("null as String?")
         else -> {
