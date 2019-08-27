@@ -16,7 +16,7 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
 
     private val callbacks = mutableListOf<DoorDatabaseCallback>()
 
-    private val migrations = mutableListOf<DoorMigration>()
+    private val migrationList = mutableListOf<DoorMigration>()
 
     actual companion object {
         actual fun <T : DoorDatabase> databaseBuilder(context: Any, dbClass: KClass<T>, dbName: String): DatabaseBuilder<T>
@@ -68,7 +68,7 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
             }
 
             while(currentDbVersion < doorDb.dbVersion) {
-                val nextMigration = migrations.filter { it.startVersion == currentDbVersion}
+                val nextMigration = migrationList.filter { it.startVersion == currentDbVersion}
                         .maxBy { it.endVersion }
                 if(nextMigration != null) {
                     nextMigration.migrate(doorDb.sqlDatabaseImpl)
@@ -91,7 +91,7 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
     }
 
     actual fun addMigrations(vararg migrations: DoorMigration): DatabaseBuilder<T> {
-        this.migrations.addAll(migrations)
+        migrationList.addAll(migrations)
         return this
     }
 
