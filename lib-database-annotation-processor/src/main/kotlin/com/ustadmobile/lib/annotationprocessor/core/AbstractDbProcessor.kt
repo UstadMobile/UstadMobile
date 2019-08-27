@@ -611,7 +611,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     | ${syncableEntityInfo.entityMasterCsnField.name} = 
                     | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
                     | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
-                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END);
+                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
+                    | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
                     | RETURN null;
                     | END $$
                     | LANGUAGE plpgsql
