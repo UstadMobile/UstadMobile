@@ -515,7 +515,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             if(pkAutoGenerate) {
                 when(dbType) {
                     DoorDbType.SQLITE -> sql += " INTEGER "
-                    DoorDbType.POSTGRES -> sql += " SERIAL "
+                    DoorDbType.POSTGRES -> sql += (if(fieldEl.type == LONG) { " BIGSERIAL " } else { " SERIAL " })
                 }
             }else {
                 sql += " ${fieldEl.type.toSqlType(dbType)} "
@@ -594,6 +594,33 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     """.trimMargin())
                 }
 
+            }
+
+            DoorDbType.POSTGRES -> {
+                listOf("m", "l").forEach {
+                    codeBlock.add("$execSqlFn(%S)\n",
+                        "CREATE SEQUENCE IF NOT EXISTS ${syncableEntityInfo.syncableEntity.simpleName}_${it}csn_seq")
+                }
+
+                codeBlock.add("$execSqlFn(%S)\n", """CREATE OR REPLACE FUNCTION 
+                    | inc_csn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
+                    | BEGIN  
+                    | UPDATE ${syncableEntityInfo.syncableEntity.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
+                    | ELSE NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_lcsn_seq') END),
+                    | ${syncableEntityInfo.entityMasterCsnField.name} = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
+                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END);
+                    | RETURN null;
+                    | END $$
+                    | LANGUAGE plpgsql
+                """.trimMargin())
+                        .add("$execSqlFn(%S)\n", """CREATE TRIGGER inc_csn_${syncableEntityInfo.tableId}_trig 
+                            |AFTER UPDATE OR INSERT ON ${syncableEntityInfo.syncableEntity.simpleName} 
+                            |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                            |EXECUTE PROCEDURE inc_csn_${syncableEntityInfo.tableId}_fn()
+                        """.trimMargin())
             }
         }
 
@@ -908,7 +935,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 val pkAnnotation = prop.annotations.firstOrNull { it.className == PrimaryKey::class.asClassName() }
                 val setterMethodName = getPreparedStatementSetterGetterTypeName(prop.type)
                 if(pkAnnotation != null && pkAnnotation.members.findBooleanMemberValue("autoGenerate") ?: false) {
-                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeSpec.name}'))\" else -> \"?\"} }")
+                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> " +
+                            "\"COALESCE(?,nextval('${entityTypeSpec.name}_${prop.name}_seq'))\" else -> \"?\"} }")
                     bindCodeBlock.add("when(entity.${prop.name}){ ${defaultVal(prop.type)} " +
                             "-> stmt.setObject(${fieldIndex}, null) " +
                             "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${prop.name})  }\n")
