@@ -4,7 +4,7 @@ import kotlin.reflect.KClass
 
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
-annotation class UmDao(val syncType: Int = UmSyncType.SYNC_NONE, val selectPermissionCondition: String = "(:accountPersonUid = :accountPersonUid)", val insertPermissionCondition: String = "(:accountPersonUid = :accountPersonUid)", val updatePermissionCondition: String = "(:accountPersonUid = :accountPersonUid)",
+annotation class UmDao(val selectPermissionCondition: String = "(:accountPersonUid = :accountPersonUid)", val insertPermissionCondition: String = "(:accountPersonUid = :accountPersonUid)", val updatePermissionCondition: String = "(:accountPersonUid = :accountPersonUid)",
                        /**
                         * If the entity of this DAO is effectively joined to one other entity, then it makes sense that
                         * the permissions for this entity should be linked to the other. This is done by adding an SQL

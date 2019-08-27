@@ -3,9 +3,9 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
@@ -63,7 +63,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Insert
     abstract override fun insert(entity: ClazzLog): Long
 
-    @Insert(onConflict = UmOnConflictStrategy.REPLACE)
+    @Insert(onConflict = REPLACE)
     abstract fun replace(entity: ClazzLog): Long
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
