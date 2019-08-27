@@ -900,6 +900,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
             val bindCodeBlock = CodeBlock.builder()
             var fieldIndex = 1
+            val pkProp = entityTypeSpec.propertySpecs
+                    .first { it.annotations.any { it.className == PrimaryKey::class.asClassName()} }
 
             entityTypeSpec.propertySpecs.forEach { prop ->
                 fieldNames.add(prop.name)
@@ -935,10 +937,13 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ""
             }
 
+            val autoGenerateSuffix = " \${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"RETURNING ${pkProp.name}\"  else -> \"\"} } "
+
             val sql = """
                 $statementClause INTO ${entityTypeSpec.name} (${fieldNames.joinToString()})
                 VALUES (${parameterHolders.joinToString()})
                 $upsertSuffix
+                $autoGenerateSuffix
                 """.trimIndent()
 
             val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
