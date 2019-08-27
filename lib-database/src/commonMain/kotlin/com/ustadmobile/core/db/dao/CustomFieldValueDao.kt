@@ -17,16 +17,18 @@ abstract class CustomFieldValueDao : BaseDao<CustomFieldValue> {
             " LEFT JOIN CustomField ON CustomField.customFieldUid = CustomFieldValue.customFieldValueFieldUid " +
             " WHERE customFieldValueEntityUid = :uid AND " +
             " CustomField.customFieldEntityType = :type LIMIT 1")
-    abstract suspend fun findByEntityTypeAndUid(type: Int, uid: Long): CustomFieldValue
+    abstract suspend fun findByEntityTypeAndUid(type: Int, uid: Long): CustomFieldValue?
 
 
     @Query("SELECT * FROM CustomFieldValue WHERE customFieldValueFieldUid = :fieldUid AND "
             + " customFieldValueEntityUid = :entityUid ")
-    abstract suspend fun findValueByCustomFieldUidAndEntityUid(fieldUid: Long, entityUid: Long) : CustomFieldValue
+    abstract suspend fun findValueByCustomFieldUidAndEntityUid(fieldUid: Long, entityUid: Long)
+            : CustomFieldValue?
 
     @Query("SELECT * FROM CustomFieldValue WHERE customFieldValueFieldUid = :fieldUid AND "
             + " customFieldValueEntityUid = :entityUid ")
-    abstract fun findValueByCustomFieldUidAndEntityUidSync(fieldUid: Long, entityUid: Long): CustomFieldValue
+    abstract fun findValueByCustomFieldUidAndEntityUidSync(fieldUid: Long, entityUid: Long)
+            : CustomFieldValue?
 
 
 }

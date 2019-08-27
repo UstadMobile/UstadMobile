@@ -27,7 +27,7 @@ abstract class SelQuestionResponseDao : BaseDao<SelQuestionResponse> {
     abstract suspend fun updateAsync(entity: SelQuestionResponse) : Int 
 
     @Query("SELECT * FROM SelQuestionResponse " + "WHERE selQuestionResponseUid = :uid")
-    abstract fun findByUid(uid: Long): SelQuestionResponse
+    abstract fun findByUid(uid: Long): SelQuestionResponse?
 
 
 }

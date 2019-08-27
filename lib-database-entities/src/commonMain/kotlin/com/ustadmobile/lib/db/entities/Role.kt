@@ -30,16 +30,16 @@ class Role {
     var rolePermissions: Long = 0
 
     //active
-    var isRoleActive: Boolean = false
+    var roleActive: Boolean = false
 
     constructor() {
-        this.isRoleActive = true
+        this.roleActive = true
     }
 
     constructor(roleName: String, rolePermissions: Long) {
         this.roleName = roleName
         this.rolePermissions = rolePermissions
-        this.isRoleActive = true
+        this.roleActive = true
     }
 
     companion object {

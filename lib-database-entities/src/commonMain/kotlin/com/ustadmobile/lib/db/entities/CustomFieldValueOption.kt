@@ -31,7 +31,7 @@ class CustomFieldValueOption {
     var customFieldValueOptionMessageId: Int = 0
 
     //active
-    var isCustomFieldValueOptionActive: Boolean = false
+    var customFieldValueOptionActive: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var customFieldValueOptionMCSN: Long = 0

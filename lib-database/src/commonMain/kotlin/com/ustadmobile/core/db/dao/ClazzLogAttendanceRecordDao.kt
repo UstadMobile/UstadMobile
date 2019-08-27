@@ -27,7 +27,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     abstract suspend fun insertListAsync(entities: List<ClazzLogAttendanceRecord>): Array<Long>
 
     @Query("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid = :uid")
-    abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord
+    abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord?
 
     @Query("SELECT * from ClazzLogAttendanceRecord " + "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
     abstract fun findAttendanceLogsByClassLogId(clazzLogUid: Long): DataSource.Factory<Int, ClazzLogAttendanceRecord>
@@ -47,13 +47,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
         var totalHighAttendanceMale: Int = 0
 
         var totalHighAttendanceFemale: Int = 0
-    }
-
-    inner class AttendanceResultGroupedByAgeAndThreshold {
-        var total: Int = 0
-        var gender: Int = 0
-        var age: Int = 0
-        var thresholdGroup: String? = null
     }
 
     @Query("select  " +

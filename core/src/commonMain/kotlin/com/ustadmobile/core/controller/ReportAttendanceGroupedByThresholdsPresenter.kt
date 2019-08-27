@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao.AttendanceResultGroupedByAgeAndThreshold
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView
@@ -18,6 +17,7 @@ import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
 import com.ustadmobile.core.xlsx.UmSheet
 import com.ustadmobile.core.xlsx.UmXLSX
 import com.ustadmobile.core.xlsx.ZipUtil
+import com.ustadmobile.lib.db.entities.AttendanceResultGroupedByAgeAndThreshold
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.IOException

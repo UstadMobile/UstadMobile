@@ -82,7 +82,7 @@ class ClazzLogDetailPresenter(context: Any,
                         ClazzMember.ROLE_TEACHER)
 
                 val clazzDao = repository.clazzDao
-                clazzName = clazzDao.findByUid(currentClazzLog!!.clazzLogClazzUid).clazzName
+                clazzName = clazzDao.findByUid(currentClazzLog!!.clazzLogClazzUid)!!.clazzName
 
                 view.runOnUiThread(Runnable{ updateViewDateHeading() })
             }

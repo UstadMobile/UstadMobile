@@ -28,13 +28,13 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     abstract suspend fun updateAsync(entity: SelQuestion):Int
 
     @Query("SELECT * FROM SelQuestion WHERE selQuestionUid = :uid")
-    abstract fun findByUid(uid: Long): SelQuestion
+    abstract fun findByUid(uid: Long): SelQuestion?
 
     @Query("SELECT * FROM SelQuestion WHERE selQuestionUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : SelQuestion
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestion?
 
     @Query("SELECT * FROM SelQuestion WHERE selQuestionUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SelQuestion>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SelQuestion?>
 
     @Query("SELECT MAX(questionIndex) FROM SelQuestion")
     abstract suspend fun getMaxIndexAsync() : Int
@@ -45,7 +45,7 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     abstract suspend fun getMaxIndexByQuestionSetAsync(questionSetUid: Long): Int
 
     @Query("SELECT * FROM SelQuestion where " + "selQuestionSelQuestionSetUid = :questionSetUid")
-    abstract suspend fun findAllByQuestionSetUidAsync(questionSetUid: Long) :SelQuestion
+    abstract suspend fun findAllByQuestionSetUidAsync(questionSetUid: Long) :SelQuestion?
 
     @Query("SELECT * FROM SelQuestion WHERE " + "selQuestionSelQuestionSetUid = :questionUid")
     abstract fun findAllQuestionsInSet(questionUid: Long): DataSource.Factory<Int, SelQuestion>
@@ -59,7 +59,7 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
             " selQuestionSelQuestionSetUid = :questionSetUid " +
             " AND questionIndex > :previousIndex ORDER BY questionIndex ASC LIMIT 1    ")
     abstract suspend fun findNextQuestionByQuestionSetUidAsync(questionSetUid: Long,
-                                                       previousIndex: Int) : SelQuestion
+                                                       previousIndex: Int) : SelQuestion?
 
     @Query("SELECT MIN(questionIndex) FROM SelQuestion")
     abstract suspend fun getMinIndexAsync() : Int

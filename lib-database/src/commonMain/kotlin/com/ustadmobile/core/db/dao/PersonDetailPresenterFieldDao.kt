@@ -17,15 +17,16 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     abstract override fun insert(entity: PersonDetailPresenterField): Long
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid = :uid")
-    abstract fun findByUid(uid: Long): PersonDetailPresenterField
+    abstract fun findByUid(uid: Long): PersonDetailPresenterField?
 
     @Query("SELECT * FROM PersonDetailPresenterField ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFields() : List<PersonDetailPresenterField>
 
-    //TODO: KMP Check MutableList return type.
+    //TODOne: KMP Check MutableList return type.
+    //Update: Nope. List it is.
     @Query("SELECT * FROM PersonDetailPresenterField WHERE viewModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsViewMode() :
-            MutableList<PersonDetailPresenterField>
+            List<PersonDetailPresenterField>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsEditMode() :

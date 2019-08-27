@@ -190,7 +190,7 @@ SELRecognitionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.ins
                 val responseNomination =
                         questionResponseNominationDao.findByUidAsync(
                                 currentRecognitionQuestionNominationResponse)
-                responseNomination.selQuestionSetResponseFinishTime =
+                responseNomination!!.selQuestionSetResponseFinishTime =
                         UMCalendarUtil.getDateInMilliPlusDays(0)
                 questionResponseNominationDao.updateAsync(responseNomination)
                 goToNextQuestion()

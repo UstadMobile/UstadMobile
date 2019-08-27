@@ -36,7 +36,7 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
 
 
     @Query("SELECT * FROM SelQuestionResponseNomination " + "WHERE selQuestionResponseNominationUid = :uid")
-    abstract fun findByUid(uid: Long): SelQuestionResponseNomination
+    abstract fun findByUid(uid: Long): SelQuestionResponseNomination?
 
     @Query(SEL_REPORT_SELECT +
             " WHERE " +

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
-
-import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao.AttendanceResultGroupedByAgeAndThreshold
+import com.ustadmobile.lib.db.entities.AttendanceResultGroupedByAgeAndThreshold
 
 
 /**

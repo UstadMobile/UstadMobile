@@ -147,7 +147,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
         //Update any toolbar title
         val currentClazz = clazzDao.findByUid(currentClazzUid)
-        view.updateToolbarTitle(currentClazz.clazzName + " "
+        view.updateToolbarTitle(currentClazz!!.clazzName + " "
                 + impl.getString(MessageID.activity, context))
 
         //Create one anyway given ClazzActivity doesn't exist (is null)

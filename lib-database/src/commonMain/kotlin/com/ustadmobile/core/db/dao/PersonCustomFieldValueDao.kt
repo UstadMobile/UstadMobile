@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -12,6 +13,7 @@ import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldVal
 @UmDao(inheritPermissionFrom = PersonDao::class, 
         inheritPermissionForeignKey = "personCustomFieldValuePersonUid",
         inheritPermissionJoinedPrimaryKey = "personUid")
+@Dao
 abstract class PersonCustomFieldValueDao : BaseDao<PersonCustomFieldValue> {
 
     @Insert
@@ -19,13 +21,13 @@ abstract class PersonCustomFieldValueDao : BaseDao<PersonCustomFieldValue> {
 
 
     @Query("SELECT * FROM PersonCustomFieldValue WHERE personCustomFieldValueUid = :uid")
-    abstract fun findByUid(uid: Long): PersonCustomFieldValue
+    abstract fun findByUid(uid: Long): PersonCustomFieldValue?
 
     @Query("SELECT * FROM PersonCustomFieldValue WHERE " +
             "personCustomFieldValuePersonUid = :personUid AND " +
             "personCustomFieldValuePersonCustomFieldUid = :fieldUid")
-    abstract suspend fun findCustomFieldByFieldAndPersonAsync(fieldUid: Long, personUid: Long) :
-            PersonCustomFieldValue
+    abstract suspend fun findCustomFieldByFieldAndPersonAsync(fieldUid: Long, personUid: Long)
+            : PersonCustomFieldValue?
 
     @Update
     abstract suspend fun updateAsync(entity: PersonCustomFieldValue) : Int
@@ -34,7 +36,7 @@ abstract class PersonCustomFieldValueDao : BaseDao<PersonCustomFieldValue> {
     abstract suspend fun updateListAsync(entities: List<PersonCustomFieldValue>) : Int
 
 
-    @Query("SELECT * FROM PersonField " +
+    @Query("SELECT PersonField.* FROM PersonField " +
             "LEFT JOIN PersonCustomFieldValue ON " +
             "PersonCustomFieldValue.personCustomFieldValuePersonCustomFieldUid = " +
             " PersonField.personCustomFieldUid " +

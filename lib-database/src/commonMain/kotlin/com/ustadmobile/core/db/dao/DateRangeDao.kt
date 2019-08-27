@@ -28,10 +28,10 @@ abstract class DateRangeDao : BaseDao<DateRange> {
     abstract fun findAllDatesInCalendar(calendarUid: Long): DataSource.Factory<Int, DateRange>
 
     @Query("SELECT * FROM DateRange WHERE dateRangeUid = :uid")
-    abstract fun findByUid(uid: Long): DateRange
+    abstract fun findByUid(uid: Long): DateRange?
 
     @Query("SELECT * FROM DateRange WHERE dateRangeUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long): DateRange
+    abstract suspend fun findByUidAsync(uid: Long): DateRange?
 
     @Query("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
     abstract fun inactivateRange(uid: Long)

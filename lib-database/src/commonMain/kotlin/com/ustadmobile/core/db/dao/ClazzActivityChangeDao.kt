@@ -35,11 +35,11 @@ abstract class ClazzActivityChangeDao : BaseDao<ClazzActivityChange> {
     abstract suspend fun updateAsync(entity: ClazzActivityChange): Int
 
     @Query("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
-    abstract fun findByUid(uid: Long): ClazzActivityChange
+    abstract fun findByUid(uid: Long): ClazzActivityChange?
 
     @Query("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long): ClazzActivityChange
+    abstract suspend fun findByUidAsync(uid: Long): ClazzActivityChange?
 
     @Query("SELECT * FROM ClazzActivityChange WHERE clazzActivityChangeTitle = :title")
-    abstract fun findByTitle(title: String): ClazzActivityChange
+    abstract fun findByTitle(title: String): ClazzActivityChange?
 }

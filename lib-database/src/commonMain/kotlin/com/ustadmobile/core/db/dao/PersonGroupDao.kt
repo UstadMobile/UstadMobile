@@ -49,13 +49,13 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     abstract suspend fun inactivateGroupAsync(uid: Long) : Int
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
-    abstract fun findByUid(uid: Long): PersonGroup
+    abstract fun findByUid(uid: Long): PersonGroup?
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : PersonGroup
+    abstract suspend fun findByUidAsync(uid: Long) : PersonGroup?
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<PersonGroup>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<PersonGroup?>
 
     @Update
     abstract suspend fun updateAsync(entity: PersonGroup) : Int

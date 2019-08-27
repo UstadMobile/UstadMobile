@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.RoleDao.Companion.SELECT_ACCOUNT_IS_ADMIN
@@ -12,13 +13,14 @@ import com.ustadmobile.lib.db.entities.Role
 @UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
         insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
+@Dao
 abstract class RoleDao : BaseDao<Role> {
 
     @Query("SELECT * FROM Role WHERE roleName=:roleName")
-    abstract suspend fun findByName(roleName: String): Role
+    abstract suspend fun findByName(roleName: String): Role?
 
     @Query("SELECT * FROM Role WHERE roleName = :roleName")
-    abstract fun findByNameSync(roleName: String): Role
+    abstract fun findByNameSync(roleName: String): Role?
 
     @Query("SELECT * FROM Role WHERE roleActive = 1")
     abstract fun findAllActiveRoles(): DataSource.Factory<Int, Role>
@@ -33,10 +35,10 @@ abstract class RoleDao : BaseDao<Role> {
     abstract suspend fun inactiveRoleAsync(uid: Long) :Int
 
     @Query("SELECT * FROM Role WHERE roleUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long): Role
+    abstract suspend fun findByUidAsync(uid: Long): Role?
 
     @Query("SELECT * FROM Role WHERE roleUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Role>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Role?>
 
     @Update
     abstract suspend fun updateAsync(entitiy: Role):Int

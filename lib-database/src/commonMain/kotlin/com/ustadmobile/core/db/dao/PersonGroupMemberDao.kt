@@ -41,7 +41,8 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract fun findPersonByGroupUid(groupUid: Long): List<Person>
 
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid AND " + " groupMemberPersonUid = :personUid ")
-    abstract suspend fun findMemberByGroupAndPersonAsync(groupUid: Long, personUid: Long) : PersonGroupMember
+    abstract suspend fun findMemberByGroupAndPersonAsync(groupUid: Long, personUid: Long)
+            : PersonGroupMember?
 
     @Query("UPDATE PersonGroupMember SET groupMemberActive = 0 " + " WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid")
     abstract suspend fun inactivateMemberFromGroupAsync(personUid: Long, groupUid: Long) : Int

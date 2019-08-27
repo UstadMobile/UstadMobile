@@ -42,7 +42,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
         if (currentRoleUid == 0L) {
             currentRole = Role()
             currentRole.roleName = ""
-            currentRole.isRoleActive = false
+            currentRole.roleActive = false
             GlobalScope.launch {
                 val result = roleDao.insertAsync(currentRole)
                 initFromRole(result)
@@ -87,7 +87,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
     fun handleClickDone() {
 
-        updatedRole!!.isRoleActive = true
+        updatedRole!!.roleActive = true
         updatedRole!!.rolePermissions = permissionField
         GlobalScope.launch {
             roleDao.updateAsync(updatedRole!!)

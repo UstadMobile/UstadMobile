@@ -16,10 +16,10 @@ import com.ustadmobile.lib.db.entities.CustomField
 abstract class CustomFieldDao : BaseDao<CustomField> {
 
     @Query("SELECT * FROM CustomField WHERE customFieldUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<CustomField>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<CustomField?>
 
     @Query("SELECT * FROM CustomField WHERE customFieldUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : CustomField
+    abstract suspend fun findByUidAsync(uid: Long) : CustomField?
 
     @Update
     abstract suspend fun updateAsync(entity: CustomField): Int

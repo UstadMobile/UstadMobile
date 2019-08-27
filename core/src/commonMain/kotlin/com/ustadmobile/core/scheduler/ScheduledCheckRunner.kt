@@ -36,11 +36,11 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
             val clazzLogUid = (params[ScheduledCheck.PARAM_CLAZZ_LOG_UID]!!).toLong()
             val clazzLog = dbRepository.clazzLogDao.findByUid(clazzLogUid)
             val clazzName = dbRepository.clazzDao.getClazzName(
-                    clazzLog.clazzLogClazzUid)
+                    clazzLog!!.clazzLogClazzUid)
 
 
             //We want to send this feed (reminder) when its not done or cancelled (ie not done)
-            if (!clazzLog.clazzLogDone || clazzLog.clazzLogCancelled) {
+            if (!clazzLog!!.clazzLogDone || clazzLog.clazzLogCancelled) {
 
                 val lazzLogSchedule = dbRepository.scheduleDao.findByUid(clazzLog.clazzLogScheduleUid)
 
@@ -79,7 +79,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                                     UMCalendarUtil.getPrettyDateSimpleFromLong(clazzLog.logDate, "")
                                     + timeBit + ")",
                             feedLink,
-                            clazzName,
+                            clazzName!!,
                             teacher.clazzMemberPersonUid)
                     val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
                     if (existingEntry != null) {
@@ -141,7 +141,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                                             each.lastName + " absent in Class " + clazzName
                                             + " over " + tardyFrequency + " times",
                                     feedLinkViewPerson,
-                                    clazzName,
+                                    clazzName!!,
                                     officer.personUid)
 
                             val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
@@ -208,7 +208,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                                             each.lastName + " absent in Class "
                                             + clazzName + " over 30 days",
                                     feedLinkViewPerson,
-                                    clazzName,
+                                    clazzName!!,
                                     mne.personUid
                             )
 
@@ -232,7 +232,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
             val currentClazzLog = dbRepository.clazzLogDao.findByUid(clazzLogUid)
             if (currentClazzLog != null) {
                 val currentClazz = dbRepository.clazzDao.findByUid(currentClazzLog.clazzLogClazzUid)
-                val clazzName = currentClazz.clazzName
+                val clazzName = currentClazz!!.clazzName
 
                 //Get officers
                 val officerRole = dbRepository.roleDao.findByNameSync(Role.ROLE_NAME_OFFICER)
@@ -384,7 +384,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
             val currentClazzLog = dbRepository.clazzLogDao.findByUid(clazzLogUid)
             if (currentClazzLog != null) {
                 val currentClazz = dbRepository.clazzDao.findByUid(currentClazzLog.clazzLogClazzUid)
-                val clazzName = currentClazz.clazzName
+                val clazzName = currentClazz!!.clazzName
 
                 //Get officers
                 val officerRole = dbRepository.roleDao.findByNameSync(Role.ROLE_NAME_OFFICER)
@@ -400,40 +400,43 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                         currentClazz.clazzUid)
                 val clazzAttendance = currentClazz.attendanceAverage
 
-                if (clazzBeforeAttendance >= feedAlertPerentageHigh && clazzAttendance < feedAlertPerentageHigh) {
+                if (clazzBeforeAttendance != null) {
+                    if (clazzBeforeAttendance >= feedAlertPerentageHigh
+                            && clazzAttendance < feedAlertPerentageHigh) {
 
 
-                    val newFeedEntries = ArrayList<FeedEntry>()
-                    val updateFeedEntries = ArrayList<FeedEntry>()
+                        val newFeedEntries = ArrayList<FeedEntry>()
+                        val updateFeedEntries = ArrayList<FeedEntry>()
 
-                    val feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
-                            ClazzListView.ARG_CLAZZ_UID + "=" +
-                            currentClazzLog.clazzLogClazzUid
+                        val feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                ClazzListView.ARG_CLAZZ_UID + "=" +
+                                currentClazzLog.clazzLogClazzUid
 
-                    for (officer in officers) {
-                        val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                officer.personUid, currentClazzLog.clazzLogUid,
-                                ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass)
+                        for (officer in officers) {
+                            val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                    officer.personUid, currentClazzLog.clazzLogUid,
+                                    ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass)
 
-                        val thisEntry = FeedEntry(
-                                feedEntryUid,
-                                "Class average dropped",
-                                "Class " + clazzName + " dropped attendance  " +
-                                        (feedAlertPerentageHigh * 100).toString() + "%",
-                                feedLinkViewClass,
-                                clazzName!!,
-                                officer.personUid
-                        )
+                            val thisEntry = FeedEntry(
+                                    feedEntryUid,
+                                    "Class average dropped",
+                                    "Class " + clazzName + " dropped attendance  " +
+                                            (feedAlertPerentageHigh * 100).toString() + "%",
+                                    feedLinkViewClass,
+                                    clazzName!!,
+                                    officer.personUid
+                            )
 
-                        val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
-                        if (existingEntry != null) {
-                            updateFeedEntries.add(thisEntry)
-                        } else {
-                            newFeedEntries.add(thisEntry)
+                            val existingEntry = dbRepository.feedEntryDao.findByUid(feedEntryUid)
+                            if (existingEntry != null) {
+                                updateFeedEntries.add(thisEntry)
+                            } else {
+                                newFeedEntries.add(thisEntry)
+                            }
                         }
+                        dbRepository.feedEntryDao.insertList(newFeedEntries)
+                        dbRepository.feedEntryDao.updateList(updateFeedEntries)
                     }
-                    dbRepository.feedEntryDao.insertList(newFeedEntries)
-                    dbRepository.feedEntryDao.updateList(updateFeedEntries)
                 }
             }
         }

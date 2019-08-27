@@ -42,7 +42,7 @@ class AddDateRangeDialogPresenter(context: Any, arguments: Map<String, String>?,
             GlobalScope.launch {
                 val result = dateRangeDao.findByUidAsync(currentDateRangeUid)
                 currentDateRange = result
-                view.updateFields(result)
+                view.updateFields(result!!)
             }
         } else {
             currentDateRange = DateRange()

@@ -47,7 +47,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
         updateFeedEntries()
 
         //All clazz's average live data
-        val averageLiveData = repository!!.clazzDao.clazzSummaryLiveData
+        val averageLiveData = repository!!.clazzDao.getClazzSummaryLiveData()
         averageLiveData.observe(this, this::handleAveragesChanged)
 
         //Check permissions

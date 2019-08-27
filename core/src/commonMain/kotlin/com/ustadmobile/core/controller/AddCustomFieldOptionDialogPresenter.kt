@@ -78,7 +78,7 @@ class AddCustomFieldOptionDialogPresenter(context: Any, arguments:Map<String, St
 
         currentOption!!.customFieldValueOptionName = optionValue
         currentOption!!.customFieldValueOptionFieldUid = customfieldUid
-        currentOption!!.isCustomFieldValueOptionActive = true
+        currentOption!!.customFieldValueOptionActive = true
 
         GlobalScope.launch {
             optionDao.updateAsync(currentOption!!)

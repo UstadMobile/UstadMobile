@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ustad Mobile</string>
+    <string name='downloaded' value='81'>Downloaded</string>
     <string name='dir'>ltr</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
@@ -14,7 +15,6 @@
     <string name='authenticating'>Authenticating</string>
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
-    <string name="downloaded" value="81">Downloaded</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='ok'>OK</string>

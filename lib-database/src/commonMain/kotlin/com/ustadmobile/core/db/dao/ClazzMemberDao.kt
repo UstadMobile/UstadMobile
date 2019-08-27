@@ -46,10 +46,10 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT * FROM ClazzMember")
-    abstract fun findAllAsList(): List<ClazzMember>
+    abstract fun findAllAsList(): List<ClazzMember?>
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
-    abstract fun findByUid(uid: Long): ClazzMember
+    abstract fun findByUid(uid: Long): ClazzMember?
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
@@ -70,11 +70,11 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findClazzMemberWithPersonByRoleForClazzUidSync(uid: Long, role: Int): List<ClazzMemberWithPerson>
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
-    abstract fun findByPersonUidAndClazzUid(personUid: Long, clazzUid: Long): ClazzMember
+    abstract fun findByPersonUidAndClazzUid(personUid: Long, clazzUid: Long): ClazzMember?
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long)
-            : ClazzMember
+            : ClazzMember?
 
     @Query("Update ClazzMember SET clazzMemberAttendancePercentage " +
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
@@ -146,8 +146,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "  AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  AND ClazzMember.clazzMemberRole = 1 " +
             " GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid ) ")
     abstract suspend fun findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(type: Int,
-                                                    clazzUid: Long, fromTime: Long, toTime: Long)
-        : ThresholdResult
+                    clazzUid: Long, fromTime: Long, toTime: Long): ThresholdResult?
 
     @Query("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
@@ -276,7 +275,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "   ) " +
             "   AND Person.active = 1 " +
             "   AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery " +
-            
+
             "ORDER BY clazzMemberRole ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(clazzUid: Long,
                apl: Float, aph: Float, searchQuery: String)
@@ -432,7 +431,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByNameDesc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
-    @Query("SELECT AVG(clazzMemberAttendancePercentage) FROM ClazzMember WHERE clazzMemberPersonUid = :personUid")
+    @Query("SELECT AVG(clazzMemberAttendancePercentage) FROM ClazzMember " +
+            " WHERE clazzMemberPersonUid = :personUid")
     abstract suspend fun getAverageAttendancePercentageByPersonUidAsync(personUid: Long): Float
 
 

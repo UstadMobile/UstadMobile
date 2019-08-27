@@ -19,10 +19,10 @@ abstract class PersonCustomFieldDao : BaseDao<PersonField> {
     abstract override fun insert(entity: PersonField): Long
 
     @Query("SELECT * FROM PersonField WHERE personCustomFieldUid = :uid")
-    abstract fun findByUid(uid: Long): PersonField
+    abstract fun findByUid(uid: Long): PersonField?
 
     @Query("SELECT * FROM PersonField WHERE personCustomFieldUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : PersonField
+    abstract suspend fun findByUidAsync(uid: Long) : PersonField?
 
     @Query("SELECT MAX(personCustomFieldUid) FROM PersonField")
     abstract fun findLatestUid(): Int
@@ -34,13 +34,13 @@ abstract class PersonCustomFieldDao : BaseDao<PersonField> {
     abstract suspend fun findByFieldNameAsync(name: String) : List<PersonField>
 
     @Query("SELECT * FROM PersonField WHERE fieldName = :fieldName")
-    abstract suspend fun findByfieldName(fieldName: String) : PersonField
+    abstract suspend fun findByfieldName(fieldName: String) : PersonField?
 
     @Query("SELECT * FROM PersonField WHERE labelMessageId = :messageId")
-    abstract suspend fun findByLabelMessageId(messageId: String) : PersonField
+    abstract suspend fun findByLabelMessageId(messageId: String) : PersonField?
 
     @Query("SELECT * FROM PersonField WHERE labelMessageId = :messageId")
-    abstract fun findByLabelMessageIdSync(messageId: String): PersonField
+    abstract fun findByLabelMessageIdSync(messageId: String): PersonField?
 
     @Query("SELECT PersonField.fieldName AS fieldName, '' AS fieldType, '' AS defaultValue " +
             "FROM PersonField " +

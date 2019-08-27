@@ -97,7 +97,7 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
 
                 val officerRole = roleDao.findByNameSync(Role.ROLE_NAME_OFFICER)
                 val officerEntityRoles = entityRoleDao.findGroupByRoleAndEntityTypeAndUidSync(Clazz.TABLE_ID,
-                        clazzUid, officerRole.roleUid)
+                        clazzUid, officerRole!!.roleUid)
                 if (officerEntityRoles.size > 0) {
                     val mainOfficerGroupUid = officerEntityRoles[0].erGroupUid
                     val officers = groupMemberDao.findPersonByGroupUid(mainOfficerGroupUid)

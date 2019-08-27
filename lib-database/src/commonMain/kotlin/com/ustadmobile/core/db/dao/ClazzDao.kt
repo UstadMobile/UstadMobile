@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CO
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION2
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -25,7 +24,7 @@ import com.ustadmobile.lib.db.entities.*
 @Dao
 abstract class ClazzDao : BaseDao<Clazz> {
 
-    @get:Query("SELECT " +
+    @Query("SELECT " +
             " (SELECT COUNT(*) FROM Clazz Where Clazz.isClazzActive = 1) as numClazzes, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT + ") as numStudents, " +
@@ -33,17 +32,17 @@ abstract class ClazzDao : BaseDao<Clazz> {
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER + ") as numTeachers, " +
             " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE Clazz.isClazzActive = 1 ) / " +
             " (SELECT COUNT(*) FROM Clazz Where Clazz.isClazzActive = 1)) as attendanceAverage ")
-    abstract val clazzSummaryLiveData: DoorLiveData<ClazzAverage>
+    abstract fun getClazzSummaryLiveData(): DoorLiveData<ClazzAverage?>
 
 
     @Insert
     abstract override fun insert(entity: Clazz): Long
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
-    abstract fun findByUid(uid: Long): Clazz
+    abstract fun findByUid(uid: Long): Clazz?
 
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
 
     @Query("SELECT * FROM Clazz")
     abstract fun findAllAsList(): List<Clazz>
@@ -255,7 +254,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             "       )" +
             "   ) * 1.0 " +
             "   AS percentage")
-    abstract fun findClazzAttendancePercentageWithoutLatestClazzLog(clazzUid: Long): Float
+    abstract fun findClazzAttendancePercentageWithoutLatestClazzLog(clazzUid: Long): Float?
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
     @Query("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
@@ -288,7 +287,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findAllClazzesWithSelectPermission(accountPersonUid: Long): List<ClazzWithTimeZone>
 
     @Query("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
-    abstract fun getClazzName(clazzUid: Long): String
+    abstract fun getClazzName(clazzUid: Long): String?
 
     @Query("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
     abstract suspend fun getClazzNameAsync(clazzUid: Long): String?

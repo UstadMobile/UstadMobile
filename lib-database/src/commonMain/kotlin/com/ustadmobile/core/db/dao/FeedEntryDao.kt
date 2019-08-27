@@ -21,10 +21,10 @@ abstract class FeedEntryDao : BaseDao<FeedEntry> {
     abstract suspend fun updateAsync(entity: FeedEntry):Int
 
     @Query("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
-    abstract fun findByUid(uid: Long): FeedEntry
+    abstract fun findByUid(uid: Long): FeedEntry?
 
     @Query("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : FeedEntry
+    abstract suspend fun findByUidAsync(uid: Long) : FeedEntry?
 
     @Query("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0" + " ORDER BY dateCreated DESC")
     abstract fun findByPersonUid(personUid: Long): DataSource.Factory<Int, FeedEntry>
@@ -36,7 +36,7 @@ abstract class FeedEntryDao : BaseDao<FeedEntry> {
     abstract fun findAll(): List<FeedEntry>
 
     @Query("SELECT * FROM FeedEntry WHERE link = :link AND feedEntryDone = 0 " + "AND feedEntryPersonUid = :personUid")
-    abstract fun findByLink(personUid: Long, link: String): FeedEntry
+    abstract fun findByLink(personUid: Long, link: String): FeedEntry?
 
     @Query("UPDATE FeedEntry SET feedEntryDone = 1 WHERE feedEntryUid = :feedEntryUid")
     abstract fun updateDoneTrue(feedEntryUid: Long)

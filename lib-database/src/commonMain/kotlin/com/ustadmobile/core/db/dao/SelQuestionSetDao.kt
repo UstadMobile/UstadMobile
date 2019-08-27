@@ -26,10 +26,10 @@ abstract class SelQuestionSetDao : BaseDao<SelQuestionSet> {
     abstract suspend fun updateAsync(entity: SelQuestionSet) : Int
 
     @Query("SELECT * FROM SelQuestionSet WHERE selQuestionSetUid = :uid")
-    abstract fun findByUid(uid: Long): SelQuestionSet
+    abstract fun findByUid(uid: Long): SelQuestionSet?
 
     @Query("SELECT * FROM SelQuestionSet WHERE selQuestionSetUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSet
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSet?
 
     @Query("SELECT * FROM SelQuestionSet")
     abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestionSet>

@@ -63,10 +63,10 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
 
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : EntityRole
+    abstract suspend fun findByUidAsync(uid: Long) : EntityRole?
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<EntityRole>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<EntityRole?>
 
     @Update
     abstract suspend fun updateAsync(entity: EntityRole) :Int

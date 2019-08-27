@@ -51,13 +51,13 @@ abstract class LocationDao : BaseDao<Location> {
     }
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
-    abstract fun findByUid(uid: Long): Location
+    abstract fun findByUid(uid: Long): Location?
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long): Location
+    abstract suspend fun findByUidAsync(uid: Long): Location?
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<Location>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Location?>
 
     @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND locationActive = 1")
     abstract suspend fun findTopLocationsAsync(): List<Location>

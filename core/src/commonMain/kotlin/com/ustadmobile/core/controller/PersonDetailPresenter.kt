@@ -130,17 +130,20 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         GlobalScope.launch {
             //Get all headers and fields
             val fields = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewMode()
+            val cleanedFields = ArrayList<PersonDetailPresenterField>()
             //Remove old custom fields
             val fieldsIterator = fields.iterator()
             while (fieldsIterator.hasNext()) {
                 val field = fieldsIterator.next()
                 val fieldIndex = field.fieldIndex
                 if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                    fieldsIterator.remove()
+                    //fieldsIterator.remove()
+                }else{
+                    cleanedFields.add(field)
                 }
             }
 
-            presenterFields = fields
+            presenterFields = cleanedFields
             customFieldWithFieldValueMap = HashMap()
 
 

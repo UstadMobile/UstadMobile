@@ -608,7 +608,7 @@ class PersonEditPresenter
             for (everyClazz in personClazzes) {
                 val mneOfficerRole = repository.roleDao.findByNameSync(Role.ROLE_NAME_MNE)
                 val mneofficers = repository.clazzDao.findPeopleWithRoleAssignedToClazz(
-                        everyClazz.clazzUid, mneOfficerRole.roleUid)
+                        everyClazz.clazzUid, mneOfficerRole!!.roleUid)
 
                 val admins = repository.personDao.findAllAdminsAsList()
 

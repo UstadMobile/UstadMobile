@@ -23,9 +23,6 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Insert
     abstract override fun insert(entity: Schedule): Long
 
-    @Update
-    abstract fun update(entity: Schedule?)
-
     @Query("SELECT * FROM Schedule")
     abstract fun findAllSchedules(): DataSource.Factory<Int, Schedule>
 
@@ -36,10 +33,10 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     abstract suspend fun updateAsync(entity: Schedule) : Int
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
-    abstract fun findByUid(uid: Long): Schedule
+    abstract fun findByUid(uid: Long): Schedule?
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : Schedule
+    abstract suspend fun findByUidAsync(uid: Long) : Schedule?
 
     @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
     abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DataSource.Factory<Int, Schedule>

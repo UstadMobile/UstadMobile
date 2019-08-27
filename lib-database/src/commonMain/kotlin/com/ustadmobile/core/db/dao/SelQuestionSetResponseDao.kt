@@ -28,10 +28,10 @@ abstract class SelQuestionSetResponseDao : BaseDao<SelQuestionSetResponse> {
     abstract suspend fun updateAsync(entity: SelQuestionSetResponse): Int
 
     @Query("SELECT * FROM SelQuestionSetResponse " + "where selQuestionSetResposeUid = :uid")
-    abstract fun findByUid(uid: Long): SelQuestionSetResponse
+    abstract fun findByUid(uid: Long): SelQuestionSetResponse?
 
     @Query("SELECT * FROM SelQuestionSetResponse " + "where selQuestionSetResposeUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSetResponse
+    abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSetResponse?
 
     @Query("SELECT * FROM SelQuestionSetResponse WHERE " +
             "selQuestionSetResponseClazzMemberUid = :uid AND " +

@@ -46,19 +46,19 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
     abstract fun findAllHolidaysLiveData(): DoorLiveData<List<UMCalendar>>
 
     @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<UMCalendar>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<UMCalendar?>
 
     @Update
     abstract suspend fun updateAsync(entity: UMCalendar):Int
 
     @Query("SELECT * FROM UMCalendar WHERE umCalendarName = :name")
-    abstract fun findByName(name: String): UMCalendar
+    abstract fun findByName(name: String): UMCalendar?
 
     @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid")
-    abstract fun findByUid(uid: Long): UMCalendar
+    abstract fun findByUid(uid: Long): UMCalendar?
 
     @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long): UMCalendar
+    abstract suspend fun findByUidAsync(uid: Long): UMCalendar?
 
     @Query("UPDATE UMCalendar SET umCalendarActive = 0 WHERE umCalendarUid = :uid")
     abstract suspend fun inactivateCalendarAsync(uid: Long): Int

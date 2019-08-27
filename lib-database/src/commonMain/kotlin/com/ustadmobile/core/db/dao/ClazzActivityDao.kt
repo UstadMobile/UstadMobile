@@ -55,18 +55,18 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
     abstract fun findWithChangeTitleByClazzUid(clazzUid: Long): DataSource.Factory<Int, ClazzActivityWithChangeTitle>
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
-    abstract fun findByUid(uid: Long): ClazzActivity
+    abstract fun findByUid(uid: Long): ClazzActivity?
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long): ClazzActivity
+    abstract suspend fun findByUidAsync(uid: Long): ClazzActivity?
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND "
             + " clazzActivityLogDate = :logDate")
-    abstract fun findByClazzAndDate(clazzUid: Long, logDate: Long): ClazzActivity
+    abstract fun findByClazzAndDate(clazzUid: Long, logDate: Long): ClazzActivity?
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND "
             + " clazzActivityLogDate = :logDate")
-    abstract suspend fun findByClazzAndDateAsync(clazzUid: Long, logDate: Long): ClazzActivity
+    abstract suspend fun findByClazzAndDateAsync(clazzUid: Long, logDate: Long): ClazzActivity?
 
 
     @Query("SELECT  " +

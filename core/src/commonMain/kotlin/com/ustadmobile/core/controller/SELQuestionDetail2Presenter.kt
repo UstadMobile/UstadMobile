@@ -29,7 +29,7 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
     internal lateinit var repository: UmAppDatabase
     private var currentQuestionUid: Long = 0
     private var currentQuestionSetUid: Long = 0
-    internal lateinit var questionUmLiveData: DoorLiveData<SelQuestion>
+    internal lateinit var questionUmLiveData: DoorLiveData<SelQuestion?>
 
     private var mOriginalQuestion: SelQuestion? = null
     private var mUpdatedQuestion: SelQuestion? = null

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.db.entities.CustomFieldValueOption
 
 @UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, 
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@Dao
 @UmRepository
 abstract class CustomFieldValueOptionDao : BaseDao<CustomFieldValueOption> {
 
@@ -20,8 +22,7 @@ abstract class CustomFieldValueOptionDao : BaseDao<CustomFieldValueOption> {
     @Query("SELECT * FROM CustomFieldValueOption " +
             " WHERE customFieldValueOptionFieldUid = :customFieldUid " +
             " AND customFieldValueOptionActive = 1")
-    abstract suspend fun findAllOptionsForFieldAsync(customFieldUid: Long):
-            List<CustomFieldValueOption>
+    abstract suspend fun findAllOptionsForFieldAsync(customFieldUid: Long):List<CustomFieldValueOption>
 
     @Query("UPDATE CustomFieldValueOption SET customFieldValueOptionActive = 0 WHERE" + 
             " customFieldValueOptionUid = :uid")
@@ -32,5 +33,5 @@ abstract class CustomFieldValueOptionDao : BaseDao<CustomFieldValueOption> {
     abstract suspend fun updateAsync(entity: CustomFieldValueOption) : Int
 
     @Query("SELECT * FROM CustomFieldValueOption WHERE customFieldValueOptionUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long) : CustomFieldValueOption
+    abstract suspend fun findByUidAsync(uid: Long) : CustomFieldValueOption?
 }
