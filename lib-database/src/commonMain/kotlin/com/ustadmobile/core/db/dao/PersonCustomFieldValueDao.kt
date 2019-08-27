@@ -36,13 +36,6 @@ abstract class PersonCustomFieldValueDao : BaseDao<PersonCustomFieldValue> {
     abstract suspend fun updateListAsync(entities: List<PersonCustomFieldValue>) : Int
 
 
-    @Query("SELECT PersonField.* FROM PersonField " +
-            "LEFT JOIN PersonCustomFieldValue ON " +
-            "PersonCustomFieldValue.personCustomFieldValuePersonCustomFieldUid = " +
-            " PersonField.personCustomFieldUid " +
-            "WHERE personCustomFieldValuePersonUid = :personUid")
-    abstract suspend fun findByPersonUidAsync2(personUid: Long):
-            List<PersonCustomFieldWithPersonCustomFieldValue>
 
 
 }

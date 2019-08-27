@@ -2,6 +2,9 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 
 
@@ -22,6 +25,15 @@ class ScheduledCheck {
     var checkParameters: String? = null
 
     var scClazzLogUid: Long = 0
+
+    @MasterChangeSeqNum
+    var scheduledCheckMasterCsn: Long = 0
+
+    @LocalChangeSeqNum
+    var scheduledCheckLocalCsn: Long = 0
+
+    @LastChangedBy
+    var scheduledCheckLastChangedBy: Int = 0
 
     constructor() {}
 

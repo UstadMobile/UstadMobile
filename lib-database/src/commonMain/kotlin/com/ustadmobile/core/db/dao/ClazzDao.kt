@@ -254,7 +254,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             "       )" +
             "   ) * 1.0 " +
             "   AS percentage")
-    abstract fun findClazzAttendancePercentageWithoutLatestClazzLog(clazzUid: Long): Float?
+    abstract fun findClazzAttendancePercentageWithoutLatestClazzLog(clazzUid: Long): Float
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
     @Query("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +

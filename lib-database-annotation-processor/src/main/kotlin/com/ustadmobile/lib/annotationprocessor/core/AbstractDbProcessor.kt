@@ -92,7 +92,13 @@ fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnviron
     if(entityType in QUERY_SINGULAR_TYPES)
         return mapOf()
 
+
     val entityTypeEl = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
+    if(entityTypeEl == null){
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                "Entity type: " + entityType.canonicalName)
+
+    }
     val syncableEntityList = mutableMapOf<List<String>, ClassName>()
     ancestorsToList(entityTypeEl, processingEnv).forEach {
         if(it.getAnnotation(SyncableEntity::class.java) != null)

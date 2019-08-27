@@ -46,7 +46,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT * FROM ClazzMember")
-    abstract fun findAllAsList(): List<ClazzMember?>
+    abstract fun findAllAsList(): List<ClazzMember>
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     abstract fun findByUid(uid: Long): ClazzMember?

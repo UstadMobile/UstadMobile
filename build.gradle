@@ -159,6 +159,7 @@ ext.findCommand = {String command, String buildConfigVarName ->
     }else {
         def pathDirs = System.getenv("PATH").split(File.pathSeparator)
         for(path in pathDirs) {
+
             if(file("$path/$command").exists()) {
                 return "$path/$command"
             }
