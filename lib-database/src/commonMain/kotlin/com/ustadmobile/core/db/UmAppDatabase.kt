@@ -235,59 +235,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     // Clazz
                     database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzLocationUid  BIGINT")
 
-                    // CLazzMember
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , dateJoined  BIGINT , dateLeft  BIGINT , role  INTEGER , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzMember_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzMember_lcsn_seq")
-                    database.execSQL("""
-                    |CREATE OR REPLACE FUNCTION 
-                    | inc_csn_11_fn() RETURNS trigger AS ${'$'}${'$'}
-                    | BEGIN  
-                    | UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzMemberLocalChangeSeqNum 
-                    | ELSE NEXTVAL('ClazzMember_lcsn_seq') END),
-                    | clazzMemberMasterChangeSeqNum = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('ClazzMember_mcsn_seq') 
-                    | ELSE NEW.clazzMemberMasterChangeSeqNum END);
-                    | RETURN null;
-                    | END ${'$'}${'$'}
-                    | LANGUAGE plpgsql
-                    """.trimMargin())
-                    database.execSQL("""
-                    |CREATE TRIGGER inc_csn_11_trig 
-                    |AFTER UPDATE OR INSERT ON ClazzMember 
-                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                    |EXECUTE PROCEDURE inc_csn_11_fn()
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-
-                    // ContextXObjectStatementJoin
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
-                    database.execSQL("""
-                    |CREATE OR REPLACE FUNCTION 
-                    | inc_csn_66_fn() RETURNS trigger AS ${'$'}${'$'}
-                    | BEGIN  
-                    | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
-                    | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
-                    | verbMasterChangeSeqNum = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
-                    | ELSE NEW.verbMasterChangeSeqNum END);
-                    | RETURN null;
-                    | END ${'$'}${'$'}
-                    | LANGUAGE plpgsql
-                    """.trimMargin())
-                    database.execSQL("""
-                    |CREATE TRIGGER inc_csn_66_trig 
-                    |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
-                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                    |EXECUTE PROCEDURE inc_csn_66_fn()
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
                     // StateContentEntity
                     database.execSQL("CREATE TABLE IF NOT EXISTS StateContentEntity (  stateContentStateUid  BIGINT , stateContentKey  TEXT , stateContentValue  TEXT , isIsactive  BOOL , stateContentMasterChangeSeqNum  BIGINT , stateContentLocalChangeSeqNum  BIGINT , stateContentLastChangedBy  INTEGER , stateContentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
@@ -459,8 +406,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("ALTER TABLE DownloadJob ADD COLUMN totalBytesToDownload BIGINT, ADD COLUMN bytesDownloadedSoFar BIGINT, ADD COLUMN djRootContentEntryUid  BIGINT, ADD COLUMN meteredNetworkAllowed  BOOL,ADD COLUMN djDestinationDir TEXT")
 
                     // DownloadJobItem
-                    database.execSQL("ALTER TABLE ADD COLUMN djiContainerUid  BIGINT , ADD COLUMN djiContentEntryUid  BIGINT")
-                    database.execSQL("ALTER TABLE DROP COLUMN djicontententryfileuid")
+                    database.execSQL("ALTER TABLE DownloadJobItem ADD COLUMN djiContainerUid  BIGINT , ADD COLUMN djiContentEntryUid  BIGINT")
+                    database.execSQL("ALTER TABLE DownloadJobItem DROP COLUMN djicontententryfileuid")
 
                     // DownloadSet
                     database.execSQL("DROP TABLE DownloadSet")
