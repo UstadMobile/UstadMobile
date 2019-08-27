@@ -562,6 +562,12 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .addCode("setupFromDataSource()\n")
         val dbImplType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
                 .superclass(dbTypeElement.asClassName())
+                .addProperty(PropertySpec.builder("dbVersion", INT)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder()
+                                .addCode("return ${dbTypeElement.getAnnotation(Database::class.java).version}")
+                                .build())
+                        .build())
 
         if(isSyncableDb(dbTypeElement, processingEnv)) {
             constructorFn.addParameter(ParameterSpec.builder("master", BOOLEAN)

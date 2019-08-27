@@ -51,7 +51,6 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
         repoClassSpec.addProperty(PropertySpec.builder("_syncHelper", syncHelperClassName)
                 .initializer("_syncHelper").build())
     }
-
     repoClassSpec.primaryConstructor(primaryConstructorFn.build())
 
     return repoClassSpec
@@ -65,7 +64,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
         for(dbTypeEl in dbs) {
             writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
-                    syncDaoMode = REPO_SYNCABLE_DAO_CONSTRUCT), AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                    syncDaoMode = REPO_SYNCABLE_DAO_CONSTRUCT, addDbVersionProp = true),
+                    AnnotationProcessorWrapper.OPTION_JVM_DIRS)
             writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
                     syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
                     overrideSyncDao = true, overrideOpenHelper = true),
@@ -89,7 +89,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                   syncDaoMode: Int = REPO_SYNCABLE_DAO_CONSTRUCT,
                                   overrideClearAllTables: Boolean = true,
                                   overrideSyncDao: Boolean = false,
-                                  overrideOpenHelper: Boolean = false): FileSpec {
+                                  overrideOpenHelper: Boolean = false,
+                                  addDbVersionProp: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
 
@@ -154,6 +155,15 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
                     .addCode("return %T.createDummyInvalidationTracker(this)\n",
                             ClassName("com.ustadmobile.door","DummyInvalidationTracker"))
+                    .build())
+        }
+
+        if(addDbVersionProp) {
+            dbRepoType.addProperty(PropertySpec.builder("dbVersion", INT)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .getter(FunSpec.getterBuilder()
+                            .addCode("return _db.dbVersion")
+                            .build())
                     .build())
         }
 
