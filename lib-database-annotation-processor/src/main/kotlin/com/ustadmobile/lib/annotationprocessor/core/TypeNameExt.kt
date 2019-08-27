@@ -4,7 +4,7 @@ import com.squareup.kotlinpoet.*
 
 internal fun TypeName.toSqlType(dbType: Int = 0) = when {
     this == BOOLEAN -> "BOOL"
-    this == BYTE -> "TINYINT"
+    this == BYTE -> "SMALLINT"
     this == SHORT -> "SMALLINT"
     this == INT ->  "INTEGER"
     this == LONG -> "BIGINT"
