@@ -966,7 +966,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }
 
             val autoGenerateSuffix = " \${when{ _db.jdbcDbType == DoorDbType.POSTGRES && returnsId -> " +
-                    "\" RETURNING ${pkProp.name} \"  else -> \"\"} } "
+                    "\"·RETURNING·${pkProp.name}·\"  else -> \"\"} } "
 
             val sql = """
                 $statementClause INTO ${entityTypeSpec.name} (${fieldNames.joinToString()})
