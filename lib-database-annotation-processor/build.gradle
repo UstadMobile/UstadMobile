@@ -18,8 +18,15 @@ kapt {
     arguments {
         arg("doordb_android_out", "$buildDir/generated/source/doordb-android")
         arg("doordb_source_path", "$projectDir/src/test/kotlin")
+
+        //Uncomment lines below to allow debugging on generated source code.
+//        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
+//        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
     }
 }
+
+//uncomment the line below to allow debugging on generated source code
+//sourceSets.test.java.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
 
 compileKotlin{
     kotlinOptions.jvmTarget = "$version_kotlin_jvmTarget"

@@ -57,7 +57,8 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
                 sqlCon = dataSource.connection
                 stmt = sqlCon.createStatement()
                 resultSet = stmt.executeQuery("SELECT dbVersion FROM _doorwayinfo")
-                currentDbVersion = resultSet.getInt(1)
+                if(resultSet.next())
+                    currentDbVersion = resultSet.getInt(1)
             }catch(e: SQLException) {
                 throw e
             }finally {
