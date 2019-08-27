@@ -37,4 +37,10 @@ actual class DatabaseBuilder<T: DoorDatabase>(private val roomBuilder: RoomDatab
         return this
     }
 
+    actual fun addMigrations(vararg migrations: DoorMigration): DatabaseBuilder<T> {
+        roomBuilder.addMigrations(*migrations)
+        return this
+    }
+
+
 }
