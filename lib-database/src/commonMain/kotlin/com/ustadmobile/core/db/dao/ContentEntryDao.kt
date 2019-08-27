@@ -103,6 +103,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("findByUidWithContentEntryStatusAsync")
     abstract suspend fun findByUidWithContentEntryStatusAsync(contentEntryUid: Long): ContentEntryWithContentEntryStatus?
 
     @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
@@ -126,9 +127,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getChildrenByParentUidWithCategoryFilter")
     abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 
+    @JsName("findLiveContentEntry")
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
     abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>
 
     @Query("SELECT contentEntryUid FROM ContentEntry WHERE entryId = :objectId LIMIT 1")
+    @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 }

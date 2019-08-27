@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Register2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.Person
@@ -75,7 +76,8 @@ class Register2Activity : UstadBaseActivity(), Register2View {
         systemImpl = UstadMobileSystemImpl.instance
 
         presenter = Register2Presenter(this,
-                bundleToMap(intent.extras), this)
+                bundleToMap(intent.extras), this,
+                UmAccountManager.getRepositoryForActiveAccount(this).personDao)
         presenter!!.onCreate(bundleToMap(savedInstanceState))
 
         for (fieldId in fieldToViewIdMap.values) {

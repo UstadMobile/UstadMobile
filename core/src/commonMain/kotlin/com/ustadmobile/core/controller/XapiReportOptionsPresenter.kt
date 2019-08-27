@@ -4,8 +4,9 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.listOfGraphs
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.xAxisList
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.yAxisList
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.XLangMapEntryDao
+import com.ustadmobile.core.db.dao.XObjectDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
@@ -20,18 +21,19 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
-class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, view: XapiReportOptionsView)
+class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
+                                 view: XapiReportOptionsView, private val personDao: PersonDao,
+                                 private val xObjectDao: XObjectDao, private val xLangMapEntryDao: XLangMapEntryDao)
     : UstadBaseController<XapiReportOptionsView>(context, arguments!!, view) {
 
 
     private lateinit var impl: UstadMobileSystemImpl
-    private lateinit var db: UmAppDatabase
 
     var fromDateTime: DateTime = DateTime.now()
-    var fromDateTimemillis = 0L
+    private var fromDateTimemillis = 0L
 
     var toDateTime: DateTime = DateTime.now()
-    var toDateTimeMillis = 0L
+    private var toDateTimeMillis = 0L
 
     private var selectedLocations: List<Long> = mutableListOf()
 
@@ -51,7 +53,6 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        db = UmAccountManager.getRepositoryForActiveAccount(context)
         impl = UstadMobileSystemImpl.instance
 
         val translatedGraphList = listOfGraphs.map { impl.getString(it, context) }
@@ -89,13 +90,13 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
             })
             GlobalScope.launch {
                 if (reportOptions!!.didFilterList.isNotEmpty()) {
-                    val verbs = db.xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
+                    val verbs = xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
                     view.runOnUiThread(Runnable {
                         view.updateDidListSelected(verbs)
                     })
                 }
                 if (reportOptions!!.whoFilterList.isNotEmpty()) {
-                    val personList = db.personDao.getAllPersonsInList(reportOptions!!.whoFilterList)
+                    val personList = personDao.getAllPersonsInList(reportOptions!!.whoFilterList)
                     view.runOnUiThread(Runnable {
                         view.updateWhoListSelected(personList)
                     })
@@ -136,14 +137,14 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     fun handleWhoDataTyped(name: String, uidList: List<Long>) {
         GlobalScope.launch {
-            val personsNames = db.personDao.getAllPersons("%$name%", uidList)
+            val personsNames = personDao.getAllPersons("%$name%", uidList)
             view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
         }
     }
 
     fun handleDidDataTyped(verb: String, uidList: List<Long>) {
         GlobalScope.launch {
-            val verbs = db.xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
+            val verbs = xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
             view.runOnUiThread(Runnable { view.updateDidDataAdapter(verbs) })
         }
     }
@@ -187,7 +188,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     fun handleEntriesListSelected(entriesList: List<Long>) {
         selectedEntries = entriesList
         GlobalScope.launch {
-            selectedObjects = db.xObjectDao.findListOfObjectUidFromContentEntryUid(selectedEntries)
+            selectedObjects = xObjectDao.findListOfObjectUidFromContentEntryUid(selectedEntries)
         }
     }
 

@@ -173,6 +173,7 @@ dependencies {
     api project(":app-android")
 
     implementation project(":lib-door-runtime")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
 

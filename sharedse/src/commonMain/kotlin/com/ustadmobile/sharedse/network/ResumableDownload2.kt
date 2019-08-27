@@ -38,23 +38,9 @@ import kotlin.coroutines.coroutineContext
 class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000,
                          private val calcMd5: Boolean = true, val httpClient: HttpClient = defaultHttpClient()) {
 
-    private var md5SumBytes: ByteArray? = null
-
     var onDownloadProgress: (Long) -> Unit = {}
 
     private val bytesDownloaded = atomic(0L)
-
-    val md5Sum: ByteArray
-        get() = /*if(md5SumBytes == null) {
-                throw IllegalStateException("Download not complete: cannot provide md5")
-            } else {
-                md5SumBytes!!
-            }*/
-            ByteBuffer.allocate(8).putLong(getSystemTimeInMillis()).array()
-
-
-
-
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
         try {

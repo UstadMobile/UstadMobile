@@ -22,6 +22,7 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
@@ -174,8 +175,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             recyclerAdapter!!.addListeners()
             recyclerAdapter!!.setEmptyStateListener(this)
 
+            val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
-                    bundleToMap(arguments), this)
+                    bundleToMap(arguments), this, umRepoDb.contentEntryDao)
             entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
         }
     }

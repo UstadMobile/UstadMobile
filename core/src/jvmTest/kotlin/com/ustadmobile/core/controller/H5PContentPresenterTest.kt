@@ -20,6 +20,7 @@ import org.junit.Test
 import org.mockito.Mockito
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import java.util.zip.ZipFile
 
 class H5PContentPresenterTest {
@@ -88,7 +89,7 @@ class H5PContentPresenterTest {
 
         h5PPresenter.onCreate(null)
 
-        verify(h5pContentView, timeout(15000 * 1000)).setContentTitle("True/False Question")
+        verify(h5pContentView, timeout(TimeUnit.MINUTES.toMillis(2))).setContentTitle("True/False Question")
 
         //A higher fidelity test is run using Espresso testing
         verify(h5pContentView, timeout(15000)).setContentHtml(any(), any())

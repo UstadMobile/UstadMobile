@@ -93,8 +93,8 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
         contentEntryDao = repository.contentEntryDao
 
         //Presenter
-        presenter = SelectMultipleEntriesTreeDialogPresenter(context!!,
-                bundleToMap(arguments), this)
+        presenter = SelectMultipleEntriesTreeDialogPresenter(context!!,bundleToMap(arguments), this,
+                repository.contentEntryParentChildJoinDao)
         presenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
         //Get any locations from given Uids (from previous activity)

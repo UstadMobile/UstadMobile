@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -20,12 +19,14 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 
-class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: VideoPlayerView)
+class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
+                           private val db: UmAppDatabase, private val repo: UmAppDatabase)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
 
-    private lateinit var contentEntryDao: ContentEntryDao
 
     private var navigation: String? = null
+
+    private lateinit var contentEntryDao: ContentEntryDao
 
     var audioInput: InputStream? = null
         private set
@@ -39,9 +40,6 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val db = UmAppDatabase.getInstance(context)
-        val dbRepo = UmAccountManager.getRepositoryForActiveAccount(context)
-        contentEntryDao = dbRepo.contentEntryDao
         val containerEntryDao = db.containerEntryDao
         val containerDao = db.containerDao
 
@@ -64,7 +62,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         GlobalScope.launch {
             container = containerDao.findByUidAsync(containerUid)
             val result = containerEntryDao.findByContainerAsync(containerUid)
-            val containerManager = ContainerManager(container!!, db, dbRepo)
+            val containerManager = ContainerManager(container!!, db, repo)
             var defaultLangName = ""
             for (entry in result) {
 

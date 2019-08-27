@@ -19,6 +19,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @JsName("stringMap")
     private var stringMap : Any = Any()
 
+    private var isBaseHomePath = false
+
     /**
      * Load all strings to be used in the app
      */
@@ -38,14 +40,30 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        val basePath = if(args.containsKey(ARG_CONTENT_ENTRY_UID)) "/${HomeView.VIEW_NAME}/" else "/"
+        val basePath = if(args.containsKey(ARG_CONTENT_ENTRY_UID)
+                || isHomeBasePath(args)) "/${HomeView.VIEW_NAME}/" else "/"
         umContext.router.navigate(arrayOf(basePath + viewName), mapToRouterParams(args))
     }
+
+    private fun isHomeBasePath(args: Map<String, String?>): Boolean{
+        var isHomePath = false
+        for ((key, _) in args) {
+            if(key == "path"){
+                isHomePath = true
+            }
+        }
+        return isHomePath
+    }
+
 
     private fun mapToRouterParams(args: Map<String, String?>): Any{
         val params = json()
         for ((key, value) in args) {
-            params[key] = value
+            if(key != "path"){
+                params[key] = value
+            }else{
+                isBaseHomePath = true
+            }
         }
         return json("queryParams" to params, "queryParamsHandling" to "merge")
     }

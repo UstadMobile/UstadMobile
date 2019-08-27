@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -17,10 +16,10 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
+class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?,
+                                        private val fragmentViewContract: ContentEntryListFragmentView,
+                                        private val contentEntryDao: ContentEntryDao)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
-
-    private var contentEntryDao: ContentEntryDao? = null
 
     private var filterByLang: Long = 0
 
@@ -31,9 +30,6 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val  appDatabase =  UmAccountManager.getRepositoryForActiveAccount(context)
-
-        contentEntryDao = appDatabase.contentEntryDao
         if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {
             showContentByParent()
         } else if (arguments.containsKey(ARG_DOWNLOADED_CONTENT)) {
@@ -54,17 +50,17 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
 
         try{
-            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDao!!.findLiveContentEntry(parentUid!!)
+            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDao.findLiveContentEntry(parentUid!!)
             entryLiveData.observe(this, this::onContentEntryChanged)
         }catch (e:Exception){
             fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
         }
 
         GlobalScope.launch {
-            val result = contentEntryDao!!.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
+            val result = contentEntryDao.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
             if (result.size > 1) {
                 val selectLang = Language()
                 selectLang.name = "Language"
@@ -81,7 +77,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         }
 
         GlobalScope.launch {
-            val result = contentEntryDao!!.findListOfCategoriesAsync(parentUid!!)
+            val result = contentEntryDao.findListOfCategoriesAsync(parentUid!!)
             val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
             for (schema in result) {
                 var data: MutableList<DistinctCategorySchema>? =
@@ -109,7 +105,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
     private fun showDownloadedContent() {
-        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.downloadedRootItems())
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.downloadedRootItems())
     }
 
 
@@ -122,7 +118,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
         GlobalScope.launch {
             try {
-                val result = contentEntryDao!!.findByUidAsync(entryUid)
+                val result = contentEntryDao.findByUidAsync(entryUid)
                 if (result == null) {
                     fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
                     return@launch
@@ -144,13 +140,13 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
     @JsName("handleUpNavigation")

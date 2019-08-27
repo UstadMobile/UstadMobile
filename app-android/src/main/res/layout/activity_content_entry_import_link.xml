@@ -7,7 +7,20 @@
 
     <include
         android:id="@+id/entry_import_link_toolbar"
-        layout="@layout/toolbar" />
+        layout="@layout/toolbar_with_progress" />
+
+    <TextView
+        android:id="@+id/import_link_error_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_16dp"
+        android:textColor="@color/red"
+        android:visibility="gone"
+        android:gravity="center"
+        tools:visibility="visible"
+        android:text="@string/import_link_error"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/entry_import_link_toolbar" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/entry_import_link_textInput"
@@ -17,7 +30,7 @@
         android:padding="@dimen/dimen_16dp"
         app:errorEnabled="true"
         app:layout_constraintStart_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/entry_import_link_toolbar">
+        app:layout_constraintTop_toBottomOf="@id/import_link_error_message">
 
 
         <EditText
@@ -63,18 +76,5 @@
         android:padding="@dimen/dimen_16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/import_link_preview_label" />
-
-    <ProgressBar
-        android:id="@+id/import_link_progress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:gravity="center"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

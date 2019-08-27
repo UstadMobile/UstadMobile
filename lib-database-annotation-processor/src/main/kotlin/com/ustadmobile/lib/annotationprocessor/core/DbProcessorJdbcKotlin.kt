@@ -638,6 +638,10 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
                         entityTypeSpec, dbProductType))
 
+                codeBlock.add(generateCreateIndicesCodeBlock(
+                        entityType.getAnnotation(Entity::class.java).indices,
+                        entityType.simpleName.toString(), "_stmt.executeUpdate"))
+
                 for(field in getEntityFieldElements(entityTypeSpec, false)) {
                     if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
                                     && it.members.findBooleanMemberValue("index") ?: false }) {

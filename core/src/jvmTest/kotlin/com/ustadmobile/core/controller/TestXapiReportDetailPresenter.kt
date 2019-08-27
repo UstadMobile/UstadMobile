@@ -57,7 +57,7 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         context = Any()
         try {
             db = UmAppDatabase.getInstance(context)
-            repo = db//.getRepository("http://localhost/dummy/", "")
+            repo = db//.getUmRepository("http://localhost/dummy/", "")
             db.clearAllTables()
 
             insertXapi(db)
@@ -100,7 +100,7 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithAvgDurationLabels)
 
         val presenter = XapiReportDetailPresenter(context,
-                args, mockView, mockImpl)
+                args, mockView, mockImpl, repo.statementDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("Average Duration (Hrs)")
@@ -128,7 +128,7 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithTotalDurationLabels)
 
         val presenter = XapiReportDetailPresenter(context,
-                args, mockView, mockImpl)
+                args, mockView, mockImpl, repo.statementDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("Total Duration (Hrs)")
@@ -152,7 +152,7 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithNoData)
 
         val presenter = XapiReportDetailPresenter(context,
-                args, mockView, mockImpl)
+                args, mockView, mockImpl, repo.statementDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
 
@@ -177,7 +177,7 @@ class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
 
         val presenter = XapiReportDetailPresenter(context,
-                args, mockView, mockImpl)
+                args, mockView, mockImpl, repo.statementDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("Score (%)")

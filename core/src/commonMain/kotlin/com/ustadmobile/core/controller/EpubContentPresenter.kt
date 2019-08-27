@@ -83,7 +83,9 @@ import org.kmp.io.KMPXmlParser
  *
  * @author mike
  */
-class EpubContentPresenter(context: Any, args: Map<String, String>?, private val epubContentView: EpubContentView?)
+class EpubContentPresenter(context: Any,
+                           args: Map<String, String>?,
+                           private val epubContentView: EpubContentView)
     : UstadBaseController<EpubContentView>(context, args!!, epubContentView!!) {
 
     private var ocf: OcfDocument? = null
@@ -140,7 +142,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                     else
                         null
 
-                    epubContentView!!.runOnUiThread(Runnable {
+                    epubContentView.runOnUiThread(Runnable {
                         val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF)) opf.getLinearSpinePositionByHREF(
                                 arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)!!) else 0
 

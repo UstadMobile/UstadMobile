@@ -39,18 +39,20 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     suspend fun handleUrlTextUpdated(url: String) {
         view.showHideVideoTitle(false)
+        view.enableDisableDoneButton(false)
 
-        var response: HttpResponse? = null
+        var response: HttpResponse?
         try {
             response = defaultHttpClient().head<HttpResponse>(url)
-        } catch (e: IOException) {
-            view.showUrlStatus(false, "Invalid Url")
+        } catch (e: Exception) {
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+            return
         }
 
         contentType = -1
 
-        if (response?.status?.value != 200) {
-            view.showUrlStatus(false, "Invalid Url")
+        if (response.status.value != 200) {
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
 
@@ -67,24 +69,26 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         if (contentTypeHeader?.startsWith("video/") == true) {
 
             if (length >= FILE_SIZE) {
-                view.showUrlStatus(false, "File size too big")
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
                 return
             }
+
             contentType = VIDEO
             this.hp5Url = url
             view.showUrlStatus(true, "")
             view.showHideVideoTitle(true)
+            view.enableDisableDoneButton(true)
             return
 
         } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
-            view.showUrlStatus(false, "Content not supported")
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
             return
         }
 
         val content = checkIfH5PValidAndReturnItsContent(url)
 
-        if (content == null) {
-            view.showUrlStatus(false, "Invalid Url")
+        if (content.isNullOrEmpty()) {
+            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             return
         }
 
@@ -94,8 +98,9 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             this.hp5Url = url
             view.showUrlStatus(isValid, "")
             view.displayUrl(url)
+            view.enableDisableDoneButton(true)
         } else {
-            view.showUrlStatus(isValid, "Content not supported")
+            view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
         }
     }
 
@@ -104,12 +109,10 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         val client = defaultHttpClient()
         var response: HttpResponse? = null
         view.showProgress(true)
+        view.enableDisableEditText(false)
+        view.showHideErrorMessage(false)
 
         when (contentType) {
-            -1 -> {
-                view.showProgress(false)
-                return
-            }
             HTML -> {
 
                 response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
@@ -134,10 +137,14 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             }
         }
 
-        view.showProgress(false)
+
         if (response?.status?.value == 200) {
 
             val content = response.receive<H5PImportData>()
+
+            view.showProgress(false)
+            view.enableDisableEditText(true)
+
             val db = UmAppDatabase.getInstance(context)
             db.contentEntryDao.insert(content.contentEntry)
             db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
@@ -146,6 +153,12 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             view.runOnUiThread(Runnable {
                 view.returnResult()
             })
+
+        } else {
+
+            view.showProgress(false)
+            view.enableDisableEditText(true)
+            view.showHideErrorMessage(true)
 
         }
 

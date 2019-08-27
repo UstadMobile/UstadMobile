@@ -206,22 +206,22 @@ class TestDownloadJobItemManager {
         runBlocking {
             UMLog.l(UMLog.INFO, 420, "Test: " + "givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch")
             setupDb()
-            val manager = DownloadJobItemManager(db, downloadJob.djUid,
-                    newSingleThreadContext("TestDownloadJobItemManager"))
+            val singleThreadContext = newSingleThreadContext("TestDownloadJobItemManager")
+            val manager = DownloadJobItemManager(db, downloadJob.djUid, singleThreadContext)
             setupRootAndSubleaf(manager)
 
             manager.commit()
 
-            val manager2 = DownloadJobItemManager(db, downloadJob!!.djUid,
-                    newSingleThreadContext("TestDownloadJobItemManager2"))
+            val manager2 = DownloadJobItemManager(db, downloadJob.djUid, singleThreadContext)
+            manager2.awaitLoaded()
 
-            val latch3 = CountDownLatch(1)
-            val statusRef = AtomicReference<DownloadJobItemStatus>()
-            statusRef.set(manager2.findStatusByContentEntryUid(parentEntry.contentEntryUid))
+            val manager2ContentEntryStatus = manager2
+                    .findStatusByContentEntryUid(parentEntry.contentEntryUid)
+
+            Assert.assertNotNull(manager2ContentEntryStatus)
 
             Assert.assertEquals("Parent entry total size is set as before",
-                    subLeafContainer.fileSize,
-                    statusRef.get().totalBytes)
+                    subLeafContainer.fileSize, manager2ContentEntryStatus!!.totalBytes)
         }
     }
 

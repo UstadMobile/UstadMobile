@@ -1,14 +1,13 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <title i18n="@@app_name">{{app_name}}</title>
 
-<ng-progress
-    [positionUsing]="'marginLeft'"
-    [direction]="'leftToRightIncreased'"
-    [color]="'#ffffff'"
-    [trickleSpeed]="500"
-    [thick]="false"
-    [showSpinner]="false"
-    [ease]="'easeInSine'">
-  </ng-progress>
+<ng-progress [positionUsing]="'marginLeft'" [direction]="'leftToRightIncreased'" [color]="'#ffffff'"
+  [trickleSpeed]="500" [thick]="false" [showSpinner]="false" [ease]="'easeInSine'">
+</ng-progress>
 
-<router-outlet (deactivate)="ngOnDestroy()"></router-outlet>
+
+<div class="fullscreen" *ngIf="showLoading">
+  <div class="center"><img class="responsive-img" src="../assets/images/ustad-logo.png"></div>
+</div>
+
+<router-outlet></router-outlet>

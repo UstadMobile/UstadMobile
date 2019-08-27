@@ -26,7 +26,7 @@ import java.util.*
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any, private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(context), private val repository: UmAppDatabase = UmAppDatabase.getInstance(context) /* appDatabase.getRepository("http://localhost/dummy/", "") */) : RouterNanoHTTPD(portNum) {
+open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any, private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(context), private val repository: UmAppDatabase = UmAppDatabase.getInstance(context)) : RouterNanoHTTPD(portNum) {
 
     private val id: Int
 

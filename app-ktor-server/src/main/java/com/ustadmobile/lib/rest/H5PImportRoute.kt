@@ -96,7 +96,9 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
             val videoTitle = call.request.queryParameters["title"]?: ""
 
-            val headers = defaultHttpClient().head<HttpResponse>(urlString).headers
+            val response = defaultHttpClient().head<HttpResponse>(urlString)
+
+            val headers = response.headers
 
             if (headers["Content-Type"]?.startsWith("video/") == true) {
 
@@ -157,12 +159,6 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
     }
 }
-
-fun downloadVideo(db: UmAppDatabase, contentEntryUid: Long, parentDir: File, containerUid: Long) {
-
-
-}
-
 
 fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, parentDir: File, h5pContentUrl: String?, containerUid: Long) {
 

@@ -1,39 +1,39 @@
+import { Subscription } from 'rxjs';
 import { UmAngularUtil } from './../util/UmAngularUtil';
 import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
 import { OnInit, OnDestroy } from '@angular/core';
-import core  from 'UstadMobile-core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import core from 'UstadMobile-core';
+
 export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   public env = environment;
-  public systemImpl: any;
-  public readonly context: UmContextWrapper;
-  public readonly MessageID;
+  protected systemImpl: any;
+  protected readonly context: UmContextWrapper;
+  protected readonly MessageID;
   public app_name: String = "...";
-  public viewContext: UmContextWrapper;
+  protected viewContext: UmContextWrapper;
+  protected subscription : Subscription;
 
 
-  protected constructor(public umService: UmBaseService, public router: Router, public route: ActivatedRoute, public mockedUmDb: UmDbMockService){
+  protected constructor(protected umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
+     protected umDatabase: UmDbMockService){
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
-    this.umService.setImpl(this.systemImpl);
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
     this.viewContext = this.context; 
-    umService.setContext(this.context);
+    this.umService.setContext(this.context);
   }
 
   ngOnInit(): void {
-    //load locale strings
-    const systemDefaultLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
-    this.umService.loadLocaleStrings(systemDefaultLocale).subscribe((loaded) => {
-      if(loaded){
+    //Listen for resources being ready
+    this.subscription = this.umService.getUmObserver().subscribe(content =>{
+      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.app_name = this.getString(this.MessageID.app_name);
-        this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
-          UmAngularUtil.DISPATCH_RESOURCE, loaded))
       }
     });
   }
@@ -51,5 +51,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     return this.systemImpl.getString(messageId, this.context)
   }
 
-  ngOnDestroy(){}
+  ngOnDestroy(){
+    this.subscription.unsubscribe();
+  }
 }

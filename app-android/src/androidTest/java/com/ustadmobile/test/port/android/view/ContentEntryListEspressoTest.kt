@@ -52,7 +52,7 @@ class ContentEntryListEspressoTest {
         val context = InstrumentationRegistry.getInstrumentation().context
         val db = UmAppDatabase.getInstance(context)
         db.clearAllTables()
-        val repo = db// db.getRepository("https://localhost", "")
+        val repo = db// db.getUmRepository("https://localhost", "")
 
         val contentDao = repo.contentEntryDao
         val pcjdao = repo.contentEntryParentChildJoinDao

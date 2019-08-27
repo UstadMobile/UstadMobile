@@ -10,8 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiReportDetailPresenter
 import com.ustadmobile.core.controller.XapiReportOptions
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -29,6 +31,8 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
     private lateinit var presenter: XapiReportDetailPresenter
 
     private lateinit var floatingButton: FloatingTextButton
+
+    private val umRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,9 +53,11 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
         floatingButton = findViewById(R.id.preview_fab)
 
+
         presenter = XapiReportDetailPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this, UstadMobileSystemImpl.instance
+                this, UstadMobileSystemImpl.instance, umRepository.statementDao,
+                umRepository.xLangMapEntryDao
         )
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

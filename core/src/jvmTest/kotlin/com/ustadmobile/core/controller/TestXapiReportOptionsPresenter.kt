@@ -55,7 +55,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         context = Any()
         try {
             db = UmAppDatabase.getInstance(context)
-            repo = db//.getRepository("http://localhost/dummy/", "")
+            repo = db//.getUmRepository("http://localhost/dummy/", "")
             db.clearAllTables()
 
             insertXapi(db)
@@ -88,7 +88,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithNoData)
 
         val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
+                args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         verify(mockView, timeout(15000)).updateChartTypeSelected(listOfGraphs.indexOf(BAR_CHART))
@@ -107,7 +107,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
             val verbs = db.xLangMapEntryDao.getAllVerbsInList(reportOptionsWithDataFilled.didFilterList)
             val persons = db.personDao.getAllPersonsInList(reportOptionsWithDataFilled.whoFilterList)
             val presenter = XapiReportOptionsPresenter(context,
-                    args, mockView)
+                    args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
             presenter.onCreate(args)
 
             verify(mockView, timeout(15000)).updateChartTypeSelected(listOfGraphs.indexOf(BAR_CHART))
@@ -128,7 +128,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
 
         val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
+                args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         presenter.handleViewReportPreview(reportOptionsWithDataFilled.didFilterList, reportOptionsWithDataFilled.whoFilterList)
@@ -145,7 +145,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithNoData)
 
         val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
+                args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         presenter.handleFromCalendarSelected(2018, 6, 10)
@@ -174,7 +174,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
 
         val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
+                args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         presenter.handleSelectedYAxis(1)
@@ -203,7 +203,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
 
         val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
+                args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         presenter.handleEntriesListSelected(listOf())
@@ -227,7 +227,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
 
         val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
+                args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
         presenter.handleWhatClicked()
@@ -240,7 +240,8 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
     @Test
     fun givenPersonName_whenNothingSelected_thenReturnFullListToActivity() {
-        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView,
+                repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(null)
 
         presenter.handleWhoDataTyped("He", listOf())
@@ -252,7 +253,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
     @Test
     fun givenPersonName_whenNamePreviouslySelected_thenReturnFilteredListToActivity() {
-        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView,repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(null)
 
         presenter.handleWhoDataTyped("He", listOf(100))
@@ -265,7 +266,8 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
     @Test
     fun givenVerb_whenNothingSelected_thenReturnFullListToActivity() {
-        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        val presenter = XapiReportOptionsPresenter(context, mapOf(),
+                mockView,repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(null)
 
         presenter.handleDidDataTyped("Attemp", listOf())
@@ -279,7 +281,8 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
     @Test
     fun givenVerb_whenNamePreviouslySelected_thenReturnFilteredListToActivity() {
-        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView,
+                repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(null)
 
         presenter.handleDidDataTyped("Attemp", listOf(201))

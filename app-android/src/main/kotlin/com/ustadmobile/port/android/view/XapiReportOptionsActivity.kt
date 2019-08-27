@@ -22,6 +22,7 @@ import com.ustadmobile.core.controller.XapiReportOptionsPresenter
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.XapiReportOptionsView
 import java.util.*
 
@@ -63,6 +64,8 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var toET: EditText
 
+    private val umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xapi_report_options)
@@ -91,7 +94,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this)
+                this, umRepo.personDao, umRepo.xObjectDao, umRepo.xLangMapEntryDao)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         /*  whereEditText.setOnClickListener {

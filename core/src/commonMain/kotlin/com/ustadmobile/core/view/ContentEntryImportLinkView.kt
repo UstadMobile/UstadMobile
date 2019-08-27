@@ -14,6 +14,12 @@ interface ContentEntryImportLinkView : UstadView {
 
     fun showProgress(showProgress: Boolean)
 
+    fun enableDisableDoneButton(enable: Boolean)
+
+    fun enableDisableEditText(enable: Boolean)
+
+    fun showHideErrorMessage(show: Boolean)
+
     companion object {
 
         const val CONTENT_ENTRY_PARENT_UID = "ContentEntryParentUid"

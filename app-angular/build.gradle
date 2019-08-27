@@ -148,6 +148,17 @@ task installDependencies{
 }
 
 
+task startEnd2EndTest{
+  doLast{
+    exec {
+      workingDir rootProject.file("app-angular/").path
+      commandLine 'ng', 'e2e'
+    }
+  }
+}
+
+startEnd2EndTest.dependsOn(build)
+
 build.dependsOn(installDependencies)
 installDependencies.dependsOn(":packPreparedModules")
 generateOtherXliff.shouldRunAfter(installDependencies)
