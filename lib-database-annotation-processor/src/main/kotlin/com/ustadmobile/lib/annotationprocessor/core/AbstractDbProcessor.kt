@@ -965,7 +965,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ""
             }
 
-            val autoGenerateSuffix = " \${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"RETURNING ${pkProp.name}\"  else -> \"\"} } "
+            val autoGenerateSuffix = " \${when{ _db.jdbcDbType == DoorDbType.POSTGRES && returnsId -> " +
+                    "\" RETURNING ${pkProp.name} \"  else -> \"\"} } "
 
             val sql = """
                 $statementClause INTO ${entityTypeSpec.name} (${fieldNames.joinToString()})
@@ -978,6 +979,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityClassName))
                     .addSuperclassConstructorParameter("_db.jdbcDbType")
                     .addFunction(FunSpec.builder("makeSql")
+                            .addParameter("returnsId", BOOLEAN)
                             .addModifiers(KModifier.OVERRIDE)
                             .addCode("return \"\"\"%L\"\"\"", sql).build())
                     .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
