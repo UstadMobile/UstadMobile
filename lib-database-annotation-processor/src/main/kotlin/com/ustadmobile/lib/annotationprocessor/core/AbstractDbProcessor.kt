@@ -536,7 +536,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return sql
     }
 
-    protected fun generateCreateIndicesCodeBlock(indexes: Array<Index>, tableName: String,
+    protected fun generateCreateIndicesCodeBlock(indexes: Array<IndexMirror>, tableName: String,
                                             execSqlFnName: String): CodeBlock {
         val codeBlock = CodeBlock.builder()
         indexes.forEach {

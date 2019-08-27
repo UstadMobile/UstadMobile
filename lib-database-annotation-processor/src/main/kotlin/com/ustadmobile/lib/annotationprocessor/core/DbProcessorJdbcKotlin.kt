@@ -666,7 +666,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                         entityTypeSpec, dbProductType))
 
                 codeBlock.add(generateCreateIndicesCodeBlock(
-                        entityType.getAnnotation(Entity::class.java).indices,
+                        entityType.getAnnotation(Entity::class.java)
+                                .indices.map { IndexMirror(it) }.toTypedArray(),
                         entityType.simpleName.toString(), "_stmt.executeUpdate"))
 
                 for(field in getEntityFieldElements(entityTypeSpec, false)) {
@@ -681,8 +682,15 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
                             "_stmt.executeUpdate", dbProductType))
 
+                    val trackerEntityClassName = generateTrackerEntity(entityType, processingEnv)
                     codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
-                            generateTrackerEntity(entityType, processingEnv), dbProductType))
+                            trackerEntityClassName, dbProductType))
+                    codeBlock.add(generateCreateIndicesCodeBlock(
+                            arrayOf(IndexMirror(value = arrayOf(DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                                    DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                                    DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
+                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME))),
+                                    trackerEntityClassName.name!!, "_stmt.executeUpdate"))
                 }
             }
 
