@@ -2,10 +2,11 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndex
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(indices = [UmIndex(name = "clazzUid_type_index", value = ["scClazzLogUid", "checkType"])])
+
+//@SyncableEntity(indices = [UmIndex(name = "clazzUid_type_index", value = ["scClazzLogUid", " +""checkType"])])
+@SyncableEntity(tableId = 173)
 @Entity
 class ScheduledCheck {
 

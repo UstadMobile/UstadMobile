@@ -2,10 +2,11 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
+
 
 /**
  * This Entity represents every field associated with the Person. This includes Core fields to be
@@ -23,7 +24,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
  * fieldName is internal and could just be "height of the person".
  *
  */
-@UmEntity(tableId = 20)
+@SyncableEntity(tableId = 20)
 @Entity
 open class PersonField {
 
@@ -39,13 +40,13 @@ open class PersonField {
     //The field icon used in the view.
     var fieldIcon: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var personFieldMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var personFieldLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var personFieldLastChangedBy: Int = 0
 
     companion object {

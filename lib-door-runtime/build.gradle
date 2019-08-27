@@ -51,6 +51,8 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                compileOnly project(":lib-room-annotations")
             }
         }
 
@@ -73,6 +75,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation project(":lib-room-annotations")
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
         }
 
@@ -80,6 +83,8 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+                implementation project(":lib-room-annotations")
+                implementation "io.ktor:ktor-client-js:$version_ktor"
             }
         }
 
@@ -89,6 +94,15 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+            }
+        }
+        androidTest{
+            dependencies{
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "junit:junit:$version_junit"
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
             }
         }
     }

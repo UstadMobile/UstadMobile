@@ -1,8 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TABLE_ID
 
@@ -11,26 +16,28 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TAB
  * ContentEntry child - parent join entity
  */
 //short code = cepcj
-@UmEntity(tableId = TABLE_ID, indices = [UmIndex(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
+@SyncableEntity(tableId = TABLE_ID)
 class ContentEntryParentChildJoin() {
 
     @PrimaryKey(autoGenerate = true)
     var cepcjUid: Long = 0
 
+    @ColumnInfo(index = true)
     var cepcjChildContentEntryUid: Long = 0
 
+    @ColumnInfo(index = true)
     var cepcjParentContentEntryUid: Long = 0
 
     var childIndex: Int = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var cepcjLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var cepcjMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var cepcjLastChangedBy: Int = 0
 
     constructor(parentEntry: ContentEntry, childEntry: ContentEntry,

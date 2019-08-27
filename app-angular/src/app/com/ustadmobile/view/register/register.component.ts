@@ -6,15 +6,15 @@ import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { Subscription } from 'rxjs';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { com as core } from 'core';
-import { com as db } from 'lib-database';
+import core from 'UstadMobile-core';
+import db from 'UstadMobile-lib-database';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent extends UmBaseComponent implements core.ustadmobile.core.view.Register2View{
+export class RegisterComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Register2View{
 
   subscription: Subscription;
   umFormRegister : FormGroup;
@@ -23,7 +23,7 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
   formValidated : boolean = false;
   showProgress : boolean = false;
   serverUrl: string = "";
-  presenter: core.ustadmobile.core.controller.Register2Presenter;
+  presenter: core.com.ustadmobile.core.controller.Register2Presenter;
   private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
@@ -46,7 +46,7 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
-      this.presenter = new core.ustadmobile.core.controller
+      this.presenter = new core.com.ustadmobile.core.controller
         .Register2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
     });

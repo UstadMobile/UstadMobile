@@ -3,19 +3,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-
-
-@UmEntity
+@SyncableEntity(tableId = 178)
 @Entity
 class PersonCustomFieldValue() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var personCustomFieldValueUid: Long = 0
 
@@ -28,12 +24,12 @@ class PersonCustomFieldValue() {
     //The value itself
     var fieldValue: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var personCustomFieldValueMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var personCustomFieldValueLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var personCustomFieldValueLastChangedBy: Int = 0
 }

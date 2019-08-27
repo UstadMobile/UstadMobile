@@ -2,7 +2,7 @@
 
 
 include ':app-android', ':lib-database-annotations', ':lib-door-runtime',
-        //':app-angular',
+        ':app-angular',
         ':dbcompress',
         ':app-ktor-server',
         ':lib-test-common',

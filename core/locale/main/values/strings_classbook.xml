@@ -150,7 +150,6 @@
     <string name="mark_all_absent">Mark all absent</string>
     <string name="present">Present</string>
     <string name="absent">Absent</string>
-    <string name="done">Done</string>
     <string name="present_selected">Present Selected</string>
     <string name="absent_selected">Absent Selected</string>
     <string name="partial_selected">Partial Selected</string>
@@ -220,7 +219,6 @@
     <string name="class_name">Class name</string>
     <string name="class_description">Class description</string>
     <string name="add_class_day">Add a class day</string>
-    <string name="from">from</string>
     <string name="to">to</string>
     <string name="holiday_calendar">Holiday Calendar</string>
     <string name="features_enabled">Features enabled</string>
@@ -313,7 +311,6 @@
     <string name="last_two_weeks">Last two weeks</string>
     <string name="last_three_months">Last three months</string>
     <string name="custom_date_range">Custom date range</string>
-    <string name="select_locations">Select Locations</string>
     <string name="location_name">Location name</string>
     <string name="sub_location_name">Sub\-location name</string>
     <string name="show_student_numbers">Show student numbers</string>

@@ -2,17 +2,17 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * Represents the question within a question set.
  * eg: "Select the students who sit alone"
  *
  */
-@UmEntity(tableId = 22)
+@SyncableEntity(tableId = 22)
 @Entity
 class SelQuestion {
 
@@ -37,12 +37,12 @@ class SelQuestion {
 
     var questionActive: Boolean = false
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var selQuestionMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var selQuestionLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var selQuestionLastChangedBy: Int = 0
 }

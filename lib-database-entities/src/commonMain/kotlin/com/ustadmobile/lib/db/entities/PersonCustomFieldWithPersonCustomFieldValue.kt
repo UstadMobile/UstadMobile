@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-import com.ustadmobile.lib.database.annotation.UmEmbedded
+import androidx.room.Embedded
 
 /**
  * Represents Field Value pair for fields (custom)
@@ -8,6 +8,6 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded
  */
 class PersonCustomFieldWithPersonCustomFieldValue : PersonField() {
 
-    @UmEmbedded
+    @Embedded
     var customFieldValue: PersonCustomFieldValue? = null
 }

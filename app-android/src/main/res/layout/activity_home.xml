@@ -38,17 +38,36 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                <TextView
-                    android:id="@+id/content_entry_toolbar_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:background="?attr/colorPrimary"
-                    android:gravity="center_vertical|start"
-                    android:minHeight="?attr/actionBarSize"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/text_title"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:layout_centerVertical="true"
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/profile_image"
+                        android:layout_width="@dimen/dimen_30dp"
+                        android:layout_height="@dimen/dimen_30dp"
+                        app:civ_border_width="2dp"
+                        app:civ_border_color="@color/primary_light"/>
+
+
+                    <TextView
+                        android:id="@+id/toolBarTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="56dp"
+                        android:background="?attr/colorPrimary"
+                        android:gravity="center_vertical|start"
+                        android:minHeight="?attr/actionBarSize"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/text_title"
+                        android:layout_toEndOf="@+id/profile_image"
+                        android:layout_marginStart="@dimen/dimen_16dp"
+                        android:textStyle="bold"
+                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                </RelativeLayout>
 
 
             </androidx.appcompat.widget.Toolbar>

@@ -2,7 +2,10 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.TABLE_ID
 
 
@@ -12,8 +15,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.TA
  * could be that the other entry is a see also link.
  */
 //shortcode cerej
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 class ContentEntryRelatedEntryJoin() {
 
 
@@ -24,7 +27,7 @@ class ContentEntryRelatedEntryJoin() {
 
     var cerejRelatedEntryUid: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var cerejLastChangedBy: Int = 0
 
     var relType: Int = 0
@@ -33,10 +36,10 @@ class ContentEntryRelatedEntryJoin() {
 
     var cerejRelLanguageUid: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var cerejLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var cerejMasterChangeSeqNum: Long = 0
 
     override fun equals(other: Any?): Boolean {

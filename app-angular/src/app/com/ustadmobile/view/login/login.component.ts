@@ -6,21 +6,21 @@ import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
-import { com as core } from 'core';
+import core from 'UstadMobile-core';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent extends UmBaseComponent implements core.ustadmobile.core.view.Login2View{
+export class LoginComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Login2View{
 
   subscription: Subscription;
   umFormLogin : FormGroup;
   formValidated : boolean = false;
   showProgress : boolean = false;
   serverUrl: string = "";
-  presenter: core.ustadmobile.core.controller.Login2Presenter;
+  presenter: core.com.ustadmobile.core.controller.Login2Presenter;
   private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
@@ -39,7 +39,7 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
-      this.presenter = new core.ustadmobile.core.controller
+      this.presenter = new core.com.ustadmobile.core.controller
         .Login2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
     });

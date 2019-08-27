@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorView
@@ -28,7 +29,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
     val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
-    private val appDb : UmAppDatabase = UmAppDatabase.getInstance(context)
+    private val appDb : UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
 
     private var contentEntry: ContentEntry = ContentEntry()
 

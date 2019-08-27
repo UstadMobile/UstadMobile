@@ -2,21 +2,21 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.annotation.SyncablePrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
+
 
 /**
  * Represents one session (e.g. day) in the class log book. This is related to attendance records, but
  * could also be related to behavior logs etc. in the future.
  */
-@UmEntity(tableId = 14)
-@Entity
-open class ClazzLog() {
 
-    @SyncablePrimaryKey
+@SyncableEntity(tableId = 14)
+@Entity
+open class ClazzLog()  {
+
     @PrimaryKey(autoGenerate = true)
     var clazzLogUid: Long = 0
 
@@ -38,13 +38,13 @@ open class ClazzLog() {
 
     var clazzLogScheduleUid: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var clazzLogMSQN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var clazzLogLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var clazzLogLCB: Int = 0
 
     constructor(clazzLogUid: Long, clazzUid: Long, logDate: Long, scheduleUid: Long): this() {

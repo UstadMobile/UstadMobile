@@ -2,13 +2,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 15)
+@SyncableEntity(tableId = 15)
 @Entity
 open class ClazzLogAttendanceRecord() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var clazzLogAttendanceRecordUid: Long = 0
 
@@ -18,13 +20,13 @@ open class ClazzLogAttendanceRecord() {
 
     var attendanceStatus: Int = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var clazzLogAttendanceRecordMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var clazzLogAttendanceRecordLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var clazzLogAttendanceRecordLastChangedBy: Int = 0
 
     companion object {

@@ -218,10 +218,16 @@ object UMCalendarUtil {
         return getPrettyDateSuperSimpleFromLong(thisDate)
     }
 
-    fun convertYYYYMMddToLong(date:String):Long{
+    fun convertYYYYMMddToLong(date:String):Long {
         val format = DateFormat("yyyy-MM-dd")
         val date = format.parse(date)
         return date.local.unixMillis.toLong()
     }
+
+    fun setDate(year: Int, month: Int, dayOfMonth: Int): DateTime {
+        return DateTime(year, month, dayOfMonth)
+
+    }
+
 
 }

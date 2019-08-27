@@ -2,17 +2,18 @@ package com.ustadmobile.sharedse.xapi
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.extractTestResourceToFile
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.AgentEntity
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementEndpoint
+import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -144,14 +145,14 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to team", team?.agentUid, entity?.teamUid)
 
         Assert.assertEquals("context statement joined matches with statement", contextJoin?.contextStatementUid, entity?.statementUid)
-        Assert.assertEquals("context statement joined matches with objectuid", parent?.xObjectUid, contextJoin?.contextXObjectUid)
+        Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin?.contextXObjectUid)
         Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
 
 
-        Assert.assertTrue("result success matched", entity?.isResultSuccess?: false)
-        Assert.assertTrue("result completion matched", entity?.isResultCompletion?: false)
-        Assert.assertEquals("result response matched", "We agreed on some example actions.", entity?.resultResponse)
-        Assert.assertEquals("result duration matched", UMTinCanUtil.parse8601Duration("PT1H0M0S"), entity?.resultDuration)
+        Assert.assertEquals("result success matched", RESULT_SUCCESS, entity.resultSuccess)
+        Assert.assertTrue("result completion matched", entity.resultCompletion)
+        Assert.assertEquals("result response matched", "We agreed on some example actions.", entity.resultResponse)
+        Assert.assertEquals("result duration matched", UMTinCanUtil.parse8601Duration("PT1H0M0S"), entity.resultDuration)
 
     }
 

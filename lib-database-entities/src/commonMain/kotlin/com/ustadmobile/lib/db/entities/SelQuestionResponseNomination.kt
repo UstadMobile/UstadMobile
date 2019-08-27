@@ -2,15 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
+
 
 /**
  * Represents the student who is nominated for a specific question in the question set
  */
-@UmEntity(tableId = 24)
+@SyncableEntity(tableId = 24)
 @Entity
 class SelQuestionResponseNomination {
 
@@ -26,15 +27,15 @@ class SelQuestionResponseNomination {
     var nominationActive: Boolean = false
 
     //Renamed:
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var selQuestionResponseNominationMasterChangeSeqNum: Long = 0
     //private long scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
 
     //Renamed:
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var selQuestionResponseNominationLocalChangeSeqNum: Long = 0
     //private long scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var selQuestionResponseNominationLastChangedBy: Int = 0
 }

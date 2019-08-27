@@ -136,7 +136,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
                             networkNodeId, statusCheckResponse[entryCounter] != 0L))
 
                 }
-                val rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList)
+                val rowCount = entryStatusResponseDao.insertList(entryFileStatusResponseList)
                 if (rowCount.size == entryFileStatusResponseList.size) {
                     UMLog.l(UMLog.DEBUG, 698, rowCount.size.toString()
                             + " response(s) logged from " + sourceDeviceAddress)

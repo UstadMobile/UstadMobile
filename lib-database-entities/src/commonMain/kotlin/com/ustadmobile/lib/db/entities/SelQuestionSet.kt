@@ -2,16 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
+
 
 /**
  * Represents a set of social nomination question eg: "Question set for Region A"
  */
-@UmEntity(tableId = 25)
+@SyncableEntity(tableId = 25)
 @Entity
 open class SelQuestionSet {
 
@@ -21,12 +21,12 @@ open class SelQuestionSet {
     // The set title.
     var title: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var selQuestionSetMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var selQuestionSetLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var selQuestionSetLastChangedBy: Int = 0
 }

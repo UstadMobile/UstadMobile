@@ -2,15 +2,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * Represents the students response to a specific question in the question set
  */
-@UmEntity(tableId = 23)
+@SyncableEntity(tableId = 23)
 @Entity
 class SelQuestionResponse {
 
@@ -23,12 +23,12 @@ class SelQuestionResponse {
     //Added the actual Question UID (28012019):
     var selQuestionResponseSelQuestionUid: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var selQuestionResponseMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var selQuestionResponseLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var selQuestionResponseLastChangedBy: Int = 0
 }

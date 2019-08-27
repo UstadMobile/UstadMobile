@@ -13,7 +13,9 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getP
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateContextStatementJoin
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateStatementEntity
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateVerb
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateVerbLangMap
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateXObject
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateXObjectLangMap
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,6 +26,10 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     private val xobjectDao: XObjectDao = db.xObjectDao
     private val contextJoinDao: ContextXObjectStatementJoinDao = db.contextXObjectStatementJoinDao
     private val agentDao: AgentDao = db.agentDao
+    private val xLangMapEntryDao: XLangMapEntryDao = db.xLangMapEntryDao
+    private val languageDao: LanguageDao = db.languageDao
+    private val langVariantDao = db.languageVariantDao
+    private val contentEntryDao = db.contentEntryDao
 
 
     @Throws(IllegalArgumentException::class)
@@ -223,6 +229,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         val agentEntity = getAgent(agentDao, personDao, statement.actor!!)
         val agentUid = agentEntity.agentUid
 
+        insertOrUpdateVerbLangMap(xLangMapEntryDao, statement.verb!!, verbEntity, languageDao, langVariantDao)
+
         var authorityUid: Long = 0
         if (statement.authority != null) {
 
@@ -242,7 +250,9 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
         var xObjectEntity: XObjectEntity? = null
         if (statement.`object` != null) {
-            xObjectEntity = insertOrUpdateXObject(xobjectDao, statement.`object`!!, gson)
+            xObjectEntity = insertOrUpdateXObject(xobjectDao, statement.`object`!!, gson, contentEntryDao)
+
+            insertOrUpdateXObjectLangMap(xLangMapEntryDao, statement.`object`!!, xObjectEntity, languageDao, langVariantDao)
         }
 
         var subActorUid: Long = 0
@@ -258,8 +268,12 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             val subVerb = insertOrUpdateVerb(verbDao, subStatement.verb!!)
             subVerbUid = subVerb.verbUid
 
-            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson)
+            insertOrUpdateVerbLangMap(xLangMapEntryDao, subStatement.verb!!, subVerb, languageDao, langVariantDao)
+
+            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson, contentEntryDao)
             subObjectUid = subObject.xObjectUid
+
+            insertOrUpdateXObjectLangMap(xLangMapEntryDao, subStatement.`object`!!, subObject, languageDao, langVariantDao)
 
         }
 
@@ -319,7 +333,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
     fun createAllContextActivities(list: List<XObject>?, statementUid: Long, flag: Int) {
         for (`object` in list!!) {
-            val xobjectEntity = insertOrUpdateXObject(xobjectDao, `object`, gson)
+            val xobjectEntity = insertOrUpdateXObject(xobjectDao, `object`, gson, contentEntryDao)
             insertOrUpdateContextStatementJoin(contextJoinDao, statementUid, xobjectEntity.xObjectUid, flag)
         }
     }

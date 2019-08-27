@@ -5,20 +5,23 @@ import androidx.work.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
 
     override fun doWork(): Result {
-        val activeAccount = UmAccountManager.getActiveAccount(applicationContext)
-
-        val umAppDb = UmAppDatabase.getInstance(applicationContext)
         try {
-           // umAppDb.syncWith(
-            //        UmAccountManager.getRepositoryForActiveAccount(applicationContext),
-          //          activeAccount?.personUid ?: 0, 100, 100)
+            println("Start sync")
+            val clientRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+            runBlocking {
+                val syncRepo =(clientRepo as DoorDatabaseSyncRepository)
+                syncRepo.sync(null)
+            }
+
             UMLog.l(UMLog.INFO, 100, "database syncWith repo ran")
         } catch (e: Exception) {
             UMLog.l(UMLog.WARN, 101, "Exception running syncWith :" + e.message)
@@ -26,13 +29,9 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
 
         if (!isStopped) {
             val appRecentlyActive = UmAppDatabaseSyncService.isInForeground || System.currentTimeMillis() - UmAppDatabaseSyncService.lastForegroundTime < UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG
-
-            //TODO: Mike Update this to use new sync method
-            /*
-            if (appRecentlyActive || umAppDb.countPendingLocalChanges(UmAccountManager.getActivePersonUid(
-                            applicationContext), umAppDb.getDeviceBits()) > 0) {
+            if (appRecentlyActive) {
                 queueSyncWorker((if (appRecentlyActive) 1 else 15).toLong(), TimeUnit.MINUTES)
-            }*/
+            }
         }
 
 

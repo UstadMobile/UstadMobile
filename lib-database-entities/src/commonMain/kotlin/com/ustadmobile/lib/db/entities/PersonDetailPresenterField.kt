@@ -2,11 +2,10 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * This entity represents all the fields including the headers and extra information that will
@@ -14,7 +13,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
  * (header or text/date/drop-down/phone/etc), the index for order and view flags.
  *
  */
-@UmEntity(tableId = 19)
+@SyncableEntity(tableId = 19)
 @Entity
 class PersonDetailPresenterField {
 
@@ -51,13 +50,13 @@ class PersonDetailPresenterField {
     //sometimes we want to display a field but not be able to edit it. This is the flag for that.
     var isReadyOnly: Boolean = false
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var personDetailPresenterFieldMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var personDetailPresenterFieldLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var personDetailPresenterFieldLastChangedBy: Int = 0
 
     companion object {

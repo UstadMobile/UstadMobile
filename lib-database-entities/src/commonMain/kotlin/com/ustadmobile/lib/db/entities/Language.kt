@@ -2,16 +2,18 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Language.Companion.TABLE_ID
 
 
-@UmEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID)
 @Entity
 class Language() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var langUid: Long = 0
 
     var name: String? = null
@@ -25,13 +27,13 @@ class Language() {
     // 3 letter code
     var iso_639_3_standard: String? = null
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var langLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var langMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var langLastChangedBy: Int = 0
 
     override fun toString(): String {

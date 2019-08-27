@@ -11,4 +11,4 @@ private val httpClient = HttpClient(){
     install(JsonFeature)
 }
 
-fun defaultHttClient() = httpClient
+fun defaultHttpClient() = httpClient

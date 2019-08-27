@@ -2,15 +2,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * Represents one run through of a question set for one particular student.
  */
-@UmEntity(tableId = 27)
+@SyncableEntity(tableId = 27)
 @Entity
 class SelQuestionSetResponse {
 
@@ -32,13 +32,12 @@ class SelQuestionSetResponse {
     //total Response Recognition percentage. - to be calculated on device (not database).
     var selQuestionSetResponseRecognitionPercentage: Float = 0.toFloat()
 
-
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var selQuestionSetResponseMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var selQuestionSetResponseLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var selQuestionSetResponseLastChangedBy: Int = 0
 }

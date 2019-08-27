@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
-import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -46,7 +46,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         GlobalScope.launch {
             mountedPath = containerMounter(containerUid)
 
-            val client = HttpClient()
+            val client = defaultHttpClient()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath!!, "tincan.xml"))
 
             val xpp = KMPXmlParser()

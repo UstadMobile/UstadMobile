@@ -4,9 +4,9 @@ import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.servic
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { com as core } from 'core';
-import { com as db } from 'lib-database';
-import { com as util } from 'lib-util';
+import core  from 'UstadMobile-core';
+import db  from 'UstadMobile-lib-database';
+import util from 'UstadMobile-lib-util';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -17,14 +17,14 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   styleUrls: ['./content-entry-list.component.css']
 })
 export class ContentEntryListComponent extends UmBaseComponent implements 
-core.ustadmobile.core.view.ContentEntryListFragmentView {
+core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   
   entries : db.ustadmobile.lib.db.entities.ContentEntry[] = [];
   env = environment;
   label_language_options : string = "";
   label_reading_level : string = "";
   private entryListObservable: Observable<ContentEntry[]> = null
-  private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
+  private presenter: core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.ustadmobile.lib.db.entities.Language[]
   categories: db.ustadmobile.lib.db.entities.DistinctCategorySchema[];
   categoryMap : any[][] = [];
@@ -48,7 +48,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
       this.entries = [];
-        this.presenter = new core.ustadmobile.core.controller
+        this.presenter = new core.com.ustadmobile.core.controller
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.umService.setPresenterInstance(this.presenter);
         this.presenter.onCreate(null);

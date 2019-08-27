@@ -2,15 +2,18 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 
 /**
  * Created by mike on 3/8/18.
  */
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 open class Person() {
 
     @PrimaryKey(autoGenerate = true)
@@ -32,6 +35,7 @@ open class Person() {
 
     var admin: Boolean = false
 
+
     var fatherName: String? = null
 
     var fatherNumber: String? = null
@@ -44,13 +48,14 @@ open class Person() {
 
     var address: String? = null
 
-    @UmSyncMasterChangeSeqNum
+
+    @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var personLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var personLastChangedBy: Int = 0
 
     constructor(username: String, firstNames: String, lastName: String) : this() {

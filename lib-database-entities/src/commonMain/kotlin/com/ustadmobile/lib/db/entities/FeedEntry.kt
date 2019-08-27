@@ -2,14 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity
+@SyncableEntity(tableId = 121)
 @Entity
 class FeedEntry()  {
 
-    @UmPrimaryKey
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var feedEntryUid: Long = 0
 
     var feedEntryPersonUid: Long = 0
@@ -60,13 +62,13 @@ class FeedEntry()  {
      */
     var feedEntryCheckType: Int = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var feedEntryLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var feedEntryMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var feedEntryLastChangedBy: Int = 0
 
 

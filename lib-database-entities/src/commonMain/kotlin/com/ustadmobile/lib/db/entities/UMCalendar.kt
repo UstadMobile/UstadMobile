@@ -2,16 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
 /**
  * Represents a Caledar which will be liked to multiple holidays, schedules etc
  * Its basically a collection of dates and time. (holidays and schedules)
  */
-@UmEntity(tableId = 28)
+@SyncableEntity(tableId = 28)
 @Entity
 open class UMCalendar {
 
@@ -30,13 +30,13 @@ open class UMCalendar {
     //Tester method- Please remove me later
     var isUmCalendarFlag: Boolean = false
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var umCalendarMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var umCalendarLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var umCalendarLastChangedBy: Int = 0
 
     constructor(name: String, category: Int) {
