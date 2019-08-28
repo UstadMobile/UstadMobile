@@ -603,7 +603,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 }
 
                 codeBlock.add("$execSqlFn(%S)\n", """CREATE OR REPLACE FUNCTION 
-                    | inc_csn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
+                    | inccsn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
                     | BEGIN  
                     | UPDATE ${syncableEntityInfo.syncableEntity.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} =
                     | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
@@ -617,7 +617,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     | END $$
                     | LANGUAGE plpgsql
                 """.trimMargin())
-                        .add("$execSqlFn(%S)\n", """CREATE TRIGGER inc_csn_${syncableEntityInfo.tableId}_trig 
+                        .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
                             |AFTER UPDATE OR INSERT ON ${syncableEntityInfo.syncableEntity.simpleName} 
                             |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                             |EXECUTE PROCEDURE inc_csn_${syncableEntityInfo.tableId}_fn()
