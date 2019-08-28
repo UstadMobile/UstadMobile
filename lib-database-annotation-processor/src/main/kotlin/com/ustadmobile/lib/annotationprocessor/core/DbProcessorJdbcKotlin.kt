@@ -30,6 +30,7 @@ import javax.tools.Diagnostic
 import com.ustadmobile.door.SyncableDoorDatabase
 import kotlin.math.absoluteValue
 import kotlin.random.Random
+import com.ustadmobile.door.DoorDbType
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
@@ -360,6 +361,8 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
         INT -> codeBlock.add("0")
         LONG -> codeBlock.add("0L")
         BYTE -> codeBlock.add("0.toByte()")
+        FLOAT -> codeBlock.add("0.toFloat()")
+        DOUBLE -> codeBlock.add("0.toDouble()")
         BOOLEAN -> codeBlock.add("false")
         String::class.asTypeName() -> codeBlock.add("null as String?")
         else -> {
@@ -457,6 +460,9 @@ fun fieldsOnEntity(entityType: TypeElement) = entityType.enclosedElements.filter
             && !it.modifiers.contains(Modifier.STATIC)
 }
 
+internal val masterDbVals = mapOf(DoorDbType.SQLITE to listOf("0", "1"),
+        DoorDbType.POSTGRES to listOf("false", "true"))
+
 internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
                                      execSqlFunName: String = "_stmt.executeUpdate",
                                      processingEnv: ProcessingEnvironment,
@@ -465,14 +471,29 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
     codeBlock.add("val _nodeId = %T.nextInt(1, %T.MAX_VALUE)\n",
             Random::class, Int::class)
             .add("println(\"Setting SyncNode nodeClientId = \$_nodeId\")\n")
-            .add("$execSqlFunName(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES·(\$_nodeId,\${if(master) 1 else 0})\")\n")
+            .add("$execSqlFunName(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES")
+
+    when(jdbcDbType) {
+        DoorDbType.SQLITE -> codeBlock.add("·(\$_nodeId,\${if(master)·1·else·0})")
+        DoorDbType.POSTGRES -> codeBlock.add("·(\$_nodeId,\$master)")
+    }
+
+    codeBlock.add("\")\n")
+
+
     syncableEntityTypesOnDb(dbType, processingEnv).forEach {
-        if(isUpdate) {
-            codeBlock.add("$execSqlFunName(%S)\n",
-                    "UPDATE sqlite_sequence SET seq = ((SELECT nodeClientId FROM SyncNode) << 32) WHERE name = '${it.simpleName}'")
-        }else {
-            codeBlock.add("$execSqlFunName(%S)\n",
-                    "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
+        val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
+        if(jdbcDbType == DoorDbType.SQLITE) {
+            if(isUpdate) {
+                codeBlock.add("$execSqlFunName(%S)\n",
+                        "UPDATE sqlite_sequence SET seq = ((SELECT nodeClientId FROM SyncNode) << 32) WHERE name = '${it.simpleName}'")
+            }else {
+                codeBlock.add("$execSqlFunName(%S)\n",
+                        "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
+            }
+        }else if(jdbcDbType == DoorDbType.POSTGRES){
+            codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
+                    "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
         }
     }
 
@@ -562,6 +583,12 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .addCode("setupFromDataSource()\n")
         val dbImplType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
                 .superclass(dbTypeElement.asClassName())
+                .addProperty(PropertySpec.builder("dbVersion", INT)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder()
+                                .addCode("return ${dbTypeElement.getAnnotation(Database::class.java).version}")
+                                .build())
+                        .build())
 
         if(isSyncableDb(dbTypeElement, processingEnv)) {
             constructorFn.addParameter(ParameterSpec.builder("master", BOOLEAN)
@@ -624,9 +651,9 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .beginControlFlow("when(jdbcDbType)")
 
         for(dbProductType in DoorDbType.SUPPORTED_TYPES) {
+            val dbTypeName = DoorDbType.PRODUCT_INT_TO_NAME_MAP[dbProductType] as String
             codeBlock.beginControlFlow("$dbProductType -> ")
-                    .add("// - create for this $dbProductType \n")
-
+                    .add("// - create for this $dbTypeName \n")
             codeBlock.add("_stmt.executeUpdate(\"CREATE·TABLE·IF·NOT·EXISTS·${DoorDatabase.DBINFO_TABLENAME}" +
                     "·(dbVersion·int·primary·key,·dbHash·varchar(255))\")\n")
             codeBlock.add("_stmt.executeUpdate(\"INSERT·INTO·${DoorDatabase.DBINFO_TABLENAME}·" +
@@ -634,15 +661,26 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             val dbEntityTypes = entityTypesOnDb(dbTypeElement, processingEnv)
             for(entityType in dbEntityTypes) {
+                codeBlock.add("//Begin: Create table ${entityType.simpleName} for $dbTypeName\n")
                 val entityTypeSpec = entityType.asEntityTypeSpec()
+                val fieldElements = getEntityFieldElements(entityTypeSpec, false)
+                val fieldListStr = fieldElements.joinToString { it.name }
+                codeBlock.add("/* START MIGRATION: \n")
+                        .add("_stmt.executeUpdate(%S)\n", "ALTER TABLE ${entityTypeSpec.name} RENAME to ${entityTypeSpec.name}_OLD")
+                        .add("END MIGRATION */\n")
                 codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
                         entityTypeSpec, dbProductType))
+                codeBlock.add("/* START MIGRATION: \n")
+                        .add("_stmt.executeUpdate(%S)\n", "INSERT INTO ${entityTypeSpec.name} ($fieldListStr) SELECT $fieldListStr FROM ${entityTypeSpec.name}_OLD")
+                        .add("_stmt.executeUpdate(%S)\n", "DROP TABLE ${entityTypeSpec.name}_OLD")
+                        .add("END MIGRATION*/\n")
 
                 codeBlock.add(generateCreateIndicesCodeBlock(
-                        entityType.getAnnotation(Entity::class.java).indices,
+                        entityType.getAnnotation(Entity::class.java)
+                                .indices.map { IndexMirror(it) }.toTypedArray(),
                         entityType.simpleName.toString(), "_stmt.executeUpdate"))
 
-                for(field in getEntityFieldElements(entityTypeSpec, false)) {
+                for(field in fieldElements) {
                     if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
                                     && it.members.findBooleanMemberValue("index") ?: false }) {
                         codeBlock.add("_stmt.executeUpdate(%S)\n",
@@ -651,12 +689,29 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 }
 
                 if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
+                    val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(),
+                            processingEnv)
                     codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
                             "_stmt.executeUpdate", dbProductType))
+                    if(dbProductType == DoorDbType.POSTGRES) {
+                        codeBlock.add("/* START MIGRATION: \n")
+                                .add("_stmt.executeUpdate(%S)\n", "DROP FUNCTION IF EXISTS inc_csn_${syncableEntityInfo.tableId}_fn")
+                                .add("_stmt.executeUpdate(%S)\n", "DROP SEQUENCE IF EXISTS spk_seq_${syncableEntityInfo.tableId}")
+                                .add("END MIGRATION*/\n")
+                    }
 
+
+                    val trackerEntityClassName = generateTrackerEntity(entityType, processingEnv)
                     codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
-                            generateTrackerEntity(entityType, processingEnv), dbProductType))
+                            trackerEntityClassName, dbProductType))
+                    codeBlock.add(generateCreateIndicesCodeBlock(
+                            arrayOf(IndexMirror(value = arrayOf(DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                                    DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                                    DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
+                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME))),
+                                    trackerEntityClassName.name!!, "_stmt.executeUpdate"))
                 }
+                codeBlock.add("//End: Create table ${entityType.simpleName} for $dbTypeName\n\n")
             }
 
             if(processingEnv.typeUtils.isAssignable(dbTypeElement.asType(),
