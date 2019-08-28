@@ -114,7 +114,6 @@ task generateMessageXlf{
 //Prepare dynamic task to generate XLF for each language locale
 def generateMessageXlfTasks = []
 new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
-
   def langCode = ""
   if(localeDir.name.contains("-")) {
     langCode = localeDir.name.substring(localeDir.name.indexOf("-") + 1)
@@ -128,7 +127,7 @@ new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
     input file(project.file("src/assets/locale/messages.xlf"))
     output file(project.file("src/assets/locale/messages.${langCode}.xlf"))
     parameters(
-      strings_src: "${localeDir.absolutePath}/strings_ui.xml)"
+      strings_src: "${localeDir.absolutePath}/strings_ui.xml"
     )
   }
   project.tasks.findByName(generateMessageTask).dependsOn(generateMessageXlf)
