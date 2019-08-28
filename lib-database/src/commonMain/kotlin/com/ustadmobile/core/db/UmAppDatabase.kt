@@ -315,6 +315,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |CREATE TRIGGER inc_csn_60_trig 
                     |AFTER UPDATE OR INSERT ON StatementEntity 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inc_csn_60_fn()
                     """.trimMargin())
                     database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
 
