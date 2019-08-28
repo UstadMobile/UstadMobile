@@ -536,7 +536,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return sql
     }
 
-    protected fun generateCreateIndicesCodeBlock(indexes: Array<Index>, tableName: String,
+    protected fun generateCreateIndicesCodeBlock(indexes: Array<IndexMirror>, tableName: String,
                                             execSqlFnName: String): CodeBlock {
         val codeBlock = CodeBlock.builder()
         indexes.forEach {
@@ -611,7 +611,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     | ${syncableEntityInfo.entityMasterCsnField.name} = 
                     | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
                     | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
-                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END);
+                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
+                    | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
                     | RETURN null;
                     | END $$
                     | LANGUAGE plpgsql
@@ -965,7 +966,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ""
             }
 
-            val autoGenerateSuffix = " \${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"RETURNING ${pkProp.name}\"  else -> \"\"} } "
+            val autoGenerateSuffix = " \${when{ _db.jdbcDbType == DoorDbType.POSTGRES && returnsId -> " +
+                    "\"·RETURNING·${pkProp.name}·\"  else -> \"\"} } "
 
             val sql = """
                 $statementClause INTO ${entityTypeSpec.name} (${fieldNames.joinToString()})
@@ -978,6 +980,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityClassName))
                     .addSuperclassConstructorParameter("_db.jdbcDbType")
                     .addFunction(FunSpec.builder("makeSql")
+                            .addParameter("returnsId", BOOLEAN)
                             .addModifiers(KModifier.OVERRIDE)
                             .addCode("return \"\"\"%L\"\"\"", sql).build())
                     .addFunction(FunSpec.builder("bindPreparedStmtToEntity")

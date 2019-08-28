@@ -44,7 +44,14 @@ internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: Proc
                             .initializer(DbProcessorSync.TRACKER_TIMESTAMP_FIELDNAME)
                             .build()
             ))
-            .addAnnotation(Entity::class)
+            .addAnnotation(AnnotationSpec.builder(Entity::class)
+                    .addMember("indices = [%T(value = [%S, %S, %S, %S])]",
+                                    Index::class,
+                                    DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                                    DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                                    DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
+                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME)
+                    .build())
             .primaryConstructor(FunSpec.constructorBuilder()
                     .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
                             .defaultValue("0L").build())
