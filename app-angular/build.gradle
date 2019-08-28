@@ -1,9 +1,8 @@
+import com.github.eerohele.SaxonXsltTask
 import groovy.json.JsonBuilder
 import org.json.simple.JSONObject
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.apache.tools.ant.taskdefs.condition.Os
-import com.github.eerohele.SaxonXsltTask
 
 plugins {
   id("com.github.eerohele.saxon-gradle") version "0.7.0"
@@ -12,36 +11,13 @@ plugins {
 apply plugin: 'java'
 
 def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
-Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
-
-//Prepare dynamic task to generate XLF for each language locale
-def generateTranslationLocaleTasks = []
-new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
-
-  def langCode = ""
-  if(localeDir.name.contains("-")) {
-    langCode = localeDir.name.substring(localeDir.name.indexOf("-") + 1)
-  }else {
-    langCode = "en"
-  }
-  def taskName = "generateLocale_${langCode}"
-
-  task "${taskName}" (type: SaxonXsltTask){
-    stylesheet project.file("locale-transform.xsl")
-    input file(project.file("src/assets/locale/messages.xlf"))
-    output file(project.file("src/assets/locale/messages.${langCode}.xlf"))
-    parameters(
-      strings_src: "${localeDir.absolutePath}/strings_ui.xml)"
-    )
-  }
-  generateTranslationLocaleTasks.push(taskName)
-}
+def appAngularPath = rootProject.file("app-angular/").path
 
 
 /**
- * Generate locale json file whic maps code to actual string
+ * Generate locale json file which maps code to actual string
  */
-task prepareMessageIDMapJsonFilesForWeb{
+task prepareMessageIDMaps{
   File outFile = null
   if(!file(translationsOutPath).exists()){
     file(translationsOutPath).mkdirs()
@@ -49,28 +25,16 @@ task prepareMessageIDMapJsonFilesForWeb{
 
   Map<String, Integer> messageIds = new HashMap<>()
   AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-  def localeCode = "en"
   rootProject.fileTree(dir: "core/locale/main").each() { File file ->
-
-    Map<String, String> idToTranslationMap = new HashMap<>()
+    def localeCode = "en"
     def jsonObj = new JSONObject()
 
-    def separator = "/"
-    if(Os.isFamily(Os.FAMILY_WINDOWS)){
-      separator = "\\\\"
+    def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
+    if(pathString.split("-").size() > 1){
+      localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
     }
 
-    if(file.absolutePath.split("-").size() > 1){
-      localeCode = file.absolutePath.split("-")[1].split(separator)[0]
-    }
-    File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
-    if(tempFile.exists()){
-      tempFile.delete()
-    }
-    outFile = tempFile
-    if(!outFile.getParentFile().exists()) {
-      outFile.getParentFile().mkdirs()
-    }
+    outFile = project.file("${translationsOutPath}locale.${localeCode}.json")
 
     def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
     def value = 0
@@ -90,20 +54,55 @@ task prepareMessageIDMapJsonFilesForWeb{
 
       msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
       jsonObj.put(String.valueOf(value),msgValue)
-
-      idToTranslationMap.put(msgName,msgValue)
-      languageMapOfMaps.put(localeCode, idToTranslationMap)
     }
 
-    outFile.write(new JsonBuilder(jsonObj).toPrettyString())
+    try {
+      if(!outFile.getParentFile().exists()) {
+        outFile.getParentFile().mkdirs()
+      }
+      FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+      jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
+      jsonFile.flush()
+
+    } catch (IOException e) {
+      e.printStackTrace()
+    }
   }
 
 }
 
+
+/**
+ * Generate app config
+ */
+task generateAppConfigJsonFile{
+  doLast{
+    try{
+      def jsonObj = new JSONObject()
+      File outFile = project.file("${rootDir.absolutePath}/app-angular/src/assets/appconfig.json")
+      Scanner scanner = new Scanner(new File("${rootDir.absolutePath}/core/src/main/assets/" +
+        "com/ustadmobile/core/appconfig.properties"))
+      while(scanner.hasNextLine()){
+        String line = scanner.nextLine()
+        if(!line.startsWith("#") && !line.isEmpty()){
+          def keyValue = line.split("=")
+          jsonObj.put(keyValue[0].replace(" ",""),keyValue[1].replace(" ",""))
+        }
+      }
+      FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+      jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
+      jsonFile.flush()
+    }catch(FileNotFoundException e){
+      e.printStackTrace()
+    }
+  }
+}
+
+
 /**
  * Generate default XLF file to be used for other translation
  */
-task generateDefaultLocaleXlf{
+task generateMessageXlf{
   doLast{
     exec {
       workingDir rootProject.file("app-angular/").path
@@ -111,29 +110,64 @@ task generateDefaultLocaleXlf{
     }
   }
 }
-generateDefaultLocaleXlf.dependsOn(prepareMessageIDMapJsonFilesForWeb)
-generateDefaultLocaleXlf.finalizedBy(generateTranslationLocaleTasks)
+
+//Prepare dynamic task to generate XLF for each language locale
+def generateMessageXlfTasks = []
+new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
+  def langCode = ""
+  if(localeDir.name.contains("-")) {
+    langCode = localeDir.name.substring(localeDir.name.indexOf("-") + 1)
+  }else {
+    langCode = "en"
+  }
+  def generateMessageTask = "generateMessage_${langCode}"
+
+  task "${generateMessageTask}" (type: SaxonXsltTask){
+    stylesheet project.file("locale-transform.xsl")
+    input file(project.file("src/assets/locale/messages.xlf"))
+    output file(project.file("src/assets/locale/messages.${langCode}.xlf"))
+    parameters(
+      strings_src: "${localeDir.absolutePath}/strings_ui.xml"
+    )
+  }
+  project.tasks.findByName(generateMessageTask).dependsOn(generateMessageXlf)
+  generateMessageXlfTasks.push(generateMessageTask)
+}
 
 /**
- * Generate other locale XLF files based on default translation
+ * Generate XLF files based on default translation
  */
-task generateOtherXliff{}
-generateOtherXliff.dependsOn(generateDefaultLocaleXlf)
+task generateLocaleFiles{}
 
 /**
- * Remove node_modules directory from app-angular
+ * Delete node_module directory
  */
-task deleteNodeModulesDirectory{
+task deleteNodeModulesDir{
   doLast{
     if(project.file("node_modules").exists()){
       exec {
-        workingDir rootProject.file("app-angular/").path
+        workingDir appAngularPath
         commandLine 'rm', '-r',project.file("node_modules").path
+      }
+    }
+
+
+  }
+}
+
+/**
+ * Delete package-lock.json since file integrity will changes on build
+ */
+task deletePackageLockJsonFile{
+  doLast{
+    if(project.file("package-lock.json").exists()){
+      exec {
+        workingDir appAngularPath
+        commandLine 'rm',project.file("package-lock.json").path
       }
     }
   }
 }
-clean.dependsOn(deleteNodeModulesDirectory)
 
 /**
  * Install all offline and other dependencies from project package.json
@@ -141,26 +175,71 @@ clean.dependsOn(deleteNodeModulesDirectory)
 task installDependencies{
   doLast{
     exec {
-      workingDir rootProject.file("app-angular/").path
-      commandLine 'npm', 'install'
+      workingDir appAngularPath
+      commandLine 'npm', 'install','--prefer-offline'
     }
   }
 }
 
-
-task startEnd2EndTest{
+/**
+ * Execute actual angular e2e tests
+ */
+task executeEnd2EndTests{
   doLast{
     exec {
-      workingDir rootProject.file("app-angular/").path
+      workingDir appAngularPath
       commandLine 'ng', 'e2e'
     }
   }
 }
 
-startEnd2EndTest.dependsOn(build)
+/**
+ * Run component specific tests
+ */
+task executeModuleTest{
+  doLast{
+    def testFilePath = "${appAngularPath}/com/ustadmobile/view/${testmodule}/${testmodule}.component.spec.ts"
+    exec {
+      workingDir rootProject.file("app-angular/").path
+      commandLine 'ng', 'test','--main',testFilePath
+    }
+  }
+}
 
+
+/**
+ * Pack all modules under node_modules/
+ */
+task packPreparedModules{
+  doLast{
+    new File("${rootProject.file("build/js/node_modules").path}").eachDir {
+      def dir = it.absolutePath
+      exec {
+        workingDir dir
+        commandLine 'npm', 'pack'
+      }
+    }
+  }
+}
+
+/**
+ * Start angular end to end test
+ */
+task ngTest{
+  def moduleName = project.hasProperty("testmodule") ? testmodule : null
+  if(moduleName != null && moduleName == "e2e"){
+    generateLocaleFiles.finalizedBy(executeEnd2EndTests)
+  }else if(moduleName != null && moduleName != "e2e"){
+    generateLocaleFiles.finalizedBy(executeModuleTest)
+  }
+}
+
+ngTest.dependsOn(build)
 build.dependsOn(installDependencies)
-installDependencies.dependsOn(":packPreparedModules")
-generateOtherXliff.shouldRunAfter(installDependencies)
+installDependencies.dependsOn(packPreparedModules, deletePackageLockJsonFile)
+installDependencies.finalizedBy(generateLocaleFiles)
+generateLocaleFiles.dependsOn(generateMessageXlfTasks)
+generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile)
 
+clean.dependsOn(deleteNodeModulesDir)
 

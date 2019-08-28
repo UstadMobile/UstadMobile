@@ -11,3 +11,7 @@
 h2 {
     font-size: 1.7em
 }
+
+.default-margin {
+    margin: 2% !important;
+  }

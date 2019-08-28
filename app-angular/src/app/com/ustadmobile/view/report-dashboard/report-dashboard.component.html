@@ -11,16 +11,16 @@ default-content-padding-right default-content-padding-left">
 
   </div>
 
-  <div class="col s12 l6 m6 z-depth-1 white default-padding-top default-padding-bottom">
+  <div class="col s12 l5 m5 default-margin z-depth-1 white default-padding-top default-padding-bottom" *ngFor="let grapItem of graphList">
 
-    <mz-dropdown [id]="'dropdown-demo'" [align]="'left'" [belowOrigin]="false" [constrainWidth]="true"
-      [dropdownButtonId]="'demo1'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
+    <mz-dropdown [id]="'report-option'" [align]="'left'" [belowOrigin]="false" [constrainWidth]="true"
+      [dropdownButtonId]="'report1'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
       [stopPropagation]="true">
       <mz-dropdown-item><a (click)="deleteOption.openModal()">Delete</a></mz-dropdown-item>
       <mz-dropdown-item><a href="#!">Add Tag</a></mz-dropdown-item>
       <mz-dropdown-item><a href="#!">Edit</a></mz-dropdown-item>
     </mz-dropdown>
-    <i id="demo1" class="material-icons grey-text text-darken-2 right options">more_vert</i>
+    <i id="report1" class="material-icons grey-text text-darken-2 right options">more_vert</i>
     <h2 class="grey-text text-lighten-1 center">Performance report for me</h2>
     <google-chart #chart [title]="title" [type]="type" [data]="data" [columnNames]="columnNames" [options]="options"
       [width]="width" [height]="height">
