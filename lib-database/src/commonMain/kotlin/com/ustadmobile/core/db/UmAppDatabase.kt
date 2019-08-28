@@ -202,6 +202,42 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     // Content Entry
                     database.execSQL("ALTER TABLE ContentEntry ADD COLUMN imported BOOL")
+                    database.executeUpdate("ALTER TABLE ContentEntry RENAME to ContentEntry_OLD")
+                    database.executeUpdate("CREATE TABLE IF NOT EXISTS ContentEntry (  title  TEXT , description  TEXT , entryId  TEXT , author  TEXT , publisher  TEXT , licenseType  INTEGER , licenseName  TEXT , licenseUrl  TEXT , sourceUrl  TEXT , thumbnailUrl  TEXT , lastModified  BIGINT , primaryLanguageUid  BIGINT , languageVariantUid  BIGINT , leaf  BOOL , imported  BOOL , publik  BOOL , contentTypeFlag  INTEGER , contentEntryLocalChangeSeqNum  BIGINT , contentEntryMasterChangeSeqNum  BIGINT , contentEntryLastChangedBy  INTEGER , contentEntryUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.executeUpdate("INSERT INTO ContentEntry (contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, imported, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy) SELECT contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, imported, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy FROM ContentEntry_OLD")
+                    database.executeUpdate("DROP TABLE ContentEntry_OLD")
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_42_fn")
+                    database.executeUpdate("CREATE SEQUENCE IF NOT EXISTS ContentEntry_mcsn_seq")
+                    database.executeUpdate("CREATE SEQUENCE IF NOT EXISTS ContentEntry_lcsn_seq")
+                    database.executeUpdate("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inc_csn_42_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ContentEntry SET contentEntryLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ContentEntry_lcsn_seq') END),
+                    | contentEntryMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ContentEntry_mcsn_seq') 
+                    | ELSE NEW.contentEntryMasterChangeSeqNum END)
+                    | WHERE contentEntryUid = NEW.contentEntryUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    _stmt.executeUpdate("""
+                    |CREATE TRIGGER inc_csn_42_trig 
+                    |AFTER UPDATE OR INSERT ON ContentEntry 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inc_csn_42_fn()
+                    """.trimMargin())
+                    _stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ContentEntry_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    _stmt.executeUpdate("""
+                    |CREATE 
+                    | INDEX index_ContentEntry_trk_clientId_epk_rx_csn 
+                    |ON ContentEntry_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                   database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_42")
 
 
                     // Agent Entity
@@ -234,6 +270,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     // Clazz
                     database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzLocationUid  BIGINT")
+                    _stmt.executeUpdate("ALTER TABLE Clazz RENAME to Clazz_OLD")
+                    _stmt.executeUpdate("CREATE TABLE IF NOT EXISTS Clazz (  clazzName  TEXT , attendanceAverage  FLOAT , clazzMasterChangeSeqNum  BIGINT , clazzLocalChangeSeqNum  BIGINT , clazzLastChangedBy  INTEGER , clazzLocationUid  BIGINT , clazzUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+
+
 
 
                     // StateContentEntity
