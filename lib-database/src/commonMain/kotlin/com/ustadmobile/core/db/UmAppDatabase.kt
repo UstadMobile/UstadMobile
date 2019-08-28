@@ -200,6 +200,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("INSERT INTO SyncNode(nodeClientId,master) SELECT devicebits, master FROM syncdevicebits")
                     database.execSQL("DROP TABLE syncdevicebits")
 
+
+                    //ContentEntryStatus
+                    database.execSQL("ALTER TABLE ContentEntryStatus ADD COLUMN locallyAvailable BOOL, ADD COLUMN downloadSpeed INTEGER")
+
+                    // NetworkNode
+                    database.execSQL("ALTER TABLE NetworkNode ADD COLUMN endpointUrl TEXT, ADD COLUMN dlastUpdateTimeStamp  BIGINT, ADD COLUMN numFailureCount  INTEGER, ADD COLUMN groupSsid  TEXT, ALTER COLUMN nodeId SET DATA TYPE BIGINT")
+
+                    // EntryStatusResponse
+                    database.execSQL("ALTER TABLE EntryStatusResponse RENAME COLUMN respondernodeid TO erNodeId")
+                    database.execSQL("ALTER TABLE EntryStatusResponse RENAME COLUMN id TO erId")
+                    database.execSQL("ALTER TABLE EntryStatusResponse DROP COLUMN entryid, ADD COLUMN erContainerUid BIGINT")
+
+
                     // Content Entry
                     database.execSQL("ALTER TABLE ContentEntry ADD COLUMN imported BOOL")
                     database.execSQL("ALTER TABLE ContentEntry RENAME to ContentEntry_OLD")
@@ -518,10 +531,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     // DownloadJob
                     database.execSQL("ALTER TABLE DownloadJob ADD COLUMN totalBytesToDownload BIGINT, ADD COLUMN bytesDownloadedSoFar BIGINT, ADD COLUMN djRootContentEntryUid  BIGINT, ADD COLUMN meteredNetworkAllowed  BOOL,ADD COLUMN djDestinationDir TEXT")
 
-
                     // DownloadJobItem
-                    database.execSQL("ALTER TABLE DownloadJobItem ADD COLUMN djiContainerUid  BIGINT , ADD COLUMN djiContentEntryUid  BIGINT")
-                    database.execSQL("ALTER TABLE DownloadJobItem DROP COLUMN djicontententryfileuid")
+                    database.execSQL("ALTER TABLE DownloadJobItem ADD COLUMN djiContainerUid  BIGINT , ADD COLUMN djiContentEntryUid  BIGINT, DROP COLUMN djicontententryfileuid")
+
+                    // DownloadJobItemParentChildJoin
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DownloadJobItemParentChildJoin (  djiParentDjiUid  INTEGER , djiChildDjiUid  INTEGER , djiCepcjUid  BIGINT , djiPcjUid  SERIAL  PRIMARY KEY  NOT NULL )")
 
                     // DownloadSet
                     database.execSQL("DROP TABLE DownloadSet")
