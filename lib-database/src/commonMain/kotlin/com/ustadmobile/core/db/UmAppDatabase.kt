@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
     Schedule::class, DateRange::class, UMCalendar::class,
     ClazzActivity::class, ClazzActivityChange::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class,
-    ContentEntryParentChildJoin::class, ContentEntryRelatedEntryJoin::class,
+    ContentEntryParentChildJoin::class,
     Location::class,
     AccessToken::class, PersonAuth::class, Role::class, EntityRole::class,
     PersonGroup::class, PersonGroupMember::class, LocationAncestorJoin::class,
