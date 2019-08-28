@@ -189,9 +189,9 @@ installDependencies.dependsOn(":packPreparedModules",deleteAllTempFileAndDirs)
 installDependencies.finalizedBy(generateLocaleFiles)
 
 /**
- * Start angular end to end test
+ * Execute actual angular e2e tests
  */
-task startEnd2EndTest{
+task executeEnd2EndTests{
   doLast{
     exec {
       workingDir rootProject.file("app-angular/").path
@@ -200,7 +200,30 @@ task startEnd2EndTest{
   }
 }
 
-startEnd2EndTest.dependsOn(build)
+task executeModuleTest{
+  doLast{
+    def testFilePath = "${rootProject.file("app-angular/").path}" +
+      "/com/ustadmobile/view/${testmodule}/${testmodule}.component.spec.ts"
+    exec {
+      workingDir rootProject.file("app-angular/").path
+      commandLine 'ng', 'test','--main',testFilePath
+    }
+  }
+}
+
+
+/**
+ * Start angular end to end test
+ */
+task ngTest{
+  def moduleName = project.hasProperty("testmodule") ? testmodule : null
+  if(moduleName != null && moduleName == "e2e"){
+    generateLocaleFiles.finalizedBy(executeEnd2EndTests)
+  }else if(moduleName != null && moduleName != "e2e"){
+    generateLocaleFiles.finalizedBy(executeModuleTest)
+  }
+}
+ngTest.dependsOn(build)
 
 build.dependsOn(installDependencies)
 
