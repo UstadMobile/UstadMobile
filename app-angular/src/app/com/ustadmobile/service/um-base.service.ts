@@ -12,7 +12,6 @@ export class UmBaseService {
 
   private umObserver = new Subject < any > ();
   private directionality: string;
-  public supportedLanguages  = []
 
   constructor(private http: HttpClient, private toastService: MzToastService) {
     this.loadAndSaveAppConfig();
@@ -58,8 +57,10 @@ export class UmBaseService {
    */
   loadStrings(locale: string){
     const localeUrl = "assets/locale/locale." + locale + ".json";
+    console.log("LOcale",locale)
     return this.http.get<Map < number, String >>(localeUrl).pipe(map(strings => strings));
   }
+  
 
   /**
    * Load appconfig properties files and store them using localstorage manager
@@ -73,20 +74,6 @@ export class UmBaseService {
     });
   }
 
-  /**
-   * Loading all supported languages from the language json file.
-   */
-  loadLanguages(){
-    const languageUrl = "assets/languages.json"
-    const supportedLanguages = [];
-    return this.http.get<Map < number, String >>(languageUrl).pipe(map(languages => {
-      Object.keys(languages).forEach(key => {
-        const language = {code: key, name: languages[key]};
-        supportedLanguages.push(language);
-      });
-      return supportedLanguages;
-    }));
-  }
 
   /**
    * Load entries

@@ -76,7 +76,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @JsName("getString")
     actual fun getString(messageCode: Int, context: Any): String {
         val map : dynamic = this.stringMap
-        return map[messageCode] as String
+        return map[messageCode].toString()
     }
 
     /**
