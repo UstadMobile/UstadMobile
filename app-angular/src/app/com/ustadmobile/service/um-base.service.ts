@@ -14,7 +14,9 @@ export class UmBaseService {
   private directionality: string;
   public supportedLanguages  = []
 
-  constructor(private http: HttpClient, private toastService: MzToastService) {}
+  constructor(private http: HttpClient, private toastService: MzToastService) {
+    this.loadAndSaveAppConfig();
+  }
 
   /**
    * Set current system language directionality
@@ -57,6 +59,18 @@ export class UmBaseService {
   loadStrings(locale: string){
     const localeUrl = "assets/locale/locale." + locale + ".json";
     return this.http.get<Map < number, String >>(localeUrl).pipe(map(strings => strings));
+  }
+
+  /**
+   * Load appconfig properties files and store them using localstorage manager
+   */
+  loadAndSaveAppConfig(){
+    this.http.get<Map < number, String >>("assets/appconfig.json")
+    .pipe(map(strings => strings)).subscribe(configs => {
+        Object.keys(configs).forEach(key => {
+          localStorage.setItem(key, configs[key])  
+        });
+    });
   }
 
   /**
