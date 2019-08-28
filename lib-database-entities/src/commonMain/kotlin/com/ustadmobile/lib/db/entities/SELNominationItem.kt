@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-class SELNominationItem {
+class SELNominationItem() {
     var clazzName: String? = null
     var questionSetTitle: String? = null
     var nominatorName: String? = null

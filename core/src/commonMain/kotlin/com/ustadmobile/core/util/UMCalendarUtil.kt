@@ -136,6 +136,10 @@ object UMCalendarUtil {
                 && givenCal.dayOfWeekInt == todayCal.dayOfWeekInt)
 
     }
+    fun getDateLongFromYMD(year:Int, month:Int, day:Int):Long{
+        val cal = DateTime(year=year, month = month, day = day)
+        return cal.unixMillisLong
+    }
 
     /**
      * Gets simple pretty looking date (eg; 23/Jan/89) from a long date specified.

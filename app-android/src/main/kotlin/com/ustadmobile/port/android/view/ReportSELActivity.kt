@@ -41,7 +41,7 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
 
     //The clazz sel report data
     internal lateinit var clazzMap: LinkedHashMap<String,
-            java.util.LinkedHashMap<String, Map<Long, List<Long>>>>
+            LinkedHashMap<String, HashMap<Long, ArrayList<Long>>>>
 
     /**
      * Creates a new Vertical line for a table's row
@@ -272,7 +272,7 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
      */
 
     override fun createTables(clazzMap: LinkedHashMap<String,
-            LinkedHashMap<String, Map<Long, List<Long>>>>, clazzToStudents: HashMap<String,
+            LinkedHashMap<String, HashMap<Long, ArrayList<Long>>>>, clazzToStudents: HashMap<String,
             List<ClazzMemberWithPerson>>) {
 
 

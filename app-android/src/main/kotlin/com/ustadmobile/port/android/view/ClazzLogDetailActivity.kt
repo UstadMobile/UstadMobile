@@ -74,7 +74,7 @@ class ClazzLogDetailActivity : UstadBaseActivity(), ClassLogDetailView {
         //Toolbar
         toolbar = findViewById(R.id.class_log_detail_toolbar)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
 
         mRecyclerView = findViewById(R.id.class_log_detail_container_recyclerview)
         val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
@@ -145,7 +145,7 @@ class ClazzLogDetailActivity : UstadBaseActivity(), ClassLogDetailView {
         runOnUiThread {
             toolbar!!.setTitle(title)
             setSupportActionBar(toolbar)
-            Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+            Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
         }
     }
 

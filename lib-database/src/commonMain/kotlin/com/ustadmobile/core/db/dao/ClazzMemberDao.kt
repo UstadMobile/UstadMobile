@@ -202,6 +202,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findAllPeopleNotInClassUid(clazzUid: Long): DataSource.Factory<Int, Person>
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -219,6 +220,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -249,9 +251,13 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
             "  (:clazzUid) AS clazzUid,  " +
 
+            " '' AS clazzName, " +
+
             "  (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "    PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "    picTimestamp DESC LIMIT 1) AS personPictureUid , " +
+
+            "   ClazzMember.clazzMemberAttendancePercentage as attendancePercentage, " +
 
             "  (SELECT clazzMemberActive FROM ClazzMember " +
             "    WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
@@ -283,6 +289,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -306,7 +313,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     //REPORT Query: At Risk Student Report
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
-
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -347,6 +354,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -368,6 +376,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -389,6 +398,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
@@ -411,6 +421,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+            " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +

@@ -58,7 +58,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
     private lateinit var mPresenter: ClazzActivityListPresenter
     internal lateinit var barChart: BarChart
 
-    internal lateinit var changesPresets: Array<String>
+    internal lateinit var changesPresets: Array<String?>
     internal lateinit var activityChangesSpinner: Spinner
     internal lateinit var negativeValue: HashMap<Float, Boolean>
     private lateinit var lastWeekButton: Button
@@ -80,18 +80,22 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
     }
 
     internal inner class AttendanceBarDataSet(yVals: List<BarEntry>, label: String) : BarDataSet(yVals, label) {
-
-        fun getColor(index: Int): Int {
-            if (negativeValue != null) {
-                if (negativeValue!!.containsKey(getEntryForIndex(index).getX())) {
-                    if (negativeValue!![getEntryForIndex(index).getX()]!!) {
-                        return mColors.get(2)
-                    }
-                }
-            }
-
-            return mColors.get(0)
+        override fun getEntryIndex(e: BarEntry?): Int {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
+
+        //TODO: Check this
+//        fun getColor(index: Int): Int {
+//            if (negativeValue != null) {
+//                if (negativeValue!!.containsKey(getEntryForIndex(index).getX())) {
+//                    if (negativeValue!![getEntryForIndex(index).getX()]!!) {
+//                        return mColors.get(2)
+//                    }
+//                }
+//            }
+//
+//            return mColors.get(0)
+//        }
     }
 
     override fun updateActivityBarChart(dataMap: LinkedHashMap<Float, Float>) {
@@ -103,12 +107,12 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
             val thisBarKey = nextEntry.key
             var thisBarValue: Float? = nextEntry.value
 
-            val anEntry = BarEntry(thisBarKey, thisBarValue)
+            val anEntry = BarEntry(thisBarKey, thisBarValue!!)
             if (thisBarValue < 0) {
-                anEntry.setIcon(AppCompatResources.getDrawable(Objects.requireNonNull(context),
+                anEntry.setIcon(AppCompatResources.getDrawable(context!!,
                         R.drawable.ic_thumb_down_black_12dp))
             } else {
-                anEntry.setIcon(AppCompatResources.getDrawable(Objects.requireNonNull(context),
+                anEntry.setIcon(AppCompatResources.getDrawable(context!!,
                         R.drawable.ic_thumb_up_black_12dp))
             }
             if (thisBarValue < 0) {
@@ -128,7 +132,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         dataSetBar1.setDrawValues(true)
         dataSetBar1.setValueFormatter { value, entry, dataSetIndex, viewPortHandler -> "" }
 
-        dataSetBar1.setColors(ContextCompat.getColor(Objects.requireNonNull(context),
+        dataSetBar1.setColors(ContextCompat.getColor(context!!,
                 R.color.traffic_green),
                 ContextCompat.getColor(context!!, R.color.traffic_orange),
                 ContextCompat.getColor(context!!, R.color.traffic_red))
@@ -159,10 +163,10 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
      */
     fun setUpCharts() {
         //Get the chart view
-        barChart = rootContainer.findViewById<View>(R.id.fragment_clazz_activity_list_bar_chart)
+        barChart = rootContainer.findViewById<BarChart>(R.id.fragment_clazz_activity_list_bar_chart)
         barChart.setMinimumHeight(dpToPx(ACTIVITY_BAR_CHART_HEIGHT))
         barChart = hideEverythingInBarChart(barChart)
-        barChart.getAxisLeft().setAxisMinimum(ACTIVITY_BAR_CHART_AXIS_MINIMUM)
+        barChart.getAxisLeft().setAxisMinimum(ACTIVITY_BAR_CHART_AXIS_MINIMUM.toFloat())
         barChart.setTouchEnabled(false)
     }
 
@@ -242,7 +246,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
     fun getTintedDrawable(drawable: Drawable, color: Int): Drawable {
         var drawable = drawable
         drawable = DrawableCompat.wrap(drawable)
-        val tintColor = ContextCompat.getColor(Objects.requireNonNull(context), color)
+        val tintColor = ContextCompat.getColor(context!!, color)
         DrawableCompat.setTint(drawable, tintColor)
         return drawable
     }

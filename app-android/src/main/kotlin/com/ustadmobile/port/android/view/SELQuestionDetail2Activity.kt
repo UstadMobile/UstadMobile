@@ -53,7 +53,7 @@ class SELQuestionDetail2Activity : UstadBaseActivity(), SELQuestionDetail2View {
         toolbar = findViewById(R.id.activity_sel_question_detail2_toolbar)
         toolbar!!.setTitle(R.string.edit_question)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Question text
         questionText = findViewById(R.id.activity_sel_question_detail2_question_name)

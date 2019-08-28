@@ -47,7 +47,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
     internal lateinit var tableLayout: TableLayout
 
     //Used for exporting
-    internal lateinit var tableTextData: MutableList<Array<String>>
+    internal lateinit var tableTextData: MutableList<Array<String?>>
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +83,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
 
         toolbar!!.setTitle(R.string.number_of_days_classes_open)
 
-        barChart = findViewById<View>(R.id.activity_report_number_of_days_classes_open_bar_chart)
+        barChart = findViewById<BarChart>(R.id.activity_report_number_of_days_classes_open_bar_chart)
 
         barChart.setMinimumHeight(dpToPx(BAR_CHART_HEIGHT))
 
@@ -96,7 +96,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
 
         barChart.getXAxis().setValueFormatter({ value, axis ->
             val prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                    mPresenter!!.barChartTimestamps!![value], currentLocale
+                    mPresenter!!.barChartTimestamps!![value.toInt()], currentLocale
             )
             prettyDate
         })
@@ -129,16 +129,15 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
     override fun updateBarChart(dataMap: LinkedHashMap<Float, Float>) {
 
         var hasSomething = false
-        mPresenter!!.barChartTimestamps = ArrayList()
-        var index = 0
+        mPresenter!!.barChartTimestamps = ArrayList<Long>()
+        var index:Float = 0F
         //RENDER HERE
 
-        val barDataEntries = ArrayList()
-        for (nextEntry in dataMap.entrySet()) {
+        val barDataEntries = ArrayList<BarEntry>()
+        for (nextEntry in dataMap.entries) {
             hasSomething = true
-            mPresenter!!.barChartTimestamps!!.add((nextEntry.getKey() * 1000) as Long)
-            val anEntry = BarEntry(index,
-                    nextEntry.getValue())
+            mPresenter!!.barChartTimestamps!!.add((nextEntry.key * 1000) as Long)
+            val anEntry = BarEntry(index as Float, nextEntry.value)
             barDataEntries.add(anEntry)
             index++
         }

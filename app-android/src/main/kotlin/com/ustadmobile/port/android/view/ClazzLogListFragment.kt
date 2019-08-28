@@ -21,12 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzLogListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -57,12 +52,12 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
     override val viewContext: Any
         get() = context!!
 
-    internal var rootContainer: View ? = null
+    internal lateinit var rootContainer: View
     private var mRecyclerView: RecyclerView? = null
 
     private var mPresenter: ClazzLogListPresenter? = null
-    internal var lineChart: LineChart? = null
-    internal var barChart: HorizontalBarChart? = null
+    internal lateinit var lineChart: LineChart
+    internal lateinit var barChart: HorizontalBarChart
 
     private var lastWeekButton: Button? = null
     private var lastMonthButton: Button? = null
@@ -126,11 +121,16 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
     /**
      * Custom Bar Data Set. The idea is any color logic can be applied here.
      */
-    internal inner class AttendanceBarDataSet(yVals: List<BarEntry>, label: String) : BarDataSet(yVals, label) {
-
-        fun getColor(index: Int): Int {
-            return mColors.get(index)
+    internal inner class AttendanceBarDataSet(yVals: List<BarEntry>, label: String)
+        : BarDataSet(yVals, label) {
+        override fun getEntryIndex(e: BarEntry?): Int {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
+
+        //TODO:
+//        fun getColor(index: Int): Int {
+//            return mColors.get(index)
+//        }
 
     }
 
@@ -153,7 +153,7 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
                 lineDataEntries.add(anEntry)
             } else {
                 //Not meant to be 0 - join adjacent lines (ie: not a school day/no ClazzLog)
-                lineDataEntriesZero.add(Entry(x, 0))
+                lineDataEntriesZero.add(Entry(x, 0F))
             }
 
 
@@ -185,17 +185,17 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         lineData.addDataSet(dataSetLine0)
 
         //Update the lineChart on the UI thread (since this method is called via the Presenter)
-        runOnUiThread {
+        runOnUiThread (Runnable{
             setUpCharts()
             if (lineDataEntries.size > 0) {
-                lineChart.setData(lineData)
-                lineChart.invalidate()
+                lineChart!!.setData(lineData)
+                lineChart!!.invalidate()
             } else {
-                lineChart.setData(null)
-                lineChart.invalidate()
+                lineChart!!.setData(null)
+                lineChart!!.invalidate()
             }
 
-        }
+        })
     }
 
     /**
@@ -219,10 +219,10 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         dataSetBar1.setValueFormatter { value, entry, dataSetIndex, viewPortHandler -> "" + value as Int + "%" }
 
         val colors = intArrayOf(
-                ContextCompat.getColor(Objects.requireNonNull(context), R.color.traffic_green),
+                ContextCompat.getColor(context!!, R.color.traffic_green),
                 ContextCompat.getColor(context!!, R.color.traffic_orange),
                 ContextCompat.getColor(context!!, R.color.traffic_red))
-        dataSetBar1.setColors(colors)
+        dataSetBar1.setColors(colors.toList())
 
 
         val barData = BarData(dataSetBar1)
@@ -241,7 +241,7 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
      */
     fun setUpCharts() {
         //Get the chart view
-        lineChart = rootContainer.findViewById<View>(R.id.fragment_clazz_log_list_line_chart)
+        lineChart = rootContainer.findViewById(R.id.fragment_clazz_log_list_line_chart)
         lineChart.setMinimumHeight(dpToPx(ATTENDANCE_LINE_CHART_HEIGHT))
         lineChart = hideEverythingInLineChart(lineChart)
         lineChart.getAxisLeft().setValueFormatter({ value, axis -> (value as Int).toString() + "%" })
@@ -251,16 +251,16 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM)
         lineChart.getAxisLeft().setLabelCount(4, true)
         //lineChart.setExtraOffsets(0,-150,0,0);
-        lineChart.getXAxis().setAxisMinimum(0)
-        lineChart.getAxisLeft().setAxisMinimum(0)
-        lineChart.getAxisLeft().setAxisMaximum(100)
+        lineChart.getXAxis().setAxisMinimum(0F)
+        lineChart.getAxisLeft().setAxisMinimum(0F)
+        lineChart.getAxisLeft().setAxisMaximum(100F)
 
-        barChart = rootContainer.findViewById<View>(R.id.fragment_clazz_log_list_bar_chart)
+        barChart = rootContainer.findViewById(R.id.fragment_clazz_log_list_bar_chart)
         barChart.setMinimumHeight(dpToPx(ATTENDANCE_BAR_CHART_HEIGHT))
         barChart.setMinimumWidth(dpToPx(ATTENDANCE_BAR_CHART_HEIGHT))
         barChart = hideEverythingInBarChart(barChart)
-        barChart.getAxisLeft().setAxisMaximum(ATTENDANCE_BAR_CHART_AXIS_MAXIMUM)
-        barChart.getAxisLeft().setAxisMinimum(ATTENDANCE_BAR_CHART_AXIS_MINIMUM)
+        barChart.getAxisLeft().setAxisMaximum(ATTENDANCE_BAR_CHART_AXIS_MAXIMUM.toFloat())
+        barChart.getAxisLeft().setAxisMinimum(ATTENDANCE_BAR_CHART_AXIS_MINIMUM.toFloat())
         barChart.setTouchEnabled(false)
 
 
@@ -315,7 +315,7 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         lastWeekButton!!.callOnClick()
 
         //Take attendance fab click listener
-        fab.setOnClickListener { v -> mPresenter!!.goToNewClazzLogDetailActivity() }
+        fab!!.setOnClickListener { v -> mPresenter!!.goToNewClazzLogDetailActivity() }
 
         return rootContainer
     }
@@ -329,7 +329,7 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
     fun getTintedDrawable(drawable: Drawable, color: Int) {
         var drawable = drawable
         drawable = DrawableCompat.wrap(drawable)
-        val tintColor = ContextCompat.getColor(Objects.requireNonNull(context), color)
+        val tintColor = ContextCompat.getColor(context!!, color)
         DrawableCompat.setTint(drawable, tintColor)
     }
 
@@ -349,9 +349,9 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
 
     override fun setFABVisibility(visible: Boolean) {
         if (visible) {
-            fab.visibility = View.VISIBLE
+            fab!!.visibility = View.VISIBLE
         } else {
-            fab.visibility = View.INVISIBLE
+            fab!!.visibility = View.INVISIBLE
         }
     }
 
@@ -372,7 +372,8 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
     override fun setClazzLogListProvider(factory : DataSource.Factory<Int, ClazzLogWithScheduleStartEndTimes>) {
 
         //Create a recycler adapter to set on the Recycler View.
-        val recyclerAdapter = ClazzLogListRecyclerAdapter(DIFF_CALLBACK, context, this, mPresenter, false)
+        val recyclerAdapter = ClazzLogListRecyclerAdapter(DIFF_CALLBACK, context!!, this,
+                mPresenter!!, false)
 
         val data = LivePagedListBuilder(factory, 20).build()
 

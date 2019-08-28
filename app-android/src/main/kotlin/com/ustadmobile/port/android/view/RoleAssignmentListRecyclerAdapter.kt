@@ -67,7 +67,7 @@ class RoleAssignmentListRecyclerAdapter protected constructor(
 
         var descText = ""
         if (scopeName != null && assigneeName != null) {
-            descText = (theActivity.getText(R.string.`in`).toString()
+            descText = (theActivity.getText(R.string.in_literal).toString()
                     + " " + scopeName + ": " + assigneeName)
         }
 

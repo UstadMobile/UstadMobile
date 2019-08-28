@@ -30,6 +30,7 @@ import java.util.*
  * ClazzStudentListFragment Android fragment extends UstadBaseFragment
  */
 class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
+
     override val viewContext: Any
         get() = context!!
 
@@ -37,7 +38,7 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mPresenter: ClazzStudentListPresenter
     private lateinit var sortSpinner: Spinner
-    internal lateinit var sortSpinnerPresets: Array<String>
+    internal lateinit var sortSpinnerPresets: Array<String?>
     private lateinit var cl: ConstraintLayout
     private var addClazzMemberEmptyAdded: Boolean = false
 
@@ -167,7 +168,7 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
         addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, context)
     }
 
-    override fun updateSortSpinner(presets: Array<String>) {
+    override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(Objects.requireNonNull(context),
                 R.layout.spinner_item, sortSpinnerPresets)
@@ -206,7 +207,7 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
         clazzMemberRoleHeadingTextView.left = 8
 
         val addIconResId = resources.getIdentifier(PersonEditActivity.ADD_PERSON_ICON,
-                "drawable", Objects.requireNonNull(activity).packageName)
+                "drawable", activity!!.packageName)
 
         val addPersonImageView = ImageView(mContext)
         addPersonImageView.setImageResource(addIconResId)

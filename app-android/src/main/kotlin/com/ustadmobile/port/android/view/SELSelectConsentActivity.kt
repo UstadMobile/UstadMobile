@@ -48,7 +48,7 @@ class SELSelectConsentActivity : UstadBaseActivity(), SELSelectConsentView {
         val toolbar = findViewById<Toolbar>(R.id.activity_selselect_consent_toolbar)
         toolbar.title = getText(R.string.social_nomination)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Call the Presenter
         mPresenter = SELSelectConsentPresenter(this,

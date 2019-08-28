@@ -9,7 +9,7 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
+import androidx.lifecycle.Observer
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit
  *
  * This Activity extends UstadBaseActivity and implements BasePointView
  */
-class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
+class BasePointActivity2() : UstadBaseActivity(), BasePointView2 {
 
     private var mPager: ViewPager? = null
     private var mPagerAdapter: BasePointViewPagerAdapter? = null
@@ -101,14 +101,14 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Get the bottom navigation component.
-        val bottomNavigation = findViewById<View>(R.id.bottom_navigation)
+        val bottomNavigation = findViewById<AHBottomNavigation>(R.id.bottom_navigation)
 
         //Style
         bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.primary))
         bottomNavigation.setAccentColor(fetchColor(R.color.just_black))
         bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor))
         bottomNavigation.setBehaviorTranslationEnabled(false)
-        bottomNavigation.setUseElevation(true, 2L)
+        bottomNavigation.setUseElevation(true, 2F)
 
         //Create the items to be added
         val feed_item = AHBottomNavigationItem(R.string.feed,
@@ -280,10 +280,10 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     private fun observeSyncing() {
         WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
-                this, { workInfos ->
+                this, Observer{ workInfos ->
             for (wi in workInfos) {
                 if (wi.getState().isFinished()) {
-                    lastSyncTime = System.currentTimeMillis()m
+                    lastSyncTime = UMCalendarUtil.getDateInMilliPlusDays(0)
                     syncing = false
                     checkSyncFinished()
                 } else {
@@ -466,7 +466,12 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
          */
         override fun getItem(position: Int): Fragment? {
             val thisFragment = positionMap[position]
-            return thisFragment ?: when (position) {
+            val aFragment = thisFragment as Fragment
+
+            //TODO: Check this edit
+            //return thisFragment ?:
+
+            when (position) {
                 0 -> {
                     newFrag = FeedListFragment.newInstance()
                     this.positionMap[position] = newFrag
@@ -490,8 +495,10 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
                     reportSelectionFragment
                 }
 
-                else -> null
+                else -> thisFragment
             }
+            //TODO: Check this edit
+            return thisFragment
         }
     }
 

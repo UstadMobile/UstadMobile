@@ -20,7 +20,7 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 @Entity
 class PersonAuth() {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personAuthUid: Long = 0
 
     var passwordHash: String? = null

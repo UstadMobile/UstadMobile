@@ -178,7 +178,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
         runOnUiThread {
             toolbar!!.setTitle(toolbarTitle)
             setSupportActionBar(toolbar)
-            Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+            Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
         }
 
     }
@@ -236,9 +236,9 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
                 } else if (fragClass == ClazzLogListFragment::class.java) {
                     ClazzLogListFragment.newInstance(currentClazzUid!!)
                 } else if (fragClass == ClazzActivityListFragment::class.java) {
-                    ClazzActivityListFragment.newInstance(currentClazzUid!!)
+                    ClazzActivityListFragment.newInstance(currentClazzUid!!) as Fragment
                 } else if (fragClass == SELAnswerListFragment::class.java) {
-                    SELAnswerListFragment.newInstance(currentClazzUid)
+                    SELAnswerListFragment.newInstance(currentClazzUid) as Fragment
                 } else {
                     null
                 }

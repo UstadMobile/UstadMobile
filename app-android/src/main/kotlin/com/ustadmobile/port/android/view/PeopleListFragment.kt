@@ -39,7 +39,7 @@ class PeopleListFragment : UstadBaseFragment(), PeopleListView {
     private var fab: FloatingTextButton? = null
 
     internal var sortSpinner: Spinner? = null
-    internal var sortSpinnerPresets: Array<String>? = null
+    internal lateinit var sortSpinnerPresets: Array<String?>
 
     private var pullToRefresh: SwipeRefreshLayout? = null
 
@@ -131,7 +131,7 @@ class PeopleListFragment : UstadBaseFragment(), PeopleListView {
 
     }
 
-    override fun updateSortSpinner(presets: Array<String>) {
+    override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(Objects.requireNonNull(context),
                 R.layout.spinner_item, sortSpinnerPresets)

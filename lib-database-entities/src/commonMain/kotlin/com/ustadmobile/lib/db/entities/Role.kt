@@ -10,7 +10,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 
 @Entity
 @SyncableEntity(tableId = 45)
-class Role {
+class Role(var roleActive: Boolean = true) {
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
 
@@ -28,17 +28,10 @@ class Role {
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
 
-    //active
-    var roleActive: Boolean = false
 
-    constructor() {
-        this.roleActive = true
-    }
-
-    constructor(roleName: String, rolePermissions: Long) {
+    constructor(roleName: String, rolePermissions: Long):this() {
         this.roleName = roleName
         this.rolePermissions = rolePermissions
-        this.roleActive = true
     }
 
     companion object {

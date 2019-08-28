@@ -51,7 +51,7 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
         toolbar = findViewById(R.id.activity_bulk_upload_master_toolbar)
         toolbar!!.setTitle(R.string.bulk_upload_master)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Timezone spinner
         timeZoneSpinner = findViewById(R.id.activity_bulk_upload_master_timezone_spinner)

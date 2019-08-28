@@ -73,7 +73,7 @@ class RoleDetailActivity : UstadBaseActivity(), RoleDetailView {
         toolbar = findViewById(R.id.activity_role_detail_toolbar)
         toolbar!!.title = getText(R.string.new_role)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         viewPeople = findViewById(R.id.permission_person_select)
         addPeople = findViewById(R.id.permission_person_insert)

@@ -64,7 +64,7 @@ class CustomFieldListActivity : UstadBaseActivity(), CustomFieldListView {
         toolbar = findViewById(R.id.activity_custom_field_list_toolbar)
         toolbar!!.title = getText(R.string.custom_fields)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         entityTypeSpinner = findViewById(R.id.activity_custom_field_list_entity_type_spinner)
 

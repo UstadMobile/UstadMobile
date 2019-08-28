@@ -21,7 +21,7 @@ class AboutActivity : UstadBaseActivity(), AboutView {
         setUMToolbar(R.id.um_toolbar)
         setTitle(R.string.about)
         mAboutController = AboutController(this,
-                Objects.requireNonNull(bundleToMap(intent.extras)),
+                bundleToMap(intent.extras),
                 this)
         mAboutController!!.onCreate(bundleToMap(savedInstanceState))
 

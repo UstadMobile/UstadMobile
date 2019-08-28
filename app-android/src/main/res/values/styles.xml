@@ -12,6 +12,15 @@
         <item name="android:dialogTheme">@style/CustomDialog</item>
     </style>
 
+    <!-- This is for the Tabs in TabLayout-->
+    <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/primary_light</item>
+        <item name="tabSelectedTextColor">@color/primary_text</item>
+    </style>
+
+    <style name="MyButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/text_secondary</item>
+    </style>
 
     <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
         <item name="android:windowNoTitle">false</item>

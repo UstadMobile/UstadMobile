@@ -51,7 +51,7 @@ class SelectTwoDatesDialogFragment : UstadDialogFragment(), SelectTwoDatesDialog
 
         val currentLocale = resources.configuration.locale
 
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_select_two_dates_dialog, null)
@@ -114,7 +114,7 @@ class SelectTwoDatesDialogFragment : UstadDialogFragment(), SelectTwoDatesDialog
 
         //Set any view components and its listener (post presenter work)
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull(context))
+        val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.custom_date_range)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.add, positiveOCL)

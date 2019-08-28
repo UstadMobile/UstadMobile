@@ -461,6 +461,8 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT + " THEN 1 ELSE 0 END) as daysAbsent, " +
             " SUM(CASE WHEN attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL + " THEN 1 ELSE 0 END) as daysPartial, " +
             " COUNT(*) as clazzDays, " +
+            " ClazzMember.clazzMemberDateLeft as dateLeft, " +
+            " ClazzMember.clazzMemberActive as isClazzMemberActive,  " +
             " Person.gender, " +
             " Person.dateOfBirth " +
             " FROM ClazzLogAttendanceRecord " +

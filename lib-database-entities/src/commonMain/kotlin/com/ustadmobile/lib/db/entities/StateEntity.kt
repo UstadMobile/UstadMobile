@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.StateEntity.Companion.TABLE_ID
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
-class StateEntity {
+class StateEntity(){
 
     @PrimaryKey(autoGenerate = true)
     var stateUid: Long = 0
@@ -36,7 +36,8 @@ class StateEntity {
     @LastChangedBy
     var stateLastChangedBy: Int = 0
 
-    constructor(activityId: String?, agentUid: Long, registration: String?, stateId: String?, isActive: Boolean, timestamp: Long) {
+    constructor(activityId: String?, agentUid: Long, registration: String?, stateId: String?,
+                isActive: Boolean, timestamp: Long):this() {
         this.activityId = activityId
         this.agentUid = agentUid
         this.registration = registration
@@ -45,9 +46,6 @@ class StateEntity {
         this.timestamp = timestamp
     }
 
-    constructor() {
-
-    }
 
     override fun equals(o: Any?): Boolean {
         if (this === o) return true

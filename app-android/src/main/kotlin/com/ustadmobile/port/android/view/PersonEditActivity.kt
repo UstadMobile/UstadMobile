@@ -35,6 +35,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
+import com.soywiz.klock.DateTime
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonEditPresenter
@@ -294,22 +295,21 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     //Get locale
                     val currentLocale = resources.configuration.locale
 
-                    //Get calendar instance
-                    val myCalendar = Calendar.getInstance()
 
-                    //TODO: KMP date stuff
+                    //TODOne: KMP date stuff
+                    //TODO:Test
                     //Date pickers's on click listener - sets text
                     val date = { view: DatePicker, year: Int, month:Int, dayOfMonth:Int ->
-                        myCalendar.set(Calendar.YEAR, year)
-                        myCalendar.set(Calendar.MONTH, month)
-                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+                        val dateLong = UMCalendarUtil.getDateLongFromYMD(year, month, dayOfMonth)
 
                         fieldEditText.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                                myCalendar.timeInMillis, currentLocale))
-                        mPresenter.handleFieldEdited(fieldUid, myCalendar.timeInMillis)
+                                dateLong, currentLocale))
+                        mPresenter.handleFieldEdited(fieldUid, dateLong)
 
                     }
 
+                    val cal = DateTime.now()
                     fieldEditText.isFocusable = false
 
                     //date listener - opens a new date picker.
@@ -318,8 +318,8 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                             //android.R.style.Widget_Holo_DatePicker,
                             //android.R.style.Theme_Holo_Dialog,
                             R.style.CustomDatePickerDialogTheme,
-                            date, myCalendar.get(Calendar.YEAR),
-                            myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH))
+                            date, cal.yearInt,
+                            cal.month0, cal.dayOfMonth) //TODO: Check cal.moth0
                     dateFieldPicker.datePicker.maxDate = System.currentTimeMillis()
                     dateFieldPicker.datePicker.spinnersShown = true
                     dateFieldPicker.datePicker.calendarViewShown = false
@@ -608,7 +608,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         customFieldsLL.addView(fieldTextInputLayout)
     }
 
-    override fun addCustomFieldDropdown(label: CustomField, options: Array<String>, selected: Int) {
+
+    override fun addCustomFieldDropdown(label: CustomField, options: Array<String?>,
+                                        selected:Int) {
         //Calculate the width of the screen.
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)

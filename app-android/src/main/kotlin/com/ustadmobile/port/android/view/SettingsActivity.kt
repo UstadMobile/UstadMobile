@@ -30,7 +30,7 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
         //Toolbar
         val toolbar = findViewById<Toolbar>(R.id.activity_settings2_toolbar)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         selLayout = findViewById(R.id.activity_settings2_sel_question_set_cl)
 

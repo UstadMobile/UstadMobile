@@ -169,6 +169,7 @@ abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT Person.* , (0) AS clazzUid, " +
             " (0) AS attendancePercentage, " +
+            " '' AS clazzName, " +
             " (0) AS clazzMemberRole, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
@@ -350,6 +351,7 @@ abstract class PersonDao : BaseDao<Person> {
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
         const val QUERY_FIND_ALL = "SELECT Person.* , (0) AS clazzUid, " +
+                " '' AS clazzName, " +
                 " (0) AS attendancePercentage, " +
                 " (0) AS clazzMemberRole, " +
                 " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +

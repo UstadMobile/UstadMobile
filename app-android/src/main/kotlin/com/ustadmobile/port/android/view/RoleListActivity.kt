@@ -55,7 +55,7 @@ class RoleListActivity : UstadBaseActivity(), RoleListView {
         toolbar = findViewById(R.id.activity_role_list_toolbar)
         toolbar!!.title = getText(R.string.roles)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(

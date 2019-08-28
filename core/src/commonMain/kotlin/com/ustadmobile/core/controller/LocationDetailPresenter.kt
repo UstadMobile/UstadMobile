@@ -26,7 +26,7 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
     internal var selectedOptions: HashMap<String, Long>
 
-    private var selectedLocationsList: MutableList<Long>? = null
+    private var selectedLocationsList: ArrayList<Long>? = null
 
     init {
 
@@ -121,13 +121,13 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         }
     }
 
-    fun getSelectedLocationsList(): MutableList<Long>? {
+    fun getSelectedLocationsList(): ArrayList<Long>? {
         return if (selectedLocationsList == null) {
             ArrayList()
         } else selectedLocationsList
     }
 
-    fun setSelectedLocationsList(selectedLocationsList: MutableList<Long>) {
+    fun setSelectedLocationsList(selectedLocationsList: ArrayList<Long>) {
         this.selectedLocationsList = selectedLocationsList
     }
 

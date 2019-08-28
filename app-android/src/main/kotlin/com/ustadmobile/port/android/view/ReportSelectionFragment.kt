@@ -71,7 +71,7 @@ class ReportSelectionFragment : UstadBaseFragment(), BaseReportView {
         expandableListView.setOnChildClickListener { parent, v, groupPosition, childPosition, id ->
 
 
-            val report = Objects.requireNonNull(expandableListDataReportsHashMap[expandableListTitle[groupPosition]]).children
+            val report = expandableListDataReportsHashMap[expandableListTitle[groupPosition]]!!.children
                     .get(childPosition)
 
             mPresenter!!.goToReport(report.name!!, report.desc!!, report.reportLink!!, report.showThreshold!!,

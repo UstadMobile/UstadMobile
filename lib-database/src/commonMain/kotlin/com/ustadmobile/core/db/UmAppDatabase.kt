@@ -35,6 +35,9 @@ import kotlin.jvm.Volatile
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     XLangMapEntry::class,SyncNode::class
 
+    //TODO: DO NOT REMOVE THIS COMMENT!
+    //#DOORDB_TRACKER_ENTITIES
+
 ], version = 24)
 
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
@@ -152,8 +155,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
     abstract val umCalendarDao : UMCalendarDao
 
-
     abstract val xLangMapEntryDao: XLangMapEntryDao
+
+    //TODO: DO NOT REMOVE THIS COMMENT!
+    //#DOORDB_SYNCDAO
 
     companion object {
 

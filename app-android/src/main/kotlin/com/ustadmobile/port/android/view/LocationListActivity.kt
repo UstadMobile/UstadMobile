@@ -56,7 +56,7 @@ class LocationListActivity : UstadBaseActivity(), LocationListView {
         toolbar = findViewById(R.id.activity_location_list_toolbar)
         toolbar!!.setTitle(getText(R.string.locations))
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.activity_location_list_recyclerview)

@@ -74,7 +74,7 @@ internal class FeedListRecyclerAdapter(private val feedListFragment: FeedListFra
         feedTitle.text = feedEntry.title
 
         if (feedEntry.deadline > 0 && UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.deadline) {
-            feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(feedListFragment.context),
+            feedText.setTextColor(ContextCompat.getColor(feedListFragment.context!!,
                     R.color.accent))
             feedText.text = feedEntry.description
         }

@@ -40,7 +40,7 @@ class RecordDropoutDialogFragment : UstadDialogFragment(), RecordDropoutDialogVi
     @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_record_dropout_dialog, null)
@@ -50,7 +50,7 @@ class RecordDropoutDialogFragment : UstadDialogFragment(), RecordDropoutDialogVi
 
         val negativeOCL = { dialog:DialogInterface, which:Int  -> finish() }
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull(context))
+        val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.record_dropout)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.ok, positiveOCL)

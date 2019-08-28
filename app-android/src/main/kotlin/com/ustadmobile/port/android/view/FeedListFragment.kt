@@ -196,8 +196,7 @@ class FeedListFragment : UstadBaseFragment(), FeedListView,
      */
     fun updateTitle(title: String) {
         //Update the parent header toolbar
-        val toolbar = Objects.requireNonNull(activity).findViewById<Toolbar>(R.id
-                .base_point_2_toolbar)
+        val toolbar = activity!!.findViewById<Toolbar>(R.id.base_point_2_toolbar)
         toolbar.setTitle(title)
     }
 

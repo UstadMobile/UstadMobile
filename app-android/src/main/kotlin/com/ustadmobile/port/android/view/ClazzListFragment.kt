@@ -39,7 +39,7 @@ class ClazzListFragment : UstadBaseFragment(), ClazzListView {
 
     private var mPresenter: ClazzListPresenter? = null
     internal var sortSpinner: Spinner ? = null
-    internal var sortSpinnerPresets: Array<String> ? = null
+    internal lateinit var sortSpinnerPresets: Array<String?>
     internal var fab: FloatingTextButton ? = null
 
     private var mOptionsMenu: Menu? = null
@@ -135,7 +135,7 @@ class ClazzListFragment : UstadBaseFragment(), ClazzListView {
      */
     override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
-        val adapter = ArrayAdapter(Objects.requireNonNull(context),
+        val adapter = ArrayAdapter(context!!,
                 R.layout.spinner_item, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter

@@ -11,7 +11,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 //@SyncableEntity(indices = [UmIndex(name = "clazzUid_type_index", value = ["scClazzLogUid", " +""checkType"])])
 @SyncableEntity(tableId = 173)
 @Entity
-class ScheduledCheck {
+class ScheduledCheck() {
 
     @PrimaryKey(autoGenerate = true)
     var scheduledCheckUid: Long = 0
@@ -35,15 +35,13 @@ class ScheduledCheck {
     @LastChangedBy
     var scheduledCheckLastChangedBy: Int = 0
 
-    constructor() {}
-
-    constructor(checkTime: Long, checkType: Int, checkParameters: String) {
+    constructor(checkTime: Long, checkType: Int, checkParameters: String): this() {
         this.checkTime = checkTime
         this.checkType = checkType
         this.checkParameters = checkParameters
     }
 
-    constructor(checkTime: Long, checkType: Int, clazzLogUid: Long) {
+    constructor(checkTime: Long, checkType: Int, clazzLogUid: Long): this() {
         this.checkTime = checkTime
         this.checkType = checkType
         this.scClazzLogUid = clazzLogUid

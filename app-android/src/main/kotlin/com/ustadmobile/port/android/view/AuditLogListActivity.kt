@@ -81,7 +81,7 @@ class AuditLogListActivity : UstadBaseActivity(), AuditLogListView, PopupMenu.On
         toolbar = findViewById(R.id.activity_audit_log_list_toolbar)
         toolbar!!.setTitle(getText(R.string.audit_log))
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.activity_audit_log_list_recyclerview)

@@ -10,7 +10,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 
 @SyncableEntity(tableId = 17)
 @Entity
-class DateRange {
+class DateRange(var dateRangeActive: Boolean = true) {
 
     @PrimaryKey(autoGenerate = true)
     var dateRangeUid: Long = 0
@@ -30,24 +30,17 @@ class DateRange {
 
     var dateRangeUMCalendarUid: Long = 0
 
-    var dateRangeActive: Boolean = false
-
     var dateRangeName: String? = null
 
     var dateRangeDesc: String? = null
 
-    constructor(fromDate: Long, toDate: Long) {
+    constructor(fromDate: Long, toDate: Long): this(true) {
         this.dateRangeFromDate = fromDate
         this.dateRangeToDate = toDate
-        this.dateRangeActive = true
     }
 
-    constructor(fromDate: Long) {
+    constructor(fromDate: Long): this(true) {
         this.dateRangeFromDate = fromDate
-        this.dateRangeActive = true
     }
 
-    constructor() {
-        this.dateRangeActive = true
-    }
 }

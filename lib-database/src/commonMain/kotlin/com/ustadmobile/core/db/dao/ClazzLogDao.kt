@@ -3,7 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy.Companion.REPLACE
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -63,7 +63,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Insert
     abstract override fun insert(entity: ClazzLog): Long
 
-    @Insert(onConflict = REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")

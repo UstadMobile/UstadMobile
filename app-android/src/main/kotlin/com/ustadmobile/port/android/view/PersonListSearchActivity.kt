@@ -58,15 +58,15 @@ class PersonListSearchActivity : UstadBaseActivity(), PersonListSearchView {
         val toolbar = findViewById<Toolbar>(R.id.activity_person_list_search_toolbar)
         toolbar.setTitle(R.string.students_literal)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.activity_person_list_search_rv)
         val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
 
-        attendanceRangeSeekbar = findViewById<View>(R.id.activity_person_list_search_attendance_range_seekbar)
-        daysAbsentSeekbar = findViewById<View>(R.id.activity_person_list_search_days_absent_seekbar)
+        attendanceRangeSeekbar = findViewById(R.id.activity_person_list_search_attendance_range_seekbar)
+        daysAbsentSeekbar = findViewById(R.id.activity_person_list_search_days_absent_seekbar)
         rangeTextView = findViewById(R.id.activity_person_list_search_range_textview)
         daysAbsentTextView = findViewById(R.id.activity_person_list_search_days_absent_textview)
 
@@ -92,8 +92,8 @@ class PersonListSearchActivity : UstadBaseActivity(), PersonListSearchView {
 
         })
 
-        attendanceRangeSeekbar!!.setOnRangeSeekbarFinalValueListener(object : OnRangeSeekbarFinalValueListener() {
-            fun finalValue(minValue: Number, maxValue: Number) {
+        attendanceRangeSeekbar!!.setOnRangeSeekbarFinalValueListener(object : OnRangeSeekbarFinalValueListener {
+            override fun finalValue(minValue: Number, maxValue: Number) {
                 if (minValue.toFloat() > 0)
                     apl = minValue.toInt() / 100f
                 if (maxValue.toFloat() > 0)

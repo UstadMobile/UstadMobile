@@ -13,7 +13,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 @SyncableEntity(tableId = 28)
 @Entity
-open class UMCalendar {
+open class UMCalendar() {
 
     @PrimaryKey(autoGenerate = true)
     var umCalendarUid: Long = 0
@@ -39,14 +39,10 @@ open class UMCalendar {
     @LastChangedBy
     var umCalendarLastChangedBy: Int = 0
 
-    constructor(name: String, category: Int) {
+    constructor(name: String, category: Int): this() {
         this.umCalendarName = name
         this.umCalendarCategory = category
         this.umCalendarActive = true
-    }
-
-    constructor() {
-
     }
 
     companion object {

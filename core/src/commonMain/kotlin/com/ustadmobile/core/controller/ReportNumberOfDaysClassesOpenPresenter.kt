@@ -26,7 +26,7 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
     private var toDate: Long = 0
     private var clazzList: List<Long>? = null
     private var locationList: List<Long>? = null
-    var barChartTimestamps: List<Long>? = null
+    var barChartTimestamps: ArrayList<Long>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -85,7 +85,7 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
     }
 
     fun dataToXLSX(title: String, xlsxReportPath: String, theWorkingPath: String,
-                   tableTextData: MutableList<Array<String>>) {
+                   tableTextData: MutableList<Array<String?>>) {
 
         try {
             ZipUtil.createEmptyZipFile(xlsxReportPath)
@@ -110,7 +110,7 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
                 var c = 0
                 for (i in tableTextDatum.indices) {
                     val value = tableTextDatum[i]
-                    reportSheet.addValueToSheet(r, c, value)
+                    reportSheet.addValueToSheet(r, c, value!!)
                     c++
                 }
                 r++

@@ -50,7 +50,7 @@ class SELQuestionActivity : UstadBaseActivity(), SELQuestionView {
         toolbar = findViewById(R.id.activity_sel_question_toolbar)
         toolbar!!.title = getText(R.string.social_nomination)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         val mRecyclerView = findViewById<RecyclerView>(

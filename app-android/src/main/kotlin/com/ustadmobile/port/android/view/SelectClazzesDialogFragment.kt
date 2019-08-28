@@ -77,7 +77,7 @@ class SelectClazzesDialogFragment : UstadDialogFragment(), SelectClazzesDialogVi
     @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_select_clazzes_dialog, null)

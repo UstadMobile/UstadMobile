@@ -9,7 +9,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 
 @SyncableEntity(tableId = 11)
 @Entity
-open class ClazzActivity {
+open class ClazzActivity() {
 
     @PrimaryKey(autoGenerate = true)
     var clazzActivityUid: Long = 0

@@ -80,7 +80,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                     theActivity!!.packageName)
         } else {
             getAddPersonIconResourceId(
-                    Objects.requireNonNull(theFragment!!.activity).packageName)
+                    theFragment!!.activity!!.packageName)
         }
 
     class ClazzLogDetailViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

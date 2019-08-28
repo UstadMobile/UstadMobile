@@ -2,9 +2,6 @@ package com.ustadmobile.port.android.view
 
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
@@ -24,11 +21,15 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.LocationDetailView
 import com.ustadmobile.lib.db.entities.Location
+import com.ustadmobile.port.android.view.LocationDetailActivity.PopulateTreeNodeCallback
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import tellh.com.recyclertreeview_lib.TreeNode
 import tellh.com.recyclertreeview_lib.TreeViewAdapter
 import tellh.com.recyclertreeview_lib.TreeViewBinder
 import java.util.*
+import kotlin.collections.ArrayList
 
 class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
 
@@ -40,7 +41,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
     private var adapter: TreeViewAdapter? = null
     internal var locationDao: LocationDao ?= null
     internal var selectedOptions: HashMap<String, Long>? = null
-    internal var selectedLocationList: List<Long>? = null
+    internal var selectedLocationList: ArrayList<Long>? = null
     private var currentLocationUid: Long = 0
 
     /**
@@ -70,7 +71,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
         toolbar = findViewById(R.id.activity_location_detail_toolbar)
         toolbar!!.setTitle(getText(R.string.add_edit_location))
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         locationTitle = findViewById(R.id.activity_location_detail_name)
 
@@ -110,7 +111,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
     }
 
     override fun populateTopLocation(locations: List<Location>) {
-        val nodes = ArrayList<TreeNode>()
+        val nodes = ArrayList<TreeNode<*>>()
 
         for (every_location in locations) {
             val childLocationUid = every_location.locationUid
@@ -125,7 +126,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
             }
             val app = TreeNode(
                     LocationLayoutType(
-                            every_location.title, every_location.locationUid,
+                            every_location.title!!, every_location.locationUid,
                             selected, false
                     )
             )
@@ -133,9 +134,12 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
         }
 
         for (childNode in nodes) {
-            val childLocationUid = (childNode.getContent() as LocationLayoutType).getUid()
-            locationDao.findAllChildLocationsForUidExceptSelectedUidAsync(childLocationUid, currentLocationUid,
-                    LocationDetailActivity.PopulateTreeNodeCallback(childNode))
+            val childLocationUid = (childNode.getContent() as LocationLayoutType).uid
+            GlobalScope.launch {
+                val result = locationDao!!.findAllChildLocationsForUidExceptSelectedUidAsync(childLocationUid, currentLocationUid)
+                val p = PopulateTreeNodeCallback(childNode)
+                p.onSuccess(result)
+            }
         }
 
         //Init adapter with the location node binder as types of data to accept
@@ -147,9 +151,9 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
 
 
         //Set adapter listener - on click the whole node itself. - Not the select listener.
-        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener() {
+        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener {
 
-            fun onClick(treeNode: TreeNode, viewHolder: RecyclerView.ViewHolder): Boolean {
+            override fun onClick(treeNode: TreeNode<*>, viewHolder: RecyclerView.ViewHolder): Boolean {
                 if (!treeNode.isLeaf()) {
                     //If not a leaf, expand it:
 
@@ -158,10 +162,13 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
                         if (childNode.isLeaf()) {
                             //Find all child's children and add then to the node
                             // (via PopulateTreeNodeCallback class)
-                            val childLocationUid = (childNode.getContent() as LocationLayoutType).getUid()
-                            locationDao.findAllChildLocationsForUidExceptSelectedUidAsync(
-                                    childLocationUid, currentLocationUid,
-                                    LocationDetailActivity.PopulateTreeNodeCallback(childNode))
+                            val childLocationUid = (childNode.getContent() as LocationLayoutType).uid
+                            GlobalScope.launch {
+                                val result = locationDao!!.findAllChildLocationsForUidExceptSelectedUidAsync(
+                                        childLocationUid, currentLocationUid)
+                                val p = PopulateTreeNodeCallback(childNode)
+
+                            }
                         }
                     }
                     //Toggle it
@@ -171,7 +178,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
                 return false
             }
 
-            fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
+            override fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
 
                 //Change icon of the item.
                 val locationViewHolder = viewHolder as LocationNodeBinder.ViewHolder
@@ -190,16 +197,17 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
 
             //Set title and add its uid to selected Location list so we can show it.
             locationTitle!!.setText(location.title)
-            selectedLocationList = ArrayList()
+            selectedLocationList = ArrayList<Long>()
             selectedLocationList!!.add(location.parentLocationUid)
         }
     }
 
-    private inner class PopulateTreeNodeCallback private constructor(private val node: TreeNode) : UmCallback<List<Location>> {
+    private inner class PopulateTreeNodeCallback(private val node: TreeNode<*>)
+        : UmCallback<List<Location>> {
 
-        override fun onSuccess(result: List<Location>) {
+        override fun onSuccess(result: List<Location>?) {
             runOnUiThread {
-                for (childLocations in result) {
+                for (childLocations in result!!) {
                     val childLocationUid = childLocations.locationUid
                     var selected = false
                     if (selectedLocationList!!.contains(childLocationUid)) {
@@ -207,10 +215,10 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
                     }
 
                     node.addChild(TreeNode(
-                            LocationLayoutType(childLocations.title,
+                            LocationLayoutType(childLocations.title!!,
                                     childLocationUid, selected, false)))
                 }
-                if (!result.isEmpty()) {
+                if (!result!!.isEmpty()) {
                     (node.getContent() as LocationLayoutType).leaf = false
                 } else {
                     (node.getContent() as LocationLayoutType).leaf = true
@@ -218,15 +226,15 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
 
             }
 
-            if (!result.isEmpty()) {
+            if (!result!!.isEmpty()) {
                 (node.getContent() as LocationLayoutType).leaf = false
             } else {
                 (node.getContent() as LocationLayoutType).leaf = true
             }
         }
 
-        override fun onFailure(exception: Throwable) {
-            exception.printStackTrace()
+        override fun onFailure(exception: Throwable?) {
+            print(exception!!.message)
         }
     }
 
@@ -235,10 +243,11 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
      * view on every tree node.
      *
      */
-    inner class TreeViewAdapterWithBind(nodes: List<TreeNode>, viewBinders: List<TreeViewBinder>) : TreeViewAdapter(nodes, viewBinders) {
+    inner class TreeViewAdapterWithBind(nodes: List<TreeNode<*>>,
+                    viewBinders:List<TreeViewBinder<*>>) : TreeViewAdapter(nodes, viewBinders) {
 
 
-        fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             super.onBindViewHolder(holder, position)
 
             val locationCB = holder.itemView.findViewById<CheckBox>(
@@ -247,7 +256,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
                     R.id.item_select_multiple_tree_dialog_arrow)
 
             val displayNodesIterator = getDisplayNodesIterator()
-            var displayNode: TreeNode? = null
+            var displayNode: TreeNode<*>? = null
             var i = 0
             while (displayNodesIterator.hasNext()) {
                 displayNode = displayNodesIterator.next()

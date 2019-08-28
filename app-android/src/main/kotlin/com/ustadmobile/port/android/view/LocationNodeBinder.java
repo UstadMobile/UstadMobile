@@ -27,8 +27,8 @@ public class LocationNodeBinder extends TreeViewBinder<LocationNodeBinder.ViewHo
     @Override
     public void bindView(ViewHolder viewHolder, int i, TreeNode treeNode) {
         LocationLayoutType locationNode = (LocationLayoutType) treeNode.getContent();
-        viewHolder.tvName.setText(locationNode.name);
-        viewHolder.locationUid = locationNode.uid;
+        viewHolder.tvName.setText(locationNode.getName());
+        viewHolder.locationUid = locationNode.getUid();
     }
 
     @Override

@@ -25,6 +25,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract fun finAllMembersWithGroupId(groupUid: Long): DataSource.Factory<Int, PersonGroupMember>
 
     @Query("SELECT Person.*, (0) AS clazzUid, " +
+            "   '' AS clazzName, " +
             "  (0) AS attendancePercentage, " +
             "  (0) AS clazzMemberRole,  " +
             "  (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +

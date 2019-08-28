@@ -52,7 +52,7 @@ class PersonAuthDetailActivity : UstadBaseActivity(), PersonAuthDetailView {
         toolbar = findViewById(R.id.activity_person_auth_detail_toolbar)
         toolbar!!.setTitle(getText(R.string.update_username_password))
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
 
         usernameET = findViewById(R.id.activity_personauth_detail_username)

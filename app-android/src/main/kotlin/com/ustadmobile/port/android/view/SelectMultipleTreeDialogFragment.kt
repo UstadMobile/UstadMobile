@@ -29,6 +29,8 @@ import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView
 import com.ustadmobile.lib.db.entities.Location
 import io.reactivex.annotations.NonNull
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import tellh.com.recyclertreeview_lib.TreeNode
 import tellh.com.recyclertreeview_lib.TreeViewAdapter
 import tellh.com.recyclertreeview_lib.TreeViewBinder
@@ -72,7 +74,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
 
     }
 
-    private inner class PopulateTreeNodeCallback private constructor(private val node: TreeNode)
+    private inner class PopulateTreeNodeCallback(private val node: TreeNode<*>)
         : UmCallback<List<Location>> {
 
         override fun onSuccess(result: List<Location>?) {
@@ -85,7 +87,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
                     }
 
                     node.addChild(TreeNode(
-                            LocationLayoutType(childLocations.title,
+                            LocationLayoutType(childLocations.title!!,
                                     childLocationUid, selected, false)))
                 }
                 if (!result.isEmpty()) {
@@ -96,7 +98,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
 
             })
 
-            if (!result.isEmpty()) {
+            if (!result!!.isEmpty()) {
                 (node.getContent() as LocationLayoutType).leaf = false
             } else {
                 (node.getContent() as LocationLayoutType).leaf = true
@@ -104,7 +106,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
         }
 
         override fun onFailure(exception: Throwable?) {
-            exception.printStackTrace()
+            print(exception!!)
         }
     }
 
@@ -123,7 +125,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
 
     @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_select_multiple_tree_dialog, null)
@@ -184,11 +186,12 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
      * view on every tree node.
      *
      */
-    inner class TreeViewAdapterWithBind(nodes: List<TreeNode>, viewBinders: List<TreeViewBinder>)
+    inner class TreeViewAdapterWithBind(nodes: List<TreeNode<*>>,
+                                        viewBinders:List<TreeViewBinder<*>>)
         : TreeViewAdapter(nodes, viewBinders) {
 
 
-        fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             super.onBindViewHolder(holder, position)
 
             val locationCB = holder.itemView.findViewById<CheckBox>(
@@ -197,7 +200,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
                     R.id.item_select_multiple_tree_dialog_arrow)
 
             val displayNodesIterator = getDisplayNodesIterator()
-            var displayNode: TreeNode? = null
+            var displayNode: TreeNode<*>? = null
             var i = 0
             while (displayNodesIterator.hasNext()) {
                 displayNode = displayNodesIterator.next()
@@ -229,7 +232,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
     }
 
     override fun populateTopLocation(locations: List<Location>) {
-        val nodes = ArrayList<TreeNode>()
+        val nodes = ArrayList<TreeNode<*>>()
 
         for (every_location in locations) {
             val childLocationUid = every_location.locationUid
@@ -239,7 +242,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
             }
             val app = TreeNode(
                     LocationLayoutType(
-                            every_location.title, every_location.locationUid,
+                            every_location.title!!, every_location.locationUid,
                             selected, false
                     )
             )
@@ -247,9 +250,13 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
         }
 
         for (childNode in nodes) {
-            val childLocationUid = (childNode.getContent() as LocationLayoutType).getUid()
-            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
-                    PopulateTreeNodeCallback(childNode))
+            val childLocationUid = (childNode.getContent() as LocationLayoutType).uid
+            GlobalScope.launch {
+                //TODO: Test
+                val result = locationDao.findAllChildLocationsForUidAsync(childLocationUid)
+                val p = PopulateTreeNodeCallback(childNode)
+                p.onSuccess(result)
+            }
         }
 
         //Init adapter with the location node binder as types of data to accept
@@ -261,18 +268,23 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
 
 
         //Set adapter listener
-        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener() {
+        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener {
 
-            fun onClick(treeNode: TreeNode, viewHolder: RecyclerView.ViewHolder): Boolean {
+            override fun onClick(treeNode: TreeNode<*>, viewHolder: RecyclerView.ViewHolder):
+                    Boolean {
                 if (!treeNode.isLeaf()) {
                     val nodeList = treeNode.getChildList()
                     for (childNode in nodeList) {
                         if (childNode.isLeaf()) {
                             //Find all child's children and add then to the node
                             // (via PopulateTreeNodeCallback class)
-                            val childLocationUid = (childNode.getContent() as LocationLayoutType).getUid()
-                            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
-                                    PopulateTreeNodeCallback(childNode))
+                            val childLocationUid = (childNode.getContent() as LocationLayoutType).uid
+                            GlobalScope.launch {
+                                //TODO: Check this
+                                val result = locationDao.findAllChildLocationsForUidAsync(childLocationUid)
+                                val p = PopulateTreeNodeCallback(childNode)
+                                p.onSuccess(result)
+                            }
                         }
                     }
                     onToggle(treeNode.isExpand(), viewHolder)
@@ -281,7 +293,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
                 return false
             }
 
-            fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
+            override fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
 
                 //Change icon of the item.
                 val locationViewHolder = viewHolder as LocationNodeBinder.ViewHolder
@@ -296,7 +308,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
     override fun finish() {
         selectedOptions = mPresenter.selectedOptions
         if (mAttachedContext is MultiSelectTreeDialogListener) {
-            (mAttachedContext as MultiSelectTreeDialogListener).onLocationResult(selectedOptions)
+            (mAttachedContext as MultiSelectTreeDialogListener).onLocationResult(selectedOptions!!)
         }
         dialog.dismiss()
     }
