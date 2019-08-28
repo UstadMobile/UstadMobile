@@ -80,6 +80,34 @@ task prepareMessageIDMaps{
 
 }
 
+
+/**
+ * Generate app config
+ */
+task generateAppConfigJsonFile{
+  doLast{
+    try{
+      def jsonObj = new JSONObject()
+      File outFile = project.file("${rootDir.absolutePath}/app-angular/src/assets/appconfig.json")
+      Scanner scanner = new Scanner(new File("${rootDir.absolutePath}/core/src/main/assets/" +
+        "com/ustadmobile/core/appconfig.properties"))
+      while(scanner.hasNextLine()){
+        String line = scanner.nextLine()
+        if(!line.startsWith("#") && !line.isEmpty()){
+          def keyValue = line.split("=")
+          jsonObj.put(keyValue[0].replace(" ",""),keyValue[1].replace(" ",""))
+        }
+      }
+      FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+      jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
+      jsonFile.flush()
+    }catch(FileNotFoundException e){
+      e.printStackTrace()
+    }
+  }
+}
+
+
 /**
  * Generate default XLF file to be used for other translation
  */
@@ -120,7 +148,7 @@ new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
  * Generate XLF files based on default translation
  */
 task generateLocaleFiles{}
-generateLocaleFiles.dependsOn(generateMessageXlfTasks, prepareMessageIDMaps)
+generateLocaleFiles.dependsOn(generateMessageXlfTasks, prepareMessageIDMaps,generateAppConfigJsonFile)
 
 
 /**
@@ -157,6 +185,8 @@ task installDependencies{
     }
   }
 }
+installDependencies.dependsOn(":packPreparedModules",deleteAllTempFileAndDirs)
+installDependencies.finalizedBy(generateLocaleFiles)
 
 /**
  * Start angular end to end test
@@ -170,10 +200,7 @@ task startEnd2EndTest{
   }
 }
 
-
 startEnd2EndTest.dependsOn(build)
 
-build.dependsOn(installDependencies, generateLocaleFiles)
-installDependencies.dependsOn(":packPreparedModules",deleteAllTempFileAndDirs)
-
+build.dependsOn(installDependencies)
 
