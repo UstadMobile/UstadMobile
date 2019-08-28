@@ -22,7 +22,6 @@ import javax.lang.model.type.TypeMirror
 import kotlin.reflect.jvm.internal.impl.name.FqName
 import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
 import org.sqlite.SQLiteDataSource
-import java.lang.RuntimeException
 import java.sql.*
 import java.util.Locale
 import javax.lang.model.util.SimpleTypeVisitor7
@@ -31,6 +30,7 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import com.ustadmobile.door.DoorDbType
+import kotlin.RuntimeException
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
@@ -725,6 +725,9 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         }
 
         codeBlock.endControlFlow() //end when
+                .nextControlFlow("catch(e: %T)", Exception::class)
+                .add("e.printStackTrace()\n")
+                .add("throw %T(%S, e)\n", RuntimeException::class, "Exception creating tables")
                 .nextControlFlow("finally")
                 .add("_stmt?.close()\n")
                 .add("_con?.close()\n")

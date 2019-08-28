@@ -78,6 +78,7 @@ dependencies {
     standaloneRuntime "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     standaloneRuntime "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     standaloneRuntime "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    standaloneRuntime "org.postgresql:postgresql:$version_postgres_jdbc"
 
 
     testImplementation "io.ktor:ktor-client-core:$version_ktor"
