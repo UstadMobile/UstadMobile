@@ -28,7 +28,9 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
         }
 
         if (!isStopped) {
-            val appRecentlyActive = UmAppDatabaseSyncService.isInForeground || System.currentTimeMillis() - UmAppDatabaseSyncService.lastForegroundTime < UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG
+            val appRecentlyActive = UmAppDatabaseSyncService.isInForeground ||
+                    System.currentTimeMillis() - UmAppDatabaseSyncService.lastForegroundTime <
+                    UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG
             if (appRecentlyActive) {
                 queueSyncWorker((if (appRecentlyActive) 1 else 15).toLong(), TimeUnit.MINUTES)
             }
@@ -37,8 +39,6 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
 
         return Result.success()
     }
-
-
 
 
     companion object {

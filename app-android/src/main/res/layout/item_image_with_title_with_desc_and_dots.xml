@@ -7,7 +7,7 @@
     android:background="?android:selectableItemBackground"
     android:layout_height="wrap_content">
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_image_with_title_with_desc_and_dots_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
         app:layout_constraintStart_toEndOf="@+id/item_image_with_title_with_desc_and_dots_image"
         app:layout_constraintTop_toBottomOf="@+id/item_image_with_title_with_desc_and_dots_title" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_image_with_title_with_desc_and_dots_dots"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

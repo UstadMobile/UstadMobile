@@ -28,7 +28,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="16dp" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_attendance_trafficlight"
         android:layout_width="12dp"
         android:layout_height="12dp"
@@ -56,7 +56,7 @@
         app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_student_title"
         android:layout_marginLeft="4dp" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_student_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
         app:layout_constraintTop_toBottomOf="@+id/item_studentlist_student_simple_attendance_percentage"
         android:layout_marginRight="8dp" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_call_iv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

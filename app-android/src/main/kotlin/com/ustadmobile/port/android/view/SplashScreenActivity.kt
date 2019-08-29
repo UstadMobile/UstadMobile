@@ -31,32 +31,102 @@
 
 package com.ustadmobile.port.android.view
 
+import android.Manifest
+import android.content.DialogInterface
+import android.content.pm.PackageManager
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.view.MenuItem
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
-import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SplashPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SplashView
-import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
+import com.ustadmobile.port.android.impl.ClazzLogScheduleWorker
 import java.util.concurrent.TimeUnit
 
 
-class SplashScreenActivity : SplashView, UstadBaseActivity() {
+class SplashScreenActivity : SplashView, UstadBaseActivity(), DialogInterface.OnClickListener{
+
+
+    override fun onClick(dialog: DialogInterface?, which: Int) {
+        checkPermissions()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        startTheUI()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        if(id==R.id.action_leavecontainer){
+            return true;
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+
+        var allGranted = permissions.size == 2
+        for (i in grantResults.indices) {
+            allGranted = allGranted and (grantResults[i] == PackageManager.PERMISSION_GRANTED)
+        }
+
+        if (allGranted) {
+            Handler().postDelayed(
+                    {
+                        UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
+                    }, 0)
+        } else {
+            /* avoid possibly getting into an infinite loop if we had no user interaction
+                and permission was denied
+             */
+            object : AsyncTask<Void, Void, Void>() {
+                override fun doInBackground(vararg voids: Void): Void? {
+                    try {
+                        Thread.sleep(500)
+                    } catch (e: InterruptedException) {
+                    }
+
+                    return null
+                }
+
+                override fun onPostExecute(o: Void) {
+                    this@SplashScreenActivity.checkPermissions()
+                }
+            }.execute()
+        }
+
+
+    }
 
     private lateinit var organisationIcon : ImageView
 
     private lateinit var constraintLayout: ConstraintLayout
+
+    val EXTERNAL_STORAGE_REQUESTED = 1
+
+    val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    internal var rationalesShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +150,25 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
                 this, UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
+        queueClazzLogScheduleWorker()
+        startTheUI()
+
+    }
+
+    fun queueClazzLogScheduleWorker(){
+        WorkManager.getInstance().cancelAllWorkByTag(ClazzLogScheduleWorker.TAG)
+        ClazzLogScheduleWorker.queueClazzLogScheduleWorker(
+                ClazzLogScheduleWorker.getNextClazzLogScheduleDueTime())
+    }
+
+    /**
+     * Calls startUi to be run. This is usually called after we have checked permissions.
+     */
+    fun startTheUI() {
+        Handler().postDelayed(
+                {
+                    UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
+                }, 0)
     }
 
     override fun startUi(delay: Boolean, animate: Boolean) {
@@ -112,6 +201,39 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
             }, TimeUnit.MILLISECONDS.toMillis(if(animate) 200 else 0))
         }
 
+    }
+
+    /**
+     * Checks for permissions and alerts the user to give permissions.
+     */
+    fun checkPermissions() {
+        var hasRequiredPermissions = true
+        for (i in REQUIRED_PERMISSIONS.indices) {
+            hasRequiredPermissions = hasRequiredPermissions and
+                    (ContextCompat.checkSelfPermission(this,
+                    REQUIRED_PERMISSIONS[i]) === PackageManager.PERMISSION_GRANTED)
+        }
+
+        if (!hasRequiredPermissions) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE) && !rationalesShown) {
+                //show an alert
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("File permissions required")
+                        .setMessage("This app requires file permissions " +
+                                "on the SD card to download and save content")
+                builder.setPositiveButton("OK", this)
+                val dialog = builder.create()
+                dialog.show()
+                rationalesShown = true
+                return
+            } else {
+                rationalesShown = false
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS,
+                        EXTERNAL_STORAGE_REQUESTED)
+                return
+            }
+        }
     }
 
 

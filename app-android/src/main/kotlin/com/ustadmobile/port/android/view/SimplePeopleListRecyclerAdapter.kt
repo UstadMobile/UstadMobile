@@ -46,7 +46,7 @@ class SimplePeopleListRecyclerAdapter : PagedListAdapter<Person,
         theContext = context
     }
 
-    protected constructor(diffCallback: DiffUtil.ItemCallback<Person>,
+    constructor(diffCallback: DiffUtil.ItemCallback<Person>,
                           context: Context, presenter: CommonHandlerPresenter<*>) : super(diffCallback) {
         theContext = context
         mPresenter = presenter

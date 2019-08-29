@@ -9,7 +9,7 @@
     android:layout_height="wrap_content">
 
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_clazzlog_detail_student_person_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"

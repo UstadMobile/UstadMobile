@@ -31,6 +31,6 @@ interface BasePointView2 : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "PeopleHome"
+        val VIEW_NAME = "BasePoint2"
     }
 }

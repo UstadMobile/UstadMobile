@@ -1,4 +1,4 @@
-<android.support.v4.widget.SwipeRefreshLayout
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     android:id="@+id/fragment_people_list_swiperefreshlayout"
     tools:context="com.ustadmobile.port.android.view.PeopleListFragment"
     xmlns:tools="http://schemas.android.com/tools"
@@ -72,4 +72,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</android.support.v4.widget.SwipeRefreshLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

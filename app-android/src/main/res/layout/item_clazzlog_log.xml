@@ -20,7 +20,7 @@
         app:layout_constraintStart_toEndOf="@+id/item_clazzlog_log_calendar_image"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_clazzlog_log_status_text_imageview"
         android:layout_width="16dp"
         android:layout_height="16dp"
@@ -69,7 +69,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginLeft="10dp" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_clazzlog_log_done_image"
         android:layout_width="18dp"
         android:layout_height="18dp"

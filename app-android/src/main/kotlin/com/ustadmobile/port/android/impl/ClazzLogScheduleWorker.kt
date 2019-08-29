@@ -20,10 +20,11 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
         dbRepo.scheduleDao.createClazzLogsForToday(
                 UmAccountManager.getActivePersonUid(applicationContext), dbRepo)
         //Queue next worker at 00:00
-        queueClazzLogScheduleWorker(nextClazzLogScheduleDueTime)
+        queueClazzLogScheduleWorker(getNextClazzLogScheduleDueTime())
         UstadMobileSystemImpl.instance.scheduleChecks(applicationContext)
         return ListenableWorker.Result.success()
     }
+
 
     companion object {
 
@@ -43,15 +44,16 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
          *
          * @return
          */
-        val nextClazzLogScheduleDueTime: Long
-            get() {
-                val nextTimeCal = Calendar.getInstance()
-                nextTimeCal.timeInMillis = System.currentTimeMillis() + 1000 * 60 * 60 * 24
-                nextTimeCal.set(Calendar.HOUR_OF_DAY, 0)
-                nextTimeCal.set(Calendar.MINUTE, 0)
-                nextTimeCal.set(Calendar.SECOND, 0)
-                nextTimeCal.set(Calendar.MILLISECOND, 0)
-                return nextTimeCal.timeInMillis
-            }
+        fun getNextClazzLogScheduleDueTime(): Long {
+            val nextTimeCal = Calendar.getInstance()
+            nextTimeCal.timeInMillis = System.currentTimeMillis() + 1000 * 60 * 60 * 24
+            nextTimeCal.set(Calendar.HOUR_OF_DAY, 0)
+            nextTimeCal.set(Calendar.MINUTE, 0)
+            nextTimeCal.set(Calendar.SECOND, 0)
+            nextTimeCal.set(Calendar.MILLISECOND, 0)
+            return nextTimeCal.timeInMillis
+        }
+
+
     }
 }

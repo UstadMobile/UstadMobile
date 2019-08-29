@@ -349,8 +349,7 @@ class BasePointActivity2() : UstadBaseActivity(), BasePointView2 {
         //Search stuff
         // Associate searchable configuration with the SearchView
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        val searchView = menu.findItem(R.id.menu_basepoint_search)
-                .actionView as SearchView
+        val searchView = menu.findItem(R.id.menu_basepoint_search).actionView as SearchView
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(componentName))
 
@@ -466,7 +465,9 @@ class BasePointActivity2() : UstadBaseActivity(), BasePointView2 {
          */
         override fun getItem(position: Int): Fragment? {
             val thisFragment = positionMap[position]
-            val aFragment = thisFragment as Fragment
+            if(thisFragment != null) {
+                val aFragment = thisFragment as Fragment
+            }
 
             //TODO: Check this edit
             //return thisFragment ?:
@@ -475,27 +476,29 @@ class BasePointActivity2() : UstadBaseActivity(), BasePointView2 {
                 0 -> {
                     newFrag = FeedListFragment.newInstance()
                     this.positionMap[position] = newFrag
-                    newFrag
+                    return newFrag
                 }
                 1 -> {
                     classesFragment = ClazzListFragment.newInstance()
                     this.positionMap[position] = classesFragment
-                    classesFragment
+                    return classesFragment
                 }
 
                 2 -> {
                     peopleListFragment = PeopleListFragment.newInstance()
                     this.positionMap[position] = peopleListFragment
-                    peopleListFragment
+                    return peopleListFragment
                 }
 
                 3 -> {
                     reportSelectionFragment = ReportSelectionFragment.newInstance()
                     this.positionMap[position] = reportSelectionFragment
-                    reportSelectionFragment
+                    return reportSelectionFragment
                 }
 
-                else -> thisFragment
+                else -> {
+                    return thisFragment
+                }
             }
             //TODO: Check this edit
             return thisFragment
