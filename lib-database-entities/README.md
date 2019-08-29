@@ -18,7 +18,7 @@ var isAvailable: Boolean
 **UID**: camel case, entity name, followed by Uid
 e.g. in ClazzMember.kt
 ```
-@PrimaryKey
+@PrimaryKey(autoGenerate = true)
 var clazzMemberUid: Long
 ```
 
