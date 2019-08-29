@@ -15,7 +15,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 
 @Entity
-@SyncableEntity(tableId = 11)
+@SyncableEntity(tableId = 65)
 open class ClazzMember()  {
 
     /**
