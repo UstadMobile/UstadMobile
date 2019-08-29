@@ -27,7 +27,7 @@ export class ReportDashboardComponent extends UmBaseComponent implements
    ];
    columnNames = ['Year', 'Asia','Europe'];
    options = {};
-   width = 400;
+   width = 370;
    height = 400;
 
    modalOptions: Materialize.ModalOptions = {
