@@ -5,8 +5,11 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.Companion.TABLE_ID
 
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 class ContextXObjectStatementJoin {
 
     @PrimaryKey(autoGenerate = true)

@@ -25,8 +25,8 @@ task prepareMessageIDMaps{
 
   Map<String, Integer> messageIds = new HashMap<>()
   AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-  def localeCode = "en"
   rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+    def localeCode = "en"
     def jsonObj = new JSONObject()
 
     def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
@@ -114,7 +114,6 @@ task generateMessageXlf{
 //Prepare dynamic task to generate XLF for each language locale
 def generateMessageXlfTasks = []
 new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
-
   def langCode = ""
   if(localeDir.name.contains("-")) {
     langCode = localeDir.name.substring(localeDir.name.indexOf("-") + 1)

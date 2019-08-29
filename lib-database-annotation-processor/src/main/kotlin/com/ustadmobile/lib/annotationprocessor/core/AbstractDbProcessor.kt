@@ -620,7 +620,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
                             |AFTER UPDATE OR INSERT ON ${syncableEntityInfo.syncableEntity.simpleName} 
                             |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                            |EXECUTE PROCEDURE inc_csn_${syncableEntityInfo.tableId}_fn()
+                            |EXECUTE PROCEDURE inccsn_${syncableEntityInfo.tableId}_fn()
                         """.trimMargin())
             }
         }
