@@ -15,7 +15,8 @@ export class HomePage {
 export class ElementUtils{
    getPageElts() {
     return {
-      appHomeMenu: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span'))
+      appHomeMenu: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span')),
+      newReportBtn: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn'))
     };
   }
 }
