@@ -32,7 +32,7 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
     private lateinit var floatingButton: FloatingTextButton
 
-    private val umRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(this)
+    private lateinit var umRepository: UmAppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +43,8 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = getString(R.string.activity_preview_xapi)
+
+        umRepository = UmAccountManager.getRepositoryForActiveAccount(this)
 
         recyclerView = findViewById(R.id.preview_report_list)
         viewManager = LinearLayoutManager(this)

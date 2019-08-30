@@ -47,6 +47,10 @@ main {
   padding-right: 2% !important;
 }
 
+.default-form-padding{
+  padding: 3% !important;
+}
+
 .default-padding-top{
   padding-top: 16px !important;
 }

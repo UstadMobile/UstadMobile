@@ -21,8 +21,8 @@
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
 
-    <li><a (click)="navigateTo(routes.list)"><span i18n="@@libraries">Libraries</span></a></li>
-    <li><a (click)="navigateTo(routes.report)"> <span i18n="@@reports">Reports</span></a></li>
+    <li><a (click)="navigateTo(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
+    <li><a (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
 
     <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
     <mz-dropdown-item>
@@ -51,13 +51,13 @@
     </mz-sidenav-header>
 
     <mz-sidenav-link [active]="true">
-      <a class="collapsible-header" (click)="navigateTo(routes.list)"><span i18n="@@libraries">Libraries</span>
+      <a class="collapsible-header" (click)="navigateTo(routes.entryList)"><span i18n="@@libraries">Libraries</span>
         <i class="material-icons {{icon_position_class}}">library_books</i>
       </a>
     </mz-sidenav-link>
 
-    <mz-sidenav-link>
-      <a class="collapsible-header" (click)="navigateTo(routes.report)"> <span i18n="@@reports">Reports</span>
+    <mz-sidenav-link> 
+      <a class="collapsible-header" (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
         <i class="material-icons {{icon_position_class}}">pie_chart</i>
       </a>
     </mz-sidenav-link>

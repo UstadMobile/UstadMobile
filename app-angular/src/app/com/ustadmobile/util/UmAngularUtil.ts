@@ -4,9 +4,10 @@ import db from 'UstadMobile-lib-database';
 import {Observable} from 'rxjs';
 
 export const appRountes = {
-  "list":"ContentEntryList", "details":"ContentEntryDetail", "register":"RegisterAccount",
+  "entryList":"ContentEntryList", "entryDetails":"ContentEntryDetail", "register":"RegisterAccount",
   "login":"Login", "xapi":"XapiPackage", "video":"VideoPlayer", "web":"webChunk", 
-  "container":"Container", "report":"Reports","reportDetails":"ReportDetails"
+  "container":"Container", "reportDashboard":"ReportDashboard","reportDetails":"ReportDetails",
+  "reportOptions":"ReportOptions"
 }
 
 export class UmAngularUtil {
@@ -31,6 +32,17 @@ export class UmAngularUtil {
     var paramString = queryParam || document.location.search + (notFound ? "":"&ref=null");
     return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString);
+  }
+
+  /**
+   * Get URL params to be passed to other views
+   * @param route route to navifate to
+   * @param entryId entry UID to open
+   */
+  static getRouteArgs(route, entryId){
+    const args = (route != appRountes.entryList &&  route != appRountes.reportDashboard && route != appRountes.reportOptions)
+     ? UmAngularUtil.queryParamsToMap("?") : UmAngularUtil.queryParamsToMap("?entryid=" + entryId+"&path=true");
+    return args;
   }
 
   static getContentToDispatch(key, value){

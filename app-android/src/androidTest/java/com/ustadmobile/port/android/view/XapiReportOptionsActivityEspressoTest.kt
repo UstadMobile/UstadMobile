@@ -47,7 +47,6 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
 
     private lateinit var reportOptionsWithDataFilled: XapiReportOptions
 
-
     private lateinit var activity: XapiReportOptionsActivity
 
 

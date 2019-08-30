@@ -10,8 +10,9 @@ import { map } from 'rxjs/operators';
 })
 export class UmBaseService {
 
-  private umObserver = new Subject < any > ();
+  private umObserver = new Subject <any> ();
   private directionality: string;
+  private umListener = <Observable<any>>this.umObserver;
 
   constructor(private http: HttpClient, private toastService: MzToastService) {
     this.loadAndSaveAppConfig();
@@ -45,11 +46,10 @@ export class UmBaseService {
   }
 
   getUmObserver(): Observable < any > {
-    return this.umObserver.asObservable();
+    return this.umListener;
   }
 
-  setContext(context: UmContextWrapper) {
-  }
+  setContext(context: UmContextWrapper) {}
 
   /**
    * Loading string map from json file

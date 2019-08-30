@@ -36,9 +36,7 @@ export class LoginComponent extends UmBaseComponent implements core.com.ustadmob
     });
 
     this.umFormLogin.valueChanges.subscribe(
-      () => { 
-          this.formValidated = this.umFormLogin.status == "VALID";
-      }
+      () => { this.formValidated = this.umFormLogin.status == "VALID";}
       );
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)

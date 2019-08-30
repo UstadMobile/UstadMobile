@@ -1,0 +1,90 @@
+<div
+  class="row white default-padding-top default-content-padding-bottom default-content-padding-right default-content-padding-left">
+  <div
+    class="col s12 default-form-padding z-depth-1 default-graph-margin white default-padding-top default-padding-bottom">
+
+    <form class="col s12" [formGroup]="umFormReportOptions">
+      <div class="row">
+        <label class="{{env.colorPrimaryText}}">General </label>
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="'Label'" [formControl]="umFormReportOptions.controls['visualization']"
+              id="graph_visualization">
+              <option *ngFor="let graph of translatedGraphList" value="{{graph}}">{{graph}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <label class="{{env.colorPrimaryText}}">Axes </label>
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="'Y-Axis'" [formControl]="umFormReportOptions.controls['y_axis']"
+              id="graph_y_axis">
+              <option *ngFor="let axis of translatedYAxisList" value="{{axis}}">{{axis}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="'X-Axis'" [formControl]="umFormReportOptions.controls['x_axis']"
+              id="graph_x_axis">
+              <option *ngFor="let axis of translatedXAxisList" value="{{axis}}">{{axis}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="'Sub Group'" [formControl]="umFormReportOptions.controls['sub_group']"
+              id="graph_sub_group">
+              <option *ngFor="let axis of translatedXAxisList" value="{{axis}}">{{axis}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+      </div>
+
+
+
+      <div class="row">
+        <label class="{{env.colorPrimaryText}}">Filters </label>
+        <div class="input-field col s12">
+          <mz-input-container>
+            <input mz-input [label]="'Who'" [validate]="true" id="graph_who" type="text">
+          </mz-input-container>
+        </div>
+
+        <div class="input-field col s12">
+          <mz-input-container>
+            <input mz-input [label]="'Did'" [validate]="true" id="graph_did" type="text">
+          </mz-input-container>
+        </div>
+
+        <div class="input-field col s12">
+          <mz-input-container>
+            <input mz-input [label]="'What'" [validate]="true" id="graph_what" type="text">
+          </mz-input-container>
+        </div>
+
+
+        <div class="input-field col s12">
+          <mz-input-container>
+            <input mz-input [label]="'When'" [validate]="true" id="graph_when" type="text">
+          </mz-input-container>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <div class="fixed-action-btn" (click)="handleOptionsSelected()">
+        <a class="btn-floating btn-large {{env.colorAcent}}">
+          <i class="large material-icons">done</i>
+        </a>
+      </div>
+</div>

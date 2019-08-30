@@ -71,13 +71,12 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   ngOnInit() {
     super.ngOnInit();
 
-    combineLatest([
-      this.umService.loadEntries(),
-      this.umService.loadEntryJoins()
-    ]).subscribe(responses => {
+    combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins()]).subscribe(responses => {
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.onCreate() 
     })
+
+    this.setToolbarTitle("...")
 
     //Listen for resources being ready
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
@@ -110,6 +109,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   openEntry(entry : db.com.ustadmobile.lib.db.entities.ContentEntry) {
+    this.setToolbarTitle(entry.title)
     this.presenter.handleContentEntryClicked(entry);
   }
 
@@ -125,11 +125,6 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
       this.categoryMap[counter] = categoryList.splice(2,3)
       counter++;
     }) 
-  }
-
-  setToolbarTitle(title: string){
-    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
-      UmAngularUtil.DISPATCH_TITLE, title));
   }
 
   ngOnDestroy(){

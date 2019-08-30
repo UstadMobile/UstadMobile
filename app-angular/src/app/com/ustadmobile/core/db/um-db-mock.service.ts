@@ -3,7 +3,6 @@ import util from 'UstadMobile-lib-util';
 import db from 'UstadMobile-lib-database';
 import door from 'UstadMobile-lib-door-runtime';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
-import core from 'UstadMobile-core';
 
 @Injectable({
   providedIn: 'root'

@@ -19,6 +19,7 @@ import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
+import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboar
     RegisterComponent,
     LoginComponent,
     XapiContentComponent,
-    ReportDashboardComponent
+    ReportDashboardComponent,
+    XapiReportOptionsComponent
   ],
   imports: [
     BrowserModule,

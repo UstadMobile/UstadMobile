@@ -1,19 +1,16 @@
-import { UmAngularUtil } from './../../util/UmAngularUtil';
+import { UmAngularUtil, appRountes } from './../../util/UmAngularUtil';
 import { Component, Renderer2, ElementRef } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
-import core from 'UstadMobile-core';
-import util from 'UstadMobile-lib-util';
 
 @Component({
   selector: 'app-report-dashboard',
   templateUrl: './report-dashboard.component.html',
   styleUrls: ['./report-dashboard.component.css']
 })
-export class ReportDashboardComponent extends UmBaseComponent implements
- core.com.ustadmobile.core.view.XapiReportOptionsView {
+export class ReportDashboardComponent extends UmBaseComponent {
 
   tagList = ["All Tags","Session","Perfomance", "Session","Performance","Session","Perfomance","20+ More"]
   title = '';
@@ -39,29 +36,26 @@ export class ReportDashboardComponent extends UmBaseComponent implements
     endingTop: '10%'
   };
 
-  graphList = []
+  graphList = ["","","",""]
 
-  presenter: core.com.ustadmobile.core.controller.XapiReportOptionsPresenter;
   private navigationSubscription;
+
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
     umDb: UmDbMockService, private renderer:Renderer2, private elem: ElementRef) { 
       super(umService, router, route, umDb);
 
       this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe( _ => {
-      if(this.umDatabase.xObjectDao){
-        this.onCreate()
-      }
+        this.subscription = this.umService.getUmObserver().subscribe(content => {
+          if (content[UmAngularUtil.DISPATCH_RESOURCE]) {
+            this.onCreate()
+          }
+        });
     }); 
     }
 
     private onCreate(){
-      if(this.umDatabase.xObjectDao){
-        this.presenter = new core.com.ustadmobile.core.controller.XapiReportOptionsPresenter(
-          this.context, UmAngularUtil.queryParamsToMap(),this, this.umDatabase.personDao,
-          this.umDatabase.xObjectDao, this.umDatabase.xLangMapEntryDao);
-        this.presenter.onCreate(null);
-      }
+      this.setToolbarTitle("Report Dashboard")
     }
 
 
@@ -81,71 +75,19 @@ export class ReportDashboardComponent extends UmBaseComponent implements
       
     }
 
+    handleNewGraphCreated(){
+      this.systemImpl.go(this.routes.reportOptions, UmAngularUtil.getRouteArgs(
+        this.routes.reportOptions,this.umDatabase.ROOT_UID), this.context);
+    }
+
     onViewMore(reportId){
       const args = UmAngularUtil.queryParamsToMap("?reportId=" + reportId)
       this.systemImpl.go("/ReportDetails", args, this.context, 0)
     }
 
-    fillVisualChartType(translatedGraphList){
-      this.graphList = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(translatedGraphList)
-      console.log(this.graphList)
-    }
     
-    fillYAxisData(translatedYAxisList){
-      console.log("translatedYAxisList",translatedYAxisList)
-    }
-
-    fillXAxisAndSubGroupData(translatedXAxisList){
-      console.log("translatedXAxisList",translatedXAxisList)
-    }
-
-    updateWhoDataAdapter(whoList){
-      console.log("whoList",whoList)
-    }
-
-    updateDidDataAdapter(didList){
-      console.log("didList",didList)
-    }
-
-    updateFromDialogText(fromDate){
-      console.log("fromDate",fromDate)
-    }
-
-    updateToDialogText(toDate){
-      console.log("toDate",toDate)
-    }
-
-    updateWhenRangeText(rangeText){
-      console.log("rangeText",rangeText)
-    }
-
-    updateChartTypeSelected(indexChart){
-      console.log("indexChart",indexChart)
-    }
-
-    updateYAxisTypeSelected(indexYAxis){
-      console.log("indexYAxis",indexYAxis)
-    }
-
-    updateXAxisTypeSelected(indexXAxis){
-      console.log("indexXAxis",indexXAxis)
-    }
-
-    updateSubgroupTypeSelected(indexSubgroup){
-      console.log("indexesSub",indexSubgroup)
-    }
-
-    updateWhoListSelected(personList){
-      console.log("persons",personList)
-    }
-
-    updateDidListSelected(verbs){
-      console.log("verbs", verbs)
-    }
-
     ngOnDestroy(){
       super.ngOnDestroy()
-      this.presenter.onDestroy();
       if (this.navigationSubscription) {  
         this.navigationSubscription.unsubscribe();
       }

@@ -19,6 +19,7 @@ import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiReportOptionsPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -64,11 +65,13 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var toET: EditText
 
-    private val umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
+    private lateinit var umRepo: UmAppDatabase;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xapi_report_options)
+
+        umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
 
         visualTypeSpinner = findViewById(R.id.type_spinner)
         yAxisSpinner = findViewById(R.id.yaxis_spinner)

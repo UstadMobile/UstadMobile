@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { UmAngularUtil } from './../util/UmAngularUtil';
+import { UmAngularUtil, appRountes } from './../util/UmAngularUtil';
 import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
@@ -17,6 +17,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   public app_name: String = "...";
   protected viewContext: UmContextWrapper;
   protected subscription : Subscription;
+  public routes = appRountes;
 
 
   protected constructor(protected umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
@@ -27,6 +28,11 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.context.setActiveRoute(this.route);
     this.viewContext = this.context; 
     this.umService.setContext(this.context);
+  }
+
+  setToolbarTitle(title){
+    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
+      UmAngularUtil.DISPATCH_TITLE, title));
   }
 
   ngOnInit(): void {
