@@ -59,7 +59,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                 val loginResponse = defaultHttpClient().get<HttpResponse>() {
                     url {
                         takeFrom(serverUrl)
-                        path("Login", "login")
+                        encodedPath = "${encodedPath}Login/login"
                     }
                     parameter("username", username)
                     parameter("password", password)

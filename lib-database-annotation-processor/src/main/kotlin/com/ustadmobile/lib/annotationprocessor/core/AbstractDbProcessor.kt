@@ -262,7 +262,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                     HttpResponse::class)
             .beginControlFlow("url")
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
-            .add("path($dbPathVarName, %S, %S)\n", daoName, methodName)
+            .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
 
@@ -1196,7 +1196,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             CLIENT_GET_MEMBER_NAME)
                             .beginControlFlow("url")
                             .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
-                            .add("path(_dbPath, %S, %S)\n", daoName,
+                            .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
                                     "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
                             .endControlFlow()
                             .add("%M(%S, _requestId)\n",
