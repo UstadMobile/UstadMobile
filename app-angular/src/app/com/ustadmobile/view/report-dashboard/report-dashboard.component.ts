@@ -46,15 +46,18 @@ export class ReportDashboardComponent extends UmBaseComponent {
 
       this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe( _ => {
-        this.subscription = this.umService.getUmObserver().subscribe(content => {
-          if (content[UmAngularUtil.DISPATCH_RESOURCE]) {
-            this.onCreate()
-          }
-        });
+        this.subscription =  UmAngularUtil.registerUmObserver(this) 
     }); 
     }
 
-    private onCreate(){
+    ngOnInit() {
+      super.ngOnInit()
+      this.subscription =  UmAngularUtil.registerUmObserver(this) 
+     }
+
+
+    onCreate(){
+      super.onCreate()
       this.setToolbarTitle("Report Dashboard")
     }
 

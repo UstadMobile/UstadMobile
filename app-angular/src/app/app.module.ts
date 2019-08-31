@@ -2,7 +2,7 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,MzSpinnerModule,MzProgressModule,
-   MzNavbarModule, MzChipModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule} from 'ngx-materialize';
+   MzNavbarModule, MzChipModule, MzDatepickerModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -20,6 +20,9 @@ import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-c
 import { GoogleChartsModule } from 'angular-google-charts';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
+import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
+import { XapiTreeviewDialogComponent } from './com/ustadmobile/view/xapi-treeview-dialog/xapi-treeview-dialog.component';
+
 
 @NgModule({
   declarations: [
@@ -32,28 +35,21 @@ import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-o
     LoginComponent,
     XapiContentComponent,
     ReportDashboardComponent,
-    XapiReportOptionsComponent
+    XapiReportOptionsComponent,
+    XapiReportDetailsComponent,
+    XapiTreeviewDialogComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    MzSidenavModule,
-    MzCardModule,
-    MzButtonModule,
-    MzNavbarModule,
-    MzChipModule,
     NgProgressModule,
     HttpClientModule,
-    MzSelectModule,
-    MzSpinnerModule,
-    MzModalModule,
+    MzSelectModule,MzSidenavModule,MzCardModule,MzButtonModule,MzNavbarModule,
+    MzChipModule,MzSpinnerModule,MzModalModule,MzToastModule,MzInputModule,MzProgressModule,MzDropdownModule,
+    MzDatepickerModule,
     FormsModule,
-    MzToastModule,
-    MzInputModule,
-    MzProgressModule,
-    MzDropdownModule,
     ReactiveFormsModule,
-    GoogleChartsModule
+    GoogleChartsModule,
   ],
   providers: [
     UmDbMockService,

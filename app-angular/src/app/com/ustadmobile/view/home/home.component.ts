@@ -15,7 +15,6 @@ import util from 'UstadMobile-lib-util';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent extends UmBaseComponent {
-  toolbar_title: string;
   menu_libaries: string;
   menu_reports: string;
   icon_position_class: string;
@@ -41,17 +40,10 @@ export class HomeComponent extends UmBaseComponent {
       'language': ['', Validators.required]
     });
 
+    //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
-        this.subscription = this.umService.getUmObserver().subscribe(content => {
-          if (content[UmAngularUtil.DISPATCH_TITLE]) {
-            this.toolbar_title = content[UmAngularUtil.DISPATCH_TITLE];
-          }
-
-          if (content[UmAngularUtil.DISPATCH_RESOURCE]) {
-            this.onCreate()
-          }
-        });
+        this.subscription =  UmAngularUtil.registerUmObserver(this) 
       });
   }
 
@@ -62,6 +54,7 @@ export class HomeComponent extends UmBaseComponent {
         window.open(window.location.origin + "/" + form.language + "/", "_self")
       }
     });
+    this.subscription =  UmAngularUtil.registerUmObserver(this) 
   }
 
   onCreate() {

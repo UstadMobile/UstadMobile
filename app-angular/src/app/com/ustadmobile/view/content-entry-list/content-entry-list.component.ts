@@ -54,29 +54,26 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
       this.entries = []; 
-      if(this.umDatabase.contentEntryDao){
-        this.onCreate()
-      }
+      this.subscription = UmAngularUtil.registerUmObserver(this)
     }); 
   }
 
-  private onCreate(){
+  onCreate(){
+    super.onCreate()
     if(this.umDatabase.contentEntryDao){
       this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
         this.context, UmAngularUtil.queryParamsToMap(), this,this.umDatabase.contentEntryDao);
       this.presenter.onCreate(null);
+      this.setToolbarTitle("...")
     }
   }
 
   ngOnInit() {
     super.ngOnInit();
-
     combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins()]).subscribe(responses => {
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
-      this.onCreate() 
+      this.subscription = UmAngularUtil.registerUmObserver(this)
     })
-
-    this.setToolbarTitle("...")
 
     //Listen for resources being ready
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
@@ -129,7 +126,9 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
 
   ngOnDestroy(){
     super.ngOnDestroy()
-    this.presenter.onDestroy();
+    if(this.presenter){
+      this.presenter.onDestroy();
+    }
     if (this.navigationSubscription) {  
       this.navigationSubscription.unsubscribe();
     }

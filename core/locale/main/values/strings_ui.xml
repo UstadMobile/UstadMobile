@@ -307,6 +307,9 @@
     <string name="xapi_content_entry" value="304">Content Entry</string>
     <string name="xapi_location" value="305">Location</string>
     <string name="xapi_gender" value="306">Gender</string>
+    <string name="xapi_clear" >Clear</string>
+    <string name="xapi_today" >Today</string>
+
 
     <string name="from">From</string>
     <string name="tocao">To</string>

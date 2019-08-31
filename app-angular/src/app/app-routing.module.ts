@@ -10,6 +10,8 @@ import { RegisterComponent } from './com/ustadmobile/view/register/register.comp
 import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
+import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
+import { XapiTreeviewDialogComponent } from './com/ustadmobile/view/xapi-treeview-dialog/xapi-treeview-dialog.component';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -23,8 +25,9 @@ const routes: Routes = [
           {path: "webChunk", component: XapiContentComponent},
           {path: "Container", component: XapiContentComponent},
           {path: "ReportDashboard", component: ReportDashboardComponent},
-          {path: "ReportDetails", component: ReportDashboardComponent},
-          {path:"ReportOptions", component: XapiReportOptionsComponent}
+          {path: "ReportOptions", component: XapiReportOptionsComponent},
+          {path: "EntriesTreeDialog",component: XapiTreeviewDialogComponent},
+          {path: "ReportPreviewView", component: XapiReportDetailsComponent} 
         ],
         canActivate: [AuthGuard],
         runGuardsAndResolvers: "always"

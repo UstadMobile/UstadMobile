@@ -1,22 +1,67 @@
 import { browser, element, by } from 'protractor';
 
+export const sleepTime = 0;
+
 export class HomePage {
 
   menus = ['Libraries', 'Reports']
+  baseUrl = "http://localhost:";
   launch() {
-    return browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid=1311236") as Promise<any>;
+    browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid=1311236") as Promise<any>;
+    browser.sleep(sleepTime)
   }
 
-  getTitle() {
-    return browser.getTitle() as Promise<any>;
+  getPage() {
+    return new ElementUtils().getPageElements().componentHome;
+  }
+}
+
+export class DashboardPage{
+
+  views = {"dashboard":"ReportDashboard", "options":"ReportOptions"};
+
+  launch() {
+    const pageHome = new HomePage()
+    pageHome.launch()
+    pageHome.getPage().menus.get(1).click()
+    browser.sleep(sleepTime);
+  }
+  getPage() {
+    return new ElementUtils().getPageElements().componentReportDashboard
+  }
+}
+
+export class ReportOptions{
+
+  views = {"what":"EntriesTreeDialog", "done":""}
+  launch() {
+    const pageDashboard = new DashboardPage()
+    pageDashboard.launch()
+    pageDashboard.getPage().newReport.click()
+    browser.sleep(sleepTime);
+  }
+  getPage() {
+    return new ElementUtils().getPageElements().componentReportOptions
   }
 }
 
 export class ElementUtils{
-   getPageElts() {
+   getPageElements() {
     return {
-      appHomeMenu: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span')),
-      newReportBtn: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn'))
+      componentHome:{
+        title: browser.getTitle() as Promise<any>,
+        menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span'))
+      },
+      componentReportDashboard: {
+        newReport: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn')),
+      },
+      componentReportOptions:{
+        formFields: element.all(by.css('app-xapi-report-options > div div.input-field')),
+        selectViews: element.all(by.css('app-xapi-report-options > div mz-select-container')),
+        inputViews: element.all(by.css('app-xapi-report-options > div mz-input-container .what')),
+        selectViewsOption: element.all(by.css('app-xapi-report-options > div option')),
+        doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn'))
+      }
     };
   }
 }

@@ -25,6 +25,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlin.js.JsName
 
 class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
                                 view: XapiReportDetailView, val impl: UstadMobileSystemImpl,
@@ -64,6 +65,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
 
     }
 
+    @JsName("handleAddDashboardClicked")
     fun handleAddDashboardClicked(title: String){
         reportOptions.reportTitle = title
         var args = HashMap<String, String?>()

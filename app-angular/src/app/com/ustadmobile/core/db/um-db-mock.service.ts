@@ -53,6 +53,15 @@ export class XLangMapEntryDao{
       {verbLangMapUid:4,valueLangMap:"DoThis"}
     ]
   }
+
+  getAllVerbs(any){
+    return [
+      {verbLangMapUid:1,valueLangMap:"Do"},
+      {verbLangMapUid:2,valueLangMap:"DoWhat"},
+      {verbLangMapUid:3,valueLangMap:"DoWhatElse"},
+      {verbLangMapUid:4,valueLangMap:"DoThis"}
+    ]
+  }
 }
 
 export class PersonDao{

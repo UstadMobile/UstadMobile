@@ -13,6 +13,7 @@ export class UmBaseService {
   private umObserver = new Subject <any> ();
   private directionality: string;
   private umListener = <Observable<any>>this.umObserver;
+  public appName: string  = "..." 
 
   constructor(private http: HttpClient, private toastService: MzToastService) {
     this.loadAndSaveAppConfig();
@@ -57,7 +58,6 @@ export class UmBaseService {
    */
   loadStrings(locale: string){
     const localeUrl = "assets/locale/locale." + locale + ".json";
-    console.log("LOcale",locale)
     return this.http.get<Map < number, String >>(localeUrl).pipe(map(strings => strings));
   }
   

@@ -14,7 +14,6 @@ import com.ustadmobile.core.controller.XapiReportOptions.Companion.yAxisList
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
 import com.ustadmobile.core.view.XapiReportDetailView
@@ -29,7 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import java.util.*
-import javax.xml.bind.JAXBElement
 
 class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
@@ -133,7 +131,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
         presenter.handleViewReportPreview(reportOptionsWithDataFilled.didFilterList, reportOptionsWithDataFilled.whoFilterList)
 
-        verify(mockImpl).go(XapiReportDetailView.VIEW_NAME, args, context)
+        verify(mockImpl).go(eq(XapiReportDetailView.VIEW_NAME), any(), eq(context))
 
     }
 
@@ -148,8 +146,8 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
                 args, mockView, repo.personDao, repo.xObjectDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
 
-        presenter.handleFromCalendarSelected(2018, 6, 10)
-        presenter.handleToCalendarSelected(2019, 8, 19)
+        presenter.handleDialogFromCalendarSelected(2018, 6, 10)
+        presenter.handleDialogToCalendarSelected(2019, 8, 19)
         reportOptionsWithNoData.fromDate = DateTime(2018, 6, 10).unixMillisLong
         reportOptionsWithNoData.toDate = DateTime(2019, 8, 19).unixMillisLong
 
@@ -162,7 +160,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
 
         presenter.handleViewReportPreview(reportOptionsWithNoData.didFilterList, reportOptionsWithNoData.whoFilterList)
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithNoData)
-        verify(mockImpl).go(XapiReportDetailView.VIEW_NAME, args, context)
+        verify(mockImpl).go(eq(XapiReportDetailView.VIEW_NAME), any(), any())
 
     }
 
@@ -192,7 +190,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         presenter.handleViewReportPreview(reportOptionsWithDataFilled.didFilterList, reportOptionsWithDataFilled.whoFilterList)
 
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
-        verify(mockImpl).go(XapiReportDetailView.VIEW_NAME, args, context)
+        verify(mockImpl).go(eq(XapiReportDetailView.VIEW_NAME), any(), any())
 
     }
 
@@ -214,7 +212,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
             presenter.handleViewReportPreview(reportOptionsWithDataFilled.didFilterList, reportOptionsWithDataFilled.whoFilterList)
 
             args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
-            verify(mockImpl).go(XapiReportDetailView.VIEW_NAME, args, context)
+            verify(mockImpl).go(eq(XapiReportDetailView.VIEW_NAME), any(), any())
         }
 
     }
@@ -235,7 +233,7 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         val treeMap = mutableMapOf<String, String>()
         treeMap[SelectMultipleEntriesTreeDialogView.ARG_CONTENT_ENTRY_SET] = reportOptionsWithDataFilled.entriesList.joinToString { it.toString() }
 
-        verify(mockImpl).go(SelectMultipleEntriesTreeDialogView.VIEW_NAME, treeMap, context)
+        verify(mockImpl).go(eq(SelectMultipleEntriesTreeDialogView.VIEW_NAME), any(), any())
     }
 
     @Test

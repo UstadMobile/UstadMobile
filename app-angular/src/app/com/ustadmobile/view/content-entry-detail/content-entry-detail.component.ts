@@ -44,6 +44,7 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umD
 }
 
 onCreate() {
+  super.onCreate()
   if(this.umDatabase.contentEntryDao){
     this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
       UmAngularUtil.queryParamsToMap(), this,this,this,this.umDatabase);

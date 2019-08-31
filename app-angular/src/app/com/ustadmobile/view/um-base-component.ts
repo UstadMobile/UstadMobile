@@ -13,15 +13,17 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   public env = environment;
   protected systemImpl: any;
   protected readonly context: UmContextWrapper;
-  protected readonly MessageID;
-  public app_name: String = "...";
+  public readonly MessageID = null;
   protected viewContext: UmContextWrapper;
   protected subscription : Subscription;
   public routes = appRountes;
+  public umService: UmBaseService
+  public toolBarTitle: string = '...';
 
 
-  protected constructor(protected umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
+  protected constructor(private baseService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
      protected umDatabase: UmDbMockService){
+    this.umService = baseService
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.context = new UmContextWrapper(router);
@@ -37,11 +39,11 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     //Listen for resources being ready
-    this.subscription = this.umService.getUmObserver().subscribe(content =>{
-      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.app_name = this.getString(this.MessageID.app_name);
-      }
-    });
+    this.subscription = UmAngularUtil.registerUmObserver(this)
+  }
+
+  onCreate(){
+    this.umService.appName = this.getString(this.MessageID.app_name)
   }
 
   runOnUiThread(runnable){
@@ -49,8 +51,9 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   }
 
   showError(errorMessage){
-    this.umService.getToastService().show(errorMessage ? errorMessage : 
-      this.getString(this.MessageID.error), 4000, 'red', () => {});
+    if(errorMessage){
+      this.umService.getToastService().show(errorMessage, 4000, 'red', () => {});
+    }
   }
 
   getString(messageId: number){
@@ -58,6 +61,8 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   }
 
   ngOnDestroy(){
-    this.subscription.unsubscribe();
+    if(this.subscription){
+      this.subscription.unsubscribe();
+    }
   }
 }

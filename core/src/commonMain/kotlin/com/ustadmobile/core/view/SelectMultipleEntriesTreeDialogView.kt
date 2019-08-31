@@ -19,7 +19,7 @@ interface SelectMultipleEntriesTreeDialogView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "SelectMultipleEntriesTreeDialog"
+        const val VIEW_NAME = "EntriesTreeDialog"
 
         const val ARG_CONTENT_ENTRY_SET = "EntriesSelected"
     }

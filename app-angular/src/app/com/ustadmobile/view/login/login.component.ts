@@ -36,27 +36,24 @@ export class LoginComponent extends UmBaseComponent implements core.com.ustadmob
     });
 
     this.umFormLogin.valueChanges.subscribe(
-      () => { this.formValidated = this.umFormLogin.status == "VALID";}
-      );
+      () => { this.formValidated = this.umFormLogin.status == "VALID";});
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe(() => {
-      this.presenter = new core.com.ustadmobile.core.controller
-        .Login2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
-        this.presenter.onCreate(null);
+      this.subscription = UmAngularUtil.registerUmObserver(this)
     });
-
-    
   }
 
   ngOnInit() {
     super.ngOnInit();
-    this.subscription = this.umService.getUmObserver().subscribe(content =>{
-      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_TITLE,
-        this.getString(this.MessageID.login)));
-      }
-    });
+    this.subscription = UmAngularUtil.registerUmObserver(this);
+  }
+
+  onCreate(){
+    this.setToolbarTitle(this.getString(this.MessageID.login))
+    this.presenter = new core.com.ustadmobile.core.controller.Login2Presenter(
+      this.context, UmAngularUtil.queryParamsToMap(), this);
+    this.presenter.onCreate(null);
   }
 
   startLogin(){

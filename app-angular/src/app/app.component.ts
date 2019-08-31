@@ -37,17 +37,23 @@ export class AppComponent extends UmBaseComponent {
     this.umService.setSystemDirectionality(this.dir);
   }
 
+  onCreate(){
+    super.onCreate()
+  }
+
   ngOnInit(): void {
     super.ngOnInit();
+    this.subscription = UmAngularUtil.registerUmObserver(this)
     const systemLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
     this.showLoading = window.location.search == "";
 
     //Load all resources async 
     combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins(),this.umService.loadStrings(systemLocale)
     ]).subscribe(responses => {
+
+    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_RESOURCE, true))
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.systemImpl.setLocaleStrings(responses[2])
-      this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_RESOURCE, true))
       if(UmAngularUtil.showSplashScreen()){ 
         window.setTimeout(this.splashScreenTimeout, 3500)
       }
@@ -56,6 +62,8 @@ export class AppComponent extends UmBaseComponent {
 
   ngOnDestroy(): void {
     super.ngOnDestroy()
-    this.navigationSubscription.unsubscribe();
+    if(this.navigationSubscription){ 
+      this.navigationSubscription.unsubscribe();
+    }
   }
 }
