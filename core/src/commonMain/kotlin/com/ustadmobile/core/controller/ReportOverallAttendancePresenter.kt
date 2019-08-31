@@ -161,7 +161,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
 
 
     fun dataToXLSX(title: String, xlsxReportPath: String, workingDir: String,
-                   tableTextData: List<Array<String>>) {
+                   tableTextData: List<Array<String?>>) {
 
         try {
             ZipUtil.createEmptyZipFile(xlsxReportPath)

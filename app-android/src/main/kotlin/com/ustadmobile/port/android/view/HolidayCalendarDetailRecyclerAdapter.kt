@@ -15,7 +15,7 @@ import com.ustadmobile.core.controller.HolidayCalendarDetailPresenter
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.DateRange
 
-class HolidayCalendarDetailRecyclerAdapter protected constructor(
+class HolidayCalendarDetailRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<DateRange>,
         internal var mPresenter: HolidayCalendarDetailPresenter,
         internal var theActivity: Activity,

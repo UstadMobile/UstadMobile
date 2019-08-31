@@ -16,7 +16,7 @@ interface RoleAssignmentDetailView : UstadView {
 
     fun setRolePresets(presets: Array<String>, position: Int)
 
-    fun setScopePresets(presets: Array<String>, position: Int)
+    fun setScopePresets(presets: Array<String?>, position: Int)
 
     fun setAssigneePresets(presets: Array<String>, position: Int)
 

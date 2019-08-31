@@ -16,7 +16,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SELQuestionSetsPresenter
 import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions
 
-class SELQuestionSetListRecyclerAdapter protected constructor(
+class SELQuestionSetListRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<SELQuestionSetWithNumQuestions>,
         internal var mPresenter: SELQuestionSetsPresenter,
         internal var theContext: Context)

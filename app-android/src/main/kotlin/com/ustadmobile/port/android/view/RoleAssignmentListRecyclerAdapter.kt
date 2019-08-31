@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
 import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Person
 
-class RoleAssignmentListRecyclerAdapter protected constructor(
+class RoleAssignmentListRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<EntityRoleWithGroupName>,
         internal var mPresenter: RoleAssignmentListPresenter,
         internal var theActivity: Activity,

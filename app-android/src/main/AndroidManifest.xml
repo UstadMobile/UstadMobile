@@ -187,9 +187,6 @@
         <activity android:name="com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
-        <activity android:name="com.ustadmobile.port.android.view.DummyActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
         <activity android:name="com.ustadmobile.port.android.view.BulkUploadMasterActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 

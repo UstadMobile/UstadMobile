@@ -24,7 +24,7 @@ interface ReportAtRiskStudentsView : UstadView {
      */
     fun updateTables(dataMaps: LinkedHashMap<String, List<PersonWithEnrollment>>)
 
-    fun setTableTextData(tableTextData: List<Array<String>>)
+    fun setTableTextData(tableTextData: MutableList<Array<String>>)
 
     /**
      * Sets report provider to view.

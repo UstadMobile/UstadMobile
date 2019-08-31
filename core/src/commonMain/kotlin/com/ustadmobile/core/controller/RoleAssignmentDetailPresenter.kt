@@ -54,7 +54,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
     private var assigneePresets: Array<String>? = null
     private var groupPresets: Array<String>? = null
     private var rolePresets: Array<String>? = null
-    private var scopePresets: Array<String>? = null
+    private var scopePresets: Array<String?>? = null
 
     init {
 
@@ -228,7 +228,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         view.setRolePresets(rolePresets!!, selectedPosition)
     }
 
-    fun setScopePresets(scopePresets: Array<String>) {
+    fun setScopePresets(scopePresets: Array<String?>) {
         this.scopePresets = scopePresets
     }
 

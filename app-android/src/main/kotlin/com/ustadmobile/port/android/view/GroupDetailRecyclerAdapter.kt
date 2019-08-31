@@ -21,7 +21,7 @@ import com.ustadmobile.core.controller.GroupDetailPresenter
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import java.io.File
 
-class GroupDetailRecyclerAdapter protected constructor(
+class GroupDetailRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>,
         internal var mPresenter: GroupDetailPresenter,
         internal var theActivity: Activity,

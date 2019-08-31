@@ -46,7 +46,7 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
     internal var repository: UmAppDatabase
 
     fun dataToXLSX(title: String, xlsxReportPath: String, workingDir: String,
-                   tableTextData: List<Array<String>>) {
+                   tableTextData: List<Array<String?>>) {
 
         try {
             ZipUtil.createEmptyZipFile(xlsxReportPath)

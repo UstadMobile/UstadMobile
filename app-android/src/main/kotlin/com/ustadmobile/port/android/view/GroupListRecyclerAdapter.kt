@@ -16,7 +16,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.GroupListPresenter
 import com.ustadmobile.lib.db.entities.GroupWithMemberCount
 
-class GroupListRecyclerAdapter protected constructor(
+class GroupListRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<GroupWithMemberCount>,
         internal var mPresenter: GroupListPresenter,
         internal var theActivity: Activity,
