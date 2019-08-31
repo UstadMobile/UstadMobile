@@ -1,6 +1,6 @@
 import { browser, element, by } from 'protractor';
 
-export const sleepTime = 0;
+export const sleepTime = 500;
 
 export class HomePage {
 
