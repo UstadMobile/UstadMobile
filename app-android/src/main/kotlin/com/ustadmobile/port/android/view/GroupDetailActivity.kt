@@ -111,9 +111,10 @@ class GroupDetailActivity : UstadBaseActivity(), GroupDetailView {
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
                     Observer<PagedList<PersonWithEnrollment>> { recyclerAdapter.submitList(it) })
+            //set the adapter
+            mRecyclerView!!.adapter = recyclerAdapter
         }
-        //set the adapter
-        mRecyclerView!!.adapter = recyclerAdapter
+
     }
 
     override fun updateGroupOnView(group: PersonGroup) {

@@ -64,9 +64,11 @@ class AddCustomFieldOptionDialogPresenter(context: Any, arguments:Map<String, St
     }
 
     private fun initFromOption(option: CustomFieldValueOption?) {
-        if (option != null) {
+        if (option != null ) {
             currentOption = option
-            view.setOptionValue(option.customFieldValueOptionName!!)
+            if(option.customFieldValueOptionName != null) {
+                view.setOptionValue(option.customFieldValueOptionName!!)
+            }
         }
     }
 
@@ -76,7 +78,9 @@ class AddCustomFieldOptionDialogPresenter(context: Any, arguments:Map<String, St
 
     fun handleClickOk() {
 
-        currentOption!!.customFieldValueOptionName = optionValue
+        if(optionValue!=null) {
+            currentOption!!.customFieldValueOptionName = optionValue
+        }
         currentOption!!.customFieldValueOptionFieldUid = customfieldUid
         currentOption!!.customFieldValueOptionActive = true
 

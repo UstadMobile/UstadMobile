@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDA
 import com.ustadmobile.lib.db.entities.DateRange
 import com.ustadmobile.lib.db.entities.UMCalendar
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -73,7 +74,9 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
         //Get person live data and observe
         val calendarLiveData = umCalendarDao.findByUidLive(currentCalendarUid)
         //Observe the live data
-        calendarLiveData.observe(this, this::handleCalendarValueChanged)
+        view.runOnUiThread(Runnable {
+            calendarLiveData.observe(this, this::handleCalendarValueChanged)
+        })
 
         GlobalScope.launch {
             val result = umCalendarDao.findByUidAsync(currentCalendarUid)

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -37,7 +38,7 @@ class CustomFieldListRecyclerAdapter(
 
         val title = holder.itemView.findViewById<TextView>(R.id.item_title_with_desc_and_dots_title)
         val desc = holder.itemView.findViewById<TextView>(R.id.item_title_with_desc_and_dots_desc)
-        val menu = holder.itemView.findViewById<TextView>(R.id.item_title_with_desc_and_dots_dots)
+        val menu = holder.itemView.findViewById<AppCompatImageView>(R.id.item_title_with_desc_and_dots_dots)
 
         val impl = UstadMobileSystemImpl.instance
         assert(entity != null)

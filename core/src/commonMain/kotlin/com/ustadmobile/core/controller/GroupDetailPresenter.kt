@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -69,7 +70,9 @@ class GroupDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
         this.currentGroupUid = groupUid
 
         val groupUmLiveData = groupDao.findByUidLive(currentGroupUid)
-        groupUmLiveData.observe(this, this::handleGroupChanged)
+        view.runOnUiThread(Runnable {
+            groupUmLiveData.observe(this, this::handleGroupChanged)
+        })
 
         GlobalScope.launch {
             val result = groupDao.findByUidAsync(groupUid)

@@ -61,7 +61,7 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
                 var c = 0
                 for (i in tableTextDatum.indices) {
                     val value = tableTextDatum[i]
-                    reportSheet.addValueToSheet(r, c, value)
+                    reportSheet.addValueToSheet(r, c, value!!)
                     c++
                 }
                 r++

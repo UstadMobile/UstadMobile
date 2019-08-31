@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.LocationDetailView.Companion.LOCATIONS_SET
 import com.ustadmobile.core.view.LocationDetailView.Companion.LOCATION_UID
 import com.ustadmobile.lib.db.entities.Location
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -77,7 +78,9 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         this.currentLocationUid = locationUid
 
         val locationUmLiveData = locationDao.findByUidLive(currentLocationUid)
-        locationUmLiveData.observe(this, this::handleLocationChanged)
+        view.runOnUiThread(Runnable {
+            locationUmLiveData.observe(this, this::handleLocationChanged)
+        })
 
         GlobalScope.launch {
             val result = locationDao.findByUidAsync(locationUid)

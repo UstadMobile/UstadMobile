@@ -125,7 +125,7 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         groupSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.updateGroup(position)
             }
 
@@ -133,7 +133,7 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
         }
 
         roleSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.updateRole(position)
             }
 
@@ -141,7 +141,7 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
         }
 
         scopeSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.updateScope(position)
             }
 
@@ -149,7 +149,7 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
         }
 
         assigneeSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.updateAssignee(position)
             }
 
@@ -167,13 +167,14 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
     override fun updateRoleAssignmentOnView(entityRoleWithGroupName: EntityRole,
                                             groupSelected: Int, roleSelected: Int) {
 
-        //Set group
-        setGroupSelected(groupSelected)
-        //Set role
-        setRoleSelected(roleSelected)
-        //Set Scope presets and scope and continue to set assignees
-        setScopeAndAssigneeSelected(entityRoleWithGroupName.erTableId)
-
+        runOnUiThread(Runnable {
+            //Set group
+            setGroupSelected(groupSelected)
+            //Set role
+            setRoleSelected(roleSelected)
+            //Set Scope presets and scope and continue to set assignees
+            setScopeAndAssigneeSelected(entityRoleWithGroupName.erTableId)
+        })
     }
 
     override fun updateScopeList(tableId: Int) {

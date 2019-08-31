@@ -63,7 +63,6 @@ class GroupListRecyclerAdapter(
         menu.setOnClickListener{ v: View ->
             //creating a popup menu
             val popup = PopupMenu(theActivity.applicationContext, v)
-
             popup.setOnMenuItemClickListener { item ->
                 val i = item.itemId
                 if (i == R.id.edit) {

@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.RoleAssignmentDetailView.Companion.ENTITYROLE_U
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -86,11 +87,15 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         if (individual) {
             //Update group
             groupUmLiveData = groupDao.findAllActivePersonPersonGroupLive()
-            groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+            view.runOnUiThread(Runnable {
+                groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+            })
         } else {
             //Update group
             groupUmLiveData = groupDao.findAllActiveGroupPersonGroupsLive()
-            groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+            view.runOnUiThread(Runnable {
+                groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+            })
         }
     }
 
@@ -135,7 +140,9 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
 
         val entityRoleLiveData = entityRoleDao.findByUidLive(currentEntityRoleUid)
         var thisP = this
-        entityRoleLiveData.observe(this, this::handleEntityRoleChanged)
+        view.runOnUiThread(Runnable {
+            entityRoleLiveData.observe(this, this::handleEntityRoleChanged)
+        })
 
         GlobalScope.launch {
             val result = entityRoleDao.findByUidAsync(uid)
@@ -143,7 +150,10 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
 
             //Update roles
             roleUmLiveData = roleDao.findAllActiveRolesLive()
-            roleUmLiveData!!.observe(thisP, thisP::handleAllRolesChanged)
+
+            view.runOnUiThread(Runnable {
+                roleUmLiveData!!.observe(thisP, thisP::handleAllRolesChanged)
+            })
 
             val groupUid = updatedEntityRole!!.erGroupUid
             val result2 = groupDao.findByUidAsync(groupUid)

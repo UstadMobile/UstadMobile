@@ -39,7 +39,7 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     @Query("SELECT MAX(questionIndex) FROM SelQuestion")
     abstract suspend fun getMaxIndexAsync() : Int
 
-    @Query("SELECT MAX(questionIndex) FROM SelQuestion WHERE " +
+    @Query("SELECT coalesce(MAX(questionIndex), 0) FROM SelQuestion WHERE " +
             "selQuestionSelQuestionSetUid = :questionSetUid " +
             " AND questionActive = 1")
     abstract suspend fun getMaxIndexByQuestionSetAsync(questionSetUid: Long): Int

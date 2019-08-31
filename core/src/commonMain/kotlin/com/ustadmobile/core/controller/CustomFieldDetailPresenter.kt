@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -58,7 +59,9 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
 
     fun initFromCustomField(uid: Long) {
         val currentFieldLive = customFieldDao.findByUidLive(uid)
-        currentFieldLive.observe(this, this::handleCustomFieldChanged)
+        view.runOnUiThread(Runnable {
+            currentFieldLive.observe(this, this::handleCustomFieldChanged)
+        })
         GlobalScope.launch {
             val result = customFieldDao.findByUidAsync(uid)
             updatedField = result

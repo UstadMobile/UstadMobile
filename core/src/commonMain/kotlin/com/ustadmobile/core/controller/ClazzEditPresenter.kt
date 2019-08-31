@@ -157,16 +157,21 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     }
 
     private fun initFromClazz(clazzUid: Long) {
-
+        var thisP = this
         this.currentClazzUid = clazzUid
-        //Handle Clazz info changed:
+
         //Get person live data and observe
         val clazzLiveData = clazzDao.findByUidLive(currentClazzUid)
         //Observe the live data
-        clazzLiveData.observe(this, this::handleClazzValueChanged)
+        view.runOnUiThread(Runnable {
+            clazzLiveData.observe(thisP, thisP::handleClazzValueChanged)
+        })
 
-        var thisP = this
+
+
         GlobalScope.launch {
+
+
             val result = clazzDao.findByUidAsync(currentClazzUid)
 
             mUpdatedClazz = result
@@ -175,12 +180,16 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
             //Holidays
             holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
-            holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
+            view.runOnUiThread(Runnable {
+                holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
+            })
 
 
             //Locations
             locationsLiveData = repository.locationDao.findAllActiveLocationsLive()
-            locationsLiveData!!.observe(thisP, thisP::handleAllLocationsChanged)
+            view.runOnUiThread(Runnable {
+                locationsLiveData!!.observe(thisP, thisP::handleAllLocationsChanged)
+            })
 
             getAllClazzCustomFields()
 

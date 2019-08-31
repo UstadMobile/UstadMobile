@@ -79,7 +79,7 @@ class PeopleListFragment : UstadBaseFragment(), PeopleListView {
         fab!!.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
         sortSpinner!! .onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.handleChangeSortOrder(position)
             }
 

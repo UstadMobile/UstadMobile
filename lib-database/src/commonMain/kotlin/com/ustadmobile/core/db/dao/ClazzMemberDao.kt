@@ -442,7 +442,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByNameDesc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
-    @Query("SELECT AVG(clazzMemberAttendancePercentage) FROM ClazzMember " +
+    @Query("SELECT coalesce(AVG(clazzMemberAttendancePercentage),0) FROM ClazzMember " +
             " WHERE clazzMemberPersonUid = :personUid")
     abstract suspend fun getAverageAttendancePercentageByPersonUidAsync(personUid: Long): Float
 

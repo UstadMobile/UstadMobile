@@ -84,7 +84,7 @@ class ClazzListFragment : UstadBaseFragment(), ClazzListView {
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         sortSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.handleChangeSortOrder(id)
             }
 

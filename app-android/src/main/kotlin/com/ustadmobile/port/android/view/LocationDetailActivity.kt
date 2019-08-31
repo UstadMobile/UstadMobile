@@ -144,7 +144,7 @@ class LocationDetailActivity : UstadBaseActivity(), LocationDetailView {
 
         //Init adapter with the location node binder as types of data to accept
         adapter = TreeViewAdapterWithBind(nodes,
-                Arrays.asList(LocationNodeBinder(mPresenter)))
+                Arrays.asList(LocationNodeBinder(mPresenter!!)))
 
         //Set adapter to Recycler view.
         runOnUiThread { mRecyclerView!!.setAdapter(adapter) }

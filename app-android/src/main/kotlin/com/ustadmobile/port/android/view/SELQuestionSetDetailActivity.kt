@@ -80,7 +80,9 @@ class SELQuestionSetDetailActivity : UstadBaseActivity(), SELQuestionSetDetailVi
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SelQuestion>> { recyclerAdapter.submitList(it) })
+        runOnUiThread(Runnable {
+            data.observe(this, Observer<PagedList<SelQuestion>> { recyclerAdapter.submitList(it) })
+        })
 
         //set the adapter
         mRecyclerView!!.adapter = recyclerAdapter

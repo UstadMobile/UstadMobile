@@ -44,6 +44,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.util.*
+import kotlin.math.roundToInt
 
 /**
  * ClazzLogListFragment Android fragment extends UstadBaseFragment
@@ -216,7 +217,8 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
                 ATTENDANCE_BAR_LABEL_DESC)
         dataSetBar1.setValueTextColor(Color.GRAY)
         dataSetBar1.setDrawValues(true)
-        dataSetBar1.setValueFormatter { value, entry, dataSetIndex, viewPortHandler -> "" + value as Int + "%" }
+        dataSetBar1.setValueFormatter { value, entry, dataSetIndex, viewPortHandler -> "" +
+                value.roundToInt() + "%" }
 
         val colors = intArrayOf(
                 ContextCompat.getColor(context!!, R.color.traffic_green),

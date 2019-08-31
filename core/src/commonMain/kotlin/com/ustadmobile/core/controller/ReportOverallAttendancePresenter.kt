@@ -175,7 +175,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
                 var c = 0
                 for (i in tableTextDatum.indices) {
                     val value = tableTextDatum[i]
-                    reportSheet.addValueToSheet(r, c, value)
+                    reportSheet.addValueToSheet(r, c, value!!)
                     c++
                 }
                 r++

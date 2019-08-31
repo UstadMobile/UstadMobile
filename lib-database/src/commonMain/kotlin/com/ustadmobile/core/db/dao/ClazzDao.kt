@@ -112,7 +112,6 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun findAllClazzesInLocationListAsync(locations: List<Long>) :
             List<ClazzWithNumStudents>
 
-
     @Query("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND isClazzActive = 1")
     abstract suspend fun findClazzesByUidListAsync(clazzUidList: List<Long>): List<Clazz>
 
@@ -257,26 +256,15 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract fun findClazzAttendancePercentageWithoutLatestClazzLog(clazzUid: Long): Float
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
-    @Query("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
-            " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")
+    @Query("SELECT EXISTS (SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" +
+            ENTITY_LEVEL_PERMISSION_CONDITION1 +
+            " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + "))")
     abstract suspend fun personHasPermission(accountPersonUid: Long, clazzUid: Long,
                                              permission: Long) : Boolean
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
     abstract suspend fun personHasPermission(accountPersonUid: Long, permission: Long): Boolean
-
-//    @Query("SELECT COUNT(*) FROM Clazz " +
-//            "WHERE " +
-//            "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
-//            "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
-//            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can updateState it
-//            ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
-//            " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 +
-//            Role.PERMISSION_CLAZZ_INSERT + //can insert on table
-//
-//            TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
-//    abstract fun countPendingLocalChanges(accountPersonUid: Long): Int
 
     @Query("SELECT Clazz.*," +
             "Location.timeZone " +

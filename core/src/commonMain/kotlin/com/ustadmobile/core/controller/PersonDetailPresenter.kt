@@ -159,7 +159,9 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 //Get person live data and observe
                 mPerson = personDao.findByUidLive(personUid)
 
-                mPerson!!.observe(thisP, thisP::handlePersonDataChanged)
+                view.runOnUiThread(Runnable {
+                    mPerson!!.observe(thisP, thisP::handlePersonDataChanged)
+                })
 
             }
         }

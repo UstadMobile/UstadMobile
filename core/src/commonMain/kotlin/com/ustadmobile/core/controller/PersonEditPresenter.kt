@@ -228,7 +228,9 @@ class PersonEditPresenter
             //Get person live data and observe
             personLiveData = personDao.findByUidLive(personUid)
             //Observe the live data
-            personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
+            view.runOnUiThread(Runnable {
+                personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
+            })
 
         }
 

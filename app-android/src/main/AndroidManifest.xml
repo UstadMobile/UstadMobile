@@ -283,7 +283,8 @@
         <activity android:name="com.ustadmobile.port.android.view.CustomFieldDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
-        <activity android:name="com.ustadmobile.port.android.view.AddCustomFieldOptionDialogFragment"
+        <activity
+            android:name="com.ustadmobile.port.android.view.AddCustomFieldOptionDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity android:name="com.ustadmobile.port.android.view.RecordDropoutDialogFragment"

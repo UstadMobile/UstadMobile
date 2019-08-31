@@ -285,7 +285,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     fieldEditText.hint = label
                 }
                 if (thisValue != null) {
-                    fieldEditText.setText(thisValue.toString())
+                    if(thisValue != null) {
+                        fieldEditText.setText(thisValue.toString())
+                    }
                 }
                 if (fieldType == FIELD_TYPE_PHONE_NUMBER) {
                     fieldEditText.inputType = InputType.TYPE_CLASS_PHONE
@@ -343,7 +345,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                         }
 
                         override fun afterTextChanged(s: Editable) {
-                            mPresenter!!.handleFieldEdited(fieldUid, s.toString())
+                            if(s!=null) {
+                                mPresenter!!.handleFieldEdited(fieldUid, s.toString())
+                            }
                         }
                     })
                 }
@@ -416,7 +420,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 //Text custom field
                 type = CustomField.FIELD_TYPE_TEXT
                 val til = field as TextInputLayout
-                valueObject = til.getEditText()!!.getText().toString()
+                if(til!=null && til.editText!!.text!=null) {
+                    valueObject = til.editText!!.text.toString()
+                }
 
             } else if (field is LinearLayout) {
                 type = CustomField.FIELD_TYPE_DROPDOWN

@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.RoleDetailView
 import com.ustadmobile.core.view.RoleListView.Companion.ROLE_UID
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -19,7 +20,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
     internal var repository: UmAppDatabase
     private var currentRoleUid: Long = 0
-    private lateinit var currentRole: Role
+    private var currentRole: Role? = null
     private var updatedRole: Role? = null
     internal var roleDao: RoleDao
 
@@ -41,10 +42,10 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         if (currentRoleUid == 0L) {
             currentRole = Role()
-            currentRole.roleName = ""
-            currentRole.roleActive = false
+            currentRole!!.roleName = ""
+            currentRole!!.roleActive = false
             GlobalScope.launch {
-                val result = roleDao.insertAsync(currentRole)
+                val result = roleDao.insertAsync(currentRole!!)
                 initFromRole(result)
             }
         } else {
@@ -71,7 +72,9 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
 
         val roleUmLiveData = roleDao.findByUidLive(currentRoleUid)
         //Observe the live data
-        roleUmLiveData.observe(this, this::handleRoleChanged)
+        view.runOnUiThread(Runnable {
+            roleUmLiveData.observe(this, this::handleRoleChanged)
+        })
 
         GlobalScope.launch {
             val result = roleDao.findByUidAsync(roleUid)

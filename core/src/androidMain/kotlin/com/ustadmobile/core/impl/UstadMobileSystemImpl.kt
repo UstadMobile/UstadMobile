@@ -108,8 +108,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             //IRC:
             BasePointView2.VIEW_NAME to Class.forName("${ PACKAGE_NAME}BasePointActivity2"),
             Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
-            BasePointView2.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity2"),
-            BasePointView.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity"),
             ClassDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzDetailActivity"),
             ClassLogDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzLogDetailActivity"),
             PersonDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonDetailActivity"),
@@ -135,7 +133,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportOverallAttendanceView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportOverallAttendanceActivity"),
             ReportNumberOfDaysClassesOpenView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity"),
             ReportAttendanceGroupedByThresholdsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity"),
-            DummyView.VIEW_NAME to Class.forName("${PACKAGE_NAME}DummyActivity"),
             BulkUploadMasterView.VIEW_NAME to Class.forName("${PACKAGE_NAME}BulkUploadMasterActivity"),
             SettingsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SettingsActivity"),
             SELQuestionSetsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SELQuestionSetsActivity"),
