@@ -7,8 +7,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.GsonBuilder
@@ -27,6 +26,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.not
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -71,12 +72,13 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         val intent = Intent()
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText("hello"), ViewActions.closeSoftKeyboard())
 
-        onView(withId(R.id.textinput_error)).check(matches(withText(UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))))
-
+        val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
+        Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
     }
 
     @Test
@@ -89,12 +91,15 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         val intent = Intent()
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
+
 
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(mockWebServer.url("/noh5p").toString()), ViewActions.closeSoftKeyboard())
 
-        onView(withId(R.id.textinput_error)).check(matches(withText(UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))))
+        val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
+        Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
 
     }
 
@@ -102,7 +107,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
     fun givenUserTypesH5PUrl_thenShowNoErrorShouldAppear() {
 
 
-        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
         mockWebServer.start()
 
         val intent = Intent()
@@ -124,7 +129,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
     @Test
     fun givenClicksOnDone() {
 
-        mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
@@ -176,6 +181,65 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
             delay(500)
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
         }
+    }
+
+    @Test
+    fun givenUserTypesVideoLink_thenShowVideoTitle() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.start()
+
+        val intent = Intent()
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        mActivityRule.launchActivity(intent)
+
+        var urlString = mockWebServer.url("/videohere").toString()
+
+        onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
+
+        Thread.sleep(500)
+
+        onView(withId(R.id.entry_import_link_titleInput)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.import_link_done)).check(matches(not(isEnabled())))
+
+        onView(withId(R.id.entry_import_link_title_editText)).perform(replaceText("Video Title"), ViewActions.closeSoftKeyboard())
+
+        onView(withId(R.id.import_link_done)).check(matches(isEnabled()))
+
+    }
+
+    @Test
+    fun givenUserTypesVideoLink_whenFileSizeTooBig_showError() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 104857600).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.start()
+
+        val intent = Intent()
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
+
+        var urlString = mockWebServer.url("/videohere").toString()
+
+        onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
+
+        Thread.sleep(500)
+
+        onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.import_link_done)).check(matches(not(isEnabled())))
+
+        val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
+        Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+
+
     }
 
 
