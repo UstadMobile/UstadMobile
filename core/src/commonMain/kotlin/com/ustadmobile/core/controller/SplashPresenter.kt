@@ -20,15 +20,8 @@ class SplashPresenter(context: Any, arguments: Map<String, String?>, view: Splas
         val animateIcon = impl.getAppConfigString(AppConfig.KEY_ANIMATE_ORGANISATION_ICON,
                 "false", context)!!.toBoolean()
 
-        val preloadLibs = impl.getAppConfigString(AppConfig.KEY_PRELOAD_LIBRARIES,
-                "false", context)!!.toBoolean()
-
         val delay = showSplash || !launched
         view.animateOrganisationIcon(animateIcon, delay)
-
-        if(!launched && preloadLibs){
-            view.preloadData()
-        }
 
         view.startUi(delay, animateIcon)
     }

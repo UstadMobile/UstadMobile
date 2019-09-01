@@ -41,14 +41,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SplashPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SplashView
-import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
 import java.util.concurrent.TimeUnit
 
 
@@ -86,13 +83,6 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
         Handler().postDelayed({
             UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
         }, if(delay) TimeUnit.SECONDS.toMillis(if(animate) 3 else 2) else 0)
-    }
-
-    override fun preloadData() {
-//        val dbWork = OneTimeWorkRequest.Builder(
-//                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
-//                .build()
-//        WorkManager.getInstance().enqueue(dbWork)
     }
 
     override fun animateOrganisationIcon(animate: Boolean, delay: Boolean) {
