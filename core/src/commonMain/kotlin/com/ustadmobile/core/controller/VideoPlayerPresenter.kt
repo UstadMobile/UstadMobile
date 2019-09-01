@@ -42,6 +42,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         super.onCreate(savedState)
         val containerEntryDao = db.containerEntryDao
         val containerDao = db.containerDao
+        contentEntryDao = db.contentEntryDao
 
         navigation = arguments[ARG_REFERRER] ?: ""
         val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
