@@ -82,8 +82,8 @@ class XapiReportDetailAdapter(var context: Context) :
             holder.person.text = data.name
             holder.verb.text = data.verb
             holder.result.text = when (data.result) {
-                StatementEntity.RESULT_SUCCESS -> "Success"
-                StatementEntity.RESULT_FAILURE -> "Failed"
+                StatementEntity.RESULT_SUCCESS -> context.getString(R.string.success)
+                StatementEntity.RESULT_FAILURE -> context.getString(R.string.failed)
                 else -> "-"
             }
             holder.whenDate.text = df.format(Date(data.whenDate))

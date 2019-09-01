@@ -64,6 +64,8 @@
     <string name='regcode'>کد</string>
     <string name='home'>کور پاڼه</string>
     <string name='add'>زیاتول</string>
+    <string name='failed'>Failed</string>
+    <string name='success'>Success</string>
 
     <string name='enter_phone_num'>په مهربانۍ سره د ټېلفون شمېره ننباسئ</string>
     <string name='enter_name'>په مهربانۍ سره نوم ننباسئ</string>

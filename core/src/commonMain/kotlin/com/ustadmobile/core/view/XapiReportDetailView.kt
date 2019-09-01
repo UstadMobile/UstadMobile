@@ -17,9 +17,9 @@ interface XapiReportDetailView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "ReportPreviewView"
+        const val VIEW_NAME = "ReportPreview"
 
-        const val ARG_REPORT_OPTIONS = "xapireportOptions"
+        const val ARG_REPORT_OPTIONS = "options"
 
     }
 

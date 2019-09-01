@@ -110,6 +110,7 @@
     <string name='waiting'>در حال انتظار</string>
     <string name='queued'>در صف</string>
     <string name='failed'> ناموفق</string>
+    <string name='success'>Success</string>
 
 
     <string name='ok_got_it'>سمه ده، پوه شوم</string>
