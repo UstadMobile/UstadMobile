@@ -73,6 +73,7 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
                 if(nextMigration != null) {
                     nextMigration.migrate(doorDb.sqlDatabaseImpl)
                     currentDbVersion = nextMigration.endVersion
+                    doorDb.sqlDatabaseImpl.execSQL("UPDATE _doorwayinfo SET dbVersion = $currentDbVersion")
                 }else {
                     throw IllegalStateException("Need to migrate to version " +
                             "${doorDb.dbVersion} from $currentDbVersion - could not find next migration")

@@ -7,7 +7,7 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
@@ -58,16 +58,16 @@
     "ktor-ktor-http-cio": "file:../build/js/node_modules/ktor-ktor-http-cio/ktor-ktor-http-cio-1.2.2.tgz",
     "ktor-ktor-utils": "file:../build/js/node_modules/ktor-ktor-utils/ktor-ktor-utils-1.2.2.tgz",
     "napier": "file:../build/js/node_modules/napier/napier-0.0.6.tgz",
-    "ngx-infinite-scroll": "^6.0.0",
     "ngx-materialize": "^6.1.3",
     "ngx-progressbar": "^2.1.1",
+    "protractor-html-reporter-2": "^1.0.4",
     "rxjs": "~6.3.3",
     "rxjs-compat": "^6.5.2",
     "tslib": "^1.9.0",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.13.0",
+    "@angular-devkit/build-angular": "^0.13.9",
     "@angular/cli": "~7.3.9",
     "@angular/compiler-cli": "~7.2.0",
     "@angular/language-service": "~7.2.0",

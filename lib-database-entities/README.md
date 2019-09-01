@@ -1,14 +1,7 @@
 # lib-entities
 
-This module contains database entity POJO classes, annotated with
-annotations from lib-database-annotation. These are roughly analagous
-to entities used in the Room Persistence Framework.
-
-__Important__: for the moment entities must have both Um annotations and 
-the required Room annotations e.g. @UmEntity and @Entity. Boolean 
-properties in Kotlin use the get prefix instead of is. Converting 
-from Java to Kotlin might result in is being added to the fieldname
-itself.
+This module contains database entity POKO classes, with most annotations
+being the standard room annotations.
 
 Correct:
 ```
@@ -25,8 +18,7 @@ var isAvailable: Boolean
 **UID**: camel case, entity name, followed by Uid
 e.g. in ClazzMember.kt
 ```
-@UmPrimaryKey
-@PrimaryKey
+@PrimaryKey(autoGenerate = true)
 var clazzMemberUid: Long
 ```
 
@@ -39,14 +31,36 @@ Eg. in ClazzMember.kt:
 var clazzMemberPersonUid: Long
 ```
 
-### Primary Constructor 
+### Field nullability
+Numerical and boolean types must be __non-nullable__ (e.g. as per Java 
+primitive types). Strings must be __nullable__.
 
-primary constructor needs to be implemted on all entities 
+### Constructors 
 
+The Kotlin primary constructor needs to be present on all entities. The
+constructor must be usable with no arguments (e.g. no arguments or
+a primary constructor where all parameters have default values).  Failure
+to add a Kotlin primary constructor will cause a strange exception when
+the Android Room annotation processor runs.
+
+Works:
 ```
-class TestEntity(){
+class TestEntity(var name: String? = null)
+```
 
+Works:
+```
+class TestEntity() {
+    var name: String? = null
 }
+```
 
-constructor() does not work 
+
+Does not work (has empty constructor, but is missing Kotlin primary constructor):
+```
+class TestEntity{
+
+constructor() 
+
+} 
 ```

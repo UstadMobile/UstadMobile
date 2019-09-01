@@ -5,6 +5,7 @@ import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import core from 'UstadMobile-core';
+import util from 'UstadMobile-lib-util';
 
 @Component({
   selector: 'app-report-dashboard',
@@ -26,7 +27,7 @@ export class ReportDashboardComponent extends UmBaseComponent implements
    ];
    columnNames = ['Year', 'Asia','Europe'];
    options = {};
-   width = 450;
+   width = 400;
    height = 400;
 
    modalOptions: Materialize.ModalOptions = {
@@ -37,6 +38,8 @@ export class ReportDashboardComponent extends UmBaseComponent implements
     startingTop: '100%',
     endingTop: '10%'
   };
+
+  graphList = []
 
   presenter: core.com.ustadmobile.core.controller.XapiReportOptionsPresenter;
   private navigationSubscription;
@@ -55,7 +58,7 @@ export class ReportDashboardComponent extends UmBaseComponent implements
     private onCreate(){
       if(this.umDatabase.xObjectDao){
         this.presenter = new core.com.ustadmobile.core.controller.XapiReportOptionsPresenter(
-          this.context, UmAngularUtil.queryParamsToMap(), this.umDatabase.personDao,
+          this.context, UmAngularUtil.queryParamsToMap(),this, this.umDatabase.personDao,
           this.umDatabase.xObjectDao, this.umDatabase.xLangMapEntryDao);
         this.presenter.onCreate(null);
       }
@@ -81,36 +84,64 @@ export class ReportDashboardComponent extends UmBaseComponent implements
     onViewMore(reportId){
       const args = UmAngularUtil.queryParamsToMap("?reportId=" + reportId)
       this.systemImpl.go("/ReportDetails", args, this.context, 0)
-      console.log(args)
     }
 
-    fillVisualChartType(translatedGraphList){}
+    fillVisualChartType(translatedGraphList){
+      this.graphList = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(translatedGraphList)
+      console.log(this.graphList)
+    }
     
-    fillYAxisData(translatedYAxisList){}
+    fillYAxisData(translatedYAxisList){
+      console.log("translatedYAxisList",translatedYAxisList)
+    }
 
-    fillXAxisAndSubGroupData(translatedXAxisList){}
+    fillXAxisAndSubGroupData(translatedXAxisList){
+      console.log("translatedXAxisList",translatedXAxisList)
+    }
 
-    updateWhoDataAdapter(whoList){}
+    updateWhoDataAdapter(whoList){
+      console.log("whoList",whoList)
+    }
 
-    updateDidDataAdapter(didList){}
+    updateDidDataAdapter(didList){
+      console.log("didList",didList)
+    }
 
-    updateFromDialogText(fromDate){}
+    updateFromDialogText(fromDate){
+      console.log("fromDate",fromDate)
+    }
 
-    updateToDialogText(toDate){}
+    updateToDialogText(toDate){
+      console.log("toDate",toDate)
+    }
 
-    updateWhenRangeText(rangeText){}
+    updateWhenRangeText(rangeText){
+      console.log("rangeText",rangeText)
+    }
 
-    updateChartTypeSelected(indexChart){}
+    updateChartTypeSelected(indexChart){
+      console.log("indexChart",indexChart)
+    }
 
-    updateYAxisTypeSelected(indexYAxis){}
+    updateYAxisTypeSelected(indexYAxis){
+      console.log("indexYAxis",indexYAxis)
+    }
 
-    updateXAxisTypeSelected(indexXAxis){}
+    updateXAxisTypeSelected(indexXAxis){
+      console.log("indexXAxis",indexXAxis)
+    }
 
-    updateSubgroupTypeSelected(indexSubgroup){}
+    updateSubgroupTypeSelected(indexSubgroup){
+      console.log("indexesSub",indexSubgroup)
+    }
 
-    updateWhoListSelected(personList){}
+    updateWhoListSelected(personList){
+      console.log("persons",personList)
+    }
 
-    updateDidListSelected(verbs){}
+    updateDidListSelected(verbs){
+      console.log("verbs", verbs)
+    }
 
     ngOnDestroy(){
       super.ngOnDestroy()

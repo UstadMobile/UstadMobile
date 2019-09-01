@@ -70,7 +70,7 @@
             <select mz-select
               [formControl]="umFormLanguage.controls['language']" 
               id="options-language">
-              <option *ngFor="let language of supportedLanguages" value="{{language.code}}">{{language.name}}</option>
+              <option *ngFor="let language of supportedLanguages" value="{{language.key}}">{{language.value}}</option>
             </select>
           </mz-select-container>
     </form>

@@ -35,7 +35,20 @@ const contentEntry = new entity.com.ustadmobile.lib.db.entities.ContentEntry();
 	ng serve  
 	```  
 This will create an app, to run it use http://localhost:4200/  
+
+## Testing  
+To execute end to end test with Protractor use:-
   
+```  
+./gradlew app-angular:ngTest -Ptestmodule=e2e  
+```
+To execute component tests with Karma use:-
+```  
+./gradlew app-angular:ngTest -Ptestmodule=<component name>  
+
+i.e
+./gradlew app-angular:ngTest -Ptestmodule=home
+```
 ## Deployment  
 To create production app, you need to generate JS bundles from angular source. To achieve that run the following command on your terminal.  
   
