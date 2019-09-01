@@ -58,6 +58,8 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         serverDb = UmAppDatabase.getInstance(context, "serverdb")
         defaultDb = UmAppDatabase.getInstance(context)
 
+
+
         repo = defaultDb //db!!.getRepository("http://localhost/dummy/", "")
         defaultDb.clearAllTables()
         serverDb.clearAllTables()
