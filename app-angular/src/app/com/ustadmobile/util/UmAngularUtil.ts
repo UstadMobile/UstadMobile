@@ -8,7 +8,12 @@ export const appRountes = {
   "login":"Login", "xapi":"XapiPackage", "video":"VideoPlayer", "web":"webChunk", 
   "container":"Container", "reportDashboard":"ReportDashboard",
   "reportOptions":"ReportOptions","notFound":"NotFound", "treeView":"EntriesTreeDialog",
-  "reportPreview":"ReportPreviewView"
+  "reportPreview":"ReportPreview"
+}
+
+export interface UmEvent extends Event{
+  key: string;
+  value: string;
 }
 
 export class UmAngularUtil {
@@ -74,27 +79,26 @@ export class UmAngularUtil {
     });
   }
 
-  static registerResourceReadyListener(component){
-    var ogSetItem = localStorage.setItem;
-    localStorage.setItem = function(key, value) {
-      var event = new Event('itemInserted');
-      document.dispatchEvent(event);
-      ogSetItem.apply(this, arguments);
-    };
-
+  static registerResourceReadyListener(component) {
+    var originalSetItem = localStorage.setItem;
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
-    this.localStorageHandler = function(event){
-      console.log(event.value)
-      switch(event.key){
-        case titleKey:
-          component.setToolbarTitle(event.value)
-        break;
-        case resourceKey:
-          component.onCreate()
-        break;
-      }
+    localStorage.setItem = function (key, value) {
+      const event = new Event('itemInserted');
+      (<any>event).key = key;
+      (<any>event).value = value; 
+      document.dispatchEvent(event);
+      originalSetItem.apply(this, arguments);
     };
+
+    this.localStorageHandler = event => {
+      if (event.key == titleKey) {
+        component.setToolbarTitle(event.value)
+      } else if (event.key == resourceKey) {
+        component.onCreate() 
+      } 
+    };
+
     document.addEventListener("itemInserted", this.localStorageHandler, false);
   }
 
@@ -104,6 +108,60 @@ export class UmAngularUtil {
 
   static fireResouceReady(ready: boolean){
     localStorage.setItem(this.DISPATCH_RESOURCE,ready+"")
+  }
+
+  static getGoogleChartFormattedData(dataList: any[], component): any{
+    const dataGroups = [];
+    const plotAgainst = []
+    const columnNames = ['Data']
+    dataList.forEach(data => {
+      if(dataGroups.indexOf(data.xAxis) == -1){
+        dataGroups.push(data.xAxis)
+      }
+
+      if(plotAgainst.indexOf(data.subgroup) == -1){
+        plotAgainst.push(data.subgroup)
+        const columnName = component.systemImpl.getString(data.subgroup, component.context)
+        columnNames.push(columnName)
+        
+      }
+    });
+    const graphData = [];
+    dataGroups.forEach(group => {
+      const column = [group]
+      this.getElementsFromObject(dataList,"xAxis",group).forEach(found => {
+        column.push(found.yAxis)
+      })
+      graphData.push(column)
+    })
+  
+    const columns = this.maxColumsNumber(graphData);
+    const formattedDataList = []
+    graphData.forEach(graph => {
+      const fill = this.getDataToFill(columns - graph.length);
+      formattedDataList.push(graph.concat(fill))
+    })
+    return {data: formattedDataList,columns: columnNames};
+  }
+
+  static getDataToFill(maxSize: number){
+    const fillData = []
+    if(maxSize != 0){
+      for(let i = 0; i < maxSize; i++){
+        fillData.push(0)
+      }
+    }
+    return fillData;
+  }
+
+  static maxColumsNumber(dataList: any[]){
+    let dataListLength = 0;
+    dataList.forEach(data => {
+      if(data.length > dataListLength){
+        dataListLength = data.length
+      }
+    })
+    return dataListLength
   }
 
   /**
@@ -191,6 +249,16 @@ export class UmAngularUtil {
       }
     });
     return foundElement;
+  }
+
+  static getElementsFromObject(object: any[], key: string, value: string){
+    var foundElements = []
+    object.forEach(element => {
+      if(element[key] == value){
+        foundElements.push(element)
+      }
+    });
+    return foundElements;
   }
 
   /**

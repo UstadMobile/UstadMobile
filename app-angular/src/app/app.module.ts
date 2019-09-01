@@ -15,7 +15,6 @@ import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.co
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
-import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
@@ -23,6 +22,8 @@ import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-o
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
 import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
 import { DatePipe } from '@angular/common';
+import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
+import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
 
 
 @NgModule({
@@ -38,7 +39,8 @@ import { DatePipe } from '@angular/common';
     ReportDashboardComponent,
     XapiReportOptionsComponent,
     XapiReportDetailsComponent,
-    XapiTreeviewDialogComponent
+    XapiTreeviewDialogComponent,
+    ActionResultDataPipe
   ],
   imports: [
     BrowserModule,
@@ -56,7 +58,7 @@ import { DatePipe } from '@angular/common';
     UmDbMockService,
     UmBaseService,
     DatePipe,
-    AuthGuard,
+    RouteGuardService,
     { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]

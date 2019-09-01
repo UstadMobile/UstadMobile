@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable, Subject} from 'rxjs';
 import { MzToastService } from 'ngx-materialize';
 import { map } from 'rxjs/operators';
+import { UmAngularUtil } from '../util/UmAngularUtil';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ export class UmBaseService {
   public appName: string  = "..." 
 
   constructor(private http: HttpClient, private toastService: MzToastService) {
+    UmAngularUtil.fireResouceReady(false); 
     this.loadAndSaveAppConfig();
   }
 

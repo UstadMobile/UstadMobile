@@ -7,11 +7,11 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-list/content-entry-list.component';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
-import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
 import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
+import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -27,9 +27,9 @@ const routes: Routes = [
           {path: "ReportDashboard", component: ReportDashboardComponent},
           {path: "ReportOptions", component: XapiReportOptionsComponent},
           {path: "EntriesTreeDialog",component: XapiTreeviewDialogComponent},
-          {path: "ReportPreviewView", component: XapiReportDetailsComponent} 
+          {path: "ReportPreview", component: XapiReportDetailsComponent} 
         ],
-        canActivate: [AuthGuard],
+        canActivate: [RouteGuardService],
         runGuardsAndResolvers: "always"
   },
   {path: "NotFound", component: NotFoundComponent}

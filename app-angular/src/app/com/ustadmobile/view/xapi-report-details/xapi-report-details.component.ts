@@ -13,26 +13,35 @@ import util from 'UstadMobile-lib-util';
   styleUrls: ['./xapi-report-details.component.css']
 })
 export class XapiReportDetailsComponent extends UmBaseComponent implements
-core.com.ustadmobile.core.view.XapiReportDetailView{
+core.com.ustadmobile.core.view.XapiReportDetailView {
 
   presenter: core.com.ustadmobile.core.controller.XapiReportDetailPresenter
   private navigationSubscription;
 
-   chartTitle:string = '';
-   chartType:string = '';
-   chartData: any[] = [];
-   columnNames: any[] = ['Year', 'Asia','Europe'];
-    options = {};
-    width = 900;
-    height = 550;  
+  chartTitle: string = '';
+  chartType: string = '';
+  chartData: any[] = [];
+  inMemoryChartData: any[] = []
+  columnNames: any[] = [];
+  inMemoryColumnNames: any[] = []
+  tableDataList = []
+  options = {
+    title: '',
+    colors: ["#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50"], 
+    vAxis: {
+      title: ''
+    }
+  };
+  width = 900;
+  height = 550;
 
 
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,umDb: UmDbMockService) {
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe( _ => {
-      this.subscription = UmAngularUtil.registerUmObserver(this)
-    });
+      .subscribe(_ => {
+        this.subscription = UmAngularUtil.registerUmObserver(this)
+      });
   }
 
   ngOnInit() {
@@ -40,44 +49,50 @@ core.com.ustadmobile.core.view.XapiReportDetailView{
     this.subscription = UmAngularUtil.registerUmObserver(this)
   }
 
-  onCreate(){
+  onCreate() {
     super.onCreate()
-    if(this.umDatabase.statementDao && this.umDatabase.xLangMapEntryDao){
+    if (this.umDatabase.statementDao && this.umDatabase.xLangMapEntryDao) {
       this.setToolbarTitle(this.getString(this.MessageID.activity_preview_xapi))
       const args = UmAngularUtil.queryParamsToMap(document.location.search, false)
-      this.chartType = JSON.parse(util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(args)[1].value).chartType == 100
-       ? 'LineChart':'ColumnChart'
+      this.chartType = JSON.parse(util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(args)[1].value).chartType == 100 ?
+        'ColumnChart' : 'LineChart'
       this.presenter = new core.com.ustadmobile.core.controller.XapiReportDetailPresenter(this.context,
-      args,this,this.systemImpl,this.umDatabase.statementDao,this.umDatabase.xLangMapEntryDao);
-     this.presenter.onCreate(null)
+        args, this, this.systemImpl, this.umDatabase.statementDao, this.umDatabase.xLangMapEntryDao);
+      this.presenter.onCreate(null)
     }
   }
-  
-  setChartData(chartData: any, options: any, xAxisLabels: any, subgroupLabels: any){
-    //console.log("labels",util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(options))
-    const dataList = [];
-    util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(chartData).forEach(chart => {
-      dataList.push([chart.xAxis,chart.yAxis, +chart.subgroup]) 
-    });
-    this.chartData = dataList
-  }
-  
-  setChartYAxisLabel(yAxisLabel: string){
-    //console.log("setClabelshat",yAxisLabel)
-  }
-  
-  setReportListData(listResults: any){
-    //console.log("list", listResults)
+
+  setChartData(chartData: any, options: any, xAxisLabels: any, subgroupLabels: any) {
+    const rawData = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(chartData)
+    const formattedData = UmAngularUtil.getGoogleChartFormattedData(rawData, this)
+    this.inMemoryChartData = formattedData.data
+    this.inMemoryColumnNames = formattedData.columns
+    this.protGraph()
   }
 
-  handleAddToDashboard(){
+  setChartYAxisLabel(yAxisLabel: string) {
+    this.options.vAxis.title = yAxisLabel
+  }
+
+  private protGraph() {
+    this.chartData = this.inMemoryChartData;
+    this.columnNames = this.inMemoryColumnNames;
+    this.inMemoryChartData = []
+    this.inMemoryColumnNames = []
+  }
+
+  setReportListData(listResults: any) {
+    this.tableDataList = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(listResults);
+  }
+
+  handleAddToDashboard() {
     //show dialog
     this.presenter.handleAddDashboardClicked("S")
   }
 
   ngOnDestroy() {
     super.ngOnDestroy()
-    if(this.presenter){
+    if (this.presenter) {
       this.presenter.onDestroy();
     }
     if (this.navigationSubscription) {

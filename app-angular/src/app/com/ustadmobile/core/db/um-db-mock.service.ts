@@ -43,21 +43,25 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
 export class StatementDao{
   getResults(any){
     const data = [
-      {yAxis:90, xAxis: "1", subgroup: "4"},
-      {yAxis:100, xAxis: "2", subgroup: "3"},
-      {yAxis:90, xAxis: "3", subgroup: "2"},
-      {yAxis:90, xAxis: "4", subgroup: "1"}, 
+      {yAxis:50.0, xAxis: "04 2019", subgroup: "301"},
+      {yAxis:100, xAxis: "05 2019", subgroup: "300"},
+      {yAxis:25, xAxis: "05 2019", subgroup: "301"},
+      {yAxis:90, xAxis: "06 2019", subgroup: "300"},
+      {yAxis:60.0, xAxis: "06 2019", subgroup: "300"}, 
     ]
     return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
   }
 
   getListResults(any){
     const data = [
-      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
-      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
-      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
-      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
-      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
+      {name:"John Doe",verb:"Attempted question 3 from Entry 4", result:"1", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 4 from Entry 1", result:"2", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 3 from Entry 1", result:"2", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 3 from Entry 1", result:"1", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 5 from Entry 5", result:"2", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 3 from Entry 1", result:"1", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 5 from Entry 1", result:"2", whenDate:1560211200000},
+      {name:"John Doe",verb:"Attempted question 3 from Entry 5", result:"2", whenDate:1560211200000},
     ];
     return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
   }
