@@ -45,6 +45,20 @@ export class ReportOptions{
   }
 }
 
+export class ReportDetails{
+
+  views = {"dashboard":"ReportDashboard"}
+  launch() {
+    const pageOption = new ReportOptions()
+    pageOption.launch()
+    pageOption.getPage().doneBtn.click()
+    browser.sleep(sleepTime);
+  }
+  getPage() {
+    return new ElementUtils().getPageElements().reportDetails
+  }
+}
+
 export class ElementUtils{
    getPageElements() {
     return {
@@ -61,6 +75,10 @@ export class ElementUtils{
         inputViews: element.all(by.css('app-xapi-report-options > div mz-input-container .what')),
         selectViewsOption: element.all(by.css('app-xapi-report-options > div option')),
         doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn'))
+      },
+      reportDetails: {
+        graph: element.all(by.css('app-xapi-report-details > div google-chart')),
+        addBtn: element.all(by.css('app-xapi-report-details > div div.fixed-action-btn'))
       }
     };
   }

@@ -132,12 +132,12 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
 
 
 
-    override fun populateTopEntries(locations: List<ContentEntry>) {
+    override fun populateTopEntries(entries: List<ContentEntry>) {
         val nodes = mutableListOf<TreeNode<EntityLayoutType>>()
 
         //Add every Tree entry to the list of notes (ie: Every Location)
-        for (everyTopLocation in locations) {
-            val topLocationUid = everyTopLocation.contentEntryUid
+        for (everyTopEntry in entries) {
+            val topLocationUid = everyTopEntry.contentEntryUid
             var selected = false
             if (selectedEntriesList?.contains(topLocationUid) == true) {
                 selected = true
@@ -145,8 +145,8 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
 
             val topLocationEntry = TreeNode(
                     EntityLayoutType(
-                            everyTopLocation.title!!,
-                            everyTopLocation.contentEntryUid,
+                            everyTopEntry.title!!,
+                            everyTopEntry.contentEntryUid,
                             selected, false
                     )
             )

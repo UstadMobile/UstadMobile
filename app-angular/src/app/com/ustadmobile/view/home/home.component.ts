@@ -26,6 +26,7 @@ export class HomeComponent extends UmBaseComponent {
   routes = appRountes
   umFormLanguage: FormGroup;
   navigationSubscription: Subscription;
+  showReports = true
 
   constructor(private location: Location, umService: UmBaseService,
     router: Router, route: ActivatedRoute, umDb: UmDbMockService, formBuilder: FormBuilder) {

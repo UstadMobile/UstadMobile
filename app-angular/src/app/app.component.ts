@@ -6,6 +6,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { UmDbMockService, ContentEntryDao } from './com/ustadmobile/core/db/um-db-mock.service';
 import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
 import { combineLatest } from 'rxjs/internal/observable/combineLatest';
+import { RESOUCE_TAG } from './com/ustadmobile/service/AuthGuard';
+import { browser } from 'protractor';
 
 @Component({
   selector: 'app-root',
@@ -21,9 +23,10 @@ export class AppComponent extends UmBaseComponent {
   private navigationSubscription : Subscription;
   private splashScreenTimeout  = () => {
     this.showLoading = false; 
+    localStorage.setItem(RESOUCE_TAG,"true") 
      //check and redirect to a specific views based on URL path & params
     const initialRoute = UmAngularUtil.getInitialRoute(this.umDb.ROOT_UID);
-    this.systemImpl.go(initialRoute.view, initialRoute.args, this.context, 0)
+    //this.systemImpl.go(initialRoute.view, initialRoute.args, this.context, 0)
   };
 
   constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService, router: Router,
@@ -39,6 +42,7 @@ export class AppComponent extends UmBaseComponent {
 
   onCreate(){
     super.onCreate()
+    console.log("oncreate called")
   }
 
   ngOnInit(): void {
@@ -47,11 +51,12 @@ export class AppComponent extends UmBaseComponent {
     const systemLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
     this.showLoading = window.location.search == "";
 
-    //Load all resources async 
-    combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins(),this.umService.loadStrings(systemLocale)
-    ]).subscribe(responses => {
+    UmAngularUtil.registerResourceReadyListener(this)
 
-    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_RESOURCE, true))
+    //Load all resources async 
+    combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins(),
+      this.umService.loadStrings(systemLocale)
+    ]).subscribe(responses => {
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.systemImpl.setLocaleStrings(responses[2])
       if(UmAngularUtil.showSplashScreen()){ 

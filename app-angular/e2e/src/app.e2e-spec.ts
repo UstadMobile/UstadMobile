@@ -1,4 +1,4 @@
-import {HomePage, DashboardPage, ReportOptions } from './app.po';
+import {HomePage, DashboardPage, ReportOptions, ReportDetails } from './app.po';
 import { browser } from 'protractor';
 
 describe('Default App behaviours', () => {
@@ -86,6 +86,29 @@ describe('Report Options', () => {
     pageOptions.launch();
     pageOptions.getPage().doneBtn.click()
     expect(browser.getCurrentUrl()).toContain(pageOptions.views.done);
+  });
+
+});
+
+
+fdescribe('Report Details', () => {
+  let pageDetails: ReportDetails;
+  browser.ignoreSynchronization = true
+
+  beforeEach(() => {
+    pageDetails = new ReportDetails();
+  });
+
+
+  it('givenApplication_whenOpen_shouldShowGoodleCharts', () => {
+    pageDetails.launch();
+    expect(pageDetails.getPage().graph.count()).toEqual(1);
+  });
+
+  it('givenApplication_whenAddToDashboardButtonIsClicked_shouldAddToDashboard', () => {
+    pageDetails.launch();
+    pageDetails.getPage().addBtn.click()
+    expect(browser.getCurrentUrl()).toContain(pageDetails.views.dashboard);
   });
 
 });

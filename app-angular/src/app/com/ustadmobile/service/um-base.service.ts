@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 export class UmBaseService {
 
   private umObserver = new Subject <any> ();
+  private context: UmContextWrapper;
   private directionality: string;
   private umListener = <Observable<any>>this.umObserver;
   public appName: string  = "..." 
@@ -50,7 +51,13 @@ export class UmBaseService {
     return this.umListener;
   }
 
-  setContext(context: UmContextWrapper) {}
+  setContext(context: UmContextWrapper) {
+    this.context = context;
+  }
+
+  getContextWrapper(){
+    return this.context;
+  }
 
   /**
    * Loading string map from json file

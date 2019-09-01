@@ -2,7 +2,7 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,MzSpinnerModule,MzProgressModule,
-   MzNavbarModule, MzChipModule, MzDatepickerModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule} from 'ngx-materialize';
+   MzNavbarModule, MzChipModule, MzDatepickerModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule, MzModalService, MzBaseModal} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -21,7 +21,8 @@ import { GoogleChartsModule } from 'angular-google-charts';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
-import { XapiTreeviewDialogComponent } from './com/ustadmobile/view/xapi-treeview-dialog/xapi-treeview-dialog.component';
+import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
+import { DatePipe } from '@angular/common';
 
 
 @NgModule({
@@ -54,6 +55,7 @@ import { XapiTreeviewDialogComponent } from './com/ustadmobile/view/xapi-treevie
   providers: [
     UmDbMockService,
     UmBaseService,
+    DatePipe,
     AuthGuard,
     { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true }
   ],

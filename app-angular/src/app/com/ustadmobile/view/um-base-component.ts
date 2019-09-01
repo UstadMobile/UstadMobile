@@ -17,13 +17,10 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   protected viewContext: UmContextWrapper;
   protected subscription : Subscription;
   public routes = appRountes;
-  public umService: UmBaseService
   public toolBarTitle: string = '...';
 
-
-  protected constructor(private baseService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
+  protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
      protected umDatabase: UmDbMockService){
-    this.umService = baseService
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.context = new UmContextWrapper(router);

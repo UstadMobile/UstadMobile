@@ -11,7 +11,7 @@ import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
-import { XapiTreeviewDialogComponent } from './com/ustadmobile/view/xapi-treeview-dialog/xapi-treeview-dialog.component';
+import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,

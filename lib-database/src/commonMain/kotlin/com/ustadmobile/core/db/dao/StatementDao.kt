@@ -6,6 +6,7 @@ import androidx.room.RawQuery
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.StatementEntity
+import kotlin.js.JsName
 
 @Dao
 @UmRepository
@@ -20,9 +21,11 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @Query("SELECT * FROM StatementEntity WHERE statementId IN (:id)")
     abstract fun findByStatementIdList(id: List<String>): List<StatementEntity>
 
+    @JsName("getResults")
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<ReportData>
 
+    @JsName("getListResults")
     @RawQuery
     abstract fun getListResults(query: DoorQuery): List<ReportListData>
 

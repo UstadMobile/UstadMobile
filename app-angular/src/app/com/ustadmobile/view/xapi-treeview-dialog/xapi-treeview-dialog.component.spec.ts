@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { XapiTreeviewDialogComponent } from './xapi-treeview-dialog.component';
+import { XapiTreeviewDialogComponent } from "./XapiTreeviewDialogComponent";
 
 describe('XapiTreeviewDialogComponent', () => {
   let component: XapiTreeviewDialogComponent;

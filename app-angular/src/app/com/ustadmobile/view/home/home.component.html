@@ -22,7 +22,7 @@
     [stopPropagation]="true">
 
     <li><a (click)="navigateTo(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
-    <li><a (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
+    <li *ngIf="showReports"> <a (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
 
     <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
     <mz-dropdown-item>
@@ -56,7 +56,7 @@
       </a>
     </mz-sidenav-link>
 
-    <mz-sidenav-link> 
+    <mz-sidenav-link *ngIf="showReports"> 
       <a class="collapsible-header" (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
         <i class="material-icons {{icon_position_class}}">pie_chart</i>
       </a>

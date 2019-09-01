@@ -21,14 +21,17 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
     }
   }
 
-  public contentEntryDao;
+  public contentEntryDao: ContentEntryDao;
+  public locationDao = new LocationDao();
   public contentEntryStatusDao = new ContentEntryStatusDao();
   public contentEntryRelatedEntryJoinDao = new ContentEntryRelatedEntryJoinDao();
   public containerDao = new ContainerDao();
   public networkNodeDao = new NetworkNodeDao();
   public xObjectDao = new XObjectDao();
   public xLangMapEntryDao = new XLangMapEntryDao();
+  public statementDao = new StatementDao();
   public personDao = new PersonDao();
+  public contentEntryParentChildJoinDao = new ContentEntryParentChildJoinDao(this.contentEntryDao);
 
   getData(entryUid) {
     return this.entries[entryUid];
@@ -37,6 +40,29 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
 
 /**DAO */
 
+export class StatementDao{
+  getResults(any){
+    const data = [
+      {yAxis:90, xAxis: "1", subgroup: "4"},
+      {yAxis:100, xAxis: "2", subgroup: "3"},
+      {yAxis:90, xAxis: "3", subgroup: "2"},
+      {yAxis:90, xAxis: "4", subgroup: "1"}, 
+    ]
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
+  }
+
+  getListResults(any){
+    const data = [
+      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
+      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
+      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
+      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
+      {name:"John Doe",verb:"Do", result:"", whenDate:1500000000},
+    ];
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
+  }
+}
+
 export class XObjectDao{
 
   findListOfObjectUidFromContentEntryUid(contentEntryUid){
@@ -44,6 +70,18 @@ export class XObjectDao{
   }
 }
 
+export class LocationDao{
+  findTopLocationsAsync(){
+
+  }
+}
+
+export class ContentEntryParentChildJoinDao{
+  constructor(private entryDao){}
+  selectTopEntries(){
+    return this.entryDao.findByUidWithContentEntryStatusAsync(1311236)
+  }
+}
 export class XLangMapEntryDao{
   getAllVerbsInList(uidList){
     return [
@@ -60,7 +98,17 @@ export class XLangMapEntryDao{
       {verbLangMapUid:2,valueLangMap:"DoWhat"},
       {verbLangMapUid:3,valueLangMap:"DoWhatElse"},
       {verbLangMapUid:4,valueLangMap:"DoThis"}
+    ] 
+  }
+
+  getValuesWithListOfId(any){
+    const data = [
+      {verbLangMapUid:1,objectLangMapUid:2,languageLangMapUid:4,languageVariantLangMapUid:0,valueLangMap:"hello",statementLangMapUid:1},
+      {verbLangMapUid:1,objectLangMapUid:2,languageLangMapUid:4,languageVariantLangMapUid:0,valueLangMap:"hello",statementLangMapUid:1},
+      {verbLangMapUid:1,objectLangMapUid:2,languageLangMapUid:4,languageVariantLangMapUid:0,valueLangMap:"hello",statementLangMapUid:1},
+      {verbLangMapUid:1,objectLangMapUid:2,languageLangMapUid:4,languageVariantLangMapUid:0,valueLangMap:"hello",statementLangMapUid:1},
     ]
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
   }
 }
 

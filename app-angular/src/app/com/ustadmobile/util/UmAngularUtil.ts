@@ -16,6 +16,9 @@ export class UmAngularUtil {
     const ktor = ktorclientserial 
   }
 
+
+  static localStorageHandler = null;
+
   /**
    * Key to be used when toolbar title value changes
    */
@@ -69,6 +72,38 @@ export class UmAngularUtil {
         observer.next(dataToObserve);
       }, 300);
     });
+  }
+
+  static registerResourceReadyListener(component){
+    var ogSetItem = localStorage.setItem;
+    localStorage.setItem = function(key, value) {
+      var event = new Event('itemInserted');
+      document.dispatchEvent(event);
+      ogSetItem.apply(this, arguments);
+    };
+
+    const resourceKey = this.DISPATCH_RESOURCE;
+    const titleKey = this.DISPATCH_TITLE;
+    this.localStorageHandler = function(event){
+      console.log(event.value)
+      switch(event.key){
+        case titleKey:
+          component.setToolbarTitle(event.value)
+        break;
+        case resourceKey:
+          component.onCreate()
+        break;
+      }
+    };
+    document.addEventListener("itemInserted", this.localStorageHandler, false);
+  }
+
+  static removeResourceReadyListener(){
+    this.localStorageHandler = null;
+  }
+
+  static fireResouceReady(ready: boolean){
+    localStorage.setItem(this.DISPATCH_RESOURCE,ready+"")
   }
 
   /**
@@ -145,6 +180,17 @@ export class UmAngularUtil {
       }
     });
     return foundPath;
+  }
+
+  static getElementFromObject(object: any[], key: string, value: string){
+    var foundElement = {}
+    object.forEach(element => {
+      if(element[key] == value){
+        foundElement = element;
+        return;
+      }
+    });
+    return foundElement;
   }
 
   /**

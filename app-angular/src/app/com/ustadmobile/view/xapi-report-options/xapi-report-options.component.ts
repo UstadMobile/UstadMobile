@@ -1,5 +1,5 @@
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { Component, Renderer2, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, Output, EventEmitter } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -8,6 +8,9 @@ import core from 'UstadMobile-core';
 import util from 'UstadMobile-lib-util';
 import { Subscription } from 'rxjs';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { MzModalService } from 'ngx-materialize';
+import { XapiTreeviewDialogComponent } from "../xapi-treeview-dialog/XapiTreeviewDialogComponent";
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-xapi-report-options', 
@@ -25,14 +28,19 @@ translatedGraphList = []
 translatedXAxisList = []
 
 visualization_label: string = ''
-y_axis_label: string = ''
-x_axis_label: string = ''
-sub_group_label: string = ''
-graph_who_label: string = ''
-graph_did_label: string = ''
-graph_what_label: string = ''
-graph_when_start_label: string = ''
-graph_when_end_label: string = ''
+y_axis_label: string = '..'
+x_axis_label: string = '..'
+sub_group_label: string = '..'
+graph_who_label: string = '..'
+graph_did_label: string = '..'
+graph_what_label: string = '..'
+graph_when_start_label: string = '..'
+graph_when_end_label: string = '..'
+
+selectedWhoList = []
+selectedDidList = []
+inMemoryWhoList = []
+inMemoryDidList = []
 @Output()
 public domChange = new EventEmitter();
 
@@ -51,21 +59,25 @@ didAutoComplete: Materialize.AutoCompleteOptions = {
 };
 
 constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
-  umDb: UmDbMockService, formBuilder: FormBuilder, private elementRef: ElementRef) {
+  umDb: UmDbMockService,formBuilder: FormBuilder,private datePipe: DatePipe,
+   private elementRef: ElementRef, private modalService: MzModalService) {
   super(umService, router, route, umDb);
-
+  const currentDate = this.datePipe.transform(new Date(), 'yyyy-MM-dd') 
+  const tomorrow = this.datePipe.transform(new Date().setDate(new Date().getDate() + 1), 'yyyy-MM-dd') 
   //Build form for capturing report options
   this.umFormReportOptions = formBuilder.group({
-    'visualization': ['', Validators.required],
-    'y_axis': ['', Validators.required],
-    'x_axis': ['', Validators.required],
-    'sub_group': ['', Validators.required],
-    'graph_who': ['', Validators.required],
-    'graph_did': ['', Validators.required],
-    'graph_what': ['', Validators.required],
-    'graph_when_start': ['', Validators.required],
-    'graph_when_end': ['', Validators.required]
+    'visualization': ['0', Validators.required],
+    'y_axis': ['0', Validators.required],
+    'x_axis': ['0', Validators.required],
+    'sub_group': ['0', Validators.required],
+    'graph_when_start': [currentDate, Validators.required],
+    'graph_when_end': [tomorrow, Validators.required]
   });
+
+  this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+    .subscribe( _ => {
+      this.subscription = UmAngularUtil.registerUmObserver(this)
+    }); 
 }
 
 
@@ -75,7 +87,17 @@ ngOnInit() {
 }
 
 onChanges() {
-  this.umFormReportOptions.valueChanges.subscribe(fields => {});
+  this.umFormReportOptions.valueChanges.subscribe(formValue => {
+    this.presenter.handleSelectedYAxis(formValue.y_axis)
+    this.presenter.handleSelectedChartType(formValue.visualization)
+    this.presenter.handleSelectedXAxis(formValue.x_axis)
+    this.presenter.handleSelectedSubGroup(formValue.sub_group)
+    const dateFrom = new Date(formValue.graph_when_start)
+    const dateTo = new Date(formValue.graph_when_end)
+    this.presenter.handleDialogFromCalendarSelected(dateFrom.getFullYear(),dateFrom.getMonth(), dateFrom.getDate())
+    this.presenter.handleDialogToCalendarSelected(dateTo.getFullYear(),dateTo.getMonth(), dateTo.getDate())
+
+  });
   const scope = this;
    this.elementRef.nativeElement.addEventListener('input', event => {
     const valueChange = $(event.target).get(0).value
@@ -107,6 +129,7 @@ onChanges() {
     this.graph_what_label = this.getString(this.MessageID.xapi_options_what)
     this.graph_when_start_label = this.getString(this.MessageID.from)
     this.graph_when_end_label = this.getString(this.MessageID.tocao)
+    
 }
 
 
@@ -135,64 +158,97 @@ fillXAxisAndSubGroupData(translatedXAxisList) {
 }
 
 handleWhatClicked() {
-  this.presenter.handleWhatClicked()
+  this.modalService.open(XapiTreeviewDialogComponent);
 }
+
 updateWhoDataAdapter(whoList) {
+  this.inMemoryWhoList = whoList;
   whoList.forEach(person => {
     this.whoAutoComplete.data[person.name] = null
   });
 }
 
 updateDidDataAdapter(didList) {
+  console.log(didList)
+  this.inMemoryDidList = didList
   didList.forEach(verb => {
     this.didAutoComplete.data[verb.valueLangMap] = null 
   });
-  console.log(this.didAutoComplete.data)
 }
 
-updateFromDialogText(fromDate) {
-  console.log("fromDate", fromDate)
+onAddPerson(event){
+  const person = UmAngularUtil.getElementFromObject(this.inMemoryWhoList,"name",event.tag)
+  if(person){
+    this.selectedWhoList.push(person);
+  }
 }
 
-updateToDialogText(toDate) {
-  console.log("toDate", toDate)
+onAddVerb(event){
+  const verb = UmAngularUtil.getElementFromObject(this.inMemoryDidList,"valueLangMap",event.tag)
+  if(verb){
+    this.selectedDidList.push(verb);
+  }
 }
 
-updateWhenRangeText(rangeText) {
-  console.log("rangeText", rangeText)
+onDeletePerson(event){
+  const person = UmAngularUtil.getElementFromObject(this.inMemoryWhoList,"name",event.tag)
+  if(person){
+    this.deleteChip(this.selectedWhoList, person);
+  }
 }
 
-updateChartTypeSelected(indexChart) {
-  console.log("indexChart", indexChart)
+onDeleteVerb(event){
+  const verb = UmAngularUtil.getElementFromObject(this.inMemoryDidList,"valueLangMap",event.tag)
+  if(verb){
+    this.deleteChip(this.selectedDidList, verb);
+  }
+}
+private deleteChip(list: any[], element: any){
+  var index = this.selectedWhoList.indexOf(element);
+  if (index > -1) {
+    list.splice(index, 1);
+  }
 }
 
-updateYAxisTypeSelected(indexYAxis) {
-  console.log("indexYAxis", indexYAxis)
-}
+updateFromDialogText(fromDate) {}
 
-updateXAxisTypeSelected(indexXAxis) {
-  console.log("indexXAxis", indexXAxis)
-}
+updateToDialogText(toDate) {}
 
-updateSubgroupTypeSelected(indexSubgroup) {
-  console.log("indexesSub", indexSubgroup)
-}
+updateWhenRangeText(rangeText) {}
 
-updateWhoListSelected(personList) {
-  console.log("persons", personList)
-}
+updateChartTypeSelected(indexChart) {}
 
-updateDidListSelected(verbs) {
-  console.log("verbs", verbs)
-}
+updateYAxisTypeSelected(indexYAxis) {}
+
+updateXAxisTypeSelected(indexXAxis) {}
+
+updateSubgroupTypeSelected(indexSubgroup) {}
+
+updateWhoListSelected(personList) {}
+
+updateDidListSelected(verbs) {}
 
 handleDoneSelected() {
-  this.presenter.handleViewReportPreview([],[])
+  const didList = []
+  const whoList = []
+
+  this.selectedDidList.forEach(did =>{
+    didList.push(did.verbLangMapUid)
+  });
+
+  this.selectedWhoList.forEach(who =>{
+    whoList.push(who.personUid)
+  });
+
+   this.presenter.handleViewReportPreview(util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(didList),
+   util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(whoList))
 }
 
 ngOnDestroy() {
   super.ngOnDestroy()
-  this.presenter.onDestroy();
+  if(this.presenter){
+    this.presenter.onDestroy(); 
+  }
   if (this.navigationSubscription) {
     this.navigationSubscription.unsubscribe();
   }

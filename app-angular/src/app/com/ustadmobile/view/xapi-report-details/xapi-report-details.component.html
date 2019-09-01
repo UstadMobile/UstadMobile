@@ -1,3 +1,13 @@
-<p>
-  xapi-report-details works!
-</p>
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-right default-content-padding-left">
+  <div class="col s12 default-form-padding z-depth-1 default-graph-margin white default-padding-top default-padding-bottom">
+      <google-chart #chart [title]="chartTitle" [type]="chartType" [data]="chartData" [columnNames]="columnNames" [options]="options"
+      [width]="width" [height]="height"> 
+    </google-chart>
+  </div>
+
+  <div class="fixed-action-btn" (click)="handleAddToDashboard()">
+      <a class="btn-floating btn-large {{env.colorAcent}}">
+        <i class="large material-icons">add</i>
+      </a>
+    </div>
+</div>
