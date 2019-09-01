@@ -306,7 +306,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         }
     }
 
-    override fun setField(index: Int, field: PersonDetailViewField, value: Any) {
+    override fun setField(index: Int, field: PersonDetailViewField, value: Any?) {
         var value = value
         if (value == null) {
             value = ""

@@ -325,7 +325,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
             if (field.fieldType == FIELD_TYPE_HEADER) {
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_HEADER,
-                        field.headerMessageId, null!!), field.headerMessageId)
+                        field.headerMessageId, null), field.headerMessageId)
                 continue
             }
 
@@ -340,19 +340,19 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             } else if (field.fieldUid == PERSON_FIELD_UID_FIRST_NAMES.toLong()) {
                 thisValue = person.firstNames
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon!!), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_LAST_NAME.toLong()) {
                 thisValue = person.lastName
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon!!), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
                 if (attendanceAverage != null) {
                     thisValue = attendanceAverage
                 }
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon!!), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_CLASSES.toLong()) {
                 thisValue = "Class Name ..."
@@ -368,8 +368,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 //Also tell the view that we need to add call and text buttons for the number
 
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, person.fatherNumber!!, field.fieldIcon!!),
-                        thisValue!!)
+                        field.labelMessageId, person.fatherNumber, field.fieldIcon),
+                        thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER.toLong()) {
                 if (person.motherNum == null) {
@@ -379,16 +379,16 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 }
 
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, person.motherNum!!, field.fieldIcon!!),
-                        thisValue!!)
+                        field.labelMessageId, person.motherNum, field.fieldIcon),
+                        thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
                 thisValue = person.fatherName
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME.toLong()) {
                 thisValue = person.motherName
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NUMBER.toLong()) {
                 if (person.fatherName != null) {
                     if (!person.fatherName!!.isEmpty()) {
@@ -397,7 +397,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 }
                 thisValue = person.fatherNumber
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NUMBER.toLong()) {
                 if (person.motherNum != null) {
                     if (!person.motherNum!!.isEmpty()) {
@@ -406,16 +406,16 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 }
                 thisValue = person.motherNum
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_ADDRESS.toLong()) {
                 thisValue = person.address
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
                 thisValue = UMCalendarUtil.getPrettyDateFromLong(
                         person.dateOfBirth, currentLocale)
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
-                        field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                        field.labelMessageId, field.fieldIcon), thisValue)
             } else {//this is actually a custom field
 
                 val cf = customFieldWithFieldValueMap!![field.fieldUid]

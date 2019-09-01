@@ -20,7 +20,7 @@ interface PersonEditView : UstadView {
      * @param field The PersonDetailViewField field representation that has its id, type label & options
      * @param value The value of the field to be set to the view.
      */
-    fun setField(index: Int, fieldUid: Long, field: PersonDetailViewField, value: Any)
+    fun setField(index: Int, fieldUid: Long, field: PersonDetailViewField, value: Any?)
 
     /**
      * Sets the class list um provider to the view.

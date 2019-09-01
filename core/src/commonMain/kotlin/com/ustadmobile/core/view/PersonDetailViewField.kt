@@ -41,7 +41,7 @@ class PersonDetailViewField {
      * @param messageLabel  The label
      * @param iconName  The icon name
      */
-    constructor(fieldType: Int, messageLabel: Int, iconName: String) {
+    constructor(fieldType: Int, messageLabel: Int, iconName: String?) {
         this.fieldType = fieldType
         this.messageLabel = messageLabel
         this.iconName = iconName
@@ -55,8 +55,8 @@ class PersonDetailViewField {
      * @param actionParam   The action parameter
      * @param iconName      The icon name
      */
-    constructor(fieldType: Int, messageLabel: Int, actionParam: String,
-                iconName: String) {
+    constructor(fieldType: Int, messageLabel: Int, actionParam: String?,
+                iconName: String?) {
         this.fieldType = fieldType
         this.messageLabel = messageLabel
         this.iconName = iconName

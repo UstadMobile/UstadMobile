@@ -611,8 +611,13 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
     private fun getDOBFromString(dateString: String): Long {
 
         //TODO: KMP Make it aware of Locale
-        return UMCalendarUtil.getLongDateFromStringAndFormat(
+        var dateLong =  UMCalendarUtil.getLongDateFromStringAndFormat(
                 dateString, "dd/MM/yyyy", null)
+        if(dateLong==null){
+            return 0
+        }else{
+            return dateLong
+        }
     }
 
     fun setCurrentPosition(currentPosition: Int) {

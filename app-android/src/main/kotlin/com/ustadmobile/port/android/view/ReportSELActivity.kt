@@ -420,8 +420,8 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
         for (i in 0 until tableLayout.childCount) {
             val child = tableLayout.getChildAt(i)
             if (child is TableRow) {
-                val childNominatorUid = child.getTag(TAG_NOMINATOR_CLAZZMEMBER_UID) as Long
-                if (childNominatorUid != null) {
+                if(child.getTag(TAG_NOMINATOR_CLAZZMEMBER_UID) != null) {
+                    val childNominatorUid = child.getTag(TAG_NOMINATOR_CLAZZMEMBER_UID) as Long
                     if (childNominatorUid == nominatorUid!!.toLong()) {
                         //Save it for the next loop
                         nominatorRow = child
@@ -436,8 +436,8 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
             for (j in 0 until nominatorRow.childCount) {
                 val rowChild = nominatorRow.getChildAt(j)
                 if (rowChild is AppCompatImageView) {
-                    val rowChildNomineeUid = rowChild.getTag(TAG_NOMINEE_CLAZZMEMBER_UID) as Long
-                    if (rowChildNomineeUid != null) {
+                    if(rowChild.getTag(TAG_NOMINEE_CLAZZMEMBER_UID) != null) {
+                        val rowChildNomineeUid = rowChild.getTag(TAG_NOMINEE_CLAZZMEMBER_UID) as Long
                         if (nomineeList.contains(rowChildNomineeUid)) {
                             //If this cell is in the nominee list , change the view to be a tick!
                             val nomineeImageView = rowChild as AppCompatImageView

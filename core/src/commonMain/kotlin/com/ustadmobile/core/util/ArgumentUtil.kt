@@ -13,7 +13,7 @@ class ArgumentUtil{
             val list = ArrayList<Long>()
             for (s in csString.split((",").toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()) {
                 val p = s.trim()
-                list.add(p as Long)
+                list.add(p.toLong())
             }
 
             return list

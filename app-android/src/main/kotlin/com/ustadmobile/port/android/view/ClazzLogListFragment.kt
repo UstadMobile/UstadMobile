@@ -379,14 +379,15 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
 
         val data = LivePagedListBuilder(factory, 20).build()
 
-//Observe the data:
+        //Observe the data:
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
                     Observer<PagedList<ClazzLogWithScheduleStartEndTimes>> { recyclerAdapter.submitList(it) })
+            mRecyclerView!!.setAdapter(recyclerAdapter)
         }
 
-        mRecyclerView!!.setAdapter(recyclerAdapter)
+
     }
 
     companion object {
@@ -400,6 +401,12 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
             val fragment = ClazzLogListFragment()
             val args = Bundle()
             args.putLong(ARG_CLAZZ_UID, clazzUid)
+            fragment.arguments = args
+            return fragment
+        }
+
+        fun newInstance(args: Bundle): ClazzLogListFragment {
+            val fragment = ClazzLogListFragment()
             fragment.arguments = args
             return fragment
         }

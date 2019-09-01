@@ -305,7 +305,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_done -> {
+            R.id.menu_catalog_entry_presenter_share -> {
                 presenter.handleViewReportPreview(
                         didFlexBoxLayout.children.filter { it is Chip }.map {
                             (it as Chip).tag as Long

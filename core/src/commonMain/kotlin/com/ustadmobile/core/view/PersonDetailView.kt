@@ -20,7 +20,7 @@ interface PersonDetailView : UstadView {
      * @param field The PersonDetailViewField field representation that has its id, type label & options
      * @param value The value of the field to be set to the view.
      */
-    fun setField(index: Int, field: PersonDetailViewField, value: Any)
+    fun setField(index: Int, field: PersonDetailViewField, value: Any?)
 
     /**
      * Set's Class list provider to the person detail page. This is a list within the person's detail

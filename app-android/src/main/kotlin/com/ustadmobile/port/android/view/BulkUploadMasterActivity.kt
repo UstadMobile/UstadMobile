@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
@@ -28,6 +29,7 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
 
 
     private var filePathFromFilePicker: String? = null
+    private var selectedPathUri : Uri? = null
     private var mPresenter: BulkUploadMasterPresenter? = null
     private var mProgressBar: ProgressBar? = null
     private var fab: FloatingTextButton? = null
@@ -93,7 +95,8 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
 
         //FAB
         fab = findViewById(R.id.activity_bulk_upload_master_fab)
-        fab!!.setOnClickListener { v -> parseFile(filePathFromFilePicker!!) }
+//        fab!!.setOnClickListener { v -> parseFile(filePathFromFilePicker!!) }
+        fab!!.setOnClickListener { v -> parseThisUri() }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -208,6 +211,14 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
                 FILE_PERMISSION_REQUEST)
     }
 
+    fun parseThisUri(){
+        setInProgress(true)
+        if(selectedPathUri == null ){
+            showMessage(getText(R.string.select_file).toString())
+        }else{
+            readUri()
+        }
+    }
     override fun parseFile(filePath: String) {
         setInProgress(true)
         if (filePath == null || filePath.isEmpty()) {
@@ -216,6 +227,20 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
             val sourceFile = File(filePath)
             readFile(sourceFile)
         }
+    }
+
+    fun readUri(){
+        val stream: InputStream = getContentResolver().openInputStream(selectedPathUri)
+        val br = BufferedReader(InputStreamReader(stream))
+        val lines = ArrayList<String>()
+        var line: String? = null
+        while ( {line = br.readLine(); line}() != null) {
+            lines.add(line!!)
+        }
+
+        mPresenter!!.lines = lines
+        mPresenter!!.setCurrentPosition(0) //skip first line
+        mPresenter!!.startParsing()
     }
 
 
@@ -232,18 +257,6 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
             mPresenter!!.setCurrentPosition(0) //skip first line
             mPresenter!!.startParsing()
 
-//            BufferedReader(FileReader(sourceFile)).use { br ->
-//                var line: String
-//                val lines = ArrayList<String>()
-//                while ((line = br.readLine()) != null) {
-//                    lines.add(line)
-//                }
-//
-//                mPresenter!!.lines = lines
-//                mPresenter!!.setCurrentPosition(0) //skip first line
-//                mPresenter!!.startParsing()
-//
-//            }
         } catch (e: FileNotFoundException) {
             showMessage("File not found")
             e.printStackTrace()
@@ -262,7 +275,6 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
                     Toast.LENGTH_SHORT
             ).show()
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -270,10 +282,10 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 FILE_PERMISSION_REQUEST -> {
-                    val selectedUri = data!!.data
+                    selectedPathUri = data!!.data
 
                     //TODO: KMP Re did this. Check and test,etc.
-                    val sourceFile = File(selectedUri.path)
+                    val sourceFile = File(data!!.data.path)
 
 //                    val sourceFile = File(Objects.requireNonNull(
 //                            UmAndroidUriUtil.getPath(this, selectedUri)))

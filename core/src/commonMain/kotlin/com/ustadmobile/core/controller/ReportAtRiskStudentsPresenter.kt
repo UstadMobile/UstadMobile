@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companio
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.view.CallPersonRelatedDialogView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonDetailView
@@ -45,22 +46,19 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
         clazzList = ArrayList()
         locationList = ArrayList()
         if (arguments!!.containsKey(ARG_FROM_DATE)) {
-            val fromDate = arguments!!.get(ARG_FROM_DATE) as Long
+            val fromDate = arguments!!.get(ARG_FROM_DATE).toString().toLong()
         }
         if (arguments!!.containsKey(ARG_TO_DATE)) {
-            val toDate = arguments!!.get(ARG_TO_DATE) as Long
+            val toDate = arguments!!.get(ARG_TO_DATE).toString().toLong()
         }
         if (arguments!!.containsKey(ARG_LOCATION_LIST)) {
-            val locations = arguments!!.get(ARG_LOCATION_LIST) as LongArray
-            locationList = convertLongArray(locations)
+            locationList = ArgumentUtil.convertCSVStringToLongList(arguments!!.get(ARG_LOCATION_LIST)!!)
         }
         if (arguments!!.containsKey(ARG_CLAZZ_LIST)) {
-            val clazzes = arguments!!.get(ARG_CLAZZ_LIST) as LongArray
-            clazzList = convertLongArray(clazzes)
+            clazzList = ArgumentUtil.convertCSVStringToLongList(arguments!!.get(ARG_CLAZZ_LIST)!!)
         }
         if (arguments!!.containsKey(ARG_GENDER_DISAGGREGATE)) {
-            //TODO: Check this for KMP
-            genderDisaggregated = arguments!!.get(ARG_GENDER_DISAGGREGATE)!!.toBoolean()
+            genderDisaggregated = arguments!!.get(ARG_GENDER_DISAGGREGATE).toString().toBoolean()
         }
     }
 

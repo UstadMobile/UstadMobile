@@ -48,21 +48,24 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
             mPager = findViewById(R.id.class_detail_view_pager_container)
             mPagerAdapter = ClassDetailViewPagerAdapter(supportFragmentManager)
             var fragCount = 0
-            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(currentClazzUid))
+            var bundle = Bundle()
+            bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
+//            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(currentClazzUid))
+            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(bundle))
             fragPosMap[fragCount++] = ClazzStudentListFragment::class.java
 
             if (attendanceVisibility) {
-                mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(currentClazzUid))
+                mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(bundle))
                 fragPosMap[fragCount++] = ClazzLogListFragment::class.java
             }
 
             if (activityVisibility) {
-                mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(currentClazzUid))
+                mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(bundle))
                 fragPosMap[fragCount++] = ClazzActivityListFragment::class.java
             }
 
             if (selVisibility) {
-                mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(currentClazzUid))
+                mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(bundle))
                 fragPosMap[fragCount++] = SELAnswerListFragment::class.java!!
             }
 
@@ -87,7 +90,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
         setContentView(R.layout.activity_clazz_detail)
 
         if (Objects.requireNonNull(intent.extras).get(ARG_CLAZZ_UID) is String) {
-            currentClazzUid = java.lang.Long.valueOf(intent.getStringExtra(ARG_CLAZZ_UID))
+            currentClazzUid = intent.getStringExtra(ARG_CLAZZ_UID).toString().toLong()
         } else {
             currentClazzUid = intent.getLongExtra(ARG_CLAZZ_UID, 0L)
         }
@@ -231,14 +234,16 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
                 return thisFragment
             } else {
                 val fragClass = fragPosMap[position]
+                var bundle = Bundle()
+                bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
                 return if (fragClass == ClazzStudentListFragment::class.java) {
-                    ClazzStudentListFragment.newInstance(currentClazzUid)
+                    ClazzStudentListFragment.newInstance(bundle)
                 } else if (fragClass == ClazzLogListFragment::class.java) {
-                    ClazzLogListFragment.newInstance(currentClazzUid!!)
+                    ClazzLogListFragment.newInstance(bundle)
                 } else if (fragClass == ClazzActivityListFragment::class.java) {
-                    ClazzActivityListFragment.newInstance(currentClazzUid!!) as Fragment
+                    ClazzActivityListFragment.newInstance(bundle) as Fragment
                 } else if (fragClass == SELAnswerListFragment::class.java) {
-                    SELAnswerListFragment.newInstance(currentClazzUid) as Fragment
+                    SELAnswerListFragment.newInstance(bundle) as Fragment
                 } else {
                     null
                 }

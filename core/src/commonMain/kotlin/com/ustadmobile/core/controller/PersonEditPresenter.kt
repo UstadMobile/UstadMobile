@@ -318,7 +318,7 @@ class PersonEditPresenter
             if (field.fieldType == FIELD_TYPE_HEADER) {
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(FIELD_TYPE_HEADER,
-                                field.headerMessageId, null!!), field.headerMessageId)
+                                field.headerMessageId, null), field.headerMessageId)
                 continue
             }
 
@@ -326,73 +326,73 @@ class PersonEditPresenter
                 thisValue = thisPerson.firstNames + " " + thisPerson.lastName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue)
+                                field.labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_FIRST_NAMES.toLong()) {
                 thisValue = thisPerson.firstNames
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_LAST_NAME.toLong()) {
                 thisValue = thisPerson.lastName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_CLASSES.toLong()) {
                 thisValue = "Class Name ..."
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue)
+                                field.labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER.toLong()) {
                 thisValue = thisPerson.fatherName + " (" + thisPerson.fatherNumber + ")"
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER.toLong()) {
                 thisValue = thisPerson.motherName + " (" + thisPerson.motherNum + ")"
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
                 thisValue = thisPerson.fatherName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME.toLong()) {
                 thisValue = thisPerson.motherName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NUMBER.toLong()) {
                 thisValue = thisPerson.fatherNumber
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NUMBER.toLong()) {
                 thisValue = thisPerson.motherNum
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_ADDRESS.toLong()) {
                 thisValue = thisPerson.address
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
                 thisValue = UMCalendarUtil.getPrettyDateFromLong(
                         thisPerson.dateOfBirth, currnetLocale)
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon!!), thisValue!!)
+                                field.labelMessageId, field.fieldIcon), thisValue)
             } else {//this is actually a custom field
                 var messageLabel = 0
                 var iconName: String? = null
@@ -415,8 +415,8 @@ class PersonEditPresenter
                         PersonDetailViewField(
                                 field.fieldType,
                                 messageLabel,
-                                iconName!!
-                        ), fieldValue!!
+                                iconName
+                        ), fieldValue
 
                 )
             }

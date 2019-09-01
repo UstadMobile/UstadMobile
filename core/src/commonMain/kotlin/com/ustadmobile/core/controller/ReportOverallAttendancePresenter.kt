@@ -67,7 +67,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
         }
 
         if (arguments!!.containsKey(ARG_STUDENT_IDENTIFIER_NUMBER)) {
-            val numberIdentifier = arguments!!.get(ARG_STUDENT_IDENTIFIER_NUMBER) as Boolean
+            val numberIdentifier = arguments!!.get(ARG_STUDENT_IDENTIFIER_NUMBER)!!.toBoolean()
             if (numberIdentifier) {
                 showPercentages = false
             } else {
@@ -76,7 +76,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
         }
 
         if (arguments!!.containsKey(ARG_STUDENT_IDENTIFIER_PERCENTAGE)) {
-            val percentageIdentifier = arguments!!.get(ARG_STUDENT_IDENTIFIER_PERCENTAGE) as Boolean
+            val percentageIdentifier = arguments!!.get(ARG_STUDENT_IDENTIFIER_PERCENTAGE)!!.toBoolean()
             if (percentageIdentifier) {
                 showPercentages = true
             } else {

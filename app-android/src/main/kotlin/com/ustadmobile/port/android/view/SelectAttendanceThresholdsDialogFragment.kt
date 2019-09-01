@@ -75,17 +75,17 @@ class SelectAttendanceThresholdsDialogFragment : UstadDialogFragment(),
 
         assert(arguments != null)
         if (arguments!!.containsKey(ARG_THRESHOLD_LOW)) {
-            setUpNP(lowNumberPicker, arguments!!.get(ARG_THRESHOLD_LOW) as Int)
+            setUpNP(lowNumberPicker, arguments!!.get(ARG_THRESHOLD_LOW).toString().toInt())
         } else {
             setUpNP(lowNumberPicker, THRESHOLD_LOW_DEFAULT)
         }
         if (arguments!!.containsKey(ARG_THRESHOLD_MID)) {
-            setUpNP(midNumberPicker, arguments!!.get(ARG_THRESHOLD_MID) as Int)
+            setUpNP(midNumberPicker, arguments!!.get(ARG_THRESHOLD_MID).toString().toInt())
         } else {
             setUpNP(midNumberPicker, THRESHOLD_MED_DEFAULT)
         }
         if (arguments!!.containsKey(ARG_THRESHOLD_HIGH)) {
-            setUpNP(highNumberPicker, arguments!!.get(ARG_THRESHOLD_HIGH) as Int)
+            setUpNP(highNumberPicker, arguments!!.get(ARG_THRESHOLD_HIGH).toString().toInt())
         } else {
             setUpNP(highNumberPicker, THRESHOLD_HIGH_DEFAULT)
         }

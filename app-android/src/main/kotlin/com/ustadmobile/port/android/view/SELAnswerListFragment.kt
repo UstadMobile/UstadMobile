@@ -133,5 +133,10 @@ class SELAnswerListFragment : UstadBaseFragment(), SELAnswerListView, View.OnCli
             fragment.arguments = args
             return fragment
         }
+        fun newInstance(args: Bundle): SELAnswerListFragment {
+            val fragment = SELAnswerListFragment()
+            fragment.arguments = args
+            return fragment
+        }
     }
 }

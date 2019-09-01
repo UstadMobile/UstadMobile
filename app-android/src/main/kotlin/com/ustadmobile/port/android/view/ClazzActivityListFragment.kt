@@ -303,6 +303,11 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
             fragment.arguments = args
             return fragment
         }
+        fun newInstance(args: Bundle): ClazzActivityListFragment {
+            val fragment = ClazzActivityListFragment()
+            fragment.arguments = args
+            return fragment
+        }
 
         fun dpToPx(dp: Int): Int {
             return (dp * Resources.getSystem().displayMetrics.density).toInt()

@@ -99,9 +99,13 @@ object UMCalendarUtil {
                                        format: String,
                                        locale: Any?): Long {
 
-        val formatted : DateFormat = DateFormat(format)
-        val date = formatted.parse(dateString)
-        return date.local.unixMillis.toLong()
+        try{
+            val formatted : DateFormat = DateFormat(format)
+            val date = formatted.parse(dateString)
+            return date.local.unixMillis.toLong()
+        }catch (e:DateException){
+            return 0
+        }
 
     }
 
@@ -162,7 +166,7 @@ object UMCalendarUtil {
 
     fun zeroOutTimeForGivenLongDate(thisDate: Long):Long{
         val cal = DateTime(thisDate)
-        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfWeekInt, hour = 0,
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth, hour = 0,
                 minute = 0, second = 0, milliseconds = 0)
         return ntcal.unixMillisLong
     }

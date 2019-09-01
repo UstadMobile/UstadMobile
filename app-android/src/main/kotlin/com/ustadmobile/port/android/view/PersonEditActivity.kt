@@ -20,6 +20,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
@@ -165,7 +166,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                      thisLinearLayout: LinearLayout?, thisValue: Any?) {
         var iconName = iconName
 
-        val parentParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        val parentParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT)
 
         //Calculate the width of the screen.
@@ -185,7 +186,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
             FIELD_TYPE_HEADER -> {
                 //Add The Divider
                 val divider = View(this)
-                val dividerLayout = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                val dividerLayout = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         DEFAULT_DIVIDER_HEIGHT)
                 divider.layoutParams = dividerLayout
                 divider.setBackgroundColor(Color.parseColor(COLOR_GREY))
@@ -234,7 +235,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     //Add a recycler view of classes
                     mRecyclerView = RecyclerView(this)
                     val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-                    val wrapParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT)
                     mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
                     mRecyclerView.setLayoutParams(wrapParams)
@@ -258,8 +259,8 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 //The field is an input type. So we are gonna add a TextInputLayout:
                 val fieldTextInputLayout = TextInputLayout(this)
                 //Edit Text is inside a TextInputLayout
-                val textInputLayoutParams = ViewGroup.LayoutParams(widthWithPadding,
-                        ViewGroup.LayoutParams.MATCH_PARENT)
+                val textInputLayoutParams = LinearLayout.LayoutParams(widthWithPadding,
+                        LinearLayout.LayoutParams.MATCH_PARENT)
 
                 //Add the icon to the Horizontal layout
                 //Set icon if not present (for margins to align ok)
@@ -277,7 +278,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 //The EditText next to the icon
                 val fieldEditText = EditText(this)
                 fieldEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-                val editTextParams = LinearLayout.LayoutParams(
+                val editTextParams = ViewGroup.LayoutParams(
                         widthWithPadding,
                         ViewGroup.LayoutParams.MATCH_PARENT)
                 fieldEditText.layoutParams = editTextParams
@@ -443,7 +444,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
      * @param field The PersonDetailViewField field representation that has its id, type label & options
      * @param value The value of the field to be set to the view.
      */
-    override fun setField(index: Int, fieldUid: Long, field: PersonDetailViewField, value: Any) {
+    override fun setField(index: Int, fieldUid: Long, field: PersonDetailViewField, value: Any?) {
         val impl = UstadMobileSystemImpl.instance
         var label: String? = null
         var labelId = 0
@@ -593,8 +594,8 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         mPresenter!!.addToMap(viewId, label.customFieldUid)
         fieldTextInputLayout.setId(viewId)
         //Edit Text is inside a TextInputLayout
-        val textInputLayoutParams = ViewGroup.LayoutParams(displayWidth,
-                ViewGroup.LayoutParams.MATCH_PARENT)
+        val textInputLayoutParams = LinearLayout.LayoutParams(displayWidth,
+                LinearLayout.LayoutParams.MATCH_PARENT)
 
         val widthWithPadding = displayWidth - dpToPx(28)
         //The EditText
@@ -602,7 +603,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         fieldEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         val editTextParams = LinearLayout.LayoutParams(
                 widthWithPadding,
-                ViewGroup.LayoutParams.MATCH_PARENT)
+                LinearLayout.LayoutParams.MATCH_PARENT)
         fieldEditText.layoutParams = editTextParams
         fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         fieldEditText.setText(value)

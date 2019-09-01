@@ -37,7 +37,7 @@ open class Location() {
 
     var timeZone: String? = null
 
-    var locationActive: Boolean = false
+    var locationActive: Boolean = true
 
     constructor(title: String, description: String) : this() {
         this.title = title

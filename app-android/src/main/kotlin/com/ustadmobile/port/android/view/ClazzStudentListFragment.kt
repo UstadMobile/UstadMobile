@@ -397,6 +397,12 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
             return fragment
         }
 
+        fun newInstance(args: Bundle): ClazzStudentListFragment {
+            val fragment = ClazzStudentListFragment()
+            fragment.arguments = args
+            return fragment
+        }
+
         val DIFF_CALLBACK2: DiffUtil.ItemCallback<PersonWithEnrollment> = object
             : DiffUtil.ItemCallback<PersonWithEnrollment>() {
             override fun areItemsTheSame(oldItem: PersonWithEnrollment,

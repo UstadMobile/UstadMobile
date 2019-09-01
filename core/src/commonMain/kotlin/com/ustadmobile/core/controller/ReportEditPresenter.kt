@@ -234,15 +234,17 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
         args.put(ARG_TO_DATE, toTime.toString())
 
         if (selectedClasses != null && !selectedClasses!!.isEmpty()) {
-            val classesArray = arrayOfNulls<Long>(selectedClasses!!.size)
             selectedClasses!!.toTypedArray()
-            args.put(ARG_CLAZZ_LIST, classesArray.toString())
+
+            val clazzesCSV = ArgumentUtil.convertLongListToStringCSV(selectedClasses!!)
+            args.put(ARG_CLAZZ_LIST, clazzesCSV)
         }
 
         if (selectedLocations != null && !selectedLocations!!.isEmpty()) {
-            val locationsArray = arrayOfNulls<Long>(selectedLocations!!.size)
             selectedLocations!!.toTypedArray()
-            args.put(ARG_LOCATION_LIST, locationsArray.toString())
+
+            val locationsCSV = ArgumentUtil.convertLongListToStringCSV(selectedLocations!!)
+            args.put(ARG_LOCATION_LIST, locationsCSV)
         }
 
         if (thresholdValues != null) {

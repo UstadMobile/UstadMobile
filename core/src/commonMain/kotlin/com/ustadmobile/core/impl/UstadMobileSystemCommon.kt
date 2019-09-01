@@ -1,11 +1,13 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.controller.AddScheduleDialogPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
@@ -425,7 +427,8 @@ open abstract class UstadMobileSystemCommon {
     }
 
     fun scheduleChecks(context: Any) {
-        UmAppDatabase.getInstance(context).scheduledCheckDao.createPendingScheduledChecks()
+        //UmAppDatabase.getInstance(context).scheduledCheckDao.createPendingScheduledChecks()
+        AddScheduleDialogPresenter.createPendingScheduledChecks(UmAppDatabase.getInstance(context).scheduledCheckDao)
     }
 
 

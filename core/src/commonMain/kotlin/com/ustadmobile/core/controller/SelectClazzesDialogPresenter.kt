@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.SelectClazzesDialogView
@@ -29,13 +30,11 @@ class SelectClazzesDialogPresenter(context: Any, arguments: Map<String, String>?
     init {
 
         if (arguments!!.containsKey(ARG_LOCATIONS_SET)) {
-            val locationsArray = arguments!!.get(ARG_LOCATIONS_SET) as LongArray
-            locations = ReportOverallAttendancePresenter.convertLongArray(locationsArray)
+            locations = ArgumentUtil.convertCSVStringToLongList(arguments.get(ARG_LOCATIONS_SET)!!)
         }
 
         if (arguments!!.containsKey(ARG_CLASSES_SET)) {
-            val clazzesSelected = arguments!!.get(ARG_CLASSES_SET) as LongArray
-            selectedClazzesList = ReportOverallAttendancePresenter.convertLongArray(clazzesSelected)
+            selectedClazzesList = ArgumentUtil.convertCSVStringToLongList(arguments.get(ARG_CLASSES_SET)!!)
         }
 
     }
@@ -61,12 +60,14 @@ class SelectClazzesDialogPresenter(context: Any, arguments: Map<String, String>?
         if (locations != null && !locations!!.isEmpty()) {
             GlobalScope.launch {
                 clazzWithEnrollmentUmProvider = repository.clazzDao.findAllClazzesInLocationList(locations!!)
+                view.setClazzListProvider(clazzWithEnrollmentUmProvider!!)
             }
         } else {
             clazzWithEnrollmentUmProvider = repository.clazzDao
                     .findAllClazzes()
+            view.setClazzListProvider(clazzWithEnrollmentUmProvider!!)
         }
-        view.setClazzListProvider(clazzWithEnrollmentUmProvider!!)
+
 
     }
 
