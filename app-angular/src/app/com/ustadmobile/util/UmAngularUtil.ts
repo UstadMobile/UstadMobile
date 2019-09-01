@@ -22,7 +22,7 @@ export class UmAngularUtil {
   }
 
 
-  static localStorageHandler = null;
+   static localStorageHandler: any= {};
 
   /**
    * Key to be used when toolbar title value changes
@@ -79,35 +79,53 @@ export class UmAngularUtil {
     });
   }
 
-  static registerResourceReadyListener(component) {
+  static createEvent(eventType: any, component){
     var originalSetItem = localStorage.setItem;
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
     localStorage.setItem = function (key, value) {
-      const event = new Event('itemInserted');
-      (<any>event).key = key;
-      (<any>event).value = value; 
-      document.dispatchEvent(event);
+      if(key == resourceKey || key == titleKey){
+        const event = new Event(key);
+        (<any>event).key = key;
+        (<any>event).value = value; 
+        document.dispatchEvent(event);
+      }
       originalSetItem.apply(this, arguments);
     };
 
-    this.localStorageHandler = event => {
-      if (event.key == titleKey) {
+    this.localStorageHandler[eventType] = event => {
+      if (event.key == resourceKey) {
+        document.removeEventListener(eventType,this.localStorageHandler[eventType])
+        this.localStorageHandler[eventType] = null;
+        component.onCreate()
+      }else if(event.key == titleKey){
         component.setToolbarTitle(event.value)
-      } else if (event.key == resourceKey) {
-        component.onCreate() 
-      } 
+      }
     };
-
-    document.addEventListener("itemInserted", this.localStorageHandler, false);
   }
 
-  static removeResourceReadyListener(){
-    this.localStorageHandler = null;
+  static registerResourceReadyListener(component) {
+    this.createEvent(this.DISPATCH_RESOURCE, component)
+    document.addEventListener(this.DISPATCH_RESOURCE, this.localStorageHandler[this.DISPATCH_RESOURCE], false); 
+    if(component.systemImpl.getString(component.MessageID.app_name, component.context) != ''){
+      this.fireResouceReady(true)
+    }
+  }
+
+  static registerTitleChangeListener(component) {
+    this.createEvent(this.DISPATCH_TITLE, component)
+    document.addEventListener(this.DISPATCH_TITLE, this.localStorageHandler[this.DISPATCH_TITLE], false); 
+    if(component.systemImpl.getString(component.MessageID.app_name, component.context) != ''){
+      this.fireResouceReady(true)
+    } 
   }
 
   static fireResouceReady(ready: boolean){
     localStorage.setItem(this.DISPATCH_RESOURCE,ready+"")
+  }
+
+  static fireTitleUpdate(title: string){
+     localStorage.setItem(this.DISPATCH_TITLE,title)
   }
 
   static getGoogleChartFormattedData(dataList: any[], component): any{
@@ -162,29 +180,6 @@ export class UmAngularUtil {
       }
     })
     return dataListLength
-  }
-
-  /**
-   * Register resource observer - make sure everything is ready before starting application logical flow.
-   * This applies to both normal navigation to url copy & paste
-   * @param component current component to be observerd
-   */
-  static registerUmObserver(component: any) : Subscription{
-
-    const subscription = component.umService.getUmObserver().subscribe(content => {
-      if (content[UmAngularUtil.DISPATCH_RESOURCE] && component.systemImpl.stringMap) {
-        component.onCreate()
-      }
-
-      if(content[UmAngularUtil.DISPATCH_TITLE]) {
-        component.toolBarTitle = content[UmAngularUtil.DISPATCH_TITLE];
-      }
-    });
-    if(component.MessageID  && component.systemImpl.stringMap){
-      component.onCreate()
-    }
-    
-    return subscription
   }
 
 

@@ -7,6 +7,7 @@ import { OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import core from 'UstadMobile-core';
+import { HomeComponent } from './home/home.component';
 
 export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
@@ -15,7 +16,6 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   protected readonly context: UmContextWrapper;
   public readonly MessageID = null;
   protected viewContext: UmContextWrapper;
-  protected subscription : Subscription;
   public routes = appRountes;
   public toolBarTitle: string = '...';
 
@@ -30,17 +30,13 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   }
 
   setToolbarTitle(title){
-    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
-      UmAngularUtil.DISPATCH_TITLE, title));
+    UmAngularUtil.fireTitleUpdate(title)
   }
 
-  ngOnInit(): void {
-    //Listen for resources being ready
-    this.subscription = UmAngularUtil.registerUmObserver(this)
-  }
+  ngOnInit(): void {}
 
   onCreate(){
-    this.umService.appName = this.getString(this.MessageID.app_name)
+    this.umService.appName = this.getString(this.MessageID.app_name) 
   }
 
   runOnUiThread(runnable){
@@ -57,9 +53,5 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     return this.systemImpl.getString(messageId, this.context)
   }
 
-  ngOnDestroy(){
-    if(this.subscription){
-      this.subscription.unsubscribe();
-    }
-  }
+  ngOnDestroy(){}
 }

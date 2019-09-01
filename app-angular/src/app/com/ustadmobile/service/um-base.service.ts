@@ -1,7 +1,7 @@
 import {UmContextWrapper} from './../util/UmContextWrapper';
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, Subject} from 'rxjs';
+import {Observable, Subject, combineLatest} from 'rxjs';
 import { MzToastService } from 'ngx-materialize';
 import { map } from 'rxjs/operators';
 import { UmAngularUtil } from '../util/UmAngularUtil';
@@ -14,6 +14,8 @@ export class UmBaseService {
   private umObserver = new Subject <any> ();
   private context: UmContextWrapper;
   private directionality: string;
+  systemLocale: any;
+  toolBarTitle: string = ".."
   private umListener = <Observable<any>>this.umObserver;
   public appName: string  = "..." 
 
@@ -22,12 +24,28 @@ export class UmBaseService {
     this.loadAndSaveAppConfig();
   }
 
+  preloadResources(fireWhenReady = true){
+    const loader = combineLatest([this.loadEntries(),this.loadEntryJoins(),
+      this.loadStrings(this.systemLocale)
+    ]);
+    if(fireWhenReady == true){
+      loader.subscribe(_ => {
+        UmAngularUtil.fireResouceReady(true)
+      })
+    }
+    return loader
+  }
+
   /**
    * Set current system language directionality
    * @param directionality current system language directionality
    */
   setSystemDirectionality(directionality){
     this.directionality = directionality;
+  }
+
+  setSystemLocale(locale){
+    this.systemLocale = locale
   }
 
   /**

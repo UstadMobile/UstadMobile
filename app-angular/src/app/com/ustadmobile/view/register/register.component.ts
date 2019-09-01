@@ -3,11 +3,11 @@ import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
-import { Subscription } from 'rxjs';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import core from 'UstadMobile-core';
 import db from 'UstadMobile-lib-database';
+import entity from 'UstadMobile-lib-database-entities';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +16,6 @@ import db from 'UstadMobile-lib-database';
 })
 export class RegisterComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Register2View{
 
-  subscription: Subscription;
   umFormRegister : FormGroup;
   label_wrong_email: string = "";
   label_password_mismatch: string = "";
@@ -46,28 +45,28 @@ export class RegisterComponent extends UmBaseComponent implements core.com.ustad
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
-      this.presenter = new core.com.ustadmobile.core.controller
-        .Register2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
-        this.presenter.onCreate(null);
+      UmAngularUtil.registerResourceReadyListener(this)
     });
+  }
+
+  onCreate(){
+    this.presenter = new core.com.ustadmobile.core.controller.Register2Presenter(
+      this.context, UmAngularUtil.queryParamsToMap(), this);
+    this.presenter.onCreate(null);
+
+    UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.create_new_account))
+    this.label_wrong_email = this.getString(this.MessageID.register_incorrect_email);
+    this.label_password_mismatch = this.getString(this.MessageID.filed_password_no_match);
   }
 
   ngOnInit() {
     super.ngOnInit();
-    this.subscription = this.umService.getUmObserver().subscribe(content =>{
-      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_TITLE,
-        this.getString(this.MessageID.create_new_account))); 
-        this.label_wrong_email = this.getString(this.MessageID.register_incorrect_email);
-        this.label_password_mismatch = this.getString(this.MessageID.filed_password_no_match);
-      }
-    });
   }
 
   startRegistration(){
     this.formValidated = false;
     const formValues = this.umFormRegister.value;
-    const person = new db.ustadmobile.lib.db.entities.Person(formValues.username, 
+    const person = new entity.com.ustadmobile.lib.db.entities.Person(formValues.username, 
       formValues.first_name, formValues.last_name);
       person.emailAddr = formValues.email;
     this.presenter.handleClickRegister("person", formValues.password,this.serverUrl);
@@ -87,7 +86,6 @@ export class RegisterComponent extends UmBaseComponent implements core.com.ustad
   ngOnDestroy(){
     super.ngOnDestroy()
     this.presenter.onDestroy();
-    this.subscription.unsubscribe();
     if (this.navigationSubscription) {  
       this.navigationSubscription.unsubscribe();
     }

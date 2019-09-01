@@ -54,7 +54,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
       this.entries = []; 
-      this.subscription = UmAngularUtil.registerUmObserver(this)
+      UmAngularUtil.registerResourceReadyListener(this)
     }); 
   }
 
@@ -66,22 +66,15 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
       this.presenter.onCreate(null);
       this.setToolbarTitle("...")
     }
+    this.label_language_options = this.getString(this.MessageID.also_available_in);
+    this.label_reading_level = this.getString(this.MessageID.library_reading_level); 
   }
 
   ngOnInit() {
     super.ngOnInit();
     combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins()]).subscribe(responses => {
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
-      this.subscription = UmAngularUtil.registerUmObserver(this)
     })
-
-    //Listen for resources being ready
-    this.subscription = this.umService.getUmObserver().subscribe(content =>{
-      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.label_language_options = this.getString(this.MessageID.also_available_in);
-        this.label_reading_level = this.getString(this.MessageID.library_reading_level); 
-      }
-    });
 
     //setup language spinner/select listener
     this.umFormLanguage.valueChanges.subscribe((form: any) => {
@@ -95,8 +88,9 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
       if(form.category > -1){
          this.presenter.handleClickFilterByCategory(form.category);
        }
-  });
+    });
   }
+
 
   setContentEntryProvider(provider : Observable<any[]>){
     this.entryListObservable = provider;
@@ -106,7 +100,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   openEntry(entry : db.com.ustadmobile.lib.db.entities.ContentEntry) {
-    this.setToolbarTitle(entry.title)
+    UmAngularUtil.fireTitleUpdate(entry.title)
     this.presenter.handleContentEntryClicked(entry);
   }
 

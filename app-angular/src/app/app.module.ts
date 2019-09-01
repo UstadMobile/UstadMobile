@@ -24,6 +24,7 @@ import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treevie
 import { DatePipe } from '@angular/common';
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
+import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog/um-tree-node/um-tree-node.component';
 
 
 @NgModule({
@@ -40,7 +41,8 @@ import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data
     XapiReportOptionsComponent,
     XapiReportDetailsComponent,
     XapiTreeviewDialogComponent,
-    ActionResultDataPipe
+    ActionResultDataPipe,
+    UmTreeNodeComponent
   ],
   imports: [
     BrowserModule,

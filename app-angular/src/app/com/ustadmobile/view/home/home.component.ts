@@ -27,6 +27,7 @@ export class HomeComponent extends UmBaseComponent {
   umFormLanguage: FormGroup;
   navigationSubscription: Subscription;
   showReports = true
+  static toolBarTitle: string = ".."
 
   constructor(private location: Location, umService: UmBaseService,
     router: Router, route: ActivatedRoute, umDb: UmDbMockService, formBuilder: FormBuilder) {
@@ -36,7 +37,6 @@ export class HomeComponent extends UmBaseComponent {
     this.toolbar_arrow = this.umService.isLTRDirectionality() ? "arrow_back" : "arrow_forward";
     this.toolbar_title_class = this.umService.isLTRDirectionality() ? "brand-logo-ltr" : "brand-logo-rtl";
     this.drawer_menu_class = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
-
     this.umFormLanguage = formBuilder.group({
       'language': ['', Validators.required]
     });
@@ -44,7 +44,8 @@ export class HomeComponent extends UmBaseComponent {
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
-        this.subscription =  UmAngularUtil.registerUmObserver(this) 
+        UmAngularUtil.registerResourceReadyListener(this)
+        UmAngularUtil.registerTitleChangeListener(this)
       });
   }
 
@@ -55,8 +56,8 @@ export class HomeComponent extends UmBaseComponent {
         window.open(window.location.origin + "/" + form.language + "/", "_self")
       }
     });
-    this.subscription =  UmAngularUtil.registerUmObserver(this) 
   }
+
 
   onCreate() {
     this.supportedLanguages = util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(
@@ -73,9 +74,16 @@ export class HomeComponent extends UmBaseComponent {
     this.systemImpl.go(route, UmAngularUtil.getRouteArgs(route, this.umDatabase.ROOT_UID), this.context);
   }
 
+  setToolbarTitle(title){
+    console.log(title)
+    this.toolBarTitle = title
+  }
+
   ngOnDestroy(): void {
     super.ngOnDestroy();
-    this.navigationSubscription.unsubscribe();
+    if(this.navigationSubscription){
+      this.navigationSubscription.unsubscribe(); 
+    }
   }
 
 }

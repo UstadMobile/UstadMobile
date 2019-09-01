@@ -83,7 +83,68 @@ export class LocationDao{
 export class ContentEntryParentChildJoinDao{
   constructor(private entryDao){}
   selectTopEntries(){
-    return this.entryDao.findByUidWithContentEntryStatusAsync(1311236)
+    return [
+      {
+        "contentEntryUid": 41250,
+        "title": "magnis dis parturient",
+        "description": "Suspendisse potenti. In eleifend quam a odio.",
+        "entryId": 7064822,
+        "author": "Moritz Lindgren",
+        "publisher": "Marlow Crumbleholme",
+        "licenseType": 81,
+        "licenseName": "vitae",
+        "licenseUrl": "https://ucoz.com/mattis/nibh/ligula/nec/sem.json",
+        "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
+        "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
+        "lastModified": "62-963-5233",
+        "leaf": false
+      },
+      {
+        "contentEntryUid": 72932,
+        "title": "magnis dis parturient",
+        "description": "Suspendisse potenti. In eleifend quam a odio.",
+        "entryId": 7064822,
+        "author": "Moritz Lindgren",
+        "publisher": "Marlow Crumbleholme",
+        "licenseType": 81,
+        "licenseName": "vitae",
+        "licenseUrl": "https://ucoz.com/mattis/nibh/ligula/nec/sem.json",
+        "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
+        "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
+        "lastModified": "62-963-5233",
+        "leaf": false
+      },
+      {
+        "contentEntryUid": 92589,
+        "title": "est phasellus sit amet erat",
+        "description": "In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue.",
+        "entryId": 4850079,
+        "author": "Steffie Limb",
+        "publisher": "Eal Geffe",
+        "licenseType": 42,
+        "licenseName": "ipsum aliquam",
+        "licenseUrl": "https://dmoz.org/augue/quam/sollicitudin/vitae/consectetuer/eget.html",
+        "sourceUrl": "https://tamu.edu/elementum/nullam/varius.png?interdum=sapien&mauris=in&non=sapien&ligula=iaculis&pellentesque=congue&ultrices=vivamus&phasellus=metus&id=arcu&sapien=adipiscing&in=molestie&sapien=hendrerit&iaculis=at&congue=vulputate&vivamus=vitae&metus=nisl&arcu=aenean&adipiscing=lectus&molestie=pellentesque&hendrerit=eget&at=nunc&vulputate=donec&vitae=quis&nisl=orci&aenean=eget&lectus=orci&pellentesque=vehicula&eget=condimentum&nunc=curabitur&donec=in&quis=libero&orci=ut&eget=massa&orci=volutpat&vehicula=convallis&condimentum=morbi&curabitur=odio&in=odio&libero=elementum&ut=eu&massa=interdum",
+        "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
+        "lastModified": "01-794-7396",
+        "leaf": true
+      },
+      {
+        "contentEntryUid": 24995,
+        "title": "est phasellus sit amet erat",
+        "description": "In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue.",
+        "entryId": 4850079,
+        "author": "Steffie Limb",
+        "publisher": "Eal Geffe",
+        "licenseType": 42,
+        "licenseName": "ipsum aliquam",
+        "licenseUrl": "https://dmoz.org/augue/quam/sollicitudin/vitae/consectetuer/eget.html",
+        "sourceUrl": "https://tamu.edu/elementum/nullam/varius.png?interdum=sapien&mauris=in&non=sapien&ligula=iaculis&pellentesque=congue&ultrices=vivamus&phasellus=metus&id=arcu&sapien=adipiscing&in=molestie&sapien=hendrerit&iaculis=at&congue=vulputate&vivamus=vitae&metus=nisl&arcu=aenean&adipiscing=lectus&molestie=pellentesque&hendrerit=eget&at=nunc&vulputate=donec&vitae=quis&nisl=orci&aenean=eget&lectus=orci&pellentesque=vehicula&eget=condimentum&nunc=curabitur&donec=in&quis=libero&orci=ut&eget=massa&orci=volutpat&vehicula=convallis&condimentum=morbi&curabitur=odio&in=odio&libero=elementum&ut=eu&massa=interdum",
+        "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
+        "lastModified": "01-794-7396",
+        "leaf": true
+      }
+    ]
   }
 }
 export class XLangMapEntryDao{

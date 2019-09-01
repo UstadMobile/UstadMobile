@@ -40,17 +40,16 @@ export class LoginComponent extends UmBaseComponent implements core.com.ustadmob
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe(() => {
-      this.subscription = UmAngularUtil.registerUmObserver(this)
+      UmAngularUtil.registerResourceReadyListener(this)
     });
   }
 
   ngOnInit() {
     super.ngOnInit();
-    this.subscription = UmAngularUtil.registerUmObserver(this);
   }
 
   onCreate(){
-    this.setToolbarTitle(this.getString(this.MessageID.login))
+    UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.login))
     this.presenter = new core.com.ustadmobile.core.controller.Login2Presenter(
       this.context, UmAngularUtil.queryParamsToMap(), this);
     this.presenter.onCreate(null);
@@ -77,16 +76,14 @@ export class LoginComponent extends UmBaseComponent implements core.com.ustadmob
   setUsername(username: string){
     this.umFormLogin.value.username = username;
   }
-
+  
   setPassword(password: string){
     this.umFormLogin.value.password = password;
   }
-  
 
   ngOnDestroy(){
     super.ngOnDestroy()
     this.presenter.onDestroy();
-    this.subscription.unsubscribe();
     if (this.navigationSubscription) {  
       this.navigationSubscription.unsubscribe();
     }

@@ -40,19 +40,18 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
     super(umService, router, route, umDb);
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
-        this.subscription = UmAngularUtil.registerUmObserver(this)
+        UmAngularUtil.registerResourceReadyListener(this)
       });
   }
 
   ngOnInit() {
     super.ngOnInit()
-    this.subscription = UmAngularUtil.registerUmObserver(this)
   }
 
   onCreate() {
     super.onCreate()
     if (this.umDatabase.statementDao && this.umDatabase.xLangMapEntryDao) {
-      this.setToolbarTitle(this.getString(this.MessageID.activity_preview_xapi))
+      UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.activity_preview_xapi))
       const args = UmAngularUtil.queryParamsToMap(document.location.search, false)
       this.chartType = JSON.parse(util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(args)[1].value).chartType == 100 ?
         'ColumnChart' : 'LineChart'

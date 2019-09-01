@@ -37,9 +37,7 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umD
 
   this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe(_ => {
-      if (this.umDatabase.contentEntryDao) {
-        this.onCreate();
-      }
+      UmAngularUtil.registerResourceReadyListener(this)
     });
 }
 
@@ -54,11 +52,6 @@ onCreate() {
 
 ngOnInit() {
   super.ngOnInit();
-  this.subscription = this.umService.getUmObserver().subscribe(content => {
-    if (content[UmAngularUtil.DISPATCH_RESOURCE]) {
-      this.onCreate()
-    }
-  });
 }
 
 openEntry() {
@@ -122,8 +115,7 @@ startMonitoringAvailability(monitor, entryUidsToMonitor){}
 stopMonitoringAvailability(monitor){}
 
 ngOnDestroy() {
-  super.ngOnDestroy()
-  this.subscription.unsubscribe();
+  super.ngOnDestroy() 
   if (this.navigationSubscription) {
     this.navigationSubscription.unsubscribe();
   }

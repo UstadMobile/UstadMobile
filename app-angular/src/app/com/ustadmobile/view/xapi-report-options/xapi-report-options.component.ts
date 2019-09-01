@@ -76,14 +76,13 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
 
   this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
-      this.subscription = UmAngularUtil.registerUmObserver(this)
-    }); 
+      UmAngularUtil.registerResourceReadyListener(this)
+  }); 
 }
 
 
 ngOnInit() {
   super.ngOnInit()
-  this.subscription = UmAngularUtil.registerUmObserver(this)
 }
 
 onChanges() {
@@ -141,7 +140,7 @@ onCreate() {
       this.context, UmAngularUtil.getRouteArgs(this.routes.treeView,0), this, this.umDatabase.personDao,
       this.umDatabase.xObjectDao, this.umDatabase.xLangMapEntryDao);
     this.presenter.onCreate(null);
-    this.setToolbarTitle(this.getString(this.MessageID.xapi_options_report_title))
+    UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.xapi_options_report_title))
   }
 }
 
