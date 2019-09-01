@@ -332,5 +332,4 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     }
 
 
-
 }

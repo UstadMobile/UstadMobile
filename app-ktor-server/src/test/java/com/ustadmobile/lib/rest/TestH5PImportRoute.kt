@@ -2,6 +2,8 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.application.install
 import io.ktor.client.HttpClient
@@ -38,6 +40,8 @@ import java.io.IOException
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.util.test.AbstractImportLinkTest
+import io.ktor.client.request.header
+import org.apache.commons.io.FilenameUtils
 
 class TestH5PImportRoute : AbstractImportLinkTest() {
 
@@ -74,6 +78,8 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
 
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", (buffer.size().toString() + "ABC").hashCode())
+                    response.setHeader("Content-Type", if(fileLocation.endsWith(".mp4")) "video/mp4" else "text/html")
+                    response.setHeader("Content-Length", buffer.size())
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 
@@ -178,24 +184,146 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
 
     }
 
-    //20/Aug/19 - commented out as this needs tidied after the video import support was added
-//    @Test
-//    fun givenValidH5P_whenContentDownloaded_checkContainerIsCreated() {
-//
-//        mockServer.setDispatcher(dispatcher)
-//        mockServer.start()
-//
-//        val parent = Files.createTempDirectory("h5p").toFile()
-//
-//        downloadH5PUrl(db, mockServer.url("/json/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent").toString(), -300, parent, null)
-//
-//        val container = db.containerDao.getMostRecentContainerForContentEntry(-300)
-//
-//        Assert.assertTrue("index.json exists", File(parent, "index.json").exists())
-//        Assert.assertTrue("contentEntry has container", container != null)
-//        Assert.assertTrue("", db.containerEntryDao.findByContainer(container!!.containerUid).map { it.cePath }.contains("index.json"))
-//
-//    }
+
+    @Test
+    fun givenH5pContent_whenValidH5p_downloadContentHasAllFiles() {
+
+        runBlocking {
+
+            mockServer.setDispatcher(dispatcher)
+            mockServer.start(8097)
+
+            val parent = Files.createTempDirectory("h5p").toFile()
+
+            val body = IOUtils.toString(javaClass.getResourceAsStream("/com/ustadmobile/lib/rest/h5pimportroute/busyants.html"), "UTF-8")
+
+            val contentEntry = ContentEntry()
+            contentEntry.contentEntryUid = -300
+            db.contentEntryDao.insert(contentEntry)
+
+            val container = Container()
+            container.containerContentEntryUid = contentEntry.contentEntryUid
+            container.mimeType = "text/html"
+            container.fileSize = 11
+            container.lastModified = 1212
+            container.mobileOptimized = true
+            container.containerUid = db.containerDao.insert(container)
+
+
+            downloadH5PUrl(db, "", -300, parent, body, container.containerUid)
+
+            Assert.assertEquals("content size matches container Entry ", 4, db.containerEntryDao.findByContainer(container.containerUid).size)
+
+
+        }
+
+    }
+
+
+
+    @Test
+    fun givenValidH5P_whenContentDownloaded_checkContainerIsCreated() {
+
+        mockServer.setDispatcher(dispatcher)
+        mockServer.start()
+
+        val parent = Files.createTempDirectory("h5p").toFile()
+
+        val body = IOUtils.toString(javaClass.getResourceAsStream("/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent"), "UTF-8")
+
+        val contentEntry = ContentEntry()
+        contentEntry.contentEntryUid = -300
+        db.contentEntryDao.insert(contentEntry)
+
+        val container = Container()
+        container.containerContentEntryUid = contentEntry.contentEntryUid
+        container.mimeType = "text/html"
+        container.fileSize = 11
+        container.lastModified = 1212
+        container.mobileOptimized = true
+        container.containerUid = db.containerDao.insert(container)
+
+
+        downloadH5PUrl(db, mockServer.url("/json/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent").toString(), -300, parent, body, container.containerUid)
+
+        val containerDb = db.containerDao.getMostRecentContainerForContentEntry(-300)
+
+        Assert.assertTrue("index.json exists", File(parent, "index.json").exists())
+        Assert.assertTrue("contentEntry has container", containerDb != null)
+        Assert.assertTrue("", db.containerEntryDao.findByContainer(container!!.containerUid).map { it.cePath }.contains("index.json"))
+
+    }
+
+    @Test
+    fun giveVideoUrlAndContentEntry_whenUrlFileSizeTooBig_thenReturnBadRequestWithMessageInvalid() {
+        runBlocking {
+            val httpClient = HttpClient() {
+                install(JsonFeature)
+            }
+
+            mockServer.enqueue(MockResponse().addHeader("Content-Type", "video/mp4").setHeader("Content-Length", 104857600).setResponseCode(200))
+            mockServer.start()
+
+
+            val response = httpClient.get<HttpResponse>("http://localhost:8096/ImportH5P/importVideo") {
+                parameter("hp5Url", mockServer.url("").toString())
+                parameter("parentUid", -1)
+                parameter("title", "Video Title")
+            }
+
+            Assert.assertEquals("Bad Request", 400, response.status.value)
+
+        }
+
+    }
+
+    @Test
+    fun giveVideoUrlAndContentEntry_whenContentTypeIsNotVideo_thenReturnBadRequestWithMessageInvalid() {
+        runBlocking {
+            val httpClient = HttpClient() {
+                install(JsonFeature)
+            }
+
+            mockServer.enqueue(MockResponse().addHeader("Content-Type", "text/html").setResponseCode(200))
+            mockServer.start()
+
+
+            val response = httpClient.get<HttpResponse>("http://localhost:8096/ImportH5P/importVideo") {
+                parameter("hp5Url", mockServer.url("").toString())
+                parameter("parentUid", -1)
+                parameter("title", "Video Title")
+            }
+
+            Assert.assertEquals("Bad Request", 400, response.status.value)
+
+        }
+
+    }
+
+
+    @Test
+    fun giveVideoUrlAndContentEntry_whenValid_thenReturnH5PImport() {
+        runBlocking {
+            val httpClient = HttpClient() {
+                install(JsonFeature)
+            }
+            mockServer.setDispatcher(dispatcher)
+            mockServer.start()
+
+            val response = httpClient.get<H5PImportData>("http://localhost:8096/ImportH5P/importVideo") {
+                parameter("hp5Url", mockServer.url("/content/com/ustadmobile/lib/rest/h5pimportroute/video.mp4").toString())
+                parameter("parentUid", -100)
+                parameter("title", "Video Title")
+            }
+
+            val containerDb = db.containerDao.getMostRecentContainerForContentEntry(response.contentEntry.contentEntryUid)
+            Assert.assertTrue("contentEntry has container", containerDb != null)
+            Assert.assertTrue("", db.containerEntryDao.findByContainer(response.container.containerUid).map { it.cePath }.contains("video.mp4"))
+
+        }
+
+    }
+
 
     @Test
     fun findLinks() {
@@ -208,7 +336,6 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
         Assert.assertEquals("list count matches", 11, list.size)
 
     }
-
 
 
 }

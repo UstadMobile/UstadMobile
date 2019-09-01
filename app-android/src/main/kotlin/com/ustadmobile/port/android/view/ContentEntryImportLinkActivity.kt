@@ -22,6 +22,9 @@ import com.ustadmobile.core.view.ContentEntryImportLinkView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import android.R.id
+import androidx.core.content.ContextCompat.getSystemService
+
 
 class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLinkView {
 
@@ -89,6 +92,19 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val item = menu?.findItem(R.id.import_link_done)
+
+        item?.isEnabled = presenter.isDoneEnabled
+        if (presenter.isDoneEnabled) {
+            item?.icon?.alpha = 255
+        } else {
+            item?.icon?.alpha = 130
+        }
+
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.import_link_done -> {
@@ -138,10 +154,8 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         }
     }
 
-    override fun enableDisableDoneButton(enable: Boolean) {
-        runOnUiThread {
-            findViewById<View>(R.id.import_link_done).isEnabled = enable
-        }
+    override fun checkDoneButton() {
+        invalidateOptionsMenu()
     }
 
     override fun enableDisableEditText(enable: Boolean) {
