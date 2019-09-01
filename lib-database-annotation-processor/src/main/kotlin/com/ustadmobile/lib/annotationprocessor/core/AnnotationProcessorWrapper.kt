@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
+import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JS_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JVM_DIRS
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_KTOR_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_SOURCE_PATH
@@ -12,11 +13,11 @@ import javax.tools.Diagnostic
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedOptions(value = [OPTION_JVM_DIRS, OPTION_ANDROID_OUTPUT, OPTION_KTOR_OUTPUT,
-    OPTION_SOURCE_PATH, "kapt.kotlin.generated"])
+    OPTION_JS_OUTPUT, OPTION_SOURCE_PATH, "kapt.kotlin.generated"])
 class AnnotationProcessorWrapper: AbstractProcessor() {
 
     val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(),
-            DbProcessorRepository(), DbProcessorSync(), DbProcessorAndroid())
+            DbProcessorRepository(), DbProcessorSync(), DbProcessorAndroid(), DbProcessorJs())
 
     lateinit var messager: Messager
 
@@ -44,6 +45,8 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
         const val OPTION_ANDROID_OUTPUT = "doordb_android_out"
 
         const val OPTION_KTOR_OUTPUT = "doordb_ktor_out"
+
+        const val OPTION_JS_OUTPUT = "doordb_js_out"
     }
 
 }

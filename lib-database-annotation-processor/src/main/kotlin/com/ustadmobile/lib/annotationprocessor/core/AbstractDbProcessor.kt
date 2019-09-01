@@ -262,7 +262,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                     HttpResponse::class)
             .beginControlFlow("url")
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
-            .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"", daoName, methodName)
+            .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
 

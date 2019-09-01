@@ -1,4 +1,4 @@
-package com.ustadmobile.core.controller
+Hi - package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.AVG_DURATION
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.CONTENT_ENTRY
