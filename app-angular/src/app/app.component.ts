@@ -42,13 +42,11 @@ export class AppComponent extends UmBaseComponent {
     const systemLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
     this.showLoading = window.location.search == "";
 
-    //Load all resources async
-    combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins(),this.umService.loadLanguages(),
-      this.umService.loadStrings(systemLocale),
+    //Load all resources async 
+    combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins(),this.umService.loadStrings(systemLocale)
     ]).subscribe(responses => {
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
-      this.umService.supportedLanguages = responses[2]
-      this.systemImpl.setLocaleStrings(responses[3])
+      this.systemImpl.setLocaleStrings(responses[2])
       this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
         UmAngularUtil.DISPATCH_RESOURCE, true))
         if(UmAngularUtil.showSplashScreen()){ 

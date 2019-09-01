@@ -15,6 +15,8 @@ actual abstract class DoorDatabase {
 
     protected lateinit var dataSource: DataSource
 
+    abstract val dbVersion: Int
+
     var jdbcDbType: Int = -1
 
     var arraySupported: Boolean = false
@@ -138,7 +140,7 @@ actual abstract class DoorDatabase {
     }
 
     companion object {
-        const val DBINFO_TABLENAME = "_door_info"
+        const val DBINFO_TABLENAME = "_doorwayinfo"
 
         const val POSTGRES_SELECT_IN_REPLACEMENT = "IN (SELECT UNNEST(?))"
 

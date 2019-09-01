@@ -20,4 +20,10 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         return this
     }
 
+    actual fun addMigrations(vararg migrations: DoorMigration): DatabaseBuilder<T> {
+        //do nothing
+
+        return this
+    }
+
 }

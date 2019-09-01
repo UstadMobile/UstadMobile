@@ -31,6 +31,7 @@
 package com.ustadmobile.lib.util
 
 import kotlinx.io.ByteArrayOutputStream
+import kotlinx.serialization.json.json
 import kotlinx.serialization.stringFromUtf8Bytes
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
@@ -561,7 +562,7 @@ object UMUtil {
     @JvmStatic
     fun jsArrayToKotlinList(array: Any): Any{
         val jsArray = array as Array<Any>
-        return array.toList()
+        return jsArray.toList()
     }
 
     @JsName("kotlinListToJsArray")
@@ -576,6 +577,18 @@ object UMUtil {
         val categories = mutableListOf<Any>()
         (ArrayList(categoriesMap.values)).forEach { list -> categories.add(list.toTypedArray()) }
         return categories.toTypedArray()
+    }
+
+    @JsName("kotlinMapToJsArray")
+    @JvmStatic
+    fun kotlinMapToJsArray(map: HashMap<String,String>): Any{
+        val outList = mutableListOf<Any>()
+        map.entries.forEach {
+            outList.add(object {
+                var key =  it.key
+                var value = it.value})
+        }
+        return outList.toTypedArray()
     }
 
 

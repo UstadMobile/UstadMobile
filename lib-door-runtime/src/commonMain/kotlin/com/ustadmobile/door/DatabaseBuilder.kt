@@ -14,8 +14,9 @@ expect class DatabaseBuilder<T: DoorDatabase> {
 
     fun addCallback(callback: DoorDatabaseCallback): DatabaseBuilder<T>
 
-    fun build() : T
+    fun addMigrations(vararg migrations: DoorMigration): DatabaseBuilder<T>
 
+    fun build() : T
 
 
 }

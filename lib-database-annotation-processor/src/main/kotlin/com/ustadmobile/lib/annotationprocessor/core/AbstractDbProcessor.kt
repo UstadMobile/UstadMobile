@@ -262,7 +262,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                     HttpResponse::class)
             .beginControlFlow("url")
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
-            .add("path($dbPathVarName, %S, %S)\n", daoName, methodName)
+            .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
 
@@ -515,7 +515,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             if(pkAutoGenerate) {
                 when(dbType) {
                     DoorDbType.SQLITE -> sql += " INTEGER "
-                    DoorDbType.POSTGRES -> sql += " SERIAL "
+                    DoorDbType.POSTGRES -> sql += (if(fieldEl.type == LONG) { " BIGSERIAL " } else { " SERIAL " })
                 }
             }else {
                 sql += " ${fieldEl.type.toSqlType(dbType)} "
@@ -536,7 +536,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return sql
     }
 
-    protected fun generateCreateIndicesCodeBlock(indexes: Array<Index>, tableName: String,
+    protected fun generateCreateIndicesCodeBlock(indexes: Array<IndexMirror>, tableName: String,
                                             execSqlFnName: String): CodeBlock {
         val codeBlock = CodeBlock.builder()
         indexes.forEach {
@@ -594,6 +594,34 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     """.trimMargin())
                 }
 
+            }
+
+            DoorDbType.POSTGRES -> {
+                listOf("m", "l").forEach {
+                    codeBlock.add("$execSqlFn(%S)\n",
+                        "CREATE SEQUENCE IF NOT EXISTS ${syncableEntityInfo.syncableEntity.simpleName}_${it}csn_seq")
+                }
+
+                codeBlock.add("$execSqlFn(%S)\n", """CREATE OR REPLACE FUNCTION 
+                    | inccsn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
+                    | BEGIN  
+                    | UPDATE ${syncableEntityInfo.syncableEntity.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
+                    | ELSE NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_lcsn_seq') END),
+                    | ${syncableEntityInfo.entityMasterCsnField.name} = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
+                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
+                    | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
+                    | RETURN null;
+                    | END $$
+                    | LANGUAGE plpgsql
+                """.trimMargin())
+                        .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
+                            |AFTER UPDATE OR INSERT ON ${syncableEntityInfo.syncableEntity.simpleName} 
+                            |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                            |EXECUTE PROCEDURE inccsn_${syncableEntityInfo.tableId}_fn()
+                        """.trimMargin())
             }
         }
 
@@ -900,13 +928,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
             val bindCodeBlock = CodeBlock.builder()
             var fieldIndex = 1
+            val pkProp = entityTypeSpec.propertySpecs
+                    .first { it.annotations.any { it.className == PrimaryKey::class.asClassName()} }
 
             entityTypeSpec.propertySpecs.forEach { prop ->
                 fieldNames.add(prop.name)
                 val pkAnnotation = prop.annotations.firstOrNull { it.className == PrimaryKey::class.asClassName() }
                 val setterMethodName = getPreparedStatementSetterGetterTypeName(prop.type)
                 if(pkAnnotation != null && pkAnnotation.members.findBooleanMemberValue("autoGenerate") ?: false) {
-                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeSpec.name}'))\" else -> \"?\"} }")
+                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> " +
+                            "\"COALESCE(?,nextval('${entityTypeSpec.name}_${prop.name}_seq'))\" else -> \"?\"} }")
                     bindCodeBlock.add("when(entity.${prop.name}){ ${defaultVal(prop.type)} " +
                             "-> stmt.setObject(${fieldIndex}, null) " +
                             "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${prop.name})  }\n")
@@ -935,16 +966,21 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ""
             }
 
+            val autoGenerateSuffix = " \${when{ _db.jdbcDbType == DoorDbType.POSTGRES && returnsId -> " +
+                    "\"·RETURNING·${pkProp.name}·\"  else -> \"\"} } "
+
             val sql = """
                 $statementClause INTO ${entityTypeSpec.name} (${fieldNames.joinToString()})
                 VALUES (${parameterHolders.joinToString()})
                 $upsertSuffix
+                $autoGenerateSuffix
                 """.trimIndent()
 
             val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
                     .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityClassName))
                     .addSuperclassConstructorParameter("_db.jdbcDbType")
                     .addFunction(FunSpec.builder("makeSql")
+                            .addParameter("returnsId", BOOLEAN)
                             .addModifiers(KModifier.OVERRIDE)
                             .addCode("return \"\"\"%L\"\"\"", sql).build())
                     .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
@@ -1160,7 +1196,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             CLIENT_GET_MEMBER_NAME)
                             .beginControlFlow("url")
                             .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
-                            .add("path(_dbPath, %S, %S)\n", daoName,
+                            .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
                                     "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
                             .endControlFlow()
                             .add("%M(%S, _requestId)\n",

@@ -3,6 +3,7 @@ import util from 'UstadMobile-lib-util';
 import db from 'UstadMobile-lib-database';
 import door from 'UstadMobile-lib-door-runtime';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
+import core from 'UstadMobile-core';
 
 @Injectable({
   providedIn: 'root'
@@ -39,14 +40,38 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
 
 export class XObjectDao{
 
+  findListOfObjectUidFromContentEntryUid(contentEntryUid){
+    return [100, 200, 300, 400]
+  }
 }
 
 export class XLangMapEntryDao{
-
+  getAllVerbsInList(uidList){
+    return [
+      {verbLangMapUid:1,valueLangMap:"Do"},
+      {verbLangMapUid:2,valueLangMap:"DoWhat"},
+      {verbLangMapUid:3,valueLangMap:"DoWhatElse"},
+      {verbLangMapUid:4,valueLangMap:"DoThis"}
+    ]
+  }
 }
 
 export class PersonDao{
-  
+
+  personList = [
+    {personUid:1,name:"Jane Doe"},
+    {personUid:2,name:"Frank Doe"},
+    {personUid:3,name:"James Doe"},
+    {personUid:4,name:"Keneth Doe"}
+
+  ];
+  getAllPersonsInList(uidList){
+    return this.personList;
+  }
+
+  getAllPersons(names,ids){
+    return this.personList
+  }
 }
 
  export class ContentEntryDao{
@@ -171,6 +196,23 @@ export interface DistinctCategorySchema {
   contentCategorySchemaUid: number
   schemaName: String
 }
+
+const dashbord = [
+  {
+    "chartType":100,
+    "yAxis": 200,
+    "xAxis": 302 ,
+    "subGroup": 306,
+    "whoFilterList": [100],
+    "didFilterList": [200],
+    "objectsList": [300],
+    "entriesList": [400],
+    "fromDate": 3,
+    "toDate": 4,
+    "locationsList": [2,0,3],
+    "reportTitle": "My personal report"
+  }
+]
 
 const languages = {
   "1311236": [{
