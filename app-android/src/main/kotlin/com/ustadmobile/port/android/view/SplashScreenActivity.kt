@@ -156,16 +156,6 @@ class SplashScreenActivity : SplashView, UstadBaseActivity(), DialogInterface.On
                 ClazzLogScheduleWorker.getNextClazzLogScheduleDueTime())
     }
 
-    /**
-     * Calls startUi to be run. This is usually called after we have checked permissions.
-     */
-    fun startTheUI() {
-        Handler().postDelayed(
-                {
-                    UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
-                }, 0)
-    }
-
     override fun startUi(delay: Boolean, animate: Boolean) {
         Handler().postDelayed({
             UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
