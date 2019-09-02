@@ -29,7 +29,7 @@ import java.util.*
 /**
  * PeopleListFragment responsible for showing people list on the people bottom navigation
  */
-class PeopleListFragment : UstadBaseFragment(), PeopleListView {
+class PeopleListFragment : UstadBaseFragment, PeopleListView {
     override val viewContext: Any
         get() = context!!
 
@@ -137,6 +137,17 @@ class PeopleListFragment : UstadBaseFragment(), PeopleListView {
                 R.layout.spinner_item, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_person_black_24dp
+        title = R.string.bottomnav_people_title
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {

@@ -1,5 +1,7 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.model.NavigationItem
+
 /**
  * Core view for main application base point - show bottom navigation and its items
  */
@@ -28,6 +30,12 @@ interface BasePointView2 : UstadView {
     fun forceSync()
 
     fun showMessage(message: String)
+
+    fun setupNavigation(items: List<NavigationItem>)
+
+    fun showDownloadAllButton(show:Boolean)
+
+    fun loadProfileIcon(profileUrl: String);
 
     companion object {
 

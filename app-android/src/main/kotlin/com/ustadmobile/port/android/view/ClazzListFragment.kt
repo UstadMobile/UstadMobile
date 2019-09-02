@@ -30,7 +30,7 @@ import java.util.*
 /**
  * ClazzListFragment Android fragment extends UstadBaseFragment
  */
-class ClazzListFragment : UstadBaseFragment(), ClazzListView {
+class ClazzListFragment : UstadBaseFragment, ClazzListView {
     override val viewContext: Any
         get() = context!!
 
@@ -187,6 +187,17 @@ class ClazzListFragment : UstadBaseFragment(), ClazzListView {
             ).show()
         })
 
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_group_black_24dp
+        title = R.string.bottomnav_classes_title
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {

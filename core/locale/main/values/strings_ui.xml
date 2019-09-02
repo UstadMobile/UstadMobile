@@ -355,5 +355,14 @@
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
 
+    <string name="courses">Courses</string>
+    <string name="content">Content</string>
+
+    <string name="bottomnav_feed_title">Feed</string>
+    <string name="bottomnav_classes_title">Classes</string>
+    <string name="bottomnav_people_title">People</string>
+    <string name="bottomnav_reports_title">Reports</string>
+    <string name="bottomnav_content_title">Content</string>
+
 
 </resources>

@@ -31,7 +31,7 @@ import java.util.*
  * FeedListFragment Android fragment extends UstadBaseFragment - fragment responsible for displaying
  * the feed page and actions on them depending on the feed.
  */
-class FeedListFragment : UstadBaseFragment(), FeedListView,
+class FeedListFragment : UstadBaseFragment, FeedListView,
         RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
     override val viewContext: Any
         get() = context!!
@@ -202,6 +202,17 @@ class FeedListFragment : UstadBaseFragment(), FeedListView,
         }
     }
 
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_today_black_48dp
+        title = R.string.bottomnav_feed_title
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
+    }
+
     companion object {
 
         /**
@@ -218,6 +229,7 @@ class FeedListFragment : UstadBaseFragment(), FeedListView,
                 return oldItem.feedEntryUid == newItem.feedEntryUid
             }
         }
+
 
         /**
          * Generates a new Fragment for a page fragment

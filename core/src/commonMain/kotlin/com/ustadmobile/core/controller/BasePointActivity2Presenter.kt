@@ -2,12 +2,16 @@ package com.ustadmobile.core.controller
 
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.model.NavigationItem
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.Login2View.Companion.ARG_STARTSYNCING
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Runnable
 
 class BasePointActivity2Presenter
 /**
@@ -22,6 +26,10 @@ class BasePointActivity2Presenter
 
     //Database repository
     internal lateinit var repository: UmAppDatabase
+
+    private var account: UmAccount? = null
+
+    private var showDownloadAll = false
 
     /**
      * Gets sync started flag
@@ -119,6 +127,50 @@ class BasePointActivity2Presenter
         impl.go(AboutView.VIEW_NAME, args, context)
     }
 
+
+    fun handleShowDownloadButton(show: Boolean){
+        view.runOnUiThread(Runnable {
+            view.showDownloadAllButton(show && showDownloadAll)
+        })
+    }
+
+
+    fun handleDownloadAllClicked(){
+        val args = HashMap<String, String>()
+        args["contentEntryUid"] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
+        impl.go("DownloadDialog", args, context)
+    }
+
+    fun handleClickPersonIcon(){
+        val args = HashMap<String, String?>()
+        args.putAll(arguments)
+        impl.go(if(account != null && account!!.personUid != 0L) UserProfileView.VIEW_NAME
+        else LoginView.VIEW_NAME , args, context)
+    }
+
+    override fun onCreate(savedState: Map<String, String?>?) {
+        super.onCreate(savedState)
+
+        account = UmAccountManager.getActiveAccount(context)
+
+        view.runOnUiThread(Runnable {
+            view.loadProfileIcon(if(account == null) "" else "")
+        })
+
+        val navItemsString = impl.getAppConfigString(
+                AppConfig.NAVIGATION_ITEMS, null, context)
+
+        if(navItemsString!=null){
+            val items:MutableList<NavigationItem> = mutableListOf<NavigationItem>()
+            val split = navItemsString.split(":")
+            for(s:String in split){
+                val navItem = NavigationItem(s, HashMap<String, String>(), "Title")
+                items.add(navItem)
+            }
+            view.setupNavigation(items)
+        }
+    }
+
     /**
      * Confirm that user wants to share the app which will get the app set up file and share it
      * upon getting it from System Impl.
@@ -137,6 +189,10 @@ class BasePointActivity2Presenter
                 print(exception!!.message)
             }
         })
+    }
+
+    companion object {
+        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
     }
 
 }

@@ -5,6 +5,7 @@ import android.view.MenuItem
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.widget.Toolbar
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -22,6 +23,8 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     private lateinit var languageName: TextView
 
+//    private var toolbar: Toolbar? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_profile)
@@ -30,6 +33,8 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         languageOption = findViewById(R.id.activity_user_profile_language_ll)
         languageName = findViewById(R.id.activity_user_profile_language_selection)
 
+//        toolbar = findViewById(R.id.activity_user_profile_toolbar)
+//        setSupportActionBar(toolbar)
         setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

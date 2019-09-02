@@ -66,11 +66,6 @@ class SplashScreenActivity : SplashView, UstadBaseActivity(), DialogInterface.On
         checkPermissions()
     }
 
-    override fun onStart() {
-        super.onStart()
-        startTheUI()
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if(id==R.id.action_leavecontainer){
@@ -151,7 +146,7 @@ class SplashScreenActivity : SplashView, UstadBaseActivity(), DialogInterface.On
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         queueClazzLogScheduleWorker()
-        startTheUI()
+        //startTheUI()
 
     }
 

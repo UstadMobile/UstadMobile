@@ -12,7 +12,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.BaseReportView
 import java.util.*
 
-class ReportSelectionFragment : UstadBaseFragment(), BaseReportView {
+class ReportSelectionFragment : UstadBaseFragment, BaseReportView {
     override val viewContext: Any
         get() = context!!
 
@@ -86,6 +86,17 @@ class ReportSelectionFragment : UstadBaseFragment(), BaseReportView {
 
     override fun finish() {
 
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_insert_chart_black_24dp
+        title = R.string.bottomnav_reports_title
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {
