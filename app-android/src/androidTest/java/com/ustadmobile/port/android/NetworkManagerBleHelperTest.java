@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 
 import androidx.test.filters.LargeTest;
+import androidx.test.filters.RequiresDevice;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.GrantPermissionRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -41,6 +42,7 @@ public class NetworkManagerBleHelperTest {
     }
 
 
+    @RequiresDevice
     @Test
     public void givenConfiguredNetwork_whenRemoveNetworkCalled_shouldRemoveTheNetworkFromTheList(){
 

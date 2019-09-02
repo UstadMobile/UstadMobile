@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.port.android.view.WebChunkActivity
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory
@@ -68,9 +69,9 @@ class WebChunkEspressoTest {
         val app = UmAppDatabase.getInstance(context)
         val statusDao = app.contentEntryStatusDao
 
-        dir = Environment.getExternalStorageDirectory()
-        tmpDir = Files.createTempDirectory("testWebChunk").toFile()
-        tmpDir!!.mkdirs()
+
+        tmpDir = UmFileUtilSe.makeTempDir("testWebChunk",
+                "" + System.currentTimeMillis())
 
         val countingFolder = File(tmpDir, "counting-out")
         countingFolder.mkdirs()

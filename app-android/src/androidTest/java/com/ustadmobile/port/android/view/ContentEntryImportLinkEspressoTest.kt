@@ -79,6 +79,8 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText("hello"), ViewActions.closeSoftKeyboard())
 
+        Thread.sleep(500)
+
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
     }
@@ -99,6 +101,8 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(mockWebServer.url("/noh5p").toString()), ViewActions.closeSoftKeyboard())
+
+        Thread.sleep(500)
 
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
@@ -177,8 +181,11 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
 
+        Thread.sleep(250)
+
         runBlocking {
 
+            delay(250)
             onView(withId(R.id.import_link_done)).perform(click())
             delay(500)
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
