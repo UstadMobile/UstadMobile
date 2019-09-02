@@ -1,9 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.asTypeName
+import com.squareup.kotlinpoet.*
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement

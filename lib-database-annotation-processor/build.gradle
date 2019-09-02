@@ -18,7 +18,7 @@ kapt {
     arguments {
         arg("doordb_android_out", "$buildDir/generated/source/doordb-android")
         arg("doordb_source_path", "$projectDir/src/test/kotlin")
-        arg("doordb_js_out", "$projectDir/generated/source/doordbJs")
+        arg("doordb_js_out", "$buildDir/generated/source/doordbJs")
 
         //Uncomment lines below to allow debugging on generated source code.
 //        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")

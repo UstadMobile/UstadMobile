@@ -1,14 +1,31 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Dao
+import androidx.room.Database
 import com.squareup.kotlinpoet.*
+import io.ktor.client.HttpClient
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import javax.tools.Diagnostic
+
+private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(): TypeSpec.Builder {
+    addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
+            .initializer("_httpClient").build())
+    addProperty(PropertySpec.builder("_endpoint", String::class)
+            .initializer("_endpoint").build())
+    addProperty(PropertySpec.builder("_dbPath", String::class)
+            .initializer("_dbPath").build())
+    primaryConstructor(FunSpec.constructorBuilder()
+            .addParameter("_httpClient", HttpClient::class)
+            .addParameter("_endpoint", String::class)
+            .addParameter("_dbPath", String::class)
+            .build())
+
+    return this
+}
 
 class DbProcessorJs : AbstractDbProcessor(){
 
@@ -17,6 +34,11 @@ class DbProcessorJs : AbstractDbProcessor(){
         if (processingEnv.options[AnnotationProcessorWrapper.OPTION_JS_OUTPUT] == null) {
             //skip output
             return true
+        }
+
+        roundEnv.getElementsAnnotatedWith(Database::class.java).map {it as TypeElement}.forEach { dbEl ->
+            writeFileSpecToOutputDirs(generateDbJsImpl(dbEl),
+                    AnnotationProcessorWrapper.OPTION_JS_OUTPUT, false)
         }
 
         roundEnv.getElementsAnnotatedWith(Dao::class.java).forEach { daoEl ->
@@ -28,13 +50,49 @@ class DbProcessorJs : AbstractDbProcessor(){
         return true
     }
 
+
+    fun generateDbJsImpl(dbTypeEl: TypeElement) : FileSpec {
+        val dbTypeClassName = dbTypeEl.asClassName()
+        val dbType = dbTypeEl.asType() as DeclaredType
+        val implFileSpec = FileSpec.builder(dbTypeClassName.packageName,
+                "${dbTypeClassName.simpleName}$SUFFIX_JS_IMPL")
+        val implTypeSpec = TypeSpec.classBuilder(implFileSpec.name)
+                .addDbJsImplPropsAndConstructor()
+
+
+        val daoGetterMethods = methodsToImplement(dbTypeEl, dbType, processingEnv)
+                .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }
+
+        daoGetterMethods.forEach {
+            val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
+            if(daoTypeEl == null)
+                return@forEach
+
+            val daoTypeClassName = daoTypeEl.asClassName()
+
+            val daoJsImplClassName = ClassName(daoTypeClassName.packageName,
+                    "${daoTypeClassName.simpleName}$SUFFIX_JS_IMPL")
+
+            implTypeSpec.addProperty(PropertySpec.builder("_${daoTypeClassName.simpleName}",
+                    daoTypeClassName)
+                    .delegate("lazy { %T(_httpClient, _endpoint, _dbPath) }", daoJsImplClassName)
+                    .build())
+
+            implTypeSpec.addAccessorOverride(it, CodeBlock.of("return _${daoTypeClassName.simpleName}\n"))
+        }
+
+        return implFileSpec.addType(implTypeSpec.build()).build()
+    }
+
+
     fun generateDaoRepositoryClass(daoTypeEl: TypeElement): FileSpec {
         val daoTypeClassName = daoTypeEl.asClassName()
         val daoType = daoTypeEl.asType()
         val daoImplFile = FileSpec.builder(daoTypeClassName.packageName,
-                "${daoTypeEl.simpleName}$SUFFIX_JS_DAO")
+                "${daoTypeEl.simpleName}$SUFFIX_JS_IMPL")
 
         val daoTypeSpec = TypeSpec.classBuilder(daoTypeClassName.simpleName)
+                .addDbJsImplPropsAndConstructor()
 
         methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv).forEach {daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
@@ -57,18 +115,24 @@ class DbProcessorJs : AbstractDbProcessor(){
 
             daoFunSpec.addAnnotations(daoMethodEl.annotationMirrors.map { AnnotationSpec.get(it) })
 
-            var codeBlock = generateKtorRequestCodeBlockForMethod(
-                    daoName = daoTypeClassName.simpleName,
-                    dbPathVarName = "_dbPath",
-                    methodName = daoSubEl.simpleName.toString(),
-                    httpResultType = resultType,
-                    params = daoFunSpec.parameters)
+            if(daoMethodResolved.parameterTypes.any { isContinuationParam(it.asTypeName())}) {
+                var codeBlock = generateKtorRequestCodeBlockForMethod(
+                        daoName = daoTypeClassName.simpleName,
+                        dbPathVarName = "_dbPath",
+                        methodName = daoSubEl.simpleName.toString(),
+                        httpResultType = resultType,
+                        params = daoFunSpec.parameters)
 
-            if(returnTypeResolved != UNIT) {
-                codeBlock = CodeBlock.builder().add(codeBlock).add("return _httpResult\n").build()
+                if(returnTypeResolved != UNIT) {
+                    codeBlock = CodeBlock.builder().add(codeBlock).add("return _httpResult\n").build()
+                }
+
+                overrideFunSpec.addCode(codeBlock)
+            }else {
+                overrideFunSpec.addCode("throw %T(%S)\n", IllegalStateException::class,
+                        "Javascript can only access DAO functions which are suspended or return LiveData/DataSource")
             }
 
-            overrideFunSpec.addCode(codeBlock)
             daoTypeSpec.addFunction(overrideFunSpec.build())
         }
 
@@ -78,7 +142,7 @@ class DbProcessorJs : AbstractDbProcessor(){
     }
 
     companion object {
-        const val SUFFIX_JS_DAO = "_JsDaoImpl"
+        const val SUFFIX_JS_IMPL = "_JsImpl"
     }
 
 

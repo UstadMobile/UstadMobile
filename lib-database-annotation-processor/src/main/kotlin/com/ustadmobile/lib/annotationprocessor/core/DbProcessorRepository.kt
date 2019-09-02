@@ -1,13 +1,10 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import androidx.paging.DataSource
 import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
-import java.io.File
-import java.util.*
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -18,7 +15,6 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
-import kotlinx.coroutines.GlobalScope
 import kotlin.reflect.KClass
 
 
@@ -208,16 +204,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
         methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
             .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
 
-            var daoFromDbGetter = ""
             val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
             if(daoTypeEl == null)
                 return@forEach
-
-            if(it.simpleName.toString().startsWith("get")) {
-                daoFromDbGetter += it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
-            }else {
-                daoFromDbGetter += "${it.simpleName}()"
-            }
 
             val repoImplClassName = ClassName(pkgNameOfElement(daoTypeEl, processingEnv),
                     "${daoTypeEl.simpleName}_$SUFFIX_REPOSITORY")
@@ -228,19 +217,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
             }
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  daoTypeEl.asType().asTypeName())
-                    .delegate("lazy { %T(_db.$daoFromDbGetter, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
-                            repoImplClassName).build())
-
-            if(it.simpleName.toString().startsWith("get")) {
-                val propName = it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
-                val getterFunSpec = FunSpec.getterBuilder().addStatement("return _${daoTypeEl.simpleName}")
-                dbRepoType.addProperty(PropertySpec.builder(propName, daoTypeEl.asType().asTypeName(),
-                        KModifier.OVERRIDE).getter(getterFunSpec.build()).build())
-            }else {
-                dbRepoType.addFunction(FunSpec.overriding(it)
-                        .addStatement("return _${daoTypeEl.simpleName}")
-                        .build())
-            }
+                    .delegate("lazy { %T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
+                            repoImplClassName, it.makeAccessorCodeBlock()).build())
+            dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
         }
 
         dbRepoFileSpec.addType(dbRepoType.build())
