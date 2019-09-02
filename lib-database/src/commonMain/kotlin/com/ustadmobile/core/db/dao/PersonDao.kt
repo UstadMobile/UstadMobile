@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlin.js.JsName
 
 
 @UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
@@ -105,10 +106,12 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
+    @JsName("getAllPersons")
     @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
     abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
 
 
+    @JsName("getAllPersonsInList")
     @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE Person.personUid IN (:uidList)")
     abstract suspend fun getAllPersonsInList(uidList: List<Long>): List<PersonNameAndUid>
 

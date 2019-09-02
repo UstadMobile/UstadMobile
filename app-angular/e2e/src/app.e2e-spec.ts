@@ -11,7 +11,12 @@ describe('Default App behaviours', () => {
     elementUtils = new ElementUtils();
   });
 
-  it('giveApplicationLaunched_whenNavigateToHome_shouldShowApplicationTitle ', () => {
+  it('giveApplication_whenLaunched_shouldUseDefaultUrl', () => {
+    pageHome.launch();
+    expect(browser.baseUrl).toContain('http://localhost:4200');
+  });
+
+  it('giveApplicationLaunched_whenNavigateToHome_shouldShowApplicationTitle', () => {
     pageHome.launch();
     expect(pageHome.getTitle()).toEqual('Ustad Mobile');
   });
@@ -25,13 +30,5 @@ describe('Default App behaviours', () => {
     pageHome.launch();
     expect(elementUtils.getPageElts().appHomeMenu.get(0).getText()).toEqual(pageHome.menus[0]);
     expect(elementUtils.getPageElts().appHomeMenu.get(1).getText()).toEqual(pageHome.menus[1]);
-  });
-
-  afterEach(async () => {
-    // Assert that there are no errors emitted from the browser
-    const logs = await browser.manage().logs().get(logging.Type.BROWSER);
-    expect(logs).not.toContain(jasmine.objectContaining({
-      level: logging.Level.SEVERE,
-    } as logging.Entry));
   });
 });

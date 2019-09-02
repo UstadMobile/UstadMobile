@@ -94,7 +94,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             val urlString = call.request.queryParameters["hp5Url"] ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
-            val videoTitle = call.request.queryParameters["title"]?: ""
+            val videoTitle = call.request.queryParameters["title"] ?: ""
 
             val response = defaultHttpClient().head<HttpResponse>(urlString)
 
@@ -165,7 +165,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
     try {
         runBlocking {
 
-            System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
+            System.setProperty("webdriver.chrome.driver", findSystemCommand("chromedriver","webdriver.chrome.driver"))
             val driver = setupLogIndexChromeDriver()
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
@@ -293,6 +293,22 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
         print(e.message)
     }
 }
+
+suspend fun findSystemCommand(command: String, buildName: String): String {
+
+    if (System.getProperty(buildName)?.isNotEmpty() == true) {
+        return System.getProperty(buildName)
+    } else {
+        var pathDirs = System.getenv("PATH").split(File.pathSeparator)
+        for (path in pathDirs) {
+            if (File("$path/$command").exists()) {
+                return "$path/$command"
+            }
+        }
+    }
+    return ""
+}
+
 
 suspend fun addToIndex(baseUrl: String, itUrl: String, parentDir: File, http: HttpClient): LogIndex.IndexEntry {
     var downloadUrl = URL(baseUrl + itUrl.replace("\"", ""))

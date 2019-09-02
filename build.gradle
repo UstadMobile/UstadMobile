@@ -227,19 +227,4 @@ subprojects { project ->
     }
 }
 
-/**
- * Pack all modules under build/js/node_modules/
- */
-task packPreparedModules{
-    doLast{
-        new File("${rootProject.file("build/js/node_modules").path}").eachDir {
-            def dir = it.absolutePath
-            exec {
-                workingDir dir
-                commandLine 'npm', 'pack'
-            }
-        }
-    }
-}
-
-packPreparedModules.dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)
+tasks.findByPath(":app-angular:packPreparedModules").dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)

@@ -50,3 +50,4 @@ Thumbs.db
 /src/assets/locale/messages.*.xlf
 /package-lock.json
 /.editorconfig
+src/assets/appconfig.json

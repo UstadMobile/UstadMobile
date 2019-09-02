@@ -7,6 +7,7 @@ import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { UmAngularUtil, appRountes } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import util from 'UstadMobile-lib-util';
 
 @Component({
   selector: 'app-home',
@@ -66,7 +67,8 @@ ngOnInit() {
 }
 
 onCreate(){
-    this.supportedLanguages = this.umService.supportedLanguages;
+  this.supportedLanguages = util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(
+    this.systemImpl.getAllUiLanguage(this.context))
 }
 
 goBack() {

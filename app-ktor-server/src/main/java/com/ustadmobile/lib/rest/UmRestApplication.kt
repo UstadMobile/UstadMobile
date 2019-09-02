@@ -20,8 +20,7 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-private val _restApplicationDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class,
-        "UmAppDatabase").build()
+private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
 
 
 fun Application.umRestApplication() {

@@ -28,6 +28,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     fun setLocaleStrings(values : Any){
         this.stringMap = values
     }
+
+
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -74,7 +76,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @JsName("getString")
     actual fun getString(messageCode: Int, context: Any): String {
         val map : dynamic = this.stringMap
-        return map[messageCode] as String
+        return map[messageCode].toString()
     }
 
     /**
@@ -131,7 +133,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    override actual fun setAppPref(key: String, value: String?, context: Any) {
+    actual override fun setAppPref(key: String, value: String?, context: Any) {
         if(value == null){
             localStorage.removeItem(key)
         }else{
@@ -171,7 +173,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return The value of the key if found, if not, the default value provided
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
-        return "https://localhost:8080/fakeEndpint"
+        val value =  localStorage.getItem(key)
+        return  value ?: defaultVal
     }
 
     /**
