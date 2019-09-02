@@ -32,7 +32,7 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
     private lateinit var floatingButton: FloatingTextButton
 
-    private val umRepository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(this)
+    private lateinit var umRepository: UmAppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +52,8 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         recyclerView.adapter = recyclerAdapter
 
         floatingButton = findViewById(R.id.preview_fab)
+
+        umRepository = UmAccountManager.getRepositoryForActiveAccount(this)
 
 
         presenter = XapiReportDetailPresenter(viewContext,

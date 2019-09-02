@@ -53,10 +53,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var isDownloadComplete: Boolean = false
 
+    private var currentContentEntry: ContentEntry = ContentEntry()
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-
-
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
@@ -95,9 +95,12 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (entry != null) {
             val licenseType = getLicenseType(entry)
             view.runOnUiThread(Runnable {
-                view.setContentEntryLicense(licenseType)
-                with(entry) {
-                    view.setContentEntry(this)
+                if (currentContentEntry != entry) {
+                    currentContentEntry = entry
+                    view.setContentEntryLicense(licenseType)
+                    with(entry) {
+                        view.setContentEntry(this)
+                    }
                 }
             })
         }
@@ -234,11 +237,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (isDownloadComplete) {
 
             val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                    "false",context)!!.toBoolean()
+                    "false", context)!!.toBoolean()
 
-            if(loginFirst){
+            if (loginFirst) {
                 impl.go(LoginView.VIEW_NAME, args, view.viewContext)
-            }else{
+            } else {
                 ContentEntryUtil.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
                         context, object : UmCallback<Any> {
 
@@ -289,15 +292,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
 
-    fun handleShowEditButton(show: Boolean){
-        view.runOnUiThread(Runnable { view.showEditButton(show)})
+    fun handleShowEditButton(show: Boolean) {
+        view.runOnUiThread(Runnable { view.showEditButton(show) })
     }
 
-    suspend fun handleCancelDownload(){
+    suspend fun handleCancelDownload() {
         val currentJobId = appRepo.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
-                appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
-                        JobStatus.CANCELLING)
-                        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
+                JobStatus.CANCELLING)
+        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
         view.stopForeGroundService(currentJobId.toLong(), true)
     }

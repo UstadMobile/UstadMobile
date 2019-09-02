@@ -16,6 +16,7 @@ import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
@@ -29,9 +30,11 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.WebChunkActivity
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.core.AllOf
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,21 +46,23 @@ class ContentEntryDetailEspressoTest {
     @get:Rule
     var mActivityRule = IntentsTestRule(ContentEntryDetailActivity::class.java, false, false)
 
-    lateinit var context: Context
+    var context: Context = InstrumentationRegistry.getInstrumentation().context
 
     @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    @get:Rule
+    val mServiceRule = ServiceTestRule()
 
 
     private var statusDao: ContentEntryStatusDao? = null
 
     val db: UmAppDatabase
         get() {
-            context = InstrumentationRegistry.getInstrumentation().context
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
-            return  UmAppDatabase.getInstance(context)// db.getUmRepository("https://localhost", "")
+            return UmAppDatabase.getInstance(context)// db.getUmRepository("https://localhost", "")
         }
 
     @Throws(IOException::class)
@@ -197,9 +202,17 @@ class ContentEntryDetailEspressoTest {
         val file = Container()
         file.mimeType = "application/webchunk+zip"
         file.lastModified = System.currentTimeMillis()
-        file.containerContentEntryUid = 18L
+        file.containerContentEntryUid = 14L
+        file.containerUid = 18L
         containerDao.insert(file)
 
+    }
+
+    @Before
+    fun setup() {
+        mServiceRule.startService(Intent(context, NetworkManagerBleAndroidService::class.java))
+        mServiceRule.bindService(
+                Intent(context, NetworkManagerBleAndroidService::class.java))
     }
 
     @Test
@@ -309,8 +322,9 @@ class ContentEntryDetailEspressoTest {
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity::class.java.canonicalName),
                 hasExtra(equalTo(WebChunkView.ARG_CONTAINER_UID),
-                        equalTo(18L.toString())
-                )))
+                        equalTo(18L.toString())),
+                hasExtra(equalTo(WebChunkView.ARG_CONTENT_ENTRY_ID),
+                equalTo(14.toString()))))
 
     }
 
