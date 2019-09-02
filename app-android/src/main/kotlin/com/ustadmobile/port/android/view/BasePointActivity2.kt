@@ -29,14 +29,20 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.BasePointActivity2Presenter
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.controller.HomePresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.NavigationItem
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.acra.util.ToastSender.sendToast
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
@@ -67,10 +73,9 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     private var mOptionsMenu: Menu? = null
 
+    //For search purposes:
     private var classesFragment: ClazzListFragment? = null
     private var peopleListFragment: PeopleListFragment? = null
-    private var reportSelectionFragment: ReportSelectionFragment? = null
-    private var newFrag: FeedListFragment? = null
 
     private var lastSyncTime: Long = 0
     private var syncing = false
@@ -88,6 +93,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
     private val viewNameToFragment = mapOf<String, Class<*>>(
             FeedListView.VIEW_NAME to FeedListFragment::class.java,
             ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
+            ContentListView.VIEW_NAME to ContentListFragment::class.java,
             ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
             PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
             BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java)
@@ -243,8 +249,11 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         dismissShareAppDialog()
     }
 
+    /**
+     * Sets bulk upload menu item
+     */
     override fun showBulkUploadForAdmin(show: Boolean) {
-        val bulkUploadMenuItem = mOptionsMenu!!.findItem(R.id.menu_basepoint_bulk_upload_master)
+        val bulkUploadMenuItem = mOptionsMenu!!.findItem(R.id.menu_action_bulk_upload_master)
         val showBU = UstadMobileSystemImpl.instance.getAppConfigString(
                 AppConfig.BULK_UPLOAD_VISIBILITY, null, this)
         if(showBU == null){
@@ -262,11 +271,27 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         }
     }
 
+    /**
+     * Checks if a given config from appconfig.properties is set to true or not
+     */
+    fun isConfigTrue(configString:String):Boolean{
+        val impl = UstadMobileSystemImpl.instance
+        val property = impl.getAppConfigString(configString, null, this)
+        return if(property==null){
+            false
+        }else{
+            if(property.toLowerCase() == "false"){
+                false
+            }else property.toLowerCase() == "true"
+
+        }
+    }
+
     override fun showSettings(show: Boolean) {
 
-        val allClazzSettingsMenuItem = mOptionsMenu!!.findItem(R.id.menu_settings_gear)
-        if (allClazzSettingsMenuItem != null) {
-            allClazzSettingsMenuItem.isVisible = show
+        val settingsMenuItem = mOptionsMenu!!.findItem(R.id.menu_action_settings)
+        if (settingsMenuItem != null) {
+            settingsMenuItem.isVisible = show
         }
     }
 
@@ -277,7 +302,6 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         }
     }
 
-
     /**
      * Handles Action Bar menu button click.
      * @param item  The MenuItem clicked.
@@ -287,21 +311,41 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         // Handle item selection
         val i = item.itemId
         //If this activity started from other activity
-        if (i == R.id.menu_basepoint_share) {
-            mPresenter!!.handleClickShareIcon()
-        } else if (i == R.id.menu_basepoint_bulk_upload_master) {
-            mPresenter!!.handleClickBulkUpload()
-        } else if (i == R.id.menu_basepoint_logout) {
-            finishAffinity()
-            mPresenter!!.handleLogOut()
-        } else if (i == R.id.menu_settings_gear) {
-            mPresenter!!.handleClickSettingsIcon()
-        } else if (i == R.id.menu_basepoint_search) {
-            mPresenter!!.handleClickSearchIcon()
-        } else if (i == R.id.menu_basepoint_about) {
-            mPresenter!!.handleClickAbout()
-        } else if (i == R.id.menu_basepoint_sync) {
-            forceSync()
+        when (i) {
+            R.id.menu_action_share -> mPresenter!!.handleClickShareIcon()
+            R.id.menu_action_bulk_upload_master -> mPresenter!!.handleClickBulkUpload()
+            R.id.menu_action_logout -> {
+                finishAffinity()
+                mPresenter!!.handleLogOut()
+            }
+            R.id.menu_action_settings -> mPresenter!!.handleClickSettingsIcon()
+            R.id.menu_action_search -> mPresenter!!.handleClickSearchIcon()
+            R.id.menu_action_about -> mPresenter!!.handleClickAbout()
+            R.id.menu_action_sync -> forceSync()
+            R.id.menu_action_clear_history -> {
+                GlobalScope.launch {
+                    val database = UmAppDatabase.getInstance(this)
+                    database.networkNodeDao.deleteAllAsync()
+                    database.entryStatusResponseDao.deleteAllAsync()
+                    database.downloadJobItemHistoryDao.deleteAllAsync()
+                    database.downloadJobDao.deleteAllAsync()
+                    database.downloadJobItemDao.deleteAllAsync()
+                    database.contentEntryStatusDao.deleteAllAsync()
+                }
+                networkManagerBle?.clearHistories()
+
+            }
+            R.id.menu_action_create_new_content -> {
+                val args = HashMap<String,String?>()
+                args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
+                args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
+                args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+                args[ContentEditorView.CONTENT_ENTRY_UID] = 0.toString()
+                args[ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID] = HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID.toString()
+                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
+                        this)
+            }
+            R.id.menu_action_send_feedback -> hearShake()
         }
 
         return super.onOptionsItemSelected(item)
@@ -311,7 +355,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         if (mOptionsMenu == null)
             return
         if (lastSyncTime > 0) {
-            val syncItem = mOptionsMenu!!.findItem(R.id.menu_basepoint_sync)
+            val syncItem = mOptionsMenu!!.findItem(R.id.menu_action_sync)
             val updatedTitle = (getString(R.string.refresh) + " ("
                     //+ getString(R.string.last_synced)
                     + UMCalendarUtil.getPrettyTimeFromLong(lastSyncTime, null) + ")")
@@ -328,7 +372,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         if (mOptionsMenu == null)
             return
 
-        val syncItem = mOptionsMenu!!.findItem(R.id.menu_basepoint_sync) ?: return
+        val syncItem = mOptionsMenu!!.findItem(R.id.menu_action_sync) ?: return
 
         val syncingString = getString(R.string.syncing)
         syncItem.title = syncingString
@@ -380,21 +424,37 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
-        inflater.inflate(R.menu.menu_share, menu)
+        inflater.inflate(R.menu.menu_home, menu)
 
         //tint
-        val shareMenuItem = menu.findItem(R.id.menu_basepoint_share)
-        val bulkUploadMenuItem = menu.findItem(R.id.menu_basepoint_bulk_upload_master)
-        val settingsMenuItem = menu.findItem(R.id.menu_settings_gear)
-        val logoutMenuItem = menu.findItem(R.id.menu_basepoint_logout)
+        val shareMenuItem = menu.findItem(R.id.menu_action_share)
+        val bulkUploadMenuItem = menu.findItem(R.id.menu_action_bulk_upload_master)
+        val settingsMenuItem = menu.findItem(R.id.menu_action_settings)
+        val logoutMenuItem = menu.findItem(R.id.menu_action_logout)
+        var createNewContentItem = menu.findItem(R.id.menu_action_create_new_content)
 
-        val syncMenuItem = menu.findItem(R.id.menu_basepoint_sync)
+        //Create content button
+        val account = UmAccountManager.getActiveAccount(this)
+        val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS,
+                null, this)!!.toBoolean()
+        menu.findItem(R.id.menu_action_create_new_content).isVisible = showControls
+                && account != null
+                && account.personUid != 0L
+
+        //Clear history visibility
+        menu.findItem(R.id.menu_action_clear_history).setVisible(
+                isConfigTrue(AppConfig.ACTION_CLEAR_HISTORY_VISIBILITY))
+
+        shareMenuItem.setVisible(isConfigTrue(AppConfig.ACTION_SHARE_APP_VISIBILITY))
 
         val shareMenuIcon = AppCompatResources.getDrawable(applicationContext,
                 R.drawable.ic_share_white_24dp)
         val bulkUploadMenuIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_file_upload_white_24dp)
         val settingsMenuIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_settings_white_24dp)
         val logoutMenuIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_dropout_bcd4_24dp)
+        val createNewContentIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_create_new_folder_white_24dp)
 
         assert(shareMenuIcon != null)
         shareMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
@@ -404,11 +464,14 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         settingsMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
         assert(logoutMenuIcon != null)
         logoutMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
+        createNewContentIcon!!.setColorFilter(resources.getColor(R.color.icons),
+                PorterDuff.Mode.SRC_IN)
 
         shareMenuItem.setIcon(shareMenuIcon)
         bulkUploadMenuItem.setIcon(bulkUploadMenuIcon)
         settingsMenuItem.setIcon(settingsMenuIcon)
         logoutMenuItem.setIcon(logoutMenuIcon)
+        createNewContentItem.setIcon(createNewContentIcon)
 
         mOptionsMenu = menu
         mPresenter!!.getLoggedInPerson()
@@ -418,7 +481,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         //Search stuff
         // Associate searchable configuration with the SearchView
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        val searchView = menu.findItem(R.id.menu_basepoint_search).actionView as SearchView
+        val searchView = menu.findItem(R.id.menu_action_search).actionView as SearchView
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(componentName))
 

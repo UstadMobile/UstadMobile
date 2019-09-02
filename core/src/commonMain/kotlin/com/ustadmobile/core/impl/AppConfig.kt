@@ -43,5 +43,9 @@ object AppConfig {
 
     const val NAVIGATION_ITEMS = "navigation_items"
 
+    const val ACTION_CLEAR_HISTORY_VISIBILITY = "action_clear_history_visibility"
+
+    const val ACTION_SHARE_APP_VISIBILITY = "action_share_app_visibility"
+
 
 }

@@ -163,7 +163,7 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView {
 
     fun showSettings() {
 
-        val allClazzSettingsMenuItem = mOptionsMenu!!.findItem(R.id.menu_settings_gear)
+        val allClazzSettingsMenuItem = mOptionsMenu!!.findItem(R.id.menu_action_settings)
         if (allClazzSettingsMenuItem != null) {
             allClazzSettingsMenuItem.isVisible = showAllClazzSettingsButton
         }
