@@ -36,7 +36,11 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 
@@ -59,6 +63,8 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     private var audioPlayer: Codec2Player? = null
 
     private var subtitleSelection = 1
+
+    private var audioBuffer: ByteArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,8 +151,21 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     }
 
     override fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
-        if (audioPath != null) {
+        GlobalScope.launch {
+            if(audioPath != null && audioBuffer == null) {
+                val audioByteArrOut = ByteArrayOutputStream(audioPath.available())
+                audioPath.copyTo(audioByteArrOut)
+                audioByteArrOut.flush()
+                audioBuffer = audioByteArrOut.toByteArray()
+            }
+            runOnUiThread(Runnable{
+                setVideoParamsInternal(videoPath, audioPath, srtLangList, srtMap)
+            })
+        }
+    }
 
+    fun setVideoParamsInternal(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
+        if (audioPath != null) {
             player?.addListener(object : Player.DefaultEventListener() {
                 override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                     if (playbackState == Player.STATE_READY && playWhenReady) {
@@ -240,7 +259,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
 
     fun playAudio(fromMs: Long) {
-        audioPlayer = Codec2Player(mPresenter.audioInput!!, fromMs)
+        audioPlayer = Codec2Player(ByteArrayInputStream(audioBuffer), fromMs)
         audioPlayer!!.play()
     }
 
