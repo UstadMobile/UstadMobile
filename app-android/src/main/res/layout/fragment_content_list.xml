@@ -40,7 +40,7 @@
 
         <ru.dimorinny.floatingtextbutton.FloatingTextButton
             android:elevation="@dimen/dimen_4dp"
-            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginBottom="0dp"
             app:layout_anchor="@id/fragment_content_list_library_viewpager"
             android:id="@+id/fragment_content_list_download_all"
             android:layout_width="wrap_content"
@@ -53,6 +53,6 @@
             app:floating_title_color="@color/fab_text" />
 
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

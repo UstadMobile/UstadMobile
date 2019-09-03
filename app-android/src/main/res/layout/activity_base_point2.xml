@@ -10,7 +10,7 @@
 
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar"
+        android:id="@+id/base_point2_appbar"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,6 +20,7 @@
             android:id="@+id/base_point_2_toolbar"
             android:titleTextColor="@color/toolbar"
             android:layout_width="match_parent"
+            android:elevation="0dp"
             android:layout_height="?attr/actionBarSize">
 
             <RelativeLayout

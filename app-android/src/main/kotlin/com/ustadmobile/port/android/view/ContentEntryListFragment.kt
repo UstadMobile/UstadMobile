@@ -35,7 +35,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-
 /**
  * A fragment representing a list of Items.
  *

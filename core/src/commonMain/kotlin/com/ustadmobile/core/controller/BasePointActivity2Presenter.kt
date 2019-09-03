@@ -55,7 +55,6 @@ class BasePointActivity2Presenter
         val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
         val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
         personLive.observe(this, this::handlePersonValueChanged)
-
     }
 
     /**

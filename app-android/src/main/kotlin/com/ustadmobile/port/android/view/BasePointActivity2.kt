@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -11,7 +12,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import androidx.lifecycle.Observer
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
@@ -22,11 +22,13 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.Observer
 import androidx.viewpager.widget.ViewPager
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
+import com.google.android.material.appbar.AppBarLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.BasePointActivity2Presenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
@@ -66,6 +68,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     private var toolbar: Toolbar? = null
     private lateinit var toolbarTitle: TextView
+    private lateinit var appBarLayout: AppBarLayout
 
     private var shareAppDialog: AlertDialog? = null
 
@@ -85,10 +88,12 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     private lateinit var bottomNavigation: AHBottomNavigation
 
+    //TODO: Observe personPicture and update this
     private lateinit var profileImage: CircleImageView
 
     private lateinit var downloadAllBtn: FloatingTextButton
 
+    private var onContent:Boolean = false
 
     private val viewNameToFragment = mapOf<String, Class<*>>(
             FeedListView.VIEW_NAME to FeedListFragment::class.java,
@@ -104,7 +109,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
     private fun setupViewPager() {
         mPager = findViewById(R.id.container_feedlist)
         mPagerAdapter = BasePointViewPagerAdapter(supportFragmentManager)
-        mPager!!.setAdapter(mPagerAdapter)
+        mPager!!.adapter = mPagerAdapter
     }
 
     private fun setupBottomNavigation(){
@@ -112,68 +117,75 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         bottomNavigation = findViewById(R.id.bottom_navigation)
 
         //Style
-        bottomNavigation.setDefaultBackgroundColor(fetchColor(R.color.primary))
-        bottomNavigation.setAccentColor(fetchColor(R.color.just_black))
-        bottomNavigation.setInactiveColor(fetchColor(R.color.bottom_nav_yourInactiveColor))
-        bottomNavigation.setBehaviorTranslationEnabled(false)
+        bottomNavigation.defaultBackgroundColor = fetchColor(R.color.primary)
+        bottomNavigation.accentColor = fetchColor(R.color.just_black)
+        bottomNavigation.inactiveColor = fetchColor(R.color.bottom_nav_yourInactiveColor)
+        bottomNavigation.isBehaviorTranslationEnabled = false
         bottomNavigation.setUseElevation(true, 2F)
     }
-
 
     override fun setupNavigation(items: List<NavigationItem>) {
 
         bottomNavigation.removeAllItems()
         bottomCount=0
         for (everyItem: NavigationItem in items){
-            val theFragment = viewNameToFragment.get(everyItem.viewName)
+            val theFragment = viewNameToFragment[everyItem.viewName]
             val fragment = theFragment!!.newInstance() as UstadBaseFragment
 
-            val nav_item = AHBottomNavigationItem(getString(fragment.title!!),
+            val navItem = AHBottomNavigationItem(getString(fragment.title!!),
                     getDrawable(fragment.icon!!),
                     ContextCompat.getColor(applicationContext, R.color.icons))
-            bottomNavigation.addItem(nav_item)
-            navToFragment.put(bottomCount, fragment)
-            bottomCount++
+            bottomNavigation.addItem(navItem)
+            navToFragment[this.bottomCount] = fragment
 
-
-            if(everyItem.viewName.equals(FeedListView.VIEW_NAME)){
-                VIEW_POSITION_POSITION_FEED = bottomCount
-            }else if(everyItem.viewName.equals(ClazzListView.VIEW_NAME)){
-                VIEW_POSITION_POSITION_CLASSES=bottomCount
-            }else if(everyItem.viewName.equals(PeopleListView.VIEW_NAME)){
-                VIEW_POSITION_POSITION_PEOPLE=bottomCount
-            }else if(everyItem.viewName.equals(BaseReportView.VIEW_NAME)){
-                VIEW_POSITION_POSITION_REPORTS=bottomCount
-            }else if(everyItem.viewName.equals(ContentEntryListView.VIEW_NAME)){
-                VIEW_POSITION_POSITION_CONTENT = bottomCount
+            when {
+                everyItem.viewName == FeedListView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_FEED = this.bottomCount
+                everyItem.viewName == ClazzListView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_CLASSES= this.bottomCount
+                everyItem.viewName == PeopleListView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_PEOPLE= this.bottomCount
+                everyItem.viewName == BaseReportView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_REPORTS= this.bottomCount
+                everyItem.viewName == ContentListView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_CONTENT = this.bottomCount
             }
+            bottomCount++
 
         }
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
-        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW)
+        bottomNavigation.titleState = AHBottomNavigation.TitleState.ALWAYS_SHOW
 
         //Click listeners for the items.
         bottomNavigation.setOnTabSelectedListener { position: Int, wasSelected:Boolean ->
 
             if (!wasSelected) {
-                //mPagerAdapter.notifyDataSetChanged();
-                mPagerAdapter!!.getItem(position.toInt())
-                //mPagerAdapter.notifyDataSetChanged();
-                mPager!!.setCurrentItem(position)
+                mPagerAdapter!!.getItem(position)
+                mPager!!.currentItem = position
             }
 
             //Update title
             when (position) {
-                position -> updateTitle(getString(navToFragment.get(position)!!.title!!))
+                position -> {
+                    val fragment = navToFragment[position]
+                    updateTitle(getString(fragment!!.title!!))
+                    onContent = if (fragment is ContentListFragment ){
+                        appBarLayout.elevation = 0F
+                        true
+                    }else{
+                        appBarLayout.elevation = 10F
+                        false
+                    }
+                }
 
             }
             true
         }
 
         // Setting the very 1st item as default home screen.
-        bottomNavigation.setCurrentItem(0)
+        bottomNavigation.currentItem = 0
     }
 
 
@@ -201,15 +213,14 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
         //Toolbar
         toolbar = findViewById(R.id.base_point_2_toolbar)
-        toolbar!!.setTitle("Ustad Mobile")
+        toolbar!!.title = "Ustad Mobile"
         setSupportActionBar(toolbar)
+
+        appBarLayout = findViewById(R.id.base_point2_appbar)
 
         profileImage = findViewById(R.id.base_point2_profile_image)
 
         toolbarTitle = findViewById(R.id.base_point2_toolbar_title)
-
-        //TODO: Move download all button to Content entry fragment
-        //downloadAllBtn = findViewById(R.id.download_all)
 
         //Style bottom navigation
         setupBottomNavigation()
@@ -252,6 +263,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
     /**
      * Sets bulk upload menu item
      */
+    @SuppressLint("DefaultLocale")
     override fun showBulkUploadForAdmin(show: Boolean) {
         val bulkUploadMenuItem = mOptionsMenu!!.findItem(R.id.menu_action_bulk_upload_master)
         val showBU = UstadMobileSystemImpl.instance.getAppConfigString(
@@ -262,7 +274,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
             }
         }else {
             if (bulkUploadMenuItem != null) {
-                if(showBU.toLowerCase().equals("false")){
+                if(showBU.toLowerCase() == "false"){
                     bulkUploadMenuItem.isVisible = false
                 }else {
                     bulkUploadMenuItem.isVisible = show
@@ -274,6 +286,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
     /**
      * Checks if a given config from appconfig.properties is set to true or not
      */
+    @SuppressLint("DefaultLocale")
     fun isConfigTrue(configString:String):Boolean{
         val impl = UstadMobileSystemImpl.instance
         val property = impl.getAppConfigString(configString, null, this)
@@ -309,9 +322,8 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
-        val i = item.itemId
         //If this activity started from other activity
-        when (i) {
+        when (item.itemId) {
             R.id.menu_action_share -> mPresenter!!.handleClickShareIcon()
             R.id.menu_action_bulk_upload_master -> mPresenter!!.handleClickBulkUpload()
             R.id.menu_action_logout -> {
@@ -351,7 +363,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         return super.onOptionsItemSelected(item)
     }
 
-    fun checkSyncFinished() {
+    private fun checkSyncFinished() {
         if (mOptionsMenu == null)
             return
         if (lastSyncTime > 0) {
@@ -368,7 +380,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     }
 
-    fun updateSyncing() {
+    private fun updateSyncing() {
         if (mOptionsMenu == null)
             return
 
@@ -378,7 +390,8 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         syncItem.title = syncingString
 
         val textWithColor = SpannableString(syncingString)
-        textWithColor.setSpan(ForegroundColorSpan(resources.getColor(R.color.text_secondary)), 0,
+        textWithColor.setSpan(ForegroundColorSpan(
+                ContextCompat.getColor(applicationContext, R.color.text_secondary)), 0,
                 textWithColor.length, 0)
         syncItem.title = textWithColor
         syncItem.isEnabled = false
@@ -396,9 +409,9 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     private fun observeSyncing() {
         WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
-                this, Observer{ workInfos ->
-            for (wi in workInfos) {
-                if (wi.getState().isFinished()) {
+                this, Observer{ workInfoList ->
+            for (wi in workInfoList) {
+                if (wi.state.isFinished) {
                     lastSyncTime = UMCalendarUtil.getDateInMilliPlusDays(0)
                     syncing = false
                     checkSyncFinished()
@@ -418,6 +431,33 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
     }
 
     /**
+     * Set content list fragment related menu items's visibility
+     */
+    private fun setContentFragmentMenuItems(override:Boolean){
+
+        if(mOptionsMenu != null) {
+            val createNewContentItem = mOptionsMenu!!.findItem(R.id.menu_action_create_new_content)
+            val clearHistoryItem = mOptionsMenu!!.findItem(R.id.menu_action_clear_history)
+
+            if (override) {
+                //Create content button
+                val account = UmAccountManager.getActiveAccount(this)
+                val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                        AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS,
+                        null, this)!!.toBoolean()
+                createNewContentItem!!.isVisible = showControls
+                        && account != null
+                        && account.personUid != 0L
+
+                //Clear history visibility
+                clearHistoryItem!!.isVisible =
+                        isConfigTrue(AppConfig.ACTION_CLEAR_HISTORY_VISIBILITY)
+            } else {
+                createNewContentItem!!.isVisible = false
+            }
+        }
+    }
+    /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
      * @return  true. always.
@@ -426,54 +466,49 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_home, menu)
 
-        //tint
+        //Get menu items:
         val shareMenuItem = menu.findItem(R.id.menu_action_share)
         val bulkUploadMenuItem = menu.findItem(R.id.menu_action_bulk_upload_master)
         val settingsMenuItem = menu.findItem(R.id.menu_action_settings)
         val logoutMenuItem = menu.findItem(R.id.menu_action_logout)
-        var createNewContentItem = menu.findItem(R.id.menu_action_create_new_content)
+        val createNewContentItem = menu.findItem(R.id.menu_action_create_new_content)
 
-        //Create content button
-        val account = UmAccountManager.getActiveAccount(this)
-        val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS,
-                null, this)!!.toBoolean()
-        menu.findItem(R.id.menu_action_create_new_content).isVisible = showControls
-                && account != null
-                && account.personUid != 0L
-
-        //Clear history visibility
-        menu.findItem(R.id.menu_action_clear_history).setVisible(
-                isConfigTrue(AppConfig.ACTION_CLEAR_HISTORY_VISIBILITY))
-
-        shareMenuItem.setVisible(isConfigTrue(AppConfig.ACTION_SHARE_APP_VISIBILITY))
-
+        //Get menu item icons
         val shareMenuIcon = AppCompatResources.getDrawable(applicationContext,
                 R.drawable.ic_share_white_24dp)
-        val bulkUploadMenuIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_file_upload_white_24dp)
-        val settingsMenuIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_settings_white_24dp)
-        val logoutMenuIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_dropout_bcd4_24dp)
+        val bulkUploadMenuIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_file_upload_white_24dp)
+        val settingsMenuIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_settings_white_24dp)
+        val logoutMenuIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_dropout_bcd4_24dp)
         val createNewContentIcon = AppCompatResources.getDrawable(applicationContext,
                 R.drawable.ic_create_new_folder_white_24dp)
 
-        assert(shareMenuIcon != null)
-        shareMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
-        assert(bulkUploadMenuIcon != null)
-        bulkUploadMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
-        assert(settingsMenuIcon != null)
-        settingsMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
-        assert(logoutMenuIcon != null)
-        logoutMenuIcon!!.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
-        createNewContentIcon!!.setColorFilter(resources.getColor(R.color.icons),
+        //Tint the icons according to theme
+        shareMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons),
+                PorterDuff.Mode.SRC_IN)
+        bulkUploadMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons),
+                PorterDuff.Mode.SRC_IN)
+        settingsMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons), PorterDuff.Mode.SRC_IN)
+        logoutMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons), PorterDuff.Mode.SRC_IN)
+        createNewContentIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons),
                 PorterDuff.Mode.SRC_IN)
 
-        shareMenuItem.setIcon(shareMenuIcon)
-        bulkUploadMenuItem.setIcon(bulkUploadMenuIcon)
-        settingsMenuItem.setIcon(settingsMenuIcon)
-        logoutMenuItem.setIcon(logoutMenuIcon)
-        createNewContentItem.setIcon(createNewContentIcon)
+        //Set tinted icons to the menu items:
+        shareMenuItem.icon = shareMenuIcon
+        bulkUploadMenuItem.icon = bulkUploadMenuIcon
+        settingsMenuItem.icon = settingsMenuIcon
+        logoutMenuItem.icon = logoutMenuIcon
+        createNewContentItem!!.icon = createNewContentIcon
 
         mOptionsMenu = menu
+
+        //Set visibility:
+        setContentFragmentMenuItems(onContent)
+        shareMenuItem.isVisible = isConfigTrue(AppConfig.ACTION_SHARE_APP_VISIBILITY)
+
+        //Observe logged in person so that the UI reflects if the logged in user changes
         mPresenter!!.getLoggedInPerson()
 
         checkSyncFinished()
@@ -484,72 +519,51 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         val searchView = menu.findItem(R.id.menu_action_search).actionView as SearchView
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(componentName))
-
-        searchView.setMaxWidth(Integer.MAX_VALUE)
+        searchView.maxWidth = Integer.MAX_VALUE
 
         // listening to search query text change
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 // filter recycler view when query submitted
-                when (mPager!!.getCurrentItem()) {
-                    VIEW_POSITION_POSITION_FEED -> {
-                    }
-                    VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses(query)
-                    VIEW_POSITION_POSITION_PEOPLE -> peopleListFragment!!.searchPeople(query)
-                    VIEW_POSITION_POSITION_REPORTS -> {
-                    }
-                    else -> {
-                    }
-                }
-
+                searchLogic(mPager!!.currentItem, query)
                 return false
             }
 
             override fun onQueryTextChange(query: String): Boolean {
-                // filter recycler view when text is changed
-
-                // filter recycler view when query submitted
-                when (mPager!!.getCurrentItem()) {
-                    VIEW_POSITION_POSITION_FEED -> {
-                    }
-                    VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses(query)
-                    VIEW_POSITION_POSITION_PEOPLE -> peopleListFragment!!.searchPeople(query)
-                    VIEW_POSITION_POSITION_REPORTS -> {
-                    }
-                    else -> {
-                    }
-                }
+                // filter recycler view when query changed
+                searchLogic(mPager!!.currentItem, query)
                 return false
             }
         })
 
-
         searchView.setOnCloseListener{
-
             // filter recycler view when query submitted
-            when (mPager!!.getCurrentItem()) {
-                VIEW_POSITION_POSITION_FEED -> {
-                }
-                VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses("")
-                VIEW_POSITION_POSITION_PEOPLE -> peopleListFragment!!.searchPeople("")
-                VIEW_POSITION_POSITION_REPORTS -> {
-                }
-                else -> {
-                }
-            }
+            searchLogic(mPager!!.currentItem, "")
             false
         }
         return true
+    }
+
+    private fun searchLogic(position:Int, query:String){
+        when (position) {
+            VIEW_POSITION_POSITION_FEED -> {
+            }
+            VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses(query)
+            VIEW_POSITION_POSITION_PEOPLE -> peopleListFragment!!.searchPeople(query)
+            VIEW_POSITION_POSITION_REPORTS -> {
+            }
+            else -> {
+            }
+        }
     }
 
     /**
      * Updates the toolbar's title
      * @param title The string of the title to be set to the toolbar
      */
-    fun updateTitle(title: String) {
-        toolbar!!.setTitle(title)
-        toolbarTitle.setText(title)
-
+    private fun updateTitle(title: String) {
+        toolbar!!.title = title
+        toolbarTitle.text = title
     }
 
     override fun showShareAppDialog() {
@@ -559,9 +573,9 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         builder.setPositiveButton(R.string.share, null)
         builder.setNegativeButton(R.string.cancel, null)
         shareAppDialog = builder.create()
-        shareAppDialog!!.setOnShowListener{ dialogInterface ->
+        shareAppDialog!!.setOnShowListener{
             val okButton = shareAppDialog!!.getButton(AlertDialog.BUTTON_POSITIVE)
-            okButton.setOnClickListener({ v -> mPresenter!!.handleConfirmShareApp() })
+            okButton.setOnClickListener{ mPresenter!!.handleConfirmShareApp() }
         }
         shareAppDialog!!.show()
     }
@@ -574,18 +588,15 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
     /**
      * Feed view pager's Adapter
      */
-    private inner class BasePointViewPagerAdapter//Constructor creates the adapter
-    internal constructor(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    private inner class BasePointViewPagerAdapter internal constructor(fm: FragmentManager)
+        : FragmentStatePagerAdapter(fm) {
+
         override fun getCount(): Int {
             return bottomCount
         }
 
         //Map of position and fragment
-        internal var positionMap: WeakHashMap<Int, UstadBaseFragment>
-
-        init {
-            positionMap = WeakHashMap()
-        }
+        internal var positionMap: WeakHashMap<Int, UstadBaseFragment> = WeakHashMap()
 
         /**
          * Generate fragment for that page/position
@@ -594,7 +605,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
          * @return  the fragment
          */
         override fun getItem(position: Int): Fragment? {
-            val thisFragment = positionMap[position]
+            var thisFragment = positionMap[position]
 
             if(thisFragment!=null){
                 return thisFragment
@@ -602,7 +613,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
             when (position) {
                 position -> {
-                    val f = navToFragment.get(position)
+                    val f = navToFragment[position]
                     this.positionMap[position] = f
                     return f
                 }
@@ -618,7 +629,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
      * @param color The color code
      * @return  the color
      */
-    fun fetchColor(color: Int): Int {
+    private fun fetchColor(color: Int): Int {
         return ContextCompat.getColor(this, color)
     }
 
