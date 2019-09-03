@@ -69,7 +69,7 @@ class WebChunkEspressoTest {
         val app = UmAppDatabase.getInstance(context)
         val statusDao = app.contentEntryStatusDao
 
-
+        dir = Environment.getExternalStorageDirectory()
         tmpDir = UmFileUtilSe.makeTempDir("testWebChunk",
                 "" + System.currentTimeMillis())
 
@@ -138,7 +138,7 @@ class WebChunkEspressoTest {
 
         UmZipUtils.unzip(chunkCountingOut, countingFolder)
         val countingMap = HashMap<File, String>()
-        readAllFilesInDirectory(countingFolder, countingMap)
+        readAllFilesInDirectory(countingFolder, countingFolder, countingMap)
 
         val container = Container()
         container.mimeType = "application/webchunk+zip"

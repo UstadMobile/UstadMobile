@@ -312,7 +312,7 @@ class ContentEntryDetailEspressoTest {
         createDummyContent()
 
         val launchActivityIntent = Intent()
-        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 14L.toString())
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 14.toString())
         mActivityRule.launchActivity(launchActivityIntent)
 
         onView(withId(R.id.entry_download_open_button)).perform(click())
@@ -322,7 +322,7 @@ class ContentEntryDetailEspressoTest {
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity::class.java.canonicalName),
                 hasExtra(equalTo(WebChunkView.ARG_CONTAINER_UID),
-                        equalTo(18L.toString())),
+                        equalTo(18.toString())),
                 hasExtra(equalTo(WebChunkView.ARG_CONTENT_ENTRY_ID),
                 equalTo(14.toString()))))
 

@@ -26,6 +26,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import org.hamcrest.Matchers
 import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.IsEqual.equalTo
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -495,12 +496,13 @@ class ContentEntryListEspressoTest {
         intended(allOf(
                 hasComponent(ContentEntryListActivity::class.java.canonicalName),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
-                        equalTo(2L.toString())
+                        equalTo(2.toString())
                 )))
     }
 
     @Test
     fun givenContentEntryLeafPresent_whenEntryClicked_intentToViewDetailIsFired() {
+
         onView(Matchers.allOf<View>(isDisplayed(), withId(R.id.content_entry_list)))
                 .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
@@ -519,7 +521,7 @@ class ContentEntryListEspressoTest {
         intended(allOf(
                 hasComponent(ContentEntryDetailActivity::class.java.canonicalName),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
-                        equalTo(6L.toString())
+                        equalTo(6.toString())
                 )))
 
     }
