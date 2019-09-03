@@ -2,17 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.annotation.SyncablePrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 61)
+
+@SyncableEntity(tableId = 61)
 @Entity
 open class Sale() {
 
-    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var saleUid: Long = 0
 
@@ -49,13 +48,13 @@ open class Sale() {
 
     var saleSignature: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var saleMCSN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var saleLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var saleLCB: Int = 0
 
     constructor(active : Boolean) : this() {

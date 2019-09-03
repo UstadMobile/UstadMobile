@@ -2,14 +2,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.annotation.SyncablePrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 63)
+@SyncableEntity(tableId = 63)
 @Entity
 open class SaleItem() {
 
-    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var saleItemUid: Long = 0
 
@@ -53,13 +54,13 @@ open class SaleItem() {
     //Stores the actual signature data
     var saleItemSignature: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var saleItemMCSN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var saleItemLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var saleItemLCB: Int = 0
 
     init {

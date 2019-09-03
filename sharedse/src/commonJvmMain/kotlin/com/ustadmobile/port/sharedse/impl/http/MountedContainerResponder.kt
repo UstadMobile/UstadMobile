@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http
 
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.xmlpull.v1.XmlPullParserException
@@ -12,6 +12,7 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.*
 import java.util.regex.Pattern
+import com.ustadmobile.core.db.UmAppDatabase
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -78,20 +79,22 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
             val containerUid = uriResource.uri.split("/")[CONTAINER_UID_INDEX].toLong()
             val context = uriResource.initParameter(0, Any::class.java)
-            val umRepo = UmAccountManager.getRepositoryForActiveAccount(context)
-            val entryFile = umRepo.containerEntryDao.findByPathInContainer(containerUid, pathInContainer)
+            val entryFile = UmAppDatabase.getInstance(context).containerEntryDao
+                    .findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                    "text/plain", "Entry not found in container")
-
+                            "text/plain", "Entry not found in container")
 
             val filterList = uriResource.initParameter(1, List::class.java)
                     as List<MountedContainerFilter>
             var response = newResponseFromFile(uriResource, session,
                     FileSource(File(entryFile.containerEntryFile!!.cefPath!!)))
+
+            if (entryFile.containerEntryFile!!.compression == COMPRESSION_GZIP)
+                response.addHeader("Content-Encoding", "gzip")
+
             for (filter in filterList) {
                 response = filter.filterResponse(response, uriResource, urlParams, session)
             }
-
             return response
         } catch (e: URISyntaxException) {
             e.printStackTrace()

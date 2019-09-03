@@ -18,3 +18,4 @@ class EntityLayoutType(var name: String, var uid: Long?,
     }
 
 }
+

@@ -286,4 +286,10 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">در حال وارد ساختن، لطفاً منتظر باشید</string>
     <string name="content_editor_save_error">هنگام ثبت نمودن خطا صورت گرفت، دوباره کوشش نمائید</string>
+
+
+    <string name="no_account">Don\'t have an account?</string>
+
+
 </resources>
+

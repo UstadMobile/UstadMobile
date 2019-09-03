@@ -3,31 +3,41 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, Subject} from 'rxjs';
 import { MzToastService } from 'ngx-materialize';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UmBaseService {
 
-  private systemImpl: any;
-  loadedLocale: boolean = false;
-  private context: UmContextWrapper;
   private umObserver = new Subject < any > ();
-  private presenter;
+  private directionality: string;
 
+  constructor(private http: HttpClient, private toastService: MzToastService) {
+    this.loadAndSaveAppConfig();
+  }
 
-  constructor(private http: HttpClient, private toastService: MzToastService) {}
+  /**
+   * Set current system language directionality
+   * @param directionality current system language directionality
+   */
+  setSystemDirectionality(directionality){
+    this.directionality = directionality;
+  }
 
+  /**
+   * Check if syatem language directionality is LTR
+   */
+  isLTRDirectionality() : boolean{
+    return this.directionality == "ltr";
+  }
+
+  /**
+   * Dispatch update to the other part of the app (other components)
+   * @param content content to be passed to the observer
+   */
   dispatchUpdate(content: any) {
     this.umObserver.next(content);
-  }
-
-  setPresenterInstance(presenter){
-    this.presenter = presenter;
-  }
-
-  goBack(){
-    this.presenter.handleUpNavigation();
   }
 
   getToastService(){
@@ -38,26 +48,47 @@ export class UmBaseService {
     return this.umObserver.asObservable();
   }
 
-  setImpl(systemImpl: any) {
-    this.systemImpl = systemImpl;
-  }
-
   setContext(context: UmContextWrapper) {
-    this.context = context;
   }
 
-  loadLocaleStrings(locale: string) {
+  /**
+   * Loading string map from json file
+   * @param locale current system locale
+   */
+  loadStrings(locale: string){
     const localeUrl = "assets/locale/locale." + locale + ".json";
-    return new Observable(observer => {
-      setTimeout(() => {
-        if (!this.loadedLocale) {
-          this.loadedLocale = true;
-          this.http.get < Map < number, String >> (localeUrl).subscribe(strings => {
-            this.systemImpl.setLocaleStrings(strings);
-            observer.next(true);
-          });
-        }
-      }, 300);
+    console.log("LOcale",locale)
+    return this.http.get<Map < number, String >>(localeUrl).pipe(map(strings => strings));
+  }
+  
+
+  /**
+   * Load appconfig properties files and store them using localstorage manager
+   */
+  loadAndSaveAppConfig(){
+    this.http.get<Map < number, String >>("assets/appconfig.json")
+    .pipe(map(strings => strings)).subscribe(configs => {
+        Object.keys(configs).forEach(key => {
+          localStorage.setItem(key, configs[key])  
+        });
     });
   }
+
+
+  /**
+   * Load entries
+   */
+  loadEntries(){
+    const entriesUrl = "assets/entries.json";
+    return this.http.get<any>(entriesUrl).pipe(map(entries => entries));
+  }
+
+  /**
+   * Load content entry parent child joins
+   */
+  loadEntryJoins(){
+    const joinUrl = "assets/entries_parent_join.json";
+    return this.http.get<any>(joinUrl).pipe(map(joins => joins));
+  }
+
 }

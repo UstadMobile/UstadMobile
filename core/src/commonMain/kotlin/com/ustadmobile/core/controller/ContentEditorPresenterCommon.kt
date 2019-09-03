@@ -4,7 +4,6 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEditorPageListView
@@ -59,7 +58,8 @@ interface ContentEditorPageActionDelegate {
  */
 
 abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String?>, view: ContentEditorView,
-                                            private val storage: String?,internal val mountContainer: suspend (Long) -> String)
+                                            private val storage: String?, val umDatabase :UmAppDatabase,
+                                            internal val mountContainer: suspend (Long) -> String)
     : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageActionDelegate{
 
     internal var contentEntryUid: Long = 0L
@@ -70,13 +70,9 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     var containerUid : Long = 0
 
-    var currentFileContent : String = ""
+    private var currentFileContent : String = ""
 
     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
-
-    internal val umAppRepo : UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-
-    internal val umDatabase :UmAppDatabase = UmAppDatabase.getInstance(context)
 
 
     /**
@@ -180,9 +176,9 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
         contentEntryUid = arguments.getOrElse(ContentEditorView.CONTENT_ENTRY_UID, {"0"})!!.toLong()
 
         GlobalScope.launch {
-            val contentEntry = umAppRepo.contentEntryDao.findByEntryId(contentEntryUid)
+            val contentEntry = umDatabase.contentEntryDao.findByEntryId(contentEntryUid)
             if(contentEntry != null){
-               val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
+               val container = umDatabase.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
 
                 val loadPage = if(container != null){
                     openExistingDocument(container)

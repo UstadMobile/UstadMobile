@@ -2,11 +2,14 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Location.Companion.TABLE_ID
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID )
 class Location() {
 
     @PrimaryKey(autoGenerate = true)
@@ -22,15 +25,15 @@ class Location() {
 
     var parentLocationUid: Long = 0
 
-    var locationActive: Boolean = false
+    var locationActive: Boolean = true
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var locationLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var locationMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var locationLastChangedBy: Int = 0
 
     constructor(title: String, description: String) : this() {
@@ -53,6 +56,6 @@ class Location() {
 
     companion object {
 
-       const val TABLE_ID = 29
+        const val TABLE_ID = 29
     }
 }

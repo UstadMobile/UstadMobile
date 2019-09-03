@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -17,15 +17,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlinx.io.InputStream
 
-class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: VideoPlayerView)
+class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
+                           private val db: UmAppDatabase, private val repo: UmAppDatabase)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
 
-    private lateinit var contentEntryDao: ContentEntryDao
 
     private var navigation: String? = null
 
-    var audioPath: String? = null
+    private lateinit var contentEntryDao: ContentEntryDao
+
+    var audioInput: InputStream? = null
         private set
     var videoPath: String? = null
         private set
@@ -37,9 +40,6 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val db = UmAppDatabase.getInstance(context)
-        val dbRepo = UmAccountManager.getRepositoryForActiveAccount(context)
-        contentEntryDao = dbRepo.contentEntryDao
         val containerEntryDao = db.containerEntryDao
         val containerDao = db.containerDao
 
@@ -62,6 +62,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         GlobalScope.launch {
             container = containerDao.findByUidAsync(containerUid)
             val result = containerEntryDao.findByContainerAsync(containerUid)
+            val containerManager = ContainerManager(container!!, db, repo)
             var defaultLangName = ""
             for (entry in result) {
 
@@ -72,7 +73,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
                         videoPath = containerEntryFile.cefPath
                     } else if (fileInContainer == "audio.c2") {
-                        audioPath = containerEntryFile.cefPath
+                        audioInput = containerManager.getInputStream(entry)
                     } else if (fileInContainer == "subtitle.srt" || fileInContainer.toLowerCase() == "subtitle-english.srt") {
 
                         defaultLangName = if (fileInContainer.contains("-"))
@@ -95,10 +96,14 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                 }
             })
 
-            srtLangList.add(0, "No Subtitles")
-            srtLangList.add(1, defaultLangName)
+            if(videoPath.isNullOrEmpty() && result.isNotEmpty()){
+                videoPath = result[0].containerEntryFile?.cefPath
+            }
 
-            view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioPath, srtLangList, srtMap) })
+            srtLangList.add(0, "No Subtitles")
+            if(defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
+
+            view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioInput, srtLangList, srtMap) })
         }
 
     }

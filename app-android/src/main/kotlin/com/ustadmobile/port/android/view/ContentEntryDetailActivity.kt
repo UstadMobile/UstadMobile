@@ -20,10 +20,12 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
@@ -67,12 +69,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private lateinit var downloadButton: Button
 
+    private lateinit var umAppRepository: UmAppDatabase
+
     private var downloadProgress: DownloadProgressView? = null
 
     private var fileStatusIcon = HashMap<Int, Int>()
 
-    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+    private var showControls : Boolean = false
 
 
     override val allKnowAvailabilityStatus: Set<Long>
@@ -89,7 +92,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
-                this, networkManagerBle)
+                this, networkManagerBle, umAppRepository)
         presenter!!.onCreate(bundleToMap(Bundle()))
 
         presenter!!.onStart()
@@ -100,6 +103,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        umAppRepository = UmAccountManager.getRepositoryForActiveAccount(this)
+        showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, "false", this)!!.toBoolean()
         setContentView(R.layout.activity_entry_detail)
 
         localAvailabilityStatusText = findViewById(R.id.content_status_text)
@@ -174,8 +181,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun setContentEntry(contentEntry: ContentEntry) {
         entryDetailsTitle!!.text = contentEntry.title
         supportActionBar!!.title = contentEntry.title
-        entryDetailsDesc!!.text = Html.fromHtml(contentEntry.description)
-        entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
+        entryDetailsDesc!!.text = if(!contentEntry.description.isNullOrBlank()) Html.fromHtml(contentEntry.description) else ""
+        entryDetailsAuthor!!.text = contentEntry.author
 
         UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
                 findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
@@ -263,7 +270,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun showDownloadOptionsDialog(map: HashMap<String, String>) {
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable { impl.go("DownloadDialog", map, this) },
                 impl.getString(MessageID.download_storage_permission_title, this),
                 impl.getString(MessageID.download_storage_permission_message, this))

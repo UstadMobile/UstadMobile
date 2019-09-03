@@ -122,16 +122,13 @@
     <string name="delivery_signature">Delivery signature</string>
     <string name="record_signature">Record signature</string>
     <string name="filter">Filter</string>
-    <string name="date_range">Date range</string>
     <string name="value">Value</string>
-    <string name="from">From</string>
     <string name="to">to</string>
     <string name="add_signature">Add signature</string>
     <string name="add_reminder">Add reminder</string>
     <string name="add_another_reminder">Add another reminder</string>
     <string name="day_before">day before</string>
     <string name="days_before">days before</string>
-    <string name="tocao">To</string>
     <string name="lowest_price">Lowest price</string>
     <string name="highest_price">Highest price</string>
     <string name="sale_reminder">Sale reminder</string>
@@ -161,7 +158,6 @@
     <string name="product_type">Product type</string>
     <string name="grantee">Grantee</string>
     <string name="sales_price">Sales price</string>
-    <string name="add_to_dashboard">Add to dashboard</string>
     <string name="sales_performance_report">Sales Performance Report</string>
     <string name="sales_performance_report_options">Sales Performance Report Options</string>
     <string name="sales_log_report">Sales Log Report</string>
@@ -175,10 +171,8 @@
     <string name="set_title">Set title</string>
     <string name="show_average_desc">Select to display the average in your report.</string>
     <string name="les">LEs</string>
-    <string name="done">Done</string>
     <string name="week">Week</string>
     <string name="selected_les">Selected LEs</string>
-    <string name="select_locations">Select locations</string>
     <string name="select_product_types">Select product types</string>
 
     <string name="this_language">English</string>

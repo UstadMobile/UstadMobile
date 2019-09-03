@@ -19,6 +19,7 @@
     <color name="bottom_navigation_selected">#FFFFFF</color>
 
     <color name="secondary_text_light">#41727272</color>
+    <color name="red">#FF0000</color>
 
 
     <color name="text_primary">#212121</color>

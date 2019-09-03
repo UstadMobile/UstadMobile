@@ -18,6 +18,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentWithOptionsView
 import java.io.File
 import java.io.FileOutputStream
@@ -89,7 +90,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
     }
 
     override fun browseFiles(callback: UmResultCallback<String>?, vararg mimeType: String) {
-        runAfterGrantingPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        runAfterGrantingPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable{
                     runAfterFileSection(Runnable{
                         HandleFileSelectionAsyncTask(callback ?: object : UmResultCallback<String> {
@@ -136,4 +137,9 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
     override fun createNewContent(arguments: HashMap<String, String?>) {
         impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
     }
+
+    override fun importContentFromLink(arguments: HashMap<String, String?>) {
+        impl!!.go(ContentEntryImportLinkView.VIEW_NAME, arguments, this)
+    }
+
 }

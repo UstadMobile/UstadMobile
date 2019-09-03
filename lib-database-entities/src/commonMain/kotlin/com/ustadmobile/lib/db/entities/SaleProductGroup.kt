@@ -2,12 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 69)
+
+@SyncableEntity(tableId = 69)
 @Entity
 class SaleProductGroup() {
 
@@ -33,13 +34,13 @@ class SaleProductGroup() {
 
     var saleProductGroupType: Int = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var saleProductGroupMCSN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var saleProductGroupLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var saleProductGroupLCB: Int = 0
 
 

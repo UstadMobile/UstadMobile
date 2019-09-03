@@ -3,7 +3,6 @@ package com.ustadmobile.lib.annotationprocessor.core
 import android.arch.persistence.room.ColumnInfo
 import androidx.room.*
 import com.squareup.kotlinpoet.*
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.OPTION_OUTPUT_DIR
 import java.io.File
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
@@ -12,6 +11,7 @@ import javax.lang.model.type.*
 import javax.sql.DataSource
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.SyncableEntity
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.statement.select.Select
 import net.sf.jsqlparser.util.TablesNamesFinder
@@ -22,10 +22,15 @@ import javax.lang.model.type.TypeMirror
 import kotlin.reflect.jvm.internal.impl.name.FqName
 import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
 import org.sqlite.SQLiteDataSource
-import java.lang.RuntimeException
 import java.sql.*
+import java.util.Locale
 import javax.lang.model.util.SimpleTypeVisitor7
 import javax.tools.Diagnostic
+import com.ustadmobile.door.SyncableDoorDatabase
+import kotlin.math.absoluteValue
+import kotlin.random.Random
+import com.ustadmobile.door.DoorDbType
+import kotlin.RuntimeException
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
@@ -57,13 +62,19 @@ fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType,
     }
 }
 
+
 /**
  * Given an input result type (e.g. Entity, Entity[], List<Entity>, String, int, etc), figure out
  * what the actual entity type is
  */
 fun resolveEntityFromResultType(type: TypeName) =
         if(type is ParameterizedTypeName && type.rawType.canonicalName == "kotlin.collections.List") {
-            type.typeArguments[0]
+            val typeArg = type.typeArguments[0]
+            if(typeArg is WildcardTypeName) {
+                typeArg.outTypes[0]
+            }else {
+                typeArg
+            }
         }else {
             type
         }
@@ -99,6 +110,7 @@ fun entityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment): 
     return entityTypeElements
 }
 
+
 /**
  * Returns a list of the entity fields of a particular object. If getAutoIncLast is true, then
  * any autoincrement primary key will always be returned at the end of the list, e.g. so that a
@@ -110,43 +122,28 @@ fun entityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment): 
  * @param getAutoIncLast if true, then always return any field that is auto increment at the very end
  * @return List of VariableElement representing the entity fields that are persisted
  */
-fun getEntityFieldElements(entityTypeElement: TypeElement,
-                           getAutoIncLast: Boolean): List<VariableElement> {
-    val entityFieldsList = mutableListOf<VariableElement>()
-    var pkAutoIncField: VariableElement? = null
-    for (subElement in entityTypeElement.enclosedElements) {
-        if (subElement.kind != ElementKind.FIELD || subElement.modifiers.contains(Modifier.STATIC))
-            continue
-
-        if (getAutoIncLast
-                && subElement.getAnnotation(PrimaryKey::class.java) != null
-                && subElement.getAnnotation(PrimaryKey::class.java).autoGenerate) {
-            pkAutoIncField = subElement as VariableElement
-        } else {
-            entityFieldsList.add(subElement as VariableElement)
+fun getEntityFieldElements(entityTypeSpec: TypeSpec,
+                           getAutoIncLast: Boolean): List<PropertySpec> {
+    val propertyList = entityTypeSpec.propertySpecs.toMutableList()
+    if(getAutoIncLast) {
+        val autoIncPropIdx = propertyList
+                .indexOfFirst { it.annotations.any { it.className == PrimaryKey::class.asClassName()
+                        && it.members.any { it.toString().contains("autoGenerate") }} }
+        if(autoIncPropIdx >= 0) {
+            val autoIncField = propertyList.removeAt(autoIncPropIdx)
+            propertyList.add(autoIncField)
         }
     }
 
-    if (pkAutoIncField != null)
-        entityFieldsList.add(pkAutoIncField)
-
-    return entityFieldsList
+    return propertyList
 }
 
-fun getFieldSqlType(fieldEl: VariableElement, processingEnv: ProcessingEnvironment, dbType: Int = 0): String {
-    when(fieldEl.asType().kind){
-        TypeKind.BOOLEAN -> return "BOOL"
-        TypeKind.INT -> return "INTEGER"
-        TypeKind.LONG -> return "BIGINT"
-        TypeKind.FLOAT -> return "FLOAT"
-        TypeKind.DECLARED -> {
-            val fieldClassName = (processingEnv.typeUtils.asElement(fieldEl.asType()) as TypeElement).qualifiedName.toString()
-            return if (fieldClassName == "java.lang.String") "TEXT" else "UNKNOWN"
+internal fun containsAutoGeneratePk(annotationList: List<AnnotationSpec>) =
+        annotationList.any {
+            it.className == PrimaryKey::class.asClassName()
+            && it.members.map { it.toString().trim() }
+            .any { it.startsWith("autoGenerate") && it.endsWith("true")}
         }
-    }
-
-    return "UNKNOWN"
-}
 
 //As per https://github.com/square/kotlinpoet/issues/236
 internal fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
@@ -243,9 +240,9 @@ fun resolveQueryResultType(returnTypeName: TypeName)  =
             returnTypeName
         }
 
-fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeName, processingEnv: ProcessingEnvironment): String {
+fun makeInsertAdapterMethodName(paramType: TypeName, returnType: TypeName, processingEnv: ProcessingEnvironment): String {
     var methodName = "insert"
-    if(isList(paramType, processingEnv)) {
+    if(paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()) {
         methodName += "List"
         if(returnType != UNIT)
             methodName += "AndReturnIds"
@@ -343,7 +340,7 @@ fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
 /**
  *
  */
-private fun ancestorsToList(child: TypeElement, processingEnv: ProcessingEnvironment): List<TypeElement> {
+internal fun ancestorsToList(child: TypeElement, processingEnv: ProcessingEnvironment): List<TypeElement> {
     val entityAncestors = mutableListOf<TypeElement>()
 
     var nextEntity = child as TypeElement?
@@ -364,6 +361,8 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
         INT -> codeBlock.add("0")
         LONG -> codeBlock.add("0L")
         BYTE -> codeBlock.add("0.toByte()")
+        FLOAT -> codeBlock.add("0.toFloat()")
+        DOUBLE -> codeBlock.add("0.toDouble()")
         BOOLEAN -> codeBlock.add("false")
         String::class.asTypeName() -> codeBlock.add("null as String?")
         else -> {
@@ -461,6 +460,46 @@ fun fieldsOnEntity(entityType: TypeElement) = entityType.enclosedElements.filter
             && !it.modifiers.contains(Modifier.STATIC)
 }
 
+internal val masterDbVals = mapOf(DoorDbType.SQLITE to listOf("0", "1"),
+        DoorDbType.POSTGRES to listOf("false", "true"))
+
+internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
+                                     execSqlFunName: String = "_stmt.executeUpdate",
+                                     processingEnv: ProcessingEnvironment,
+                                     isUpdate: Boolean = false): CodeBlock {
+    val codeBlock = CodeBlock.builder()
+    codeBlock.add("val _nodeId = %T.nextInt(1, %T.MAX_VALUE)\n",
+            Random::class, Int::class)
+            .add("println(\"Setting SyncNode nodeClientId = \$_nodeId\")\n")
+            .add("$execSqlFunName(\"INSERT·INTO·SyncNode(nodeClientId,master)·VALUES")
+
+    when(jdbcDbType) {
+        DoorDbType.SQLITE -> codeBlock.add("·(\$_nodeId,\${if(master)·1·else·0})")
+        DoorDbType.POSTGRES -> codeBlock.add("·(\$_nodeId,\$master)")
+    }
+
+    codeBlock.add("\")\n")
+
+
+    syncableEntityTypesOnDb(dbType, processingEnv).forEach {
+        val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
+        if(jdbcDbType == DoorDbType.SQLITE) {
+            if(isUpdate) {
+                codeBlock.add("$execSqlFunName(%S)\n",
+                        "UPDATE sqlite_sequence SET seq = ((SELECT nodeClientId FROM SyncNode) << 32) WHERE name = '${it.simpleName}'")
+            }else {
+                codeBlock.add("$execSqlFunName(%S)\n",
+                        "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
+            }
+        }else if(jdbcDbType == DoorDbType.POSTGRES){
+            codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
+                    "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
+        }
+    }
+
+    return codeBlock.build()
+}
+
 /**
  * Determine if the result type is nullable. Any single result entity object or String result can be
  * null (e.g. no such object was found by the query). Primitives cannot be null as they will be 0/false.
@@ -475,23 +514,16 @@ fun isNullableResultType(typeName: TypeName) = typeName != UNIT
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
 
 
-@SupportedAnnotationTypes("androidx.room.Database")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedOptions(OPTION_OUTPUT_DIR)
 class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
-
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
-        val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
-        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
-        messager?.printMessage(Diagnostic.Kind.NOTE, "DbProcessorJdbcKotlin: output to ${File(outputDir).absolutePath}")
 
         for(dbTypeEl in dbs) {
             val dbFileSpec = generateDbImplClass(dbTypeEl as TypeElement)
-            dbFileSpec.writeTo(File(outputDir))
+            writeFileSpecToOutputDirs(dbFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
         }
 
 
@@ -500,7 +532,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
             val daoFileSpec = generateDaoImplClass(daoTypeEl)
-            daoFileSpec.writeTo(File(outputDir))
+            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
         }
 
         return true
@@ -511,11 +543,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         val daoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT")
         daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
-        val daoImpl = TypeSpec.classBuilder("${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT")
-                .primaryConstructor(FunSpec.constructorBuilder().addParameter("_db",
-                        DoorDatabase::class).build())
-                .addProperty(PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
-                .superclass(daoTypeElement.asClassName())
+        val daoImpl = jdbcDaoTypeSpecBuilder("${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT",
+                daoTypeElement.asClassName())
 
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach {daoSubEl ->
             if(daoSubEl.kind != ElementKind.METHOD)
@@ -548,12 +577,29 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 "${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
 
 
+        val constructorFn = FunSpec.constructorBuilder()
+                .addParameter("dataSource", DataSource::class)
+                .addCode("this.dataSource = dataSource\n")
+                .addCode("setupFromDataSource()\n")
         val dbImplType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
                 .superclass(dbTypeElement.asClassName())
-                .addFunction(FunSpec.constructorBuilder()
-                        .addParameter("dataSource", DataSource::class)
-                        .addCode("this.dataSource = dataSource\n")
-                        .addCode("setupFromDataSource()\n").build())
+                .addProperty(PropertySpec.builder("dbVersion", INT)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder()
+                                .addCode("return ${dbTypeElement.getAnnotation(Database::class.java).version}")
+                                .build())
+                        .build())
+
+        if(isSyncableDb(dbTypeElement, processingEnv)) {
+            constructorFn.addParameter(ParameterSpec.builder("master", BOOLEAN)
+                    .defaultValue("false")
+                    .addModifiers(KModifier.OVERRIDE).build())
+            dbImplType.addProperty(PropertySpec.builder("master", BOOLEAN)
+                    .initializer("master").build())
+        }
+
+
+        dbImplType.primaryConstructor(constructorFn.build())
         dbImplType.addFunction(generateCreateTablesFun(dbTypeElement))
         dbImplType.addFunction(generateClearAllTablesFun(dbTypeElement))
 
@@ -574,7 +620,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             if(subEl.simpleName.startsWith("get")) {
                 //must be overriden using a val
-                val propName = subEl.simpleName.substring(3, 4).toLowerCase() + subEl.simpleName.substring(4)
+                val propName = subEl.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + subEl.simpleName.substring(4)
                 val getterFunSpec = FunSpec.getterBuilder().addStatement("return _${daoTypeEl.simpleName}").build()
                 dbImplType.addProperty(PropertySpec.builder(propName,
                         methodEl.returnType.asTypeName(), KModifier.OVERRIDE)
@@ -605,30 +651,83 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .beginControlFlow("when(jdbcDbType)")
 
         for(dbProductType in DoorDbType.SUPPORTED_TYPES) {
+            val dbTypeName = DoorDbType.PRODUCT_INT_TO_NAME_MAP[dbProductType] as String
             codeBlock.beginControlFlow("$dbProductType -> ")
-                    .add("// - create for this $dbProductType \n")
-
+                    .add("// - create for this $dbTypeName \n")
             codeBlock.add("_stmt.executeUpdate(\"CREATE·TABLE·IF·NOT·EXISTS·${DoorDatabase.DBINFO_TABLENAME}" +
                     "·(dbVersion·int·primary·key,·dbHash·varchar(255))\")\n")
             codeBlock.add("_stmt.executeUpdate(\"INSERT·INTO·${DoorDatabase.DBINFO_TABLENAME}·" +
                     "VALUES·($initDbVersion,·'')\")\n")
+
             val dbEntityTypes = entityTypesOnDb(dbTypeElement, processingEnv)
             for(entityType in dbEntityTypes) {
-                codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(entityType,
-                        dbProductType))
+                codeBlock.add("//Begin: Create table ${entityType.simpleName} for $dbTypeName\n")
+                val entityTypeSpec = entityType.asEntityTypeSpec()
+                val fieldElements = getEntityFieldElements(entityTypeSpec, false)
+                val fieldListStr = fieldElements.joinToString { it.name }
+                codeBlock.add("/* START MIGRATION: \n")
+                        .add("_stmt.executeUpdate(%S)\n", "ALTER TABLE ${entityTypeSpec.name} RENAME to ${entityTypeSpec.name}_OLD")
+                        .add("END MIGRATION */\n")
+                codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
+                        entityTypeSpec, dbProductType))
+                codeBlock.add("/* START MIGRATION: \n")
+                        .add("_stmt.executeUpdate(%S)\n", "INSERT INTO ${entityTypeSpec.name} ($fieldListStr) SELECT $fieldListStr FROM ${entityTypeSpec.name}_OLD")
+                        .add("_stmt.executeUpdate(%S)\n", "DROP TABLE ${entityTypeSpec.name}_OLD")
+                        .add("END MIGRATION*/\n")
 
-                for(field in getEntityFieldElements(entityType, false)) {
-                    if(field.getAnnotation(ColumnInfo::class.java)?.index == true) {
+                codeBlock.add(generateCreateIndicesCodeBlock(
+                        entityType.getAnnotation(Entity::class.java)
+                                .indices.map { IndexMirror(it) }.toTypedArray(),
+                        entityType.simpleName.toString(), "_stmt.executeUpdate"))
+
+                for(field in fieldElements) {
+                    if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
+                                    && it.members.findBooleanMemberValue("index") ?: false }) {
                         codeBlock.add("_stmt.executeUpdate(%S)\n",
-                                "CREATE INDEX index_${entityType.simpleName}_${field.simpleName} ON ${entityType.simpleName} (${field.simpleName})")
+                                "CREATE INDEX index_${entityType.simpleName}_${field.name} ON ${entityType.simpleName} (${field.name})")
                     }
                 }
+
+                if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
+                    val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(),
+                            processingEnv)
+                    codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
+                            "_stmt.executeUpdate", dbProductType))
+                    if(dbProductType == DoorDbType.POSTGRES) {
+                        codeBlock.add("/* START MIGRATION: \n")
+                                .add("_stmt.executeUpdate(%S)\n", "DROP FUNCTION IF EXISTS inc_csn_${syncableEntityInfo.tableId}_fn")
+                                .add("_stmt.executeUpdate(%S)\n", "DROP SEQUENCE IF EXISTS spk_seq_${syncableEntityInfo.tableId}")
+                                .add("END MIGRATION*/\n")
+                    }
+
+
+                    val trackerEntityClassName = generateTrackerEntity(entityType, processingEnv)
+                    codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
+                            trackerEntityClassName, dbProductType))
+                    codeBlock.add(generateCreateIndicesCodeBlock(
+                            arrayOf(IndexMirror(value = arrayOf(DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                                    DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                                    DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
+                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME))),
+                                    trackerEntityClassName.name!!, "_stmt.executeUpdate"))
+                }
+                codeBlock.add("//End: Create table ${entityType.simpleName} for $dbTypeName\n\n")
             }
+
+            if(processingEnv.typeUtils.isAssignable(dbTypeElement.asType(),
+                            processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())){
+                codeBlock.add(generateInsertNodeIdFun(dbTypeElement, dbProductType, "_stmt.executeUpdate",
+                        processingEnv))
+            }
+
 
             codeBlock.endControlFlow()
         }
 
         codeBlock.endControlFlow() //end when
+                .nextControlFlow("catch(e: %T)", Exception::class)
+                .add("e.printStackTrace()\n")
+                .add("throw %T(%S, e)\n", RuntimeException::class, "Exception creating tables")
                 .nextControlFlow("finally")
                 .add("_stmt?.close()\n")
                 .add("_con?.close()\n")
@@ -647,6 +746,17 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         for(entityType in entityTypesOnDb(dbTypeElement, processingEnv)) {
             dropFunSpec.addCode("_stmt!!.executeUpdate(%S)\n", "DELETE FROM ${entityType.simpleName}")
         }
+
+        dropFunSpec.beginControlFlow("when(jdbcDbType)")
+        DoorDbType.SUPPORTED_TYPES.forEach {
+            dropFunSpec.beginControlFlow("$it -> ")
+                    .addCode(generateInsertNodeIdFun(dbTypeElement, it, "_stmt.executeUpdate", processingEnv,
+                            isUpdate = true))
+                    .endControlFlow()
+        }
+        dropFunSpec.endControlFlow()
+
+
         dropFunSpec.nextControlFlow("finally")
                 .addCode("_stmt?.close()\n")
                 .addCode("_con?.close()\n")
@@ -682,115 +792,15 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
             return insertFun.build()
         }
 
-        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
-
         val upsertMode = daoMethod.getAnnotation(Insert::class.java).onConflict == OnConflictStrategy.REPLACE
-        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""}"
-        if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
-            val fieldNames = mutableListOf<String>()
-            val parameterHolders = mutableListOf<String>()
-
-            val bindCodeBlock = CodeBlock.builder()
-            var fieldIndex = 1
-            fieldsOnEntity(entityTypeEl).forEach {subEl ->
-                fieldNames.add(subEl.simpleName.toString())
-                val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
-                val setterMethodName = getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())
-                if(pkAnnotation != null && pkAnnotation.autoGenerate) {
-                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
-                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ ${defaultVal(subEl.asType().asTypeName())} " +
-                            "-> stmt.setObject(${fieldIndex}, null) " +
-                            "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})  }\n")
-                }else {
-                    parameterHolders.add("?")
-                    bindCodeBlock.add("stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})\n")
-                }
-            }
-
-            val statementClause = if(upsertMode) {
-                "\${when(_db.jdbcDbType) { DoorDbType.SQLITE -> \"INSERT·OR·REPLACE\" else -> \"INSERT\"} }"
-            }else {
-                "INSERT"
-            }
-
-            val upsertSuffix = if(upsertMode) {
-                val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
-                val nonPkFieldPairs = nonPkFields.map { "${it.simpleName}·=·excluded.${it.simpleName}" }
-                val pkField = entityTypeEl.enclosedElements.firstOrNull { it.getAnnotation(PrimaryKey::class.java) != null }
-                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.simpleName})·" +
-                        "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
-                        "else -> \"·\" } } "
-            } else {
-                ""
-            }
-
-            val sql = """
-                $statementClause INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
-                VALUES (${parameterHolders.joinToString()})
-                $upsertSuffix
-                """.trimIndent()
-
-            val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
-                    .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
-                    .addSuperclassConstructorParameter("_db.jdbcDbType")
-                    .addFunction(FunSpec.builder("makeSql")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addCode("return \"\"\"%L\"\"\"", sql).build())
-                    .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addParameter("stmt", PreparedStatement::class)
-                            .addParameter("entity", entityType.asTypeName())
-                            .addCode(bindCodeBlock.build()).build())
-
-            daoTypeBuilder.addProperty(PropertySpec.builder(entityInserterPropName,
-                    EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
-                    .initializer("%L", insertAdapterSpec.build())
-                    .build())
-        }
-
-
-        val returnType = daoMethodResolved.returnType
-
-        if(resolvedReturnType != UNIT) {
-            insertFun.addCode("val _retVal = ")
-        }
-
-
-        val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
-                resolvedReturnType, processingEnv)
-        insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())")
-
-        if(resolvedReturnType != UNIT) {
-            if(isListOrArray(resolvedReturnType)
-                    && resolvedReturnType is ParameterizedTypeName
-                    && resolvedReturnType.typeArguments[0] == INT) {
-                insertFun.addCode(".map { it.toInt() }")
-            }else if(resolvedReturnType == INT){
-                insertFun.addCode(".toInt()")
-            }
-        }
-
-        insertFun.addCode("\n")
-
-        insertFun.addCode("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
-
-        if(resolvedReturnType != UNIT) {
-            insertFun.addCode("return _retVal")
-        }
-
-        if(resolvedReturnType is ParameterizedTypeName
-                && resolvedReturnType.rawType == ARRAY) {
-            insertFun.addCode(".toTypedArray()")
-        }else if(resolvedReturnType == LongArray::class.asClassName()) {
-            insertFun.addCode(".toLongArray()")
-        }else if(resolvedReturnType == IntArray::class.asClassName()) {
-            insertFun.addCode(".toIntArray()")
-        }
-
-        insertFun.addCode("\n")
-
+        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
+        insertFun.addCode(generateInsertCodeBlock(
+                insertFun.parameters[0],
+                resolvedReturnType, entityTypeEl.asEntityTypeSpec(),
+                daoTypeBuilder, upsertMode))
         return insertFun.build()
     }
+
 
     fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder,
                          isRawQuery: Boolean = false) : FunSpec {
@@ -1026,8 +1036,6 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
     fun makeLogPrefix(enclosing: TypeElement, method: ExecutableElement) = "DoorDb: ${enclosing.qualifiedName}. ${method.simpleName} "
 
     companion object {
-
-        const val OPTION_OUTPUT_DIR = "door_jdbc_kt_out"
 
         const val SUFFIX_JDBC_KT = "JdbcKt"
 

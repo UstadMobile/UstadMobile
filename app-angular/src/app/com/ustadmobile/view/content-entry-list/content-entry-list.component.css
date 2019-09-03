@@ -20,7 +20,19 @@ a.disabled {
     cursor: default;
  }
 
- .entry-image{
+ .entry-image-left{
      margin-left: -44% !important;
+ }
+
+ .entry-summary-left{
+    padding: 0 3% 0 3% !important;
+ }
+
+ .entry-ltr{
+     padding-left: 3% !important;
+ }
+
+ .entry-rtl{
+     padding-right: 3% !important;
  }
 

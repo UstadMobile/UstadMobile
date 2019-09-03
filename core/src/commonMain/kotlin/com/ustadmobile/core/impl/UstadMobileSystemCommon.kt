@@ -16,7 +16,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * Class has all the shared function across all supported platforms
  */
-abstract class UstadMobileSystemCommon {
+open abstract class UstadMobileSystemCommon {
 
     /**
      * Returns whether or not the init method has already been run
@@ -215,6 +215,21 @@ abstract class UstadMobileSystemCommon {
 
         return locale
     }
+
+    /**
+     * Get list of all UI supported languages
+     */
+    @JsName("getAllUiLanguage")
+    open fun getAllUiLanguage(context: Any): Map<String,String>{
+        val languageList = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context)!!.split(",")
+        val languageMap = HashMap<String,String>()
+        for(language in languageList){
+            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?: error("English")
+        }
+        return languageMap
+    }
+
 
     /**
      * Starts the user interface for the app

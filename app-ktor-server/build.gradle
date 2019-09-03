@@ -4,7 +4,8 @@ plugins {
     id 'war'
     id 'maven-publish'
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
-    id 'com.github.johnrengelman.shadow' version "5.1.0"
+    id 'com.github.johnrengelman.shadow'
+    id 'kotlinx-serialization'
 }
 
 configurations {
@@ -23,25 +24,37 @@ shadowJar {
     configurations += [project.configurations.standaloneRuntime]
 }
 
+sourceSets {
+    main.java.srcDirs += ["$buildDir/generated/source/door"]
+}
 
 war {
     classpath configurations.servletRuntime
 }
 
 task appRun(type: JavaExec) {
-    classpath = configurations.standaloneRuntime
+    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
-    args = ['-port', '8087']
+    args '-port', '8087'
 }
+
+appRun.dependsOn(shadowJar)
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     standaloneRuntime "io.ktor:ktor-server-netty:$version_ktor"
     servletRuntime "io.ktor:ktor-server-servlet:$version_ktor"
+    implementation "io.ktor:ktor-server-netty:$version_ktor"
     implementation "io.ktor:ktor-jackson:$version_ktor"
     implementation "io.ktor:ktor-gson:$version_ktor"
+    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "commons-io:commons-io:$version_commons_io"
+    implementation "org.jsoup:jsoup:$version_jsoup"
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
 
-    implementation project(":core")
+    implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
     implementation project(":lib-door-runtime")
@@ -49,8 +62,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    testImplementation project(":lib-test-common")
-    testImplementation project(":sharedse")
+    testImplementation project(path: ":lib-test-common", configuration: "jvmDefault")
+    testImplementation project(path: ":sharedse", configuration: "jvmDefault")
 
     testImplementation "junit:junit:$version_junit"
 
@@ -58,11 +71,14 @@ dependencies {
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    testImplementation "io.ktor:ktor-server-netty:$version_ktor"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
     standaloneRuntime "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     standaloneRuntime "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     standaloneRuntime "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     standaloneRuntime "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    standaloneRuntime "org.postgresql:postgresql:$version_postgres_jdbc"
 
 
     testImplementation "io.ktor:ktor-client-core:$version_ktor"

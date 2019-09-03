@@ -1,0 +1,91 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+/**
+ * Core module build script : see buildconfig.core.default.gradle for configuration
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+    }
+}
+
+
+apply plugin: "kotlin-multiplatform"
+apply plugin: "maven-publish"
+apply plugin: 'com.github.johnrengelman.shadow'
+
+kotlin {
+
+
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        configure([jvmJar]) {
+            manifest {
+                attributes 'Main-Class': 'com.ustadmobile.dbcompress.CompressJob'
+            }
+        }
+
+    }
+
+    sourceSets {
+
+        jvmMain {
+            dependencies {
+                implementation fileTree(dir: 'libs', include: ['*.jar'])
+                implementation project(path: ":core", configuration: "jvmDefault")
+                implementation project(path: ":lib-database-mpp", configuration: "jvmDefault")
+                implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
+                implementation project(path: ":lib-door-runtime", configuration: "jvmDefault")
+                implementation project(path: ":sharedse")
+                implementation project(path: ":lib-util")
+
+                implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+            }
+        }
+
+    }
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+
+task shadowJar(type: ShadowJar, dependsOn: [jvmJar]) {
+    from jvmJar.archiveFile
+    configurations = [project.configurations.jvmRuntimeClasspath]
+    manifest {
+        attributes 'Main-Class': "com.ustadmobile.dbcompress.CompressJob"
+    }
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
+
+

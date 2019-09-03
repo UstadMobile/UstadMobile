@@ -286,4 +286,8 @@
     <string name="content_supported_files">ملاتړ شوی فایلونه: &lt;b&gt;H5P, Epub, TinCan (XAPI) Zip&lt;/b&gt;</string>
     <string name="content_entry_importing">و واردولوو په حال کې، هیله ده انتظار وباسئ</string>
     <string name="content_editor_save_error"> د ثبتولو په وخت کې تیروتنه وشو، بیا هڅه وکړئ</string>
+
+
+    <string name="no_account">Don\'t have an account?</string>
 </resources>
+

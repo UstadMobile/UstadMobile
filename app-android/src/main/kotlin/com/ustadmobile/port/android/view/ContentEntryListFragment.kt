@@ -22,6 +22,7 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
@@ -174,8 +175,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             recyclerAdapter!!.addListeners()
             recyclerAdapter!!.setEmptyStateListener(this)
 
+            val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
-                    bundleToMap(arguments), this)
+                    bundleToMap(arguments), this, umRepoDb.contentEntryDao)
             entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
         }
     }
@@ -219,7 +221,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         val impl = UstadMobileSystemImpl.instance
         if(::ustadBaseActivity.isInitialized){
             ustadBaseActivity.runAfterGrantingPermission(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
                     impl.getString(MessageID.download_storage_permission_title, context!!),
                     impl.getString(MessageID.download_storage_permission_message, context!!))

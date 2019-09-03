@@ -22,7 +22,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
 
     init {
-        ///load from database
+        ///load from umDatabase
         val entryList = db.containerEntryDao.findByContainer(container.containerUid)
         containerUid = container.containerUid
         pathToEntryMap.putAll(entryList.map { it.cePath!! to it }.toMap())
@@ -56,6 +56,11 @@ abstract class ContainerManagerCommon(protected val container: Container,
          * The MD5 sum of the entry being added (if known)
          */
         val md5Sum: ByteArray
+
+        /**
+         * The compression (if this file is already compressed)
+         */
+        val compression: Int
 
     }
 

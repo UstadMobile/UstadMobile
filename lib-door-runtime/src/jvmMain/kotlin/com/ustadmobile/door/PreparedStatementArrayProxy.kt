@@ -152,6 +152,8 @@ class PreparedStatementArrayProxy
                     Types.BIGINT -> stmt!!.setLong(paramIndex, value as Long)
 
                     Types.FLOAT -> stmt!!.setFloat(paramIndex, value as Float)
+
+                    ARR_PROXY_SET_OBJECT -> stmt!!.setObject(paramIndex, value)
                 }
 
             }
@@ -236,7 +238,7 @@ class PreparedStatementArrayProxy
 
     @Throws(SQLException::class)
     override fun setBigDecimal(i: Int, bigDecimal: BigDecimal) {
-
+        throw SQLException("PreparedStatementArrayProxy unsupported type: BigDecimal")
     }
 
     @Throws(SQLException::class)
@@ -247,12 +249,12 @@ class PreparedStatementArrayProxy
 
     @Throws(SQLException::class)
     override fun setBytes(i: Int, bytes: ByteArray) {
-
+        throw SQLException("PreparedStatementArrayProxy unsupported type: Bytes")
     }
 
     @Throws(SQLException::class)
     override fun setDate(i: Int, date: Date) {
-
+        throw SQLException("PreparedStatementArrayProxy unsupported type: Date")
     }
 
     @Throws(SQLException::class)
@@ -287,12 +289,13 @@ class PreparedStatementArrayProxy
 
     @Throws(SQLException::class)
     override fun setObject(i: Int, o: Any, i1: Int) {
-
+        throw SQLException("Unsupported: setObject, Int")
     }
 
     @Throws(SQLException::class)
     override fun setObject(i: Int, o: Any) {
-
+        queryParams[i] = o
+        queryTypes[i] = ARR_PROXY_SET_OBJECT
     }
 
     @Throws(SQLException::class)
@@ -312,17 +315,17 @@ class PreparedStatementArrayProxy
 
     @Throws(SQLException::class)
     override fun setCharacterStream(i: Int, reader: Reader, i1: Int) {
-
+        throw SQLException("PreparedStatementArrayProxy: Unsupported type: setCharacterStream")
     }
 
     @Throws(SQLException::class)
     override fun setRef(i: Int, ref: Ref) {
-
+        throw SQLException("PreparedStatementArrayProxy: Unsupported type: setRef")
     }
 
     @Throws(SQLException::class)
     override fun setBlob(i: Int, blob: Blob) {
-
+        throw SQLException("PreparedStatementArrayProxy: Unsupported type: blob")
     }
 
     @Throws(SQLException::class)
@@ -695,6 +698,8 @@ class PreparedStatementArrayProxy
     }
 
     companion object {
+
+        const val ARR_PROXY_SET_OBJECT = -5000
 
         /**
          * Create a proxy array, using the same method parameters as a JDBC connection uses to create it.

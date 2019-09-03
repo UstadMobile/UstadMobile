@@ -340,7 +340,8 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
         return dateFieldPicker
     }
 
-    override fun onLocationResult(selectedLocations: HashMap<String, Long>) {
+
+    override fun onLocationResult(selectedLocations: MutableMap<String, Long>) {
         val selectedLocationsNameIterator = selectedLocations.keys.iterator()
         val locationsSelectedString = StringBuilder()
         while (selectedLocationsNameIterator.hasNext()) {

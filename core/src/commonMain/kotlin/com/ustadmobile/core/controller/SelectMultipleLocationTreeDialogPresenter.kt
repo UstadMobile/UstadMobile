@@ -1,87 +1,48 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
-/**
- * The SelectMultipleTreeDialog Presenter.
- */
-class SelectMultipleLocationTreeDialogPresenter(
-        context: Any, arguments: Map<String, String>?,
-        view: SelectMultipleLocationTreeDialogView)
-    : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(
-        context, arguments!!, view) {
+class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
+                                                view: SelectMultipleLocationTreeDialogView,
+                                                private val locationDao: LocationDao)
+    : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
 
-    /**
-     * Getter for selected Locations
-     * @return  selected options (locations) as a HashMap<Location name, Location Uid>
-    </Location> */
-    val selectedOptions: HashMap<String, Long>
+    var selectedLocationsList: List<Long> = listOf()
 
-    private var selectedLocationsList: List<Long>? = null
-
-    internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
+    var selectedOptions = mutableMapOf<String, Long>()
 
     init {
-
-        if (arguments!!.containsKey(ARG_LOCATIONS_SET)) {
-            val locationsArrayString = arguments.get(ARG_LOCATIONS_SET).toString()
-
-            selectedLocationsList = convertCSVStringToLongList(locationsArrayString)
-
+        val locationsArray = arguments.getValue(ARG_LOCATIONS_SET)
+        selectedLocationsList = locationsArray!!.split(",").filter { it.isNotEmpty() }.map {
+            it.trim().toLong()
         }
-        selectedOptions = HashMap()
-
-        //Get top locations - and populate the view with it.
         getTopLocations()
-
     }
 
-
-    /**
-     * Gets top locations and load initial data to the recycler view
-     */
-    private fun getTopLocations() {
-        val locationDao = repository.locationDao
-        GlobalScope.launch {
-            val result = locationDao.findTopLocationsAsync()
-            view.populateTopLocation(result)
-        }
-    }
-
-    override fun onCreate(savedState: Map<String, String?>?) {
-        super.onCreate(savedState)
-    }
-
-    fun getSelectedLocationsList(): List<Long> {
-        return (if (selectedLocationsList == null) {
-            ArrayList()
-        } else selectedLocationsList)!!
-    }
-
-    override fun entityChecked(entityName: String, entityUid: Long?, checked: Boolean) {
+    override fun entityChecked(entityName: String, entityUid: Long, checked: Boolean) {
         if (checked) {
-            if (entityUid != null) {
-                selectedOptions.put(entityName, entityUid)
-            }
+            selectedOptions[entityName] = entityUid
         } else {
             selectedOptions.remove(entityName)
         }
     }
 
-    fun convertCSVStringToLongList(csString:String):List<Long> {
-        val list = ArrayList<Long>()
-        for (s in csString.split((",").
-                toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()){
-            val p = s.trim()
-            list.add(p as Long)
+    /**
+     * Gets top locations and load initial data to the recycler view
+     */
+    private fun getTopLocations() {
+        GlobalScope.launch {
+            val locationList = locationDao.findTopLocationsAsync()
+            view.runOnUiThread(Runnable {
+                view.populateTopLocation(locationList)
+            })
         }
-
-        return list
     }
 
 }

@@ -1,6 +1,5 @@
 package com.ustadmobile.core.view
 
-
 /**
  * Core View. Screen is for UserProfile's View
  */
@@ -33,4 +32,5 @@ interface UserProfileView : UstadView {
 
 
 }
+
 

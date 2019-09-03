@@ -2,12 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 65)
+
+@SyncableEntity(tableId = 65)
 @Entity
 class SalePayment() {
 
@@ -32,13 +33,13 @@ class SalePayment() {
     //If false, it wont show up on the app and reports - effectively deleted.
     var salePaymentActive: Boolean = false
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var salePaymentMCSN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var salePaymentLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var salePaymentLCB: Int = 0
 
 

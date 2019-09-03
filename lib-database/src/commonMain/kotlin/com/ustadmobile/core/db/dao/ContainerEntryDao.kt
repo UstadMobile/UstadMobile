@@ -22,9 +22,6 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
     @Insert
     abstract suspend fun insertListAsync(containerEntryList: List<ContainerEntry>)
 
-    @Delete
-    abstract fun deleteList(containerEntryList: List<ContainerEntry>)
-
     @Query("SELECT ContainerEntry.*, ContainerEntryFile.* " +
             "FROM ContainerEntry " +
             "LEFT JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
@@ -58,4 +55,7 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
     @Query("DELETE FROM ContainerEntry WHERE ceUid = :containerEntryUid")
     abstract fun deleteByContainerEntryUid(containerEntryUid: Long)
+
+    @Delete
+    abstract fun deleteList(entries: List<ContainerEntry>)
 }

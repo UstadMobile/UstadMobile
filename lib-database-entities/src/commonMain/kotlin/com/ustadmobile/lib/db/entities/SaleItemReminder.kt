@@ -2,12 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 79)
+
+@SyncableEntity(tableId = 79)
 @Entity
 class SaleItemReminder() {
 
@@ -21,13 +22,13 @@ class SaleItemReminder() {
 
     var saleItemReminderActive: Boolean = false
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var saleItemReminderMCSN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var saleItemReminderLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var saleItemReminderLCB: Int = 0
 
     init {

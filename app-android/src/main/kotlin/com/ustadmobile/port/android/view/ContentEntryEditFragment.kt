@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryEditPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
@@ -68,6 +69,10 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     private var mProgress: ProgressDialog? = null
 
+    private lateinit var umDatabase: UmAppDatabase
+
+    private lateinit var umRepository: UmAppDatabase
+
 
     interface EntryCreationActionListener {
 
@@ -106,6 +111,10 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         rootView = inflater.inflate(R.layout.fragment_content_entry,
                 container, false)
 
+        val fragmentContext = context!!
+        umDatabase = UmAppDatabase.getInstance(fragmentContext)
+        umRepository = UmAccountManager.getRepositoryForActiveAccount(fragmentContext)
+
         toolbar = rootView!!.findViewById(R.id.toolbar)
         toolbar!!.setNavigationIcon(if (getDirectionality(activity?.applicationContext!!) == "ltr")
             R.drawable.ic_arrow_back_white_24dp
@@ -125,7 +134,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         val addThumbnail = rootView!!.findViewById<View>(R.id.add_folder_thumbnail)
 
 
-        toolbar!!.setNavigationOnClickListener { v -> dismiss() }
+        toolbar!!.setNavigationOnClickListener { dismiss() }
 
         toolbar!!.inflateMenu(R.menu.menu_content_entry_fragment_top)
 

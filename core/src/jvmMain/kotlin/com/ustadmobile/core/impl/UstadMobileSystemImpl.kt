@@ -51,7 +51,7 @@ import kotlin.collections.ArrayList
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
+actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
     private var appConfig: Properties? = null
 

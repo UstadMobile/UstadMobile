@@ -27,7 +27,7 @@ class UmHttpRequest {
     private var onlyIfCached: Boolean = false
 
     /**
-     * The context object is required for communication with the database (via HttpCacheDbManager)
+     * The context object is required for communication with the umDatabase (via HttpCacheDbManager)
      * and to determine http proxy settings.
      *
      * @return System context object.

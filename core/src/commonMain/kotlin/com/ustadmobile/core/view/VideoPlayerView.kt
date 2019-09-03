@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.io.InputStream
 
 interface VideoPlayerView : UstadView {
 
@@ -8,7 +9,7 @@ interface VideoPlayerView : UstadView {
 
     fun setVideoInfo(result: ContentEntry)
 
-    fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)
+    fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)
 
     companion object {
 

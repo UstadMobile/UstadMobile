@@ -82,7 +82,7 @@ abstract class DownloadJobDao {
     abstract fun getJobsLive(jobStatus: Int): DoorLiveData<List<DownloadJob>>
 
     @Query("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
-    abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int?
+    abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int
 
     @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
     abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int

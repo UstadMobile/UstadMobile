@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -40,6 +41,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEditorPresenter
 import com.ustadmobile.core.controller.ContentEditorPresenterCommon.Companion.EDITOR_BASE_DIR_NAME
@@ -159,7 +161,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
         embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
         presenter = ContentEditorPresenter(this, args!!, this,
-                args!![CONTENT_STORAGE_OPTION]) {
+                args!![CONTENT_STORAGE_OPTION], UmAppDatabase.getInstance(this),
+                UmAccountManager.getRepositoryForActiveAccount(this)) {
 
             val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
             val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
@@ -177,10 +180,12 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     /**
      * Class which represent a link inside the editor.
      */
-    private inner class UmLink {
+    inner class UmLink {
 
+        @SerializedName("linkText")
         internal val linkText: String? = null
 
+        @SerializedName("linkUrl")
         internal val linkUrl: String? = null
     }
 
@@ -762,7 +767,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mFromCamera.setOnClickListener {
             isOpeningFilePickerOrCamera = true
             viewSwitcher!!.closeAnimatedView(UmEditorAnimatedViewSwitcher.ANIMATED_MEDIA_TYPE_PANEL)
-            runAfterGrantingPermission(Manifest.permission.CAMERA,
+            runAfterGrantingPermission(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     Runnable { this.showMediaTypeDialog() }, getString(R.string.permission_camera_title),
                     getString(R.string.permission_camera_message))
         }
@@ -795,6 +800,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mWebView!!.addJavascriptInterface(
                 UmWebContentEditorInterface(this, this), "UmEditor")
         mWebView!!.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
     }
 
 
@@ -1016,7 +1022,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 builder.setView(view)
                 builder.setNegativeButton(R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }
-                if (umLink.linkUrl!!.isNotEmpty()) {
+                if (umLink.linkUrl?.isNotEmpty()!!) {
                     builder.setNeutralButton(R.string.content_editor_link_remove) { _, _ ->
                         executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "removeLink",
                                 this@ContentEditorActivity)

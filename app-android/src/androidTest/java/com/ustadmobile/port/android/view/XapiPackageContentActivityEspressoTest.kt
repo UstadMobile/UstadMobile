@@ -39,7 +39,7 @@ class XapiPackageContentActivityEspressoTest {
     @Throws(IOException::class)
     fun setup() {
         db = UmAppDatabase.getInstance(context)
-        repo = db //db!!.getRepository("http://localhost/dummy/", "")
+        repo = db //db!!.getUmRepository("http://localhost/dummy/", "")
         db!!.clearAllTables()
 
         val storageDir = ContextCompat.getExternalFilesDirs(

@@ -125,4 +125,9 @@ object UMCalendarUtil {
         val date = format.parse(date)
         return date.local.unixMillis.toLong()
     }
+
+    fun setDate(year: Int, month: Int, dayOfMonth: Int): DateTime {
+        return DateTime(year, month, dayOfMonth)
+    }
+
 }

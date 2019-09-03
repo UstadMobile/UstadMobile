@@ -2,14 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.TABLE_ID
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 class StatementEntity {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey(autoGenerate = true)
     var statementUid: Long = 0
 
@@ -35,9 +37,9 @@ class StatementEntity {
 
     var teamUid: Long = 0
 
-    var isResultCompletion: Boolean = false
+    var resultCompletion: Boolean = false
 
-    var isResultSuccess: Boolean = false
+    var resultSuccess: Byte = RESULT_UNSET
 
     var resultScoreScaled: Long = 0
 
@@ -63,17 +65,23 @@ class StatementEntity {
 
     var fullStatement: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var statementMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var statementLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var statementLastChangedBy: Int = 0
 
     companion object {
 
         const val TABLE_ID = 60
+
+        const val RESULT_UNSET = 0.toByte()
+
+        const val RESULT_SUCCESS = 1.toByte()
+
+        const val RESULT_FAILURE = 2.toByte()
     }
 }

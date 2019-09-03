@@ -2,14 +2,17 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 class XObjectEntity {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey(autoGenerate = true)
     var xObjectUid: Long = 0
 
@@ -23,53 +26,57 @@ class XObjectEntity {
 
     var correctResponsePattern: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    var objectContentEntryUid: Long = 0
+
+    @MasterChangeSeqNum
     var xObjectMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var xObjectocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var xObjectLastChangedBy: Int = 0
 
     constructor() {
 
     }
 
-    constructor(id: String?, objectType: String?, type: String?, interactionType: String?, responsePattern: String?) {
+    constructor(id: String?, objectType: String?, type: String?, interactionType: String?, responsePattern: String?, objectContentEntryUid: Long = 0) {
         this.objectId = id
         this.objectType = objectType
         this.definitionType = type
         this.interactionType = interactionType
         this.correctResponsePattern = responsePattern
+        this.objectContentEntryUid = objectContentEntryUid
     }
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || this::class != o::class) return false
-
-        val that = o as XObjectEntity?
-
-        if (xObjectUid != that!!.xObjectUid) return false
-        if (if (objectType != null) objectType != that.objectType else that.objectType != null)
-            return false
-        if (if (objectId != null) objectId != that.objectId else that.objectId != null)
-            return false
-        if (if (definitionType != null) definitionType != that.definitionType else that.definitionType != null)
-            return false
-        if (if (interactionType != null) interactionType != that.interactionType else that.interactionType != null)
-            return false
-        return if (correctResponsePattern != null) correctResponsePattern == that.correctResponsePattern else that.correctResponsePattern == null
-    }
 
     override fun hashCode(): Int {
         var result = (xObjectUid xor xObjectUid.ushr(32)).toInt()
-        result = 31 * result + if (objectType != null) objectType!!.hashCode() else 0
-        result = 31 * result + if (objectId != null) objectId!!.hashCode() else 0
-        result = 31 * result + if (definitionType != null) definitionType!!.hashCode() else 0
-        result = 31 * result + if (interactionType != null) interactionType!!.hashCode() else 0
-        result = 31 * result + if (correctResponsePattern != null) correctResponsePattern!!.hashCode() else 0
+        result = 31 * result + (objectType?.hashCode() ?: 0)
+        result = 31 * result + (objectId?.hashCode() ?: 0)
+        result = 31 * result + (definitionType?.hashCode() ?: 0)
+        result = 31 * result + (interactionType?.hashCode() ?: 0)
+        result = 31 * result + (correctResponsePattern?.hashCode() ?: 0)
+        result = 31 * result + objectContentEntryUid.hashCode()
         return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as XObjectEntity
+
+        if (xObjectUid != other.xObjectUid) return false
+        if (objectType != other.objectType) return false
+        if (objectId != other.objectId) return false
+        if (definitionType != other.definitionType) return false
+        if (interactionType != other.interactionType) return false
+        if (correctResponsePattern != other.correctResponsePattern) return false
+        if (objectContentEntryUid != other.objectContentEntryUid) return false
+
+        return true
     }
 
     companion object {

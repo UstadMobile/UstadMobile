@@ -69,7 +69,7 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
     }
 
-    override fun entityChecked(entityName: String, entityUid: Long?, checked: Boolean) {
+    override fun entityChecked(entityName: String, entityUid: Long, checked: Boolean) {
         if (checked) {
             if (entityUid != null) {
                 selectedOptions.put(entityName, entityUid)

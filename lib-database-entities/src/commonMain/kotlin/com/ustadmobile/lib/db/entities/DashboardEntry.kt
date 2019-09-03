@@ -2,17 +2,16 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.annotation.SyncablePrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 
-@UmEntity(tableId = 80)
+
+@SyncableEntity(tableId = 80)
 @Entity
 class DashboardEntry {
-
-    @SyncablePrimaryKey
+    
     @PrimaryKey(autoGenerate = true)
     var dashboardEntryUid: Long = 0
 
@@ -28,13 +27,13 @@ class DashboardEntry {
 
     var dashboardEntryActive: Boolean = false
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var dashboardEntryMCSN: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var dashboardEntryLCSN: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var dashboardEntryLCB: Int = 0
 
     constructor() {

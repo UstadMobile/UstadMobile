@@ -98,6 +98,31 @@
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
+        <RelativeLayout
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:focusable="true"
+            android:id="@+id/content_import_link"
+            android:padding="@dimen/dimen_16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:tint="@color/text_secondary"
+                android:src="@drawable/ic_import_export_black_24dp"
+                android:id="@+id/import_link"
+                android:layout_centerVertical="true"
+                android:layout_width="@dimen/dimen_20dp"
+                android:layout_height="@dimen/dimen_20dp" />
+
+            <TextView
+                android:text="@string/content_editor_create_new_import_link"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_toEndOf="@+id/import_link"
+                android:textSize="15sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
 
         <RelativeLayout
             android:clickable="true"

@@ -13,11 +13,11 @@ import kotlin.js.JsName
 abstract class ContainerDao : BaseDao<Container> {
 
     @Insert
-    abstract fun insert(containerList: List<Container>): Array<Long>
+    abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
+           // "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     @JsName("getMostRecentDownloadedContainerForContentEntryAsync")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?
@@ -32,7 +32,7 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     @JsName("getFileSizeOfMostRecentContainerForContentEntry")
-    abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long?
+    abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long
 
 
     @Query("SELECT * FROM Container WHERE containerUid = :uid")
@@ -74,11 +74,18 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("updateContainerSizeAndNumEntries")
     abstract fun updateContainerSizeAndNumEntries(containerUid: Long)
 
+    @Query("UPDATE Container SET fileSize = " +
+            "(SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize " +
+            "FROM ContainerEntry JOIN ContainerEntryFile ON " +
+            "ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
+            "WHERE ContainerEntry.ceContainerUid = Container.containerUid)")
+    abstract suspend fun updateFileSizeForAllContainers()
+
     @Query("SELECT Container.containerUid FROM Container " +
             "WHERE Container.containerUid = :containerUid " +
             "AND (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries")
     @JsName("findLocalAvailabilityByUid")
-    abstract fun findLocalAvailabilityByUid(containerUid: Long): Long?
+    abstract fun findLocalAvailabilityByUid(containerUid: Long): Long
 
     @Query("SELECT * FROM Container WHERE Container.containerUid = :containerUid")
     @JsName("findAllWithId")

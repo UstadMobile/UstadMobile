@@ -57,7 +57,7 @@ class TestXapiPackageContentPresenter {
         context = Any()
         try {
             db = UmAppDatabase.getInstance(context)
-            repo = db//.getRepository("http://localhost/dummy/", "")
+            repo = db//.getUmRepository("http://localhost/dummy/", "")
             db.clearAllTables()
         } catch (e: Exception) {
             e.printStackTrace()

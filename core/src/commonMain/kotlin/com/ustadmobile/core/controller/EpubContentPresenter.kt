@@ -67,10 +67,10 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.dumpException
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.util.UMUtil
-import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -83,7 +83,9 @@ import org.kmp.io.KMPXmlParser
  *
  * @author mike
  */
-class EpubContentPresenter(context: Any, args: Map<String, String>?, private val epubContentView: EpubContentView?)
+class EpubContentPresenter(context: Any,
+                           args: Map<String, String>?,
+                           private val epubContentView: EpubContentView)
     : UstadBaseController<EpubContentView>(context, args!!, epubContentView!!) {
 
     private var ocf: OcfDocument? = null
@@ -105,7 +107,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
             val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
             GlobalScope.launch {
                 try {
-                    val client = HttpClient()
+                    val client = defaultHttpClient()
                     val ocfContent = client.get<String>(containerUri)
 
                     ocf = OcfDocument()
@@ -140,7 +142,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                     else
                         null
 
-                    epubContentView!!.runOnUiThread(Runnable {
+                    epubContentView.runOnUiThread(Runnable {
                         val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF)) opf.getLinearSpinePositionByHREF(
                                 arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)!!) else 0
 

@@ -4,6 +4,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.Statement
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.regex.Pattern
 import javax.naming.InitialContext
@@ -12,6 +14,8 @@ import javax.sql.DataSource
 actual abstract class DoorDatabase {
 
     protected lateinit var dataSource: DataSource
+
+    abstract val dbVersion: Int
 
     var jdbcDbType: Int = -1
 
@@ -55,7 +59,9 @@ actual abstract class DoorDatabase {
         tableNamesList.toList()
     }
 
-    actual constructor()
+    actual constructor() {
+
+    }
 
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource
@@ -67,6 +73,24 @@ actual abstract class DoorDatabase {
         val iContext = InitialContext()
         dataSource = iContext.lookup("java:/comp/env/jdbc/${dbName}") as DataSource
         setupFromDataSource()
+    }
+
+    internal val sqlDatabaseImpl = object: DoorSqlDatabase {
+        override fun execSQL(sql: String) {
+            var dbConnection = null as Connection?
+            var stmt = null as Statement?
+            try {
+                dbConnection = openConnection()
+                stmt = dbConnection.createStatement()
+                stmt.executeUpdate(sql)
+            } catch (sqle: SQLException) {
+                sqle.printStackTrace()
+            } finally {
+                stmt?.close()
+                dbConnection?.close()
+            }
+
+        }
     }
 
     protected fun setupFromDataSource() {
@@ -116,7 +140,7 @@ actual abstract class DoorDatabase {
     }
 
     companion object {
-        const val DBINFO_TABLENAME = "_door_info"
+        const val DBINFO_TABLENAME = "_doorwayinfo"
 
         const val POSTGRES_SELECT_IN_REPLACEMENT = "IN (SELECT UNNEST(?))"
 

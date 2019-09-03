@@ -1,9 +1,9 @@
-<div class="row white default-padding-top default-content-padding-bottom default-content-padding-left">
-  <div class="col s5">
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-left default-content-padding-right">
+  <div class="col s12 l5 {{entry_thumbnail_class}} center-align">
     <img class="responsive-img img-margin-top" src="{{entryThumbnail}}"/>
   </div>
 
-  <div class="col s7">
+  <div class="col s12 l7 {{entry_summary_class}}">
     <p class="entry-title">{{entryTitle}}</p>
     <p  *ngIf="entryAuthor" class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author"> Author</span>: {{entryAuthor}}</p>
     <label *ngIf="entryLicence" i18n="@@entry_details_license">License</label>
@@ -21,7 +21,7 @@
 
     <div class="row default-padding-top right default-margin-right">
           <div class="fixed-action-btn">
-              <button mz-button class="orange darken-2" i18n="@@open">
+              <button mz-button class="orange darken-2" i18n="@@open" (click)="openEntry()">
                   OPEN
                 </button>
             </div>

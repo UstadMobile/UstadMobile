@@ -1,20 +1,46 @@
 <header>
-
   <div class="navbar-fixed">
-    <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
-      <mz-navbar-item-container [align]="'left'">
-        <mz-navbar-item>
-          <i (click)="goBack()" class="material-icons large white-text go-back-icon">arrow_back</i>
-        </mz-navbar-item>
-        <p class="header-title-label">{{toolbar_title}}</p>
-      </mz-navbar-item-container>
+    <mz-navbar navbarClass="top-nav-height  z-depth-2 {{env.colorPrimary}}">
+      <p class="brand-logo {{toolbar_title_class}}">
+        <span (click)="goBack()" class="open-content"><i
+            class="material-icons {{toolbar_icon_class}}">{{toolbar_arrow}}</i></span>
+        <span class="truncate">{{toolbar_title}}</span></p>
+      <p class="show-on-small  open-content drawer-menu {{drawer_menu_class}}">
+        <a mz-button [flat]=true id="um-drawer" (click)="dropwdown.open()">
+          <i class="material-icons white-text">menu</i>
+        </a>
+      </p>
+
     </mz-navbar>
   </div>
 
 
   <!-- side nav starts here-->
 
-  <mz-sidenav #sidenav [fixed]=true [id]="'sidenav-demo'" [collapseButtonId]="'btn-sidenav-demo'" [edge]="'right'">
+  <mz-dropdown #dropwdown [id]="'dropdown-demo'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
+    [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
+    [stopPropagation]="true">
+
+    <li><a (click)="navigateTo(routes.list)"><span i18n="@@libraries">Libraries</span></a></li>
+    <li><a (click)="navigateTo(routes.report)"> <span i18n="@@reports">Reports</span></a></li>
+
+    <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
+    <mz-dropdown-item>
+        <form *ngIf="supportedLanguages" >
+            <p class="language grey-text text-lighten-2" i18n="@@language">Languages</p>
+                <mz-select-container [inline]=false *ngIf="supportedLanguages">
+                    <select mz-select
+                      [formControl]="umFormLanguage.controls['language']" 
+                      id="options-language">
+                      <option *ngFor="let language of supportedLanguages" value="{{language.code}}">{{language.name}}</option>
+                    </select>
+                  </mz-select-container>
+            </form>
+    </mz-dropdown-item>
+  </mz-dropdown>
+
+
+  <mz-sidenav #sidenav [fixed]=true [edge]="'left'" class="show-on-medium-and-up">
 
     <mz-sidenav-header>
       <div class="user-view">
@@ -25,17 +51,30 @@
     </mz-sidenav-header>
 
     <mz-sidenav-link [active]="true">
-      <a class="collapsible-header"><span i18n="@@libraries">Libraries</span>
-        <i class="material-icons">library_books</i>
+      <a class="collapsible-header" (click)="navigateTo(routes.list)"><span i18n="@@libraries">Libraries</span>
+        <i class="material-icons {{icon_position_class}}">library_books</i>
       </a>
     </mz-sidenav-link>
 
     <mz-sidenav-link>
-      <a class="collapsible-header"> <span i18n="@@reports">Reports</span>
-        <i class="material-icons">pie_chart</i>
+      <a class="collapsible-header" (click)="navigateTo(routes.report)"> <span i18n="@@reports">Reports</span>
+        <i class="material-icons {{icon_position_class}}">pie_chart</i>
       </a>
     </mz-sidenav-link>
+    <mz-sidenav-subheader></mz-sidenav-subheader>
+    <mz-sidenav-divider></mz-sidenav-divider>
 
+    <form *ngIf="supportedLanguages" >
+    <span class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</span>
+        <mz-select-container [inline]=true *ngIf="supportedLanguages">
+            <select mz-select
+              [formControl]="umFormLanguage.controls['language']" 
+              id="options-language">
+              <option *ngFor="let language of supportedLanguages" value="{{language.key}}">{{language.value}}</option>
+            </select>
+          </mz-select-container>
+    </form>
+   
   </mz-sidenav>
 
   <!-- side nav ends here-->

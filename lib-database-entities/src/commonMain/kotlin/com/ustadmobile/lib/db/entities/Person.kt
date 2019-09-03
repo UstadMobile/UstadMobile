@@ -2,6 +2,10 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 
@@ -9,8 +13,9 @@ import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
  * Created by mike on 3/8/18.
  */
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+
+@SyncableEntity(tableId = TABLE_ID)
 open class Person() {
 
     @PrimaryKey(autoGenerate = true)
@@ -40,13 +45,13 @@ open class Person() {
     //In Goldozi's case, a Lead Entrepreneur will be managing Women Entrepreneurs group.
     var mPersonGroupUid : Long = 0L
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var personLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var personLastChangedBy: Int = 0
 
     constructor(username: String, firstNames: String, lastName: String, active:Boolean = false,

@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -31,14 +30,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UserProfileView
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.Objects
-
 import id.zelory.compressor.Compressor
+import java.io.*
 
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
@@ -175,7 +168,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     override fun addImageFromGallery() {
         //READ_EXTERNAL_STORAGE
         if (ContextCompat.checkSelfPermission(applicationContext,
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this@UserProfileActivity,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                     GALLERY_REQUEST_CODE)

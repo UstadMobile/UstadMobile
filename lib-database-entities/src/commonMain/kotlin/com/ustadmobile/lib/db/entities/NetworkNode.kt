@@ -3,18 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 /**
  * Created by mike on 1/29/18.
  */
-@UmEntity
 @Entity
 class NetworkNode() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var nodeId: Long = 0
 
@@ -26,7 +21,6 @@ class NetworkNode() {
      * Method which is used to set NetworkNode's Bluetooth address
      * @param bluetoothMacAddress Device bluetooth address
      */
-    @UmIndexField
     @ColumnInfo(index = true)
     var bluetoothMacAddress: String? = null
 
@@ -71,7 +65,6 @@ class NetworkNode() {
     /**
      * Method which used to set last node update time by Wi-Fi Direct service.
      */
-    @UmIndexField
     @ColumnInfo(index = true)
     var lastUpdateTimeStamp: Long = 0
 

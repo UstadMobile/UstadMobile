@@ -1,20 +1,17 @@
 package com.ustadmobile.door
 
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.Statement
+import java.sql.*
 
 abstract class EntityInsertionAdapter<T>(dbType: Int) {
 
     abstract fun bindPreparedStmtToEntity(stmt: PreparedStatement, entity: T)
 
-    abstract fun makeSql(): String
+    abstract fun makeSql(returnsId: Boolean): String
 
     fun insert(entity: T, con: Connection) {
         var stmt = null as PreparedStatement?
         try {
-            stmt = con.prepareStatement(makeSql())
+            stmt = con.prepareStatement(makeSql(false))
             bindPreparedStmtToEntity(stmt, entity)
             stmt.executeUpdate()
         }finally {
@@ -42,7 +39,7 @@ abstract class EntityInsertionAdapter<T>(dbType: Int) {
         var stmt = null as PreparedStatement?
         var generatedKey = 0L
         try {
-            stmt = con.prepareStatement(makeSql(), Statement.RETURN_GENERATED_KEYS)
+            stmt = con.prepareStatement(makeSql(true), Statement.RETURN_GENERATED_KEYS)
             bindPreparedStmtToEntity(stmt, entity)
             stmt.executeUpdate()
             generatedKey = getGeneratedKey(stmt)
@@ -59,12 +56,14 @@ abstract class EntityInsertionAdapter<T>(dbType: Int) {
         val generatedKeys = mutableListOf<Long>()
         try {
             con.autoCommit = false
-            stmt = con.prepareStatement(makeSql())
+            stmt = con.prepareStatement(makeSql(true), Statement.RETURN_GENERATED_KEYS)
             for(entity in entities) {
                 bindPreparedStmtToEntity(stmt, entity)
                 stmt.executeUpdate()
                 generatedKeys.add(getGeneratedKey(stmt))
             }
+        }catch(e: SQLException) {
+            e.printStackTrace()
         }finally {
             con.autoCommit = true
             stmt?.close()
@@ -78,12 +77,14 @@ abstract class EntityInsertionAdapter<T>(dbType: Int) {
         var stmt = null as PreparedStatement?
         try {
             con.autoCommit = false
-            stmt = con.prepareStatement(makeSql())
+            stmt = con.prepareStatement(makeSql(false))
             for(entity in entities) {
                 bindPreparedStmtToEntity(stmt, entity)
                 stmt.executeUpdate()
             }
             con.commit()
+        }catch(e: SQLException) {
+            e.printStackTrace()
         }finally {
             stmt?.close()
             con.autoCommit = true

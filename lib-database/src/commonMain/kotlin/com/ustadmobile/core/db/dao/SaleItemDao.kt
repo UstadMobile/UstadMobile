@@ -59,16 +59,16 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
     abstract fun findAllSaleItemListDetailActiveBySaleProvider(saleUid: Long): DataSource.Factory<Int,SaleItemListDetail>
 
     @Query(TOTAL_PAID_BY_SALE_UID)
-    abstract fun findTotalPaidInASale(saleUid: Long): Long?
+    abstract fun findTotalPaidInASale(saleUid: Long): Long
 
     @Query(TOTAL_PAID_BY_SALE_UID)
-    abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Long?
+    abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Long
 
     @Query(TOTAL_DISCOUNT_BY_SALE_UID)
-    abstract fun findTotalDiscountInASale(saleUid: Long): Long?
+    abstract fun findTotalDiscountInASale(saleUid: Long): Long
 
     @Query(TOTAL_DISCOUNT_BY_SALE_UID)
-    abstract suspend fun findTotalDiscountBySaleAsync(saleUid: Long):Long?
+    abstract suspend fun findTotalDiscountBySaleAsync(saleUid: Long):Long
 
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUid(uid: Long): SaleItem?

@@ -8,6 +8,7 @@ import android.webkit.WebView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.view.ViewWithErrorNotifier
@@ -34,12 +35,13 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
         mWebView = findViewById(R.id.activity_webchunk_webview)
         mWebView!!.settings.javaScriptEnabled = true
         mWebView!!.settings.domStorageEnabled = true
-        mWebView!!.settings.domStorageEnabled = true
         mWebView!!.settings.allowUniversalAccessFromFileURLs = true
         mWebView!!.settings.allowFileAccessFromFileURLs = true
+        mWebView!!.settings.mediaPlaybackRequiresUserGesture = false
 
+        val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this)
+                bundleToMap(intent.extras), this, repository)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }
