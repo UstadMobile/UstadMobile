@@ -13,6 +13,8 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntry
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -23,20 +25,42 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                            private val db: UmAppDatabase, private val repo: UmAppDatabase)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
 
+    data class VideoParams(val videoPath: String? = null,
+                           val audioPath: ContainerEntryWithContainerEntryFile? = null,
+                           val srtLangList: MutableList<String> = mutableListOf(),
+                           val srtMap: MutableMap<String, String> = mutableMapOf())
 
     private var navigation: String? = null
 
     private lateinit var contentEntryDao: ContentEntryDao
 
+    var audioEntry: ContainerEntryWithContainerEntryFile? = null
+        private set
+
     var audioInput: InputStream? = null
         private set
+        get() {
+            val audioEntryVal = audioEntry
+            return if(audioEntryVal != null) {
+                containerManager.getInputStream(audioEntryVal)
+            }else {
+                null
+            }
+        }
+
     var videoPath: String? = null
         private set
     var srtMap = mutableMapOf<String, String>()
         private set
     var srtLangList = mutableListOf<String>()
         private set
-    var container: Container? = null
+
+    lateinit var container: Container
+
+    lateinit var containerManager: ContainerManager
+
+    var videoParams: VideoParams? = null
+        private set
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -61,9 +85,9 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         }
 
         GlobalScope.launch {
-            container = containerDao.findByUidAsync(containerUid)
+            container = containerDao.findByUidAsync(containerUid)!!
             val result = containerEntryDao.findByContainerAsync(containerUid)
-            val containerManager = ContainerManager(container!!, db, repo)
+            containerManager = ContainerManager(container, db, repo)
             var defaultLangName = ""
             for (entry in result) {
 
@@ -74,9 +98,9 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
                         videoPath = containerEntryFile.cefPath
                     } else if (fileInContainer == "audio.c2") {
-                        audioInput = containerManager.getInputStream(entry)
+                        //audioInput = containerManager.getInputStream(entry)
+                        audioEntry = entry
                     } else if (fileInContainer == "subtitle.srt" || fileInContainer.toLowerCase() == "subtitle-english.srt") {
-
                         defaultLangName = if (fileInContainer.contains("-"))
                             fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
                         else "English"
@@ -104,7 +128,10 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
             srtLangList.add(0, "No Subtitles")
             if(defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
-            view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioInput, srtLangList, srtMap) })
+            view.runOnUiThread(Runnable {
+                videoParams = VideoParams(videoPath, audioEntry, srtLangList, srtMap)
+                view.setVideoParams(videoParams!!)
+            })
         }
 
     }

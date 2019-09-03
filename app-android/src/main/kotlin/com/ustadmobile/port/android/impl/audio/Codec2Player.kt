@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.impl.audio
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
+import android.util.Log
 import com.ustadmobile.codec2.Codec2
 import com.ustadmobile.codec2.Codec2Decoder
 import com.ustadmobile.core.util.UMIOUtils
@@ -15,10 +16,12 @@ class Codec2Player(private val inStream: InputStream, private val pos: Long) : R
 
     fun play() {
         playing.set(true)
+        Log.println(Log.INFO, "Codec2", "Codec2: Play")
         Thread(this).start()
     }
 
     fun stop() {
+        Log.println(Log.INFO, "Codec2", "Codec2: Stop")
         playing.set(false)
     }
 
@@ -52,11 +55,13 @@ class Codec2Player(private val inStream: InputStream, private val pos: Long) : R
                 buffer = codec2.readFrame()
             }
         } catch (e: IOException) {
+            Log.println(Log.INFO, "Codec2", "Codec2: Crashed")
             e.printStackTrace()
         } finally {
+            Log.println(Log.INFO, "Codec2", "Codec2: Finished")
             track?.release()
             codec2?.destroy()
-            UMIOUtils.closeInputStream(inStream)
+            inStream.close()
         }
 
     }
