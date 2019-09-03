@@ -1,16 +1,15 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SplashView
+import com.ustadmobile.core.view.SplashScreenView
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 
 class SplashScreenPresenterTest {
 
-    private lateinit var view: SplashView
+    private lateinit var view: SplashScreenView
 
     private lateinit var impl: UstadMobileSystemImpl
 

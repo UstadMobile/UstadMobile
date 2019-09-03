@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface SplashView : UstadView {
+interface SplashScreenView : UstadView {
 
     fun startUi(delay: Boolean, animate: Boolean)
 

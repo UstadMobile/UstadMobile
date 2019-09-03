@@ -45,11 +45,11 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SplashScreenPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SplashView
+import com.ustadmobile.core.view.SplashScreenView
 import java.util.concurrent.TimeUnit
 
 
-class SplashScreenActivity : SplashView, UstadBaseActivity() {
+class SplashScreenActivity : SplashScreenView, UstadBaseActivity() {
 
     private lateinit var organisationIcon : ImageView
 
