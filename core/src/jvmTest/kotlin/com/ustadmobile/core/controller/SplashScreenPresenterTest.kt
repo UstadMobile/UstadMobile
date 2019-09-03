@@ -1,26 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.core.view.SplashView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.extractTestResourceToFile
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import java.io.File
 import java.io.IOException
-import java.util.zip.ZipFile
 
 class SplashScreenPresenterTest {
 
@@ -28,7 +14,7 @@ class SplashScreenPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private lateinit var presenter: SplashPresenter
+    private lateinit var screenPresenter: SplashScreenPresenter
 
     private val context = Any()
 
@@ -38,7 +24,7 @@ class SplashScreenPresenterTest {
         view = mock()
         impl = mock()
 
-        presenter = SplashPresenter(context, mapOf(),view,impl)
+        screenPresenter = SplashScreenPresenter(context, mapOf(),view,impl)
     }
 
     @Test
@@ -51,7 +37,7 @@ class SplashScreenPresenterTest {
             "true"
         }.`when`(impl).getAppConfigString(any(), any(), any())
 
-        presenter.onCreate(mapOf())
+        screenPresenter.onCreate(mapOf())
 
         verify(view).animateOrganisationIcon(eq(true), eq(true))
     }
@@ -66,7 +52,7 @@ class SplashScreenPresenterTest {
             "false"
         }.`when`(impl).getAppConfigString(any(), any(), any())
 
-        presenter.onCreate(mapOf())
+        screenPresenter.onCreate(mapOf())
 
         verify(view).animateOrganisationIcon(eq(false), eq(true))
     }
@@ -82,9 +68,7 @@ class SplashScreenPresenterTest {
             "true"
         }.`when`(impl).getAppConfigString(any(), any(), any())
 
-        presenter.onCreate(mapOf())
-
-        verify(view).preloadData()
+        screenPresenter.onCreate(mapOf())
     }
 
     @Test
@@ -97,9 +81,7 @@ class SplashScreenPresenterTest {
             "true"
         }.`when`(impl).getAppConfigString(any(), any(), any())
 
-        presenter.onCreate(mapOf())
-
-        verify(view, times(0)).preloadData()
+        screenPresenter.onCreate(mapOf())
     }
 
 }

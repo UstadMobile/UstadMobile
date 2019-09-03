@@ -42,7 +42,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.SplashPresenter
+import com.ustadmobile.core.controller.SplashScreenPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SplashView
@@ -73,7 +73,7 @@ class SplashScreenActivity : SplashView, UstadBaseActivity() {
         organisationIcon = findViewById(R.id.organisation_icon)
         constraintLayout = findViewById(R.id.constraint_layout)
 
-        val presenter = SplashPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+        val presenter = SplashScreenPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
                 this, UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
