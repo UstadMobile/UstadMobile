@@ -14,9 +14,10 @@
         <item name="android:windowBackground">@color/icons</item>
     </style>
 
-
-    <style name="ToolbarDark" parent="ThemeOverlay.AppCompat.Light">
+    <style name="ToolbarDark" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:background">@color/primary_dark</item>
+        <item name="android:backgroundTint">@color/primary_dark</item>
+
     </style>
 
 

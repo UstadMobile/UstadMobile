@@ -60,7 +60,9 @@
         android:layout_height="wrap_content"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-
+        app:menu_colorNormal="@color/fab"
+        fab:fab_colorPressed="@color/fab_pressed"
+        fab:fab_colorRipple="@color/fab_ripple"
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.github.clans.fab.FloatingActionButton

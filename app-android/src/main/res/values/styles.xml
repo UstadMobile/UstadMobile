@@ -15,6 +15,7 @@
 
     <style name="ToolbarDark" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:background">@color/primary_dark</item>
+        <item name="android:backgroundTint">@color/primary_dark</item>
 
     </style>
 
