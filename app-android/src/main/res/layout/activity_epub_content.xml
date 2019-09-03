@@ -25,7 +25,7 @@
             android:id="@+id/appbar"
             android:elevation="@dimen/dimen_4dp"
             android:animateLayoutChanges="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            android:theme="@style/ToolbarDark">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/um_toolbar"

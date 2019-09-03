@@ -64,10 +64,10 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
     abstract fun findBySaleProvider(saleUid: Long): DataSource.Factory<Int,SalePayment>
 
     @Query(TOTAL_PAID_BY_SALE_UID)
-    abstract fun findTotalPaidPaymentsInASale(saleUid: Long): Long
+    abstract fun findTotalPaidPaymentsInASale(saleUid: Long): Int
 
     @Query(TOTAL_PAID_BY_SALE_UID)
-    abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Long
+    abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Int
 
 
     @Query(FIND_BY_UID_QUERY)

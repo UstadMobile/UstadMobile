@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -14,6 +15,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -56,6 +58,40 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
     internal lateinit var bottomNavigation: AHBottomNavigation
     private var ab: ActionBar? = null
 
+
+    fun tintMenuIcons(){
+        //Get menu items:
+        val shareMenuItem = mOptionsMenu!!.findItem(R.id.menu_basepoint_share)
+        val settingsMenuItem = mOptionsMenu!!.findItem(R.id.menu_settings_gear)
+        val searchMenuItem = mOptionsMenu!!.findItem(R.id.menu_basepoint_search)
+
+        //Get menu item icons
+        val shareMenuIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_share_white_24dp)
+
+        val settingsMenuIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_settings_white_24dp)
+
+        val searchMenuIcon = AppCompatResources.getDrawable(applicationContext,
+                R.drawable.ic_search_white_24dp)
+
+
+        //Tint the icons according to theme
+        shareMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons),
+                PorterDuff.Mode.SRC_IN)
+
+        settingsMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons),
+                PorterDuff.Mode.SRC_IN)
+        searchMenuIcon!!.setColorFilter(ContextCompat.getColor(applicationContext, R.color.icons),
+                PorterDuff.Mode.SRC_IN)
+
+        //Set tinted icons to the menu items:
+        shareMenuItem.icon = shareMenuIcon
+        settingsMenuItem.icon = settingsMenuIcon
+        searchMenuItem.icon = searchMenuIcon
+
+    }
+
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
@@ -65,6 +101,8 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_basepoint, menu)
         mOptionsMenu = menu
+
+        tintMenuIcons()
 
         //Search stuff
         val searchItem = menu.findItem(R.id.menu_basepoint_search)
@@ -122,11 +160,12 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
         //Style it
         bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(
-                R.color.primary, applicationContext))
+                R.color.primaryDarkColor, applicationContext))
         bottomNavigation.setAccentColor(getContextCompatColorFromColor(
-                R.color.text_primary, applicationContext))
+                R.color.secondaryDarkColor, applicationContext))
         bottomNavigation.setInactiveColor(getContextCompatColorFromColor(
-                R.color.bottom_navigation_unselected, applicationContext))
+                R.color.text_primary, applicationContext))
+        
         bottomNavigation.setBehaviorTranslationEnabled(false)
         bottomNavigation.setNotificationBackgroundColor(getContextCompatColorFromColor(
                 R.color.text_primary, applicationContext))

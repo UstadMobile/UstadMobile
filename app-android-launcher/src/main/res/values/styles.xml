@@ -14,6 +14,12 @@
         <item name="android:windowBackground">@color/icons</item>
     </style>
 
+
+    <style name="ToolbarDark" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:background">@color/primary_dark</item>
+    </style>
+
+
     <style name="UmTheme.Button.Stacked" parent="Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">@color/primary</item>
         <item name="android:textSize">@dimen/text_body</item>

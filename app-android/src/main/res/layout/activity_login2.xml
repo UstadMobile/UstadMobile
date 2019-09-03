@@ -13,11 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:theme="@style/ToolbarDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
         <include layout="@layout/toolbar_with_progress" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -76,9 +75,9 @@
         android:backgroundTint="@color/accent"
         android:text="@string/login"
         android:textSize="@dimen/text_body"
-        android:padding="@dimen/dimen_16dp"
+        android:padding="@dimen/dimen_4dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_forgot_password" />

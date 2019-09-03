@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:theme="@style/ToolbarDark">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
@@ -36,7 +36,7 @@
                 android:background="?attr/colorPrimary"
                 android:minHeight="?attr/actionBarSize"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+                app:theme="@style/ToolbarDark">
 
 
                 <RelativeLayout
@@ -66,7 +66,7 @@
                         android:layout_marginStart="@dimen/dimen_16dp"
                         android:textStyle="bold"
                         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                        app:theme="@style/ToolbarDark" />
                 </RelativeLayout>
 
 

@@ -4,22 +4,35 @@
     Helped by using:
     http://www.materialpalette.com/blue-grey/light-blue
     -->
-    <color name="primary">#FF9800</color>
-    <color name="primary_dark">#F57C00</color>
-    <color name="primary_light">#B2DFDB</color>
-    <color name="accent">#FF9800</color>
-    <color name="primary_text">#FFFFFF</color>
-    <color name="secondary_text">#727272</color>
-    <color name="fab">#FF5722</color>
-    <color name="fab_pressed">#FF4322</color>
-    <color name="fab_ripple">#99FFFFFF</color>
+
+    <color name="primaryColor">#ffffff</color>
+    <color name="primaryLightColor">#ffffff</color>
+    <color name="primaryDarkColor">#cccccc</color>
+    <color name="secondaryColor">#e2bc44</color>
+    <color name="secondaryLightColor">#ffee75</color>
+    <color name="secondaryDarkColor">#ad8c07</color>
+    <color name="primaryTextColor">#000000</color>
+    <color name="secondaryTextColor">#000000</color>
+
+
+    <color name="primary">#ffffff</color>
+    <color name="primary_dark">#cccccc</color>
+    <color name="primary_light">#ffffff</color>
+    <color name="accent">#e2bc44</color>
+    <color name="primary_text">#000000</color>
+    <color name="secondary_text">#000000</color>
+
+    <color name="fab">#e2bc44</color>
+    <color name="fab_pressed">#ad8c07</color>
+    <color name="fab_ripple">#ffee75</color>
+    <color name="fab_text">#000000</color>
 
     <color name="bottom_navigation_unselected">#FFDFB2</color>
     <color name="bottom_navigation_selected">#FFFFFF</color>
 
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
-    <color name="icons">#FFFFFF</color>
+    <color name="icons">#000000</color>
     <color name="icons_light">#ABFFFFFF</color>
     <color name="divider">#EAEAEA</color>
 

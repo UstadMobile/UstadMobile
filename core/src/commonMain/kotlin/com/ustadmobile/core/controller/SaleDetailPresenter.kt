@@ -146,7 +146,7 @@ class SaleDetailPresenter(context: Any,
         GlobalScope.launch {
             val res = salePaymentDao.findTotalPaidBySaleAsync(saleUid)
             if(res!=null){
-                totalPayment = res
+                totalPayment = res.toLong()
                 updateBalance()
             }
         }
@@ -168,7 +168,7 @@ class SaleDetailPresenter(context: Any,
                 val result =
                         salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.saleItemUid)
                 if(result!=null)
-                    view.updatePaymentTotal(result)
+                    view.updatePaymentTotal(result.toLong())
             }
 
         }
