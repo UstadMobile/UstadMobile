@@ -269,7 +269,7 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
                 Matchers.allOf(withId(R.id.menu_done), withContentDescription("Done"),
                         childAtPosition(
                                 childAtPosition(
-                                        withId(R.id.new_report_toolbar),
+                                        withId(R.id.um_toolbar),
                                         2),
                                 0),
                         isDisplayed()))
@@ -280,7 +280,7 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
         val textView2 = onView(
                 Matchers.allOf(withText("Preview"),
                         childAtPosition(
-                                Matchers.allOf(withId(R.id.preview_toolbar),
+                                Matchers.allOf(withId(R.id.um_toolbar),
                                         childAtPosition(
                                                 withId(R.id.new_report_collapsing_toolbar),
                                                 0)),

@@ -34,15 +34,22 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
     private lateinit var umRepository: UmAppDatabase
 
+    private lateinit var progressBar: ProgressBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xapi_report_preview)
 
-        setUMToolbar(R.id.preview_toolbar)
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = getString(R.string.activity_preview_xapi)
+
+        progressBar = findViewById(R.id.progressBar)
+        progressBar.isIndeterminate = true
+        progressBar.scaleY = 3f
+        showProgress(false)
 
         recyclerView = findViewById(R.id.preview_report_list)
         viewManager = LinearLayoutManager(this)
@@ -84,6 +91,13 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
                 presenter.handleAddDashboardClicked(input.text.toString())
             }
             alertDialog.show()
+        }
+    }
+
+
+    override fun showProgress(showProgress: Boolean) {
+        runOnUiThread {
+            progressBar.visibility = if (showProgress) View.VISIBLE else View.GONE
         }
     }
 

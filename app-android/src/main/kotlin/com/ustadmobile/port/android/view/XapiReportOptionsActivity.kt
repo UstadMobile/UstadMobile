@@ -67,6 +67,8 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var umRepo: UmAppDatabase
 
+    private lateinit var progressBar: ProgressBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xapi_report_options)
@@ -89,11 +91,16 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
         umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
 
-        setUMToolbar(R.id.new_report_toolbar)
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = "Report Options"
+
+        progressBar = findViewById(R.id.progressBar)
+        progressBar.isIndeterminate = true
+        progressBar.scaleY = 3f
+        showProgress(false)
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -177,6 +184,12 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_done, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun showProgress(showProgress: Boolean) {
+        runOnUiThread {
+            progressBar.visibility = if (showProgress) View.VISIBLE else View.GONE
+        }
     }
 
 

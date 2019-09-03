@@ -16,6 +16,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
+import com.ustadmobile.test.port.android.UmAndroidTestUtil.childAtPosition
 import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
 import junit.framework.Assert.assertTrue
 import kotlinx.serialization.json.Json
@@ -69,12 +70,13 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
 
         Espresso.onView(ViewMatchers.withId(R.id.preview_chart_view)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
 
+
         val textView2 = Espresso.onView(
                 Matchers.allOf(ViewMatchers.withText("Preview"),
-                        UmAndroidTestUtil.childAtPosition(
-                                Matchers.allOf(ViewMatchers.withId(R.id.preview_toolbar),
-                                        UmAndroidTestUtil.childAtPosition(
-                                                ViewMatchers.withId(R.id.new_report_collapsing_toolbar),
+                        childAtPosition(
+                                Matchers.allOf(ViewMatchers.withId(R.id.um_toolbar),
+                                        childAtPosition(
+                                                ViewMatchers.withId(R.id.preview_toolbar),
                                                 0)),
                                 1),
                         ViewMatchers.isDisplayed()))
@@ -112,10 +114,10 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
 
         val textView2 = Espresso.onView(
                 Matchers.allOf(ViewMatchers.withText("Preview"),
-                        UmAndroidTestUtil.childAtPosition(
-                                Matchers.allOf(ViewMatchers.withId(R.id.preview_toolbar),
-                                        UmAndroidTestUtil.childAtPosition(
-                                                ViewMatchers.withId(R.id.new_report_collapsing_toolbar),
+                        childAtPosition(
+                                Matchers.allOf(ViewMatchers.withId(R.id.um_toolbar),
+                                        childAtPosition(
+                                                ViewMatchers.withId(R.id.preview_toolbar),
                                                 0)),
                                 1),
                         ViewMatchers.isDisplayed()))

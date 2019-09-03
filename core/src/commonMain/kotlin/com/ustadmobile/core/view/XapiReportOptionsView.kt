@@ -48,6 +48,9 @@ interface XapiReportOptionsView : UstadView {
     @JsName("updateDidListSelected")
     fun updateDidListSelected(verbs: List<XLangMapEntryDao.Verb>)
 
+    @JsName("showProgress")
+    fun showProgress(showProgress: Boolean)
+
     companion object {
 
         const val VIEW_NAME = "XapiReportOptionsView"

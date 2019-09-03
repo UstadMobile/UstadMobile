@@ -59,11 +59,11 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         val translatedYAxisList = yAxisList.map { impl.getString(it, context) }
         val translatedXAxisList = xAxisList.map { impl.getString(it, context) }
 
-        view.runOnUiThread(Runnable { view.fillVisualChartType(translatedGraphList) })
+        view.fillVisualChartType(translatedGraphList)
 
-        view.runOnUiThread(Runnable { view.fillYAxisData(translatedYAxisList) })
+        view.fillYAxisData(translatedYAxisList)
 
-        view.runOnUiThread(Runnable { view.fillXAxisAndSubGroupData(translatedXAxisList) })
+        view.fillXAxisAndSubGroupData(translatedXAxisList)
 
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments[XapiReportDetailView.ARG_REPORT_OPTIONS]
@@ -82,12 +82,13 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                 toDateTime = DateTime(reportOptions!!.toDate)
                 handleDateRangeSelected()
             }
-            view.runOnUiThread(Runnable {
-                view.updateChartTypeSelected(selectedChartType)
-                view.updateYAxisTypeSelected(selectedYaxis)
-                view.updateXAxisTypeSelected(selectedXAxis)
-                view.updateSubgroupTypeSelected(selectedSubGroup)
-            })
+
+            view.updateChartTypeSelected(selectedChartType)
+            view.updateYAxisTypeSelected(selectedYaxis)
+            view.updateXAxisTypeSelected(selectedXAxis)
+            view.updateSubgroupTypeSelected(selectedSubGroup)
+
+            view.showProgress(true)
             GlobalScope.launch {
                 if (reportOptions!!.didFilterList.isNotEmpty()) {
                     val verbs = xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
@@ -101,6 +102,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                         view.updateWhoListSelected(personList)
                     })
                 }
+                view.showProgress(false)
             }
 
         }
@@ -136,16 +138,20 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     fun handleWhoDataTyped(name: String, uidList: List<Long>) {
+        view.showProgress(true)
         GlobalScope.launch {
             val personsNames = personDao.getAllPersons("%$name%", uidList)
             view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
+            view.showProgress(false)
         }
     }
 
     fun handleDidDataTyped(verb: String, uidList: List<Long>) {
+        view.showProgress(true)
         GlobalScope.launch {
             val verbs = xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
             view.runOnUiThread(Runnable { view.updateDidDataAdapter(verbs) })
+            view.showProgress(false)
         }
     }
 

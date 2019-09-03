@@ -11,6 +11,8 @@ interface XapiReportDetailView : UstadView {
 
     fun setReportListData(listResults: List<StatementDao.ReportListData>)
 
+    fun showProgress(showProgress: Boolean)
+
     companion object {
 
         const val VIEW_NAME = "XapiReportPreviewView"
