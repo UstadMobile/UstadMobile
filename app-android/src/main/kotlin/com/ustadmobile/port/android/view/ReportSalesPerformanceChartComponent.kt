@@ -39,7 +39,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout, ReportBarChartCompone
         runOnUiThread (Runnable {
             removeAllViews()
             barChart = createSalesBarChart(dataSet)
-            addView(barChart)
+            addView(barChart!!)
         })
 
     }
