@@ -40,7 +40,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments.getValue(ARG_REPORT_OPTIONS)!!
         reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
-        view.showProgress(true)
+        view.showBaseProgressBar(true)
         GlobalScope.launch {
             val sql = reportOptions.toSql()
             var data = statementDao.getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
@@ -59,7 +59,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
             val results = statementDao.getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
             view.runOnUiThread(Runnable {
                 view.setReportListData(results)
-                view.showProgress(false)
+                view.showBaseProgressBar(false)
             })
 
         }

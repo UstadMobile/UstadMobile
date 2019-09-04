@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -50,6 +51,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     private var selectedSubGroup: Int = 0
 
     private var reportOptions: XapiReportOptions? = null
+
+    private var activeJobCount = 0
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -88,7 +91,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
             view.updateXAxisTypeSelected(selectedXAxis)
             view.updateSubgroupTypeSelected(selectedSubGroup)
 
-            view.showProgress(true)
+            activeJobCount += 1
+            view.showBaseProgressBar(activeJobCount > 0)
             GlobalScope.launch {
                 if (reportOptions!!.didFilterList.isNotEmpty()) {
                     val verbs = xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
@@ -102,7 +106,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                         view.updateWhoListSelected(personList)
                     })
                 }
-                view.showProgress(false)
+                activeJobCount -= 1
+                view.showBaseProgressBar(activeJobCount > 0)
             }
 
         }
@@ -138,20 +143,33 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     fun handleWhoDataTyped(name: String, uidList: List<Long>) {
-        view.showProgress(true)
+        activeJobCount += 1
+        view.showBaseProgressBar(activeJobCount > 0)
         GlobalScope.launch {
             val personsNames = personDao.getAllPersons("%$name%", uidList)
-            view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
-            view.showProgress(false)
+            println("calling who ui thread")
+            view.runOnUiThread(Runnable {
+                println("on who ui thread")
+                view.updateWhoDataAdapter(personsNames)
+                activeJobCount -= 1
+                view.showBaseProgressBar(activeJobCount > 0)
+            })
         }
     }
 
     fun handleDidDataTyped(verb: String, uidList: List<Long>) {
-        view.showProgress(true)
+        activeJobCount++
+        view.showBaseProgressBar(activeJobCount > 0)
         GlobalScope.launch {
             val verbs = xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
-            view.runOnUiThread(Runnable { view.updateDidDataAdapter(verbs) })
-            view.showProgress(false)
+            println("calling who did thread")
+            view.runOnUiThread(Runnable {
+                println("on who di thread")
+                view.updateDidDataAdapter(verbs)
+                activeJobCount--
+                view.showBaseProgressBar(activeJobCount > 0)
+            })
+
         }
     }
 

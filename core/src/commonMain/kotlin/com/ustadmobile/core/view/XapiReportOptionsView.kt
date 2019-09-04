@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import kotlin.js.JsName
 
-interface XapiReportOptionsView : UstadView {
+interface XapiReportOptionsView : UstadView, UstadViewWithProgress {
 
     @JsName("fillVisualChartType")
     fun fillVisualChartType(translatedGraphList: List<String>)
@@ -47,9 +47,6 @@ interface XapiReportOptionsView : UstadView {
 
     @JsName("updateDidListSelected")
     fun updateDidListSelected(verbs: List<XLangMapEntryDao.Verb>)
-
-    @JsName("showProgress")
-    fun showProgress(showProgress: Boolean)
 
     companion object {
 

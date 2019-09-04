@@ -103,6 +103,7 @@ object ContentEntryUtil {
             }
             if (viewName != null) {
                 impl.go(viewName, args, context)
+                callback.onSuccess(Any())
             }
 
         } else if (openEntryIfNotDownloaded) {
