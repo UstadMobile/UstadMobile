@@ -25,6 +25,9 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
     @Query(GENERATE_SALE_NAME)
     abstract suspend fun getTitleForSaleUidAsync(saleUid: Long) : String?
 
+    @Query(GENERATE_SALE_NAME)
+    abstract fun getTitleForSaleUidLive(saleUid: Long) : DoorLiveData<String?>
+
     //FIND ALL ACTIVE
 
     @Query("SELECT * FROM SaleItem")
@@ -46,6 +49,10 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
             "AND SaleItem.saleItemActive = 1")
     abstract suspend fun getSaleItemCountFromSale(saleUid: Long): Int
 
+    @Query("SELECT count(*) From SaleItem where SaleItem.saleItemSaleUid = :saleUid " +
+            "AND SaleItem.saleItemActive = 1")
+    abstract fun getSaleItemCountFromSaleLive(saleUid: Long): DoorLiveData<Int>
+
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
     abstract fun findAllSaleItemListDetailActiveLive(): DoorLiveData<List<SaleItemListDetail>>
 
@@ -63,6 +70,9 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
 
     @Query(TOTAL_PAID_BY_SALE_UID)
     abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Long
+
+    @Query(TOTAL_PAID_BY_SALE_UID)
+    abstract fun findTotalPaidBySaleLive(saleUid: Long):DoorLiveData<Long>
 
     @Query(TOTAL_DISCOUNT_BY_SALE_UID)
     abstract fun findTotalDiscountInASale(saleUid: Long): Long

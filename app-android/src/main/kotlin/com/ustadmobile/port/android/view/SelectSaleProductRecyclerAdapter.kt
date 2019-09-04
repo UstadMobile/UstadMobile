@@ -130,7 +130,7 @@ class SelectSaleProductRecyclerAdapter
         }
 
 
-        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity.productUid, listCategory) }
+        holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.productUid, listCategory) }
 
     }
 

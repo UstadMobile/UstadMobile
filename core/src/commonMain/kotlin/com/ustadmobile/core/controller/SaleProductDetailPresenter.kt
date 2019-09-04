@@ -3,13 +3,11 @@ package com.ustadmobile.core.controller
 import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleProductDao
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_ASSIGN_TO_CATEGORY_UID
@@ -82,31 +80,48 @@ class SaleProductDetailPresenter(context: Any,
         view.updateToolbarTitle(toolbarTitle)
         view.updateCategoryTitle(categoryTitle)
 
+        var thisP = this
         //Get SaleProductSelected and update the view
         GlobalScope.launch {
             if (arguments.containsKey(ARG_SALE_PRODUCT_UID)) {
 
-                val result = saleProductDao.findByUidAsync((arguments[ARG_SALE_PRODUCT_UID]!!.toLong()))
-                currentSaleProduct = result
-                updateView()
+                val product = saleProductDao.findByUidLive(arguments[ARG_SALE_PRODUCT_UID]!!.toLong())
+                view.runOnUiThread(Runnable {
+                    product.observe(thisP, thisP::updateView)
+                })
 
+//                val result = saleProductDao.findByUidAsync((arguments[ARG_SALE_PRODUCT_UID]!!.toLong()))
+//                currentSaleProduct = result
+//                updateView()
 
             } else {
                 currentSaleProduct = SaleProduct("", "", isCategory, false)
 
-                val result = saleProductDao.insertAsync(currentSaleProduct!!)
-                currentSaleProduct!!.saleProductUid = result
-                updateView()
+                val product = saleProductDao.findByUidLive(arguments[ARG_SALE_PRODUCT_UID]!!.toLong())
+                view.runOnUiThread(Runnable {
+                    product.observe(thisP, thisP::updateView)
+                })
+
+//                val result = saleProductDao.insertAsync(currentSaleProduct!!)
+//                currentSaleProduct!!.saleProductUid = result
+//                updateView()
             }
         }
 
+    }
+
+    fun updateView(saleProduct: SaleProduct?){
+        currentSaleProduct = saleProduct
+        updateView()
     }
 
     private fun updateView() {
         val itemUid: Long
         itemUid = currentSaleProduct!!.saleProductUid
 
-        view.initFromSaleProduct(currentSaleProduct!!)
+        view.runOnUiThread(Runnable {
+            view.initFromSaleProduct(currentSaleProduct!!)
+        })
 
         //Assign
         if (arguments.containsKey(ARG_ASSIGN_TO_CATEGORY_UID)) {
@@ -119,7 +134,9 @@ class SaleProductDetailPresenter(context: Any,
         categoriesProvider = productParentJoinDao.findAllSelectedCategoriesForSaleProductProvider(
                 itemUid)
         GlobalScope.launch(Dispatchers.Main) {
-            view.setListProvider(categoriesProvider!!)
+            view.runOnUiThread(Runnable {
+                view.setListProvider(categoriesProvider!!)
+            })
         }
 
         //Update image on view
@@ -148,7 +165,6 @@ class SaleProductDetailPresenter(context: Any,
 //                view.updateImageOnView(
 //                        pictureDao.getAttachmentPath(productPicture.saleProductPictureUid))
             })
-
         }
     }
 

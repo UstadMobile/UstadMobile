@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+
 import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
@@ -7,6 +8,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.AppCompatSpinner
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -40,7 +43,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
     internal lateinit var valueRangeTV: TextView
     private lateinit var valueSeekbar:RangeSeekCustom
 
-    private var sortSpinner: Spinner? = null
+    private var sortSpinner: AppCompatSpinner? = null
     internal lateinit var sortSpinnerPresets: Array<String?>
 
     /**
@@ -234,7 +237,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
 
             override fun areContentsTheSame(oldItem: SaleListDetail,
                                             newItem: SaleListDetail): Boolean {
-                return oldItem == newItem
+                return oldItem.saleUid == newItem.saleUid
             }
         }
     }

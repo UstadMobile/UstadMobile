@@ -37,6 +37,9 @@ abstract class LocationDao : BaseDao<Location> {
     @Query("SELECT * FROM Location WHERE parentLocationUid = 0")
     abstract suspend fun findTopLocationsAsync(): List<Location>
 
+    @Query("SELECT * FROM Location WHERE parentLocationUid = 0")
+    abstract fun findTopLocationsLive(): DoorLiveData<List<Location>>
+
     @Query("SELECT * FROM Location WHERE parentLocationUid = :uid")
     abstract suspend fun findAllChildLocationsForUidAsync(uid: Long): List<Location>
 

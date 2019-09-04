@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
+import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkManager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.squareup.picasso.Picasso
@@ -31,9 +33,12 @@ import com.ustadmobile.core.controller.BasePoint2Presenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.BasePoint2View
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
+import org.acra.util.ToastSender
 import java.io.File
 import java.security.AccessController.getContext
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
@@ -160,7 +165,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
         //Style it
         bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(
-                R.color.primaryDarkColor, applicationContext))
+                R.color.primary, applicationContext))
         bottomNavigation.setAccentColor(getContextCompatColorFromColor(
                 R.color.secondaryDarkColor, applicationContext))
         bottomNavigation.setInactiveColor(getContextCompatColorFromColor(
@@ -169,7 +174,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         bottomNavigation.setBehaviorTranslationEnabled(false)
         bottomNavigation.setNotificationBackgroundColor(getContextCompatColorFromColor(
                 R.color.text_primary, applicationContext))
-        bottomNavigation.setUseElevation(true, 2F)
+        bottomNavigation.setUseElevation(true, 10F)
 
         //Create the items to be added
         val catalog_item = AHBottomNavigationItem(R.string.catalog,
@@ -340,10 +345,10 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
     override fun forceSync() {
 
-        //TODO: KMP Sync stuff
-        //        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
-        //        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
-
+        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG)
+        UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(1000, TimeUnit.MILLISECONDS,
+                ExistingWorkPolicy.KEEP)
+        ToastSender.sendToast(applicationContext, "Sync started", 42)
         updateSyncing()
     }
 
@@ -400,7 +405,6 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
     }
 
     override fun updateNotificationForSales(number: Int) {
-        //Sprint 2
         //Send notification to 2nd last item (sales)
         var nString = number.toString()
         if (number == 0) {
@@ -466,14 +470,12 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
                     else -> return null
                 }
             }
-
         }
 
         override fun getCount(): Int {
 
             return BASEPOINT_ITEM_COUNT
         }
-
     }
 
     companion object {

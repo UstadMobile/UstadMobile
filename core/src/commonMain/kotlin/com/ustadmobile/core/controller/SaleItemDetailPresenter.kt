@@ -268,23 +268,38 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 updatedSaleItem!!.saleItemQuantity = 1
             }
 
+            val thisP = this
             GlobalScope.launch {
                 try {
-                    val result = saleItemDao!!.updateAsync(updatedSaleItem!!)
+                    saleItemDao!!.updateAsync(updatedSaleItem!!)
                     //Update reminders as well.
+
+
                     //Get all reminders.
-                    val reminders =
-                            reminderDao!!.findBySaleItemUidAsync(updatedSaleItem!!.saleItemUid)
-                    for (everyReminder in reminders!!) {
-                        val days = everyReminder.saleItemReminderDays
-                        view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
-                    }
-                    view.finish()
+                    val remindersLive = reminderDao!!.findBySaleItemUidLive(updatedSaleItem!!.saleItemUid)
+                    view.runOnUiThread(Runnable {
+                        remindersLive.observe(thisP, thisP::handleReminderLive)
+                    })
+//                    val reminders =
+//                            reminderDao!!.findBySaleItemUidAsync(updatedSaleItem!!.saleItemUid)
+//                    for (everyReminder in reminders!!) {
+//                        val days = everyReminder.saleItemReminderDays
+//                        view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
+//                    }
+//                    view.finish()
                 } catch (e: Exception) {
                     println(e.message)
                 }
             }
         }
+    }
+
+    private fun handleReminderLive(reminders : List<SaleItemReminder>?){
+        for (everyReminder in reminders!!) {
+            val days = everyReminder!!.saleItemReminderDays
+            view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
+        }
+        view.finish()
     }
 
     fun handleAddReminder(days: Int) {

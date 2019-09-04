@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -51,7 +52,9 @@ class UserProfilePresenter(context: Any,
                 loggedInPerson = result
                 if (loggedInPerson != null) {
                     val personName = result!!.firstNames + " " + result.lastName
-                    view.updateToolbarTitle(personName)
+                    view.runOnUiThread(Runnable {
+                        view.updateToolbarTitle(personName)
+                    })
 
                     personPictureDao = repository.personPictureDao
                     val personPicture =

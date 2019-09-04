@@ -201,7 +201,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         imagePathFromCamera = output.absolutePath
 
         val cameraImage = FileProvider.getUriForFile(applicationContext,
-                "$packageName.fileprovider", output)
+                "$packageName.provider", output)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
 
         val resInfoList = packageManager.queryIntentActivities(cameraIntent,

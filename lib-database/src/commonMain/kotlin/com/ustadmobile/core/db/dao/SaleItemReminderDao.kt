@@ -4,6 +4,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleItemReminder
@@ -29,6 +30,10 @@ abstract class SaleItemReminderDao : BaseDao<SaleItemReminder> {
     @Query("SELECT * FROM SaleItemReminder WHERE saleItemReminderSaleItemUid = :uid " +
             "AND saleItemReminderActive = 1")
     abstract suspend fun findBySaleItemUidAsync(uid: Long):List<SaleItemReminder>
+
+    @Query("SELECT * FROM SaleItemReminder WHERE saleItemReminderSaleItemUid = :uid " +
+            "AND saleItemReminderActive = 1")
+    abstract fun findBySaleItemUidLive(uid: Long):DoorLiveData<List<SaleItemReminder>>
 
     @Query("SELECT * FROM SaleItemReminder WHERE saleItemReminderSaleItemUid = :uid " +
             "AND saleItemReminderDays = :days AND saleItemReminderActive = 1")

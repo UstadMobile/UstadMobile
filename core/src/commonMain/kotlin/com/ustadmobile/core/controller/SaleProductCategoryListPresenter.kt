@@ -88,18 +88,15 @@ class SaleProductCategoryListPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
+        val thisP = this
         if (arguments.containsKey(ARG_SALEPRODUCT_UID)) {
             GlobalScope.launch {
                 try{
-                    val result =
-                            productDao.findByUidAsync((arguments[ARG_SALEPRODUCT_UID]!!.toLong()))
-                    if (result != null) {
-                        currentSaleProductCategory = result
-                    } else {
-                        currentSaleProductCategory = SaleProduct("", "",
-                                true, false)
-                    }
-                    setCategoryOnView(true, true)
+                    val categoryLive = productDao.findByUidLive(arguments[ARG_SALEPRODUCT_UID]!!.toLong())
+                    view.runOnUiThread(Runnable {
+                        categoryLive.observe(thisP, thisP::setCategoryLiveOnView)
+                    })
+
                 }catch(e:Exception){
                     println(e.message)
                 }
@@ -115,6 +112,17 @@ class SaleProductCategoryListPresenter(context: Any,
         if (selectProductMode) {
             view.hideFAB(true)
         }
+    }
+
+    private fun setCategoryLiveOnView(saleProductCategory:SaleProduct?){
+
+        if (saleProductCategory != null) {
+            currentSaleProductCategory = saleProductCategory
+        } else {
+            currentSaleProductCategory = SaleProduct("", "",
+                    true, false)
+        }
+        setCategoryOnView(true, true)
     }
 
     private fun setCategoryOnView(recent: Boolean, category: Boolean) {

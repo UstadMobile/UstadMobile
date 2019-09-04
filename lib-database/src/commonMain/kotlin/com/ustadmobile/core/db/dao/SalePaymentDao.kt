@@ -69,6 +69,8 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
     @Query(TOTAL_PAID_BY_SALE_UID)
     abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Int
 
+    @Query(TOTAL_PAID_BY_SALE_UID)
+    abstract fun findTotalPaidBySaleLive(saleUid: Long):DoorLiveData<Int>
 
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUid(uid: Long): SalePayment?
@@ -112,7 +114,7 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
         const val ALL_ACTIVE_QUERY = "SELECT * FROM SalePayment WHERE salePaymentActive = 1"
         const val FIND_ALL_BY_SALE_UID_QUERY = "SELECT * FROM SalePayment WHERE salePaymentSaleUid = :saleUid AND " + "salePaymentActive = 1 ORDER BY salePaymentPaidDate DESC"
 
-        const val TOTAL_PAID_BY_SALE_UID = "SELECT SUM(salePaymentPaidAmount) FROM SalePayment " +
+        const val TOTAL_PAID_BY_SALE_UID = "SELECT coalesce(SUM(salePaymentPaidAmount), 0) FROM SalePayment " +
                 "WHERE salePaymentSaleUid = :saleUid AND salePaymentActive = 1 " +
                 "AND salePaymentDone = 1"
         //LOOK UP

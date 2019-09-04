@@ -53,17 +53,36 @@ class SalePaymentDetailPresenter(context: Any,
     }
 
     fun initFromSalePaymentUid(uid: Long) {
+        val thisP = this
         GlobalScope.launch {
             try{
-                val result = paymentDao.findByUidAsync(uid)
-                currentPayment = result
-                view.runOnUiThread(Runnable { view.updateSalePaymentOnView(currentPayment!!) })
-                if (balanceDue > 0) {
-                    view.runOnUiThread(Runnable { view.updateDefaultValue(balanceDue) })
-                }
+                val resultLive = paymentDao.findByUidLive(uid)
+                view.runOnUiThread(Runnable {
+                    resultLive.observe(thisP, thisP::updatePaymentOnView)
+                })
+
+
+//                val result = paymentDao.findByUidAsync(uid)
+//                currentPayment = result
+//                view.runOnUiThread(Runnable { view.updateSalePaymentOnView(currentPayment!!) })
+//                if (balanceDue > 0) {
+//                    view.runOnUiThread(Runnable { view.updateDefaultValue(balanceDue) })
+//                }
             }catch(e:Exception){
                 println(e.message)
             }
+        }
+    }
+
+    fun updatePaymentOnView(salePayment:SalePayment?){
+        if(salePayment!= null){
+            currentPayment = salePayment
+
+            view.runOnUiThread(Runnable { view.updateSalePaymentOnView(currentPayment!!) })
+            if (balanceDue > 0) {
+                view.runOnUiThread(Runnable { view.updateDefaultValue(balanceDue) })
+            }
+
         }
     }
 

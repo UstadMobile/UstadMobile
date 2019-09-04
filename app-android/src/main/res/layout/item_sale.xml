@@ -65,7 +65,7 @@
         android:layout_marginBottom="8dp"
         android:text="Order due date"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-        android:textColor="#FF511A"
+        android:textColor="@color/accent"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -114,6 +114,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         return super.onOptionsItemSelected(item)
     }
 
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

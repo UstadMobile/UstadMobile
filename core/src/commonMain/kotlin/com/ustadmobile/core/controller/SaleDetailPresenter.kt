@@ -100,7 +100,6 @@ class SaleDetailPresenter(context: Any,
                 initFromSale(result)
             }
         }
-
     }
 
     private fun updateSaleItemProvider(saleUid: Long) {
@@ -116,39 +115,63 @@ class SaleDetailPresenter(context: Any,
         view.setPaymentProvider(pProvider)
     }
 
-
     fun getTotalSaleOrderAndDiscountAndUpdateView(saleUid: Long) {
+        var thisP = this
         if(saleUid != null) {
             GlobalScope.launch {
-                val result = saleItemDao.getSaleItemCountFromSale(saleUid)
-                if (result > 0) {
-                    view.runOnUiThread(Runnable {
-                        view.showSaveButton(true)
-                        view.showNotes(true)
-                        view.showDelivered(true)
-                        view.showCalculations(true)
-                        view.showPayments(true)
-                    })
-                }
+                val resultLive = saleItemDao.getSaleItemCountFromSaleLive(saleUid)
+                view.runOnUiThread(Runnable {
+                    resultLive.observe(thisP, thisP::updateSaleNumbers)
+                })
 
-                val res = saleItemDao.findTotalPaidBySaleAsync(saleUid)
-                if(res!=null) {
-                    view.updateOrderTotal(res as Long)
-                }
+                //val res = saleItemDao.findTotalPaidBySaleAsync(saleUid)
+                val resLive = saleItemDao.findTotalPaidBySaleLive(saleUid)
+                view.runOnUiThread(Runnable {
+                    resLive.observe(thisP, thisP::updateOrderTotal)
+                })
+
             }
         }
 
     }
 
+    private fun updateOrderTotal(res: Long?){
+        if(res!=null) {
+            view.runOnUiThread(Runnable {
+                view.updateOrderTotal(res)
+            })
+        }
+    }
+
+    private fun updateSaleNumbers(result : Int?){
+        if (result != null && result > 0) {
+            view.runOnUiThread(Runnable {
+                view.showSaveButton(true)
+                view.showNotes(true)
+                view.showDelivered(true)
+                view.showCalculations(true)
+                view.showPayments(true)
+            })
+        }
+    }
+
+    private fun updatePaymentTotal(res:Int?){
+        if(res!=null){
+            totalPayment = res.toLong()
+            updateBalance()
+        }
+    }
+
     //Called every time payment list gets updated (via Recycler Adapter's custom observer)
     fun getTotalPaymentsAndUpdateTotalView(saleUid: Long) {
+        var thisP = this
         //Get total payment count
         GlobalScope.launch {
-            val res = salePaymentDao.findTotalPaidBySaleAsync(saleUid)
-            if(res!=null){
-                totalPayment = res.toLong()
-                updateBalance()
-            }
+            val res = salePaymentDao.findTotalPaidBySaleLive(saleUid)
+            view.runOnUiThread(Runnable {
+                res.observe(thisP, thisP::updatePaymentTotal)
+            })
+
         }
     }
 
@@ -187,10 +210,12 @@ class SaleDetailPresenter(context: Any,
 
             GlobalScope.launch {
                 //Get the sale entity
-                val result = saleDao.findByUidAsync(saleUid)
-                updatedSale = result
-                view.updateSaleOnView(updatedSale!!)
+                val resultLive = saleDao.findByUidLive(saleUid)
+                view.runOnUiThread(Runnable {
+                   resultLive.observe(thisP, thisP::updateSaleOnView)
+                })
                 startObservingLocations()
+
             }
 
             //Any voice notes
@@ -214,6 +239,15 @@ class SaleDetailPresenter(context: Any,
             updatePaymentItemProvider(saleUid)
 
             getPaymentTotalAndUpdateView()
+        }
+    }
+
+    fun updateSaleOnView(sale:Sale?){
+        if(sale != null){
+            updatedSale = sale
+            view.runOnUiThread(Runnable {
+                view.updateSaleOnView(updatedSale!!)
+            })
         }
     }
 
@@ -305,13 +339,22 @@ class SaleDetailPresenter(context: Any,
                 }
             }
 
+            var thisP = this
             GlobalScope.launch {
-                val result = saleItemDao.getTitleForSaleUidAsync(updatedSale!!.saleUid)
-                updatedSale!!.saleTitle = result
-                saleDao.updateAsync(updatedSale!!)
-                view.finish()
+                val resultLive = saleItemDao.getTitleForSaleUidLive(updatedSale!!.saleUid)
+                view.runOnUiThread(Runnable {
+                    resultLive.observe(thisP, thisP::handleUpdateSaleName)
+                })
+
             }
         }
+    }
+    private fun handleUpdateSaleName(result:String?){
+        updatedSale!!.saleTitle = result
+        GlobalScope.launch {
+            saleDao.updateAsync(updatedSale!!)
+        }
+        view.finish()
     }
 
     fun handleClickSaleItemEdit(saleItemUid: Long) {

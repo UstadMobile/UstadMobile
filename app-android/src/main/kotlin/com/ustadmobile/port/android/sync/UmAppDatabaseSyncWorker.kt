@@ -59,6 +59,10 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
             WorkManager.getInstance().enqueue(request)
         }
 
+        /**
+         * It will run the new OneTimeWorkRequests only if
+         *             there is no pending work labelled with the TAG
+         */
         fun queueSyncWorkerWithPolicy(delay: Long, timeUnit: TimeUnit,
                                       policy: ExistingWorkPolicy) {
             val workConstraint = Constraints.Builder()

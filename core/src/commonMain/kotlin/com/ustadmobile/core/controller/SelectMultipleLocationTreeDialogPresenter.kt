@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
+import com.ustadmobile.lib.db.entities.Location
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -18,10 +19,13 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
     var selectedOptions = mutableMapOf<String, Long>()
 
     init {
-        val locationsArray = arguments.getValue(ARG_LOCATIONS_SET)
-        selectedLocationsList = locationsArray!!.split(",").filter { it.isNotEmpty() }.map {
-            it.trim().toLong()
+        if(arguments.containsKey(ARG_LOCATIONS_SET)){
+            val locationsArray = arguments.getValue(ARG_LOCATIONS_SET)
+            selectedLocationsList = locationsArray!!.split(",").filter { it.isNotEmpty() }.map {
+                it.trim().toLong()
+            }
         }
+
         getTopLocations()
     }
 
@@ -33,14 +37,22 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
         }
     }
 
+    private fun handleGetTopLocations(locations:List<Location>?){
+        view.runOnUiThread(Runnable {
+            if(locations!=null) {
+                view.populateTopLocation(locations)
+            }
+        })
+    }
     /**
      * Gets top locations and load initial data to the recycler view
      */
     private fun getTopLocations() {
+        val thisP=this
         GlobalScope.launch {
-            val locationList = locationDao.findTopLocationsAsync()
+            val locationListLive = locationDao.findTopLocationsLive()
             view.runOnUiThread(Runnable {
-                view.populateTopLocation(locationList)
+                locationListLive.observe(thisP, thisP::handleGetTopLocations)
             })
         }
     }

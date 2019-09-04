@@ -15,4 +15,7 @@
     <files-path
         name="files"
         path="." />
+    <files-path
+        name="internal_storage"
+        path="."/>
 </paths>
