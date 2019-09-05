@@ -312,7 +312,6 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
                 args, mockView, mockWebServer.url("").toString())
         presenter.onCreate(args)
 
-
         val url = mockWebServer.url("/somehp5here").toString()
 
         runBlocking {

@@ -109,7 +109,6 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         IdlingRegistry.getInstance().register(idleProgress)
 
-
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(mockWebServer.url("/noh5p").toString()), ViewActions.closeSoftKeyboard())
 
@@ -197,13 +196,9 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
-
-
-        runBlocking {
-
-            onView(withId(R.id.import_link_done)).perform(click())
-            Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
-        }
+        
+        onView(withId(R.id.import_link_done)).perform(click())
+        Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
     }
 
     @Test
