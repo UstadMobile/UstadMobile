@@ -18,7 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
     </com.google.android.material.chip.ChipGroup>
 
     <TextView
@@ -53,17 +52,21 @@
         fab:visibility="visible" />
 
 
-
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fragment_dashboard_entry_list_fab_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="visible"
+        app:menu_icon="@drawable/ic_add_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:menu_colorNormal="@color/fab"
+        app:menu_colorPressed="@color/fab_pressed"
+        app:menu_colorRipple="@color/fab_ripple"
+        fab:fab_colorNormal="@color/fab"
         fab:fab_colorPressed="@color/fab_pressed"
         fab:fab_colorRipple="@color/fab_ripple"
-        app:layout_constraintEnd_toEndOf="parent">
+        >
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fragment_dashboard_entry_list_fab_menu_sales_performance"
@@ -75,6 +78,9 @@
             android:src="@drawable/ic_insert_chart_white_24dp"
             app:fab_label="@string/sales_performance"
             app:fab_size="mini"
+            app:menu_colorNormal="@color/fab"
+            app:menu_colorPressed="@color/fab_pressed"
+            app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
             fab:fab_colorRipple="@color/fab_ripple" />
@@ -89,6 +95,9 @@
             android:src="@drawable/ic_assignment_ind_black_24dp"
             app:fab_label="@string/sales_log"
             app:fab_size="mini"
+            app:menu_colorNormal="@color/fab"
+            app:menu_colorPressed="@color/fab_pressed"
+            app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
             fab:fab_colorRipple="@color/fab_ripple" />
@@ -103,6 +112,9 @@
             android:src="@drawable/ic_content_paste_black_24dp"
             app:fab_label="@string/top_les"
             app:fab_size="mini"
+            app:menu_colorNormal="@color/fab"
+            app:menu_colorPressed="@color/fab_pressed"
+            app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
             fab:fab_colorRipple="@color/fab_ripple" />

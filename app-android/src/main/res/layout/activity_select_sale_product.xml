@@ -170,11 +170,15 @@
     </ScrollView>
 
     <com.github.clans.fab.FloatingActionMenu
-    android:id="@+id/activity_select_sale_product_fab_menu"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/activity_select_sale_product_fab_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:menu_icon="@drawable/ic_add_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:menu_colorNormal="@color/fab"
+        app:menu_colorPressed="@color/fab_pressed"
+        app:menu_colorRipple="@color/fab_ripple"
 
         >
 

@@ -15,6 +15,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -84,22 +85,33 @@ class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
 
         //Set listeners
         floatingActionMenu = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu)
-        rootContainer.findViewById<View>(R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
-                .setOnClickListener { v ->
-                    floatingActionMenu!!.close(true)
+        val salesPerformance = rootContainer.findViewById<FloatingActionButton>(
+                R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
+        salesPerformance.setOnClickListener { v ->
+                    floatingActionMenu.close(true)
                     mPresenter!!.handleClickNewSalePerformanceReport()
                 }
+        salesPerformance.setColorNormalResId(R.color.fab)
+        salesPerformance.setColorPressedResId(R.color.fab_pressed)
+        salesPerformance.setColorRippleResId(R.color.fab_ripple)
 
-        rootContainer.findViewById<View>(R.id.fragment_dashboard_entry_list_fab_menu_sales_log)
-                .setOnClickListener { v ->
-                    floatingActionMenu!!.close(true)
+        val salesLog = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_sales_log)
+        salesLog.setOnClickListener { v ->
+                    floatingActionMenu.close(true)
                     mPresenter!!.handleClickNewSalesLogReport()
                 }
-        rootContainer.findViewById<View>(R.id.fragment_dashboard_entry_list_fab_menu_top_les)
-                .setOnClickListener { v ->
-                    floatingActionMenu!!.close(true)
+        salesLog.setColorNormalResId(R.color.fab)
+        salesLog.setColorPressedResId(R.color.fab_pressed)
+        salesLog.setColorRippleResId(R.color.fab_ripple)
+
+        val topLEs = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_top_les)
+        topLEs.setOnClickListener { v ->
+                    floatingActionMenu.close(true)
                     mPresenter!!.handleClickTopLEsReport()
                 }
+        topLEs.setColorNormalResId(R.color.fab)
+        topLEs.setColorPressedResId(R.color.fab_pressed)
+        topLEs.setColorRippleResId(R.color.fab_ripple)
 
         return rootContainer
     }
