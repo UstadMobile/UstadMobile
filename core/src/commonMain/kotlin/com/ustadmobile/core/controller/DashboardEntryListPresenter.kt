@@ -23,6 +23,7 @@ import com.ustadmobile.lib.db.entities.DashboardTag
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -69,12 +70,16 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
             //Get provider
             GlobalScope.launch {
                 entryProvider = dashboardEntryDao.findByPersonAndActiveProvider(loggedInPersonUid)
-                view.setDashboardEntryProvider(entryProvider!!)
+                view.runOnUiThread(Runnable {
+                    view.setDashboardEntryProvider(entryProvider!!)
+                })
             }
 
             GlobalScope.launch {
                 tagProvider = tagDao.findAllActiveProvider()
-                view.setDashboardTagProvider(tagProvider!!)
+                view.runOnUiThread(Runnable {
+                    view.setDashboardTagProvider(tagProvider!!)
+                })
             }
 
             val thisP = this

@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemReminder
+import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -26,8 +27,8 @@ import kotlinx.coroutines.launch
 class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
     internal var repository: UmAppDatabase
-    private var saleItemDao: SaleItemDao? = null
-    private var reminderDao: SaleItemReminderDao? = null
+    private var saleItemDao: SaleItemDao
+    private var reminderDao: SaleItemReminderDao
 
     private var currentSaleItem: SaleItem? = null
     private var updatedSaleItem: SaleItem? = null
@@ -39,6 +40,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     private var saleProductName: String? = null
 
     private var refreshSaleItem = true
+    val thisP = this
 
     constructor(context: Any,
                 arguments: Map<String, String?>,
@@ -95,104 +97,82 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             updatedSaleItem = SaleItem(productUid)
             GlobalScope.launch {
                 try {
-                    val result = saleItemDao!!.insertAsync(updatedSaleItem!!)
-                    initFromSaleItem(result!!)
+                    val result = saleItemDao.insertAsync(updatedSaleItem!!)
+                    initFromSaleItem(result)
                 }catch(e:Exception){
                     println(e.message)
                 }
             }
         }
     }
+
+    private fun handleSaleItemLive(saleItem:SaleItem?){
+        if(saleItem!=null) {
+            saleItemDueDate = saleItem.saleItemDueDate
+        }
+    }
+
 
     private fun initFromSaleItem(saleItemUid: Long) {
 
-
         //Get the sale item entity
         GlobalScope.launch {
-            try {
-                val result = saleItemDao!!.findByUidAsync(saleItemUid)
-                saleItemDueDate = result!!.saleItemDueDate
-            }catch(e:Exception){
-                println(e.message)
-            }
 
-        }
-        if (refreshSaleItem) {
-            //Observe it.
-            val saleItemLiveData = saleItemDao!!.findByUidLive(saleItemUid)
-            val thisP = this
+            val resultLive = saleItemDao.findByUidLive(saleItemUid)
             GlobalScope.launch(Dispatchers.Main) {
-                saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
+                resultLive.observe(thisP, thisP::handleSaleItemLive)
             }
 
+            if (refreshSaleItem) {
+                //Observe it.
+                val saleItemLiveData = saleItemDao.findByUidLive(saleItemUid)
 
-            //Get the sale item entity
-            GlobalScope.launch {
-                val result:SaleItem?
-                try {
-                    result = saleItemDao!!.findByUidAsync(saleItemUid)
-
-                    updatedSaleItem = result
-                    var saleProductUid: Long = 0
-                    if (result!!.saleItemProductUid != 0L) {
-                        saleProductUid = result.saleItemProductUid
-                    }
-                    if (producerUid != 0L) {
-                        saleProductUid = productUid
-                    }
-
-                    GlobalScope.launch {
-                        try {
-                            val saleProduct =
-                                    repository.saleProductDao.findByUidAsync(saleProductUid)
-
-                            saleProductName = saleProduct!!.saleProductName
-                            if (saleTitle == null) {
-                                saleTitle = saleProductName
-                            }
-                            view.updateSaleItemOnView(updatedSaleItem!!, saleProductName!!)
-                        }catch(e:Exception){
-                            println(e.message)
-                        }
-                    }
-
-                    //Notification observer
-                    val provider =
-                            reminderDao!!.findBySaleItemUid(saleItemUid)
-                    view.setReminderProvider(provider)
-                }catch(e:Exception){
-                    println(e.message)
+                GlobalScope.launch(Dispatchers.Main) {
+                    saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
                 }
+
+                //Notification observer
+                val provider =
+                        reminderDao!!.findBySaleItemUid(saleItemUid)
+                view.setReminderProvider(provider)
+
             }
         }
     }
 
+
+
     private fun handleSaleItemChanged(changedSaleItem: SaleItem?) {
-        if (currentSaleItem == null)
-            currentSaleItem = changedSaleItem
+        if(changedSaleItem!=null) {
+            saleItemDueDate = changedSaleItem.saleItemDueDate
 
-        if (updatedSaleItem == null || updatedSaleItem != changedSaleItem) {
-            if (changedSaleItem != null) {
-
-                var saleProductUid: Long = 0
-                if (productUid != 0L) {
-                    saleProductUid = productUid
-                } else if (updatedSaleItem!!.saleItemProductUid != 0L) {
-                    saleProductUid = updatedSaleItem!!.saleItemProductUid
-                }
-                GlobalScope.launch {
-                    try {
-                        val saleProduct =
-                                repository.saleProductDao.findByUidAsync(saleProductUid)
-                        var productName: String? = ""
-                        productName = saleProduct!!.saleProductName
-                        view.updateSaleItemOnView(updatedSaleItem!!, productName!!)
-                    }catch (e:Exception){
-                        println(e.message)
-                    }
-                }
-                updatedSaleItem = changedSaleItem
+            if (currentSaleItem == null) {
+                currentSaleItem = changedSaleItem
             }
+
+            var saleProductUid: Long = 0L
+            if (updatedSaleItem == null || updatedSaleItem != changedSaleItem) {
+                saleProductUid = changedSaleItem.saleItemProductUid
+                updatedSaleItem = changedSaleItem
+            }else if(updatedSaleItem!!.saleItemProductUid != 0L){
+                saleProductUid = updatedSaleItem!!.saleItemProductUid
+            }
+
+            GlobalScope.launch {
+                val saleProductLive = repository.saleProductDao.findByUidLive(saleProductUid)
+                GlobalScope.launch(Dispatchers.Main) {
+                    saleProductLive.observe(thisP, thisP::handleSaleProductLive)
+                }
+
+            }
+        }
+    }
+
+    private fun handleSaleProductLive(saleProduct : SaleProduct?){
+        if(saleProduct!=null) {
+            var productName: String? = ""
+            productName = saleProduct!!.saleProductName
+            view.updateSaleItemOnView(updatedSaleItem!!, productName!!)
         }
     }
 
@@ -280,13 +260,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                     view.runOnUiThread(Runnable {
                         remindersLive.observe(thisP, thisP::handleReminderLive)
                     })
-//                    val reminders =
-//                            reminderDao!!.findBySaleItemUidAsync(updatedSaleItem!!.saleItemUid)
-//                    for (everyReminder in reminders!!) {
-//                        val days = everyReminder.saleItemReminderDays
-//                        view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
-//                    }
-//                    view.finish()
+
                 } catch (e: Exception) {
                     println(e.message)
                 }

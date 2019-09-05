@@ -283,9 +283,15 @@ abstract class SaleDao : BaseDao<Sale> {
 
     @Query(SALE_PERFORMANCE_REPORT_1)
     abstract suspend fun getSalesPerformanceReportSumGroupedByLocation(leUids: List<Long> ,
-                                                               producerUids:List<Long>, locationUids:List<Long> ,
-                                                               productTypeUids:List<Long> , fromDate:Long, toDate:Long,
-                                                               fromPrice:Int, toPrice:Int): List<ReportSalesPerformance>
+                                   producerUids:List<Long>, locationUids:List<Long> ,
+                                   productTypeUids:List<Long> , fromDate:Long, toDate:Long,
+                                   fromPrice:Int, toPrice:Int): List<ReportSalesPerformance>
+
+    @Query(SALE_PERFORMANCE_REPORT_1)
+    abstract fun getSalesPerformanceReportSumGroupedByLocationLive(leUids: List<Long> ,
+                       producerUids:List<Long>, locationUids:List<Long> ,
+                       productTypeUids:List<Long> , fromDate:Long, toDate:Long,
+                       fromPrice:Int, toPrice:Int): DoorLiveData<List<ReportSalesPerformance>>
 
     @Query("SELECT    " +
             " SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as totalSalesValue,  " +

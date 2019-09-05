@@ -97,8 +97,11 @@ class ReportSalesPerformanceChartComponent : LinearLayout, ReportBarChartCompone
             val locationUid = entry.locationUid
 
             //Build the Location Uid, Location Name for future lookup.
-            val locationName = entry.locationName
+            var locationName = entry.locationName
             if (!locationUidToName.containsKey(locationUid)) {
+                if(locationName == null){
+                    locationName = ""
+                }
                 locationUidToName[locationUid] = locationName!!
             }
 

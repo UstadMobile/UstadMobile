@@ -22,9 +22,7 @@ import com.ustadmobile.core.controller.ReportSalesLogComponentPresenter
 import com.ustadmobile.core.controller.ReportTopLEsComponentPresenter
 import com.ustadmobile.core.view.ReportOptionsDetailView
 import com.ustadmobile.lib.db.entities.DashboardEntry
-
 import java.util.Hashtable
-
 
 class DashboardEntryListRecyclerAdapter internal constructor(
         diffCallback: DiffUtil.ItemCallback<DashboardEntry>,
@@ -125,7 +123,7 @@ class DashboardEntryListRecyclerAdapter internal constructor(
                 //Create the chart component, sets its layout and call the presenter on the view.
                 val chartComponent = ReportSalesPerformanceChartComponent(theContext)
                 chartComponent.layoutParams = params
-                val cPresenter = ReportChartViewComponentPresenter(this, args, chartComponent)
+                val cPresenter = ReportChartViewComponentPresenter(theContext, args, chartComponent)
                 cPresenter.onCreate(args)
 
                 chartLL.addView(chartComponent)
@@ -141,7 +139,7 @@ class DashboardEntryListRecyclerAdapter internal constructor(
                 //Create View, presenter and add it to the view
                 val salesLogComponent = ReportTableListComponent(theContext)
                 salesLogComponent.layoutParams = params
-                val lPresenter = ReportSalesLogComponentPresenter(this, args, salesLogComponent)
+                val lPresenter = ReportSalesLogComponentPresenter(theContext, args, salesLogComponent)
                 lPresenter.onCreate(args)
 
                 chartLL.addView(salesLogComponent)

@@ -124,8 +124,10 @@ class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
         }
 
 
-        //set the adapter
-        entriesRV!!.setAdapter(recyclerAdapter)
+        runOnUiThread(Runnable {
+            //set the adapter
+            entriesRV!!.setAdapter(recyclerAdapter)
+        })
 
     }
 
