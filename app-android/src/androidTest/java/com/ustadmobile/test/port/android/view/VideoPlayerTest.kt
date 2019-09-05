@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.view.VideoPlayerActivity
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
@@ -61,8 +62,9 @@ class VideoPlayerTest {
         spanishQuiz.leaf = true
         contentDao.insert(spanishQuiz)
 
-        val tmpDir = Files.createTempDirectory("testVideoPlayer").toFile()
-        tmpDir.mkdirs()
+        val tmpDir = UmFileUtilSe.makeTempDir("testVideoPlayer",
+                "" + System.currentTimeMillis())
+
         val videoFile = File(tmpDir, "video1.webm")
         val audioTempFile = File(tmpDir, "audio.c2")
         val srtTmpFile = File(tmpDir, "subtitle-english.srt")

@@ -8,12 +8,14 @@ import kotlinx.coroutines.launch
 
 class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
                                                view: SelectMultipleEntriesTreeDialogView,
-                                               private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao):
+                                               private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao) :
         CommonEntityHandlerPresenter<SelectMultipleEntriesTreeDialogView>(context, arguments, view) {
 
     var selectedEntriesList: List<Long> = listOf()
 
     var selectedOptions = mutableMapOf<String, Long>()
+
+    var jobCount = 0
 
     init {
         val entryArray = arguments.getValue(SelectMultipleEntriesTreeDialogView.ARG_CONTENT_ENTRY_SET)
@@ -24,10 +26,14 @@ class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<Stri
     }
 
     private fun getTopEntries() {
+        jobCount++
+        view.showBaseProgressBar(jobCount > 0)
         GlobalScope.launch {
             val entriesList = contentEntryParentChildJoinDao.selectTopEntries()
             view.runOnUiThread(Runnable {
                 view.populateTopEntries(entriesList)
+                jobCount--
+                view.showBaseProgressBar(jobCount > 0)
             })
         }
     }

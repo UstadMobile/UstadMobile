@@ -109,7 +109,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     suspend fun handleClickImport() {
         val client = defaultHttpClient()
         var response: HttpResponse? = null
-        view.showProgress(true)
+        view.showBaseProgressBar(true)
         view.enableDisableEditText(false)
         view.showHideErrorMessage(false)
 
@@ -127,7 +127,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
                     if (videoTitle.isNullOrEmpty()) {
                         view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
-                        view.showProgress(false)
+                        view.showBaseProgressBar(false)
                         return
                     }
 
@@ -147,7 +147,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
             val content = response.receive<H5PImportData>()
 
-            view.showProgress(false)
+            view.showBaseProgressBar(false)
             view.enableDisableEditText(true)
 
             val db = UmAppDatabase.getInstance(context)
@@ -161,7 +161,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
         } else {
 
-            view.showProgress(false)
+            view.showBaseProgressBar(false)
             view.enableDisableEditText(true)
             view.showHideErrorMessage(true)
 

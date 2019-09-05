@@ -89,11 +89,14 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
         umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
 
-        setUMToolbar(R.id.new_report_toolbar)
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = "Report Options"
+
+        setProgressBar()
+        showBaseProgressBar(false)
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),

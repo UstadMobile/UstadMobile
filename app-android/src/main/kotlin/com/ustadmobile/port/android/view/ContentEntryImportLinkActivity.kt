@@ -75,10 +75,8 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         editText.addTextChangedListener(textWatcher)
         titleEdiText.addTextChangedListener(titleWatcher)
 
-        progressBar = findViewById(R.id.progressBar)
-        progressBar.isIndeterminate = true
-        progressBar.scaleY = 3f
-        showProgress(false)
+        setProgressBar()
+        showBaseProgressBar(false)
 
         presenter = ContentEntryImportLinkPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -139,12 +137,6 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
     override fun showHideVideoTitle(showTitle: Boolean) {
         runOnUiThread {
             titleInput.visibility = if (showTitle) VISIBLE else GONE
-        }
-    }
-
-    override fun showProgress(showProgress: Boolean) {
-        runOnUiThread {
-            progressBar.visibility = if (showProgress) VISIBLE else GONE
         }
     }
 
