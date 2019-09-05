@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -38,7 +39,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
 
-    private fun onContentEntryChanged(entry: ContentEntry?){
+    private fun onContentEntryChanged(entry: ContentEntry?) {
         if (entry == null) {
             fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
             return
@@ -50,12 +51,13 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
+        val provider = contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
+        fragmentViewContract.setContentEntryProvider(provider)
 
-        try{
+        try {
             val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDao.findLiveContentEntry(parentUid!!)
             entryLiveData.observe(this, this::onContentEntryChanged)
-        }catch (e:Exception){
+        } catch (e: Exception) {
             fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
         }
 
@@ -115,26 +117,10 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         val args = hashMapOf<String, String?>()
         args.putAll(arguments)
         val entryUid = entry.contentEntryUid
+        args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
+        val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
+        impl.go(destView, args, view.viewContext)
 
-        GlobalScope.launch {
-            try {
-                val result = contentEntryDao.findByUidAsync(entryUid)
-                if (result == null) {
-                    fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
-                    return@launch
-                }
-                if (result.leaf) {
-                    args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
-                } else {
-                    args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListView.VIEW_NAME, args, view.viewContext)
-                }
-            } catch (e: Exception) {
-                fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
-            }
-
-        }
     }
 
     @JsName("handleClickFilterByLanguage")

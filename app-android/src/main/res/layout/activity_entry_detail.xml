@@ -283,11 +283,12 @@
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:titleEnabled="false">
+
+
             <include
                 android:id="@+id/entry_detail_toolbar"
-                layout="@layout/toolbar"
-                android:layout_width="wrap_content"
-                android:layout_height="56dp" />
+                layout="@layout/toolbar_with_progress" />
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>

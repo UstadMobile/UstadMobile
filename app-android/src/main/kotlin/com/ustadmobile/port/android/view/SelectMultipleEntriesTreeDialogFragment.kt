@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.CheckBox
+import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
@@ -29,7 +30,7 @@ import tellh.com.recyclertreeview_lib.TreeNode
 import tellh.com.recyclertreeview_lib.TreeViewAdapter
 import tellh.com.recyclertreeview_lib.TreeViewBinder
 
-class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMultipleEntriesTreeDialogView, DismissableDialog {
+class SelectMultipleEntriesTreeDialogFragment : UstadDialogFragment(), SelectMultipleEntriesTreeDialogView, DismissableDialog {
 
     lateinit var toolbar: Toolbar
     lateinit var dialog: AlertDialog
@@ -55,6 +56,8 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
     override val viewContext: Any
         get() = context!!
 
+    private lateinit var progressBar: ProgressBar
+
     interface MultiSelectEntriesTreeDialogListener {
         fun onEntriesSelectedResult(selected: MutableMap<String, Long>)
     }
@@ -70,7 +73,7 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         //Toolbar
-        toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar)
+        toolbar = rootView.findViewById(R.id.um_toolbar)
 
         //Set up icon to toolbar
         var upIcon = AppCompatResources.getDrawable(context!!,
@@ -86,14 +89,19 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
             }
             false
         }
-        toolbar.setTitle(R.string.select_locations)
+        toolbar.setTitle(R.string.select_entries)
+
+        progressBar = rootView.findViewById(R.id.progressBar)
+        progressBar.isIndeterminate = true
+        progressBar.scaleY = 3f
+        showBaseProgressBar(false)
 
         //TODO: Get dao - Were using DAOs in the Fragment - Something we should consider changing.
         val repository = UmAccountManager.getRepositoryForActiveAccount(context!!)
         contentEntryDao = repository.contentEntryDao
 
         //Presenter
-        presenter = SelectMultipleEntriesTreeDialogPresenter(context!!,bundleToMap(arguments), this,
+        presenter = SelectMultipleEntriesTreeDialogPresenter(context!!, bundleToMap(arguments), this,
                 repository.contentEntryParentChildJoinDao)
         presenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
@@ -108,7 +116,15 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
 
     }
 
+    override fun showBaseProgressBar(showProgress: Boolean) {
+        runOnUiThread(Runnable {
+            progressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
+        })
+    }
+
     fun populateTreeNode(childNode: TreeNode<EntityLayoutType>, childEntryUid: Long) {
+        presenter.jobCount++
+        showBaseProgressBar(presenter.jobCount > 0)
         GlobalScope.launch {
             val entriesList = contentEntryDao.getChildrenByParentAsync(childEntryUid)
             (childNode.content as EntityLayoutType).leaf = entriesList.isEmpty()
@@ -126,10 +142,11 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
                 }
 
                 (childNode.content as EntityLayoutType).leaf = entriesList.isEmpty()
+                presenter.jobCount--
+                showBaseProgressBar(presenter.jobCount > 0)
             })
         }
     }
-
 
 
     override fun populateTopEntries(locations: List<ContentEntry>) {
@@ -180,7 +197,7 @@ class SelectMultipleEntriesTreeDialogFragment: UstadDialogFragment(), SelectMult
                     val nodeList = treeNode.childList
                     for (childNode in nodeList) {
                         if (childNode.isLeaf) {
-                            //Find all child's children and add then to the node
+                            //Find all child's children and add then  to the node
                             // (via PopulateTreeNodeCallback class)
                             val childLocationUid = (childNode.content as EntityLayoutType).uid
                             //Get child locations :

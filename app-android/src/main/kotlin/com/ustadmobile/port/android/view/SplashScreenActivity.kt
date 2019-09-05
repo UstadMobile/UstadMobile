@@ -36,10 +36,7 @@ import android.os.Handler
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
 
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
 import com.ustadmobile.core.db.UmAppDatabase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -60,12 +57,6 @@ class SplashScreenActivity : UstadBaseActivity() {
         setContentView(R.layout.activity_splash_screen)
 
         val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
-
-        if(!launched){val dbWork = OneTimeWorkRequest.Builder(
-                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
-                .build()
-            WorkManager.getInstance().enqueue(dbWork)
-        }
 
         //TODO: KMP Remove When DELEGATE WEB works
         //Load Dummy data
