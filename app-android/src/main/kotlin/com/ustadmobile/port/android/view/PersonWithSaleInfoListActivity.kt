@@ -46,10 +46,11 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
         val data = LivePagedListBuilder(factory, 20).build()
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            data.observe(thisP, Observer<PagedList<PersonWithSaleInfo>> { recyclerAdapter.submitList(it) })
+            data.observe(thisP, Observer<PagedList<PersonWithSaleInfo>>
+                { recyclerAdapter.submitList(it) })
         }
 
-        mRecyclerView!!.adapter = recyclerAdapter
+        mRecyclerView.adapter = recyclerAdapter
     }
 
     override fun updateSortSpinner(presets: Array<String?>) {
@@ -57,7 +58,7 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
         val adapter = ArrayAdapter(this,
                 R.layout.spinner_item, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sortSpinner!!.adapter = adapter
+        sortSpinner.adapter = adapter
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -73,7 +74,6 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_search, menu)
-
 
         // Associate searchable configuration with the SearchView
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
@@ -116,7 +116,7 @@ class PersonWithSaleInfoListActivity : UstadBaseActivity(), PersonWithSaleInfoLi
         //Setting layout:
         setContentView(R.layout.activity_person_with_sale_info_list)
 
-        toolbar = findViewById<Toolbar>(R.id.activity_person_with_saleinfo_list_toolbar)
+        toolbar = findViewById(R.id.activity_person_with_saleinfo_list_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 

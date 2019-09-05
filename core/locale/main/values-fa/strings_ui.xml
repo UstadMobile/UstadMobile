@@ -291,5 +291,70 @@
     <string name="no_account">Don\'t have an account?</string>
 
 
+    <!-- Untranslated bits -->
+    <string name="other">Other</string>
+    <string name="unset">Unset</string>
+    <string name="device_name">Device name</string>
+    <string name="scanning">Scanning</string>
+    <string name="connecting">Connecting</string>
+    <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
+    <string name="resume_download">Resume download</string>
+    <string name="cancel_download">Cancel download</string>
+    <string name="only_download_on_wifi">Only download on Wi-FI</string>
+    <string name="failed_message">Try again</string>
+    <string name="download_pause_stacked_label">Pause download</string>
+    <string name="download_cancel_stacked_label">Cancel download</string>
+    <string name="download_entry_state_downloading">Downloading</string>
+    <string name="download_entry_state_downloaded">Downloaded</string>
+    <string name="content_editor_create_new_import_link">Import from link</string>
+    <string name="bar_chart" value="100">Bar Chart</string>
+    <string name="line_graph" value="101">Line Graph</string>
+    <string name="score" value="200">Average Score</string>
+    <string name="total_duration" value="201">Total Duration</string>
+    <string name="average_duration" value="202">Average Duration</string>
+    <string name="count_activity" value="203"># of activities</string>
+    <string name="xapi_day" value="300">Day</string>
+    <string name="xapi_week" value="301">Week</string>
+    <string name="xapi_month" value="302">Month</string>
+    <string name="xapi_custom_date" value="303">Custom Date</string>
+    <string name="xapi_content_entry" value="304">Content Entry</string>
+    <string name="xapi_location" value="305">Location</string>
+    <string name="xapi_gender" value="306">Gender</string>
+    <string name="from">از</string>
+    <string name="tocao">الی</string>
+    <string name="date_range">مدت تاریخ</string>
+    <string name="done">Done</string>
+    <string name="select_locations">Select Locations</string>
+    <string name="xapi_options_general">General</string>
+    <string name="xapi_options_report_title">Report Title</string>
+    <string name="xapi_options_visual_type">Visualization Type</string>
+    <string name="xapi_options_axes">Axes</string>
+    <string name="xapi_options_y_axes">Y-Axis</string>
+    <string name="xapi_options_x_axes">X-Axis</string>
+    <string name="xapi_options_subgroup">Subgroup by</string>
+    <string name="xapi_options_filters">Filters</string>
+    <string name="xapi_options_who">Who</string>
+    <string name="xapi_options_did">Did</string>
+    <string name="xapi_options_what">What</string>
+    <string name="xapi_options_when">When</string>
+    <string name="xapi_options_where">Where</string>
+    <string name="activity_preview_xapi">Preview</string>
+    <string name="add_to_dashboard">علاوه ساختن در صفحه گذارشات</string>
+    <string name="activity_import_link">Import Link</string>
+    <string name="xapi_hours">Hrs</string>
+    <string name="xapi_minutes">Mins</string>
+    <string name="xapi_seconds">Secs</string>
+    <string name="xapi_person_header">Person</string>
+    <string name="xapi_verb_header">Did what</string>
+    <string name="xapi_result_header">Result</string>
+    <string name="xapi_when_header">When</string>
+    <string name="xapi_score">Score (%)</string>
+    <string name="import_link_video">Title</string>
+    <string name="import_title_not_entered">Title not entered</string>
+    <string name="enter_url">Enter Url</string>
+    <string name="import_link_invalid_url">Invalid Url</string>
+    <string name="import_link_content_not_supported">Content not supported</string>
+    <string name="import_link_big_size">File size too big</string>
+    <string name="import_link_error">Import Error</string>
 </resources>
 

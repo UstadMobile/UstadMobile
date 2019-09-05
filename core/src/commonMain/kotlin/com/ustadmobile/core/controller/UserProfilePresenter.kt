@@ -4,6 +4,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
@@ -68,6 +69,14 @@ class UserProfilePresenter(context: Any,
             }
         }
 
+        //TODO: Get last time the device/account was synced.
+        val lastSyncedText = UstadMobileSystemImpl.instance.getString(MessageID.account_last_synced,
+                context)
+        val lastSyncedText2 = ""
+        val lastSynced = lastSyncedText + " " + lastSyncedText2
+        view.runOnUiThread(Runnable {
+            view.updateLastSyncedText(lastSynced)
+        })
     }
 
     fun handleClickChangePassword() {
@@ -89,6 +98,7 @@ class UserProfilePresenter(context: Any,
         UmAccountManager.setActiveAccount(emptyAcccount, context)
         UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.instance)
         val impl = UstadMobileSystemImpl.instance
+        impl.setAppPref(UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME, "", context)
         val args = HashMap<String, String>()
         impl.go(LoginView.VIEW_NAME, args, context)
     }

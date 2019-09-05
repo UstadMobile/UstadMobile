@@ -122,16 +122,15 @@
     <string name="delivery_signature">امضأ ارسال شدن</string>
     <string name="record_signature">تسجیل امضأ</string>
     <string name="filter">فلتر</string>
-    <string name="date_range">مدت تاریخ</string>
+
     <string name="value">ارزش</string>
-    <string name="from">از</string>
+
     <string name="to">الی</string>
     <string name="add_signature">علاوه ساختن امضأ</string>
     <string name="add_reminder">علاوه ساختن به یاد آوری</string>
     <string name="add_another_reminder">علاوه ساختن به یاد آوری دیگر</string>
     <string name="day_before">روز قبل</string>
     <string name="days_before">روزهای قبل</string>
-    <string name="tocao">الی</string>
     <string name="lowest_price">کمترین نرخ</string>
     <string name="highest_price">بیشترین نرخ</string>
     <string name="sale_reminder">به یاد آوری فروش</string>
@@ -161,7 +160,6 @@
     <string name="product_type">نوع محصول</string>
     <string name="grantee">دریافت کننده اعانه</string>
     <string name="sales_price">نرخ فروشات</string>
-    <string name="add_to_dashboard">علاوه ساختن در صفحه گذارشات</string>
     <string name="sales_performance_report">گزارش کارآیی فروشات</string>
     <string name="sales_log_report">گزارش یادداشتهای فروشات</string>
     <string name="top_les_report">عالی LEs گزارش</string>
@@ -184,4 +182,39 @@
     <string name="top_products">Top products</string>
     <string name="profile">Profile</string>
     <string name="summary">Summary</string>
+
+    <!--Untranslated -->
+    <string name="sales_performance_report_options">Sales Performance Report Options</string>
+    <string name="sales_log_report_options">Sales Log Report Options</string>
+    <string name="top_les_report_options">Top LEs Report Options</string>
+    <string name="show_average_desc">Select to display the average in your report.</string>
+    <string name="les">LEs</string>
+    <string name="week">Week</string>
+    <string name="selected_les">Selected LEs</string>
+    <string name="select_product_types">Select product types</string>
+
+
+    <!--Sprint 7-->
+    <string name="users">Users</string>
+    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
+    <string name="user">User</string>
+    <string name="send_message">Send message</string>
+    <string name="reset_password">Reset password</string>
+    <string name="deactivate">Deactivate</string>
+    <string name="groups">Groups</string>
+    <string name="group">Group</string>
+    <string name="group_setting_desc">Add, remove, or modify groups</string>
+    <string name="group_name">Group name</string>
+    <string name="members">Members</string>
+    <string name="add_members">Add members</string>
+    <string name="remove">Remove</string>
+    <string name="subgroup">Subgroup</string>
+    <string name="locations">Locations</string>
+    <string name="locations_setting_desc">Manage locations</string>
+    <string name="account_last_synced">Account last synced</string>
+    <string name="ago">ago</string>
+    <string name="minutes">minutes</string>
+    <string name="hours">hours</string>
+    <string name="weeks">weeks</string>
+    <string name="years">years</string>
 </resources>

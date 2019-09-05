@@ -122,16 +122,13 @@
     <string name="delivery_signature">د سپارلو لاسلیک</string>
     <string name="record_signature">د لاسلیک ثبتول</string>
     <string name="filter">فلتر</string>
-    <string name="date_range">د نیټې لړۍ</string>
     <string name="value">ارزښت</string>
-    <string name="from">له</string>
     <string name="to">تر</string>
     <string name="add_signature">د لاسليک زیاتول</string>
     <string name="add_reminder">په یاد راوړلو زیاتول</string>
     <string name="add_another_reminder">یو بل په یاد راوړل زیاتول</string>
     <string name="day_before">یوه ورځ مخکې</string>
     <string name="days_before">ورځي مخکی</string>
-    <string name="tocao">ته</string>
     <string name="lowest_price">تر ټولو کمه بیه</string>
     <string name="highest_price">ترټولو جګه بیه</string>
     <string name="sale_reminder">د خرڅلا په یاد راوړل</string>
@@ -161,7 +158,6 @@
     <string name="product_type">د محصول ډول</string>
     <string name="grantee">مستفید کیدونکی</string>
     <string name="sales_price">د خرڅلاوو بیه</string>
-    <string name="add_to_dashboard">په رپورټ کې زیاتول</string>
     <string name="sales_performance_report">د خرڅلاوو د کارکردګی رپورټ</string>
     <string name="sales_log_report">د خرڅلاوو د ثبت/سجل رپورټ</string>
     <string name="top_les_report">د غوره متشبثینو رپورټ</string>
@@ -184,4 +180,39 @@
     <string name="top_products">Top products</string>
     <string name="profile">Profile</string>
     <string name="summary">Summary</string>
+
+    <!-- Untranslated bits-->
+    <string name="sales_performance_report_options">Sales Performance Report Options</string>
+    <string name="sales_log_report_options">Sales Log Report Options</string>
+    <string name="top_les_report_options">Top LEs Report Options</string>
+    <string name="show_average_desc">Select to display the average in your report.</string>
+    <string name="les">LEs</string>
+    <string name="week">Week</string>
+    <string name="selected_les">Selected LEs</string>
+    <string name="select_product_types">Select product types</string>
+
+
+    <!--Sprint 7-->
+    <string name="users">Users</string>
+    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
+    <string name="user">User</string>
+    <string name="send_message">Send message</string>
+    <string name="reset_password">Reset password</string>
+    <string name="deactivate">Deactivate</string>
+    <string name="groups">Groups</string>
+    <string name="group">Group</string>
+    <string name="group_setting_desc">Add, remove, or modify groups</string>
+    <string name="group_name">Group name</string>
+    <string name="members">Members</string>
+    <string name="add_members">Add members</string>
+    <string name="remove">Remove</string>
+    <string name="subgroup">Subgroup</string>
+    <string name="locations">Locations</string>
+    <string name="locations_setting_desc">Manage locations</string>
+    <string name="account_last_synced">Account last synced</string>
+    <string name="ago">ago</string>
+    <string name="minutes">minutes</string>
+    <string name="hours">hours</string>
+    <string name="weeks">weeks</string>
+    <string name="years">years</string>
 </resources>

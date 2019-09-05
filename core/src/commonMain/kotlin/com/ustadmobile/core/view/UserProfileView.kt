@@ -24,6 +24,8 @@ interface UserProfileView : UstadView {
 
     fun sendMessage(messageId: Int)
 
+    fun updateLastSyncedText(lastSynced: String)
+
     companion object {
 
         // This defines the view name that is an argument value in the go() in impl.

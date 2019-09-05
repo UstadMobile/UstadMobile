@@ -12,7 +12,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_UID
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
+import kotlinx.coroutines.Dispatchers.Main
 
 /**
  *  Presenter for MyWomenEntrepreneurs view
@@ -40,6 +42,8 @@ class PersonWithSaleInfoListPresenter(context: Any,
         personDao = repository.personDao
     }
 
+    val thisP=this
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
@@ -50,12 +54,26 @@ class PersonWithSaleInfoListPresenter(context: Any,
         updateSortSpinnerPreset()
 
         GlobalScope.launch {
-            val person = personDao.findByUidAsync(personUid)
-            if(person!=null) {
-                weGroupUid = person.mPersonGroupUid
-                //Get assigned people
-                getAndSetProvider(currentSortOrder)
+            val personLive = personDao.findByUidLive(personUid)
+            GlobalScope.launch(Main){
+                personLive.observe(thisP, thisP::observePerson)
             }
+
+
+//            val person = personDao.findByUidAsync(personUid)
+//            if(person!=null) {
+//                weGroupUid = person.mPersonGroupUid
+//                //Get assigned people
+//                getAndSetProvider(currentSortOrder)
+//            }
+        }
+    }
+
+    private fun observePerson(person: Person?){
+        if(person!=null) {
+            weGroupUid = person.mPersonGroupUid
+            //Get assigned people
+            getAndSetProvider(currentSortOrder)
         }
     }
 

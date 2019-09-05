@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!--Goldozi-->
     <string name="app_name_goldozi">Goldozi</string>
     <string name="sales">Sales</string>
@@ -134,7 +135,6 @@
     <string name="sale_reminder">Sale reminder</string>
     <string name="sale_due_today">Due today is sale </string>
     <string name="due_in">Due in</string>
-    <string name="days">days</string>
     <string name="is_sale">is sale</string>
     <string name="product_name">Product name..</string>
 
@@ -185,7 +185,7 @@
     <string name="feedback_thanks">Thank you for the feedback.</string>
 
     <!--Sprint 6-->
-    <string name="my_women_entrepreneurs">My Women Embroiders</string>
+    <string name="my_women_entrepreneurs">My Women Entrepreneurs</string>
     <string name="top_products">Top products</string>
     <string name="profile">Profile</string>
     <string name="summary">Summary</string>
@@ -210,7 +210,11 @@
     <string name="account_last_synced">Account last synced</string>
     <string name="ago">ago</string>
     <string name="minutes">minutes</string>
+    <string name="days">days</string>
     <string name="hours">hours</string>
     <string name="weeks">weeks</string>
     <string name="years">years</string>
+
+
+
 </resources>

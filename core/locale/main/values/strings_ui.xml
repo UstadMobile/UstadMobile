@@ -173,7 +173,6 @@
     <string name="resume_download">Resume download</string>
     <string name="cancel_download">Cancel download</string>
     <string name="only_download_on_wifi">Only download on Wi-FI</string>
-
     <string name="failed_message">Try again</string>
     <string name="download_delete_btn_label">Delete</string>
     <string name="download_continue_stacked_label">Continue download</string>

@@ -35,6 +35,7 @@ import java.io.*
 
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
+
     private var toolbar: Toolbar? = null
     private var mPresenter: UserProfilePresenter? = null
 
@@ -52,6 +53,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     internal var IMAGE_QUALITY = 75
 
     private var imagePathFromCamera: String? = null
+    private lateinit var lastSyncedTV : TextView
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -89,6 +91,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         languageSet = findViewById(R.id.activity_user_profile_language_selection)
         pictureEdit = findViewById(R.id.activity_user_profile_edit)
         personEditImage = findViewById(R.id.activity_user_profile_user_image)
+        lastSyncedTV = findViewById(R.id.activity_user_prodile_last_synced)
 
         //Call the Presenter
         mPresenter = UserProfilePresenter(this,
@@ -101,6 +104,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         myWomenEntLL!!.setOnClickListener{ v -> mPresenter!!.handleClickMyWomenEntrepreneurs()}
 
         pictureEdit.setOnClickListener { v -> showGetImageAlertDialog() }
+    }
+
+    override fun updateLastSyncedText(lastSynced: String) {
+        lastSyncedTV.setText(lastSynced)
     }
 
     override fun onResume() {

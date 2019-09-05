@@ -40,6 +40,18 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_appbar"
         app:srcCompat="@drawable/ic_account_circle_black_32dp" />
 
+    <View
+        android:id="@+id/view5"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_user_image" />
+
+
     <LinearLayout
         android:id="@+id/activity_user_profile_change_password_ll"
         android:layout_width="0dp"
@@ -76,6 +88,17 @@
 
     </LinearLayout>
 
+
+    <View
+        android:id="@+id/postChangePasswordHLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_change_password_ll" />
+
     <LinearLayout
         android:background="?android:attr/selectableItemBackground"
         android:id="@+id/activity_user_profile_my_women_entrepreneurs_ll"
@@ -88,7 +111,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_change_password_ll">
+        app:layout_constraintTop_toBottomOf="@+id/postChangePasswordHLine">
 
         <ImageView
             android:id="@+id/my_women_entrepreneurs_logo"
@@ -116,12 +139,20 @@
                 app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon"
                 />
 
-
         </LinearLayout>
-
 
     </LinearLayout>
 
+
+    <View
+        android:id="@+id/postMyWomenEntrepreneursHLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_my_women_entrepreneurs_ll" />
 
     <LinearLayout
         android:id="@+id/activity_user_profile_language_ll"
@@ -135,7 +166,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_my_women_entrepreneurs_ll">
+        app:layout_constraintTop_toBottomOf="@+id/postMyWomenEntrepreneursHLine">
 
         <ImageView
             android:id="@+id/language_logo"
@@ -173,8 +204,17 @@
                 app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon" />
         </LinearLayout>
 
-
     </LinearLayout>
+
+    <View
+        android:id="@+id/postLanguageHLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_language_ll" />
 
     <LinearLayout
         android:background="?android:attr/selectableItemBackground"
@@ -188,7 +228,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_language_ll">
+        app:layout_constraintTop_toBottomOf="@+id/postLanguageHLine">
 
         <ImageView
             android:id="@+id/activity_user_profile_logout_icon"
@@ -212,16 +252,40 @@
 
     </LinearLayout>
 
+
     <View
-        android:id="@+id/view5"
+        android:id="@+id/hLinePostLogout"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="8dp"
         android:background="@color/divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_user_image" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_logout_ll" />
+
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="14dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/hLinePostLogout"
+        app:srcCompat="@drawable/ic_done_all_black_24dp" />
+
+    <TextView
+        android:id="@+id/activity_user_prodile_last_synced"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/account_last_synced"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageView8"
+        app:layout_constraintTop_toBottomOf="@+id/hLinePostLogout" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
