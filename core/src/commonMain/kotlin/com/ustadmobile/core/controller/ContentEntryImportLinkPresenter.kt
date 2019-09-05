@@ -16,6 +16,7 @@ import io.ktor.client.response.discardRemaining
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
@@ -40,15 +41,15 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
     }
 
-    fun showProgress() {
+    fun checkProgressBar() {
         view.showBaseProgressBar(jobCount > 0)
     }
 
 
-    suspend fun handleUrlTextUpdated(url: String) {
+    fun handleUrlTextUpdated(url: String): Job {
         jobCount++
-        showProgress()
-        GlobalScope.launch {
+        checkProgressBar()
+        return GlobalScope.launch {
             view.showHideVideoTitle(false)
             isDoneEnabled = false
             view.checkDoneButton()
@@ -57,18 +58,18 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             try {
                 response = defaultHttpClient().head<HttpResponse>(url)
             } catch (e: Exception) {
-                jobCount--
-                view.showBaseProgressBar(jobCount > 0)
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                jobCount--
+                checkProgressBar()
                 return@launch
             }
 
             contentType = -1
 
             if (response.status.value != 200) {
-                jobCount--
-                showProgress()
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                jobCount--
+                checkProgressBar()
                 return@launch
             }
 
@@ -85,33 +86,33 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             if (contentTypeHeader?.startsWith("video/") == true) {
 
                 if (length >= FILE_SIZE) {
-                    jobCount--
-                    showProgress()
                     view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+                    jobCount--
+                    checkProgressBar()
                     return@launch
                 }
 
                 contentType = VIDEO
                 hp5Url = url
-                jobCount--
-                showProgress()
                 view.showUrlStatus(true, "")
                 view.showHideVideoTitle(true)
+                jobCount--
+                checkProgressBar()
                 return@launch
 
             } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
-                jobCount--
-                showProgress()
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
+                jobCount--
+                checkProgressBar()
                 return@launch
             }
 
             val content = checkIfH5PValidAndReturnItsContent(url)
 
             if (content.isNullOrEmpty()) {
-                jobCount--
-                showProgress()
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                jobCount--
+                checkProgressBar()
                 return@launch
             }
 
@@ -127,74 +128,75 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
             }
             jobCount--
-            showProgress()
+            checkProgressBar()
         }
     }
 
 
-    suspend fun handleClickImport() {
-        val client = defaultHttpClient()
-        var response: HttpResponse? = null
+    fun handleClickImport(): Job {
         jobCount++
-        showProgress()
-        view.enableDisableEditText(false)
-        view.showHideErrorMessage(false)
+        checkProgressBar()
+        return GlobalScope.launch {
+            val client = defaultHttpClient()
+            var response: HttpResponse? = null
+            view.enableDisableEditText(false)
+            view.showHideErrorMessage(false)
+            try {
+                when (contentType) {
+                    HTML -> {
 
-        try {
-            when (contentType) {
-                HTML -> {
+                        response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
+                            parameter("hp5Url", hp5Url)
+                            parameter("parentUid", parentContentEntryUid)
+                        }
 
-                    response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
-                        parameter("hp5Url", hp5Url)
-                        parameter("parentUid", parentContentEntryUid)
                     }
+                    VIDEO -> {
 
+                        if (videoTitle.isNullOrEmpty()) {
+                            view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
+                            jobCount--
+                            checkProgressBar()
+                            return@launch
+                        }
+
+                        response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
+                            parameter("hp5Url", hp5Url)
+                            parameter("parentUid", parentContentEntryUid)
+                            parameter("title", videoTitle)
+                        }
+                    }
                 }
-                VIDEO -> {
-
-                    if (videoTitle.isNullOrEmpty()) {
-                        view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
-                        jobCount--
-                        showProgress()
-                        return
-                    }
-
-                    response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
-                        parameter("hp5Url", hp5Url)
-                        parameter("parentUid", parentContentEntryUid)
-                        parameter("title", videoTitle)
-                    }
-                }
+            } catch (e: Exception) {
+                response = null
             }
-        } catch (e: Exception) {
-            response = null
-        }
 
 
 
-        if (response?.status?.value == 200) {
+            if (response?.status?.value == 200) {
 
-            val content = response.receive<H5PImportData>()
-            view.enableDisableEditText(true)
+                val content = response.receive<H5PImportData>()
+                view.enableDisableEditText(true)
 
-            val db = UmAppDatabase.getInstance(context)
-            db.contentEntryDao.insert(content.contentEntry)
-            db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
-            db.containerDao.insert(content.container)
+                val db = UmAppDatabase.getInstance(context)
+                db.contentEntryDao.insert(content.contentEntry)
+                db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
+                db.containerDao.insert(content.container)
 
-            view.runOnUiThread(Runnable {
-                view.returnResult()
+                view.runOnUiThread(Runnable {
+                    jobCount--
+                    checkProgressBar()
+                    view.returnResult()
+                })
+
+            } else {
+
+                view.enableDisableEditText(true)
+                view.showHideErrorMessage(true)
                 jobCount--
-                showProgress()
-            })
+                checkProgressBar()
 
-        } else {
-
-            view.enableDisableEditText(true)
-            view.showHideErrorMessage(true)
-            jobCount--
-            showProgress()
-
+            }
         }
 
 

@@ -106,9 +106,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.import_link_done -> {
-                GlobalScope.launch {
-                    presenter.handleClickImport()
-                }
+                presenter.handleClickImport()
                 return true
             }
 
