@@ -9,6 +9,8 @@ targetCompatibility = '1.8'
 group rootProject.group
 version rootProject.version
 
+apply plugin: 'kotlinx-serialization'
+
 kotlin {
     jvm {
         compilations.main.kotlinOptions {
@@ -23,7 +25,13 @@ kotlin {
     }
 
     js {
-        nodejs()
+        browser {
+            testTask {
+                useKarma {
+                    useChrome()
+                }
+            }
+        }
 
         compilations.main.kotlinOptions {
             metaInfo = true
@@ -38,10 +46,12 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation project(":lib-database")
                 implementation project(":lib-database-entities")
+                implementation project(":lib-database-mpp")
                 implementation project(":lib-door-runtime")
                 implementation project(":lib-room-annotations")
             }
@@ -69,6 +79,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
             }
