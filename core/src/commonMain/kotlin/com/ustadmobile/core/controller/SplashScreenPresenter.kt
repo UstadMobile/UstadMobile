@@ -3,11 +3,10 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.core.view.SplashView
-import kotlinx.coroutines.Runnable
+import com.ustadmobile.core.view.SplashScreenView
 
-class SplashPresenter(context: Any, arguments: Map<String, String?>, view: SplashView, val impl: UstadMobileSystemImpl)
-    : UstadBaseController<SplashView>(context, arguments, view) {
+class SplashScreenPresenter(context: Any, arguments: Map<String, String?>, view: SplashScreenView, val impl: UstadMobileSystemImpl)
+    : UstadBaseController<SplashScreenView>(context, arguments, view) {
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
