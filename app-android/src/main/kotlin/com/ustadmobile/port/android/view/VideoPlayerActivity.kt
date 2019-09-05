@@ -67,8 +67,6 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
     private var subtitleSelection = 1
 
-    private var audioBuffer: ByteArray? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -179,14 +177,14 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
                 subtitles.setOnClickListener {
                     val builderSingle = AlertDialog.Builder(viewContext as Context)
-                    builderSingle.setTitle("Select Subtitle Language")
+                    builderSingle.setTitle(R.string.select_subtitle_video)
                     builderSingle.setSingleChoiceItems(arrayAdapter, subtitleSelection) { dialogInterface, position ->
                         subtitleSelection = position
                         val srtName = arrayAdapter.getItem(position)
                         setSubtitle(srtMap[srtName], mediaSource)
                         dialogInterface.cancel()
                     }
-                    builderSingle.setNegativeButton("cancel") { dialog, _ -> dialog.dismiss() }
+                    builderSingle.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
                     builderSingle.show()
 
                 }
@@ -292,11 +290,6 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                     or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     or SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         }
-
-    }
-
-    override fun loadUrl(videoPath: String) {
-
 
     }
 

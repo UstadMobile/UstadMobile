@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -138,7 +139,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     videoPath = result[0].containerEntryFile?.cefPath
                 }
 
-                srtLangList.add(0, "No Subtitles")
+                srtLangList.add(0, UstadMobileSystemImpl.instance.getString(MessageID.no_subtitle, context))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
             }

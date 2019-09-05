@@ -109,7 +109,8 @@
     <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
-
+    <string name="select_subtitle_video">Select Subtitle Language</string>
+    <string name="no_subtitle">No Subtitles</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
