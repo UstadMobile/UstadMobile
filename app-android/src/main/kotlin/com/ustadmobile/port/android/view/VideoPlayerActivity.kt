@@ -158,7 +158,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
             player!!.addListener(audioListener)
         }
 
-        if (videoPath != null && videoPath.isNotEmpty()) {
+        if (!videoPath.isNullOrEmpty()) {
             val uri = Uri.parse(videoPath)
             val mediaSource = buildMediaSource(uri)
 
