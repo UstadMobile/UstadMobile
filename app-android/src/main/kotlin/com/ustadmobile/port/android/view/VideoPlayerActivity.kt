@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.view.MenuItem
 import android.view.View
 import android.view.View.*
@@ -34,17 +32,13 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 import java.io.BufferedInputStream
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.nio.Buffer
 import java.util.*
 
 
@@ -78,9 +72,9 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         }
 
         if (savedInstanceState != null) {
-            playbackPosition = savedInstanceState.get("playback") as Long
-            playWhenReady = savedInstanceState.get("playWhenReady") as Boolean
-            currentWindow = savedInstanceState.get("currentWindow") as Int
+            playbackPosition = savedInstanceState.get(PLAYBACK) as Long
+            playWhenReady = savedInstanceState.get(PLAY_WHEN_READY) as Boolean
+            currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
         }
 
         playerView = findViewById(R.id.activity_video_player_view)
@@ -259,9 +253,9 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putLong("playback", playbackPosition)
-        outState.putBoolean("playWhenReady", playWhenReady)
-        outState.putInt("currentWindow", currentWindow)
+        outState.putLong(PLAYBACK, playbackPosition)
+        outState.putBoolean(PLAY_WHEN_READY, playWhenReady)
+        outState.putInt(CURRENT_WINDOW, currentWindow)
         super.onSaveInstanceState(outState)
     }
 
@@ -306,5 +300,16 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         return ExtractorMediaSource.Factory(
                 FileDataSourceFactory())
                 .createMediaSource(uri)
+    }
+
+    companion object {
+
+        const val PLAYBACK = "playback"
+
+        const val PLAY_WHEN_READY = "playWhenReady"
+
+        const val CURRENT_WINDOW = "currentWindow"
+
+
     }
 }

@@ -78,17 +78,12 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         var entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
         containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
 
-
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch {
             val contentEntry = contentEntryDao.getContentByUuidAsync(entryUuid)
             if (contentEntry != null)
                 view.setVideoInfo(contentEntry)
         }
 
-        GlobalScope.launch {
-            val result = contentEntryDao.getContentByUuidAsync(entryUuid)
-            view.setVideoInfo(result!!)
-        }
     }
 
     override fun onResume() {
