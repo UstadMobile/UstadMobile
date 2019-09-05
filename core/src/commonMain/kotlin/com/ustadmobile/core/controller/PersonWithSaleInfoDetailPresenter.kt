@@ -8,7 +8,9 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_UID
+import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -40,12 +42,21 @@ class PersonWithSaleInfoDetailPresenter(context: Any,
 			personUid = (arguments[ARG_WE_UID]!!.toLong())
 		}
 
+        val thisP = this
         //Populate view
         GlobalScope.launch {
-            val person = personDao.findByUidAsync(personUid)
-            if(person!= null) {
-                view.updatePersonOnView(person)
-            }
+
+            val personLive = personDao.findByUidLive(personUid)
+            view.runOnUiThread(Runnable {
+                personLive.observe(thisP, thisP::handlePersonLive)
+            })
+
+        }
+    }
+
+    private fun handlePersonLive(person:Person?){
+        if(person!= null) {
+            view.updatePersonOnView(person)
         }
     }
 }

@@ -58,14 +58,6 @@ class PersonWithSaleInfoListPresenter(context: Any,
             GlobalScope.launch(Main){
                 personLive.observe(thisP, thisP::observePerson)
             }
-
-
-//            val person = personDao.findByUidAsync(personUid)
-//            if(person!=null) {
-//                weGroupUid = person.mPersonGroupUid
-//                //Get assigned people
-//                getAndSetProvider(currentSortOrder)
-//            }
         }
     }
 

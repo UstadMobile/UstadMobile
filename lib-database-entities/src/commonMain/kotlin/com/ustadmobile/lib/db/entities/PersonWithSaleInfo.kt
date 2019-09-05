@@ -8,5 +8,6 @@ class PersonWithSaleInfo() : Person() {
 
     var totalSale : Long = 0
     var topProducts: String? = null
+    var personPictureUid: Long = 0
 
 }

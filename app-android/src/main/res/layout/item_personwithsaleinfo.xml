@@ -11,13 +11,13 @@
         android:id="@+id/item_person_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="8dp"
         android:text="Person Name"
-        android:textColor="@color/text_primary"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/text_primary"
         android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/item_person_picture"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -36,13 +36,13 @@
         android:id="@+id/item_person_top_products"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="8dp"
-        android:textColor="@color/text_secondary"
         android:text="@string/top_products"
+        android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toTopOf="@+id/item_sale_order_due_date"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/item_person_picture"
         app:layout_constraintTop_toBottomOf="@+id/item_person_name" />
 
     <TextView
@@ -94,4 +94,14 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/item_sale_order_due_date" />
+
+    <ImageView
+        android:id="@+id/item_person_picture"
+        android:layout_width="48dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_account_circle_black_32dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

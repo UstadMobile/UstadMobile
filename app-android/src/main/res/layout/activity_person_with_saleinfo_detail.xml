@@ -45,11 +45,9 @@
                     android:background="?attr/colorPrimary"
                     android:gravity="center_vertical|start"
                     android:minHeight="?attr/actionBarSize"
-                    android:textColor="@android:color/white"
                     android:textSize="@dimen/text_title"
                     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                     app:theme="@style/ToolbarDark" />
-
 
             </androidx.appcompat.widget.Toolbar>
 
@@ -58,11 +56,11 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/activity_person_with_saleinfo_detail_tabs"
-            style="@style/TabLayoutStyleHome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabTextColor="@color/primary_light"
-            android:background="?attr/colorPrimary"/>
+            />
+
+        <!--   style="@style/TabLayoutStyleHome"-->
 
     </com.google.android.material.appbar.AppBarLayout>
 

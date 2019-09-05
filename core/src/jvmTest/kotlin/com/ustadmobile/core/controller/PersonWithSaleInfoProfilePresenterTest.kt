@@ -37,7 +37,7 @@ class PersonWithSaleInfoProfilePresenterTest : AbstractSaleRelatedSetup() {
         }
 
         val presenter = PersonWithSaleInfoProfilePresenter(Any(),
-                presenterArgs, mockView, systemImplSpy)
+                presenterArgs, mockView)
         return Pair(mockView, presenter)
     }
 

@@ -350,11 +350,13 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query("SELECT " +
             "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
             "   'Product list goes here' AS topProducts, " +
+            "   PersonPicture.personPicturePersonUid as personPictureUid, " +
             "   Members.* " +
             " FROM PersonGroupMember " +
             "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
             "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
             "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+            "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
             " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
             "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit  OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
             " GROUP BY(Members.personUid)")
@@ -565,11 +567,13 @@ abstract class SaleDao : BaseDao<Sale> {
                 "SELECT " +
                         "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
                         "   'Product list goes here' AS topProducts, " +
+                        "   PersonPicture.personPicturePersonUid as personPictureUid, "+
                         "   Members.* " +
                         " FROM PersonGroupMember " +
                         "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
                         "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
                         "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+                        "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
                         " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
                         "   GROUP BY(Members.personUid) "
         const val MY_WE_SORT_BY_NAME_ASC = " ORDER BY Members.firstNames ASC"

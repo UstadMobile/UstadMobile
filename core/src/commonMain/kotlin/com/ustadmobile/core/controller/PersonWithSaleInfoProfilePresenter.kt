@@ -4,22 +4,22 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoProfileView
 import com.ustadmobile.lib.db.entities.Person
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
  * Presenter for UserProfile view
  */
 class PersonWithSaleInfoProfilePresenter(context: Any,
-                         arguments: Map<String, String>?,
-                         view: PersonWithSaleInfoProfileView,
-                         val systemImpl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
-                         private val repository: UmAppDatabase =
-                                 UmAccountManager.getRepositoryForActiveAccount(context) )
+                                         arguments: Map<String, String>?,
+                                         view: PersonWithSaleInfoProfileView,
+                                         repository: UmAppDatabase =
+                                                 UmAccountManager.getRepositoryForActiveAccount(context))
     : UstadBaseController<PersonWithSaleInfoProfileView>(context, arguments!!, view) {
 
 
@@ -30,11 +30,9 @@ class PersonWithSaleInfoProfilePresenter(context: Any,
 
 
     init {
-
         //Get provider Dao
         personDao = repository.personDao
         personPictureDao = repository.personPictureDao
-
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -45,25 +43,35 @@ class PersonWithSaleInfoProfilePresenter(context: Any,
             personUid = arguments.get(PersonWithSaleInfoDetailView.ARG_WE_UID)!!.toLong()
         }
 
+        val thisP=this
         if (personUid != 0L) {
 
             GlobalScope.launch {
-                thisPerson = personDao.findByUidAsync(personUid)
-
-                if (thisPerson != null) {
-                    view.updatePersonOnView(thisPerson!!)
-
-                    personPictureDao = repository.personPictureDao
-                    val personPicture =
-                            personPictureDao.findByPersonUidAsync(thisPerson!!.personUid)
-                    if (personPicture != null) {
-                        //TODO: Fix for KMP
-                        //view.updateImageOnView(personPictureDao!!.getAttachmentPath
-                        //(personPicture.personPictureUid))
-                    }
+                val personLive = personDao.findByUidLive(personUid)
+                GlobalScope.launch(Dispatchers.Main){
+                    personLive.observe(thisP, thisP::handlePersonLive)
                 }
             }
         }
+    }
+    private fun handlePersonLive(person:Person?){
+        if (person != null) {
+            view.runOnUiThread(Runnable {
+                view.updatePersonOnView(person)
+            })
 
+            thisPerson = person
+
+
+            GlobalScope.launch {
+                val personPicture =
+                        personPictureDao.findByPersonUidAsync(thisPerson!!.personUid)
+                if (personPicture != null) {
+                    //TODO: Fix for KMP
+                    //view.updateImageOnView(personPictureDao!!.getAttachmentPath
+                    //(personPicture.personPictureUid))
+                }
+            }
+        }
     }
 }
