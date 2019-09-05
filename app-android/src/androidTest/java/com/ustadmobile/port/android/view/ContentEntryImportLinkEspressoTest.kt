@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Intent
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -21,6 +22,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.H5PImportData
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.test.core.impl.ProgressIdlingResource
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -28,10 +30,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.not
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import java.io.IOException
 
 class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
@@ -51,6 +50,8 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
     var h5pServer = MockWebServer()
 
+    private var idleProgress: ProgressIdlingResource? = null
+
     @Before
     @Throws(IOException::class)
     fun setup() {
@@ -68,6 +69,11 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         createDb(serverDb)
     }
 
+    @After
+    fun close() {
+        IdlingRegistry.getInstance().unregister(idleProgress)
+    }
+
     @Test
     fun givenUserTypesInvalidUrl_thenShowUserErrorMessageWithInvalidUrl() {
 
@@ -76,10 +82,12 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         mActivityRule.launchActivity(intent)
         var activity = mActivityRule.activity
 
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText("hello"), ViewActions.closeSoftKeyboard())
-
-        Thread.sleep(500)
 
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
@@ -97,12 +105,13 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         mActivityRule.launchActivity(intent)
         var activity = mActivityRule.activity
 
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
 
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(mockWebServer.url("/noh5p").toString()), ViewActions.closeSoftKeyboard())
-
-        Thread.sleep(500)
 
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
@@ -120,6 +129,10 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         mActivityRule.launchActivity(intent)
         var activity = mActivityRule.activity
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
 
         var urlString = mockWebServer.url("/somehp5here").toString()
 
@@ -176,18 +189,19 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         intent.putExtra(ContentEntryImportLinkView.END_POINT_URL, h5pServer.url("").toString())
         mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
 
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
 
-        Thread.sleep(250)
 
         runBlocking {
 
-            delay(250)
             onView(withId(R.id.import_link_done)).perform(click())
-            delay(500)
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
         }
     }
@@ -202,14 +216,18 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
         mActivityRule.launchActivity(intent)
 
+        var activity = mActivityRule.activity
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
         var urlString = mockWebServer.url("/videohere").toString()
 
         onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
-
-        Thread.sleep(500)
 
         onView(withId(R.id.entry_import_link_titleInput)).check(matches(isDisplayed()))
 
@@ -232,14 +250,16 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         mActivityRule.launchActivity(intent)
         var activity = mActivityRule.activity
 
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
         var urlString = mockWebServer.url("/videohere").toString()
 
         onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
-
-        Thread.sleep(500)
 
         onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
 
