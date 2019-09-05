@@ -34,14 +34,17 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
+import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.nio.Buffer
 import java.util.*
 
 
@@ -101,9 +104,40 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         runOnUiThread {
             mPresenter.handleUpNavigation()
         }
-
-
     }
+
+    override fun onStart() {
+        super.onStart()
+        if (Util.SDK_INT > 23) {
+            initializePlayer()
+        }
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        hideSystemUi()
+        if (Util.SDK_INT <= 23 || player == null) {
+            initializePlayer()
+        }
+        mPresenter.onResume()
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        if (Util.SDK_INT <= 23) {
+            releasePlayer()
+            releaseAudio()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (Util.SDK_INT > 23) {
+            releasePlayer()
+            releaseAudio()
+        }
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -116,12 +150,6 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (Util.SDK_INT > 23) {
-            initializePlayer()
-        }
-    }
 
     private fun initializePlayer() {
         player = ExoPlayerFactory.newSimpleInstance(
@@ -129,55 +157,13 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                 DefaultTrackSelector(), DefaultLoadControl())
 
         playerView.player = player
-        if (mPresenter.audioInput != null) {
-
-            player!!.addListener(object : Player.DefaultEventListener() {
-                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                    if (playbackState == Player.STATE_READY && playWhenReady) {
-                        playbackPosition = player!!.contentPosition
-                        releaseAudio()
-                        playAudio(playbackPosition)
-                    } else {
-                        releaseAudio()
-                    }
-                    super.onPlayerStateChanged(playWhenReady, playbackState)
-                }
-            })
-        }
-
         player!!.playWhenReady = playWhenReady
         player!!.seekTo(currentWindow, playbackPosition)
-        setVideoParams(mPresenter.videoPath, mPresenter.audioInput, mPresenter.srtLangList, mPresenter.srtMap)
     }
 
     override fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
-        GlobalScope.launch {
-            if(audioPath != null && audioBuffer == null) {
-                val audioByteArrOut = ByteArrayOutputStream(audioPath.available())
-                audioPath.copyTo(audioByteArrOut)
-                audioByteArrOut.flush()
-                audioBuffer = audioByteArrOut.toByteArray()
-            }
-            runOnUiThread(Runnable{
-                setVideoParamsInternal(videoPath, audioPath, srtLangList, srtMap)
-            })
-        }
-    }
-
-    fun setVideoParamsInternal(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
         if (audioPath != null) {
-            player?.addListener(object : Player.DefaultEventListener() {
-                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                    if (playbackState == Player.STATE_READY && playWhenReady) {
-                        playbackPosition = player?.contentPosition!!
-                        releaseAudio()
-                        playAudio(playbackPosition)
-                    } else {
-                        releaseAudio()
-                    }
-                    super.onPlayerStateChanged(playWhenReady, playbackState)
-                }
-            })
+            player!!.addListener(audioListener)
         }
 
         if (videoPath != null && videoPath.isNotEmpty()) {
@@ -231,12 +217,9 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(viewContext)
         val appDatabase = UmAppDatabase.getInstance(viewContext)
 
-        val ht = HandlerThread("SubtitleThread")
-        ht.start()
-        Handler(ht.looper).post {
-
+        GlobalScope.launch {
             try {
-                val containerManager = ContainerManager(mPresenter.container!!, appDatabase, repoAppDatabase)
+                val containerManager = ContainerManager(mPresenter.container, appDatabase, repoAppDatabase)
 
                 val byteArrayDataSource = ByteArrayDataSource(
                         UMIOUtils.readStreamToString(containerManager.getInputStream(containerManager.getEntry(subtitleData)!!)).toByteArray())
@@ -246,20 +229,34 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                 val subTitleSource = SingleSampleMediaSource.Factory(factory).createMediaSource(Uri.EMPTY, subtitleFormat, C.TIME_UNSET)
 
                 val mergedSource = MergingMediaSource(mediaSource, subTitleSource)
-                player?.prepare(mergedSource, false, false)
+                runOnUiThread {
+                    player?.prepare(mergedSource, false, false)
+                }
             } catch (ignored: IOException) {
 
             }
+        }
+    }
 
+    var audioListener = object : Player.DefaultEventListener() {
+        override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            runOnUiThread {
+                if (playbackState == Player.STATE_READY && playWhenReady) {
+                    playbackPosition = player!!.contentPosition
+                    releaseAudio()
+                    playAudio(playbackPosition)
+                } else {
+                    releaseAudio()
+                }
+                super.onPlayerStateChanged(playWhenReady, playbackState)
+            }
 
         }
-
-
     }
 
 
     fun playAudio(fromMs: Long) {
-        audioPlayer = Codec2Player(ByteArrayInputStream(audioBuffer), fromMs)
+        audioPlayer = Codec2Player(BufferedInputStream(mPresenter.audioInput), fromMs)
         audioPlayer!!.play()
     }
 
@@ -268,30 +265,6 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         outState.putBoolean("playWhenReady", playWhenReady)
         outState.putInt("currentWindow", currentWindow)
         super.onSaveInstanceState(outState)
-    }
-
-    public override fun onResume() {
-        super.onResume()
-        hideSystemUi()
-        if (Util.SDK_INT <= 23 || player == null) {
-            initializePlayer()
-        }
-    }
-
-    public override fun onPause() {
-        super.onPause()
-        if (Util.SDK_INT <= 23) {
-            releasePlayer()
-            releaseAudio()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (Util.SDK_INT > 23) {
-            releasePlayer()
-            releaseAudio()
-        }
     }
 
     private fun releasePlayer() {
