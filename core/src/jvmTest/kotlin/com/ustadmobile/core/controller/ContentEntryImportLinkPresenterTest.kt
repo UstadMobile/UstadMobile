@@ -237,10 +237,10 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
             presenter.handleUrlTextUpdated(url)
             presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showProgress(true)
+            verify(mockView, timeout(1000)).showBaseProgressBar(true)
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
-            verify(mockView, timeout(1000)).showProgress(false)
+            verify(mockView, timeout(1000)).showBaseProgressBar(false)
             Assert.assertEquals("Func for h5p download called", 1, count)
 
 
@@ -265,9 +265,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
             presenter.handleUrlTextUpdated(url)
             presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showProgress(true)
+            verify(mockView, timeout(1000)).showBaseProgressBar(true)
             verify(mockView, timeout(1000)).showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
-            verify(mockView, timeout(1000)).showProgress(false)
+            verify(mockView, timeout(1000)).showBaseProgressBar(false)
         }
 
 
@@ -287,10 +287,10 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             presenter.handleUrlTextUpdated(url)
             presenter.handleTitleChanged("Video Title")
             presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showProgress(true)
+            verify(mockView, timeout(1000)).showBaseProgressBar(true)
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
-            verify(mockView, timeout(1000)).showProgress(false)
+            verify(mockView, timeout(1000)).showBaseProgressBar(false)
             Assert.assertEquals("Func for h5p not called", 0, count)
 
         }
@@ -321,8 +321,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             presenter.handleTitleChanged("Video Title")
             presenter.handleClickImport()
             verify(mockView, timeout(1000)).showHideErrorMessage(false)
-            verify(mockView, timeout(1000)).showProgress(true)
-            verify(mockView, timeout(1000)).showProgress(false)
+            verify(mockView, timeout(1000)).showBaseProgressBar(true)
+            verify(mockView, timeout(1000)).showBaseProgressBar(false)
             verify(mockView, timeout(1000)).enableDisableEditText(true)
             verify(mockView, timeout(1000)).showHideErrorMessage(true)
 
