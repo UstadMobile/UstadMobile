@@ -58,6 +58,13 @@ class DbProcessorJs : AbstractDbProcessor(){
                 "${dbTypeClassName.simpleName}$SUFFIX_JS_IMPL")
         val implTypeSpec = TypeSpec.classBuilder(implFileSpec.name)
                 .addDbJsImplPropsAndConstructor()
+                .superclass(dbTypeEl.asClassName())
+                .addFunction(FunSpec.builder("clearAllTables")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
+                .addProperty(PropertySpec.builder("master", BOOLEAN)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .initializer("false").build())
 
 
         val daoGetterMethods = methodsToImplement(dbTypeEl, dbType, processingEnv)
@@ -91,8 +98,9 @@ class DbProcessorJs : AbstractDbProcessor(){
         val daoImplFile = FileSpec.builder(daoTypeClassName.packageName,
                 "${daoTypeEl.simpleName}$SUFFIX_JS_IMPL")
 
-        val daoTypeSpec = TypeSpec.classBuilder(daoTypeClassName.simpleName)
+        val daoTypeSpec = TypeSpec.classBuilder("${daoTypeClassName.simpleName}$SUFFIX_JS_IMPL")
                 .addDbJsImplPropsAndConstructor()
+                .superclass(daoTypeEl.asClassName())
 
         methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv).forEach {daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
@@ -129,7 +137,7 @@ class DbProcessorJs : AbstractDbProcessor(){
 
                 overrideFunSpec.addCode(codeBlock)
             }else {
-                overrideFunSpec.addCode("throw %T(%S)\n", IllegalStateException::class,
+                overrideFunSpec.addCode("throw %T(%S)\n", ClassName("kotlin", "IllegalStateException"),
                         "Javascript can only access DAO functions which are suspended or return LiveData/DataSource")
             }
 
