@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingPolicies
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.intent.rule.IntentsTestRule
@@ -15,15 +17,19 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.test.core.impl.ProgressIdlingResource
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
+import com.ustadmobile.test.port.android.UmAndroidTestUtil.childAtPosition
 import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
 import junit.framework.Assert.assertTrue
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import org.hamcrest.Matchers
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
 
@@ -42,6 +48,8 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
 
     private lateinit var activity: XapiReportDetailActivity
 
+    private var idleProgress: ProgressIdlingResource? = null
+
 
     @Before
     fun setup() {
@@ -58,6 +66,11 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
         reportOptionsWithNoFilters = XapiReportOptions(XapiReportOptions.BAR_CHART, XapiReportOptions.SCORE, XapiReportOptions.MONTH, XapiReportOptions.CONTENT_ENTRY)
     }
 
+    @After
+    fun close() {
+        IdlingRegistry.getInstance().unregister(idleProgress)
+    }
+
 
     @Test
     fun givenDataWithNoFilters_whenActivityLaunches_thenDisplayDataWithChartAndList() {
@@ -67,14 +80,21 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
         mActivityRule.launchActivity(intent)
         activity = mActivityRule.activity
 
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
+        IdlingPolicies.setMasterPolicyTimeout(3, TimeUnit.MINUTES)
+        IdlingPolicies.setIdlingResourceTimeout(3, TimeUnit.MINUTES)
+
         Espresso.onView(ViewMatchers.withId(R.id.preview_chart_view)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
 
         val textView2 = Espresso.onView(
                 Matchers.allOf(ViewMatchers.withText("Preview"),
-                        UmAndroidTestUtil.childAtPosition(
-                                Matchers.allOf(ViewMatchers.withId(R.id.preview_toolbar),
-                                        UmAndroidTestUtil.childAtPosition(
-                                                ViewMatchers.withId(R.id.new_report_collapsing_toolbar),
+                        childAtPosition(
+                                Matchers.allOf(ViewMatchers.withId(R.id.um_toolbar),
+                                        childAtPosition(
+                                                ViewMatchers.withId(R.id.preview_toolbar),
                                                 0)),
                                 1),
                         ViewMatchers.isDisplayed()))
@@ -108,14 +128,18 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
         mActivityRule.launchActivity(intent)
         activity = mActivityRule.activity
 
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
         Espresso.onView(ViewMatchers.withId(R.id.preview_chart_view)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
 
         val textView2 = Espresso.onView(
                 Matchers.allOf(ViewMatchers.withText("Preview"),
-                        UmAndroidTestUtil.childAtPosition(
-                                Matchers.allOf(ViewMatchers.withId(R.id.preview_toolbar),
-                                        UmAndroidTestUtil.childAtPosition(
-                                                ViewMatchers.withId(R.id.new_report_collapsing_toolbar),
+                        childAtPosition(
+                                Matchers.allOf(ViewMatchers.withId(R.id.um_toolbar),
+                                        childAtPosition(
+                                                ViewMatchers.withId(R.id.preview_toolbar),
                                                 0)),
                                 1),
                         ViewMatchers.isDisplayed()))
@@ -139,7 +163,5 @@ class XapiReportDetailActivityEspressoTest : AbstractXapiReportOptionsTest() {
         assertTrue(activity.findViewById<RecyclerView>(R.id.preview_report_list).adapter!!.itemCount > 0)
 
     }
-
-
 
 }

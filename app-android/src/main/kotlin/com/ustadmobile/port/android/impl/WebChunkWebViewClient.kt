@@ -54,7 +54,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                     linkPatterns[Pattern.compile(link)] = linksMap[link]!!
                 }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             System.err.println("Error opening Zip File from path $pathToZip")
         }
 

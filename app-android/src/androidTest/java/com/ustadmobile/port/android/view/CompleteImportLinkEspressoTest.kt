@@ -32,7 +32,7 @@ import android.os.IBinder
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 
-
+// TODO tests are disabled until jenkins are create its own server
 class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
 
@@ -87,7 +87,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
     }
 
-    @Test
+    //@Test
     fun endToEnd() {
 
         var urlString = "https://h5p.org/h5p/embed/612"
@@ -106,7 +106,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
     }
 
-    @Test
+    //@Test
     fun videoEndToEnd() {
 
         var urlString = "https://www.ustadmobile.com/files/vso/cleansurroundings.mp4"

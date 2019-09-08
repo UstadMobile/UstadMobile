@@ -13,6 +13,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
@@ -21,9 +22,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.ContentEntryListActivity
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import org.hamcrest.Matchers
 import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.IsEqual.equalTo
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,9 +38,18 @@ class ContentEntryListEspressoTest {
     @get:Rule
     var mActivityRule = IntentsTestRule(ContentEntryListActivity::class.java, false, false)
 
+    @get:Rule
+    val mServiceRule = ServiceTestRule()
+
+    private var context = InstrumentationRegistry.getInstrumentation().context
+
     @Before
     fun before() {
         initDb()
+        mServiceRule.startService(Intent(context, NetworkManagerBleAndroidService::class.java))
+        mServiceRule.bindService(
+                Intent(context, NetworkManagerBleAndroidService::class.java))
+
         launchActivity()
     }
 
@@ -49,7 +61,7 @@ class ContentEntryListEspressoTest {
     }
 
     fun initDb() {
-        val context = InstrumentationRegistry.getInstrumentation().context
+        val context = context
         val db = UmAppDatabase.getInstance(context)
         db.clearAllTables()
         val repo = db// db.getUmRepository("https://localhost", "")
@@ -484,12 +496,13 @@ class ContentEntryListEspressoTest {
         intended(allOf(
                 hasComponent(ContentEntryListActivity::class.java.canonicalName),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
-                        equalTo(2L.toString())
+                        equalTo(2.toString())
                 )))
     }
 
     @Test
     fun givenContentEntryLeafPresent_whenEntryClicked_intentToViewDetailIsFired() {
+
         onView(Matchers.allOf<View>(isDisplayed(), withId(R.id.content_entry_list)))
                 .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
@@ -508,7 +521,7 @@ class ContentEntryListEspressoTest {
         intended(allOf(
                 hasComponent(ContentEntryDetailActivity::class.java.canonicalName),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
-                        equalTo(6L.toString())
+                        equalTo(6.toString())
                 )))
 
     }

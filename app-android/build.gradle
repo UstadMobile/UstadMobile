@@ -66,6 +66,7 @@ android {
     }
 
     testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
         unitTests {
             includeAndroidResources = true
             returnDefaultValues = true
@@ -99,6 +100,7 @@ android {
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
         buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
@@ -378,6 +380,7 @@ dependencies {
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
     androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
     androidTestImplementation "androidx.test:rules:$version_android_junit_runner"
+    androidTestUtil "androidx.test:orchestrator:$version_android_junit_runner"
     androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$version_android_espresso"

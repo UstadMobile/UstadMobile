@@ -126,9 +126,12 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         fileStatusIcon[LOCALLY_AVAILABLE_ICON] = R.drawable.ic_nearby_black_24px
         fileStatusIcon[LOCALLY_NOT_AVAILABLE_ICON] = R.drawable.ic_cloud_download_black_24dp
 
-        setUMToolbar(R.id.entry_detail_toolbar)
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        setProgressBar()
+        showBaseProgressBar(false)
 
         downloadProgress!!.setOnStopDownloadListener(this)
 

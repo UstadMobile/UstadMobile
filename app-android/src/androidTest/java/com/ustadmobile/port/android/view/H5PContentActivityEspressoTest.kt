@@ -28,14 +28,16 @@ class H5PContentActivityEspressoTest {
 
     private var repo: UmAppDatabase? = null
 
+    private var context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().context
+
     @JvmField
     @get:Rule
     val mActivityRule = IntentsTestRule(H5PContentActivity::class.java, false, false)
 
     @Before
     fun setup() {
-        db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
-        repo =  UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext()) //db?.getUmRepository("http://localhost/dummy/", "")
+        db = UmAppDatabase.getInstance(context)
+        repo =  UmAppDatabase.getInstance(context) //db?.getUmRepository("http://localhost/dummy/", "")
         db?.clearAllTables()
 
         h5PTmpFile = File.createTempFile("H5pContentActivityEspressoTest", "h5p-true-false.h5p")
@@ -56,7 +58,7 @@ class H5PContentActivityEspressoTest {
         intent.putExtra(UstadView.ARG_CONTAINER_UID, h5pContainer?.containerUid.toString())
         mActivityRule.launchActivity(intent)
 
-        TimeUnit.MILLISECONDS.sleep(180000)
+        TimeUnit.MILLISECONDS.sleep(5000)
         Assert.assertTrue(true)
 
 

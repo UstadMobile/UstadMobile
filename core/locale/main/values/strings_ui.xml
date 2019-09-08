@@ -109,7 +109,8 @@
     <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
-
+    <string name="select_subtitle_video">Select Subtitle Language</string>
+    <string name="no_subtitle">No Subtitles</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -163,7 +164,7 @@
     <string name="onboarding_offline_sharing">Share offline</string>
     <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
     <string name="location_permission_title">Location permissions required</string>
-    <string name="location_permission_message">This app requires location permissions to enable you to download and share content offline.</string>
+    <string name="location_permission_message">This app requires the location permission to enable high-speed offline sharing with nearby users.</string>
 
     <string name="download_delete_btn_label">Delete</string>
     <string name="download_continue_stacked_label">Continue download</string>
@@ -314,6 +315,7 @@
 
     <string name="done">Done</string>
     <string name="select_locations">Select Locations</string>
+    <string name="select_entries">Select Entries</string>
 
     <string name="xapi_options_general">General</string>
     <string name="xapi_options_report_title">Report Title</string>

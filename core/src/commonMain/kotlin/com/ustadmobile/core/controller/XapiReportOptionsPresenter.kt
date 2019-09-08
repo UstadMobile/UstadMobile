@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -51,6 +52,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
 
     private var reportOptions: XapiReportOptions? = null
 
+    private var activeJobCount = 0
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         impl = UstadMobileSystemImpl.instance
@@ -59,11 +62,11 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         val translatedYAxisList = yAxisList.map { impl.getString(it, context) }
         val translatedXAxisList = xAxisList.map { impl.getString(it, context) }
 
-        view.runOnUiThread(Runnable { view.fillVisualChartType(translatedGraphList) })
+        view.fillVisualChartType(translatedGraphList)
 
-        view.runOnUiThread(Runnable { view.fillYAxisData(translatedYAxisList) })
+        view.fillYAxisData(translatedYAxisList)
 
-        view.runOnUiThread(Runnable { view.fillXAxisAndSubGroupData(translatedXAxisList) })
+        view.fillXAxisAndSubGroupData(translatedXAxisList)
 
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments[XapiReportDetailView.ARG_REPORT_OPTIONS]
@@ -82,12 +85,14 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                 toDateTime = DateTime(reportOptions!!.toDate)
                 handleDateRangeSelected()
             }
-            view.runOnUiThread(Runnable {
-                view.updateChartTypeSelected(selectedChartType)
-                view.updateYAxisTypeSelected(selectedYaxis)
-                view.updateXAxisTypeSelected(selectedXAxis)
-                view.updateSubgroupTypeSelected(selectedSubGroup)
-            })
+
+            view.updateChartTypeSelected(selectedChartType)
+            view.updateYAxisTypeSelected(selectedYaxis)
+            view.updateXAxisTypeSelected(selectedXAxis)
+            view.updateSubgroupTypeSelected(selectedSubGroup)
+
+            activeJobCount += 1
+            view.showBaseProgressBar(activeJobCount > 0)
             GlobalScope.launch {
                 if (reportOptions!!.didFilterList.isNotEmpty()) {
                     val verbs = xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
@@ -101,6 +106,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                         view.updateWhoListSelected(personList)
                     })
                 }
+                activeJobCount -= 1
+                view.showBaseProgressBar(activeJobCount > 0)
             }
 
         }
@@ -136,16 +143,33 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     fun handleWhoDataTyped(name: String, uidList: List<Long>) {
+        activeJobCount += 1
+        view.showBaseProgressBar(activeJobCount > 0)
         GlobalScope.launch {
             val personsNames = personDao.getAllPersons("%$name%", uidList)
-            view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
+            println("calling who ui thread")
+            view.runOnUiThread(Runnable {
+                println("on who ui thread")
+                view.updateWhoDataAdapter(personsNames)
+                activeJobCount -= 1
+                view.showBaseProgressBar(activeJobCount > 0)
+            })
         }
     }
 
     fun handleDidDataTyped(verb: String, uidList: List<Long>) {
+        activeJobCount++
+        view.showBaseProgressBar(activeJobCount > 0)
         GlobalScope.launch {
             val verbs = xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
-            view.runOnUiThread(Runnable { view.updateDidDataAdapter(verbs) })
+            println("calling who did thread")
+            view.runOnUiThread(Runnable {
+                println("on who di thread")
+                view.updateDidDataAdapter(verbs)
+                activeJobCount--
+                view.showBaseProgressBar(activeJobCount > 0)
+            })
+
         }
     }
 

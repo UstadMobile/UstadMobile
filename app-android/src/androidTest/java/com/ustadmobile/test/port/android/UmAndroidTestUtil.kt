@@ -16,8 +16,6 @@ import org.hamcrest.TypeSafeMatcher
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 import java.util.regex.Pattern
 
@@ -51,13 +49,13 @@ object UmAndroidTestUtil {
 
         SystemClock.sleep(100)
         uiDevice.pressBack()
-        if(backTwice){
+        if (backTwice) {
             SystemClock.sleep(100)
             uiDevice.pressBack()
         }
     }
 
-    fun setAirplaneModeEnabled(enabled: Boolean){
+    fun setAirplaneModeEnabled(enabled: Boolean) {
         setAirplaneModeEnabled(enabled, true)
     }
 
@@ -70,10 +68,10 @@ object UmAndroidTestUtil {
         return false
     }
 
-    fun swipeScreenDown(){
+    fun swipeScreenDown() {
         val uiDevice = UiDevice.getInstance(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation())
         val deviceHeight = uiDevice.displayHeight
-        uiDevice.swipe(100, deviceHeight /2 , 0, 0, 10)
+        uiDevice.swipe(100, deviceHeight / 2, 0, 0, 10)
     }
 
 
@@ -119,17 +117,18 @@ object UmAndroidTestUtil {
         return targetFile
     }
 
-    fun readAllFilesInDirectory(directory: File, filemap: HashMap<File, String>) {
-        val sourceDirPath = Paths.get(directory.toURI())
+    fun readAllFilesInDirectory(sourceDirPath: File, directory: File, filemap: HashMap<File, String>) {
         try {
-            Files.walk(sourceDirPath).filter { path -> !Files.isDirectory(path) }
-                    .forEach { path ->
-                        val relativePath = sourceDirPath.relativize(path).toString()
-                                .replace(Pattern.quote("\\").toRegex(), "/")
-                        filemap[path.toFile()] = relativePath
-
-                    }
-        } catch (e: IOException) {
+            for (fileEntry in directory.listFiles()) {
+                if (fileEntry.isDirectory) {
+                    readAllFilesInDirectory(sourceDirPath, fileEntry, filemap)
+                } else {
+                    val relativePath = sourceDirPath.relativeTo(fileEntry).toString()
+                            .replace(Pattern.quote("\\").toRegex(), "/")
+                    filemap[fileEntry] = relativePath
+                }
+            }
+        }catch (e: Exception){
             e.printStackTrace()
         }
 
