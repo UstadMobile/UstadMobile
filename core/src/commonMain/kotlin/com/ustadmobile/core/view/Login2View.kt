@@ -31,7 +31,7 @@ interface Login2View : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "Login"
+        const val VIEW_NAME = "Login2"
         const val ARG_LOGIN_USERNAME = "LoginUsername"
     }
 
