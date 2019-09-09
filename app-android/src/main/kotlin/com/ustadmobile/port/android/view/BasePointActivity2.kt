@@ -101,7 +101,10 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
             ContentListView.VIEW_NAME to ContentListFragment::class.java,
             ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
             PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
-            BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java)
+            BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java,
+            SelectSaleProductView.VIEW_NAME to CatalogListFragment::class.java,
+            ComingSoonView.VIEW_NAME to ComingSoonFragment::class.java,
+            SaleListView.VIEW_NAME to SaleListFragment::class.java)
 
     /**
      * ViewPager set up in its own method for clarity.

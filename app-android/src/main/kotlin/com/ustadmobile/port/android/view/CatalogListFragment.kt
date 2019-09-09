@@ -24,7 +24,7 @@ import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 
 
-class CatalogListFragment : UstadBaseFragment(), SelectSaleProductView {
+class CatalogListFragment : UstadBaseFragment, SelectSaleProductView {
     override val viewContext: Any
         get() = context!!
 
@@ -173,6 +173,17 @@ class CatalogListFragment : UstadBaseFragment(), SelectSaleProductView {
                     Toast.LENGTH_SHORT
             ).show()
         })
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_list_black_24dp
+        title = R.string.catalog
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {

@@ -9,7 +9,7 @@ import androidx.annotation.Nullable
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.ComingSoonView
 
-class ComingSoonFragment : UstadBaseFragment(), ComingSoonView {
+class ComingSoonFragment : UstadBaseFragment, ComingSoonView {
     override val viewContext: Any
         get() = context!!
 
@@ -31,6 +31,17 @@ class ComingSoonFragment : UstadBaseFragment(), ComingSoonView {
 
         return rootContainer
 
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_assignment_black_24dp
+        title = R.string.inventory
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {

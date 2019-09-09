@@ -33,10 +33,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.Login2View.Companion.ARG_LOGIN_USERNAME
-import com.ustadmobile.core.view.UstadViewWithNotifications
-import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.impl.LastActive
 import com.ustadmobile.port.android.impl.UserFeedbackException
@@ -47,7 +44,7 @@ import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 import androidx.core.app.ActivityCompat
-import com.ustadmobile.core.view.UstadViewWithProgress
+import com.ustadmobile.core.view.*
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
@@ -366,7 +363,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
             {
                 args.put(ARG_LOGIN_USERNAME, currentUsername)
             }
-            impl.go(Login2View.VIEW_NAME, args, viewContext)
+            impl.go(LoginView.VIEW_NAME, args, viewContext)
         }
     }
 

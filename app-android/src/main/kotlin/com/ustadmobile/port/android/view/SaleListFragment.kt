@@ -24,7 +24,7 @@ import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class SaleListFragment : UstadBaseFragment(), SaleListView {
+class SaleListFragment : UstadBaseFragment, SaleListView {
     override val viewContext: Any
         get() = context!!
 
@@ -215,6 +215,17 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
                 Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
 
         mRecyclerView!!.adapter = recyclerAdapter
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_payment_note_cash_black_24dp
+        title = R.string.sales
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {
