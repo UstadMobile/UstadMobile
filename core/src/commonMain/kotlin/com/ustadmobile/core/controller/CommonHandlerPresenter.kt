@@ -16,7 +16,11 @@ abstract class CommonHandlerPresenter<V : UstadView> : UstadBaseController<V> {
      * Primary action on item.
      * @param arg   The argument to be passed to the presenter for primary action pressed.
      */
-    abstract fun handleCommonPressed(arg: Any, arg2: Any)
+    abstract fun handleCommonPressed(arg: Any, arg2:Any)
+
+    fun handleCommonPressed(arg: Any){
+        handleCommonPressed(arg, "")
+    }
 
     /**
      * Secondary action on item.

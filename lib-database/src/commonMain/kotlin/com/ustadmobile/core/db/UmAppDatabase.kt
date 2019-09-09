@@ -21,18 +21,27 @@ import com.ustadmobile.core.db.dao.SaleDao
 @Database(entities = [
     NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
-    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
-    ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
-    ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
-    Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
-    EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
-    LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
-    ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class,
-    VerbEntity::class, XObjectEntity::class, StatementEntity::class,
-    ContextXObjectStatementJoin::class, AgentEntity::class,
-    StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class
+    PersonCustomField::class, ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class,
+    ContentCategory::class, Language::class, LanguageVariant::class, Container::class,
+    ContainerEntry::class, ContainerEntryFile::class, VerbEntity::class, XObjectEntity::class,
+    StatementEntity::class, ContextXObjectStatementJoin::class, AgentEntity::class,
+    StateEntity::class, StateContentEntity::class,Clazz::class, ClazzMember::class,
+    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class,PersonField::class,
+    PersonCustomFieldValue::class,PersonDetailPresenterField::class,SelQuestion::class,
+    SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
+    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
+    Schedule::class, DateRange::class, UMCalendar::class,
+    ClazzActivity::class, ClazzActivityChange::class,
+    ContentEntry::class, ContentEntryContentCategoryJoin::class,
+    ContentEntryParentChildJoin::class,
+    Location::class,
+    AccessToken::class, PersonAuth::class, Role::class, EntityRole::class,
+    PersonGroup::class, PersonGroupMember::class, LocationAncestorJoin::class,
+    SelQuestionOption::class, ScheduledCheck::class,
+    PersonLocationJoin::class, PersonPicture::class, ScrapeQueueItem::class, ScrapeRun::class,
+    ContentEntryStatus::class, ConnectivityStatus::class,
+    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
+    XLangMapEntry::class,SyncNode::class
 
     //Goldozi :
     ,Sale::class, SaleItem::class, SalePayment::class,
@@ -44,6 +53,8 @@ import com.ustadmobile.core.db.dao.SaleDao
     DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class
 
 
+
+    //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
     ], version = 26)
 
@@ -54,6 +65,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     override val master: Boolean
         get() = false
+
+    //end of Goldozi bit.
+
+//    fun validateAuth(personUid: Long, auth: String): Boolean {
+//        return if (personUid == 0L) true else accessTokenDao.isValidToken(personUid, auth)//Anonymous or guest access
+//    }
 
     abstract val networkNodeDao: NetworkNodeDao
 
@@ -141,8 +158,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val agentDao: AgentDao
 
-    //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
-
     //Goldozi bit:
 
     abstract val saleDao: SaleDao
@@ -170,16 +185,33 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val dashboardTagDao:DashboardTagDao
 
     abstract val dashboardEntryTagDao:DashboardEntryTagDao
+    //End of Goldozi
 
+    abstract val auditLogDao : AuditLogDao
+    abstract val clazzActivityChangeDao : ClazzActivityChangeDao
+    abstract val clazzActivityDao : ClazzActivityDao
+    abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
+    abstract val clazzLogDao : ClazzLogDao
+    abstract val customFieldDao: CustomFieldDao
+    abstract val customFieldValueDao : CustomFieldValueDao
+    abstract val customFieldValueOptionDao : CustomFieldValueOptionDao
+    abstract val dateRangeDao : DateRangeDao
+    abstract val feedEntryDao : FeedEntryDao
+    abstract val personDetailPresenterFieldDao : PersonDetailPresenterFieldDao
+    abstract val scheduleDao : ScheduleDao
+    abstract val scheduledCheckDao : ScheduledCheckDao
+    abstract val selQuestionDao : SelQuestionDao
+    abstract val selQuestionOptionDao : SelQuestionOptionDao
+    abstract val selQuestionResponseDao : SelQuestionResponseDao
+    abstract val selQuestionResponseNominationDao : SelQuestionResponseNominationDao
+    abstract val selQuestionSetDao : SelQuestionSetDao
+    abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
+    abstract val umCalendarDao : UMCalendarDao
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
-    //end of Goldozi bit.
-
+    //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 
-    fun validateAuth(personUid: Long, auth: String): Boolean {
-        return if (personUid == 0L) true else accessTokenDao.isValidToken(personUid, auth)//Anonymous or guest access
-    }
     companion object {
 
         @Volatile

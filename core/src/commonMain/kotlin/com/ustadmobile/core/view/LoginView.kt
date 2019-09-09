@@ -31,6 +31,7 @@ interface LoginView : UstadView {
 
         const val VIEW_NAME = "Login"
         const val ARG_LOGIN_USERNAME = "LoginUsername"
+        val ARG_STARTSYNCING = "argStatSync"
     }
 
 }

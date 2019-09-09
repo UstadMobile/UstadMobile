@@ -449,6 +449,13 @@ dependencies {
 
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+
+    //Range seekbar by Crystal
+    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
+
+    //Bottom Navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
+
 }
 
 task sourceJar(type: Jar) {

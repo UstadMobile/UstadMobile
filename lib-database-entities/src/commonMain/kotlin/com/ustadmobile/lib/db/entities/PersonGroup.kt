@@ -9,7 +9,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 
 @Entity
 @SyncableEntity(tableId = 43)
-class PersonGroup() {
+open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
     var groupUid: Long = 0
@@ -25,7 +25,7 @@ class PersonGroup() {
 
     var groupName: String? = null
 
-
+    var groupActive : Boolean = true
     /**
      * If this was created as a group for one person, this is the uid for that Person object.
      * Single member groups are used to avoid queries having to look things up from another table.

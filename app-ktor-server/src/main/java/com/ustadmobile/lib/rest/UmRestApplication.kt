@@ -5,8 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseCallback
-import com.ustadmobile.door.DoorSqlDatabase
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.util.encryptPassword
@@ -65,4 +63,9 @@ fun Application.umRestApplication() {
         LoginRoute(_restApplicationDb)
         UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
     }
+
+
+    //IRC specific:
+    val loadData = LoadInitialData(_restApplicationDb)
+    loadData.loadData()
 }

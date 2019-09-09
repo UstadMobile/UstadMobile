@@ -125,7 +125,7 @@ class UserProfilePresenter(context: Any,
         val personPictureDao = repository.personPictureDao
         val personPicture = PersonPicture()
         personPicture.personPicturePersonUid = loggedInPersonUid
-        personPicture.picTimestamp = DateTime.nowUnixLong().toInt() //Check this TODO
+        personPicture.picTimestamp = DateTime.nowUnixLong() //Check this TODO
 
         val personDao = repository.personDao
 

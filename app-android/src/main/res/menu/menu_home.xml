@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_action_share"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:title="@string/share_application"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_action_bulk_upload_master"
+        android:icon="@drawable/ic_file_upload_white_24dp"
+        android:title="@string/settings"
+        android:visible="false"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item
+        android:visible="false"
+        android:icon="@drawable/ic_create_new_folder_white_24dp"
+        android:id="@+id/menu_action_create_new_content"
+        android:title="@string/content_editor_create_new"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item
+        android:visible="false"
+        android:id="@+id/menu_action_clear_history"
+        android:title="@string/clear_history"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_action_send_feedback"
+        android:title="@string/send_feedback"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/menu_action_logout"
+        android:icon="@drawable/ic_dropout_bcd4_24dp"
+        android:title="@string/logout"
+        android:visible="false"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/done"
+        android:visible="false"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_action_search"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:title="@string/search"
+        android:visible="true"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+
+    <item android:id="@+id/menu_action_about"
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/about"
+        android:visible="true"
+        />
+
+    <item android:id="@+id/menu_action_sync"
+        android:icon="@drawable/ic_sync_black_24dp"
+        android:title="@string/force_sync"
+        android:textColor="@color/enable_disable_text"
+        android:visible="true"/>
+
+</menu>

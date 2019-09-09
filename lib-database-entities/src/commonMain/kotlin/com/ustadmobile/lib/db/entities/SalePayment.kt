@@ -8,7 +8,7 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 
 
-@SyncableEntity(tableId = 65)
+@SyncableEntity(tableId = 76)
 @Entity
 class SalePayment() {
 

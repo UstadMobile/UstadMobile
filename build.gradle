@@ -150,11 +150,13 @@ ext {
     version_crystalrangeseekbar="1.1.3"
     version_android_ahbottomnavigation="2.1.0"
 
+
     //Goldozi specific
     version_android_floating_text_button = "0.0.4"
-    version_mpandroidchart = "3.1.0"
+    version_mpandroidchart = "v3.0.3"
     version_gcacace_signaturepad = "1.2.1"
     version_androidsvg="1.4"
+
 }
 
 /*

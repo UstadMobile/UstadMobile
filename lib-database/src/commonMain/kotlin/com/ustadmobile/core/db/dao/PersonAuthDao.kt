@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonDao.Companion.SESSION_LENGTH
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -83,42 +82,41 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
     @Insert
     abstract fun insertAccessToken(token: AccessToken)
 
-    protected fun onSuccessCreateAccessToken(personUid: Long, username: String,
-                                             callback: UmCallback<UmAccount>) {
+    protected suspend fun onSuccessCreateAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
         insertAccessToken(accessToken)
-        callback.onSuccess(UmAccount(personUid, username, accessToken.token, null))
+        return (UmAccount(personUid, username, accessToken.token, null))
     }
 
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    fun authenticate(username: String, loggedInPersonUid: Long, oldPassword: String,
-                     resetCallback: UmCallback<UmAccount>) {
+    suspend fun authenticate(username: String, loggedInPersonUid: Long, oldPassword: String) :
+            UmAccount? {
         //Authenticate with current password first.
         val personAuthResult = findByUid(loggedInPersonUid)
         if (personAuthResult == null) {
-            resetCallback.onFailure(null)
+            return null
         } else {
             val passwordHash = personAuthResult.passwordHash
 
             if (passwordHash!!.startsWith(PLAIN_PASS_PREFIX) &&
                     passwordHash.substring(2) == oldPassword) {
                 println("ok1")
-                onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback)
+                return onSuccessCreateAccessToken(loggedInPersonUid, username)
 
             } else if (passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) &&
                     authenticateThisEncryptedPassword(oldPassword,
                             passwordHash.substring(2))) {
                 println("ok2")
-                onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback)
+                return onSuccessCreateAccessToken(loggedInPersonUid, username)
             } else if (authenticateThisEncryptedPassword(oldPassword,
                             passwordHash)) {
                 println("ok3")
-                onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback)
+                return onSuccessCreateAccessToken(loggedInPersonUid, username)
             } else {
                 println("nope1")
-                resetCallback.onSuccess(null)
+                return null
             }
         }
 

@@ -6,12 +6,11 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
-class XObjectEntity {
+class XObjectEntity() {
 
     @PrimaryKey(autoGenerate = true)
     var xObjectUid: Long = 0
@@ -37,11 +36,8 @@ class XObjectEntity {
     @LastChangedBy
     var xObjectLastChangedBy: Int = 0
 
-    constructor() {
-
-    }
-
-    constructor(id: String?, objectType: String?, type: String?, interactionType: String?, responsePattern: String?, objectContentEntryUid: Long = 0) {
+    constructor(id: String?, objectType: String?, type: String?, interactionType: String?,
+                responsePattern: String?, objectContentEntryUid: Long = 0): this() {
         this.objectId = id
         this.objectType = objectType
         this.definitionType = type

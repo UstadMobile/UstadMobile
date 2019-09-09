@@ -9,15 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 
-class ContentEntryDetailLanguageAdapter(
-        private val data: List<ContentEntryRelatedEntryJoinWithLanguage>,
-        val listener: AdapterViewListener,
-        private val entryUid: Long)
+class ContentEntryDetailLanguageAdapter(private val data: List<ContentEntryRelatedEntryJoinWithLanguage>,
+                                        val listener: AdapterViewListener, private val entryUid: Long)
     : RecyclerView.Adapter<ContentEntryDetailLanguageAdapter.LangHolder>() {
 
     interface AdapterViewListener {
         fun selectContentEntryOfLanguage(contentEntryUid: Long)
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LangHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_entry_lang, parent, false)

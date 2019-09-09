@@ -39,4 +39,14 @@ object AppConfig {
 
     const val KEY_SHOW_REGISTER = "app.register_before_open"
 
+    const val BULK_UPLOAD_VISIBILITY = "bulk_upload_visibility"
+
+    const val NAVIGATION_ITEMS = "navigation_items"
+
+    const val ACTION_CLEAR_HISTORY_VISIBILITY = "action_clear_history_visibility"
+
+    const val ACTION_SHARE_APP_VISIBILITY = "action_share_app_visibility"
+
+
+
 }

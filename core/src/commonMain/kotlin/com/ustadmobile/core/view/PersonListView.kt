@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.Person
 
@@ -9,7 +10,7 @@ import com.ustadmobile.lib.db.entities.Person
 
 interface PersonListView : UstadView {
 
-    fun setProvider(provider: UmProvider<Person>)
+    fun setProvider(provider: DataSource.Factory<Int, Person>)
 
     companion object {
 

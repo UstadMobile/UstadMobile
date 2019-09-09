@@ -7,6 +7,7 @@ import com.soywiz.klock.Month
 import com.soywiz.klock.Year
 
 
+
 /**
  * Basic calendar related utility methods. These are isolated in their own class as Calendar is not
  * supported on the GWT client.
@@ -81,16 +82,74 @@ object UMCalendarUtil {
     }
 
     /**
-    * Gets date in long plus/minus the days specified from today.
-    *
-    * @param days  The days (positive or negative) off from today
-    * @return  The date in long
-    */
+
+     * Gets date in long plus/minus the days specified from today.
+     *
+     * @param days  The days (positive or negative) off from today
+     * @return  The date in long
+     */
     public fun getDateInMilliPlusDays(nDays: Int):Long {
         val now = DateTime.now()
         val duration = nDays.days
         val then = now + duration
         return then.unixMillisLong
+    }
+
+    /**
+     *
+     * @param dateString
+     * @param format
+     * @param locale
+     * @return
+     */
+    fun getLongDateFromStringAndFormat(dateString: String,
+                                       format: String,
+                                       locale: Any?): Long {
+
+        try{
+            val formatted : DateFormat = DateFormat(format)
+            val date = formatted.parse(dateString)
+            return date.local.unixMillis.toLong()
+        }catch (e:DateException){
+            return 0
+        }
+
+    }
+
+
+    /**
+     * Get date in long w.r.t plus/minus the days specified from a specified date
+     * @param dateLong  The specified date (in long) where the days to be calculated.
+     * @param days  The days (positive or negative) off from the dateLong specified
+     * @return  The date in long
+     */
+    fun getDateInMilliPlusDaysRelativeTo(dateLong: Long, days: Int): Long {
+        // get a calendar instance, which defaults to "now"
+        val givenCal = DateTime(dateLong)
+        val duration = days.days
+        val then = givenCal + duration
+        return then.unixMillisLong
+
+    }
+
+    /**
+     * Checks if a given long date is today or not.
+     *
+     * @param date  The Date object which we want to check if its a today date.
+     *
+     * @return  true if given date is today, false if it isn't
+     */
+    fun isToday(dateLong: Long): Boolean {
+
+        val givenCal = DateTime(dateLong)
+        val todayCal = DateTime.now()
+        return (givenCal.dayOfYear == todayCal.dayOfYear && givenCal.dayOfMonth == todayCal.dayOfMonth
+                && givenCal.dayOfWeekInt == todayCal.dayOfWeekInt)
+
+    }
+    fun getDateLongFromYMD(year:Int, month:Int, day:Int):Long{
+        val cal = DateTime(year=year, month = month, day = day)
+        return cal.unixMillisLong
     }
 
     /**
@@ -106,8 +165,62 @@ object UMCalendarUtil {
         return cal.format(format)
     }
 
+    fun showTimeForGivenLongDate(thisDate:Long):String{
+        val format: DateFormat = DateFormat("HH:mmm")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    fun zeroOutTimeForGivenLongDate(thisDate: Long):Long{
+        val cal = DateTime(thisDate)
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth, hour = 0,
+                minute = 0, second = 0, milliseconds = 0)
+        return ntcal.unixMillisLong
+    }
+
+    fun getPrettyTimeFromLong(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("HH:mm")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    /**
+     * Gets pretty looking date (eg: Mon, 23/Jan/1989) from a long date specified.
+     *
+     * @param thisDate The date in long for which we want a pretty date
+     * @return  The pretty date for the long date specified as string.
+     */
+    fun getPrettyDateFromLong(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("EEEE, dd/MMMM/yyyy")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+
+    /**
+     * Gets simple day only (eg: Mon) from a long date specified.
+     *
+     * @param thisDate  The date in long for which we want the day for.
+     * @return  The day for the long date specified as string.
+     */
+    fun getSimpleDayFromLongDate(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("EEEE")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
     fun getPrettyDateSuperSimpleFromLong(thisDate: Long, locale: Any?):String{
         return getPrettyDateSuperSimpleFromLong(thisDate)
+    }
+
+    fun getPrettyDateSimpleWithoutYearFromLong(thisDate: Long, locale: Any?): String {
+        val format: DateFormat = DateFormat("dd/MMM")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
+    fun getPrettySuperSimpleDateSimpleWithoutYearFromLong(thisDate: Long): String {
+        return getPrettyDateSimpleWithoutYearFromLong(thisDate, null)
     }
 
     /***
@@ -120,7 +233,7 @@ object UMCalendarUtil {
         return getPrettyDateSuperSimpleFromLong(thisDate)
     }
 
-    fun convertYYYYMMddToLong(date:String):Long{
+    fun convertYYYYMMddToLong(date:String):Long {
         val format = DateFormat("yyyy-MM-dd")
         val date = format.parse(date)
         return date.local.unixMillis.toLong()
@@ -128,6 +241,8 @@ object UMCalendarUtil {
 
     fun setDate(year: Int, month: Int, dayOfMonth: Int): DateTime {
         return DateTime(year, month, dayOfMonth)
+
     }
+
 
 }

@@ -28,7 +28,7 @@ class PersonPicture() {
 
     var fileSize: Int = 0
 
-    var picTimestamp: Int = 0
+    var picTimestamp: Long = 0
 
     var mimeType: String? = null
 

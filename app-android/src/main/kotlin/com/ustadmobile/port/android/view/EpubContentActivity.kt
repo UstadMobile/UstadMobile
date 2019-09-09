@@ -1,7 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -24,7 +27,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.EpubContentView
 import java.util.*
 
-class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener, EpubContentPageFragment.TapToHideToolbarHandler {
+class EpubContentActivity : ZippedContentActivity(), EpubContentView,
+        AdapterView.OnItemClickListener, TocListView.OnItemClickListener,
+        EpubContentPageFragment.TapToHideToolbarHandler {
 
 
     /** The ViewPager used to swipe between epub pages  */

@@ -32,7 +32,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-
 /**
  * A fragment representing a list of Items.
  *
@@ -44,7 +43,7 @@ import kotlinx.coroutines.launch
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
+class ContentEntryListFragment : UstadBaseFragment, ContentEntryListFragmentView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor,
         ContentEntryListRecyclerViewAdapter.EmptyStateListener {
 
@@ -250,6 +249,17 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         super.onDestroy()
         if (recyclerAdapter != null)
             recyclerAdapter!!.removeListeners()
+    }
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_collections_bookmark_black_24dp
+        title = R.string.bottomnav_content_title
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
     }
 
     companion object {

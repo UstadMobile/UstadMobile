@@ -145,7 +145,7 @@ class SelectMultiplePeopleFragment : UstadDialogFragment(),
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, Person>) {
-        val mAdapter = PersonListReturnSelectedRecyclerAdapter(DIFF_CALLBACK, context!!,
+        val mAdapter = PersonListReturnSelectedSimpleRecyclerAdapter(DIFF_CALLBACK, context!!,
                 this, mPresenter!!)
         //A warning is expected
         val data = LivePagedListBuilder(factory, 20).build()

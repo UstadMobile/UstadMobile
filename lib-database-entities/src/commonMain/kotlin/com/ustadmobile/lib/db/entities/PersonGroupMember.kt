@@ -16,6 +16,9 @@ class PersonGroupMember() {
     @PrimaryKey(autoGenerate = true)
     var groupMemberUid: Long = 0
 
+
+    var groupMemberActive: Boolean = false
+
     @ColumnInfo(index = true)
     var groupMemberPersonUid: Long = 0
 

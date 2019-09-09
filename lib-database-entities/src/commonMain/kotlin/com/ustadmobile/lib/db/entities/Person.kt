@@ -6,7 +6,6 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 
 /**
@@ -44,6 +43,16 @@ open class Person() {
     //Added speicifically for Goldozi : mPersonGroupUid is this person's managing group .
     //In Goldozi's case, a Lead Entrepreneur will be managing Women Entrepreneurs group.
     var mPersonGroupUid : Long = 0L
+
+    var fatherName: String? = null
+
+    var fatherNumber: String? = null
+
+    var motherName: String? = null
+
+    var motherNum: String? = null
+
+    var dateOfBirth: Long = 0
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

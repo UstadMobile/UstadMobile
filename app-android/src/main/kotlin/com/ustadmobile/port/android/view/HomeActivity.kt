@@ -37,7 +37,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
+        ViewPager.OnPageChangeListener {
 
     private lateinit var presenter: HomePresenter
 

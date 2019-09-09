@@ -4,9 +4,9 @@
     <!-- disable state. -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
-            <solid android:color="#666666"/>
+            <solid android:color="@color/color_gray"/>
             <corners android:radius="30dp"/>
-            <stroke android:color="#666666" android:width="2dp"/>
+            <stroke android:color="@color/color_gray" android:width="2dp"/>
         </shape>
     </item>
 
@@ -14,9 +14,9 @@
     <!--released state. -->
     <item android:state_pressed="false">
         <shape android:shape="rectangle">
-            <solid android:color="#666666"/>
+            <solid android:color="@color/color_gray"/>
             <corners android:radius="30dp"/>
-            <stroke android:color="#666666" android:width="2dp"/>
+            <stroke android:color="@color/color_gray" android:width="2dp"/>
         </shape>
     </item>
 

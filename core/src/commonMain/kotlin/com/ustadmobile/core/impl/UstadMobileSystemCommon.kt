@@ -1,10 +1,13 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.controller.AddScheduleDialogPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.PersonWithSaleInfoListView
 import kotlinx.io.InputStream
@@ -425,6 +428,11 @@ open abstract class UstadMobileSystemCommon {
 
     protected fun getContentDirName(context: Any): String? {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
+    }
+
+    fun scheduleChecks(context: Any) {
+        //UmAppDatabase.getInstance(context).scheduledCheckDao.createPendingScheduledChecks()
+        AddScheduleDialogPresenter.createPendingScheduledChecks(UmAppDatabase.getInstance(context).scheduledCheckDao)
     }
 
 

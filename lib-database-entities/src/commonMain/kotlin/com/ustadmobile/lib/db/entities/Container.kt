@@ -9,7 +9,8 @@ import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 
-@Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
+@Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
+        value = ["containerContentEntryUid", "lastModified"])))
 @SyncableEntity(tableId = 51)
 open class Container() {
 

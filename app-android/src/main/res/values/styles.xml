@@ -12,6 +12,15 @@
         <item name="android:dialogTheme">@style/CustomDialog</item>
     </style>
 
+    <!-- This is for the Tabs in TabLayout-->
+    <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/primary_light</item>
+        <item name="tabSelectedTextColor">@color/primary_text</item>
+    </style>
+
+    <style name="MyButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/text_secondary</item>
+    </style>
 
     <style name="ToolbarDark" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:background">@color/primary</item>
@@ -80,7 +89,7 @@
         <item name="android:windowIsFloating">false</item>
 
         <!-- This is important! Don't forget to set window background -->
-        <item name="android:windowBackground">@color/icons</item>
+        <item name="android:windowBackground">@color/background_light</item>
         <item name="android:popupMenuStyle">@style/PopupMenu</item>
         <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
     </style>
@@ -175,6 +184,15 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@color/icons</item>
+    </style>
+
+
+    <style name="CustomDatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>
+    </style>
+
+    <style name="MyDatePickerStyle" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:datePickerMode">spinner</item>
     </style>
 
 </resources>

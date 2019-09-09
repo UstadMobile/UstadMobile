@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import androidx.annotation.Nullable
+import androidx.paging.DataSource
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.view.PersonListView
@@ -16,6 +17,10 @@ import com.ustadmobile.lib.db.entities.Person
  */
 
 class PersonListFragment : UstadBaseFragment(), PersonListView {
+    override fun setProvider(provider: DataSource.Factory<Int, Person>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override val viewContext: Any
         get() = context!!
 
@@ -29,9 +34,6 @@ class PersonListFragment : UstadBaseFragment(), PersonListView {
         return rootView
     }
 
-    override fun setProvider(provider: UmProvider<Person>) {
-
-    }
 
 
 }

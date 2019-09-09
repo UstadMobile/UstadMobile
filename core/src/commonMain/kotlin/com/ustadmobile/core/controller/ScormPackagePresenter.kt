@@ -1,21 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.contentformats.scorm.ScormManifest
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.dumpException
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ScormPackageView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadViewWithNotifications
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
-import kotlinx.io.IOException
-import kotlinx.io.StringReader
-import org.kmp.io.KMPPullParserException
-import org.kmp.io.KMPXmlParser
 
 /**
  *

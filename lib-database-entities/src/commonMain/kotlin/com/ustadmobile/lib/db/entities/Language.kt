@@ -8,7 +8,6 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Language.Companion.TABLE_ID
 
-
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 class Language() {

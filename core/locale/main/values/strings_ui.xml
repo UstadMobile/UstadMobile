@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">Goldozi</string>
+    <string name='downloaded' value='81'>Downloaded</string>
     <string name='dir'>ltr</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
@@ -14,7 +16,6 @@
     <string name='authenticating'>Authenticating</string>
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
-    <string name="downloaded" value="81">Downloaded</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='ok'>OK</string>
@@ -110,7 +111,8 @@
     <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
-
+    <string name="select_subtitle_video">Select Subtitle Language</string>
+    <string name="no_subtitle">No Subtitles</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -369,6 +371,15 @@
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
+
+    <string name="courses">Courses</string>
+    <string name="content">Content</string>
+
+    <string name="bottomnav_feed_title">Feed</string>
+    <string name="bottomnav_classes_title">Classes</string>
+    <string name="bottomnav_people_title">People</string>
+    <string name="bottomnav_reports_title">Reports</string>
+    <string name="bottomnav_content_title">Content</string>
 
 
 </resources>

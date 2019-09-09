@@ -22,10 +22,10 @@ import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
 import java.io.File
 import java.util.*
-import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
-import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
 
 /**
  * Fragment responsible for editing entry details

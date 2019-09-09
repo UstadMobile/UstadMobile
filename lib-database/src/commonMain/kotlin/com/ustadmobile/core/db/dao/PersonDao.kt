@@ -20,11 +20,12 @@ import kotlin.js.JsName
 
 
 @UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
-        + ENTITY_LEVEL_PERMISSION_CONDITION2, updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
+        + ENTITY_LEVEL_PERMISSION_CONDITION2,
+        updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
         + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
-abstract class PersonDao : BaseDao<Person> {
+abstract class  PersonDao : BaseDao<Person> {
 
     class PersonUidAndPasswordHash {
         var passwordHash: String = ""
@@ -72,8 +73,8 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-  /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun incrementPrimaryKey()*/
+    /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
+      protected abstract fun incrementPrimaryKey()*/
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
         var accessToken = AccessToken(personUid,
@@ -125,7 +126,7 @@ abstract class PersonDao : BaseDao<Person> {
      */
     @Query("SELECT 1 FROM Person WHERE Person.personUid = :personUid AND (" +
             ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
-    abstract fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
+    abstract fun personHasPermission(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
 
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
@@ -138,6 +139,9 @@ abstract class PersonDao : BaseDao<Person> {
 
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long
+
+    @Query("SELECT * FROM Clazz")
+    abstract fun findAllClazzes(): List<Clazz>
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
@@ -166,11 +170,77 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
 
 
+    @Query("SELECT * FROM Person WHERE admin = 1")
+    abstract fun findAllAdminsAsList(): List<Person>
+
+
+    @Query("SELECT Person.* , (0) AS clazzUid, " +
+            " (0) AS attendancePercentage, " +
+            " '' AS clazzName, " +
+            " (0) AS clazzMemberRole, " +
+            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+            " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+            " DESC LIMIT 1) AS personPictureUid, " +
+            " CASE WHEN EXISTS " +
+            " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
+            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND PersonGroupMember.groupMemberActive = 1) " +
+            "   THEN 1 " +
+            "   ELSE 0 " +
+            " END AS enrolled " +
+            "  FROM Person WHERE Person.active = 1 ORDER BY Person.firstNames ASC")
+    abstract fun findAllPeopleWithEnrollmentInGroup(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
+
     @Insert
     abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long
 
     @Insert
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
+
+
+    @Query(QUERY_FIND_ALL)
+    abstract fun findAllPeopleWithEnrollment(): DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query(QUERY_FIND_ALL + QUERY_SEARCH_BIT)
+    abstract fun findAllPeopleWithEnrollmentBySearch(searchQuery: String):
+            DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
+    abstract fun findAllPeopleWithEnrollmentSortNameDesc(): DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
+    abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
+
+    @Query("SELECT * FROM Person where active = 1")
+    abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
+
+    /**
+     * Creates actual person and assigns it to a group for permissions' sake. Use this
+     * instead of direct insert.
+     *
+     * @param person    The person entity
+     * @param callback  The callback.
+     */
+    suspend fun createPersonAsync(person: Person):Long  {
+        val personUid = insertAsync(person)
+        person.personUid = personUid
+
+        val personGroup = PersonGroup()
+        personGroup.groupName = if (person.firstNames != null)
+            person.firstNames
+        else
+            "" + "'s group"
+        val personGroupUid = insertPersonGroup(personGroup)
+        personGroup.groupUid = personGroupUid
+
+        val personGroupMember = PersonGroupMember()
+        personGroupMember.groupMemberPersonUid = personUid
+        personGroupMember.groupMemberGroupUid = personGroupUid
+        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
+
+        personGroupMember.groupMemberUid = personGroupMemberUid
+        return personUid
+    }
+
 
     suspend fun createPersonAndGroup(person:Person):Long{
         //1. Insert the person if unique
@@ -202,6 +272,65 @@ abstract class PersonDao : BaseDao<Person> {
         }
     }
 
+
+    inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
+
+    /**
+     * Insert the person given and create a PersonGroup for it and set it to individual.
+     * Note: this does not check if the person exists. The given person must not exist.
+     *
+     * @param person    The person object to persist. Must not already exist.
+     * @param callback  The callback that returns PersonWithGroup pojo object - basically
+     * Person Uids and PersonGroup Uids
+     */
+    suspend fun createPersonWithGroupAsync(person: Person): PersonWithGroup {
+        val personUid = insertAsync(person)
+
+        person.personUid = personUid
+
+        val personGroup = PersonGroup()
+        personGroup.groupName = if (person.firstNames != null)
+            person.firstNames!! + "'s individual group"
+        else
+            "Person individual group"
+        personGroup.groupPersonUid = personUid
+        val personGroupUid = insertPersonGroup(personGroup)
+
+        personGroup.groupUid = personGroupUid
+
+        val personGroupMember = PersonGroupMember()
+        personGroupMember.groupMemberPersonUid = personUid
+        personGroupMember.groupMemberGroupUid = personGroupUid
+        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
+
+        personGroupMember.groupMemberUid = personGroupMemberUid
+        val personWithGroup = PersonWithGroup(personUid!!, personGroupUid!!)
+        return personWithGroup
+
+    }
+
+    suspend fun insertPersonAsync(entity: Person, loggedInPersonUid: Long):Long {
+        val result = insertAsync(entity)
+        val personUid = result!!
+        createAuditLog(personUid, loggedInPersonUid)
+        return result
+    }
+
+    fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
+        val auditLog = AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid)
+        insertAuditLog(auditLog)
+    }
+
+    @Insert
+    abstract fun insertAuditLog(entity: AuditLog): Long
+
+    fun updatePersonAsync(entity: Person, loggedInPersonUid: Long): Int  {
+        val result = updateAsync(entity)
+        createAuditLog(entity.personUid, loggedInPersonUid)
+        return result
+    }
+
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
@@ -226,6 +355,21 @@ abstract class PersonDao : BaseDao<Person> {
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
+
+        const val QUERY_FIND_ALL = "SELECT Person.* , (0) AS clazzUid, " +
+                " '' AS clazzName, " +
+                " (0) AS attendancePercentage, " +
+                " (0) AS clazzMemberRole, " +
+                " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+                " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+                " DESC LIMIT 1) AS personPictureUid, " +
+                " (0) AS enrolled FROM Person WHERE Person.active = 1 "
+
+        const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
+            ":searchQuery "
+
+        const val QUERY_SORT_BY_NAME_DESC = " ORDER BY Person.lastName DESC "
+        const val QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC "
     }
 
     data class PersonNameAndUid(var personUid: Long = 0L, var name: String = ""){

@@ -200,7 +200,7 @@ class SaleListSearchPresenter(context: Any,
 
     }
 
-    override fun handleCommonPressed(arg: Any, arg2: Any) {
+    override fun handleCommonPressed(arg: Any, arg2:Any) {
         handleClickSale(arg as Long)
     }
 

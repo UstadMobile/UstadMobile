@@ -4,7 +4,7 @@ interface SettingsView : UstadView {
 
     fun finish()
 
-    companion object{
-        const val VIEW_NAME = "SettingsFromToolbar"
+    companion object {
+        val VIEW_NAME = "SettingsFromToolbar"
     }
 }

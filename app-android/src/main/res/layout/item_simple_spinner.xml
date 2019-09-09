@@ -2,12 +2,10 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
     style="?android:attr/spinnerItemStyle"
+    android:singleLine="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
     android:ellipsize="marquee"
-    android:singleLine="true"
-    android:text="Select"
     android:textAlignment="inherit"
-    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-    android:textColor="#000000" />
+    android:text="Testing"
+    android:textAppearance="@style/TextAppearance.AppCompat.Title" />
