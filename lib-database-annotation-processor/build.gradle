@@ -39,12 +39,11 @@ task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
     outputs.upToDateWhen { false }
     classpath = sourceSets.test.runtimeClasspath
     main = 'io.ktor.server.netty.EngineMain'
-    args = ['-port', '8087']
-    waitForPort = 8087
+    args = ['-port', '8089']
+    waitForPort = 8089
     workingDir = "$projectDir/"
     standardOutput = "$projectDir/build/tmp/daemon.log"
     errorOutput = "$projectDir/build/tmp/daemon-error.log"
-    //environment 'JAVA_HOME', System.properties.find { it.key == "java.home" }
 }
 
 
