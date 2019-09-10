@@ -10,6 +10,7 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import com.ustadmobile.door.DatabaseBuilder
 
 private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(): TypeSpec.Builder {
     addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
@@ -56,6 +57,7 @@ class DbProcessorJs : AbstractDbProcessor(){
         val dbType = dbTypeEl.asType() as DeclaredType
         val implFileSpec = FileSpec.builder(dbTypeClassName.packageName,
                 "${dbTypeClassName.simpleName}$SUFFIX_JS_IMPL")
+
         val implTypeSpec = TypeSpec.classBuilder(implFileSpec.name)
                 .addDbJsImplPropsAndConstructor()
                 .superclass(dbTypeEl.asClassName())
@@ -65,7 +67,13 @@ class DbProcessorJs : AbstractDbProcessor(){
                 .addProperty(PropertySpec.builder("master", BOOLEAN)
                         .addModifiers(KModifier.OVERRIDE)
                         .initializer("false").build())
-
+                .addType(TypeSpec.companionObjectBuilder()
+                        .addFunction(FunSpec.builder("register")
+                                .addCode("%T.registerImpl(%T::class, %T::class)\n",
+                                        DatabaseBuilder::class, dbTypeEl,
+                                        ClassName(dbTypeClassName.packageName, implFileSpec.name))
+                                .build())
+                        .build())
 
         val daoGetterMethods = methodsToImplement(dbTypeEl, dbType, processingEnv)
                 .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }

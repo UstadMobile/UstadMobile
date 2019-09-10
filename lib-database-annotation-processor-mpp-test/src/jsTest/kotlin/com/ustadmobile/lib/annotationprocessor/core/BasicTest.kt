@@ -20,92 +20,48 @@ import kotlinx.coroutines.promise
 import kotlinx.serialization.Serializable
 import org.w3c.dom.set
 import kotlin.browser.localStorage
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
 import kotlinx.serialization.json.*
+import kotlin.test.*
 
 
 class BasicTest {
 
-    @Serializable
-    data class NameCls(val first: String = "", val second: String = "")
-
-    @Test
-    fun basicTest() {
-        assertEquals(4, 2+2, "2+2=4")
+    @BeforeTest
+    fun register() {
+        localStorage["doordb.endpoint.url"] = "http://localhost:8087/"
+        ExampleDatabase2_JsImpl.register()
     }
 
-    @Test
-    fun testHttp() = GlobalScope.promise{
-        val httpClient = HttpClient()
-        val localContent = httpClient.get<String>("http://localhost/")
-        assertNotNull(localContent, "Got HTML from localhost")
-        httpClient.close()
-    }
 
     @Test
     fun testDatabaseBuilder() {
         println("Attempt test database builder")
-        println(ExampleDatabase2_JsImpl::class)
-        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2_JsImpl::class,
+        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class,
                 "ExampleDatabase2").build()
         assertNotNull(dbInstance, "Constructed db instance object")
     }
 
     @Test
     fun testDaoGetSingularResult() = GlobalScope.promise {
-        localStorage["doordb.endpoint.url"] = "http://localhost:8087/"
-        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2_JsImpl::class,
+        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class,
                 "ExampleDatabase2").build()
 
-        val initEntity = dbInstance.exampleDao2().findByUidAsync(42)
+        val initEntity = dbInstance.exampleDao2().findByUidAsync(5000L)
         assertNotNull(initEntity, "init entity not null")
-        assertEquals("BobJs", initEntity.name, "got empty entries list")
+        assertEquals("Initial Entry", initEntity.name, "got initial entry")
     }
 
-//    @Test
-//    fun testDaoPostWithoutIdFetch() = GlobalScope.promise {
-//        localStorage["doordb.endpoint.url"] = "http://localhost:8087/"
-//        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2_JsImpl::class,
-//                "ExampleDatabase2").build()
-//        dbInstance.exampleDao2().insertAsync(ExampleEntity2(name = "JsPost", someNumber =  50))
-//    }
-
     @Test
-    fun testJson() = GlobalScope.promise {
-        val kotlinxSerializerClass = KotlinxSerializer::class
-        println(kotlinxSerializerClass)
-
-        val httpClient = HttpClient() {
-            install(JsonFeature)
-        }
-        val nameFromServer = httpClient.get<NameCls>("http://localhost/name.json")
-        assertEquals("Bob", nameFromServer.first)
-        httpClient.close()
-    }
-
-
-    @Test
-    fun testPost() = GlobalScope.promise {
-        js("debugger")
-        delay(1*1000)
-        val kotlinxSerializerClass = KotlinxSerializer::class
-        println(kotlinxSerializerClass)
-
+    fun testDaoPostWithoutIdFetch() = GlobalScope.promise {
         val json = Json(JsonConfiguration.Stable)
-        val jsonData = json.stringify(NameCls.serializer(), NameCls("Hello", "Cruel World2"))
 
-        val httpClient = HttpClient() {
-            install(JsonFeature)
-        }
-
-        val localContent = httpClient.post<String>("http://localhost/") {
-            body = defaultSerializer().write(NameCls("Hello", "Cruel World23"))
-        }
-        assertNotNull(localContent, "Got HTML from localhost via POST")
-        httpClient.close()
+        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class,
+                "ExampleDatabase2").build()
+        val entity = ExampleEntity2(name = "JsPost", someNumber =  50)
+        val jsonStr = json.stringify(ExampleEntity2.serializer(), entity)
+        console.log("Json str = $jsonStr")
+        entity.uid = dbInstance.exampleDao2().insertAsyncAndGiveId(entity)
+        assertNotEquals(0, entity.uid, "After insert non-zero UID is received")
     }
 
 }
