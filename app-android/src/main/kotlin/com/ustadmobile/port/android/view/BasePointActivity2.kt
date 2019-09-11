@@ -124,7 +124,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         bottomNavigation.accentColor = fetchColor(R.color.just_black)
         bottomNavigation.inactiveColor = fetchColor(R.color.bottom_nav_yourInactiveColor)
         bottomNavigation.isBehaviorTranslationEnabled = false
-        bottomNavigation.setUseElevation(true, 2F)
+        bottomNavigation.setUseElevation(true, 16F)
     }
 
     override fun setupNavigation(items: List<NavigationItem>) {
