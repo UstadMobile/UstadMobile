@@ -4,10 +4,12 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
+import kotlinx.serialization.Serializable
 
 
 @Entity(indices = arrayOf(Index("otherFk", "otherNum", name="index_other_fk_to_num")))
 @SyncableEntity(tableId = 44)
+@Serializable
 data class OtherSyncableEntity (@PrimaryKey(autoGenerate = true) var osUid: Long = 0,
                                 @LastChangedBy var osLcb: Int = 0,
                                 @MasterChangeSeqNum var osMcsn: Int = 0,

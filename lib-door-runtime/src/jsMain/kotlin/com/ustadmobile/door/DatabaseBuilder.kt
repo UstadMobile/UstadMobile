@@ -1,7 +1,5 @@
 package com.ustadmobile.door
 
-import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import org.w3c.dom.get
 import kotlin.browser.localStorage
@@ -36,12 +34,8 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
 
         console.log("DoorDbJs endpoint = $dbEndpoint")
         @Suppress("UNUSED_VARIABLE")
-        val httpClient = HttpClient() {
-            install(JsonFeature)
-        }
 
-        return jsImplClass.js.createInstance(httpClient, dbEndpoint, dbName)
-                .unsafeCast<T>()
+        return jsImplClass.js.createInstance(dbEndpoint, dbName).unsafeCast<T>()
     }
 
     actual fun addCallback(callback: DoorDatabaseCallback): DatabaseBuilder<T> {

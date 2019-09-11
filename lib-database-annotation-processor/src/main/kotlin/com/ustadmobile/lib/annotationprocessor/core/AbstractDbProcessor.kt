@@ -26,7 +26,6 @@ import com.ustadmobile.door.PreparedStatementArrayProxy
 import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
 import org.apache.commons.text.StringEscapeUtils
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.ktor.http.HttpStatusCode
 
 
@@ -245,6 +244,11 @@ internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "rec
  * @param httpResultType the type of response expected from the other end (e.g. the result type of
  * the method)
  * @param params a list of the parameters (e.g. from the method signature) that need to be sent
+ * @param useKotlinxListSerialization if true, the generated code will use the Kotlinx Json object
+ * to serialize and deserialize lists. This is because the Javascript client (using Kotlinx serialization)
+ * will not automatically handle .receive<List<Entity>>
+ * @param kotlinxSerializationJsonVarName if useKotlinxListSerialization, thne this is the variable
+ * name that will be used to access the Json object to serialize or deserialize.
  */
 internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String = "_endpoint",
                                                    dbPathVarName: String,
@@ -254,7 +258,9 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    httpResultVarName: String = "_httpResult",
                                                    requestBuilderCodeBlock: CodeBlock = CodeBlock.of(""),
                                                    httpResultType: TypeName,
-                                                   params: List<ParameterSpec> ): CodeBlock {
+                                                   params: List<ParameterSpec>,
+                                                   useKotlinxListSerialization: Boolean = false,
+                                                   kotlinxSerializationJsonVarName: String = ""): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
             .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
@@ -283,8 +289,15 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
 
     codeBlock.endControlFlow()
 
-    val receiveCodeBlock = CodeBlock.of("$httpResponseVarName.%M<%T>()\n",
-        CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+    val receiveCodeBlock = if(useKotlinxListSerialization && httpResultType is ParameterizedTypeName
+            && httpResultType.rawType == List::class.asClassName() ) {
+        CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.serializer().%M, $httpResponseVarName.%M<String>())\n",
+                httpResultType.typeArguments[0], MemberName("kotlinx.serialization", "list"),
+                CLIENT_RECEIVE_MEMBER_NAME)
+    }else{
+        CodeBlock.of("$httpResponseVarName.%M<%T>()\n",
+                CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+    }
     if(httpResultType.isNullable) {
         codeBlock.beginControlFlow("val $httpResultVarName = if(${httpResponseVarName}.status == %T.NoContent)",
             HttpStatusCode::class)

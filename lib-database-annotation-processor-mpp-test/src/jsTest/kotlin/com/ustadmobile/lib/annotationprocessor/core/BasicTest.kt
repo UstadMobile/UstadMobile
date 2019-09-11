@@ -62,11 +62,16 @@ class BasicTest {
 
     @Test
     fun testDaoPostWithoutIdFetch() = GlobalScope.promise {
-        val dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class,
-                "ExampleDatabase2").build()
         val entity = ExampleEntity2(name = "JsPost", someNumber =  50)
         entity.uid = dbInstance.exampleDao2().insertAsyncAndGiveId(entity)
         assertNotEquals(0, entity.uid, "After insert non-zero UID is received")
+    }
+
+    @Test
+    fun getList()  = GlobalScope.promise {
+        val aList =dbInstance.exampleDao2().findAllAsync()
+        assertNotNull(aList)
+        println("dah")
     }
 
 }

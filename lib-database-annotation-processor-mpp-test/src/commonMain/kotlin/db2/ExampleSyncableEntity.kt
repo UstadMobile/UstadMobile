@@ -6,9 +6,11 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = 42)
+@Serializable
 open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Long = 0,
                                  @LocalChangeSeqNum var esLcsn: Int = 0,
                                  @MasterChangeSeqNum var esMcsn: Int = 0,

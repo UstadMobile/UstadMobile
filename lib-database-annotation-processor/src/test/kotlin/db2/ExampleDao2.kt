@@ -58,7 +58,7 @@ abstract class ExampleDao2 {
     abstract fun findAll(): List<ExampleEntity2>
 
     @Query("SELECT * FROM ExampleEntity2")
-    abstract suspend fun findAllAsync(): List<ExampleEntity2WithExampleLinkEntity>
+    abstract suspend fun findAllAsync(): List<ExampleEntity2>
 
     @Update
     abstract fun updateSingleItem(entity: ExampleEntity2)

@@ -11,19 +11,34 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.DatabaseBuilder
+import io.ktor.client.features.json.JsonFeature
 
-private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(): TypeSpec.Builder {
-    addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
-            .initializer("_httpClient").build())
+private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(addHttpClient: Boolean = true,
+                                                            addJsonProp: Boolean = true): TypeSpec.Builder {
     addProperty(PropertySpec.builder("_endpoint", String::class)
             .initializer("_endpoint").build())
     addProperty(PropertySpec.builder("_dbPath", String::class)
             .initializer("_dbPath").build())
-    primaryConstructor(FunSpec.constructorBuilder()
-            .addParameter("_httpClient", HttpClient::class)
-            .addParameter("_endpoint", String::class)
-            .addParameter("_dbPath", String::class)
-            .build())
+    val constructorSpec = FunSpec.constructorBuilder()
+
+    if(addHttpClient) {
+        addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
+                .initializer("_httpClient").build())
+        constructorSpec.addParameter("_httpClient", HttpClient::class)
+    }
+
+    constructorSpec.addParameter("_endpoint", String::class)
+                    .addParameter("_dbPath", String::class)
+
+    if(addJsonProp) {
+        addProperty(PropertySpec.builder("_json", DbProcessorJs.KOTLINX_JSON_CLASSNAME)
+                .initializer("_json")
+                .build())
+        constructorSpec.addParameter("_json", DbProcessorJs.KOTLINX_JSON_CLASSNAME)
+    }
+
+
+    primaryConstructor(constructorSpec.build())
 
     return this
 }
@@ -59,7 +74,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                 "${dbTypeClassName.simpleName}$SUFFIX_JS_IMPL")
 
         val implTypeSpec = TypeSpec.classBuilder(implFileSpec.name)
-                .addDbJsImplPropsAndConstructor()
+                .addDbJsImplPropsAndConstructor(addHttpClient = false, addJsonProp = false)
                 .superclass(dbTypeEl.asClassName())
                 .addFunction(FunSpec.builder("clearAllTables")
                         .addModifiers(KModifier.OVERRIDE)
@@ -73,6 +88,26 @@ class DbProcessorJs : AbstractDbProcessor(){
                                         DatabaseBuilder::class, dbTypeEl,
                                         ClassName(dbTypeClassName.packageName, implFileSpec.name))
                                 .build())
+                        .build())
+
+        val initSerializerCodeBlock = CodeBlock.of("%T()", KOTLINX_SERIALIZATION_CLASSNAME)
+
+        val initHttpClientCodeBlock = CodeBlock.builder()
+                .beginControlFlow("%T()", HttpClient::class)
+                .beginControlFlow("install(%T)", JsonFeature::class)
+                .add("serializer = _serializer\n")
+                .endControlFlow()
+                .endControlFlow()
+
+
+        implTypeSpec.addProperty(PropertySpec.builder("_serializer", KOTLINX_SERIALIZATION_CLASSNAME)
+                    .initializer(initSerializerCodeBlock.build()).build())
+                .addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
+                    .initializer(initHttpClientCodeBlock.build())
+                .build())
+                .addProperty(PropertySpec.builder("_json", KOTLINX_JSON_CLASSNAME)
+                        .initializer(CodeBlock.of("%T(%T.Stable)", KOTLINX_JSON_CLASSNAME,
+                                ClassName("kotlinx.serialization.json", "JsonConfiguration")))
                         .build())
 
         val daoGetterMethods = methodsToImplement(dbTypeEl, dbType, processingEnv)
@@ -90,7 +125,7 @@ class DbProcessorJs : AbstractDbProcessor(){
 
             implTypeSpec.addProperty(PropertySpec.builder("_${daoTypeClassName.simpleName}",
                     daoTypeClassName)
-                    .delegate("lazy { %T(_httpClient, _endpoint, _dbPath) }", daoJsImplClassName)
+                    .delegate("lazy { %T(_httpClient, _endpoint, _dbPath, _json) }", daoJsImplClassName)
                     .build())
 
             implTypeSpec.addAccessorOverride(it, CodeBlock.of("return _${daoTypeClassName.simpleName}\n"))
@@ -137,7 +172,9 @@ class DbProcessorJs : AbstractDbProcessor(){
                         dbPathVarName = "_dbPath",
                         methodName = daoSubEl.simpleName.toString(),
                         httpResultType = resultType,
-                        params = daoFunSpec.parameters)
+                        params = daoFunSpec.parameters,
+                        useKotlinxListSerialization = true,
+                        kotlinxSerializationJsonVarName = "_json")
 
                 if(returnTypeResolved != UNIT) {
                     codeBlock = CodeBlock.builder().add(codeBlock).add("return _httpResult\n").build()
@@ -159,6 +196,12 @@ class DbProcessorJs : AbstractDbProcessor(){
 
     companion object {
         const val SUFFIX_JS_IMPL = "_JsImpl"
+
+        val KOTLINX_SERIALIZATION_CLASSNAME = ClassName("io.ktor.client.features.json.serializer",
+                "KotlinxSerializer")
+
+        val KOTLINX_JSON_CLASSNAME = ClassName("kotlinx.serialization.json", "Json")
+
     }
 
 
