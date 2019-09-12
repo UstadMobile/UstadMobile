@@ -27,6 +27,8 @@ import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
 import org.apache.commons.text.StringEscapeUtils
 import io.ktor.http.HttpStatusCode
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+
 
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)

@@ -12,6 +12,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.DatabaseBuilder
 import io.ktor.client.features.json.JsonFeature
+import com.ustadmobile.door.DoorLiveData
 
 private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(addHttpClient: Boolean = true,
                                                             addJsonProp: Boolean = true): TypeSpec.Builder {
@@ -101,7 +102,7 @@ class DbProcessorJs : AbstractDbProcessor(){
 
 
         implTypeSpec.addProperty(PropertySpec.builder("_serializer", KOTLINX_SERIALIZATION_CLASSNAME)
-                    .initializer(initSerializerCodeBlock.build()).build())
+                    .initializer(initSerializerCodeBlock).build())
                 .addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
                     .initializer(initHttpClientCodeBlock.build())
                 .build())
@@ -166,7 +167,9 @@ class DbProcessorJs : AbstractDbProcessor(){
 
             daoFunSpec.addAnnotations(daoMethodEl.annotationMirrors.map { AnnotationSpec.get(it) })
 
-            if(daoMethodResolved.parameterTypes.any { isContinuationParam(it.asTypeName())}) {
+
+            if(daoMethodResolved.parameterTypes.any { isContinuationParam(it.asTypeName())}
+                    || (returnTypeResolved is ParameterizedTypeName &&  returnTypeResolved.rawType == DoorLiveData::class.asClassName())) {
                 var codeBlock = generateKtorRequestCodeBlockForMethod(
                         daoName = daoTypeClassName.simpleName,
                         dbPathVarName = "_dbPath",
@@ -176,7 +179,13 @@ class DbProcessorJs : AbstractDbProcessor(){
                         useKotlinxListSerialization = true,
                         kotlinxSerializationJsonVarName = "_json")
 
-                if(returnTypeResolved != UNIT) {
+                if(returnTypeResolved is ParameterizedTypeName && returnTypeResolved.rawType == DoorLiveData::class.asClassName()) {
+                    codeBlock = CodeBlock.builder().beginControlFlow("return %T ",
+                            ClassName("com.ustadmobile.door", "DoorLiveDataJs"))
+                            .add(codeBlock)
+                            .add("_httpResult\n")
+                            .endControlFlow().build()
+                }else if(returnTypeResolved != UNIT) {
                     codeBlock = CodeBlock.builder().add(codeBlock).add("return _httpResult\n").build()
                 }
 

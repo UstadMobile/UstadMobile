@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.door.DatabaseBuilder
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_JsImpl
@@ -73,5 +74,19 @@ class BasicTest {
         assertNotNull(aList)
         println("dah")
     }
+
+    @Test
+    fun testLiveData() = GlobalScope.promise {
+        val entity = ExampleEntity2(name = "LiveData Test", someNumber =  50)
+        entity.uid = dbInstance.exampleDao2().insertAsyncAndGiveId(entity)
+        val listRef = mutableListOf<List<ExampleEntity2>>()
+        waitForLiveData(dbInstance.exampleDao2().findByMinUidLive(), 5000) {
+            listRef[0] = it
+            it.isNotEmpty()
+        }
+
+        assertTrue(listRef.isNotEmpty() && listRef[0] != null, "LiveData loads with callback as expected")
+    }
+
 
 }

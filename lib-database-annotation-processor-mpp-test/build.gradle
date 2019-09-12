@@ -53,6 +53,7 @@ kotlin {
                 implementation project(":lib-door-runtime")
                 implementation project(":lib-database-annotations")
                 implementation project(":lib-room-annotations")
+                implementation project(":lib-util")
             }
         }
 
