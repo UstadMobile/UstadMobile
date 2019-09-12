@@ -54,7 +54,7 @@ describe('Report Dashboard', () => {
   it('givenApplicationLaunchedAndDashboardOpen_whenNewReportButtonIsClicked_shouldOpenReportOptionsScreen', () => {
     pageDashboard.launch();
     pageDashboard.getPage().newReport.click()
-    browser.sleep(500)
+    browser.sleep(1000)
     expect(browser.getCurrentUrl()).toContain(pageDashboard.views.options);
   });
 });

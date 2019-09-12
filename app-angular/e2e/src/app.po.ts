@@ -79,7 +79,7 @@ export class ElementUtils{
       componentReportOptions:{
         formFields: element.all(by.css('app-xapi-report-options > div div.input-field')),
         selectViews: element.all(by.css('app-xapi-report-options > div mz-select-container')),
-        inputViews: element.all(by.css('app-xapi-report-options > div mz-input-container .what')),
+        inputViews: element.all(by.css('app-xapi-report-options > div mz-input-container')),
         selectViewsOption: element.all(by.css('app-xapi-report-options > div option')),
         doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn')),
         dialog: element.all(by.css('xapi-treeview-dialog mz-modal'))
