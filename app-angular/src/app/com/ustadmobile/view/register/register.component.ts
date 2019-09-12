@@ -6,7 +6,6 @@ import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import core from 'UstadMobile-core';
-import db from 'UstadMobile-lib-database';
 import entity from 'UstadMobile-lib-database-entities';
 
 @Component({
@@ -44,7 +43,7 @@ export class RegisterComponent extends UmBaseComponent implements core.com.ustad
   );
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe((event:NavigationEnd) => {
+    .subscribe(() => {
       UmAngularUtil.registerResourceReadyListener(this)
     });
   }

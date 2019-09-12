@@ -39,8 +39,10 @@ graph_when_end_label: string = '..'
 
 selectedWhoList = []
 selectedDidList = []
+selectedWhatList = []
 inMemoryWhoList = []
 inMemoryDidList = []
+inMemorySelectedNames = ""
 @Output()
 public domChange = new EventEmitter();
 
@@ -70,6 +72,7 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
     'y_axis': ['0', Validators.required],
     'x_axis': ['0', Validators.required],
     'sub_group': ['0', Validators.required],
+    'graph_what': [this.inMemorySelectedNames, Validators.required],
     'graph_when_start': [currentDate, Validators.required],
     'graph_when_end': [tomorrow, Validators.required]
   });
@@ -144,6 +147,28 @@ onCreate() {
   }
 }
 
+onDataChange(data) {
+  console.log("is node ", data.nodes != undefined, data)
+  if (data.nodes != undefined) {
+    this.selectedWhatList = []
+    if (data.nodes === "clear") {
+      this.inMemorySelectedNames = ""
+    } else {
+      const selectedNames: string[] = []
+      const selectedUid: number[] = []
+      JSON.parse(data.nodes).forEach(selection => {
+        const data = JSON.parse(atob(selection))
+        this.selectedWhatList.push(data)
+        selectedNames.push(data.name)
+        selectedUid.push(+data.id)
+      });
+      this.presenter.handleEntriesListSelected(
+        util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(selectedUid))
+      this.inMemorySelectedNames = selectedNames.join(",")
+    }
+  }
+}
+
 fillVisualChartType(graphList) {
   this.translatedGraphList = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(graphList)
 }
@@ -157,6 +182,8 @@ fillXAxisAndSubGroupData(translatedXAxisList) {
 }
 
 handleWhatClicked() {
+  UmAngularUtil.registerDataChangeListener(this)
+  this.inMemorySelectedNames = ''
   this.modalService.open(XapiTreeviewDialogComponent);
 }
 
@@ -164,11 +191,10 @@ updateWhoDataAdapter(whoList) {
   this.inMemoryWhoList = whoList;
   whoList.forEach(person => {
     this.whoAutoComplete.data[person.name] = null
-  });
+  }); 
 }
 
 updateDidDataAdapter(didList) {
-  console.log(didList)
   this.inMemoryDidList = didList
   didList.forEach(verb => {
     this.didAutoComplete.data[verb.valueLangMap] = null 

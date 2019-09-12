@@ -1,0 +1,18 @@
+.icon-size{
+    font-size: 0.4em !important; 
+}
+
+li{
+    padding-top: 10px !important;
+}
+
+.node-checkBox{
+    margin-bottom: -30px !important;
+}
+
+.node-title{
+    font-size: 1.2em !important;
+    font-weight: 400;
+    margin-left: 3% !important;
+    top: -30px !important;
+}

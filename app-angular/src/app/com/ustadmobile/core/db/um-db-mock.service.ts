@@ -70,7 +70,7 @@ export class StatementDao{
 export class XObjectDao{
 
   findListOfObjectUidFromContentEntryUid(contentEntryUid){
-    return [100, 200, 300, 400]
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([100, 200, 300, 400])
   }
 }
 
@@ -83,7 +83,7 @@ export class LocationDao{
 export class ContentEntryParentChildJoinDao{
   constructor(private entryDao){}
   selectTopEntries(){
-    return [
+    const data = [
       {
         "contentEntryUid": 41250,
         "title": "magnis dis parturient",
@@ -145,6 +145,7 @@ export class ContentEntryParentChildJoinDao{
         "leaf": true
       }
     ]
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
   }
 }
 export class XLangMapEntryDao{
@@ -257,6 +258,11 @@ export class PersonDao{
       }
     ];
     return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schemas])
+  }
+
+  getChildrenByParentAsync(entryUid){
+    var entries = UmAngularUtil.findChildrenByParentUid(this.joins, this.entries, entryUid);
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(entries);
   }
 }
 

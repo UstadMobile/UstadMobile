@@ -71,7 +71,7 @@
 
         <div class="input-field col s12">
           <mz-input-container >
-            <input class="what" mz-input (click)="handleWhatClicked()" [label]="[graph_what_label]" [validate]="true"
+            <input mz-input (click)="handleWhatClicked()" value="{{inMemorySelectedNames}}" [label]="[graph_what_label]" [validate]="true"
              id="graph_what" type="text">
           </mz-input-container>
         </div>

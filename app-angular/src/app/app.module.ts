@@ -2,7 +2,7 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,MzSpinnerModule,MzProgressModule,
-   MzNavbarModule, MzChipModule, MzDatepickerModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule, MzModalService, MzBaseModal} from 'ngx-materialize';
+   MzNavbarModule, MzChipModule, MzDatepickerModule,MzCheckboxModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule, MzModalService, MzBaseModal} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -49,7 +49,7 @@ import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog
     AppRoutingModule,
     NgProgressModule,
     HttpClientModule,
-    MzSelectModule,MzSidenavModule,MzCardModule,MzButtonModule,MzNavbarModule,
+    MzSelectModule,MzSidenavModule,MzCardModule,MzButtonModule,MzNavbarModule,MzCheckboxModule,
     MzChipModule,MzSpinnerModule,MzModalModule,MzToastModule,MzInputModule,MzProgressModule,MzDropdownModule,
     MzDatepickerModule,
     FormsModule,

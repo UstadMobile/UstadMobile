@@ -34,6 +34,8 @@ export class UmAngularUtil {
    */
   static DISPATCH_RESOURCE = "resouce_ready";
 
+  static DISPATCH_DATA_CHANGE = "data_change"
+
 
   /**
    * Convert query parameters to a kotlin map to be used on presenters
@@ -83,8 +85,9 @@ export class UmAngularUtil {
     var originalSetItem = localStorage.setItem;
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
+    const dataKey = this.DISPATCH_DATA_CHANGE;
     localStorage.setItem = function (key, value) {
-      if(key == resourceKey || key == titleKey){
+      if(key == resourceKey || key == titleKey || key == dataKey){
         const event = new Event(key);
         (<any>event).key = key;
         (<any>event).value = value; 
@@ -100,6 +103,8 @@ export class UmAngularUtil {
         component.onCreate()
       }else if(event.key == titleKey){
         component.setToolbarTitle(event.value)
+      }else if(event.key == dataKey){ 
+        component.onDataChange(event.value)
       }
     };
   }
@@ -115,13 +120,19 @@ export class UmAngularUtil {
   static registerTitleChangeListener(component) {
     this.createEvent(this.DISPATCH_TITLE, component)
     document.addEventListener(this.DISPATCH_TITLE, this.localStorageHandler[this.DISPATCH_TITLE], false); 
-    if(component.systemImpl.getString(component.MessageID.app_name, component.context) != ''){
-      this.fireResouceReady(true)
-    } 
+  }
+
+  static registerDataChangeListener(component){
+    this.createEvent(this.DISPATCH_DATA_CHANGE, component)
+    document.addEventListener(this.DISPATCH_DATA_CHANGE, this.localStorageHandler[this.DISPATCH_DATA_CHANGE], false); 
   }
 
   static fireResouceReady(ready: boolean){
     localStorage.setItem(this.DISPATCH_RESOURCE,ready+"")
+  }
+
+  static fireOnDataChanged(data){
+    localStorage.setItem(this.DISPATCH_DATA_CHANGE,data);
   }
 
   static fireTitleUpdate(title: string){

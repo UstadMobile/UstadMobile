@@ -264,4 +264,7 @@
     <string name="no_account">Don\'t have an account?</string>
     <string name="xapi_clear" >Clear</string>
     <string name="xapi_today" >Today</string>
+    <string name="done">Done</string>
+    <string name="select_locations">Select Locations</string>
+    <string name="select_entries">Select Entries</string>
 </resources>

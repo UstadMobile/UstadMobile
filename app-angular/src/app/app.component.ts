@@ -51,7 +51,7 @@ export class AppComponent extends UmBaseComponent {
     super.onCreate() 
     this.showLoading = window.location.search == "";
     if(UmAngularUtil.showSplashScreen()) {
-      window.setTimeout(this.splashScreenTimeout, 3500) 
+      window.setTimeout(this.splashScreenTimeout, 2000) 
     }
   }
 

@@ -75,7 +75,6 @@ export class HomeComponent extends UmBaseComponent {
   }
 
   setToolbarTitle(title){
-    console.log(title)
     this.toolBarTitle = title
   }
 
