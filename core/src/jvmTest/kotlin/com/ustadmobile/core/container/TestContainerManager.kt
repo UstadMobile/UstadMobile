@@ -336,5 +336,44 @@ class TestContainerManager {
         }
     }
 
+    @Test
+    fun givenExistingContainer_whenExportSelected_thenShouldZipAllEntryFiles(){
+        runBlocking {
+            val pathList = mutableListOf("path1.txt", "path2.txt", "path3.txt", "path4.txt")
+            val entry = ContentEntry()
+            entry.title = "Sample Entry Title"
+            entry.leaf = true
+            entry.contentEntryUid = db.contentEntryDao.insert(entry)
+            val container = Container()
+            container.containerContentEntryUid = entry.contentEntryUid
+            container.containerUid = repo.containerDao.insert(container)
+
+            val containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
+
+            val fileSources = mutableListOf<ContainerManager.FileEntrySource>()
+
+            pathList.forEach {
+                fileSources.add(ContainerManager.FileEntrySource(
+                        File.createTempFile("tmp", it), it))
+            }
+            containerManager.addEntries(*fileSources.toTypedArray())
+
+            val foundContainer = repo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entry.contentEntryUid)
+
+            val manager = ContainerManager(foundContainer!!, db, repo, containerTmpDir.absolutePath)
+            val destZipFile = File.createTempFile("tmp", "temp.zip")
+            var progressValue = 0
+            Assert.assertEquals("Zip file is empty", 0, destZipFile.length())
+
+            manager.exportContainer(destZipFile.absolutePath, object : ContainerManagerCommon.ExportProgressListener{
+                override fun onProcessing(progress: Int) {
+                    progressValue = progress
+                }
+            })
+
+            Assert.assertTrue("All entry files were zipped", destZipFile.length() > 0 && progressValue == 100)
+        }
+    }
+
 
 }

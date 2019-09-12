@@ -64,6 +64,15 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
     }
 
+    interface ExportProgressListener{
+
+        /**
+         * Report export progress to all listening parts
+         */
+        fun onProcessing(progress: Int)
+
+    }
+
 
     /**
      * Make a copy of this container as a new container - e.g. when making a new version of this
@@ -93,6 +102,8 @@ abstract class ContainerManagerCommon(protected val container: Container,
     }
 
     abstract suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
+
+    abstract fun exportContainer(zipFile: String, progressListener: ExportProgressListener?)
 
     suspend fun addEntries(vararg entries: EntrySource) = addEntries(null, *entries)
 

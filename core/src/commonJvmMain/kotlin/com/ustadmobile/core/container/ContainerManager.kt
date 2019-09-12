@@ -22,7 +22,12 @@ import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import java.io.BufferedInputStream
+import java.util.zip.ZipOutputStream
+import java.io.BufferedOutputStream
+import java.util.zip.ZipEntry
 import kotlin.io.copyTo
+import kotlinx.coroutines.runBlocking
 
 actual class ContainerManager actual constructor(container: Container,
                                                  db: UmAppDatabase,
@@ -183,8 +188,44 @@ actual class ContainerManager actual constructor(container: Container,
         }
     }
 
+    actual override fun exportContainer(zipFile: String, progressListener: ExportProgressListener?){
+        runBlocking{
+            lateinit var bufferInput: BufferedInputStream
+            val outputStream: ZipOutputStream = ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile)))
+            try{
+                var fileCount = 1
+                val buffer = ByteArray(BUFFER_SIZE)
+                pathToEntryMap.values.forEach {
+                    val entryFilePath = it.containerEntryFile!!.cefPath!!
+                    bufferInput = BufferedInputStream(FileInputStream(entryFilePath), BUFFER_SIZE)
+                    try{
+                        val zipEntry: ZipEntry = ZipEntry(entryFilePath.substring(entryFilePath.lastIndexOf("/") + 1))
+                        var bytesRead: Int
+                        outputStream.putNextEntry(zipEntry)
+                        while (bufferInput.read(buffer).also { bytesRead = it } != -1) {
+                            outputStream.write(buffer, 0, bytesRead)
+                        }
+                    }catch (exception: IOException){
+                        print(exception.message)
+                    }finally {
+                        if(progressListener != null){
+                            progressListener.onProcessing(((fileCount.toFloat()/pathToEntryMap.values.size) * 100).toInt())
+                        }
+                        bufferInput.close()
+                        fileCount++
+                    }
+                }
+            }catch (exception: IOException){
+                print(exception.message)
+            }finally {
+                outputStream.close()
+            }
+        }
+    }
+
     companion object {
         val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4")
+        private const  val BUFFER_SIZE = 1024
     }
 
 }
