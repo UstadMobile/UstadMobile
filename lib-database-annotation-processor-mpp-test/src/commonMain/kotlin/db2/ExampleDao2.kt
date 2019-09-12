@@ -20,6 +20,9 @@ abstract class ExampleDao2 {
     abstract fun insertList(entityList: List<ExampleEntity2>)
 
     @Insert
+    abstract suspend fun insertListAsync(entityList: List<ExampleEntity2>)
+
+    @Insert
     abstract fun insertOtherList(entityList: List<ExampleEntity2>)
 
     @Insert

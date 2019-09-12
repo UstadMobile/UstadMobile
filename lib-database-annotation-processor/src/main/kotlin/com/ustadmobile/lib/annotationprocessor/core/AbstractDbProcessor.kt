@@ -28,7 +28,8 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import org.apache.commons.text.StringEscapeUtils
 import io.ktor.http.HttpStatusCode
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-
+import io.ktor.content.TextContent
+import io.ktor.http.ContentType
 
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
@@ -284,9 +285,22 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
     val requestBodyParam = getRequestBodyParam(params)
 
     if(requestBodyParam != null) {
+        val requestBodyParamType = requestBodyParam.type
+
+        val writeBodyCodeBlock = if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
+                && requestBodyParamType.rawType == List::class.asClassName()) {
+            val entityComponentType = resolveEntityFromResultType(requestBodyParamType)
+            CodeBlock.of("body = %T(_json.stringify(%T.serializer().%M, ${requestBodyParam.name}), %T.Application.Json)\n",
+                TextContent::class, entityComponentType,
+                    MemberName("kotlinx.serialization", "list"),
+                    ContentType::class)
+        }else {
+            CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
+                    MemberName("io.ktor.client.features.json", "defaultSerializer"))
+        }
+
         codeBlock.addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
-                CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
-                        MemberName("io.ktor.client.features.json", "defaultSerializer")))
+                writeBodyCodeBlock)
     }
 
     codeBlock.endControlFlow()
