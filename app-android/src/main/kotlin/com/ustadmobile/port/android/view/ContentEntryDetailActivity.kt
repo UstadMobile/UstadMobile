@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -77,6 +78,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var showControls : Boolean = false
 
+    private var showExportIcon: Boolean = false
+
 
     override val allKnowAvailabilityStatus: Set<Long>
         get() = managerAndroidBle.getLocallyAvailableContainerUids()
@@ -89,6 +92,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
+                GlobalScope.launch{
+
+        }
+
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
@@ -97,7 +104,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
         presenter!!.onStart()
         managerAndroidBle.addLocalAvailabilityListener(this)
-        presenter!!.handleShowEditButton(showControls)
+        presenter!!.handleShowEditControls(showControls)
 
     }
 
@@ -154,11 +161,27 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_content_entry_details, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+
     @SuppressLint("RestrictedApi")
     override fun showEditButton(show: Boolean) {
        if(::editButton.isInitialized){
            editButton.visibility = if(show) View.VISIBLE else View.GONE
        }
+    }
+
+    override fun showExportContentIcon(visible: Boolean) {
+        this.showExportIcon = visible
+        invalidateOptionsMenu()
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu!!.findItem(R.id.export_content).isVisible = showExportIcon
+        return super.onPrepareOptionsMenu(menu)
     }
 
 
@@ -168,6 +191,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
             android.R.id.home -> {
                 clickUpNavigation()
                 return true
+            }
+
+            R.id.export_content ->{
+                presenter!!.handleContentEntryExport()
             }
         }
         return super.onOptionsItemSelected(item)

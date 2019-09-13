@@ -66,6 +66,9 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("showDownloadOptionsDialog")
     fun showDownloadOptionsDialog(map: HashMap<String, String>)
 
+    @JsName("showExportContentIcon")
+    fun showExportContentIcon(visible: Boolean)
+
     fun stopForeGroundService(jobId: Long,cancel: Boolean)
 
     companion object {

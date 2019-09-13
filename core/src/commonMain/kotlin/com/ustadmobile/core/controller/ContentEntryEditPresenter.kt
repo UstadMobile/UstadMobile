@@ -60,8 +60,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         super.onCreate(savedState)
 
         GlobalScope.launch {
-            val entry = appDb.contentEntryDao.findByEntryId(arguments.getValue(
-                    ContentEditorView.CONTENT_ENTRY_UID)!!.toLong())
+            val entry = appDb.contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
@@ -125,6 +124,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             contentEntry.imported = isImportedContent
 
             if(isNewContent){
+                contentEntry.inAppContent = true
                 contentEntry.leaf = isLeaf
                 contentEntry.contentEntryUid = appDb.contentEntryDao.insert(contentEntry)
 

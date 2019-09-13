@@ -9,12 +9,14 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.*
+import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 
 
@@ -370,6 +372,7 @@ class TestContainerManager {
                     progressValue = progress
                 }
             })
+            delay(TimeUnit.SECONDS.toMillis(3))
 
             Assert.assertTrue("All entry files were zipped", destZipFile.length() > 0 && progressValue == 100)
         }

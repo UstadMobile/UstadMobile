@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -189,20 +190,24 @@ actual class ContainerManager actual constructor(container: Container,
     }
 
     actual override fun exportContainer(zipFile: String, progressListener: ExportProgressListener?){
-        runBlocking{
-            lateinit var bufferInput: BufferedInputStream
-            val outputStream: ZipOutputStream = ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile)))
+        GlobalScope.launch{
+            lateinit var inputStream : InputStream
+            val outputStream: ZipOutputStream = ZipOutputStream(
+                    BufferedOutputStream(FileOutputStream(zipFile)))
             try{
                 var fileCount = 1
                 val buffer = ByteArray(BUFFER_SIZE)
-                pathToEntryMap.values.forEach {
-                    val entryFilePath = it.containerEntryFile!!.cefPath!!
-                    bufferInput = BufferedInputStream(FileInputStream(entryFilePath), BUFFER_SIZE)
+                for ((fileName, containerEntryWithFile) in pathToEntryMap) {
+                    val entryWithFile = containerEntryWithFile.containerEntryFile!!
+                    val fileInputStream = FileInputStream(entryWithFile.cefPath!!)
+                    inputStream = if(entryWithFile.compression == COMPRESSION_GZIP) GZIPInputStream(fileInputStream)
+                    else BufferedInputStream(fileInputStream, BUFFER_SIZE)
+
                     try{
-                        val zipEntry: ZipEntry = ZipEntry(entryFilePath.substring(entryFilePath.lastIndexOf("/") + 1))
+                        val zipEntry: ZipEntry = ZipEntry(fileName)
                         var bytesRead: Int
                         outputStream.putNextEntry(zipEntry)
-                        while (bufferInput.read(buffer).also { bytesRead = it } != -1) {
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                             outputStream.write(buffer, 0, bytesRead)
                         }
                     }catch (exception: IOException){
@@ -211,10 +216,11 @@ actual class ContainerManager actual constructor(container: Container,
                         if(progressListener != null){
                             progressListener.onProcessing(((fileCount.toFloat()/pathToEntryMap.values.size) * 100).toInt())
                         }
-                        bufferInput.close()
+                        inputStream.close()
                         fileCount++
                     }
                 }
+
             }catch (exception: IOException){
                 print(exception.message)
             }finally {

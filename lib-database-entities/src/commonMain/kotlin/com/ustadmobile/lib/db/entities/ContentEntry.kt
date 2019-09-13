@@ -82,6 +82,8 @@ open class ContentEntry() {
 
     var imported: Boolean = false
 
+    var inAppContent: Boolean = false
+
     /**
      * Represents if this content entry is public for anyone to use
      *

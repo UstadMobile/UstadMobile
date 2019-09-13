@@ -1,0 +1,67 @@
+package com.ustadmobile.core.controller
+
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManagerCommon
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.UmResultCallback
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryExportView
+import com.ustadmobile.core.view.ContentEntryExportView.Companion.ARG_CONTENT_ENTRY_TITLE
+import com.ustadmobile.lib.db.entities.Container
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
+
+class ContentEntryExportPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryExportView,
+                                  private val umDb: UmAppDatabase,private val umRepo: UmAppDatabase,
+                                  private val impl: UstadMobileSystemImpl)
+    : UstadBaseController<ContentEntryExportView>(context, arguments, view), ContainerManagerCommon.ExportProgressListener {
+
+    private var exporting: Boolean = false
+
+    private var container: Container? = null
+
+    private var destinationDir: String? = null
+
+    private var entryTile: String = arguments[ARG_CONTENT_ENTRY_TITLE] ?: ""
+
+    private var entryUid: Long = (arguments[ContentEntryExportView.ARG_CONTENT_ENTRY_UID] ?: "0").toLong()
+
+    override fun onCreate(savedState: Map<String, String?>?) {
+        super.onCreate(savedState)
+
+        container =  umRepo.containerDao.getMostRecentContainerForContentEntry(entryUid)
+
+        impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
+            override fun onDone(result: List<UMStorageDir>?) {
+                destinationDir = result?.get(0)?.dirURI
+                view.setMessageText(entryTile)
+                view.checkFilePermissions()
+            }
+        })
+    }
+
+    override fun onProcessing(progress: Int) {
+        view.runOnUiThread(Runnable {
+            if(progress == 100){
+                view.dismissDialog()
+            }
+            view.updateExportProgress(progress)
+        })
+    }
+
+    fun handleClickPositive(){
+        exporting = true
+        view.runOnUiThread(Runnable { view.prepareProgressView(true)})
+        val manager = ContainerManager(container!!,umDb,umRepo,destinationDir, mutableMapOf())
+        manager.exportContainer("$destinationDir/${entryTile.replace(" ","_")}_$entryUid.zip", this)
+    }
+
+
+    fun handleClickNegative(){
+        view.runOnUiThread(Runnable {
+            view.dismissDialog()
+        })
+    }
+}

@@ -11,6 +11,7 @@ import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryExportView.Companion.ARG_CONTENT_ENTRY_TITLE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.door.DoorLiveData
@@ -52,6 +53,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     private var entryLiveData: DoorLiveData<ContentEntry?>? = null
 
     private var isDownloadComplete: Boolean = false
+
+    private var showEditorControls: Boolean = false
 
     private var currentContentEntry: ContentEntry = ContentEntry()
 
@@ -102,6 +105,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     currentContentEntry = entry
                     view.setContentEntryLicense(licenseType)
                     with(entry) {
+                        view.runOnUiThread(Runnable {
+                            view.showEditButton(showEditorControls && this.inAppContent)
+                        })
                         view.setContentEntry(this)
                     }
                 }
@@ -126,6 +132,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     private fun onEntryStatusChanged(status: ContentEntryStatus?) {
 
         isDownloadComplete = status != null && status.downloadStatus == JobStatus.COMPLETE
+
+        if(currentContentEntry.contentEntryUid != 0L){
+            view.runOnUiThread(Runnable {
+                view.showExportContentIcon(showEditorControls
+                        && currentContentEntry.inAppContent && isDownloadComplete)
+            })
+        }
 
         val buttonLabel = impl.getString(if (status == null || !isDownloadComplete)
             MessageID.download
@@ -297,8 +310,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
 
-    fun handleShowEditButton(show: Boolean) {
-        view.runOnUiThread(Runnable { view.showEditButton(show) })
+    fun handleShowEditControls(show: Boolean) {
+       this.showEditorControls = show
     }
 
     suspend fun handleCancelDownload() {
@@ -315,7 +328,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             val entry = appRepo.contentEntryDao.findByEntryId(entryUuid)
-
             if (entry != null) {
                 args.putAll(arguments)
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
@@ -330,6 +342,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
         }
+    }
+
+    @JsName("handleContentEntryExport")
+    fun handleContentEntryExport(){
+        val args = HashMap(arguments)
+        args[ARG_CONTENT_ENTRY_TITLE] = currentContentEntry.title
+        impl.go(ContentEntryExportView.VIEW_NAME, args, context)
     }
 
 
