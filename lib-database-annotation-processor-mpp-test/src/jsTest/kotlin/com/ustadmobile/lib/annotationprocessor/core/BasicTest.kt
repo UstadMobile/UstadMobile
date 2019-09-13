@@ -7,21 +7,11 @@ import db2.ExampleDatabase2_JsImpl
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.content.TextContent
-import io.ktor.http.contentType
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.promise
-import kotlinx.serialization.Serializable
 import org.w3c.dom.set
 import kotlin.browser.localStorage
-import kotlinx.serialization.json.*
 import kotlin.test.*
 
 
@@ -29,13 +19,17 @@ class BasicTest {
 
     private lateinit var dbInstance: ExampleDatabase2
 
+    private val httpClient = HttpClient()
+
+    private val testServerUrl = "http://localhost:8089/"
+
     @BeforeTest
-    fun register() {
-        localStorage["doordb.endpoint.url"] = "http://localhost:8089/"
+    fun setup() = GlobalScope.promise {
+        localStorage["doordb.endpoint.url"] = testServerUrl
         ExampleDatabase2_JsImpl.register()
         dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class,
                 "ExampleDatabase2").build()
-
+        httpClient.get<Unit>("${testServerUrl}ExampleDatabase2/clearAllTables")
     }
 
 
@@ -53,14 +47,6 @@ class BasicTest {
         assertEquals(exampleEntity, entityFromDao, "Entity retrieved by UID is the same as inserted")
     }
 
-
-    @Test
-    fun givenDatabaseCreated_whenSelectEntityOnServerIsCalled_thenShouldReturnEntity() = GlobalScope.promise {
-        val initEntity = dbInstance.exampleDao2().findByUidAsync(5000L) //inserted by ExampleDatabase2App
-        assertNotNull(initEntity, "init entity not null")
-        assertEquals("Initial Entry", initEntity.name, "got initial entry")
-    }
-
     @Test
     fun testDaoPostWithoutIdFetch() = GlobalScope.promise {
         val entity = ExampleEntity2(name = "JsPost", someNumber =  50)
@@ -70,7 +56,7 @@ class BasicTest {
 
     @Test
     fun getList()  = GlobalScope.promise {
-        val aList =dbInstance.exampleDao2().findAllAsync()
+        val aList = dbInstance.exampleDao2().findAllAsync()
         assertNotNull(aList)
         println("dah")
     }
@@ -86,6 +72,16 @@ class BasicTest {
         }
 
         assertTrue(listRef.isNotEmpty() && listRef[0] != null, "LiveData loads with callback as expected")
+    }
+
+    @Test
+    fun givenBlankDatabase_whenListInserted_thenTotalNumItemsShouldMatch() = GlobalScope.promise {
+        val entityList = listOf(ExampleEntity2(name = "Test Item 1", someNumber =  50),
+                ExampleEntity2(name = "Test Item 2", someNumber =  51))
+        dbInstance.exampleDao2().insertListAsync(entityList)
+        assertEquals(entityList.size, dbInstance.exampleDao2().countNumEntitiesAsync(),
+                "After inserting entities into blank db, num entities in db equals list length")
+
     }
 
 

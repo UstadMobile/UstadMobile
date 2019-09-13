@@ -12,10 +12,13 @@ import io.ktor.routing.Routing
 import db2.ExampleDatabase2_KtorRoute
 import com.ustadmobile.door.DatabaseBuilder
 import db2.ExampleEntity2
+import io.ktor.application.call
 import io.ktor.features.CORS
 import io.ktor.features.DefaultHeaders
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.response.respond
+import io.ktor.routing.get
 
 private val serverDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
     .build() as ExampleDatabase2
@@ -48,5 +51,9 @@ fun Application.ExampleDatabase2App(devMode: Boolean = true) {
     val gson = Gson()
     install(Routing) {
         ExampleDatabase2_KtorRoute(serverDb, gson)
+        get("ExampleDatabase2/clearAllTables") {
+            serverDb.clearAllTables()
+            call.respond("OK - cleared")
+        }
     }
 }

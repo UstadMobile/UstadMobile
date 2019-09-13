@@ -91,6 +91,9 @@ abstract class ExampleDao2 {
     @Query("SELECT COUNT(*) FROM ExampleEntity2")
     abstract fun countNumEntities(): Int
 
+    @Query("SELECT COUNT(*) FROM ExampleEntity2")
+    abstract suspend fun countNumEntitiesAsync(): Int
+
     @Query("SELECT * FROM ExampleEntity2 WHERE uid IN (:uidList)")
     abstract fun queryUsingArray(uidList: List<Long>): List<ExampleEntity2>
 
