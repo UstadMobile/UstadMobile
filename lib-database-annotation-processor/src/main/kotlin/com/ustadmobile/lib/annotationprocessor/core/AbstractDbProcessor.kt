@@ -18,19 +18,20 @@ import io.ktor.client.response.HttpResponse
 import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.DoorLiveData
 import kotlinx.coroutines.GlobalScope
 import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.PreparedStatementArrayProxy
 import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
 import org.apache.commons.text.StringEscapeUtils
 import io.ktor.http.HttpStatusCode
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
-
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+//here in a comment because it sometimes gets removed by 'optimization of parameters'
+// import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -1093,13 +1094,27 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                          syncHelperDaoVarName: String = "_syncHelper") : CodeBlock {
         val codeBlock = CodeBlock.builder()
         val resultType = resolveQueryResultType(daoMethod.returnType!!)
+        val returnType = daoMethod.returnType
+        val isDataSourceFactory = returnType is ParameterizedTypeName
+                && returnType.rawType == DataSource.Factory::class.asClassName()
 
         daoMethod.parameters.forEach {
             codeBlock.add(generateGetParamFromRequestCodeBlock(it.type,
                     it.name, declareVariableName = it.name, declareVariableType = "val"))
         }
 
+        if(isDataSourceFactory) {
+            listOf("_offset", "_limit").forEach {
+                codeBlock.add(generateGetParamFromRequestCodeBlock(INT, it, it,
+                        declareVariableType = "val"))
+            }
+        }
+
         val queryVarsMap = daoMethod.parameters.map { it.name to it.type}.toMap().toMutableMap()
+        if(isDataSourceFactory){
+            queryVarsMap += "_offset" to INT
+            queryVarsMap += "_limit" to INT
+        }
 
         var querySql = daoMethod.annotations.first { it.className == Query::class.asClassName() }
                 .members.first { it.toString().trim().startsWith("value") || it.toString().trim().startsWith("\"") }.toString()
@@ -1136,6 +1151,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     processingEnv)
         }
 
+        if(isDataSourceFactory) {
+            querySql += " LIMIT :_limit OFFSET :_offset"
+        }
 
         codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, null))
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
@@ -1245,9 +1263,10 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
         if(addReturnDaoResult) {
-            codeBlock.add("return _dao.${daoFunSpec.name}(")
-                    .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
-                    .add(")\n")
+//            codeBlock.add("return _dao.${daoFunSpec.name}(")
+//                    .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
+//                    .add(")\n")
+            codeBlock.add("return ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
         }
 
 
