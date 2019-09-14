@@ -32,7 +32,6 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
         val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
         val containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
 
-
         navigation = arguments[ARG_REFERRER] ?: ""
 
         GlobalScope.launch {

@@ -5,8 +5,6 @@ import kotlinx.io.InputStream
 
 interface VideoPlayerView : UstadView {
 
-    fun loadUrl(videoPath: String)
-
     fun setVideoInfo(result: ContentEntry)
 
     fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)

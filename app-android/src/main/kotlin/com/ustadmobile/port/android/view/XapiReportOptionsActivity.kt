@@ -19,6 +19,7 @@ import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiReportOptionsPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -64,7 +65,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var toET: EditText
 
-    private val umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
+    private lateinit var umRepo: UmAppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,11 +87,16 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             createDateRangeDialog().show()
         }
 
-        setUMToolbar(R.id.new_report_toolbar)
+        umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
+
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = "Report Options"
+
+        setProgressBar()
+        showBaseProgressBar(false)
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),

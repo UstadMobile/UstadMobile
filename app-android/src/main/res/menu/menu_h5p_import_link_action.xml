@@ -6,6 +6,7 @@
         app:showAsAction="always"
         android:id="@+id/import_link_done"
         android:title="@string/content_editor_action_done"
+        android:enabled="false"
         android:icon="@drawable/ic_done_white_24dp" />
 
 </menu>

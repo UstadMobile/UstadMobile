@@ -37,7 +37,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
     private lateinit var repo: UmAppDatabase
 
-    private var mockView: ContentEntryImportLinkView = mock {}
+    private lateinit var mockView: ContentEntryImportLinkView
 
     private lateinit var presenter: ContentEntryImportLinkPresenter
 
@@ -64,6 +64,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         createDb(serverdb)
         createDb(defaultDb)
 
+        mockView = mock {}
+
         val args = Hashtable<String, String>()
         args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
         presenter = ContentEntryImportLinkPresenter(context,
@@ -87,10 +89,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
     @Test
     fun givenWhenHandleUrlTextUpdated_whenInvalidUrl_showInvalidUrlMessage() {
-        runBlocking {
-            presenter.handleUrlTextUpdated("hello")
-            verify(mockView).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-        }
+        presenter.handleUrlTextUpdated("hello")
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
     }
 
     @Test
@@ -99,10 +99,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setBody("no h5p here").setResponseCode(404))
         mockWebServer.start()
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
-            verify(mockView).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-        }
+        presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+
     }
 
 
@@ -112,10 +111,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setBody("no h5p here").setResponseCode(200))
         mockWebServer.start()
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
-            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
-        }
+        presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
 
 
     }
@@ -129,12 +126,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val url = mockWebServer.url("/somehp5here").toString()
 
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(url)
+        presenter.handleUrlTextUpdated(url)
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
 
-            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-
-        }
 
     }
 
@@ -147,11 +141,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val url = mockWebServer.url("/somehp5here").toString()
 
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(url)
-            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-
-        }
+        presenter.handleUrlTextUpdated(url)
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
 
     }
 
@@ -163,13 +154,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setBody("no h5p here"))
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
-
-
-        runBlocking {
-            presenter.handleUrlTextUpdated(url)
-            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-
-        }
+        
+        presenter.handleUrlTextUpdated(url)
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
 
     }
 
@@ -180,10 +167,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setHeader("Content-Length", FILE_SIZE).setHeader("Content-Type", "video/").setResponseCode(200))
         mockWebServer.start()
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
-            verify(mockView, timeout(1000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
-        }
+        presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
     }
 
 
@@ -193,11 +178,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
         mockWebServer.start()
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
-            verify(mockView, timeout(1000)).showUrlStatus(true, "")
-            verify(mockView, timeout(1000)).showHideVideoTitle(true)
-        }
+        presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
+        verify(mockView, timeout(5000)).showUrlStatus(true, "")
+        verify(mockView, timeout(5000)).showHideVideoTitle(true)
     }
 
 
@@ -210,13 +193,11 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val url = mockWebServer.url("/somehp5here").toString()
 
 
-        runBlocking {
-            presenter.handleUrlTextUpdated(url)
+        presenter.handleUrlTextUpdated(url)
 
-            verify(mockView, timeout(1000)).showUrlStatus(true, "")
-            verify(mockView, timeout(1000)).displayUrl(url)
+        verify(mockView, timeout(5000)).showUrlStatus(true, "")
+        verify(mockView, timeout(5000)).displayUrl(url)
 
-        }
 
     }
 
@@ -233,19 +214,14 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
 
-        runBlocking {
 
-            presenter.handleUrlTextUpdated(url)
-            presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showProgress(true)
+        runBlocking {
+            presenter.handleUrlTextUpdated(url).join()
+            presenter.handleClickImport().join()
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
-            verify(mockView, timeout(1000)).showProgress(false)
             Assert.assertEquals("Func for h5p download called", 1, count)
-
-
         }
-
 
     }
 
@@ -262,15 +238,10 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val url = mockWebServer.url("/somehp5here").toString()
 
         runBlocking {
-
-            presenter.handleUrlTextUpdated(url)
-            presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showProgress(true)
-            verify(mockView, timeout(1000)).showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
-            verify(mockView, timeout(1000)).showProgress(false)
+            presenter.handleUrlTextUpdated(url).join()
+            presenter.handleClickImport().join()
+            verify(mockView, timeout(5000)).showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
         }
-
-
     }
 
     @Test
@@ -282,17 +253,14 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
 
-        runBlocking {
 
-            presenter.handleUrlTextUpdated(url)
+        runBlocking {
+            presenter.handleUrlTextUpdated(url).join()
             presenter.handleTitleChanged("Video Title")
-            presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showProgress(true)
+            presenter.handleClickImport().join()
             Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
             Assert.assertTrue(serverdb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
-            verify(mockView, timeout(1000)).showProgress(false)
             Assert.assertEquals("Func for h5p not called", 0, count)
-
         }
 
 
@@ -312,25 +280,20 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
                 args, mockView, mockWebServer.url("").toString())
         presenter.onCreate(args)
 
-
         val url = mockWebServer.url("/somehp5here").toString()
 
         runBlocking {
-
-            presenter.handleUrlTextUpdated(url)
+            presenter.handleUrlTextUpdated(url).join()
             presenter.handleTitleChanged("Video Title")
-            presenter.handleClickImport()
-            verify(mockView, timeout(1000)).showHideErrorMessage(false)
-            verify(mockView, timeout(1000)).showProgress(true)
-            verify(mockView, timeout(1000)).showProgress(false)
-            verify(mockView, timeout(1000)).enableDisableEditText(true)
-            verify(mockView, timeout(1000)).showHideErrorMessage(true)
-
+            presenter.handleClickImport().join()
+            verify(mockView, timeout(5000)).showHideErrorMessage(false)
+            verify(mockView, timeout(5000)).enableDisableEditText(true)
+            verify(mockView, timeout(5000)).showHideErrorMessage(true)
         }
 
 
-    }
 
+    }
 
 
 }

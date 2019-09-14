@@ -7,7 +7,6 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.lib.db.entities.H5PImportData
-import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.head
@@ -16,8 +15,10 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
-import kotlinx.io.IOException
+import kotlinx.coroutines.launch
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
@@ -30,136 +31,172 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     private var contentType = -1
 
+    var isDoneEnabled = false
+
+    var jobCount = 0
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
     }
 
+    fun checkProgressBar() {
+        view.showBaseProgressBar(jobCount > 0)
+    }
 
-    suspend fun handleUrlTextUpdated(url: String) {
-        view.showHideVideoTitle(false)
-        view.enableDisableDoneButton(false)
 
-        var response: HttpResponse?
-        try {
-            response = defaultHttpClient().head<HttpResponse>(url)
-        } catch (e: Exception) {
-            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-            return
-        }
+    fun handleUrlTextUpdated(url: String): Job {
+        jobCount++
+        checkProgressBar()
+        return GlobalScope.launch {
+            view.showHideVideoTitle(false)
+            isDoneEnabled = false
+            view.checkDoneButton()
 
-        contentType = -1
-
-        if (response.status.value != 200) {
-            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-            return
-        }
-
-        var contentTypeHeader = response.headers["Content-Type"]
-        if (contentTypeHeader?.contains(";") == true) {
-            contentTypeHeader = contentTypeHeader.split(";")[0]
-        }
-
-        val length = response.headers["Content-Length"]?.toInt() ?: FILE_SIZE
-
-        response.discardRemaining()
-        response.close()
-
-        if (contentTypeHeader?.startsWith("video/") == true) {
-
-            if (length >= FILE_SIZE) {
-                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
-                return
+            var response: HttpResponse?
+            try {
+                response = defaultHttpClient().head<HttpResponse>(url)
+            } catch (e: Exception) {
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                jobCount--
+                checkProgressBar()
+                return@launch
             }
 
-            contentType = VIDEO
-            this.hp5Url = url
-            view.showUrlStatus(true, "")
-            view.showHideVideoTitle(true)
-            view.enableDisableDoneButton(true)
-            return
+            contentType = -1
 
-        } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
-            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
-            return
-        }
+            if (response.status.value != 200) {
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                jobCount--
+                checkProgressBar()
+                return@launch
+            }
 
-        val content = checkIfH5PValidAndReturnItsContent(url)
+            var contentTypeHeader = response.headers["Content-Type"]
+            if (contentTypeHeader?.contains(";") == true) {
+                contentTypeHeader = contentTypeHeader.split(";")[0]
+            }
 
-        if (content.isNullOrEmpty()) {
-            view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
-            return
-        }
+            val length = response.headers["Content-Length"]?.toInt() ?: FILE_SIZE
 
-        val isValid = content.contains("H5PIntegration")
-        if (isValid) {
-            contentType = HTML
-            this.hp5Url = url
-            view.showUrlStatus(isValid, "")
-            view.displayUrl(url)
-            view.enableDisableDoneButton(true)
-        } else {
-            view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+            response.discardRemaining()
+            response.close()
+
+            if (contentTypeHeader?.startsWith("video/") == true) {
+
+                if (length >= FILE_SIZE) {
+                    view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+                    jobCount--
+                    checkProgressBar()
+                    return@launch
+                }
+
+                contentType = VIDEO
+                hp5Url = url
+                view.showUrlStatus(true, "")
+                view.showHideVideoTitle(true)
+                jobCount--
+                checkProgressBar()
+                return@launch
+
+            } else if (!listOfHtmlContentType.contains(contentTypeHeader)) {
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
+                jobCount--
+                checkProgressBar()
+                return@launch
+            }
+
+            val content = checkIfH5PValidAndReturnItsContent(url)
+
+            if (content.isNullOrEmpty()) {
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                jobCount--
+                checkProgressBar()
+                return@launch
+            }
+
+            val isValid = content.contains("H5PIntegration")
+            if (isValid) {
+                contentType = HTML
+                hp5Url = url
+                view.showUrlStatus(isValid, "")
+                view.displayUrl(url)
+                isDoneEnabled = true
+                view.checkDoneButton()
+            } else {
+                view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+            }
+            jobCount--
+            checkProgressBar()
         }
     }
 
 
-    suspend fun handleClickImport() {
-        val client = defaultHttpClient()
-        var response: HttpResponse? = null
-        view.showProgress(true)
-        view.enableDisableEditText(false)
-        view.showHideErrorMessage(false)
+    fun handleClickImport(): Job {
+        jobCount++
+        checkProgressBar()
+        return GlobalScope.launch {
+            val client = defaultHttpClient()
+            var response: HttpResponse? = null
+            view.enableDisableEditText(false)
+            view.showHideErrorMessage(false)
+            try {
+                when (contentType) {
+                    HTML -> {
 
-        when (contentType) {
-            HTML -> {
+                        response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
+                            parameter("hp5Url", hp5Url)
+                            parameter("parentUid", parentContentEntryUid)
+                        }
 
-                response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
-                    parameter("hp5Url", hp5Url)
-                    parameter("parentUid", parentContentEntryUid)
+                    }
+                    VIDEO -> {
+
+                        if (videoTitle.isNullOrEmpty()) {
+                            view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
+                            jobCount--
+                            checkProgressBar()
+                            return@launch
+                        }
+
+                        response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
+                            parameter("hp5Url", hp5Url)
+                            parameter("parentUid", parentContentEntryUid)
+                            parameter("title", videoTitle)
+                        }
+                    }
                 }
+            } catch (e: Exception) {
+                response = null
+            }
+
+
+
+            if (response?.status?.value == 200) {
+
+                val content = response.receive<H5PImportData>()
+                view.enableDisableEditText(true)
+
+                val db = UmAppDatabase.getInstance(context)
+                db.contentEntryDao.insert(content.contentEntry)
+                db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
+                db.containerDao.insert(content.container)
+
+                view.runOnUiThread(Runnable {
+                    jobCount--
+                    checkProgressBar()
+                    view.returnResult()
+                })
+
+            } else {
+
+                view.enableDisableEditText(true)
+                view.showHideErrorMessage(true)
+                jobCount--
+                checkProgressBar()
 
             }
-            VIDEO -> {
-
-                if (videoTitle.isNullOrEmpty()) {
-                    view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
-                    view.showProgress(false)
-                    return
-                }
-
-                response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
-                    parameter("hp5Url", hp5Url)
-                    parameter("parentUid", parentContentEntryUid)
-                    parameter("title", videoTitle)
-                }
-            }
-        }
-
-
-        if (response?.status?.value == 200) {
-
-            val content = response.receive<H5PImportData>()
-
-            view.showProgress(false)
-            view.enableDisableEditText(true)
-
-            val db = UmAppDatabase.getInstance(context)
-            db.contentEntryDao.insert(content.contentEntry)
-            db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
-            db.containerDao.insert(content.container)
-
-            view.runOnUiThread(Runnable {
-                view.returnResult()
-            })
-
-        } else {
-
-            view.showProgress(false)
-            view.enableDisableEditText(true)
-            view.showHideErrorMessage(true)
-
         }
 
 
@@ -167,7 +204,11 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     fun handleTitleChanged(title: String) {
         this.videoTitle = title
-        view.showNoTitleEntered("")
+        if (title.isNotEmpty()) {
+            isDoneEnabled = true
+            view.checkDoneButton()
+            view.showNoTitleEntered("")
+        }
     }
 
     companion object {

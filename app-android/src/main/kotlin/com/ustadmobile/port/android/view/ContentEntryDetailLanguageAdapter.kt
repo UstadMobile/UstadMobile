@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.appcompat.widget.AppCompatButton
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
@@ -31,11 +32,7 @@ class ContentEntryDetailLanguageAdapter(private val data: List<ContentEntryRelat
     }
 
     inner class LangHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val entryLang: Button
-
-        init {
-            entryLang = view as Button
-        }
+        val entryLang: Button = view as AppCompatButton
 
         override fun toString(): String {
             return entryLang.text.toString()

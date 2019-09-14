@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEntryImportLinkView : UstadView {
+interface ContentEntryImportLinkView : UstadView, UstadViewWithProgress {
 
     fun showUrlStatus(isValid: Boolean, message: String)
 
@@ -12,9 +12,7 @@ interface ContentEntryImportLinkView : UstadView {
 
     fun showNoTitleEntered(errorText: String)
 
-    fun showProgress(showProgress: Boolean)
-
-    fun enableDisableDoneButton(enable: Boolean)
+    fun checkDoneButton()
 
     fun enableDisableEditText(enable: Boolean)
 

@@ -3,11 +3,10 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.core.view.SplashView
-import kotlinx.coroutines.Runnable
+import com.ustadmobile.core.view.SplashScreenView
 
-class SplashPresenter(context: Any, arguments: Map<String, String?>, view: SplashView, val impl: UstadMobileSystemImpl)
-    : UstadBaseController<SplashView>(context, arguments, view) {
+class SplashScreenPresenter(context: Any, arguments: Map<String, String?>, view: SplashScreenView, val impl: UstadMobileSystemImpl)
+    : UstadBaseController<SplashScreenView>(context, arguments, view) {
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -20,15 +19,8 @@ class SplashPresenter(context: Any, arguments: Map<String, String?>, view: Splas
         val animateIcon = impl.getAppConfigString(AppConfig.KEY_ANIMATE_ORGANISATION_ICON,
                 "false", context)!!.toBoolean()
 
-        val preloadLibs = impl.getAppConfigString(AppConfig.KEY_PRELOAD_LIBRARIES,
-                "false", context)!!.toBoolean()
-
         val delay = showSplash || !launched
         view.animateOrganisationIcon(animateIcon, delay)
-
-        if(!launched && preloadLibs){
-            view.preloadData()
-        }
 
         view.startUi(delay, animateIcon)
     }

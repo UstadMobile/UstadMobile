@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntry
 
-interface SelectMultipleEntriesTreeDialogView : UstadView {
+interface SelectMultipleEntriesTreeDialogView : UstadView, UstadViewWithProgress {
 
     fun populateTopEntries(locations: List<ContentEntry>)
 
