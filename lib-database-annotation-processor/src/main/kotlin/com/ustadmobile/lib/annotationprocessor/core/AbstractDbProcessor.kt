@@ -173,7 +173,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
         val syncableEntityInfo = SyncableEntityInfo(it, processingEnv)
 
         """( ${syncableEntityInfo.entityMasterCsnField.name} > COALESCE((SELECT 
-            |${syncableEntityInfo.trackerCsnField.name} FROM ${syncableEntityInfo.tracker.simpleName}  
+            |MAX(${syncableEntityInfo.trackerCsnField.name}) FROM ${syncableEntityInfo.tracker.simpleName}  
             |WHERE  ${syncableEntityInfo.trackerDestField.name} = :$clientIdParamName 
             |AND ${syncableEntityInfo.trackerPkField.name} = 
             |${resultComponentClassName.simpleName}.${syncableEntityInfo.entityPkField.name} 
