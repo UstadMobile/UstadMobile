@@ -12,7 +12,7 @@ expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?
                                     mountContainer: suspend (Long) -> String)
     : ContentEditorPresenterCommon{
 
-    override suspend fun createDocument(title: String, description: String): Boolean
+    override suspend fun createDocument(title: String, description: String, author: String): Boolean
 
     override suspend fun openExistingDocument(container: Container): Boolean
 
@@ -20,7 +20,7 @@ expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?
 
     override suspend fun saveContentToFile(filename: String, content: String): Boolean
 
-    override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String?
+    override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, author: String, isNewDocument: Boolean): String?
 
     override suspend fun addPageToDocument(pageTitle: String): Boolean
 

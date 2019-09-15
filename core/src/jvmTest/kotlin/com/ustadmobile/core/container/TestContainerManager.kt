@@ -9,12 +9,14 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.*
+import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 
 
@@ -333,6 +335,41 @@ class TestContainerManager {
 
             Assert.assertTrue("Given 1 already downloaded entry, remaining items to download is empty",
                     remainingEntriesToDownload.isEmpty())
+        }
+    }
+
+    @Test
+    fun givenExistingContainer_whenExportSelected_thenShouldZipAllEntryFiles(){
+        runBlocking {
+            val pathList = mutableListOf("path1.txt", "path2.txt", "path3.txt", "path4.txt")
+            val entry = ContentEntry()
+            entry.title = "Sample Entry Title"
+            entry.leaf = true
+            entry.contentEntryUid = db.contentEntryDao.insert(entry)
+            val container = Container()
+            container.containerContentEntryUid = entry.contentEntryUid
+            container.containerUid = repo.containerDao.insert(container)
+
+            val containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
+
+            val fileSources = mutableListOf<ContainerManager.FileEntrySource>()
+
+            pathList.forEach {
+                fileSources.add(ContainerManager.FileEntrySource(
+                        File.createTempFile("tmp", it), it))
+            }
+            containerManager.addEntries(*fileSources.toTypedArray())
+
+            val foundContainer = repo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entry.contentEntryUid)
+
+            val manager = ContainerManager(foundContainer!!, db, repo, containerTmpDir.absolutePath)
+            val destZipFile = File.createTempFile("tmp", "temp.zip")
+            Assert.assertEquals("Zip file is empty", 0, destZipFile.length())
+
+            manager.exportContainer(destZipFile.absolutePath, null)
+            delay(TimeUnit.SECONDS.toMillis(3))
+
+            Assert.assertTrue("All entry files were zipped", destZipFile.length() > 0)
         }
     }
 

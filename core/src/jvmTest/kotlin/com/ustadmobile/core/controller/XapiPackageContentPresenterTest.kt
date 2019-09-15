@@ -25,7 +25,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 
-class TestXapiPackageContentPresenter {
+class XapiPackageContentPresenterTest {
 
     private lateinit var context: Any
 

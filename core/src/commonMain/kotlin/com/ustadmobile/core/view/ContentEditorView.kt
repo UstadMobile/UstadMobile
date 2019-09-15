@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEditorView : ViewWithErrorNotifier {
-
+interface ContentEditorView : ContentWithOptionsView{
 
     /**
      * Set bold formatting on selected/focused content

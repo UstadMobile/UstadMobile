@@ -185,10 +185,11 @@ task installDependencies{
  * Execute actual angular e2e tests
  */
 task executeEnd2EndTests{
+  def portNumber = project.hasProperty("testport") ? testport : 4200
   doLast{
     exec {
       workingDir appAngularPath
-      commandLine 'ng', 'e2e'
+      commandLine 'ng', 'e2e', '--port', portNumber
     }
   }
 }

@@ -291,6 +291,9 @@
     <string name="done">Done</string>
     <string name="select_locations">Select Locations</string>
     <string name="select_entries">Select Entries</string>
+    <string name="content_entry_export">Export</string>
+    <string name="content_entry_export_inprogress">Exporting</string>
+    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
 
 </resources>

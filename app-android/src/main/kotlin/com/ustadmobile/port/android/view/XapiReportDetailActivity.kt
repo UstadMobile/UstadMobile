@@ -2,8 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,13 +40,14 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xapi_report_preview)
 
-        setUMToolbar(R.id.preview_toolbar)
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = getString(R.string.activity_preview_xapi)
 
-        umRepository = UmAccountManager.getRepositoryForActiveAccount(this)
+        setProgressBar()
+        showBaseProgressBar(false)
 
         recyclerView = findViewById(R.id.preview_report_list)
         viewManager = LinearLayoutManager(this)
@@ -55,6 +58,7 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
         floatingButton = findViewById(R.id.preview_fab)
 
+        umRepository = UmAccountManager.getRepositoryForActiveAccount(this)
 
         presenter = XapiReportDetailPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),

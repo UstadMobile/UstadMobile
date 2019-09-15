@@ -89,6 +89,10 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
     this.presenter.handleAddDashboardClicked("S")
   }
 
+  showBaseProgressBar(showProgress){
+    
+  }
+
   ngOnDestroy() {
     super.ngOnDestroy()
     if (this.presenter) {

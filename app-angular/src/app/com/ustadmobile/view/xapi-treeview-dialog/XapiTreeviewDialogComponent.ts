@@ -26,7 +26,7 @@ export class UmDataTreeNode implements UmTreeNode{
   
   
 export class XapiTreeviewDialogComponent extends MzBaseModal implements OnInit,
-core.com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView {
+core.com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView{
   presenter: core.com.ustadmobile.core.controller.SelectMultipleLocationTreeDialogPresenter;
   subscription : Subscription; 
   systemImpl: any;
@@ -92,11 +92,9 @@ core.com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView {
     UmAngularUtil.fireOnDataChanged({nodes:"clear"})
   }
 
-  setTitle(title: string){
-    console.log(title)
-  }
+  showBaseProgressBar(showProgress){}
 
-  finish(){
+  setTitle(title: string){}
 
-  }
+  finish(){}
 }

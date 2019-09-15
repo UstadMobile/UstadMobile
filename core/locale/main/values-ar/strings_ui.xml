@@ -283,6 +283,9 @@
     <string name='error_message_load_page'>فشل تحميل الصفحة</string>
     <string name='error_message_update_document'>فشل تحديث المستند</string>
     <string name='content_update_massage'>تم التحديث بنجاح</string>
+    <string name="content_entry_export">Export</string>
+    <string name="content_entry_export_inprogress">Exporting</string>
+    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
     <string name='location_permission_message'>التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق ال Bluetooth للبحث عن الاجهزة القريبة</string>
     <string name='download_storage_permission_title'>مطلوب أذن للحصول على الملف</string>

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import kotlinx.io.IOException
 import kotlinx.io.InputStream
 
 expect class ContainerManager : ContainerManagerCommon {
@@ -21,7 +22,10 @@ expect class ContainerManager : ContainerManagerCommon {
 
     fun getEntry(pathInContainer: String): ContainerEntryWithContainerEntryFile?
 
+    override fun exportContainer(zipFile: String, progressListener: ExportProgressListener?)
+
     suspend fun linkExistingItems(itemsToDownload: List<ContainerEntryWithMd5>) : List<ContainerEntryWithMd5>
 
+    override fun cancelExporting()
 
 }

@@ -118,6 +118,7 @@ describe('Report Details', () => {
   it('givenApplication_whenAddToDashboardButtonIsClicked_shouldAddToDashboard', () => {
     pageDetails.launch();
     pageDetails.getPage().addBtn.click()
+    browser.sleep(2000)
     //expect(browser.getCurrentUrl()).toContain(pageDetails.views.dashboard);
   });
 

@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
-interface SelectMultipleEntriesTreeDialogView : UstadView {
+interface SelectMultipleEntriesTreeDialogView : UstadView, UstadViewWithProgress {
 
     @JsName("populateTopEntries")
     fun populateTopEntries(entries: List<ContentEntry>)

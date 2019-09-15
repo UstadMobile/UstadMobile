@@ -24,7 +24,7 @@ import org.junit.Test
 import org.mockito.Mockito
 import java.util.*
 
-class TestXapiReportDetailPresenter : AbstractXapiReportOptionsTest() {
+class XapiReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
 
     private lateinit var mockImpl: UstadMobileSystemImpl
 

@@ -107,7 +107,7 @@ mocha-chrome content-language-locale-tests.html --timeout 6000
 **Run with gradle**
   
 ```   
- ./gradlew :lib-content-editor:test  
+ ./gradlew :lib-content-editor:umTest  
 ```
 ## Playground
 You can use index.html as your playground during development or just to check if things work, or to test how the lib works from native point of view.

@@ -65,7 +65,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var toET: EditText
 
-    private lateinit var umRepo: UmAppDatabase;
+    private lateinit var umRepo: UmAppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,11 +89,16 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             createDateRangeDialog().show()
         }
 
-        setUMToolbar(R.id.new_report_toolbar)
+        umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
+
+        setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = "Report Options"
+
+        setProgressBar()
+        showBaseProgressBar(false)
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),

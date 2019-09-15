@@ -40,7 +40,10 @@ This will create an app, to run it use http://localhost:4200/
 To execute end to end test with Protractor use:-
   
 ```  
-./gradlew app-angular:ngTest -Ptestmodule=e2e  
+./gradlew app-angular:ngTest -Ptestmodule=e2e 
+
+//specify port if needed, otherwise test will use default angulat port i.e 4200
+./gradlew app-angular:ngTest -Ptestmodule=e2e -Ptestport=<port number>
 ```
 To execute component tests with Karma use:-
 ```  

@@ -15,7 +15,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
 
 
-    actual override suspend fun createDocument(title: String, description: String): Boolean {
+    actual override suspend fun createDocument(title: String, description: String, author: String): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -31,7 +31,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         TODO("not implemented")
     }
 
-    actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String? {
+    actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, author: String, isNewDocument: Boolean): String? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

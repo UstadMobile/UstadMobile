@@ -148,7 +148,6 @@ onCreate() {
 }
 
 onDataChange(data) {
-  console.log("is node ", data.nodes != undefined, data)
   if (data.nodes != undefined) {
     this.selectedWhatList = []
     if (data.nodes === "clear") {
@@ -268,6 +267,8 @@ handleDoneSelected() {
    this.presenter.handleViewReportPreview(util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(didList),
    util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(whoList))
 }
+
+showBaseProgressBar(showProgress){}
 
 ngOnDestroy() {
   super.ngOnDestroy()

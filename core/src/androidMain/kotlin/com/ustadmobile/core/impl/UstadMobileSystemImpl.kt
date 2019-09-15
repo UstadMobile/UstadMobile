@@ -89,6 +89,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryEditFragment"),
             SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
             SelectMultipleEntriesTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleEntriesTreeDialogFragment"),
+            XapiReportOptionsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportOptionsActivity"),
             XapiReportDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportDetailActivity"),
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
@@ -103,6 +104,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
             ContentEntryListFragmentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
             ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
+            ContentEntryExportView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryExportFragmentDialog"),
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"))
 
 

@@ -7,16 +7,12 @@ import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
-                                                       view: ContentEditorView, val storage: String?,
-                                                       val database : UmAppDatabase,
+                                                       view: ContentEditorView, private val storage: String?,
+                                                       private val database : UmAppDatabase,
                                                        private val repository : UmAppDatabase,
                                                        mountContainer: suspend (Long) -> String)
     :ContentEditorPresenterCommon(context,arguments,view,storage,database,mountContainer){
 
-
-    actual override suspend fun createDocument(title: String, description: String): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     actual override suspend fun openExistingDocument(container: Container): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -28,10 +24,6 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     actual override suspend fun saveContentToFile(filename: String, content: String):Boolean {
         TODO("not implemented")
-    }
-
-    actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     actual override suspend fun addPageToDocument(pageTitle: String): Boolean {
@@ -61,6 +53,13 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    actual override suspend fun createDocument(title: String, description: String, author: String): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, author: String, isNewDocument: Boolean): String? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
 
 }

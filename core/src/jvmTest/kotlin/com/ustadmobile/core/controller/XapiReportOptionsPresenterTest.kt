@@ -29,7 +29,7 @@ import org.junit.Test
 import org.mockito.Mockito
 import java.util.*
 
-class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
+class XapiReportOptionsPresenterTest : AbstractXapiReportOptionsTest() {
 
 
     private lateinit var reportOptionsWithNoData: XapiReportOptions

@@ -11,6 +11,7 @@ import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryExportView.Companion.ARG_CONTENT_ENTRY_TITLE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.door.DoorLiveData
@@ -53,10 +54,12 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var isDownloadComplete: Boolean = false
 
+    private var showEditorControls: Boolean = false
+
+    private var currentContentEntry: ContentEntry = ContentEntry()
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-
-
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
@@ -75,12 +78,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             })
         }
 
+
         GlobalScope.launch {
+            view.showBaseProgressBar(true)
             val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsForContentEntryAsync(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setTranslationLabelVisible(result.isNotEmpty())
                 view.setFlexBoxVisible(result.isNotEmpty())
                 view.setAvailableTranslations(result, entryUuid)
+                view.showBaseProgressBar(false)
             })
         }
 
@@ -95,9 +101,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (entry != null) {
             val licenseType = getLicenseType(entry)
             view.runOnUiThread(Runnable {
-                view.setContentEntryLicense(licenseType)
-                with(entry) {
-                    view.setContentEntry(this)
+                if (currentContentEntry != entry) {
+                    currentContentEntry = entry
+                    view.setContentEntryLicense(licenseType)
+                    with(entry) {
+                        view.runOnUiThread(Runnable {
+                            view.showEditButton(showEditorControls && this.inAppContent)
+                        })
+                        view.setContentEntry(this)
+                    }
                 }
             })
         }
@@ -120,6 +132,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     private fun onEntryStatusChanged(status: ContentEntryStatus?) {
 
         isDownloadComplete = status != null && status.downloadStatus == JobStatus.COMPLETE
+
+        if(currentContentEntry.contentEntryUid != 0L){
+            view.runOnUiThread(Runnable {
+                view.showExportContentIcon(showEditorControls
+                        && currentContentEntry.inAppContent && isDownloadComplete)
+            })
+        }
 
         val buttonLabel = impl.getString(if (status == null || !isDownloadComplete)
             MessageID.download
@@ -174,7 +193,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             val maxFailureFromTimeStamp = currentTimeStamp - 300000
 
             GlobalScope.launch {
-
                 val container = appRepo.containerDao.getMostRecentContainerForContentEntry(entryUuid)
                 if (container != null) {
                     containerUid = container.containerUid
@@ -234,15 +252,18 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (isDownloadComplete) {
 
             val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                    "false",context)!!.toBoolean()
+                    "false", context)!!.toBoolean()
 
-            if(loginFirst){
+            if (loginFirst) {
                 impl.go(LoginView.VIEW_NAME, args, view.viewContext)
-            }else{
+            } else {
+                view.showBaseProgressBar(true)
                 ContentEntryUtil.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
                         context, object : UmCallback<Any> {
 
-                    override fun onSuccess(result: Any?) {}
+                    override fun onSuccess(result: Any?) {
+                        view.showBaseProgressBar(false)
+                    }
 
                     override fun onFailure(exception: Throwable?) {
                         if (exception != null) {
@@ -289,15 +310,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
 
-    fun handleShowEditButton(show: Boolean){
-        view.runOnUiThread(Runnable { view.showEditButton(show)})
+    fun handleShowEditControls(show: Boolean) {
+       this.showEditorControls = show
     }
 
-    suspend fun handleCancelDownload(){
+    suspend fun handleCancelDownload() {
         val currentJobId = appRepo.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
-                appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
-                        JobStatus.CANCELLING)
-                        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
+                JobStatus.CANCELLING)
+        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
         view.stopForeGroundService(currentJobId.toLong(), true)
     }
@@ -307,7 +328,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             val entry = appRepo.contentEntryDao.findByEntryId(entryUuid)
-
             if (entry != null) {
                 args.putAll(arguments)
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
@@ -322,6 +342,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
         }
+    }
+
+    @JsName("handleContentEntryExport")
+    fun handleContentEntryExport(){
+        val args = HashMap(arguments)
+        args[ARG_CONTENT_ENTRY_TITLE] = currentContentEntry.title
+        impl.go(ContentEntryExportView.VIEW_NAME, args, context)
     }
 
 

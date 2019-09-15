@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.XapiReportOptions
 import com.ustadmobile.core.db.dao.StatementDao
 import kotlin.js.JsName
 
-interface XapiReportDetailView : UstadView {
+interface XapiReportDetailView : UstadView, UstadViewWithProgress {
 
     @JsName("setChartData")
     fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions, xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>)
@@ -14,6 +14,7 @@ interface XapiReportDetailView : UstadView {
 
     @JsName("setReportListData")
     fun setReportListData(listResults: List<StatementDao.ReportListData>)
+
 
     companion object {
 
