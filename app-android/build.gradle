@@ -259,7 +259,7 @@ task generateCoreStringToAndroidResMap {
 }
 tasks.whenTaskAdded { task ->
     if (task.name.startsWith("compile") || task.name.startsWith("assemble")) {
-        task.dependsOn(generateCoreStringToAndroidResMap)
+        task.dependsOn(generateCoreStringToAndroidResMap, ":lib-content-editor:build")
     }
 }
 
