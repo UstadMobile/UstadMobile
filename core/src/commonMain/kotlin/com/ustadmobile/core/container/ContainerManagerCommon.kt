@@ -17,6 +17,10 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
     var containerUid: Long = 0
 
+    var exporting: Boolean = false
+
+    lateinit var destinationZipFile: String
+
     val allEntries: List<ContainerEntryWithContainerEntryFile>
         get() = pathToEntryMap.values.toList()
 
@@ -103,8 +107,10 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
     abstract suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
 
-    abstract fun exportContainer(zipFile: String, progressListener: ExportProgressListener?)
+    abstract fun exportContainer(zipFile: String,progressListener: ExportProgressListener?)
 
     suspend fun addEntries(vararg entries: EntrySource) = addEntries(null, *entries)
+
+    abstract fun cancelExporting()
 
 }

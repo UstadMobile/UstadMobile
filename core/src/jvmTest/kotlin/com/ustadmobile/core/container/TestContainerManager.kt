@@ -364,17 +364,12 @@ class TestContainerManager {
 
             val manager = ContainerManager(foundContainer!!, db, repo, containerTmpDir.absolutePath)
             val destZipFile = File.createTempFile("tmp", "temp.zip")
-            var progressValue = 0
             Assert.assertEquals("Zip file is empty", 0, destZipFile.length())
 
-            manager.exportContainer(destZipFile.absolutePath, object : ContainerManagerCommon.ExportProgressListener{
-                override fun onProcessing(progress: Int) {
-                    progressValue = progress
-                }
-            })
+            manager.exportContainer(destZipFile.absolutePath, null)
             delay(TimeUnit.SECONDS.toMillis(3))
 
-            Assert.assertTrue("All entry files were zipped", destZipFile.length() > 0 && progressValue == 100)
+            Assert.assertTrue("All entry files were zipped", destZipFile.length() > 0)
         }
     }
 

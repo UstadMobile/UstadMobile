@@ -23,7 +23,7 @@ import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Assert
 import org.mockito.Mockito.spy
 
-class TestContentEntryDetailPresenter {
+class ContentEntryDetailPresenterTest {
 
     private var mockView: ContentEntryDetailView? = null
     private var monitor: LocalAvailabilityMonitor? = null

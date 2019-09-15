@@ -7,24 +7,30 @@ import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryExportPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryExportView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 
 
 /**
  * A simple [Fragment] subclass.
  */
-class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryExportView{
+class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryExportView,
+        AdapterView.OnItemSelectedListener{
 
     override val viewContext: Any
         get() = activity!!
@@ -41,11 +47,19 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
 
     lateinit var exportProgress: ProgressBar
 
+    private lateinit var mStorageOptions: Spinner
+
+    private lateinit var storageOptionHolder: RelativeLayout
+
+    private lateinit var storageDirs: List<UMStorageDir>
+
+    private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
+
     override fun onAttach(context: Context?) {
         if(context is UstadBaseActivity){
             presenter = ContentEntryExportPresenter(activity!!, UMAndroidUtil.bundleToMap(arguments),
                     this,UmAccountManager.getRepositoryForActiveAccount(activity!!),
-                    UmAppDatabase.getInstance(context), UstadMobileSystemImpl.instance)
+                    UmAppDatabase.getInstance(context),impl)
             baseActivity = context
         }
         super.onAttach(context)
@@ -62,12 +76,14 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
         dialogTitle = rootView.findViewById(R.id.dialog_title)
         dialogMessage = rootView.findViewById(R.id.dialog_message)
         exportProgress = rootView.findViewById(R.id.export_progress)
+        mStorageOptions = rootView.findViewById(R.id.storage_option)
+        storageOptionHolder = rootView.findViewById(R.id.use_sdcard_option_holder)
 
         exportProgress.max = 100
         exportProgress.progress = 20
 
         val builder = AlertDialog.Builder(context!!)
-        builder.setPositiveButton(R.string.ok, null)
+        builder.setPositiveButton(R.string.download_continue_btn_label, null)
         builder.setNegativeButton(R.string.cancel, null)
         builder.setView(rootView)
         mDialog = builder.create()
@@ -83,7 +99,9 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
         val okButton = mDialog.getButton(AlertDialog.BUTTON_POSITIVE)
         val cancelButton = mDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
         okButton.setOnClickListener {
-            presenter.handleClickPositive()
+           GlobalScope.launch {
+               presenter.handleClickPositive()
+           }
         }
 
         cancelButton.setOnClickListener {
@@ -102,7 +120,27 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
                 getString(R.string.download_storage_permission_message))
     }
 
-    override fun setMessageText(title: String) {
+    override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
+        val options = ArrayList<String>()
+        this.storageDirs = storageOptions
+        for (umStorageDir in storageOptions) {
+            val deviceStorageLabel = String.format(impl.getString(
+                    MessageID.download_storage_option_device, context!!), umStorageDir.name,
+                    UMFileUtil.formatFileSize(File(umStorageDir.dirURI!!).usableSpace))
+            options.add(deviceStorageLabel)
+        }
+
+        val storageOptionAdapter = ArrayAdapter(
+                Objects.requireNonNull<Context>(context),
+                android.R.layout.simple_spinner_item, options)
+        storageOptionAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item)
+
+        mStorageOptions.adapter = storageOptionAdapter
+        mStorageOptions.onItemSelectedListener = this
+    }
+
+    override fun setDialogMessage(title: String) {
         dialogMessage.text = Html.fromHtml(String.format(getString(
                 R.string.content_entry_export_message, "<b>$title</b>")))
     }
@@ -116,7 +154,16 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
         dialogMessage.visibility = View.GONE
         mDialog.getButton(AlertDialog.BUTTON_POSITIVE).visibility = View.GONE
         exportProgress.visibility = if(show) View.VISIBLE else View.GONE
+        storageOptionHolder.visibility = View.GONE
         exportProgress.isIndeterminate = false
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+        presenter.handleStorageOptionSelection(storageDirs[position].dirURI!!)
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>) {
+        presenter.handleStorageOptionSelection(storageDirs[0].dirURI!!)
     }
 
     override fun updateExportProgress(progress: Int) {

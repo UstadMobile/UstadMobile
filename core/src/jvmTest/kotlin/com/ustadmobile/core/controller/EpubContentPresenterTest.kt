@@ -37,7 +37,7 @@ import java.util.zip.ZipFile
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import kotlinx.coroutines.runBlocking
 
-class TestEpubContentPresenter {
+class EpubContentPresenterTest {
 
     private lateinit var db: UmAppDatabase
 

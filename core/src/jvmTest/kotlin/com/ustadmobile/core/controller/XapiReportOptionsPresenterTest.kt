@@ -31,7 +31,7 @@ import org.mockito.Mockito
 import java.util.*
 import javax.xml.bind.JAXBElement
 
-class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
+class XapiReportOptionsPresenterTest : AbstractXapiReportOptionsTest() {
 
 
     private lateinit var reportOptionsWithNoData: XapiReportOptions

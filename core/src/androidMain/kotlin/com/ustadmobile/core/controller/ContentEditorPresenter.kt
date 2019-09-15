@@ -5,11 +5,10 @@ import com.ustadmobile.core.container.ContainerManager.FileEntrySource
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
+import com.ustadmobile.core.contentformats.epub.opf.OpfCreator
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
@@ -28,8 +27,8 @@ import kotlin.text.Charsets.UTF_8
 
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
-                                                       view: ContentEditorView, val storage: String?,
-                                                       val database : UmAppDatabase,
+                                                       view: ContentEditorView, private val storage: String?,
+                                                       private val database : UmAppDatabase,
                                                        private val repository : UmAppDatabase ,
                                                        mountContainer: suspend (Long) -> String)
     :ContentEditorPresenterCommon(context,arguments,view,storage,database,mountContainer){
@@ -41,12 +40,25 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     private var containerManager: ContainerManager? = null
 
+    private var currentTitle: String = ""
+
+    private var currentDescription: String = ""
+
+    private var currentAuthor: String = ""
+
+    private lateinit var creators: MutableList<OpfCreator>
+
     /**
      * {@inheritDoc}
      */
-    actual override suspend fun createDocument(title: String, description: String): Boolean {
+    actual override suspend fun createDocument(title: String, description: String, author: String): Boolean {
         var filePath = "/http/$EDITOR_BASE_DIR_NAME/templates"
+        this.currentTitle = title
+        this.currentDescription = description
+        this.currentAuthor = author
         filePath = joinPaths(filePath, ContentEditorView.RESOURCE_BLANK_DOCUMENT)
+
+        creators = mutableListOf(OpfCreator(author, UUID.randomUUID().toString()))
 
         val emptyDocInputStream : InputStream = impl.getAssetInputStreamAsync(context,filePath)
 
@@ -78,7 +90,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             if (!tmpFile.delete())
                 tmpFile.deleteOnExit()
         }
-        val updateDocument = updateDocumentMetaInfo(title, description, true)
+        val updateDocument = updateDocumentMetaInfo(currentTitle, currentDescription, currentAuthor,true)
         if(updateDocument != null){
             val pageTitle = impl.getString(MessageID.content_untitled_page, context)
             val pageAdded = addPageToDocument(pageTitle)
@@ -146,14 +158,20 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     /**
      * {@inheritDoc}
      */
-    actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String? {
+    actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, author: String,isNewDocument: Boolean): String? {
+        this.currentTitle = documentTitle
+        this.currentDescription = description
+        this.currentAuthor = author
+
         try {
-            if (updateOpfMetadataInfo(documentTitle, description,
+            if (updateOpfMetadataInfo(currentTitle, description, author,
                             if (isNewDocument) UUID.randomUUID().toString() else null)) {
                 val entry = database.contentEntryDao.findByEntryId(contentEntryUid)!!
-                entry.title = documentTitle
+                entry.title = currentTitle
+                entry.description = currentDescription
+                entry.author = currentAuthor
                 database.contentEntryDao.update(entry)
-                return documentTitle
+                return currentTitle
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -219,7 +237,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             val navContent = String(bout.toByteArray(), UTF_8)
             val filename = getEpubOpfDocument()?.navItem?.href!!
             addEntryWithContent(filename, navContent)
-            metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+            metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -256,7 +274,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             val navContent = String(bout.toByteArray(), UTF_8)
             val filename = getEpubOpfDocument()?.navItem?.href!!
             addEntryWithContent(filename, navContent)
-            updateOpfMetadataInfo(null, null, null)
+            updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -291,18 +309,22 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     /**
      * Update opf document meta data iformation
-     * @param title new opf document title
+     * @param title new opf document currentTitle
+     * @param author document creator
      * @param uuid epub pub-id
      * @return True if meta data were updated successfully otherwise they were not update.
      */
-    private suspend fun updateOpfMetadataInfo(title: String?, description: String?, uuid: String?): Boolean {
+    private suspend fun updateOpfMetadataInfo(title: String?, description: String?, author: String?, uuid: String?): Boolean {
         val opfDocument = getEpubOpfDocument()!!
+        creators = mutableListOf(OpfCreator(author, UUID.randomUUID().toString()))
+        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss 'Z'")
+        formatter.timeZone = TimeZone.getTimeZone("UTC")
+        val date = formatter.format(Date(System.currentTimeMillis()))
         opfDocument.title = title ?: opfDocument.title
+        opfDocument.date = date
         opfDocument.description = description ?: opfDocument.description
         opfDocument.id = uuid ?: opfDocument.id
-        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-        formatter.timeZone = TimeZone.getTimeZone("UTC")
-        val lastUpdateDateTime = formatter.format(Date(System.currentTimeMillis()))
+        opfDocument.creators = creators
         val bout = ByteArrayOutputStream()
         val serializer = impl.newXMLSerializer()
         serializer.setOutput(bout, UTF_8.name())
@@ -374,7 +396,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             val opfContent = String(bout.toByteArray(), UTF_8)
             addEntryWithContent(CONTENT_OPF_FILE, opfContent)
 
-            metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+            metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -405,7 +427,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             bout.flush()
             val opfContent = String(bout.toByteArray(), UTF_8)
             addEntryWithContent(CONTENT_OPF_FILE, opfContent)
-            metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+            metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -417,7 +439,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     /**
      * Add an item to the navigation file.
      * @param href item ref
-     * @param title item title.
+     * @param title item currentTitle.
      * @return true if added otherwise false.
      */
     private suspend fun addNavItem(href: String, title: String): Boolean {
@@ -435,7 +457,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             val navContent = String(bout.toByteArray(), UTF_8)
             val filename = getEpubOpfDocument()!!.navItem!!.href
             addEntryWithContent(filename!!, navContent)
-            metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+            metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -474,7 +496,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
                 val navContent = String(bout.toByteArray(), UTF_8)
                 val filename = getEpubOpfDocument()!!.navItem!!.href
                 addEntryWithContent(filename!!, navContent)
-                metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+                metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
             } catch (e: IOException) {
                 e.printStackTrace()
             } finally {
@@ -509,7 +531,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             bout.flush()
             val opfContent = String(bout.toByteArray(), UTF_8)
             addEntryWithContent(CONTENT_OPF_FILE, opfContent)
-            metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+            metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
@@ -537,7 +559,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
                 bout.flush()
                 val opfContent = String(bout.toByteArray(), UTF_8)
                 addEntryWithContent(CONTENT_OPF_FILE, opfContent)
-                metaInfoUpdated = updateOpfMetadataInfo(null, null, null)
+                metaInfoUpdated = updateOpfMetadataInfo(currentTitle, currentDescription, currentAuthor, null)
             } catch (e: IOException) {
                 e.printStackTrace()
             } finally {
@@ -617,6 +639,10 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             joinPaths(baseDir,documentsDir, contentEntryUid.toString())
         }
         return documentPath!!
+    }
+
+    fun handleFileImportDialog(isShowing: Boolean){
+        view.runOnUiThread(Runnable { view.showProgressDialog(!isShowing)})
     }
 
 

@@ -26,5 +26,6 @@ expect class ContainerManager : ContainerManagerCommon {
 
     suspend fun linkExistingItems(itemsToDownload: List<ContainerEntryWithMd5>) : List<ContainerEntryWithMd5>
 
+    override fun cancelExporting()
 
 }
