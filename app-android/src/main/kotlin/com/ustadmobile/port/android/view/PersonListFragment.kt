@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.annotation.Nullable
 import androidx.paging.DataSource
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.lib.db.entities.Person
 
