@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -13,15 +14,16 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.InputStream
 import java.io.UnsupportedEncodingException
+import java.util.ArrayList
 
 class DummyData {
 
-    private var personDao: PersonDao? = null
-    private var locationDao: LocationDao? = null
-    private var personAuthDao: PersonAuthDao? = null
-    private var saleProductDao: SaleProductDao? = null
-    private var productParentJoinDao: SaleProductParentJoinDao? = null
-    private var repo: UmAppDatabase? = null
+    private var personDao: PersonDao
+    private var locationDao: LocationDao
+    private var personAuthDao: PersonAuthDao
+    private var saleProductDao: SaleProductDao
+    private var productParentJoinDao: SaleProductParentJoinDao
+    private var repo: UmAppDatabase
     private var context:Any ?= null
 
     var le1Uid : Long = 0L
@@ -31,15 +33,19 @@ class DummyData {
     constructor(theContext:Any, theRepo:UmAppDatabase){
         this.context = theContext
         this.repo = theRepo
+
+        personCustomFieldDao = repo.personCustomFieldDao
+        personDetailPresenterFieldDao = repo.personDetailPresenterFieldDao
+        personDao = repo.personDao
+        locationDao = repo.locationDao
+        personAuthDao = repo.personAuthDao
+        saleProductDao = repo.saleProductDao
+        productParentJoinDao = repo.saleProductParentJoinDao
     }
 
     fun loadInitialData() {
 
-        personDao = repo!!.personDao
-        locationDao = repo!!.locationDao
-        personAuthDao = repo!!.personAuthDao
-        saleProductDao = repo!!.saleProductDao
-        productParentJoinDao = repo!!.saleProductParentJoinDao
+        
         
         //Any data goes here.
 
@@ -66,6 +72,9 @@ class DummyData {
 
                 //For testing: TODO: Remove or find better solution
                 addTestData()
+
+                //Field data
+                addFieldData()
 
                 //Dont time out for signing in.
                 val impl = UstadMobileSystemImpl.instance
@@ -294,125 +303,125 @@ class DummyData {
                 pinkHatProduct = SaleProduct(pinkHatName, "Testing dummy data")
                 pinkHatProduct.saleProductUid = saleProductDao!!.insert(pinkHatProduct)
                 addPicToProduct(pinkHatProduct,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_pink_hats.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_pink_hats.png", repo)
 
                 //Create other products
                 val greenSheets = SaleProduct("Green Sheet", "Testing dummy data")
                 greenSheets.saleProductUid = saleProductDao!!.insert(greenSheets)
                 addPicToProduct(greenSheets,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_green_sheets.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_green_sheets.png", repo)
 
                 val floralScarves = SaleProduct("Floral Scarf", "Dummy data")
                 floralScarves.saleProductUid = saleProductDao!!.insert(floralScarves)
                 addPicToProduct(floralScarves,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_floral_scarves.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_floral_scarves.png", repo)
 
                 val pinkBedLinen = SaleProduct("Pink Bed Linen", "Dummy data")
                 pinkBedLinen.saleProductUid = saleProductDao!!.insert(pinkBedLinen)
                 addPicToProduct(pinkBedLinen,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_bed_linen.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_bed_linen.png", repo)
 
                 val redTableLinen = SaleProduct("Red Table Linen", "Dummy data")
                 redTableLinen.saleProductUid = saleProductDao!!.insert(redTableLinen)
                 addPicToProduct(redTableLinen,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_table_linen.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_table_linen.png", repo)
 
                 val zariToy = SaleProduct("Zari Bagchesimsim", "Dummy data")
                 zariToy.saleProductUid = saleProductDao!!.insert(zariToy)
                 addPicToProduct(zariToy,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_toys.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_toys.png", repo)
 
                 val womenSuit = SaleProduct("Women Suit", "Dummy data")
                 womenSuit.saleProductUid = saleProductDao!!.insert(womenSuit)
                 addPicToProduct(womenSuit,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_women.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_women.png", repo)
 
                 val mensBelt = SaleProduct("Men Belt", "Dummy data")
                 mensBelt.saleProductUid = saleProductDao!!.insert(mensBelt)
                 addPicToProduct(mensBelt,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_men.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_men.png", repo)
 
                 val beigeClutch = SaleProduct("Beige Clutch", "Dummy data")
                 beigeClutch.saleProductUid = saleProductDao!!.insert(beigeClutch)
                 addPicToProduct(beigeClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo)
 
 
                 val brownBag = SaleProduct("Brown Bag", "Dummy data")
                 brownBag.saleProductUid = saleProductDao!!.insert(brownBag)
                 addPicToProduct(brownBag,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_bag.jpg", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_bag.jpg", repo)
 
 
                 val blueClutch = SaleProduct("Blue Clutch", "Dummy data")
                 blueClutch.saleProductUid = saleProductDao!!.insert(blueClutch)
                 addPicToProduct(blueClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_blue_clutch.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_blue_clutch.png", repo)
 
                 val bowKeychain = SaleProduct("Bow Keychain", "Dummy data")
                 bowKeychain.saleProductUid = saleProductDao!!.insert(bowKeychain)
                 addPicToProduct(bowKeychain,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_bow_keychain.jpeg", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_bow_keychain.jpeg", repo)
 
                 val keychain = SaleProduct("Keychain", "Dummy data")
                 keychain.saleProductUid = saleProductDao!!.insert(keychain)
                 addPicToProduct(keychain,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_keychain.jpg", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_keychain.jpg", repo)
 
                 val keychains = SaleProduct("Keychains", "Dummy data")
                 keychains.saleProductUid = saleProductDao!!.insert(keychains)
                 addPicToProduct(keychains,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_keychains.jpg", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_keychains.jpg", repo)
 
                 val lightBlueClutch = SaleProduct("Light Blue Clutch", "Dummy data")
                 lightBlueClutch.saleProductUid = saleProductDao!!.insert(lightBlueClutch)
                 addPicToProduct(lightBlueClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_light_blue_clutch.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_light_blue_clutch.png", repo)
 
                 val metallicClutch = SaleProduct("Metallic Clutch", "Dummy data")
                 metallicClutch.saleProductUid = saleProductDao!!.insert(metallicClutch)
                 addPicToProduct(metallicClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_metallic_clutch.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_metallic_clutch.png", repo)
 
                 val rubyClutch = SaleProduct("Ruby Clutch", "Dummy data")
                 rubyClutch.saleProductUid = saleProductDao!!.insert(rubyClutch)
                 addPicToProduct(rubyClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_clutch.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_clutch.png", repo)
 
                 val rubyPurse = SaleProduct("Ruby purse", "Dummy data")
                 rubyPurse.saleProductUid = saleProductDao!!.insert(rubyPurse)
                 addPicToProduct(rubyPurse,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_purse.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_purse.png", repo)
 
                 val rubyScarf = SaleProduct("Ruby Scarf", "Dummy data")
                 rubyScarf.saleProductUid = saleProductDao!!.insert(rubyScarf)
                 addPicToProduct(rubyScarf,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_scarf.jpg", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_scarf.jpg", repo)
 
                 val laceholderRubyScarf = SaleProduct("Laceholder Ruby Scarf", "Dummy data")
                 laceholderRubyScarf.saleProductUid = saleProductDao!!.insert(laceholderRubyScarf)
                 addPicToProduct(laceholderRubyScarf,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_scarves.jpg", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_scarves.jpg", repo)
 
                 val turquoiseClutch = SaleProduct("Turquoise Clutch", "Dummy data")
                 turquoiseClutch.saleProductUid = saleProductDao!!.insert(turquoiseClutch)
                 addPicToProduct(turquoiseClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_turquoise_clutch.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_turquoise_clutch.png", repo)
 
                 val turquoisePurse = SaleProduct("Turquoise Purse", "Dummy data")
                 turquoisePurse.saleProductUid = saleProductDao!!.insert(turquoisePurse)
                 addPicToProduct(turquoisePurse,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_turquoise_purse .png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_turquoise_purse .png", repo)
 
                 val yellowClutch = SaleProduct("Yellow Clutch", "Dummy data")
                 yellowClutch.saleProductUid = saleProductDao!!.insert(yellowClutch)
                 addPicToProduct(yellowClutch,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_yellow_clutch.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_yellow_clutch.png", repo)
 
                 val yellowPurse = SaleProduct("Yellow Purse", "Dummy data")
                 yellowPurse.saleProductUid = saleProductDao!!.insert(yellowPurse)
                 addPicToProduct(yellowPurse,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_yellow_purse.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_yellow_purse.png", repo)
 
 
                 //Create categories (Joins) (NEW)
@@ -420,17 +429,17 @@ class DummyData {
                 val bedLinenCategry = SaleProduct("Bed Linen", "Dummy data", true)
                 bedLinenCategry.saleProductUid = saleProductDao!!.insert(bedLinenCategry)
                 addPicToProduct(bedLinenCategry,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_bed_linen.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_bed_linen.png", repo)
 
                 val toysCategory = SaleProduct("Toys", "Dummy data", true)
                 toysCategory.saleProductUid = saleProductDao!!.insert(toysCategory)
                 addPicToProduct(toysCategory,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_toys.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_toys.png", repo)
 
                 val accessoriesCategory = SaleProduct("Accessories", "Dummy data", true)
                 accessoriesCategory.saleProductUid = saleProductDao!!.insert(accessoriesCategory)
                 addPicToProduct(accessoriesCategory,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo)
 
 
                 //Create joins to categories (new)
@@ -449,15 +458,15 @@ class DummyData {
                 //two level categories
                 val categoryclutches = SaleProduct("Clutches", "All clutches", true)
                 categoryclutches.saleProductUid = saleProductDao!!.insert(categoryclutches)
-                addPicToProduct(categoryclutches, "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_clutch.png", repo!!)
+                addPicToProduct(categoryclutches, "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_clutch.png", repo)
 
                 val pursesCategory = SaleProduct("Purses", "All purses", true)
                 pursesCategory.saleProductUid = saleProductDao!!.insert(pursesCategory)
-                addPicToProduct(pursesCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_purse.png", repo!!)
+                addPicToProduct(pursesCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_purse.png", repo)
 
                 val scarvesCategory = SaleProduct("Scarves", "All scarves", true)
                 scarvesCategory.saleProductUid = saleProductDao!!.insert(scarvesCategory)
-                addPicToProduct(scarvesCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_scarf.jpg", repo!!)
+                addPicToProduct(scarvesCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_ruby_scarf.jpg", repo)
 
                 val clutchAccessoriesJoin = SaleProductParentJoin(categoryclutches.saleProductUid,
                         accessoriesCategory.saleProductUid, true)
@@ -474,11 +483,11 @@ class DummyData {
                 //Create collections new
                 val womenCategory = SaleProduct("Women", "All women products", true)
                 womenCategory.saleProductUid = saleProductDao!!.insert(womenCategory)
-                addPicToProduct(womenCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_women.png", repo!!)
+                addPicToProduct(womenCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_women.png", repo)
 
                 val menCategory = SaleProduct("Men", "All men products", true)
                 menCategory.saleProductUid = saleProductDao!!.insert(menCategory)
-                addPicToProduct(menCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_men.png", repo!!)
+                addPicToProduct(menCategory, "/WEB-INF/goldozi/goldozi_product_placeholder_men.png", repo)
 
                 val suitWomenJoin = SaleProductParentJoin(womenSuit.saleProductUid,
                         womenCategory.saleProductUid, true)
@@ -494,7 +503,7 @@ class DummyData {
                         "All collections", true)
                 collectionCategory.saleProductUid = saleProductDao!!.insert(collectionCategory)
                 addPicToProduct(collectionCategory,
-                        "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo!!)
+                        "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo)
 
                 val womenCategoryCollectionJoin = SaleProductParentJoin(womenCategory.saleProductUid,
                         collectionCategory.saleProductUid, true)
@@ -540,19 +549,18 @@ class DummyData {
                 ee.printStackTrace()
             }
         }
-
     }
 
 
     fun addTestData(){
 
-        val personDao = repo!!.personDao
-        val personGroupDao = repo!!.personGroupDao
-        val personGroupMemberDao = repo!!.personGroupMemberDao
-        val saleProductDao = repo!!.saleProductDao
-        val saleDao = repo!!.saleDao
-        val saleItemDao = repo!!.saleItemDao
-        val personAuthDao = repo!!.personAuthDao
+        val personDao = repo.personDao
+        val personGroupDao = repo.personGroupDao
+        val personGroupMemberDao = repo.personGroupMemberDao
+        val saleProductDao = repo.saleProductDao
+        val saleDao = repo.saleDao
+        val saleItemDao = repo.saleItemDao
+        val personAuthDao = repo.personAuthDao
 
         //Create two LEs
         val le1 = Person(le1Username, "Le", "One", true)
@@ -683,8 +691,364 @@ class DummyData {
         saleItemDao.insert(saleItem23)
         saleItemDao.insert(saleItem24)
 
+    }
+
+
+
+    private lateinit var allFields: List<HeadersAndFields>
+    private var fieldIndex = 0
+    /**
+     * Just a POJO for this test class to loop through and create the fields.
+     */
+    internal inner class HeadersAndFields(//icon
+            var fieldIcon: String, //random name
+            var fieldName: String, //label
+            var fieldLabel: Int, //field uid
+            var fieldUid: Int,
+            //index (order)
+            var fieldIndex: Int, //type (field/header)
+            var fieldType: Int, //header label (if applicable)
+            var headerMessageId: Int,
+            var readOnly: Boolean, var viewMode: Boolean, var editMode: Boolean)
+
+
+    private var personCustomFieldDao: PersonCustomFieldDao
+    private var personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
+
+    /**
+     * Adds dummy data in the start of the application here. It also sets a key so that we don't
+     * add the dummy data every time. This will get replaced with real data that will sync with
+     * the server.
+     */
+    private fun addFieldData() {
+        allFields = getAllFields()
+
+        println("Adding PersonFields and PersonDetailPresenter entities. \n")
+        //Start with next field (1st field really)
+        addNextField()
 
     }
+
+    private fun addNextField() {
+
+        if (fieldIndex >= allFields!!.size) {
+            //addSELQuestions();
+            return
+        }
+        val field = allFields!![fieldIndex]
+
+        var isHeader = false
+        if (field.fieldType == PersonField.FIELD_TYPE_HEADER) {
+            isHeader = true
+        }
+
+        val finalIsHeader = isHeader
+
+        GlobalScope.launch {
+
+            val resultList = personCustomFieldDao!!.findByFieldNameAsync(field.fieldName)
+
+            //Create the custom fields - basically label & icon .
+            val personField = PersonField()
+
+            if (resultList!!.isEmpty()) {
+
+                //Create the field only if it is a field (ie not a header)
+                if (!finalIsHeader) {
+                    personField.fieldIcon = field.fieldIcon //Icon
+                    personField.fieldName = field.fieldName //Internal name
+                    personField.labelMessageId = field.fieldLabel    //Label
+
+                    //Set PersonFields' Uid (PersonCustomFieldUid) (No auto generation)
+                    //If field not set ie its a Custom Field
+                    if (field.fieldUid == 0) {
+                        //It is a custom field
+                        val lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid()
+                        var newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1
+                        if (lastPersonCustomFieldUidUsed < PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID) {
+                            //first Custom field
+                            newCustomPersonCustomFieldUid = PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID + 1
+                        }
+                        personField.personCustomFieldUid = newCustomPersonCustomFieldUid.toLong()
+                        field.fieldUid = newCustomPersonCustomFieldUid
+
+                    } else {
+                        //Not a custom field.
+                        personField.personCustomFieldUid = field.fieldUid.toLong()   //Field's uid
+                    }
+
+                    //Persist
+                    val result = personCustomFieldDao.insertAsync(personField)
+                    //Persist 2
+                    createPersonDetailPresenterField(field, finalIsHeader, personField,
+                            personDetailPresenterFieldDao!!, true)
+
+                } else {
+
+                    //Persist 2
+                    createPersonDetailPresenterField(field, finalIsHeader, personField,
+                            personDetailPresenterFieldDao!!, true)
+                }
+
+            } else {
+
+                //Persist 2
+                createPersonDetailPresenterField(field, finalIsHeader, personField,
+                        personDetailPresenterFieldDao!!, true)
+            }
+
+        }
+
+    }
+
+    private fun createPersonDetailPresenterField(field: HeadersAndFields, isHeader: Boolean,
+                                                 pcf: PersonField, personDetailPresenterFieldDao: PersonDetailPresenterFieldDao,
+                                                 gotoNext: Boolean?) {
+
+
+        GlobalScope.launch {
+            val resultList2 = personDetailPresenterFieldDao.findAllByFieldIndex(field.fieldIndex)
+
+            if (resultList2!!.isEmpty()) {
+
+                //Create the Mapping between the fields and extra information like :
+                //  type(header / field)
+                //  index (for ordering)
+                //  Header String Id (if header)
+                //
+                val pdpf1 = PersonDetailPresenterField()
+                pdpf1.fieldType = field.fieldType
+                pdpf1.fieldIndex = field.fieldIndex
+
+                pdpf1.fieldIcon = field.fieldIcon
+                pdpf1.labelMessageId = field.fieldLabel
+
+                //Set Visibility
+                pdpf1.isReadyOnly = field.readOnly
+                pdpf1.viewModeVisible = field.viewMode
+                pdpf1.editModeVisible = field.editMode
+
+                //If not a header set the field. If is header, set the header label.
+                if (!isHeader) {
+                    val pcfUid = pcf.personCustomFieldUid
+                    pdpf1.fieldUid = pcfUid
+                } else {
+                    pdpf1.headerMessageId = field.headerMessageId
+                }
+
+                //persist:
+                personDetailPresenterFieldDao.insert(pdpf1)
+            }
+
+            if (gotoNext!!) {
+                fieldIndex++
+                addNextField()
+            }
+
+        }
+
+    }
+
+    private fun getAllFields(): List<HeadersAndFields> {
+
+        val allTheFields = ArrayList<HeadersAndFields>()
+
+
+        allTheFields.add(HeadersAndFields(
+                "",
+                "",
+                0,
+                0,
+                1,
+                PersonField.FIELD_TYPE_HEADER,
+                MessageID.profile,
+                false,
+                true,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Full Name",
+                MessageID.field_fullname,
+                PersonDetailPresenterField.PERSON_FIELD_UID_FULL_NAME,
+                2,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                true,
+                false
+        ))
+
+        ///FIRST NAME LAST NAME
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "First Names",
+                MessageID.first_names,
+                PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES,
+                3,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                false,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Last Name",
+                MessageID.last_name,
+                PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME,
+                4,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                false,
+                true
+        ))
+
+        //BIRTHDAY
+        allTheFields.add(HeadersAndFields(
+                "ic_perm_contact_calendar_black_24dp",
+                "Date of Birth",
+                MessageID.birthday,
+                PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
+                5,
+                PersonField.FIELD_TYPE_DATE,
+                0,
+                false,
+                true,
+                true
+        ))
+        //ADDRESS
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Home Address",
+                MessageID.home_address,
+                PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS,
+                6,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                true,
+                true
+        ))
+
+        //ATTENDANCE
+        allTheFields.add(HeadersAndFields(
+                "",
+                "",
+                0,
+                0,
+                7,
+                PersonField.FIELD_TYPE_HEADER,
+                MessageID.attendance,
+                false,
+                true,
+                false
+        ))
+        allTheFields.add(HeadersAndFields(
+                "ic_lens_black_24dp",
+                "Total Attendance for student and days",
+                MessageID.attendance,
+                PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
+                8,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                true,
+                false
+        ))
+
+        //PARENTS
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "Father with number",
+                MessageID.father,
+                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
+                11,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
+                0,
+                false,
+                true,
+                false
+        ))
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "Father name",
+                MessageID.fathers_name,
+                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
+                12,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                false,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "Father  number",
+                MessageID.fathers_number,
+                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
+                13,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
+                0,
+                false,
+                false,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "Mother name",
+                MessageID.mothers_name,
+                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
+                14,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                false,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "Mother number",
+                MessageID.mothers_number,
+                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
+                15,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
+                0,
+                false,
+                false,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "Mother with number",
+                MessageID.mother,
+                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
+                16,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                true,
+                false
+        ))
+
+        //CLASSES
+        allTheFields.add(HeadersAndFields(
+                "",
+                "",
+                0,
+                0,
+                17,
+                PersonField.FIELD_TYPE_HEADER,
+                MessageID.classes,
+                false,
+                true,
+                true
+        ))
+
+        return allTheFields
+    }
+
 
 
 }

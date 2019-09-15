@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
@@ -445,6 +446,10 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     @Query("SELECT coalesce(AVG(clazzMemberAttendancePercentage),0) FROM ClazzMember " +
             " WHERE clazzMemberPersonUid = :personUid")
     abstract suspend fun getAverageAttendancePercentageByPersonUidAsync(personUid: Long): Float
+
+    @Query("SELECT coalesce(AVG(clazzMemberAttendancePercentage),0) FROM ClazzMember " +
+            " WHERE clazzMemberPersonUid = :personUid")
+    abstract fun getAverageAttendancePercentageByPersonUidLive(personUid: Long): DoorLiveData<Float>
 
 
     @Query("SELECT " +
