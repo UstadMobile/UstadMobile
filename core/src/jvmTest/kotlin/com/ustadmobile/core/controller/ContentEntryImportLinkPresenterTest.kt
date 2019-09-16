@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
+import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.GOOGLE_DRIVE_LINK
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -118,6 +119,30 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     }
 
     @Test
+    fun givenWhenHandleUrlTextUpdated_whenInvalidGoogleDriveLink_showUnSupportedContent() {
+
+
+        mockWebServer.start()
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "video/")
+                .setHeader("location", mockWebServer.url("/noVideoHere"))
+                .setResponseCode(302))
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "audio/")
+                .setResponseCode(200))
+
+        GOOGLE_DRIVE_LINK = mockWebServer.url("/google.drive.com").toString()
+
+        presenter.handleUrlTextUpdated(mockWebServer.url("/google.drive.com").toString())
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
+
+
+    }
+
+
+    @Test
     fun givenWhenHandleUrlTextUpdated_whenContentSupportedButNotH5P_showInvalidUrl() {
 
         mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
@@ -154,7 +179,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setBody("no h5p here"))
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
-        
+
         presenter.handleUrlTextUpdated(url)
         verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
 
@@ -290,7 +315,6 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             verify(mockView, timeout(5000)).enableDisableEditText(true)
             verify(mockView, timeout(5000)).showHideErrorMessage(true)
         }
-
 
 
     }
