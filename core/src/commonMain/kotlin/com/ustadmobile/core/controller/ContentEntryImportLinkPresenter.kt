@@ -114,7 +114,16 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 contentTypeHeader = contentTypeHeader.split(";")[0]
             }
 
+            val length = headResponse.headers["content-length"]?.get(0)?.toInt() ?: 0
+
             if (contentTypeHeader.startsWith("video/")) {
+
+                if (length >= FILE_SIZE) {
+                    view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+                    jobCount--
+                    checkProgressBar()
+                    return@launch
+                }
 
                 contentType = VIDEO
                 hp5Url = url
