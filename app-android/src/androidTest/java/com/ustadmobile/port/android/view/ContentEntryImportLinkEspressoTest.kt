@@ -288,10 +288,10 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
     }
 
-    @Test
+    //@Test
     fun givenUserTypesVideoLink_whenFileSizeTooBig_showError() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 104857600).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-length", 104857600).setHeader("content-type", "video/").setResponseCode(200))
         mockWebServer.start()
 
         val intent = Intent()
@@ -362,18 +362,18 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
     }
 
-    //@Test
+    @Test
     fun givenUserTypesGoogleDriveShareLink_whenLinkValid_clickDone() {
 
         mockWebServer.start()
 
         mockWebServer.enqueue(MockResponse()
-                .setHeader("Content-Type", "video/")
+                .setHeader("content-type", "video/")
                 .setHeader("location", mockWebServer.url("/noVideoHere"))
                 .setResponseCode(302))
 
         mockWebServer.enqueue(MockResponse()
-                .setHeader("Content-Type", "video/")
+                .setHeader("content-type", "video/")
                 .setResponseCode(200))
 
 

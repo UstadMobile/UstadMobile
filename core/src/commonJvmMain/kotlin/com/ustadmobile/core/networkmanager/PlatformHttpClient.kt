@@ -3,6 +3,7 @@ package com.ustadmobile.core.networkmanager
 import com.ustadmobile.core.model.HeadResponse
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
 
 actual class PlatformHttpClient {
 
@@ -14,7 +15,7 @@ actual class PlatformHttpClient {
         con.requestMethod = "HEAD"
 
         val responseCode = con.responseCode
-        val headers = con.headerFields
+        val headers = con.headerFields.mapKeys {  if(it.key != null) it.key.toLowerCase() else "" }
 
         con.disconnect()
 
