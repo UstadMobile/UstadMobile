@@ -175,6 +175,9 @@ dependencies {
     implementation project(":lib-door-runtime")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+    implementation "com.github.aakira:napier-android:$version_napier"
+    implementation "com.github.aakira:napier:$version_napier"
+
     vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
 
     //Crash reporting

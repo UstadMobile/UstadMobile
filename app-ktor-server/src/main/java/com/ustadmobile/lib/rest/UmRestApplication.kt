@@ -11,6 +11,7 @@ import com.ustadmobile.lib.util.encryptPassword
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
@@ -23,7 +24,7 @@ import javax.naming.InitialContext
 private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
 
 
-fun Application.umRestApplication() {
+fun Application.umRestApplication(devMode: Boolean = false) {
 
     val adminuser = _restApplicationDb.personDao.findByUsername("admin")
     if(adminuser == null) {
@@ -45,6 +46,12 @@ fun Application.umRestApplication() {
 
         adminPassFile.writeText(adminPass)
         println("Saved admin password to ${adminPassFile.absolutePath}")
+    }
+
+    if(devMode) {
+        install(DefaultHeaders) {
+            header("Access-Control-Allow-Origin", "*")
+        }
     }
 
     install(ContentNegotiation) {

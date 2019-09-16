@@ -6,8 +6,6 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
-import java.io.File
-import java.util.*
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -18,7 +16,7 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
-import kotlinx.coroutines.GlobalScope
+import java.util.*
 import kotlin.reflect.KClass
 
 
@@ -68,7 +66,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     AnnotationProcessorWrapper.OPTION_JVM_DIRS)
             writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
                     syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
-                    overrideSyncDao = true, overrideOpenHelper = true),
+                    overrideSyncDao = true, overrideOpenHelper = true,
+                    addBoundaryCallbackGetters = true),
                     AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
@@ -76,9 +75,14 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
-            val daoFileSpec = generateDaoRepositoryClass(daoTypeEl)
-            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-            writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+            writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl).first, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            val (androidRepoFileSpec, androidBoundaryCallbackFileSpec) =
+                    generateDaoRepositoryClass(daoTypeEl, pagingBoundaryCallbackEnabled = true)
+            writeFileSpecToOutputDirs(androidRepoFileSpec,
+                    AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+            if(androidBoundaryCallbackFileSpec != null)
+                writeFileSpecToOutputDirs(androidBoundaryCallbackFileSpec,
+                        AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
         return true
@@ -90,7 +94,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                   overrideClearAllTables: Boolean = true,
                                   overrideSyncDao: Boolean = false,
                                   overrideOpenHelper: Boolean = false,
-                                  addDbVersionProp: Boolean = false): FileSpec {
+                                  addDbVersionProp: Boolean = false,
+                                  addBoundaryCallbackGetters: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
 
@@ -208,17 +213,11 @@ class DbProcessorRepository: AbstractDbProcessor() {
         methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
             .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
 
-            var daoFromDbGetter = ""
             val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
             if(daoTypeEl == null)
                 return@forEach
 
-            if(it.simpleName.toString().startsWith("get")) {
-                daoFromDbGetter += it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
-            }else {
-                daoFromDbGetter += "${it.simpleName}()"
-            }
-
+            val daoClassName = daoTypeEl.asClassName()
             val repoImplClassName = ClassName(pkgNameOfElement(daoTypeEl, processingEnv),
                     "${daoTypeEl.simpleName}_$SUFFIX_REPOSITORY")
             val syncDaoParam = if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
@@ -227,19 +226,21 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 ""
             }
 
-            dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  daoTypeEl.asType().asTypeName())
-                    .delegate("lazy { %T(_db.$daoFromDbGetter, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
-                            repoImplClassName).build())
+            dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
+                    .delegate("lazy { %T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
+                            repoImplClassName, it.makeAccessorCodeBlock()).build())
+            dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
 
-            if(it.simpleName.toString().startsWith("get")) {
-                val propName = it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
-                val getterFunSpec = FunSpec.getterBuilder().addStatement("return _${daoTypeEl.simpleName}")
-                dbRepoType.addProperty(PropertySpec.builder(propName, daoTypeEl.asType().asTypeName(),
-                        KModifier.OVERRIDE).getter(getterFunSpec.build()).build())
-            }else {
-                dbRepoType.addFunction(FunSpec.overriding(it)
-                        .addStatement("return _${daoTypeEl.simpleName}")
+            if(addBoundaryCallbackGetters && daoTypeEl.hasDataSourceFactory()) {
+                val boundaryCallbackClassName = ClassName(daoClassName.packageName,
+                        "${daoClassName.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
+                val boundaryCallbackVarName = "_${daoTypeEl.simpleName}$SUFFIX_BOUNDARY_CALLBACKS"
+                dbRepoType.addProperty(PropertySpec.builder(boundaryCallbackVarName,
+                        boundaryCallbackClassName)
+                        .delegate("lazy { %T(_${daoTypeEl.simpleName}::getBoundaryCallback) }", boundaryCallbackClassName)
                         .build())
+                dbRepoType.addAccessorOverride("${it.simpleName}$SUFFIX_BOUNDARY_CALLBACKS",
+                        boundaryCallbackClassName, CodeBlock.of("return $boundaryCallbackVarName\n"))
             }
         }
 
@@ -250,10 +251,14 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
 
 
-    fun generateDaoRepositoryClass(daoTypeElement: TypeElement): FileSpec {
+    fun generateDaoRepositoryClass(daoTypeElement: TypeElement,
+                                   pagingBoundaryCallbackEnabled: Boolean = false): Pair<FileSpec, FileSpec?> {
         val repoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
         repoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
+        var boundaryCallbackFile = null as FileSpec.Builder?
+        var boundaryCallbackClassSpec = null as TypeSpec.Builder?
+
         val syncableEntitiesOnDao = syncableEntitiesOnDao(daoTypeElement.asClassName(),
                 processingEnv)
 
@@ -261,6 +266,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
         val repoClassSpec = newRepositoryClassBuilder(daoTypeElement.asClassName(),
                 syncableEntitiesOnDao.isNotEmpty())
 
+
+        var pagingBoundarySourceToKeyMap = null as PropertySpec?
 
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
@@ -274,7 +281,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
             // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
             val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
             val resultType = resolveQueryResultType(returnTypeResolved)
+            val entityType = resolveEntityFromResultType(resultType)
             val incSyncableHttpRequest = !isUpdateDeleteOrInsertMethod(daoSubEl) && resultType != UNIT
+                    && entityType is ClassName && findSyncableEntities(entityType, processingEnv).isNotEmpty()
+
 
             var repoMethodType = if(daoMethodEl.getAnnotation(Repository::class.java) != null) {
                 daoMethodEl.getAnnotation(Repository::class.java).methodType
@@ -299,23 +309,101 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             daoFunSpec.addAnnotations(daoMethodEl.annotationMirrors.map { AnnotationSpec.get(it) })
 
+            var generateBoundaryCallback = false
+            if(pagingBoundaryCallbackEnabled && repoMethodType == Repository.METHOD_SYNCABLE_GET
+                    && returnTypeResolved is ParameterizedTypeName
+                    && returnTypeResolved.rawType == DataSource.Factory::class.asClassName()) {
+                if(pagingBoundarySourceToKeyMap == null) {
+                    pagingBoundarySourceToKeyMap = PropertySpec.builder(
+                            DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME,
+                            BOUNDARY_CALLBACK_MAP_CLASSNAME)
+                            .initializer("%T()", WeakHashMap::class)
+                            .build()
+                    repoClassSpec.addProperty(pagingBoundarySourceToKeyMap!!)
+                }
+
+                generateBoundaryCallback = true
+                repoMethodType = Repository.METHOD_DELEGATE_TO_DAO
+            }
+
             val codeBlock = CodeBlock.builder()
 
             when(repoMethodType) {
-                Repository.METHOD_SYNCABLE_GET ->
-                        codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
-                        daoTypeElement.simpleName.toString()))
-                Repository.METHOD_DELEGATE_TO_DAO ->
-                    codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
+                Repository.METHOD_SYNCABLE_GET -> {
+                    codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+                            daoTypeElement.simpleName.toString(), addReturnDaoResult = !generateBoundaryCallback))
+                }
+                Repository.METHOD_DELEGATE_TO_DAO -> {
+                    if(generateBoundaryCallback) {
+                        if(boundaryCallbackFile == null) {
+                            boundaryCallbackFile = FileSpec.builder(daoTypeElement.asClassName().packageName,
+                                    "${daoTypeElement.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
+                            val funSpecType = LambdaTypeName.get(
+                                    parameters = listOf(ParameterSpec.builder("dataSourceFactory",
+                                            DataSource.Factory::class.asClassName().parameterizedBy(INT, STAR)).build()),
+                                    returnType = BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(STAR).copy(nullable = true)) as LambdaTypeName
+
+                            boundaryCallbackClassSpec = TypeSpec.classBuilder("${daoTypeElement.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
+                                    .primaryConstructor(FunSpec.constructorBuilder()
+                                            .addParameter(ParameterSpec.builder("_boundaryGetter", funSpecType).build())
+                                            .build())
+                                    .addProperty(PropertySpec.builder("_boundaryGetter", funSpecType)
+                                            .initializer("_boundaryGetter").build())
+                            repoClassSpec.addFunction(FunSpec.builder("getBoundaryCallback")
+                                .addParameter("_dataSource", DataSource.Factory::class.asClassName().parameterizedBy(INT, STAR))
+                                .returns(BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(STAR).copy(nullable = true))
+                                    .addCode("return $DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME[_dataSource]\n")
+                                .build())
+                        }
+
+                        val daoFunSpecBuilt = daoFunSpec.build()
+                        val boundaryCallbackRetType = BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType)
+                        boundaryCallbackClassSpec!!.addFunction(FunSpec.builder(daoFunSpecBuilt.name)
+                                .addParameter("_dataSource", DataSource.Factory::class.asClassName().parameterizedBy(INT, entityType))
+                                .returns(boundaryCallbackRetType)
+                                .addCode("return _boundaryGetter(_dataSource) as %T\n", boundaryCallbackRetType)
+                                .build())
+
+                        codeBlock.add("val _dataSource = ")
+                                .addDelegateFunctionCall("_dao", daoFunSpecBuilt).add("\n")
+                                .add("val _limit = 50\n")
+                        daoFunSpec.addParameter("_limit", INT)
+                        val callbackTypeSpec = TypeSpec.anonymousClassBuilder()
+                                .superclass(BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType))
+                                .addFunction(FunSpec.builder("loadMore")
+                                        .addModifiers(KModifier.PRIVATE)
+                                        .addCode(CodeBlock.builder()
+                                                .add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+                                                        daoTypeElement.simpleName.toString(), addReturnDaoResult = false))
+                                                .build())
+                                        .build())
+                                .addFunction(FunSpec.builder("onItemAtEndLoaded")
+                                        .addParameter("itemAtEnd", entityType)
+                                        .addModifiers(KModifier.OVERRIDE)
+                                        .addCode("loadMore()\n")
+                                        .build())
+                                .addFunction(FunSpec.builder("onZeroItemsLoaded")
+                                        .addModifiers(KModifier.OVERRIDE)
+                                        .addCode("loadMore()\n")
+                                        .build())
+
+                        codeBlock.add("$DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME[_dataSource] = %L\n",
+                                        callbackTypeSpec.build())
+                                .add("return _dataSource\n")
+                    }else {
+                        codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
+                    }
+                }
             }
 
             overrideFunSpec.addCode(codeBlock.build())
             repoClassSpec.addFunction(overrideFunSpec.build())
         }
 
+        boundaryCallbackFile?.addType(boundaryCallbackClassSpec!!.build())
         repoImplFile.addType(repoClassSpec.build())
 
-        return repoImplFile.build()
+        return Pair(repoImplFile.build(), boundaryCallbackFile?.build())
     }
 
     /**
@@ -377,6 +465,17 @@ class DbProcessorRepository: AbstractDbProcessor() {
          * path e.g. endpoint/dbname/daoname
          */
         const val DB_NAME_VAR = "_DB_NAME"
+
+        const val SUFFIX_BOUNDARY_CALLBACKS = "BoundaryCallbacks"
+
+        const val DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME = "_dataSourceFactoryToBoundaryCallbackMap"
+
+        val BOUNDARY_CALLBACK_CLASSNAME = ClassName("androidx.paging", "PagedList")
+                .nestedClass("BoundaryCallback")
+
+        val BOUNDARY_CALLBACK_MAP_CLASSNAME = WeakHashMap::class.asClassName().parameterizedBy(
+                DataSource.Factory::class.asClassName().parameterizedBy(INT, STAR),
+                BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(STAR))
 
     }
 
