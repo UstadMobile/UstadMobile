@@ -1,10 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.dao.CustomFieldDao
-import com.ustadmobile.core.db.dao.CustomFieldValueDao
-import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
-import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -12,7 +9,6 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ATTENDANCE
@@ -29,6 +25,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -42,10 +39,8 @@ import kotlinx.coroutines.launch
  *
  */
 class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view: PersonDetailView,
- val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
+                            val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<PersonDetailView>(context, arguments!!, view) {
-
-    private var mPerson: DoorLiveData<Person?>? = null
 
     private var presenterFields: List<PersonDetailPresenterField>? = null
 
@@ -69,9 +64,12 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 
-    private var customFieldDao: CustomFieldDao? = null
-    private var customFieldValueDao: CustomFieldValueDao? = null
-    private var optionDao: CustomFieldValueOptionDao? = null
+    private var customFieldDao: CustomFieldDao
+    private var customFieldValueDao: CustomFieldValueDao
+    private var optionDao: CustomFieldValueOptionDao
+    private var personDao: PersonDao
+    private var clazzMemberDao: ClazzMemberDao
+    private var personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
 
     init {
 
@@ -80,6 +78,14 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
         viewIdToCustomFieldUid = HashMap()
+
+        clazzMemberDao = repository.clazzMemberDao
+        customFieldDao = repository.customFieldDao
+        customFieldValueDao = repository.customFieldValueDao
+        optionDao = repository.customFieldValueOptionDao
+        personDao = repository.personDao
+        personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
+        personPictureDao = repository.personPictureDao
     }
 
     fun addToMap(viewId: Int, fieldId: Long) {
@@ -94,80 +100,20 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        val personDao = repository.personDao
-        val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        val clazzMemberDao = repository.clazzMemberDao
-
-        customFieldDao = repository.customFieldDao
-        customFieldValueDao = repository.customFieldValueDao
-        optionDao = repository.customFieldValueOptionDao
-
-        GlobalScope.launch {
-            val thisPerson = personDao.findByUidAsync(personUid)
-            if (thisPerson != null) {
-                currentPerson = thisPerson
-                if (thisPerson.fatherNumber != null && !thisPerson.fatherNumber!!.isEmpty()) {
-                    oneParentNumber = thisPerson.fatherNumber!!
-                } else if (thisPerson.motherNum != null && !thisPerson.motherNum!!.isEmpty
-                        ()) {
-                    oneParentNumber = thisPerson.motherNum!!
-                }
-
-                personPictureDao = repository.personPictureDao
-                GlobalScope.launch {
-                    val personPicture = personPictureDao!!.findByPersonUidAsync(thisPerson.personUid)
-                    if (personPicture != null) {
-                        //TODO: KMP
-                        //view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture.personPictureUid))
-                    }
-                }
-            }
-        }
-
-        getAllPersonCustomFields()
-
         val thisP = this
-        GlobalScope.launch {
-            //Get all headers and fields
-            val fields = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewMode()
-            val cleanedFields = ArrayList<PersonDetailPresenterField>()
-            //Remove old custom fields
-            val fieldsIterator = fields.iterator()
-            while (fieldsIterator.hasNext()) {
-                val field = fieldsIterator.next()
-                val fieldIndex = field.fieldIndex
-                if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                    //fieldsIterator.remove()
-                }else{
-                    cleanedFields.add(field)
-                }
-            }
-
-            presenterFields = cleanedFields
-            customFieldWithFieldValueMap = HashMap()
-
-
-            //Get the attendance average for this person.
-            GlobalScope.launch {
-                val result = clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid)
-                if (result == null) {
-                    attendanceAverage = "N/A"
-                } else {
-                    attendanceAverage = (result * 100).toString() + "%"
-                }
-
-                //Get person live data and observe
-                mPerson = personDao.findByUidLive(personUid)
-
-                view.runOnUiThread(Runnable {
-                    mPerson!!.observe(thisP, thisP::handlePersonDataChanged)
-                })
-
-            }
-        }
 
         checkPermissions()
+
+        GlobalScope.launch {
+            //Get all headers and fields and the person as well as attendance average
+            val fieldsLive = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewModeLive()
+            GlobalScope.launch(Dispatchers.Main) {
+                fieldsLive.observe(thisP, thisP::handleFieldsLive)
+            }
+        }
     }
+
+
 
     /**
      * Getting custom fields (new way)
@@ -211,10 +157,10 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
                     }
                     val finalValueSelection = valueSelection
-                    val result3 = optionDao!!.findAllOptionsForFieldAsync(c.customFieldUid)
+                    val result3 = optionDao.findAllOptionsForFieldAsync(c.customFieldUid)
                     val options = ArrayList<String>()
 
-                    for (o in result3!!) {
+                    for (o in result3) {
                         options.add(o.customFieldValueOptionName!!)
                     }
                     //Get value
@@ -227,7 +173,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                         view.addComponent(finalValueString, c.customFieldName!!)
 
                     })
-
                 }
 
             }
@@ -239,22 +184,41 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
-        GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_UPDATE)
-            view.showFAB(result!!)
-        }
-
         val personDao = repository.personDao
-        GlobalScope.launch {
-            val result2 = personDao.personHasPermission(loggedInPersonUid, personUid,Role.PERMISSION_PERSON_PICTURE_UPDATE)
-            view.showUpdateImageButton(result2!!)
-        }
+
+        val thisP= this
 
         GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_INSERT)
-            view.showDropout(result!!)
-            view.showEnrollInClass(result)
+
+            val result1 = clazzDao.personHasPermissionLive(loggedInPersonUid, Role.PERMISSION_PERSON_UPDATE)
+            view.runOnUiThread(Runnable {
+                result1.observe(thisP, thisP::handleFabLive)
+            })
+
+            val result2 = personDao.personHasPermissionLive(loggedInPersonUid, personUid, Role.PERMISSION_PERSON_PICTURE_UPDATE)
+            view.runOnUiThread(Runnable {
+                result2.observe(thisP, thisP::handleImageButtonLive)
+            })
+
+            val result3 = clazzDao.personHasPermissionLive(loggedInPersonUid, Role.PERMISSION_PERSON_INSERT)
+            view.runOnUiThread(Runnable {
+                result3.observe(thisP, thisP::handleDropoutAndEnrollLive)
+            })
+
         }
+    }
+
+    private fun handleFabLive(result:Boolean?){
+        view.showFAB(result!!)
+    }
+
+    private fun handleImageButtonLive(result:Boolean?){
+        view.showUpdateImageButton(result!!)
+    }
+
+    private fun handleDropoutAndEnrollLive(result:Boolean?){
+        view.showDropout(result!!)
+        view.showEnrollInClass(result)
     }
 
     /**
@@ -281,7 +245,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             //TODO: KMP attachment
             //view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid))
         }
-
     }
 
 
@@ -303,11 +266,16 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         view.setClazzListProvider(assignedClazzes!!)
     }
 
+
     /**
      * This method tells the View what to show. It will set every field item to the view.
      * @param person The person that needs to be displayed.
      */
     private fun handlePersonDataChanged(person: Person?) {
+
+        if (person == null) {
+            return
+        }
 
         //TODO: KMP Locale ?
         //val currentLocale = Locale(impl.getLocale(context))
@@ -315,9 +283,29 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
         view.clearAllFields()
 
-        if (person == null) {
-            return
+        currentPerson = person
+
+        GlobalScope.launch {
+            //TODO: Make it Live
+            val personPicture = personPictureDao!!.findByPersonUidAsync(currentPerson!!.personUid)
+            if (personPicture != null) {
+                //TODO: KMP
+                //view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture.personPictureUid))
+            }
         }
+
+        //Fields work:
+
+
+        if (person.fatherNumber != null && !person.fatherNumber!!.isEmpty()) {
+            oneParentNumber = person.fatherNumber!!
+        } else if (person.motherNum != null && !person.motherNum!!.isEmpty()) {
+            oneParentNumber = person.motherNum!!
+        }
+
+
+        //Fields here:
+
 
         for (field in presenterFields!!) {
 
@@ -408,7 +396,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_ADDRESS.toLong()) {
-                thisValue = person.address
+                thisValue = person.personAddress
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
@@ -448,6 +436,51 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                         cfValue!!
                 )
             }
+        }
+    }
+
+    private fun handleAverageLive(result:Float?){
+        if (result == null) {
+            attendanceAverage = "N/A"
+        } else {
+            attendanceAverage = (result * 100).toString() + "%"
+        }
+
+    }
+
+    var thisP = this
+
+    private fun handleFieldsLive(fields:List<PersonDetailPresenterField>?){
+        val cleanedFields = ArrayList<PersonDetailPresenterField>()
+        //Remove old custom fields
+        val fieldsIterator = fields!!.iterator()
+        while (fieldsIterator.hasNext()) {
+            val field = fieldsIterator.next()
+            val fieldIndex = field.fieldIndex
+            if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
+                //fieldsIterator.remove()
+            }else{
+                cleanedFields.add(field)
+            }
+        }
+
+        presenterFields = cleanedFields
+        customFieldWithFieldValueMap = HashMap()
+
+        getAllPersonCustomFields()
+
+        //Get the attendance average for this person.
+        GlobalScope.launch {
+            val averageLive = clazzMemberDao.getAverageAttendancePercentageByPersonUidLive(personUid)
+            GlobalScope.launch(Dispatchers.Main) {
+                averageLive.observe(thisP, thisP::handleAverageLive)
+            }
+        }
+
+        personDao = repository.personDao
+        val thisPerson = personDao.findByUidLive(personUid)
+        GlobalScope.launch(Dispatchers.Main) {
+            thisPerson.observe(thisP, thisP::handlePersonDataChanged)
         }
     }
 

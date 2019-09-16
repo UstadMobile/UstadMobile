@@ -56,7 +56,7 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
 
 /**
- * The PersonDetail activity - Shows the detail of a person (like a contact in an address book)
+ * The PersonDetail activity - Shows the detail of a person (like a contact in an personAddress book)
  *
  * This Activity extends UstadBaseActivity and implements PersonDetailView
  */

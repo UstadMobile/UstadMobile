@@ -128,6 +128,11 @@ abstract class PersonDao : BaseDao<Person> {
             ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
     abstract fun personHasPermission(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
 
+    @Query("SELECT 1 FROM Person WHERE Person.personUid = :personUid AND (" +
+            ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
+    abstract fun personHasPermissionLive(accountPersonUid: Long, personUid: Long, permission: Long)
+            : DoorLiveData<Boolean>
+
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 

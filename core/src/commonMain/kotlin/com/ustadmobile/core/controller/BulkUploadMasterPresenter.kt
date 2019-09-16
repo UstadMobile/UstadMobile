@@ -397,7 +397,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
                 if (!studentFatherNum.isEmpty())
                     person.fatherNumber = (studentFatherNum)
                 if (!studentAddress.isEmpty())
-                    person.address = (studentAddress)
+                    person.personAddress = (studentAddress)
                 person.phoneNum = studentPhoneNo
                 person.dateOfBirth = (getDOBFromString(studentDateOfBirth))
                 if (studentGender.toLowerCase().startsWith("f")) {
@@ -859,7 +859,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
                         "motherNum" -> INDEX_MOTHER_NUMBER = colIndex
                         "fatherName" -> INDEX_FATHER_NAME = colIndex
                         "fatherNumber" -> INDEX_FATHER_NUMBER = colIndex
-                        "address" -> INDEX_ADDRESS = colIndex
+                        "personAddress" -> INDEX_ADDRESS = colIndex
                         else ->
                             //Lookup custom field
                             findCustomField(everyHeader.substring("student ".length), Person.TABLE_ID, colIndex, CUSTOM_FIELD_STUDENT)

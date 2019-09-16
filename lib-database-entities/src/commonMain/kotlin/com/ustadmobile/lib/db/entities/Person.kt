@@ -46,7 +46,7 @@ open class Person() {
 
     var dateOfBirth: Long = 0
 
-    var address: String? = null
+    var personAddress: String? = null
 
 
     @MasterChangeSeqNum

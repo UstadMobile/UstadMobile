@@ -109,7 +109,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
 
     /**
      * Handle response from the entry status task
-     * @param sourceDeviceAddress Server device bluetooth MAC address
+     * @param sourceDeviceAddress Server device bluetooth MAC personAddress
      * @param response Message received as a response from the server device.
      */
     override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {

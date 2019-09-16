@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
@@ -27,6 +28,9 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Query("SELECT * FROM PersonDetailPresenterField WHERE viewModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsViewMode() :
             List<PersonDetailPresenterField>
+
+    @Query("SELECT * FROM PersonDetailPresenterField WHERE viewModeVisible = 1 ORDER BY fieldIndex")
+    abstract fun findAllPersonDetailPresenterFieldsViewModeLive() : DoorLiveData<List<PersonDetailPresenterField>>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsEditMode() :

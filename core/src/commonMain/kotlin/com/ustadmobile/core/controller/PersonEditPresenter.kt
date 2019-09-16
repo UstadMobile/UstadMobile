@@ -383,7 +383,7 @@ class PersonEditPresenter
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_ADDRESS.toLong()) {
-                thisValue = thisPerson.address
+                thisValue = thisPerson.personAddress
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon), thisValue)
@@ -458,7 +458,7 @@ class PersonEditPresenter
             personToUpdate!!.dateOfBirth = (value as Long)
 
         } else if (fieldcode == PERSON_FIELD_UID_ADDRESS.toLong()) {
-            personToUpdate!!.address = (value as String)
+            personToUpdate!!.personAddress = (value as String)
 
         } else {
             //This is actually a custom field. (old)
