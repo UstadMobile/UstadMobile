@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.ustadmobile.core.db.waitForLiveData
+import com.ustadmobile.door.DataSourceFactoryJs
 import com.ustadmobile.door.DatabaseBuilder
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_JsImpl
@@ -9,7 +10,9 @@ import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.promise
+import kotlinx.coroutines.withTimeout
 import org.w3c.dom.set
 import kotlin.browser.localStorage
 import kotlin.test.*
@@ -75,6 +78,25 @@ class BasicTest {
     }
 
     @Test
+    fun testDataSourceFactory() = GlobalScope.promise {
+        val syncableEntity = ExampleSyncableEntity(esNumber = 101)
+        syncableEntity.esUid = dbInstance.exampleSyncableDao().insert(syncableEntity)
+        val dataSource = dbInstance.exampleSyncableDao().findAllDataSource()
+        val channel = Channel<List<ExampleSyncableEntity>>(1)
+        (dataSource as DataSourceFactoryJs<Int, ExampleSyncableEntity>).create().load(0, 50) {e: Exception?, entities: List<ExampleSyncableEntity>? ->
+            if(entities != null) {
+                channel.offer(entities)
+            }else {
+                println("Exception loading entities: $e")
+            }
+        }
+
+        val listReceived = withTimeout(5000) { channel.receive() }
+        assertEquals(1, listReceived.size, "Got list of one entitity")
+    }
+
+
+    @Test
     fun givenBlankDatabase_whenListInserted_thenTotalNumItemsShouldMatch() = GlobalScope.promise {
         val entityList = listOf(ExampleEntity2(name = "Test Item 1", someNumber =  50),
                 ExampleEntity2(name = "Test Item 2", someNumber =  51))
@@ -83,6 +105,7 @@ class BasicTest {
                 "After inserting entities into blank db, num entities in db equals list length")
 
     }
+
 
 
 }
