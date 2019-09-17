@@ -13,8 +13,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.util.parseRangeRequestHeader
+import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
+import fi.iki.elonen.NanoHTTPD
 import java.io.ByteArrayInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
@@ -148,9 +153,47 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
-            val data = containerManager!!.getInputStream(containerManager!!.getEntry(log.path!!)!!)
+            val entry = containerManager!!.getEntry(log.path!!)!!
+            var data = containerManager!!.getInputStream(entry)
 
-            return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data)
+            // if not range header, load the file as normal
+            var rangeHeader: String? = request.requestHeaders["Range"]
+                    ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data)
+
+            val totalLength = entry.containerEntryFile!!.ceTotalSize
+            val isHEADRequest = request.method == "HEAD"
+
+            var range = if (rangeHeader != null) {
+                parseRangeRequestHeader(rangeHeader, totalLength)
+            } else {
+                null
+            }
+            if (range != null && range.statusCode == 206) {
+                if(!isHEADRequest){
+                    data = RangeInputStream(data, range.fromByte, range.toByte)
+                }
+                var mutMap = mutableMapOf<String, String>()
+                if (log.headers != null) {
+                    mutMap.putAll(log.headers!!)
+                }
+                range.responseHeaders.forEach { mutMap[it.key] = it.value }
+                return WebResourceResponse(log.mimeType, "utf-8", HttpURLConnection.HTTP_PARTIAL,
+                        "OK", mutMap, if(isHEADRequest) null else data)
+
+            } else if (range?.statusCode == 416) {
+                return WebResourceResponse("text/plain", "utf-8",416,
+                        if (isHEADRequest) "" else "Range request not satisfiable", null, null)
+            } else {
+
+                var mutMap = mutableMapOf<String, String>()
+                if (log.headers != null) {
+                    mutMap.putAll(log.headers!!)
+                }
+                mutMap["Content-Length"] = totalLength.toString()
+                mutMap["Connection"] = "close"
+                return WebResourceResponse(log.mimeType, "utf-8", 200,
+                        "OK", mutMap, data)
+            }
         } catch (e: IOException) {
             System.err.println("did not find entry in zip for url " + log.url!!)
             e.printStackTrace()
