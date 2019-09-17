@@ -146,47 +146,4 @@ constructor(`in`: InputStream, start: Long, private val end: Long) : FilterInput
 
         super.mark(readlimit)
     }
-
-    companion object {
-
-        /**
-         * Parse a range header, and determine the bytes that should be sent to answer a request.
-         *
-         * @param header Value of the "range" header (if any). This can be null if there is no such header.
-         *
-         * @param totalLength The total length of the response in it's entirety (e.g. the file size).
-         * This method will use it to determine the end position.
-         *
-         * @return a two value long array of the first byte (inclusive) and last byte (TODO: check this)
-         */
-        fun parseRangeRequest(header: String?, totalLength: Long): LongArray? {
-            var header = header
-            var range: LongArray? = null
-            if (header != null && header.startsWith("bytes=")) {
-                range = longArrayOf(0, -1)
-                header = header.substring("bytes=".length)
-                val dashPos = header.indexOf('-')
-                try {
-                    if (dashPos > 0) {
-                        range[0] = Integer.parseInt(header.substring(0, dashPos)).toLong()
-                    }
-
-                    if (dashPos == header.length - 1) {
-                        range[1] = totalLength - 1
-                    } else if (dashPos > 0) {
-                        range[1] = Integer.parseInt(header.substring(dashPos + 1)).toLong()
-
-                    }
-                } catch (nfe: NumberFormatException) {
-
-                }
-
-                if (range[0] < 0 || range[1] > totalLength) {
-                    range[0] = -1//Error flag
-                }
-            }
-
-            return range
-        }
-    }
 }
