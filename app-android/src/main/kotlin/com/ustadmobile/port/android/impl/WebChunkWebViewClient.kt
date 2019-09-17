@@ -178,7 +178,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                 }
                 range.responseHeaders.forEach { mutMap[it.key] = it.value }
                 return WebResourceResponse(log.mimeType, "utf-8", HttpURLConnection.HTTP_PARTIAL,
-                        "OK", mutMap, if(isHEADRequest) null else data)
+                        "Partial Content", mutMap, if(isHEADRequest) null else data)
 
             } else if (range?.statusCode == 416) {
                 return WebResourceResponse("text/plain", "utf-8",416,
