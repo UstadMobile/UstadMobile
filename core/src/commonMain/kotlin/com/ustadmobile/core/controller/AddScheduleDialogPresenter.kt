@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.core.db.dao.ScheduleDao
 import com.ustadmobile.core.db.dao.ScheduledCheckDao
 import com.ustadmobile.core.impl.UmAccountManager
@@ -15,6 +16,7 @@ import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ScheduledCheck
+import com.ustadmobile.lib.db.entities.UMCalendar
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -85,8 +87,10 @@ class AddScheduleDialogPresenter
 
         //Creates ClazzLogs for today (since ClazzLogs are automatically only created for tomorrow)
         val runAfterInsertOrUpdate = Runnable {
-            scheduleDao.createClazzLogsForToday(
-                    UmAccountManager.getActivePersonUid(context), appDatabaseRepo)
+            createClazzlogsForToday(UmAccountManager.getActivePersonUid(context), appDatabaseRepo, context)
+//            scheduleDao.createClazzLogsForToday(
+//                    UmAccountManager.getActivePersonUid(context), appDatabaseRepo)
+
             //If you want it to create ClazzLogs for every day of schedule (useful for testing):
             //scheduleDao.createClazzLogsForEveryDayFromDays(5,
             //        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
@@ -160,6 +164,210 @@ class AddScheduleDialogPresenter
         currentSchedule!!.scheduleDay = position + 1
     }
 
+    fun createClazzlogsForToday(accountPersonUid: Long, dbRepo:UmAppDatabase, theContext: Any){
+
+
+        //Note this calendar is created on the device's time zone.
+//        val dayCal = Calendar.getInstance()
+//        dayCal.set(Calendar.HOUR_OF_DAY, 0)
+//        dayCal.set(Calendar.MINUTE, 0)
+//        dayCal.set(Calendar.SECOND, 0)
+//        dayCal.set(Calendar.MILLISECOND, 0)
+//        val startTime = dayCal.getTimeInMillis()
+        val startTime = UMCalendarUtil.getToday000000()
+
+//        dayCal.set(Calendar.HOUR_OF_DAY, 23)
+//        dayCal.set(Calendar.MINUTE, 59)
+//        dayCal.set(Calendar.SECOND, 59)
+//        dayCal.set(Calendar.MILLISECOND, 999)
+//        val endTime = dayCal.getTimeInMillis()
+        val endTime = UMCalendarUtil.getToday235959()
+
+        createClazzLogs(startTime, endTime,
+                UmAccountManager.getActivePersonUid(theContext), dbRepo)
+    }
+
+    /**
+     * Creates ClazzLogs for every clazzes the account person has access to between start and end
+     * time.
+     *
+     * Note: We always create ClazzLogs in the TimeZone.
+     * Note 2: the startTime and endTime are times in the phone's timezone.
+     *
+     * @param startTime             between start time
+     * @param endTime               AND end time
+     * @param accountPersonUid      The person
+     * @param db                    The database
+     */
+    fun createClazzLogs(startTime: Long, endTime: Long, accountPersonUid: Long, db: UmAppDatabase) {
+
+        //This method will usually be called from the Workmanager in Android every day. Making the
+        // start time 00:00 and end tim 23:59 : Note: This is the device's timzone. (not class)
+        var startT: Long = UMCalendarUtil.normalizeSecondsAndMillis(startTime)
+//        val startCalendar = Calendar.getInstance()
+//        startCalendar.setTimeInMillis(startT)
+
+        var endT: Long = UMCalendarUtil.normalizeSecondsAndMillis(endTime)
+//        val endCalendar = Calendar.getInstance()
+//        endCalendar.setTimeInMillis(endT)
+
+        val startMsOfDay = (UMCalendarUtil.getHourOfDay24(startT) * 24 +
+                UMCalendarUtil.getMinuteOfDay(startT) * 60 * 100).toLong()
+
+//        val startMsOfDay = ((startCalendar.get(Calendar.HOUR_OF_DAY) * 24 +
+//                startCalendar.get(Calendar.MINUTE)) * 60 * 1000).toLong()
+
+        //Get a list of all classes the logged in user has access to:
+        val clazzList = db.clazzDao.findAllClazzesWithSelectPermission(
+                accountPersonUid)
+        //Loop over the classes
+        for (clazz in clazzList) {
+            //Skipp classes that have no time zone
+            //TODO: KMP TimeZone fix.
+//            if (clazz.timeZone == null) {
+//                System.err.println("Warning: cannot create schedules for clazz" +
+//                        clazz.clazzName + ", uid:" +
+//                        clazz.clazzUid + " as it has no timezone")
+//                continue
+//            }
+
+            var timeZone = clazz.timeZone
+            if(timeZone == null){
+                timeZone = ""
+            }
+
+
+            //Get a list of schedules for the classes
+            val clazzSchedules = db.scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)
+            for (schedule in clazzSchedules) {
+
+                var incToday = startMsOfDay <= schedule.sceduleStartTime
+                val startTimeMins = schedule.sceduleStartTime / (1000 * 60)
+
+//                var nextScheduleOccurence: Calendar? = null
+                var nextSchedule: Long = 0
+
+                if (schedule.scheduleFrequency == Schedule.SCHEDULE_FREQUENCY_DAILY) {
+
+                    val tomorrowLong = UMCalendarUtil.getDateInMilliPlusDays(1)
+                    val tomorrowDay = UMCalendarUtil.getDayOfWeek(tomorrowLong)
+                    val today = UMCalendarUtil.getDayOfWeek(UMCalendarUtil.getDateInMilliPlusDays(0))
+
+
+//                    val tomorrow = Calendar.getInstance()
+//                    tomorrow.add(Calendar.DATE, 1)
+//                    val tomorrowDay = tomorrow.get(Calendar.DAY_OF_WEEK)
+//                    val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+
+                    val dayOfWeek: Int
+                    if (!incToday) {
+                        dayOfWeek = tomorrowDay
+                    } else {
+                        dayOfWeek = today
+                    }
+                    //TODO: Associate with weekend feature in the future
+//                    if (dayOfWeek == Calendar.SUNDAY) {
+                    if (dayOfWeek == 0) { //Sunday in DateTime klock
+                        //skip
+                        println("Today is a weekend. Skipping ClazzLog creation for today.")
+
+                    } else if (db.scheduleDao.checkGivenDateAHolidayForClazz(startT,
+                                    clazz.clazzUid)) {
+                        //Its a holiday. Skip
+                        println("Skipping holiday")
+
+                    } else if (clazz.clazzEndTime != 0L && startT > clazz.clazzEndTime) {
+                        //Date is ahead of clazz end date. Skipping.
+                        println("Skipping cause current date is after Class's end date.")
+
+                    } else if (clazz.clazzStartTime != 0L && startT < clazz.clazzStartTime) {
+                        //Date is before Clazz's start date. Skipping
+                        println("Skipping cause current date is before Class's start date.")
+                    } else {
+
+                        //This will get the next schedule for that day. For the same day, it will
+                        //return itself if incToday is set to true, else it will go to next week.
+                        nextSchedule = UMCalendarUtil.copyCalendarAndAdvanceTo(startT,
+                                dayOfWeek, incToday)
+                        nextSchedule = UMCalendarUtil.zeroOutTimeForGivenLongDate(nextSchedule)
+
+//                        //Set to 00:00
+//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, 0)
+//                        nextScheduleOccurence!!.set(Calendar.MINUTE, 0)
+//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
+//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
+
+                        //Now move it to desired hour:
+                        nextSchedule = UMCalendarUtil.changeDatetoThis(nextSchedule, startTimeMins)
+
+//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, (startTimeMins / 60).toInt())
+//                        nextScheduleOccurence!!.set(Calendar.MINUTE, (startTimeMins % 60).toInt())
+//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
+//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
+                    }
+
+                } else if (schedule.scheduleFrequency == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
+
+                    if (db.scheduleDao.checkGivenDateAHolidayForClazz(startT,
+                                    clazz.clazzUid)) {
+                        //Its a holiday. Skip it.
+                        println("Skipping holiday")
+                    } else if (clazz.clazzEndTime != 0L && startT > clazz.clazzEndTime) {
+                        //Date is ahead of clazz end date. Skipping.
+                        println("Skipping cause current date is after Class's end date.")
+
+                    } else if (clazz.clazzStartTime != 0L && startT < clazz.clazzStartTime) {
+                        //Date is before Clazz's start date. Skipping
+                        println("Skipping cause current date is before Class's start date.")
+                    } else {
+
+                        //Will be true if today is schedule day
+                        //TODO: Check this
+                        val today = UMCalendarUtil.getDayOfWeek(UMCalendarUtil.getToday000000())
+                        incToday = today == schedule.scheduleDay
+
+                        //Get the day of next occurence.
+                        nextSchedule = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                                startT, schedule.scheduleDay, incToday)
+
+                        //Set the day's timezone to Clazz
+                        //TODO: TimeZone
+//                        nextScheduleOccurence!!.setTimeZone(TimeZone.getTimeZone(timeZone))
+
+                        nextSchedule = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                                startT, schedule.scheduleDay, incToday)
+
+                        //Set to 00:00
+                        nextSchedule = UMCalendarUtil.zeroOutTimeForGivenLongDate(nextSchedule)
+//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, 0)
+//                        nextScheduleOccurence!!.set(Calendar.MINUTE, 0)
+//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
+//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
+
+                        //Now move it to desired hour:
+                        nextSchedule = UMCalendarUtil.changeDatetoThis(nextSchedule, startTimeMins)
+//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, (startTimeMins / 60).toInt())
+//                        nextScheduleOccurence!!.set(Calendar.MINUTE, (startTimeMins % 60).toInt())
+//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
+//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
+                    }
+                }
+
+                if (nextSchedule != null && nextSchedule < endT) {
+                    //this represents an instance of this class that should take place and
+                    //according to the arguments provided, we should check that this instance exists
+                    val logInstanceHash = ClazzLogDao.generateClazzLogUid(clazz.clazzUid,nextSchedule)
+                    val existingLog = db.clazzLogDao.findByUid(logInstanceHash.toLong())
+
+                    if (existingLog == null || existingLog!!.clazzLogCancelled) {
+                        val newLog = ClazzLog(logInstanceHash.toLong(), clazz.clazzUid,
+                                nextSchedule, schedule.scheduleUid)
+                        db.clazzLogDao.replace(newLog)
+                    }
+                }
+            }
+        }
+    }
 
 
     companion object{

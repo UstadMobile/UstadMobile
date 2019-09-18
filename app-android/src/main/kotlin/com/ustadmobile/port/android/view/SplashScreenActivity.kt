@@ -148,11 +148,10 @@ class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterf
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         queueClazzLogScheduleWorker()
-        //startTheUI()
 
     }
 
-    fun queueClazzLogScheduleWorker(){
+    private fun queueClazzLogScheduleWorker(){
         WorkManager.getInstance().cancelAllWorkByTag(ClazzLogScheduleWorker.TAG)
         ClazzLogScheduleWorker.queueClazzLogScheduleWorker(
                 ClazzLogScheduleWorker.getNextClazzLogScheduleDueTime())

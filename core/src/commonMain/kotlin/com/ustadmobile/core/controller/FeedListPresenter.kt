@@ -81,9 +81,10 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
     fun checkPermissions() {
         val clazzDao = repository!!.clazzDao
         GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, Role
-                    .PERMISSION_REPORTS_VIEW)
-            view.showReportOptionsOnSummaryCard(result!!)
+            val result = clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_REPORTS_VIEW)
+            if(result!=null) {
+                view.showReportOptionsOnSummaryCard(result!!)
+            }
         }
 
     }
