@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
@@ -99,6 +100,16 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
             " GROUP BY saleProductParentJoinParentUid")
     abstract suspend fun findTopSaleProductsAsync():List<SaleProduct>
+
+
+    @Query("SELECT Parent.* FROM SaleProductParentJoin " +
+            "LEFT JOIN SaleProduct as Parent ON " +
+            "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+            " WHERE SaleProductParentJoinActive = 1  " +
+            "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
+            "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
+            " GROUP BY saleProductParentJoinParentUid")
+    abstract fun findTopSaleProductsLive():DoorLiveData<List<SaleProduct>>
 
 
     //Find categories in a category uid

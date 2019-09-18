@@ -92,4 +92,17 @@ open class SaleItem() {
         this.saleItemSold = true
 
     }
+
+    constructor(productUid: Long, quantity: Int, ppp: Long, saleUid: Long, dueDate: Long, creationDate:Long):this() {
+        this.saleItemCurrency = "Afs"
+        this.saleItemActive = true
+        this.saleItemCreationDate = creationDate
+        this.saleItemProductUid = productUid
+        this.saleItemQuantity = quantity
+        this.saleItemPricePerPiece = ppp.toFloat()
+        this.saleItemSaleUid = saleUid
+        this.saleItemDueDate = dueDate
+        this.saleItemSold = true
+
+    }
 }

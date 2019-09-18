@@ -19,7 +19,7 @@ class PeopleListActivity : UstadBaseActivity(){
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        val currentFrag = PeopleListFragment.newInstance()
+        val currentFrag = PeopleListFragment.newInstance(true)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                     .add(R.id.activity_people_list_framelayout, currentFrag)

@@ -2,15 +2,12 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-
 import androidx.appcompat.widget.Toolbar
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportChartViewComponentPresenter
 import com.ustadmobile.core.controller.ReportDetailPresenter
@@ -20,11 +17,8 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
 import com.ustadmobile.lib.db.entities.DashboardEntry
-
-import java.util.Hashtable
-import java.util.Objects
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.util.*
 
 
 class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {

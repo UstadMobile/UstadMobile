@@ -66,14 +66,7 @@ class ReportChartViewComponentPresenter(context: Any,
                 GlobalScope.launch(Dispatchers.Main) {
                     resultLive.observe(thisP, thisP::handleReportLive)
                 }
-                //})
 
-//                val result =
-//                        saleDao.getSalesPerformanceReportSumGroupedByLocation(reportOptions.les!!,
-//                        producerUids, reportOptions.locations!!, reportOptions.productTypes!!,
-//                        reportOptions.fromDate, reportOptions.toDate,
-//                        reportOptions.fromPrice, reportOptions.toPrice)
-//                view.setChartData((result as List<Any>?)!!)
             }
         }
 

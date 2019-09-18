@@ -41,7 +41,8 @@ import java.util.HashMap
  * Designed to be common for both Location and Classes (although classes wont be in a tree structure).
  * The data should be provided to it to load.
  */
-class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), SelectMultipleProductTypeTreeDialogView, DismissableDialog {
+class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
+        SelectMultipleProductTypeTreeDialogView, DismissableDialog {
     override val viewContext: Any
         get() = context!!
 

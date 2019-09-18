@@ -153,7 +153,7 @@ class DashboardEntryListRecyclerAdapter internal constructor(
                 //Create View, presenter and add it to the view
                 val topLEsComponent = ReportTableListComponent(theContext)
                 topLEsComponent.layoutParams = params
-                val tPresenter = ReportTopLEsComponentPresenter(this, args, topLEsComponent)
+                val tPresenter = ReportTopLEsComponentPresenter(theContext, args, topLEsComponent)
                 tPresenter.onCreate(args)
 
                 chartLL.addView(topLEsComponent)

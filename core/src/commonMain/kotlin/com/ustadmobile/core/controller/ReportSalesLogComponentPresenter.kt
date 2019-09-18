@@ -9,7 +9,9 @@ import com.ustadmobile.core.model.ReportOptions
 import com.ustadmobile.core.view.ReportTableListComponentView
 
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
+import com.ustadmobile.lib.db.entities.ReportSalesLog
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -55,13 +57,18 @@ class ReportSalesLogComponentPresenter(context: Any,
             val json = Json(JsonConfiguration.Stable)
             reportOptions = json.parse(ReportOptions.serializer(), reportOptionsString!!)
 
-            GlobalScope.launch {
-                val result = saleDao.getSaleLog()
-                view.setSalesLogData((result as List<Any>?)!!)
-            }
+            val thisP = this
+            val resultLive = saleDao.getSaleLogLive()
+            view.runOnUiThread(Runnable {
+                resultLive.observe(thisP, thisP::handleSalesLogResultLive)
+            })
+
         }
 
+    }
 
+    private fun handleSalesLogResultLive(result: List<ReportSalesLog>?){
+        view.setSalesLogData((result as List<Any>?)!!)
     }
 
 

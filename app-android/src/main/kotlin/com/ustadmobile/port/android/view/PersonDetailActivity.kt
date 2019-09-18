@@ -86,8 +86,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             return true
 
         } else if (i == R.id.update_username_password) {
-            //TODO: KMP Server stuff
-            //mPresenter!!.goToUpdateUsernamePassword()
+            mPresenter!!.goToUpdateUsernamePassword()
 
         }
         return super.onOptionsItemSelected(item)

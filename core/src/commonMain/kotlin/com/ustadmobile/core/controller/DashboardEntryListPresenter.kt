@@ -150,6 +150,7 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             dashboardEntryDao.updateTitle(entryUid, title)
+            val a=0
         }
     }
 

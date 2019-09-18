@@ -8,6 +8,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.ReportOptions
 import com.ustadmobile.core.view.ReportTableListComponentView
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
+import com.ustadmobile.lib.db.entities.ReportTopLEs
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -46,20 +48,29 @@ class ReportTopLEsComponentPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
+        val thisP = this
+
         if (arguments.containsKey(ARG_REPORT_OPTIONS)) {
             reportOptionsString = arguments[ARG_REPORT_OPTIONS].toString()
             val gson = Json(JsonConfiguration.Stable)
             reportOptions = gson.parse(ReportOptions.serializer(), reportOptionsString!!)
 
             GlobalScope.launch {
-                val result = saleDao.getTopLEs()
 
-                view.runOnUiThread(Runnable{ view.setTopLEsData((result as List<Any>?)!!) })
+                val resultLive = saleDao.getTopLEsLive()
+                GlobalScope.launch(Dispatchers.Main) {
+                    resultLive.observe(thisP, thisP::handleReportResultLive)
+                }
+
             }
 
         }
+    }
 
-
+    private fun handleReportResultLive(result: List<ReportTopLEs>?){
+        view.runOnUiThread(Runnable {
+            view.setTopLEsData((result as List<Any>?)!!)
+        })
     }
 
 }

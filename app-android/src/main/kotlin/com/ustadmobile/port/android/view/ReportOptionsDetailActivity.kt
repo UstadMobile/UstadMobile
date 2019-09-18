@@ -218,7 +218,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
     override fun setEditMode(editMode: Boolean) {
         this.editMode = editMode
         if (menu != null) {
-            menu!!.getItem(R.id.menu_create_report).setTitle(if (editMode) R.string.save else R.string.create_report)
+            menu!!.findItem(R.id.menu_create_report).setTitle(if (editMode) R.string.save else R.string.create_report)
         }
     }
 

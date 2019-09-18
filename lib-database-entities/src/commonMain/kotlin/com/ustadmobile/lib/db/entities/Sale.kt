@@ -76,6 +76,9 @@ open class Sale() {
         //Ideally salePaymentDone should be triggered from SaleItem and SalePayment
     }
 
+    constructor(active: Boolean, creationDate: Long):this(active){
+        this.saleCreationDate = creationDate
+    }
     init {
         this.saleCancelled = false
         this.saleActive = false // false is essentially deleted.

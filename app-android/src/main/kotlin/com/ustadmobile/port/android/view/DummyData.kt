@@ -16,41 +16,26 @@ import java.io.InputStream
 import java.io.UnsupportedEncodingException
 import java.util.ArrayList
 
-class DummyData {
+class DummyData(theContext: Any, theRepo: UmAppDatabase) {
 
     private var personDao: PersonDao
     private var locationDao: LocationDao
     private var personAuthDao: PersonAuthDao
     private var saleProductDao: SaleProductDao
     private var productParentJoinDao: SaleProductParentJoinDao
-    private var repo: UmAppDatabase
-    private var context:Any ?= null
+    private var repo: UmAppDatabase = theRepo
+    private var context:Any ?= theContext
 
     var le1Uid : Long = 0L
     var le1Username : String = "le1"
     var le2Uid : Long = 0L
 
-    constructor(theContext:Any, theRepo:UmAppDatabase){
-        this.context = theContext
-        this.repo = theRepo
-
-        personCustomFieldDao = repo.personCustomFieldDao
-        personDetailPresenterFieldDao = repo.personDetailPresenterFieldDao
-        personDao = repo.personDao
-        locationDao = repo.locationDao
-        personAuthDao = repo.personAuthDao
-        saleProductDao = repo.saleProductDao
-        productParentJoinDao = repo.saleProductParentJoinDao
-    }
-
     fun loadInitialData() {
-
-        
         
         //Any data goes here.
 
         //Create Admin
-        var adminPerson = personDao!!.findByUsername("admin")
+        var adminPerson = personDao.findByUsername("admin")
         if (adminPerson == null) {
             adminPerson = Person()
             adminPerson.admin = true
@@ -59,13 +44,13 @@ class DummyData {
             adminPerson.lastName = "Admin"
             adminPerson.active = true
 
-            adminPerson.personUid = personDao!!.insert(adminPerson)
+            adminPerson.personUid = personDao.insert(adminPerson)
 
             val adminPersonAuth = PersonAuth(adminPerson.personUid,
                     ENCRYPTED_PASS_PREFIX +
                             encryptPassword("golDoz1"))
             GlobalScope.launch {
-                personAuthDao!!.insertAsync(adminPersonAuth)
+                personAuthDao.insertAsync(adminPersonAuth)
                 //Admin created.
                 println("ServletContextClass: Admin created. Continuing..")
                 addDummyData()
@@ -281,10 +266,10 @@ class DummyData {
                 person3.active = true
                 person4.active = true
 
-                personDao!!.insert(person1)
-                personDao!!.insert(person2)
-                personDao!!.insert(person3)
-                personDao!!.insert(person4)
+                personDao.insert(person1)
+                personDao.insert(person2)
+                personDao.insert(person3)
+                personDao.insert(person4)
 
                 addSaleProducts()
             }
@@ -641,17 +626,19 @@ class DummyData {
         val saleProduct4 = SaleProduct("Product4", "testing ")
         val saleProduct4Uid = saleProductDao.insert(saleProduct4)
 
-
+        val dateNow = UMCalendarUtil.getDateInMilliPlusDays(0)
         //Create new Sales for LE1
         //a. Create Sale
-        val sale11 = Sale(true)
+        val sale11 = Sale(true, dateNow)
         sale11.saleTitle = "Test Sale 1"
         sale11.saleDone = true
         sale11.saleNotes = "Test Sale"
         sale11.salePersonUid = le1Uid
         val sale11Uid = saleDao.insert(sale11)
 
-        val sale12 = Sale(true)
+
+
+        val sale12 = Sale(true, dateNow)
         sale12.saleTitle = "Test Sale 1.2"
         sale12.saleDone = true
         sale12.saleNotes = "Test Sale"
@@ -660,16 +647,16 @@ class DummyData {
 
 
         //b. Create SaleItem
-        val saleItem11 = SaleItem(saleProduct1Uid, 10, 420L, sale11Uid, 0L)
+        val saleItem11 = SaleItem(saleProduct1Uid, 10, 420L, sale11Uid, 0L, dateNow)
         saleItem11.saleItemProducerUid = we1PersonUid
-        val saleItem12 = SaleItem(saleProduct2Uid, 8, 240, sale11Uid, 0L)
+        val saleItem12 = SaleItem(saleProduct2Uid, 8, 240, sale11Uid, 0L, dateNow)
         saleItem12.saleItemProducerUid = we2PersonUid
         saleItemDao.insert(saleItem11)
         saleItemDao.insert(saleItem12)
 
-        val saleItem111 = SaleItem(saleProduct1Uid, 12, 440L, sale12Uid, 0L)
+        val saleItem111 = SaleItem(saleProduct1Uid, 12, 440L, sale12Uid, 0L, dateNow)
         saleItem111.saleItemProducerUid = we1PersonUid
-        val saleItem122 = SaleItem(saleProduct2Uid, 4, 220, sale12Uid, 0L)
+        val saleItem122 = SaleItem(saleProduct2Uid, 4, 220, sale12Uid, 0L, dateNow)
         saleItem122.saleItemProducerUid = we2PersonUid
         saleItemDao.insert(saleItem111)
         saleItemDao.insert(saleItem122)
@@ -677,16 +664,16 @@ class DummyData {
 
         //Create new Sales for LE2
         //a. Create Sale
-        val sale22 = Sale(true)
+        val sale22 = Sale(true, dateNow)
         sale22.saleTitle = "Test Sale 2"
         sale22.saleDone = true
         sale22.saleNotes = "Test Sale"
         sale22.salePersonUid = le2Uid
         val sale22Uid = saleDao.insert(sale22)
         //b. Create SaleItem
-        val saleItem23 = SaleItem(saleProduct3Uid, 10, 420L, sale22Uid, 0L)
+        val saleItem23 = SaleItem(saleProduct3Uid, 10, 420L, sale22Uid, 0L, dateNow)
         saleItem23.saleItemProducerUid = we4PersonUid
-        val saleItem24 = SaleItem(saleProduct4Uid, 8, 240, sale22Uid, 0L)
+        val saleItem24 = SaleItem(saleProduct4Uid, 8, 240, sale22Uid, 0L, dateNow)
         saleItem24.saleItemProducerUid = we5PersonUid
         saleItemDao.insert(saleItem23)
         saleItemDao.insert(saleItem24)
@@ -1049,6 +1036,15 @@ class DummyData {
         return allTheFields
     }
 
+    init {
+        personCustomFieldDao = repo.personCustomFieldDao
+        personDetailPresenterFieldDao = repo.personDetailPresenterFieldDao
+        personDao = repo.personDao
+        locationDao = repo.locationDao
+        personAuthDao = repo.personAuthDao
+        saleProductDao = repo.saleProductDao
+        productParentJoinDao = repo.saleProductParentJoinDao
+    }
 
 
 }

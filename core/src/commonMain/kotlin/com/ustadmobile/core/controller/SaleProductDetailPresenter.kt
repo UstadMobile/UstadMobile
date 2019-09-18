@@ -97,7 +97,9 @@ class SaleProductDetailPresenter(context: Any,
             } else {
                 currentSaleProduct = SaleProduct("", "", isCategory, false)
 
-                val product = saleProductDao.findByUidLive(arguments[ARG_SALE_PRODUCT_UID]!!.toLong())
+                currentSaleProduct!!.saleProductUid = saleProductDao.insertAsync(currentSaleProduct!!)
+                
+                val product = saleProductDao.findByUidLive(currentSaleProduct!!.saleProductUid)
                 view.runOnUiThread(Runnable {
                     product.observe(thisP, thisP::updateView)
                 })

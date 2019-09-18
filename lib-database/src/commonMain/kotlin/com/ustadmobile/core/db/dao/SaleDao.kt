@@ -306,6 +306,19 @@ abstract class SaleDao : BaseDao<Sale> {
             "  ORDER BY    totalSalesValue DESC")
     abstract suspend fun getTopLEs(): List<ReportTopLEs>
 
+    @Query("SELECT    " +
+            " SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as totalSalesValue,  " +
+            "    LE.firstNames||' '||LE.lastName as leName,   " +
+            "   '' as lastActiveOnApp, " +
+            "   '' as leRank, " +
+            "   LE.personUid as leUid " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
+            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
+            " GROUP BY leUid " +
+            "  ORDER BY    totalSalesValue DESC")
+    abstract fun getTopLEsLive(): DoorLiveData<List<ReportTopLEs>>
+
     @Query("SELECT   LE.firstNames||' '||LE.lastName as leName, " +
             " (SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleValue,    " +
             "  Sale.saleCreationDate AS saleDate,  " +
@@ -318,6 +331,19 @@ abstract class SaleDao : BaseDao<Sale> {
             " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1    " +
             "  ORDER BY    saleDate DESC ")
     abstract suspend fun getSaleLog(): List<ReportSalesLog>
+
+    @Query("SELECT   LE.firstNames||' '||LE.lastName as leName, " +
+            " (SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleValue,    " +
+            "  Sale.saleCreationDate AS saleDate,  " +
+            "  SaleProduct.saleProductName as productNames, " +
+            "Location.title as locationName " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
+            " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
+            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1    " +
+            "  ORDER BY    saleDate DESC ")
+    abstract fun getSaleLogLive(): DoorLiveData<List<ReportSalesLog>>
 
 
     //My Women Entrepreneurs

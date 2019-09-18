@@ -47,6 +47,8 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         super.onCreate(savedInstanceState)
     }
 
+    private var activityMode : Boolean = false
+
     /**
      * On Create of the View fragment. Sets up the presenter and the floating action button's
      * on click listener.
@@ -77,6 +79,12 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         pullToRefresh = rootContainer!!.findViewById(R.id.fragment_people_list_swiperefreshlayout)
 
         fab!!.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
+
+        if(activityMode){
+            val layout = rootContainer!!.findViewById<SwipeRefreshLayout>(
+                    R.id.fragment_people_list_swiperefreshlayout)
+            layout.setPadding(0,0,0,24)
+        }
 
         sortSpinner!! .onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -161,6 +169,14 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
          */
         fun newInstance(): PeopleListFragment {
             val fragment = PeopleListFragment()
+            val args = Bundle()
+            fragment.arguments = args
+            return fragment
+        }
+
+        fun newInstance(fromActivity: Boolean): PeopleListFragment {
+            val fragment = PeopleListFragment()
+            fragment.activityMode = fromActivity
             val args = Bundle()
             fragment.arguments = args
             return fragment

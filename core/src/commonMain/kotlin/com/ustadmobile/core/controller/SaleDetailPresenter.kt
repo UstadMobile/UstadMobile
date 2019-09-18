@@ -90,6 +90,7 @@ class SaleDetailPresenter(context: Any,
         } else {
             view.runOnUiThread(Runnable{ view.showPayments(false) })
             updatedSale = Sale()
+            updatedSale!!.saleCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
             updatedSale!!.salePreOrder = true //ie: Not delivered unless ticked.
             updatedSale!!.saleDone = false
             updatedSale!!.saleActive = false

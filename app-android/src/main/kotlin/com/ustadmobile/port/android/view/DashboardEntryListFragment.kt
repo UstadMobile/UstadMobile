@@ -30,7 +30,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
+class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
     override val viewContext: Any
         get() = context!!
 
@@ -175,6 +175,17 @@ class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
         adb.show()
     }
 
+
+    constructor()  {
+        val args = Bundle()
+        arguments = args
+        icon = R.drawable.ic_insert_chart_black_24dp
+        title = R.string.reports
+    }
+
+    constructor(args:Bundle) : this() {
+        arguments = args
+    }
     companion object {
 
         fun newInstance(): DashboardEntryListFragment {

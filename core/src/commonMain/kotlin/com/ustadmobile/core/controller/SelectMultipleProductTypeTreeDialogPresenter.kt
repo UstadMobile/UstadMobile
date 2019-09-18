@@ -3,7 +3,10 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.Companion.ARG_PRODUCT_SELECTED_SET
+import com.ustadmobile.lib.db.entities.SaleProduct
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -46,12 +49,20 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
     private fun getTopProductTypes() {
         val parentJoinDao = repository.saleProductParentJoinDao
+        val thisP=this
         GlobalScope.launch {
-            val result = parentJoinDao.findTopSaleProductsAsync()
-            view.populateTopProductType(result)
+            val resultLive = parentJoinDao.findTopSaleProductsLive()
+            GlobalScope.launch(Dispatchers.Main) {
+                resultLive.observe(thisP, thisP::handleProductTypes)
+            }
         }
     }
 
+    private fun handleProductTypes(types:List<SaleProduct>?){
+        view.runOnUiThread(Runnable {
+            view.populateTopProductType(types!!)
+        })
+    }
 
     fun handleClickPrimaryActionButton() {
         view.finish()

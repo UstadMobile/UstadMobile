@@ -19,7 +19,8 @@ import com.ustadmobile.lib.db.entities.ReportSalesPerformance
 import kotlinx.coroutines.Runnable
 import java.util.*
 
-class ReportSalesPerformanceChartComponent : LinearLayout, ReportBarChartComponentView {
+class ReportSalesPerformanceChartComponent : LinearLayout,
+        ReportBarChartComponentView {
     override val viewContext: Any
         get() = context!!
 
@@ -33,7 +34,8 @@ class ReportSalesPerformanceChartComponent : LinearLayout, ReportBarChartCompone
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {}
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
+            : super(context, attrs, defStyleAttr) {}
 
     override fun setChartData(dataSet: List<Any>) {
         runOnUiThread (Runnable {

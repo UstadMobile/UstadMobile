@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OP
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_TYPE
 import com.ustadmobile.lib.db.entities.DashboardEntry
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 /**
@@ -54,15 +55,21 @@ class ReportDetailPresenter(context: Any, arguments: Map<String, String?>,
             dashboardEntryUid = arguments[ARG_DASHBOARD_ENTRY_UID].toString().toLong()
             GlobalScope.launch {
                 val result = entryDao.findByUidAsync(dashboardEntryUid)
-                view.showAddToDashboardButton(false)
-                view.setTitle(result!!.dashboardEntryTitle!!)
+                view.runOnUiThread(Runnable {
+                    view.showAddToDashboardButton(false)
+                    view.setTitle(result!!.dashboardEntryTitle!!)
+                })
             }
 
         } else {
-            view.showAddToDashboardButton(true)
+            view.runOnUiThread(Runnable {
+                view.showAddToDashboardButton(true)
+            })
         }
 
-        view.showDownloadButton(true)
+        view.runOnUiThread(Runnable {
+            view.showDownloadButton(true)
+        })
 
         if (arguments.containsKey(ARG_REPORT_TYPE)) {
             reportType = arguments[ARG_REPORT_TYPE].toString().toInt()
@@ -72,13 +79,15 @@ class ReportDetailPresenter(context: Any, arguments: Map<String, String?>,
             reportOptionsString = arguments[ARG_REPORT_OPTIONS].toString()
         }
 
-        when (reportType) {
-            DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE -> view.showSalesPerformanceReport()
-            DashboardEntry.REPORT_TYPE_SALES_LOG -> view.showSalesLogReport()
-            DashboardEntry.REPORT_TYPE_TOP_LES -> view.showTopLEsReport()
-            else -> {
+        view.runOnUiThread(Runnable {
+            when (reportType) {
+                DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE -> view.showSalesPerformanceReport()
+                DashboardEntry.REPORT_TYPE_SALES_LOG -> view.showSalesLogReport()
+                DashboardEntry.REPORT_TYPE_TOP_LES -> view.showTopLEsReport()
+                else -> {
+                }
             }
-        }
+        })
     }
 
     fun handleClickAddToDashboard() {

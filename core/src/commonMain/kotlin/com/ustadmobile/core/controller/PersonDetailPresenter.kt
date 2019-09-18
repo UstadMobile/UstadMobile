@@ -43,8 +43,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                             val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<PersonDetailView>(context, arguments!!, view) {
 
-    private var mPerson: DoorLiveData<Person?>? = null
-
     private var presenterFields: List<PersonDetailPresenterField>? = null
 
     private var customFieldWithFieldValueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>? = null
@@ -67,10 +65,12 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 
-    private var customFieldDao: CustomFieldDao? = null
-    private var customFieldValueDao: CustomFieldValueDao? = null
-    private var optionDao: CustomFieldValueOptionDao? = null
-    private var personDao: PersonDao?=null
+    private var customFieldDao: CustomFieldDao
+    private var customFieldValueDao: CustomFieldValueDao
+    private var optionDao: CustomFieldValueOptionDao
+    private var personDao: PersonDao
+    private var clazzMemberDao: ClazzMemberDao
+    private var personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
 
     init {
 
@@ -79,6 +79,14 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
         viewIdToCustomFieldUid = HashMap()
+
+        clazzMemberDao = repository.clazzMemberDao
+        customFieldDao = repository.customFieldDao
+        customFieldValueDao = repository.customFieldValueDao
+        optionDao = repository.customFieldValueOptionDao
+        personDao = repository.personDao
+        personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
+        personPictureDao = repository.personPictureDao
     }
 
     fun addToMap(viewId: Int, fieldId: Long) {
@@ -93,41 +101,17 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        val personDao = repository.personDao
-        val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        val clazzMemberDao = repository.clazzMemberDao
-
-        customFieldDao = repository.customFieldDao
-        customFieldValueDao = repository.customFieldValueDao
-        optionDao = repository.customFieldValueOptionDao
-        personPictureDao = repository.personPictureDao
-
         val thisP = this
 
         checkPermissions()
 
-        //Get the attendance average for this person.
         GlobalScope.launch {
-            val averageLive = clazzMemberDao.getAverageAttendancePercentageByPersonUidLive(personUid)
-            GlobalScope.launch(Dispatchers.Main) {
-                averageLive.observe(thisP, thisP::handleAverageLive)
-            }
-        }
-
-        GlobalScope.launch {
-            //Get all headers and fields
+            //Get all headers and fields and the person as well as attendance average
             val fieldsLive = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewModeLive()
             GlobalScope.launch(Dispatchers.Main) {
                 fieldsLive.observe(thisP, thisP::handleFieldsLive)
             }
         }
-
-//        GlobalScope.launch {
-//            val thisPerson = personDao.findByUidLive(personUid)
-//            GlobalScope.launch(Dispatchers.Main) {
-//                thisPerson.observe(thisP, thisP::handlePersonDataChanged)
-//            }
-//        }
     }
 
 
@@ -174,10 +158,10 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
                     }
                     val finalValueSelection = valueSelection
-                    val result3 = optionDao!!.findAllOptionsForFieldAsync(c.customFieldUid)
+                    val result3 = optionDao.findAllOptionsForFieldAsync(c.customFieldUid)
                     val options = ArrayList<String>()
 
-                    for (o in result3!!) {
+                    for (o in result3) {
                         options.add(o.customFieldValueOptionName!!)
                     }
                     //Get value
@@ -190,7 +174,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                         view.addComponent(finalValueString, c.customFieldName!!)
 
                     })
-
                 }
 
             }
@@ -263,7 +246,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             //TODO: KMP attachment
             //view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid))
         }
-
     }
 
 
@@ -488,8 +470,16 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
         getAllPersonCustomFields()
 
+        //Get the attendance average for this person.
+        GlobalScope.launch {
+            val averageLive = clazzMemberDao.getAverageAttendancePercentageByPersonUidLive(personUid)
+            GlobalScope.launch(Dispatchers.Main) {
+                averageLive.observe(thisP, thisP::handleAverageLive)
+            }
+        }
+
         personDao = repository.personDao
-        val thisPerson = personDao!!.findByUidLive(personUid)
+        val thisPerson = personDao.findByUidLive(personUid)
         GlobalScope.launch(Dispatchers.Main) {
             thisPerson.observe(thisP, thisP::handlePersonDataChanged)
         }
