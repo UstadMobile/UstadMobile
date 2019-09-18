@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Database
 import com.squareup.kotlinpoet.*
@@ -168,20 +169,44 @@ class DbProcessorJs : AbstractDbProcessor(){
             daoFunSpec.addAnnotations(daoMethodEl.annotationMirrors.map { AnnotationSpec.get(it) })
 
 
+            val isLiveData = (returnTypeResolved is ParameterizedTypeName)
+                    && returnTypeResolved.rawType == DoorLiveData::class.asClassName()
+            val isDataSourceFactory = (returnTypeResolved is ParameterizedTypeName)
+                    && returnTypeResolved.rawType == DataSource.Factory::class.asClassName()
             if(daoMethodResolved.parameterTypes.any { isContinuationParam(it.asTypeName())}
-                    || (returnTypeResolved is ParameterizedTypeName &&  returnTypeResolved.rawType == DoorLiveData::class.asClassName())) {
+                    || isLiveData || isDataSourceFactory) {
+
+                val queryParams = daoFunSpec.parameters.toMutableList()
+                if(isDataSourceFactory) {
+                    queryParams += ParameterSpec.builder("_offset", INT).build()
+                    queryParams += ParameterSpec.builder("_limit", INT).build()
+                }
+
                 var codeBlock = generateKtorRequestCodeBlockForMethod(
                         daoName = daoTypeClassName.simpleName,
                         dbPathVarName = "_dbPath",
                         methodName = daoSubEl.simpleName.toString(),
                         httpResultType = resultType,
-                        params = daoFunSpec.parameters,
+                        params = queryParams,
                         useKotlinxListSerialization = true,
                         kotlinxSerializationJsonVarName = "_json")
 
-                if(returnTypeResolved is ParameterizedTypeName && returnTypeResolved.rawType == DoorLiveData::class.asClassName()) {
+                if(isLiveData || isDataSourceFactory) {
+                    val implClassName = if(isLiveData) {
+                        "DoorLiveDataJs"
+                    }else {
+                        "DataSourceFactoryJs"
+                    }
+
+                    val paramNames = if(isDataSourceFactory) {
+                        "_offset: Int, _limit: Int -> \n"
+                    }else {
+                        ""
+                    }
+
                     codeBlock = CodeBlock.builder().beginControlFlow("return %T ",
-                            ClassName("com.ustadmobile.door", "DoorLiveDataJs"))
+                            ClassName("com.ustadmobile.door", implClassName))
+                            .add(paramNames)
                             .add(codeBlock)
                             .add("_httpResult\n")
                             .endControlFlow().build()
