@@ -231,7 +231,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             repoImplClassName, it.makeAccessorCodeBlock()).build())
             dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
 
-            if(addBoundaryCallbackGetters && daoTypeEl.hasDataSourceFactory()) {
+            if(addBoundaryCallbackGetters
+                    && daoTypeEl.hasDataSourceFactory(daoMethodSyncableDataSourceFactoryFilter)) {
                 val boundaryCallbackClassName = ClassName(daoClassName.packageName,
                         "${daoClassName.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
                 val boundaryCallbackVarName = "_${daoTypeEl.simpleName}$SUFFIX_BOUNDARY_CALLBACKS"
