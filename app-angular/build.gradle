@@ -111,6 +111,16 @@ task generateMessageXlf{
   }
 }
 
+
+/*
+new File("${rootProject.buildDir}/js/packages_imported").eachDir{File packageDir ->
+  if(project.dependencyMap.find{ it.value == packageDir.name}?.value == null){
+    project.dependencyMap[packageDir.name] = packageDir.name
+  }
+}
+*/
+
+
 //Prepare dynamic task to generate XLF for each language locale
 def generateMessageXlfTasks = []
 new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
@@ -181,6 +191,7 @@ task installDependencies{
   }
 }
 
+
 /**
  * Execute actual angular e2e tests
  */
@@ -208,20 +219,25 @@ task executeModuleTest{
 }
 
 
+
 /**
  * Pack all modules under node_modules/
  */
 task packPreparedModules{
   doLast{
     new File("${rootProject.file("build/js/node_modules").path}").eachDir {
-      def dir = it.absolutePath
-      exec {
-        workingDir dir
-        commandLine 'npm', 'pack'
+      def dir = it.absolutePath, dirName = it.name
+      if(dir.indexOf("UstadMobile-") != -1 || dir.indexOf("ktor-") != -1
+        || dir.indexOf("kotlinx-") != -1 || project.dependencyMap.find{ it.value == dirName}?.value != null){
+        exec {
+          workingDir dir
+          commandLine 'npm', 'pack'
+        }
       }
     }
   }
 }
+
 
 /**
  * Start angular end to end test

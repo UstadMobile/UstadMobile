@@ -54,13 +54,14 @@ subprojects {
     }
 }
 
-task clean(type: Delete) {
+task deleteBuildDir(type: Delete) {
     delete rootProject.buildDir
 }
 
 //Major.minor.database version
 version = "0.2.8"
 group = "com.ustadmobile.app"
+apply plugin: 'java'
 
 ext {
     ustadVersion = project.version
@@ -180,7 +181,7 @@ ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 
 
 //Map dependencies with the actual packages inside build/js/node_modules
-def dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"kmpxmlpullparser",
+project.ext.dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"kmpxmlpullparser",
                      "klock-js":"klock","":"kotlin-test","kotlinx-coroutines-core-js":"kotlinx-coroutines-core",
                      "kotlinx-serialization-runtime-js":"kotlinx-serialization-runtime-js",
                      "ktor-client-js":"ktor-ktor-client-js","ktor-client-serialization-js":"ktor-ktor-client-serialization",
@@ -204,7 +205,7 @@ subprojects { project ->
                         project.configurations.each {
                             if (it.name == "jsMainImplementation") {
                                 it.allDependencies.each{ dep ->
-                                    dependencies.put(dependencyMap[dep.name],dep.version)
+                                    dependencies.put(project.dependencyMap[dep.name],dep.version)
                                 }
                                 jsonObj.put("dependencies",dependencies)
                             }
@@ -224,3 +225,4 @@ subprojects { project ->
 }
 
 tasks.findByPath(":app-angular:packPreparedModules").dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)
+clean.dependsOn(deleteBuildDir)
