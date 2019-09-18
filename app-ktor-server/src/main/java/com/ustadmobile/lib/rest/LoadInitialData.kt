@@ -1,19 +1,9 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.EntityRoleDao
-import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.core.db.dao.PersonCustomFieldDao
-import com.ustadmobile.core.db.dao.PersonDao
-import com.ustadmobile.core.db.dao.PersonDetailPresenterFieldDao
-import com.ustadmobile.core.db.dao.PersonGroupMemberDao
-import com.ustadmobile.core.db.dao.RoleDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.db.entities.*
-
-import java.util.ArrayList
-
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_MNE
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_OFFICER
@@ -21,9 +11,9 @@ import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_SEL
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_SITE_STAFF
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_TEACHER
 import com.ustadmobile.lib.util.encryptPassword
-import jdk.nashorn.internal.objects.Global
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 
 class LoadInitialData {
 
