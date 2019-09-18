@@ -7,6 +7,8 @@ import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.FileHeader
 import java.io.*
+import com.ustadmobile.lib.util.RangeResponse
+import com.ustadmobile.lib.util.parseRangeRequestHeader
 
 /**
  * This is a RouterNanoHTTPD Responder that can be used to serve files from the file system or
@@ -160,7 +162,7 @@ abstract class FileResponder {
         fun newResponseFromFile(method: NanoHTTPD.Method, uriResource: RouterNanoHTTPD.UriResource, session: NanoHTTPD.IHTTPSession, file: IFileSource, cacheControlHeader: String? = "cache, max-age=86400"): NanoHTTPD.Response {
             val isHeadRequest = method == NanoHTTPD.Method.HEAD
             try {
-                val range: LongArray?
+                val range: RangeResponse?
                 val ifNoneMatchHeader: String?
                 var retInputStream: InputStream?
 
@@ -188,31 +190,28 @@ abstract class FileResponder {
                     return r
                 }
 
-                range = parseRangeRequest(session, totalLength)
+                val rangeHeader = session.headers["range"] as String?
+                range = if(rangeHeader != null) {
+                    parseRangeRequestHeader(rangeHeader, totalLength)
+                }else {
+                    null
+                }
+
                 retInputStream = if (isHeadRequest) null else file.inputStream
-                if (range != null) {
-                    if (range[0] != -1L) {
-                        retInputStream = if (isHeadRequest) null else RangeInputStream(retInputStream!!, range[0], range[1])
-                        val contentLength = range[1] + 1 - range[0]
-                        val r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
-                                mimeType, retInputStream, contentLength)
+                if (range != null && range.statusCode == 206) {
+                    retInputStream = if (isHeadRequest) null else RangeInputStream(retInputStream!!,
+                            range.fromByte, range.toByte)
+                    //val contentLength = range[1] + 1 - range[0]
+                    val r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
+                            mimeType, retInputStream, range.actualContentLength)
 
-                        r.addHeader("ETag", etag)
-
-                        /*
-                         * range request is inclusive: e.g. range 0-1 length is 2 bytes as per
-                         * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html 14.35.1 Byte Ranges
-                         */
-                        r.addHeader("Content-Length", contentLength.toString())
-                        r.addHeader("Content-Range", "bytes " + range[0] + '-'.toString() + range[1] +
-                                '/'.toString() + totalLength)
-                        r.addHeader("Accept-Ranges", "bytes")
-                        r.addHeader("Connection", "close")
-                        return r
-                    } else {
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
-                                if (isHeadRequest) null else "Range request not satisfiable")
-                    }
+                    r.addHeader("ETag", etag)
+                    range.responseHeaders.forEach { r.addHeader(it.key, it.value) }
+                    r.addHeader("Connection", "close")
+                    return r
+                } else if(range?.statusCode == 416) {
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
+                            if (isHeadRequest) null else "Range request not satisfiable")
                 } else {
                     //Workaround : NanoHTTPD is using the InputStream.available method incorrectly
                     // see RangeInputStream.available
@@ -239,9 +238,6 @@ abstract class FileResponder {
             return newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, file)
         }
 
-        private fun parseRangeRequest(session: NanoHTTPD.IHTTPSession, totalLength: Long): LongArray? {
-            return RangeInputStream.parseRangeRequest(session.headers["range"], totalLength)
-        }
     }
 
 
