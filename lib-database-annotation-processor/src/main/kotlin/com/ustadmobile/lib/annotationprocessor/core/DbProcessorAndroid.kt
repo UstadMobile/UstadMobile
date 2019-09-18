@@ -67,7 +67,7 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                         val returnTypeEl = processingEnv.typeUtils.asElement(execEl.returnType)
 
                         if(returnTypeEl != null && returnTypeEl is TypeElement
-                                && returnTypeEl.hasDataSourceFactory { it.any { it is ClassName && findSyncableEntities(it, processingEnv).isNotEmpty() } }) {
+                                && returnTypeEl.hasDataSourceFactory(daoMethodSyncableDataSourceFactoryFilter) ) {
                             val returnTypeClass = returnTypeEl.asClassName()
                             val boundaryCallbackQualifiedName = "${returnTypeClass.packageName}.${returnTypeClass.simpleName}${DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS}"
                             if(it.simpleName.toString().startsWith("get")) {

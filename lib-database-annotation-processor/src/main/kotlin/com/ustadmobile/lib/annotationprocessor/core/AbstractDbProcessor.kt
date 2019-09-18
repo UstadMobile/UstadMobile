@@ -490,6 +490,14 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      */
     protected val allKnownEntityNames = mutableListOf<String>()
 
+    /**
+     * Used to determine if a DAO method returns a DataSource.Factory with a syncable entity type
+     * (e.g. should have a boundary callback)
+     */
+    protected val daoMethodSyncableDataSourceFactoryFilter = { returnTypeArgs : List<TypeName> ->
+        returnTypeArgs.any { it is ClassName && findSyncableEntities(it, processingEnv).isNotEmpty() }
+    }
+
     override fun init(p0: ProcessingEnvironment) {
         super.init(p0)
         messager = p0.messager
