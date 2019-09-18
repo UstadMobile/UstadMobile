@@ -45,6 +45,7 @@ allprojects {
     }
 }
 
+
 subprojects {
     if(Arrays.asList("lib-database-runtime",
             "lib-database-runtime-jdbc", "lib-database-jdbc", "lib-database-retrofitrepository",
@@ -54,13 +55,10 @@ subprojects {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 //Major.minor.database version
 version = "0.2.8"
 group = "com.ustadmobile.app"
+apply plugin: 'java'
 
 ext {
     ustadVersion = project.version
@@ -223,4 +221,9 @@ subprojects { project ->
     }
 }
 
+task deleteRootBuildDir(type: Delete) {
+    delete rootProject.buildDir
+}
+
 tasks.findByPath(":app-angular:packPreparedModules").dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)
+clean.dependsOn(deleteRootBuildDir)
