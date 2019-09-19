@@ -66,7 +66,7 @@ class SELQuestionEditActivity : UstadBaseActivity(), SELQuestionEditView {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
         val i = item.itemId
-        if (i == R.id.menu_catalog_entry_presenter_share) {//If this activity started from other activity
+        if (i == R.id.menu_done) {//If this activity started from other activity
             val newQuestion = findViewById<TextInputLayout>(R.id.activity_sel_question_edit_question)
             val assignToAllClasses = findViewById<CheckBox>(R.id.activity_sel_question_edit_assign_to_all_classes)
             val allowMultipleNominations = findViewById<CheckBox>(R.id.activity_sel_question_edit_allow_multiple_nominations)

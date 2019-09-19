@@ -66,7 +66,7 @@ class CustomFieldDetailActivity : UstadBaseActivity(), CustomFieldDetailView {
      * @return true if accounted for
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_catalog_entry_presenter_share) {
+        if (item.itemId == R.id.menu_done) {
             mPresenter!!.handleClickDone()
 
             return super.onOptionsItemSelected(item)

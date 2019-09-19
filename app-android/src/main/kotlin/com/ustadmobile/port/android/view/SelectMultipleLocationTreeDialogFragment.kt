@@ -84,7 +84,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
         toolbar.inflateMenu(R.menu.menu_done)
         toolbar.setOnMenuItemClickListener { item ->
             val i = item.itemId
-            if (i == R.id.menu_catalog_entry_presenter_share) {
+            if (i == R.id.menu_done) {
                 finish() //This will send back the selection to the activity calling this fragment.
             }
             false

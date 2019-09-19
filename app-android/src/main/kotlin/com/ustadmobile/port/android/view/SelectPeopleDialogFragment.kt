@@ -103,7 +103,7 @@ class SelectPeopleDialogFragment : UstadDialogFragment(), SelectPeopleDialogView
         //Click the tick button on the toolbar:
         toolbar.setOnMenuItemClickListener { item ->
             val i = item.itemId
-            if (i == R.id.menu_catalog_entry_presenter_share) {
+            if (i == R.id.menu_done) {
                 mPresenter!!.handleCommonPressed(-1)
             }
             false

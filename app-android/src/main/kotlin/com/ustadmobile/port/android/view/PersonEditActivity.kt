@@ -401,7 +401,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         // Handle item selection
         val i = item.itemId
         //If this activity started from other activity
-        if (i == R.id.menu_catalog_entry_presenter_share) {
+        if (i == R.id.menu_done) {
             handleClickDone()
 
             return super.onOptionsItemSelected(item)

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/menu_catalog_entry_presenter_share"
+    <item android:id="@+id/menu_done"
         android:icon="@drawable/ic_check_black_24dp"
         android:title="@string/done"
         android:iconTint="@color/icons"

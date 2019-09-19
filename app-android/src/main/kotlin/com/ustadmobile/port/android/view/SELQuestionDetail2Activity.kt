@@ -29,7 +29,6 @@ import com.ustadmobile.lib.db.entities.SelQuestionOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 
 class SELQuestionDetail2Activity : UstadBaseActivity(), SELQuestionDetail2View {
 
@@ -136,7 +135,7 @@ class SELQuestionDetail2Activity : UstadBaseActivity(), SELQuestionDetail2View {
         // Handle item selection
         val i = item.itemId
         //If this activity started from other activity
-        if (i == R.id.menu_catalog_entry_presenter_share) {
+        if (i == R.id.menu_done) {
             mPresenter!!.handleClickDone()
 
             return super.onOptionsItemSelected(item)

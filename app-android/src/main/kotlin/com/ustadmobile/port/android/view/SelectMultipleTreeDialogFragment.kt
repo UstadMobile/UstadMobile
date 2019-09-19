@@ -113,7 +113,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
     override fun onPrepareOptionsMenu(menu: Menu?) {
         super.onPrepareOptionsMenu(menu)
 
-        val item = menu!!.findItem(R.id.menu_catalog_entry_presenter_share)
+        val item = menu!!.findItem(R.id.menu_done)
 
         //Get the icon itself.
         val itemIcon = resources.getDrawable(R.drawable.ic_check_white_24dp)
@@ -150,7 +150,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
         toolbar.inflateMenu(R.menu.menu_done)
         toolbar.setOnMenuItemClickListener { item ->
             val i = item.itemId
-            if (i == R.id.menu_catalog_entry_presenter_share) {
+            if (i == R.id.menu_done) {
                 mPresenter.handleClickPrimaryActionButton()
             }
             false
