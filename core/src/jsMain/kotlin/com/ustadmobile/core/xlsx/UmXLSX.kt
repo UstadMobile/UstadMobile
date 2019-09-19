@@ -22,9 +22,11 @@ actual class UmXLSX {
     }
 
     actual fun addSheet(newSheet: UmSheet) {
+        TODO("not implemented")
     }
 
     actual fun createXLSX() {
+        TODO("not implemented")
     }
 
 

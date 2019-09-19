@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -36,6 +35,8 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
     private var atRiskStudentsUmProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
     private val dataMapsMap: LinkedHashMap<String, List<PersonWithEnrollment>>
+
+    val z = ZipUtil()
 
     internal var repository: UmAppDatabase
 
@@ -161,7 +162,8 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
         val tableTextData = ArrayList<Array<String>>()
 
         try {
-            ZipUtil.createEmptyZipFile(xlsxReportPath)
+
+            z.createEmptyZipFile(xlsxReportPath)
 
             val umXLSX = UmXLSX(title, xlsxReportPath, workingDir)
 

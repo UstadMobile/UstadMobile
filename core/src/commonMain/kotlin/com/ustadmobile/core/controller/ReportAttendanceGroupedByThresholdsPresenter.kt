@@ -41,6 +41,8 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
         private set
     var showPercentages: Boolean? = false
 
+    val z = ZipUtil()
+
     private val dataMapsMap: LinkedHashMap<String, List<AttendanceResultGroupedByAgeAndThreshold>>
 
     internal var repository: UmAppDatabase
@@ -49,7 +51,7 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
                    tableTextData: List<Array<String?>>) {
 
         try {
-            ZipUtil.createEmptyZipFile(xlsxReportPath)
+            z.createEmptyZipFile(xlsxReportPath)
 
             val umXLSX = UmXLSX(title, xlsxReportPath, workingDir)
 

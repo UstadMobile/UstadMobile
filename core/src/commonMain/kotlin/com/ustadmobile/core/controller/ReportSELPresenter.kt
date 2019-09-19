@@ -219,6 +219,8 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
         }
     }
 
+    val z = ZipUtil()
+
     /**
      * Generates the excel file with th ecurrently set data.
      * @param title             The title of the excel file
@@ -228,7 +230,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
     fun dataToXLSX(title: String, xlsxReportPath: String, theWorkingPath: String) {
 
         try {
-            ZipUtil.createEmptyZipFile(xlsxReportPath)
+            z.createEmptyZipFile(xlsxReportPath)
 
             val umXLSX = UmXLSX(title, xlsxReportPath, theWorkingPath)
 

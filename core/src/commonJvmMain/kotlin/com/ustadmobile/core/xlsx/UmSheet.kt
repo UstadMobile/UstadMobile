@@ -1,10 +1,10 @@
 package com.ustadmobile.core.xlsx
 
 
-class UmSheet {
-    var title: String
+actual class UmSheet {
+    actual var title: String
     internal var sheetValues: MutableList<TableValue>
-    var sheetMap: LinkedHashMap<Int, LinkedHashMap<Int, String>>? = null
+    actual var sheetMap: LinkedHashMap<Int, LinkedHashMap<Int, String>>? = null
         internal set
 
     val tableValueList: List<TableValue>
@@ -27,17 +27,17 @@ class UmSheet {
             return returnMe
         }
 
-    inner class TableValue internal constructor(internal var rowIndex: Int,
+    actual inner class TableValue internal constructor(internal var rowIndex: Int,
                                                 internal var colIndex: Int,
                                                 internal var value: String)
 
-    constructor(newTitle: String) {
+    actual constructor(newTitle: String) {
         this.title = newTitle
         this.sheetValues = ArrayList()
         this.sheetMap = LinkedHashMap()
     }
 
-    constructor(newTitle: String, sheetValues: MutableList<TableValue>,
+    actual constructor(newTitle: String, sheetValues: MutableList<TableValue>,
                 sheetMap: LinkedHashMap<Int, LinkedHashMap<Int, String>>) {
 
         this.title = newTitle
@@ -46,7 +46,7 @@ class UmSheet {
 
     }
 
-    fun addValueToSheet(r: Int, c: Int, value: String) {
+    actual fun addValueToSheet(r: Int, c: Int, value: String) {
         val newTableValue = TableValue(r, c, value)
 
         //replace
@@ -86,7 +86,7 @@ class UmSheet {
 
     }
 
-    fun getSheetValues(): List<TableValue> {
+    actual fun getSheetValues(): List<TableValue> {
         return sheetValues
     }
 }

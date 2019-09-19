@@ -159,12 +159,13 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
         getAttendanceDataAndUpdateCharts()
     }
 
+    val z = ZipUtil()
 
     fun dataToXLSX(title: String, xlsxReportPath: String, workingDir: String,
                    tableTextData: List<Array<String?>>) {
 
         try {
-            ZipUtil.createEmptyZipFile(xlsxReportPath)
+            z.createEmptyZipFile(xlsxReportPath)
 
             val umXLSX = UmXLSX(title, xlsxReportPath, workingDir)
 
