@@ -24,5 +24,6 @@ internal fun TypeElement.asEntityTypeSpecBuilder(): TypeSpec.Builder {
 
 internal fun TypeElement.asEntityTypeSpec() = this.asEntityTypeSpecBuilder().build()
 
-internal fun TypeElement.hasDataSourceFactory() = enclosedElements.any { it.kind == ElementKind.METHOD
-                    && (it as ExecutableElement).returnType.asTypeName().isDataSourceFactory() }
+internal fun TypeElement.hasDataSourceFactory(paramTypeFilter: (List<TypeName>) -> Boolean = {true})
+        = enclosedElements.any { it.kind == ElementKind.METHOD
+        && (it as ExecutableElement).returnType.asTypeName().isDataSourceFactory(paramTypeFilter) }
