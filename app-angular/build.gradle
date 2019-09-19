@@ -144,10 +144,20 @@ task generateLocaleFiles{}
 /**
  * Delete temp directories
  */
-task deleteTempDir(type: Delete){
+task deleteTempDirs{
   doLast{
-    delete project.file("node_modules")
-    delete rootProject.buildDir
+    if(project.file("node_modules").exists()){
+      exec {
+        workingDir appAngularPath
+        commandLine 'rm', '-r',project.file("node_modules").path
+      }
+    }
+
+    if(rootProject.buildDir.exists()){
+      exec {
+        commandLine 'rm', '-r',rootProject.buildDir.path
+      }
+    }
   }
 }
 
@@ -263,5 +273,5 @@ installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)
 generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile)
 
-clean.dependsOn(deleteTempDir)
+clean.dependsOn(deleteTempDirs)
 
