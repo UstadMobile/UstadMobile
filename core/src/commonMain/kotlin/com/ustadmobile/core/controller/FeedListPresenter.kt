@@ -72,7 +72,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
         //Update: Not part of new Sprint design.
         //view.updateAttendanceTrend(0, 0);
 
-        checkPermissions()
+        //checkPermissions()
     }
 
     /**
