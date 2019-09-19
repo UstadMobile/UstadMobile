@@ -86,6 +86,10 @@ class DbProcessorJs : AbstractDbProcessor(){
                         .initializer("false").build())
                 .addType(TypeSpec.companionObjectBuilder()
                         .addFunction(FunSpec.builder("register")
+                                .addAnnotation(AnnotationSpec.builder(
+                                        ClassName("kotlin.js", "JsName"))
+                                        .addMember("%S", "register")
+                                        .build())
                                 .addCode("%T.registerImpl(%T::class, %T::class)\n",
                                         DatabaseBuilder::class, dbTypeEl,
                                         ClassName(dbTypeClassName.packageName, implFileSpec.name))
