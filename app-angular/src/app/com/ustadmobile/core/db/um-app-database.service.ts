@@ -13,9 +13,9 @@ export class UmAppDatabaseService{
   constructor() {}
 
   getInstance(context: UmContextWrapper){
-    //mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.register()
-    console.log(mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl)
+    mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
     const database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(context)
+    console.log(database ) 
     return database
   }
 }

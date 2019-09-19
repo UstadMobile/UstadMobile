@@ -28,7 +28,6 @@ export class AppComponent extends UmBaseComponent {
   constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService, router: Router,
     route: ActivatedRoute, private umDb: UmDbMockService, private db: UmAppDatabaseService) {
     super(localeService, router, route, umDb);
-    db.getInstance(this.context) 
     if (this.locale.startsWith('en')) {
       this.dir = "ltr";
     } else {
@@ -44,6 +43,7 @@ export class AppComponent extends UmBaseComponent {
     super.ngOnInit();
     UmAngularUtil.registerResourceReadyListener(this)
     this.umService.preloadResources().subscribe(responses => { 
+      this.db.getInstance(this.context) 
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.systemImpl.setLocaleStrings(responses[2])
     })
@@ -51,6 +51,8 @@ export class AppComponent extends UmBaseComponent {
 
   onCreate() {
     super.onCreate() 
+
+    console.log("reached here")  
     this.showLoading = window.location.search == "";
     if(UmAngularUtil.showSplashScreen()) {
       window.setTimeout(this.splashScreenTimeout, 2000) 

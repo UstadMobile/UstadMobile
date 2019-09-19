@@ -2,9 +2,13 @@ import { browser, element, by, protractor } from 'protractor';
 
 export const sleepTime = 500;
 
+export abstract class DbInitializer{
+  clearDb(){
+    browser.get(localStorage.getItem("doordb.endpoint.url")+"/UmAppDatabase/clearAllTables")
+  }
+}
 
-
-export class HomePage {
+export class HomePage{
 
   menus = ['Libraries', 'Reports']
   title = 'Ustad Mobile'
