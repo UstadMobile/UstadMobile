@@ -5,6 +5,7 @@ import { Component, Inject, LOCALE_ID, HostBinding } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService, ContentEntryDao } from './com/ustadmobile/core/db/um-db-mock.service';
 import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
+import { UmAppDatabaseService } from './com/ustadmobile/core/db/um-app-database.service';
 
 @Component({
   selector: 'app-root',
@@ -25,8 +26,9 @@ export class AppComponent extends UmBaseComponent {
   };
 
   constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService, router: Router,
-    route: ActivatedRoute, private umDb: UmDbMockService) {
+    route: ActivatedRoute, private umDb: UmDbMockService, private db: UmAppDatabaseService) {
     super(localeService, router, route, umDb);
+    db.initDb(this.context) 
     if (this.locale.startsWith('en')) {
       this.dir = "ltr";
     } else {

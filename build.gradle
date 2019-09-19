@@ -192,8 +192,14 @@ subprojects { project ->
             def modulePath = "${rootProject.file("build/js/node_modules/${packageName}").path}"
             //add dynamic task to each module except core to fix package.json
             project.task(fixJsonTask){
-                def ktxSerializationVersion = new JsonSlurper().parseText(
-                        rootProject.file("build/js/node_modules/kotlinx-serialization-kotlinx-serialization-runtime/package.json").text).version
+                def ktxSerializationVersion = "0.11.1"
+                try{
+                    new JsonSlurper().parseText(
+                            rootProject.file("build/js/node_modules/kotlinx-serialization-kotlinx-serialization-runtime/package.json").text).version
+                }catch(IOException e){
+                    e.printStackTrace()
+                }
+
                 doLast{
                     if(!project.name.contains("core")){
                         def jsonObj = new JSONObject()

@@ -25,6 +25,7 @@ import { DatePipe } from '@angular/common';
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
 import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog/um-tree-node/um-tree-node.component';
+import { UmAppDatabaseService } from './com/ustadmobile/core/db/um-app-database.service';
 
 
 @NgModule({
@@ -58,6 +59,7 @@ import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog
   ],
   providers: [
     UmDbMockService,
+    UmAppDatabaseService,
     UmBaseService,
     DatePipe,
     RouteGuardService,

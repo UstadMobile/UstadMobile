@@ -174,8 +174,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 //            return instance!!
 //        }
 
-        fun getInstance(context: Any) = lazy { Companion.getInstance(context, "UmAppDatabase") }.value
+        @JsName("getInstance")
+        fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
 
+        @JsName("getInstanceWithDbName")
         @Synchronized
         fun getInstance(context: Any, dbName: String): UmAppDatabase {
             var db = namedInstances[dbName]

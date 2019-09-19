@@ -146,13 +146,8 @@ task generateLocaleFiles{}
  */
 task deleteTempDir(type: Delete){
   doLast{
-    if(project.file("node_modules").exists()){
-      delete project.file("node_modules")
-    }
-
-    if(rootProject.buildDir.exists()){
-      delete rootProject.buildDir
-    }
+    delete project.file("node_modules")
+    delete rootProject.buildDir
   }
 }
 
