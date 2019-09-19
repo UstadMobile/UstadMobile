@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * A DownloadJob represents a specific run of downloading a DownloadSet. The DownloadSet contains
@@ -10,6 +11,7 @@ import androidx.room.PrimaryKey
  * new entries become available, etc.
  */
 @Entity
+@Serializable
 open class DownloadJob() {
 
     @PrimaryKey(autoGenerate = true)

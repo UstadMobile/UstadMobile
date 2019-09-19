@@ -7,6 +7,7 @@ import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -17,6 +18,7 @@ import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 //shortcode = ctnCat
+@Serializable
 class ContentCategory() {
 
     @PrimaryKey(autoGenerate = true)

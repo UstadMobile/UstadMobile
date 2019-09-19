@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * DownloadJobItemHistory represents one attempt to download a given DownloadJobItem. It is used
@@ -9,6 +10,7 @@ import androidx.room.PrimaryKey
  * download items in the future.
  */
 @Entity
+@Serializable
 class DownloadJobItemHistory() {
 
     @PrimaryKey(autoGenerate = true)
