@@ -16,5 +16,5 @@ internal fun TypeName.toSqlType(dbType: Int = 0) = when {
     else -> "ERR_UNSUPPORTED_TPYE-$this"
 }
 
-internal fun TypeName.isDataSourceFactory() = this is ParameterizedTypeName
-        && this.rawType == DataSource.Factory::class.asClassName()
+internal fun TypeName.isDataSourceFactory(paramTypeFilter: (List<TypeName>) -> Boolean = {true}) = this is ParameterizedTypeName
+        && this.rawType == DataSource.Factory::class.asClassName() && paramTypeFilter(this.typeArguments)
