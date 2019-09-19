@@ -1,6 +1,8 @@
 import com.github.eerohele.SaxonXsltTask
 import groovy.json.JsonBuilder
 import org.json.simple.JSONObject
+import java.nio.file.Files
+import java.nio.file.Paths
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -111,16 +113,6 @@ task generateMessageXlf{
   }
 }
 
-
-/*
-new File("${rootProject.buildDir}/js/packages_imported").eachDir{File packageDir ->
-  if(project.dependencyMap.find{ it.value == packageDir.name}?.value == null){
-    project.dependencyMap[packageDir.name] = packageDir.name
-  }
-}
-*/
-
-
 //Prepare dynamic task to generate XLF for each language locale
 def generateMessageXlfTasks = []
 new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
@@ -150,18 +142,17 @@ new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
 task generateLocaleFiles{}
 
 /**
- * Delete node_module directory
+ * Delete temp directories
  */
-task deleteNodeModulesDir{
+task deleteTempDir(type: Delete){
   doLast{
     if(project.file("node_modules").exists()){
-      exec {
-        workingDir appAngularPath
-        commandLine 'rm', '-r',project.file("node_modules").path
-      }
+      delete project.file("node_modules")
     }
 
-
+    if(rootProject.buildDir.exists()){
+      delete rootProject.buildDir
+    }
   }
 }
 
@@ -178,6 +169,8 @@ task deletePackageLockJsonFile{
     }
   }
 }
+
+
 
 /**
  * Install all offline and other dependencies from project package.json
@@ -218,6 +211,23 @@ task executeModuleTest{
   }
 }
 
+task updateRequiredImports{
+  doLast{
+    def modulesPath = rootProject.file("build/js/node_modules")
+    ["${modulesPath}/kmpxmlpullparser/kmpxmlpullparser.js",
+     "${modulesPath}/UstadMobile-lib-util/kotlin/UstadMobile-lib-util.js"].forEach{ path->
+      try{
+        String content = new String(Files.readAllBytes(Paths.get(path)), "UTF-8")
+        content = content.replace("kotlinx-serialization-runtime-js","kotlinx-serialization-kotlinx-serialization-runtime")
+        FileWriter jsonFile = new FileWriter(path)
+        jsonFile.write(content)
+        jsonFile.flush()
+      }catch(IOException e){
+        e.printStackTrace()
+      }
+    }
+  }
+}
 
 
 /**
@@ -227,7 +237,7 @@ task packPreparedModules{
   doLast{
     new File("${rootProject.file("build/js/node_modules").path}").eachDir {
       def dir = it.absolutePath, dirName = it.name
-      if(dir.indexOf("UstadMobile-") != -1 || dir.indexOf("ktor-") != -1
+      if(dir.indexOf("UstadMobile-") != -1 || dir.indexOf("ktor-") != -1 || dir.indexOf("kotlin-") != -1
         || dir.indexOf("kotlinx-") != -1 || project.dependencyMap.find{ it.value == dirName}?.value != null){
         exec {
           workingDir dir
@@ -258,5 +268,5 @@ installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)
 generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile)
 
-clean.dependsOn(deleteNodeModulesDir)
+clean.dependsOn(deleteTempDir)
 

@@ -1,5 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.json.simple.JSONObject
 
 buildscript {
@@ -54,14 +55,10 @@ subprojects {
     }
 }
 
-task deleteBuildDir(type: Delete) {
-    delete rootProject.buildDir
-}
 
 //Major.minor.database version
 version = "0.2.8"
 group = "com.ustadmobile.app"
-apply plugin: 'java'
 
 ext {
     ustadVersion = project.version
@@ -183,7 +180,7 @@ ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 //Map dependencies with the actual packages inside build/js/node_modules
 project.ext.dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"kmpxmlpullparser",
                      "klock-js":"klock","":"kotlin-test","kotlinx-coroutines-core-js":"kotlinx-coroutines-core",
-                     "kotlinx-serialization-runtime-js":"kotlinx-serialization-runtime-js",
+                     "kotlinx-serialization-runtime-js":"kotlinx-serialization-kotlinx-serialization-runtime",
                      "ktor-client-js":"ktor-ktor-client-js","ktor-client-serialization-js":"ktor-ktor-client-serialization",
                      "napier-js":"napier","lib-room-annotations":"UstadMobile-lib-room-annotations"]
 def prepareModuleTasks = []
@@ -195,6 +192,8 @@ subprojects { project ->
             def modulePath = "${rootProject.file("build/js/node_modules/${packageName}").path}"
             //add dynamic task to each module except core to fix package.json
             project.task(fixJsonTask){
+                def ktxSerializationVersion = new JsonSlurper().parseText(
+                        rootProject.file("build/js/node_modules/kotlinx-serialization-kotlinx-serialization-runtime/package.json").text).version
                 doLast{
                     if(!project.name.contains("core")){
                         def jsonObj = new JSONObject()
@@ -205,7 +204,8 @@ subprojects { project ->
                         project.configurations.each {
                             if (it.name == "jsMainImplementation") {
                                 it.allDependencies.each{ dep ->
-                                    dependencies.put(project.dependencyMap[dep.name],dep.version)
+                                    dependencies.put(project.dependencyMap[dep.name],dep.name == "kotlinx-serialization-runtime-js"
+                                            ? ktxSerializationVersion: dep.version)
                                 }
                                 jsonObj.put("dependencies",dependencies)
                             }
@@ -218,6 +218,7 @@ subprojects { project ->
             }
             //Run fixJsonTask after running jsJar to each modules
             project.tasks.findByName(fixJsonTask).shouldRunAfter(project.tasks.findByName("jsJar"))
+            project.tasks.findByName(fixJsonTask).dependsOn(":app-angular:updateRequiredImports")
             //Add all dynamic tasks to the list
             prepareModuleTasks.push("${project.path}:${fixJsonTask}")
         }
@@ -225,4 +226,3 @@ subprojects { project ->
 }
 
 tasks.findByPath(":app-angular:packPreparedModules").dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)
-clean.dependsOn(deleteBuildDir)

@@ -49,7 +49,6 @@
     "kotlinx-coroutines-io": "file:../build/js/node_modules/kotlinx-coroutines-io/kotlinx-coroutines-io-0.1.10.tgz",
     "kotlinx-io": "file:../build/js/node_modules/kotlinx-io/kotlinx-io-0.1.10.tgz",
     "kotlinx-serialization-kotlinx-serialization-runtime": "file:../build/js/node_modules/kotlinx-serialization-kotlinx-serialization-runtime/kotlinx-serialization-kotlinx-serialization-runtime-0.11.1.tgz",
-    "kotlinx-serialization-runtime-js": "file:../build/js/node_modules/kotlinx-serialization-runtime-js/kotlinx-serialization-runtime-js-0.11.0.tgz",
     "ktor-ktor-client-core": "file:../build/js/node_modules/ktor-ktor-client-core/ktor-ktor-client-core-1.2.2.tgz",
     "ktor-ktor-client-js": "file:../build/js/node_modules/ktor-ktor-client-js/ktor-ktor-client-js-1.2.2.tgz",
     "ktor-ktor-client-json": "file:../build/js/node_modules/ktor-ktor-client-json/ktor-ktor-client-json-1.2.2.tgz",
