@@ -7,6 +7,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 /**
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
@@ -14,6 +15,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 @Entity
 @SyncableEntity(tableId = 11)
+@Serializable
 class ClazzMember()  {
 
     /**

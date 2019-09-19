@@ -1,11 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
 import kotlin.jvm.Transient
 
 /**
  * This is used as a memory efficient summary of the status of a download
  *
  */
+@Serializable
 class DownloadJobItemStatus() {
 
     var jobItemUid: Int = 0

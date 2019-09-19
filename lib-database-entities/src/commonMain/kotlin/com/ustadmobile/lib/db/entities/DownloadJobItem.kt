@@ -3,6 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * A DownloadJobItem is a specific DownloadRun of a specific item. It corresponds with a given
@@ -11,6 +12,7 @@ import androidx.room.PrimaryKey
  * updated, re-downloaded after the user deletes it, etc)
  */
 @Entity
+@Serializable
 open class DownloadJobItem() {
 
     @PrimaryKey(autoGenerate = true)
