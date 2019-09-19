@@ -370,7 +370,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
 
     //Codec2 (low bitrate voice) Android library
-    implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
+    implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64"
 
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
