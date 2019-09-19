@@ -140,7 +140,7 @@ actual class ZipUtil {
     actual fun createEmptyZipFile(zipPath:String){
         createEmptyZipFile1(zipPath)
     }
-    
+
     companion object {
         private val BUFFER = 2048
 

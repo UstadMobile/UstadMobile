@@ -54,54 +54,53 @@ class ClazzLogDetailPresenter(context: Any,
     internal var clazzDao = repository.clazzDao
     private val scheduleDao = repository.scheduleDao
 
-    private val setupFromClazzLogCallback = object : UmCallback<ClazzLog> {
-        override fun onFailure(exception: Throwable?) {
-            print(exception!!.message)
-        }
 
-        override fun onSuccess(clazzLog: ClazzLog?) {
-            if (clazzLog != null) {
-                currentClazzLog = clazzLog
-                insertAllAndSetProvider(clazzLog)
-                loadClazzLogListForClazz()
-                checkPermissions()
 
-                if (title == null) {
-                    GlobalScope.launch {
-                        val title = repository.clazzDao.getClazzNameAsync(clazzLog.clazzLogClazzUid)
-                        setTitleCallback.onSuccess(title)
-                    }
+    fun setupFromClazzLogCallbackOnSuccess(clazzLog: ClazzLog?) {
+        if (clazzLog != null) {
+            currentClazzLog = clazzLog
+            insertAllAndSetProvider(clazzLog)
+            loadClazzLogListForClazz()
+            checkPermissions()
+
+            if (title == null) {
+                GlobalScope.launch {
+                    var title = repository.clazzDao.getClazzNameAsync(clazzLog.clazzLogClazzUid)
+//                        setTitleCallback.onSuccess(title)
+                    val title2 = "$title " + UstadMobileSystemImpl.instance.getString(
+                            MessageID.attendance, context)
+                    view.runOnUiThread(Runnable{ view.updateToolbarTitle(title2!!) })
                 }
-
-                //Get clazzlog schedule
-                currentSchedule = scheduleDao.findByUid(currentClazzLog!!.clazzLogScheduleUid)
-
-                //Get all teachers
-                val clazzMemberDao = repository.clazzMemberDao
-                teachers = clazzMemberDao.findByClazzUid(currentClazzLog!!.clazzLogClazzUid,
-                        ClazzMember.ROLE_TEACHER)
-
-                val clazzDao = repository.clazzDao
-                clazzName = clazzDao.findByUid(currentClazzLog!!.clazzLogClazzUid)!!.clazzName
-
-                view.runOnUiThread(Runnable{ updateViewDateHeading() })
             }
 
+            //Get clazzlog schedule
+            currentSchedule = scheduleDao.findByUid(currentClazzLog!!.clazzLogScheduleUid)
+
+            //Get all teachers
+            val clazzMemberDao = repository.clazzMemberDao
+            teachers = clazzMemberDao.findByClazzUid(currentClazzLog!!.clazzLogClazzUid,
+                    ClazzMember.ROLE_TEACHER)
+
+            val clazzDao = repository.clazzDao
+            clazzName = clazzDao.findByUid(currentClazzLog!!.clazzLogClazzUid)!!.clazzName
+
+            view.runOnUiThread(Runnable{ updateViewDateHeading() })
         }
 
     }
 
-    private val setTitleCallback = object : UmCallback<String> {
-        override fun onSuccess(result: String?) {
-            title = "$result " + UstadMobileSystemImpl.instance.getString(
-                    MessageID.attendance, context)
-            view.runOnUiThread(Runnable{ view.updateToolbarTitle(title!!) })
-        }
 
-        override fun onFailure(exception: Throwable?) {
-            print(exception!!.message)
-        }
-    }
+//    private val setTitleCallback = object : UmCallback<String> {
+//        override fun onSuccess(result: String?) {
+//            title = "$result " + UstadMobileSystemImpl.instance.getString(
+//                    MessageID.attendance, context)
+//            view.runOnUiThread(Runnable{ view.updateToolbarTitle(title!!) })
+//        }
+//
+//        override fun onFailure(exception: Throwable?) {
+//            print(exception!!.message)
+//        }
+//    }
 
     /**
      * The Presenter's onCreate. This populated the provider and sets it to the View.
@@ -128,13 +127,13 @@ class ClazzLogDetailPresenter(context: Any,
             val clazzLogUid = (arguments[ClassLogDetailView.ARG_CLAZZ_LOG_UID])!!.toLong()
             GlobalScope.launch {
                 val res = repository.clazzLogDao.findByUidAsync(clazzLogUid)
-                setupFromClazzLogCallback.onSuccess(res)
+                setupFromClazzLogCallbackOnSuccess(res)
             }
         } else if (arguments.containsKey(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID)) {
             val clazzUid = arguments[ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID]!!.toLong()
             GlobalScope.launch {
                 val result = repository.clazzLogDao.findMostRecentByClazzUid(clazzUid)
-                setupFromClazzLogCallback.onSuccess(result)
+                setupFromClazzLogCallbackOnSuccess(result)
             }
         }
 
@@ -236,7 +235,7 @@ class ClazzLogDetailPresenter(context: Any,
             GlobalScope.launch {
                 val clazzLogUid = repository.clazzLogDao.findByUidAsync(
                         currentClazzLogs!![nextIndex].clazzLogUid)
-                setupFromClazzLogCallback.onSuccess(clazzLogUid)
+                setupFromClazzLogCallbackOnSuccess(clazzLogUid)
             }
         }
     }
