@@ -216,23 +216,26 @@ task executeModuleTest{
   }
 }
 
-task updateRequiredImports{
+/**
+ * Fixing kotlinx serialization imports
+ */
+task fixRequiredImports{
   doLast{
-    def modulesPath = rootProject.file("build/js/node_modules")
-    ["${modulesPath}/kmpxmlpullparser/kmpxmlpullparser.js",
-     "${modulesPath}/UstadMobile-lib-util/kotlin/UstadMobile-lib-util.js"].forEach{ path->
-      try{
-        String content = new String(Files.readAllBytes(Paths.get(path)), "UTF-8")
-        content = content.replace("kotlinx-serialization-runtime-js","kotlinx-serialization-kotlinx-serialization-runtime")
-        FileWriter jsonFile = new FileWriter(path)
-        jsonFile.write(content)
-        jsonFile.flush()
-      }catch(IOException e){
-        e.printStackTrace()
+    rootProject.fileTree (dir: "build/js/node_modules",
+      includes: ['**/UstadMobile-lib*.js','**/kmpxmlpullparser*.js'], exclude: '**/*.meta.js')
+      .each() { File file ->
+        String fileContent = new String(Files.readAllBytes(Paths.get(file.path)), "UTF-8")
+        if (fileContent.contains("kotlinx-serialization-runtime-js")) {
+          println("Updating ${file.name} ....")
+          fileContent = fileContent.replace("kotlinx-serialization-runtime-js", "kotlinx-serialization-kotlinx-serialization-runtime")
+          FileWriter writer = new FileWriter(file.path)
+          writer.write(fileContent)
+          writer.flush()
+        }
       }
-    }
   }
 }
+
 
 
 /**
@@ -274,4 +277,3 @@ generateLocaleFiles.dependsOn(generateMessageXlfTasks)
 generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile)
 
 clean.dependsOn(deleteTempDirs)
-

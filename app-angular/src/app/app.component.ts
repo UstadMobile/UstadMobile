@@ -28,7 +28,7 @@ export class AppComponent extends UmBaseComponent {
   constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService, router: Router,
     route: ActivatedRoute, private umDb: UmDbMockService, private db: UmAppDatabaseService) {
     super(localeService, router, route, umDb);
-    db.initDb(this.context) 
+    db.getInstance(this.context) 
     if (this.locale.startsWith('en')) {
       this.dir = "ltr";
     } else {

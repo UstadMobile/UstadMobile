@@ -224,7 +224,7 @@ subprojects { project ->
             }
             //Run fixJsonTask after running jsJar to each modules
             project.tasks.findByName(fixJsonTask).shouldRunAfter(project.tasks.findByName("jsJar"))
-            project.tasks.findByName(fixJsonTask).dependsOn(":app-angular:updateRequiredImports")
+            project.tasks.findByName(fixJsonTask).dependsOn(":app-angular:fixRequiredImports")
             //Add all dynamic tasks to the list
             prepareModuleTasks.push("${project.path}:${fixJsonTask}")
         }

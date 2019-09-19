@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import util from 'UstadMobile-lib-util';
 import db from 'UstadMobile-lib-database';
-import door from 'UstadMobile-lib-door-runtime';
+import mpp from 'UstadMobile-lib-database-mpp';
 import { UmContextWrapper } from '../../util/UmContextWrapper';
 
 @Injectable({
@@ -13,7 +12,10 @@ export class UmAppDatabaseService{
 
   constructor() {}
 
-  initDb(context: UmContextWrapper){
-    db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(context)
+  getInstance(context: UmContextWrapper){
+    //mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.register()
+    console.log(mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl)
+    const database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(context)
+    return database
   }
 }
