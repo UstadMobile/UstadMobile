@@ -157,10 +157,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="68dp"
                 android:text="@string/order_total"
                 android:textAppearance="@style/TextAppearance.AppCompat"
                 android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@+id/textView23"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_order_total"
                 app:layout_constraintTop_toBottomOf="@+id/view3" />
 
             <TextView
@@ -168,7 +169,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="16dp"
                 android:text="@string/discount"
                 android:textAppearance="@style/TextAppearance.AppCompat"
                 android:visibility="invisible"
@@ -239,7 +240,7 @@
                 android:text="@string/total_colon"
                 android:textAppearance="@style/TextAppearance.AppCompat"
                 android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@+id/textView23"
+                app:layout_constraintEnd_toEndOf="@+id/textView21"
                 app:layout_constraintTop_toBottomOf="@+id/view2" />
 
             <TextView
