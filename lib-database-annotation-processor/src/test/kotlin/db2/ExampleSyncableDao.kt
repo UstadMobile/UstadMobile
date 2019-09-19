@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.Repository
 
 @Dao
 abstract class ExampleSyncableDao {
@@ -33,5 +34,9 @@ abstract class ExampleSyncableDao {
             "WHERE " +
             "esUid = :uid")
     abstract fun updateNumberByUid(uid: Long, newNumber: Long)
+
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @Query("SELECT * FROM ExampleSyncableEntity LIMIT 1")
+    abstract suspend fun findOneFromWeb(): ExampleSyncableEntity?
 
 }

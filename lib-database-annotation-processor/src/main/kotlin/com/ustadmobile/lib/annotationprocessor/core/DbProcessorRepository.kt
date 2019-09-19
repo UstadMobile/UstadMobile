@@ -329,9 +329,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             val codeBlock = CodeBlock.builder()
 
+            val daoFunSpecBuilt = daoFunSpec.build()
             when(repoMethodType) {
                 Repository.METHOD_SYNCABLE_GET -> {
-                    codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+                    codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpecBuilt,
                             daoTypeElement.simpleName.toString(), addReturnDaoResult = !generateBoundaryCallback))
                 }
                 Repository.METHOD_DELEGATE_TO_DAO -> {
@@ -393,6 +394,21 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .add("return _dataSource\n")
                     }else {
                         codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
+                    }
+                }
+
+                Repository.METHOD_DELEGATE_TO_WEB -> {
+                    codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                            daoName = daoTypeElement.simpleName.toString(),
+                            dbPathVarName = "_dbPath",
+                            methodName = daoFunSpecBuilt.name,
+                            httpResultType = resultType,
+                            requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
+                                    MemberName("io.ktor.client.request", "header"),
+                                    "X-nid"),
+                            params = daoFunSpecBuilt.parameters))
+                    if(returnTypeResolved != UNIT) {
+                        codeBlock.add("return _httpResult\n")
                     }
                 }
             }
