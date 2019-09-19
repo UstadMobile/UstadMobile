@@ -3,11 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * Represents the response from a network node to whether or not a given entry is available locally
  */
 @Entity(indices = arrayOf(Index(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])))
+@Serializable
 open class EntryStatusResponse() {
 
     @PrimaryKey(autoGenerate = true)

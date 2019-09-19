@@ -204,7 +204,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                         ""
                     }
 
-                    codeBlock = CodeBlock.builder().beginControlFlow("return %T ",
+                    codeBlock = CodeBlock.builder().beginControlFlow("return %T() ",
                             ClassName("com.ustadmobile.door", implClassName))
                             .add(paramNames)
                             .add(codeBlock)

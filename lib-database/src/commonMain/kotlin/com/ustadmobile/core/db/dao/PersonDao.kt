@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
 
@@ -154,6 +155,8 @@ abstract class PersonDao : BaseDao<Person> {
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
     }
 
+
+    @Serializable
     data class PersonNameAndUid(var personUid: Long = 0L, var name: String = ""){
 
         override fun toString(): String {

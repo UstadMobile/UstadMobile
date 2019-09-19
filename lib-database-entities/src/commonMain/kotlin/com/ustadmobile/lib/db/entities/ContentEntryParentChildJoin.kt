@@ -10,6 +10,7 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -18,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TAB
 //short code = cepcj
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
 @SyncableEntity(tableId = TABLE_ID)
+@Serializable
 class ContentEntryParentChildJoin() {
 
     @PrimaryKey(autoGenerate = true)
