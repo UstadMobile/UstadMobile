@@ -1,14 +1,13 @@
-import {HomePage, DashboardPage, ReportOptions, ReportDetails } from './app.po';
-import { browser, element, by } from 'protractor';
-import { By } from 'selenium-webdriver';
+import {HomePage, DashboardPage, ReportOptions, ReportDetails, TestSetup } from './app.po';
+import { browser } from 'protractor';
 
 describe('Default App behaviours', () => {
   let pageHome: HomePage;
   browser.ignoreSynchronization = true
 
-  beforeEach(() => {
+  beforeAll(() => {
     pageHome = new HomePage();
-  });
+  })
 
   it('giveApplication_whenLaunched_shouldUseDefaultUrl', () => {
     pageHome.launch();
@@ -41,7 +40,7 @@ describe('Report Dashboard', () => {
   let pageDashboard: DashboardPage;
   browser.ignoreSynchronization = true
 
-  beforeEach(() => {
+  beforeAll(() => {
     pageDashboard = new DashboardPage();
   });
 
@@ -63,7 +62,7 @@ describe('Report Options', () => {
   let pageOptions: ReportOptions;
   browser.ignoreSynchronization = true
 
-  beforeEach(() => {
+  beforeAll(() => {
     pageOptions = new ReportOptions();
   });
 
@@ -104,7 +103,7 @@ describe('Report Details', () => {
   let pageDetails: ReportDetails;
   browser.ignoreSynchronization = true
 
-  beforeEach(() => {
+  beforeAll(() => {
     pageDetails = new ReportDetails();
   });
 

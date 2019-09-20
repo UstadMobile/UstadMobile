@@ -8,14 +8,5 @@ import { UmContextWrapper } from '../../util/UmContextWrapper';
 })
 export class UmAppDatabaseService{
   
-  public database: db.com.ustadmobile.core.db.UmAppDatabase
-
-  constructor() {}
-
-  getInstance(context: UmContextWrapper){
-    mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
-    const database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(context)
-    console.log(database ) 
-    return database
-  }
+  
 }

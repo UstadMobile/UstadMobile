@@ -1,10 +1,31 @@
 import { browser, element, by, protractor } from 'protractor';
+import db from 'UstadMobile-lib-database';
+import mpp from 'UstadMobile-lib-database-mpp';
+import { UmAppDatabaseService } from 'src/app/com/ustadmobile/core/db/um-app-database.service';
 
 export const sleepTime = 500;
+const fs = require("fs")
+const path = require("path")
+const https = require("https")
 
-export abstract class DbInitializer{
-  clearDb(){
-    browser.get(localStorage.getItem("doordb.endpoint.url")+"/UmAppDatabase/clearAllTables")
+export class TestSetup{
+  constructor(){}
+  
+  setupDb(){
+    https.get("http://localhost:8087/UmAppDatabase/clearAllTables", response => {
+      response.on('data', (chunk) => {
+        console.log("data received")
+      });
+
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    });
+
+  }
+
+  insertContentEntries(){
+    const entriesRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname,'assets/entries.json'))) as any[];
+    //entriesRaw.forEach(entry)
   }
 }
 
@@ -14,7 +35,7 @@ export class HomePage{
   title = 'Ustad Mobile'
   baseUrl = "http://localhost:";
   launch() {
-    browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid=1311236") as Promise<any>;
+    browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid=1311236&test=true") as Promise<any>;
     return new ElementUtils().launchAsync()
   }
 
@@ -62,7 +83,7 @@ export class ReportDetails{
 
   views = {"dashboard":"ReportDashboard"}
   launch() {
-    browser.get(browser.baseUrl+'/Home/ReportPreview?entryid=0&options=%7B"chartType":100,"yAxis":200,"xAxis":301,"subGroup":306,"whoFilterList":%5B%5D,"didFilterList":%5B%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
+    browser.get(browser.baseUrl+'/Home/ReportPreview?entryid=0&test=true&options=%7B"chartType":100,"yAxis":200,"xAxis":301,"subGroup":306,"whoFilterList":%5B%5D,"didFilterList":%5B%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
     return new ElementUtils().launchAsync()
   }
   getPage() {

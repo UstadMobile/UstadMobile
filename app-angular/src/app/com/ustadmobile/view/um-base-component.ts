@@ -1,4 +1,3 @@
-import { Subscription } from 'rxjs';
 import { UmAngularUtil, appRountes } from './../util/UmAngularUtil';
 import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
@@ -7,7 +6,6 @@ import { OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import core from 'UstadMobile-core';
-import { HomeComponent } from './home/home.component';
 
 export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
@@ -20,13 +18,13 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   public toolBarTitle: string = '...';
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
-     protected umDatabase: UmDbMockService){
+     protected umDatabase: UmDbMockService = null){
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
-    this.viewContext = this.context; 
-    this.umService.setContext(this.context);
+    this.viewContext = this.context;
+    this.umService.initDb(this)
   }
 
   setToolbarTitle(title){

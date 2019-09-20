@@ -72,9 +72,6 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
 
   ngOnInit() {
     super.ngOnInit();
-    combineLatest([this.umService.loadEntries(),this.umService.loadEntryJoins()]).subscribe(responses => {
-      this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
-    })
 
     //setup language spinner/select listener
     this.umFormLanguage.valueChanges.subscribe((form: any) => {
