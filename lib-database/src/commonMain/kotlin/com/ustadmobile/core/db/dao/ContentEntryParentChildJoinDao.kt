@@ -1,12 +1,14 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import kotlin.js.JsName
 
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
 
@@ -14,6 +16,10 @@ data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: L
 @Dao
 @UmRepository
 abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
+
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<ContentEntryParentChildJoin>)
 
     @Query("SELECT ContentEntryParentChildJoin.* FROM " +
             "ContentEntryParentChildJoin " +

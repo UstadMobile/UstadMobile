@@ -16,6 +16,10 @@ import kotlin.js.JsName
 @UmRepository
 abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
+
     @Query("SELECT * FROM ContentEntry")
     @JsName("allEntries")
     abstract fun allEntries(): List<ContentEntry>
