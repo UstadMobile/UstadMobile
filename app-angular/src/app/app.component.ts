@@ -43,7 +43,7 @@ export class AppComponent extends UmBaseComponent {
     super.ngOnInit();
     UmAngularUtil.registerResourceReadyListener(this)
     this.umService.preloadResources().subscribe(responses => { 
-      this.db.getInstance(this.context) 
+      this.db.initDb(this.context) 
       this.umDatabase.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
       this.systemImpl.setLocaleStrings(responses[2])
     })

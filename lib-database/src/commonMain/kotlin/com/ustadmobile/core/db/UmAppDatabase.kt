@@ -51,6 +51,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val clazzMemberDao: ClazzMemberDao
 
+    @JsName("contentEntryDao")
     abstract val contentEntryDao: ContentEntryDao
 
     abstract val personCustomFieldDao: PersonCustomFieldDao
