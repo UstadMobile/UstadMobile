@@ -3,7 +3,6 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { UmAngularUtil, appRountes } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -30,8 +29,8 @@ export class HomeComponent extends UmBaseComponent {
   static toolBarTitle: string = ".."
 
   constructor(private location: Location, umService: UmBaseService,
-    router: Router, route: ActivatedRoute, umDb: UmDbMockService, formBuilder: FormBuilder) {
-    super(umService, router, route, umDb);
+    router: Router, route: ActivatedRoute,formBuilder: FormBuilder) {
+    super(umService, router, route);
     this.icon_position_class = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
     this.toolbar_icon_class = this.umService.isLTRDirectionality() ? "left icon-right-spacing" : "right icon-left-spacing";
     this.toolbar_arrow = this.umService.isLTRDirectionality() ? "arrow_back" : "arrow_forward";
@@ -65,13 +64,13 @@ export class HomeComponent extends UmBaseComponent {
   }
 
   goBack() {
-    if (!window.location.search.includes(this.umDatabase.ROOT_UID + "")) {
+    if (!window.location.search.includes(this.umService.ROOT_UID + "")) {
       this.location.back();
     }
   }
 
   navigateTo(route) {
-    this.systemImpl.go(route, UmAngularUtil.getRouteArgs(route, this.umDatabase.ROOT_UID), this.context);
+    this.systemImpl.go(route, UmAngularUtil.getRouteArgs(route, this.umService.ROOT_UID), this.context);
   }
 
   setToolbarTitle(title){

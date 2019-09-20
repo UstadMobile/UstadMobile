@@ -61,9 +61,9 @@ didAutoComplete: Materialize.AutoCompleteOptions = {
 };
 
 constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
-  umDb: UmDbMockService,formBuilder: FormBuilder,private datePipe: DatePipe,
+  formBuilder: FormBuilder,private datePipe: DatePipe,
    private elementRef: ElementRef, private modalService: MzModalService) {
-  super(umService, router, route, umDb);
+  super(umService, router, route);
   const currentDate = this.datePipe.transform(new Date(), 'yyyy-MM-dd') 
   const tomorrow = this.datePipe.transform(new Date().setDate(new Date().getDate() + 1), 'yyyy-MM-dd') 
   //Build form for capturing report options
@@ -137,14 +137,12 @@ onChanges() {
 
 onCreate() {
   super.onCreate()
-  if (this.umDatabase.xObjectDao) {
-    this.onChanges()
+  this.onChanges()
     this.presenter = new core.com.ustadmobile.core.controller.XapiReportOptionsPresenter(
-      this.context, UmAngularUtil.getRouteArgs(this.routes.treeView,0), this, this.umDatabase.personDao,
-      this.umDatabase.xObjectDao, this.umDatabase.xLangMapEntryDao);
+      this.context, UmAngularUtil.getRouteArgs(this.routes.treeView,0), this, this.umService.getDbInstance().personDao,
+      this.umService.getDbInstance().xObjectDao, this.umService.getDbInstance().xLangMapEntryDao);
     this.presenter.onCreate(null);
     UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.xapi_options_report_title))
-  }
 }
 
 onDataChange(data) {

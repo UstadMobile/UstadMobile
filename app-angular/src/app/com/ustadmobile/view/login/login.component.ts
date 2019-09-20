@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import core from 'UstadMobile-core';
 
@@ -24,9 +23,8 @@ export class LoginComponent extends UmBaseComponent implements core.com.ustadmob
   private navigationSubscription;
   btn_class : string;
 
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
-    umDb: UmDbMockService, formBuilder: FormBuilder) {
-    super(umService, router, route, umDb);
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
+    super(umService, router, route);
 
     this.btn_class = this.umService.isLTRDirectionality() ? "right-align":"left-align";
 

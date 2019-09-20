@@ -30,8 +30,8 @@ private navigationSubscription;
 entry_thumbnail_class: string;
 entry_summary_class: string;
 
-constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
-  super(umService, router, route, umDb);
+constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
+  super(umService, router, route);
   this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left";
   this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
 
@@ -43,11 +43,9 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umD
 
 onCreate() {
   super.onCreate()
-  if(this.umDatabase.contentEntryDao){
-    this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
-      UmAngularUtil.queryParamsToMap(), this,this,this,this.umDatabase);
+  this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
+      UmAngularUtil.queryParamsToMap(), this,this,this,this.umService.getDbInstance());
     this.presenter.onCreate(null);
-  }
 }
 
 ngOnInit() {

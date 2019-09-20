@@ -41,8 +41,8 @@ export class ReportDashboardComponent extends UmBaseComponent {
   private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
-    umDb: UmDbMockService, private renderer: Renderer2, private elem: ElementRef) {
-    super(umService, router, route, umDb);
+    private renderer: Renderer2, private elem: ElementRef) {
+    super(umService, router, route);
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
@@ -77,7 +77,7 @@ export class ReportDashboardComponent extends UmBaseComponent {
 
   handleNewGraphCreated() {
     this.systemImpl.go(this.routes.reportOptions, UmAngularUtil.getRouteArgs(
-      this.routes.reportOptions, this.umDatabase.ROOT_UID), this.context);
+      this.routes.reportOptions, this.umService.ROOT_UID), this.context);
   }
 
   onViewMore(reportId) {

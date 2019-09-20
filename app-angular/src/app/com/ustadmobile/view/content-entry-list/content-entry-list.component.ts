@@ -36,9 +36,8 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   entry_collection_class: string;
   entry_options_class: string;
 
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
-     umDb: UmDbMockService, formBuilder: FormBuilder) {
-    super(umService, router, route, umDb);
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,formBuilder: FormBuilder) {
+    super(umService, router, route);
     this.entry_summary_class =  this.umService.isLTRDirectionality() ? "right":"left entry-summary-left";
     this.entry_options_class =  this.umService.isLTRDirectionality() ? "right":"left";
     this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left entry-ltr":"right entry-rtl";
@@ -60,12 +59,10 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
 
   onCreate(){
     super.onCreate()
-    if(this.umDatabase.contentEntryDao){
-      this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
-        this.context, UmAngularUtil.queryParamsToMap(), this,this.umDatabase.contentEntryDao);
-      this.presenter.onCreate(null);
-      this.setToolbarTitle("...")
-    }
+    this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
+      this.context, UmAngularUtil.queryParamsToMap(), this,this.umService.getDbInstance().contentEntryDao);
+    this.presenter.onCreate(null);
+    this.setToolbarTitle("...")
     this.label_language_options = this.getString(this.MessageID.also_available_in);
     this.label_reading_level = this.getString(this.MessageID.library_reading_level); 
   }

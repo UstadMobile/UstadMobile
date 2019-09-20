@@ -2,7 +2,6 @@ import { Component} from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import core from 'UstadMobile-core';
@@ -24,9 +23,8 @@ export class RegisterComponent extends UmBaseComponent implements core.com.ustad
   presenter: core.com.ustadmobile.core.controller.Register2Presenter;
   private navigationSubscription;
 
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
-    umDb: UmDbMockService, formBuilder: FormBuilder) {
-    super(umService, router, route, umDb);
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
+    super(umService, router, route);
     this.umFormRegister = formBuilder.group({
       'first_name': ['', Validators.required],
       'last_name': ['', Validators.required],

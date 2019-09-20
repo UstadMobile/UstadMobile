@@ -2,9 +2,8 @@ import {  DomSanitizer } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { Component } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
-import { UmBaseService } from '../../service/um-base.service';
+import { UmBaseService} from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import core from 'UstadMobile-core';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 
@@ -22,9 +21,8 @@ export class XapiContentComponent extends UmBaseComponent {
   urlToLoad: string = "https://www.ustadmobile.com/files/s4s/2-coverletter/en/EPUB/main.html";
   
   
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
-    umDb: UmDbMockService, public sanitizer: DomSanitizer) {
-    super(umService, router, route, umDb);
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,public sanitizer: DomSanitizer) {
+    super(umService, router, route);
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe(() => {

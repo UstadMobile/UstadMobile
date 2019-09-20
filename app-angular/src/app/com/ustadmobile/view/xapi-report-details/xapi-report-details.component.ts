@@ -36,8 +36,8 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
   height = 550;
 
 
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
-    super(umService, router, route, umDb);
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
+    super(umService, router, route);
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
@@ -50,15 +50,14 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
 
   onCreate() {
     super.onCreate()
-    if (this.umDatabase.statementDao && this.umDatabase.xLangMapEntryDao) {
-      UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.activity_preview_xapi))
-      const args = UmAngularUtil.queryParamsToMap(document.location.search, false)
-      this.chartType = JSON.parse(util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(args)[1].value).chartType == 100 ?
-        'ColumnChart' : 'LineChart'
-      this.presenter = new core.com.ustadmobile.core.controller.XapiReportDetailPresenter(this.context,
-        args, this, this.systemImpl, this.umDatabase.statementDao, this.umDatabase.xLangMapEntryDao);
-      this.presenter.onCreate(null)
-    }
+    UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.activity_preview_xapi))
+    const args = UmAngularUtil.queryParamsToMap(document.location.search, false)
+    this.chartType = JSON.parse(util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(args)[1].value).chartType == 100 ?
+      'ColumnChart' : 'LineChart'
+    this.presenter = new core.com.ustadmobile.core.controller.XapiReportDetailPresenter(this.context,
+      args, this, this.systemImpl, this.umService.getDbInstance().statementDao, 
+      this.umService.getDbInstance().xLangMapEntryDao);
+    this.presenter.onCreate(null)
   }
 
   setChartData(chartData: any, options: any, xAxisLabels: any, subgroupLabels: any) {

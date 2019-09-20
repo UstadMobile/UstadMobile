@@ -69,8 +69,8 @@ export class UmBaseService {
           this.http.get<any>("assets/entries.json").pipe(map(entries => entries)),
           this.http.get<any>("assets/entries_parent_join.json").pipe(map(joins => joins))
         ]).subscribe(dataResponse => {
-          const entries = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[0])
-          console.log(entries)
+          //this.database.contentEntryDao.insertAsync(util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[0])[0])
+          console.log(this.database)
           return this.preloadSystemResources(fireWhenReady)
         })
       })
