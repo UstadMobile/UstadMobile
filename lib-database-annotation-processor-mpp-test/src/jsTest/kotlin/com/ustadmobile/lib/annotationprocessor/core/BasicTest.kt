@@ -119,6 +119,18 @@ class BasicTest {
 
     }
 
+    @Test
+    fun givenQueryWithArrayParam_whenQueryCalled_thenShouldReturnMatchingValuse() = GlobalScope.promise {
+        val e1 = ExampleSyncableEntity(esNumber = 42)
+        var e2 = ExampleSyncableEntity(esNumber = 43)
+        e1.esUid = dbInstance.exampleSyncableDao().insertAsync(e1)
+        e2.esUid = dbInstance.exampleSyncableDao().insertAsync(e2)
+
+        val entitiesFromListParam = dbInstance.exampleSyncableDao().findByListParam(
+                listOf(42, 43))
+        assertEquals(2, entitiesFromListParam.size, "Got expected results from list param query")
+    }
+
 
 
 }

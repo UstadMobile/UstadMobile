@@ -98,4 +98,5 @@ kotlin {
 }
 
 jsTest.dependsOn(":lib-database-annotation-processor:testClasses")
+jsTest.dependsOn(":lib-database-annotation-processor-testdb:jvmJar")
 jsTest.dependsOn(":lib-database-annotation-processor:testWebAppRunFork")
