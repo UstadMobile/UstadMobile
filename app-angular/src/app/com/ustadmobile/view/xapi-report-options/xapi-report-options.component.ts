@@ -105,10 +105,10 @@ onChanges() {
     const valueChange = $(event.target).get(0).value
     switch($(event.target).parent().attr('id')){
       case 'graph_who':
-          scope.presenter.handleWhoDataTyped(valueChange,[0,2])
+          scope.presenter.handleWhoDataTyped(valueChange,UmAngularUtil.jsArrayToKotlinList([1,2]))
         break;
       case 'graph_did':
-          scope.presenter.handleDidDataTyped(valueChange,[]) 
+          scope.presenter.handleDidDataTyped(valueChange,UmAngularUtil.jsArrayToKotlinList([0])) 
           break;
     }
   }, false);

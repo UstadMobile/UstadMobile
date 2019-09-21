@@ -1,6 +1,4 @@
-import { Observable, combineLatest } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { UmDbMockService, ContentEntryDao} from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -19,11 +17,10 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 export class ContentEntryListComponent extends UmBaseComponent implements 
 core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   
-  entries : db.com.ustadmobile.lib.db.entities.ContentEntry[] = [];
+  entryList = [];
   env = environment;
   label_language_options : string = "";
   label_reading_level : string = "";
-  private entryListObservable: Observable<any[]> = null
   private presenter: core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.com.ustadmobile.lib.db.entities.Language[]
   categories: db.com.ustadmobile.lib.db.entities.DistinctCategorySchema[];
@@ -52,13 +49,15 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     });
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
-      this.entries = []; 
+      this.entryList = []; 
+      console.log("navigation end")
       UmAngularUtil.registerResourceReadyListener(this)
     }); 
   }
 
   onCreate(){
     super.onCreate()
+    console.log("create called")
     this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
       this.context, UmAngularUtil.queryParamsToMap(), this,this.umService.getDbInstance().contentEntryDao);
     this.presenter.onCreate(null);
@@ -86,33 +85,30 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
 
-  setContentEntryProvider(provider){
-    
-    const data = provider.fetchFn(0,100, this.umService.continuation, loaded => {
-      console.log("loaded", loaded)
-    })
+  setContentEntryProvider(provider: any){
+    const context = this
+    provider.create().load(0,100, function(error, entries) {
+      context.entryList = context.entryList.concat(UmAngularUtil.kotlinListToJsArray(entries))
+    }) 
+  }
 
-    console.log(data)  
-    
+  setLanguageOptions(languages: any){
+    const languageList = UmAngularUtil.kotlinListToJsArray(languages)
+    this.languages = languageList.splice(1,languageList.length);
+  }
+
+  setCategorySchemaSpinner(categories: any){
+    const categoriesMap = UmAngularUtil.kotlinCategoryMapToJSArray(categories)
+    var counter = 0;
+    categoriesMap.forEach(categoryList =>{  
+      this.categoryMap[counter] = categoryList.splice(2,3)
+      counter++;
+    })  
   }
 
   openEntry(entry) {
     UmAngularUtil.fireTitleUpdate(entry.title)
     this.presenter.handleContentEntryClicked(entry);
-  }
-
-  setLanguageOptions(languages){
-    const languageList = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(languages);
-    this.languages = languageList.splice(1,languageList.length);
-  }
-
-  setCategorySchemaSpinner(categories){
-    const categoriesMap: any[] = util.com.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(categories);
-    var counter = 0;
-    categoriesMap.forEach(categoryList =>{  
-      this.categoryMap[counter] = categoryList.splice(2,3)
-      counter++;
-    }) 
   }
 
   ngOnDestroy(){

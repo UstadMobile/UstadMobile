@@ -73,21 +73,17 @@ export class UmBaseService {
           this.http.get<any>("assets/data_persons.json").pipe(map(res => res)),
           this.http.get<any>("assets/data_statements.json").pipe(map(res => res))
         ]).subscribe(dataResponse => { 
-          const entries = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[0])
-          this.database.contentEntryDao.insertListAsync(entries, this.continuation)
 
-          const entryParentJoins = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[1])
-          this.database.contentEntryParentChildJoinDao.insertListAsync(entryParentJoins, this.continuation)
+          this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[0]), this.continuation)
 
-          const languages = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[2])
-          this.database.languageDao.insertListAsync(languages, this.continuation)
+          this.database.contentEntryParentChildJoinDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
 
-          const persons = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[3])
-          this.database.personDao.insertListAsync(persons, this.continuation)
+          this.database.languageDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[2]), this.continuation)
+
+          this.database.personDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[3]), this.continuation)
           
-          const statements = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[4])
-          this.database.statementDao.insertListAsync(statements, this.continuation)
-          
+          this.database.statementDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[4]), this.continuation)
+
           return this.preloadSystemResources(fireWhenReady)
         })
       })
