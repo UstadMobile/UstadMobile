@@ -325,7 +325,8 @@ fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
                            processingEnv: ProcessingEnvironment): EntityFieldMap {
 
     ancestorsToList(entityTypeEl, processingEnv).forEach {
-        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD }.partition { it.getAnnotation(Embedded::class.java) == null }
+        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD && Modifier.STATIC !in it.modifiers}
+                .partition { it.getAnnotation(Embedded::class.java) == null }
         listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
         listParted.second.forEach {
             embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it))

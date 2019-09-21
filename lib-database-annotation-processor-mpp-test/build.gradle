@@ -50,6 +50,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation project(":lib-database-annotation-processor-testdb")
                 implementation project(":lib-door-runtime")
                 implementation project(":lib-database-annotations")
                 implementation project(":lib-room-annotations")

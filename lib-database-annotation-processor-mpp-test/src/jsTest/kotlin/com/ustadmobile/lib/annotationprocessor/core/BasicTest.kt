@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.door.DataSourceFactoryJs
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorObserver
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_JsImpl
 import db2.ExampleEntity2
@@ -15,6 +16,7 @@ import kotlinx.coroutines.promise
 import kotlinx.coroutines.withTimeout
 import org.w3c.dom.set
 import kotlin.browser.localStorage
+import kotlin.js.Date
 import kotlin.test.*
 
 
@@ -37,7 +39,7 @@ class BasicTest {
 
 
     @Test
-    fun testDatabaseBuilder() {
+    fun testDatabaseBuilder() = GlobalScope.promise {
         println("Attempt test database builder")
         assertNotNull(dbInstance, "Constructed db instance object")
     }
@@ -66,21 +68,31 @@ class BasicTest {
 
     @Test
     fun testLiveData() = GlobalScope.promise {
-        val entity = ExampleEntity2(name = "LiveData Test", someNumber =  50)
+        var startTime = Date().getTime().toLong()
+        val entity = ExampleEntity2(name = "LiveData Test2", someNumber =  501)
         entity.uid = dbInstance.exampleDao2().insertAsyncAndGiveId(entity)
-        val listRef = mutableListOf<List<ExampleEntity2>>()
-        waitForLiveData(dbInstance.exampleDao2().findByMinUidLive(), 5000) {
-            listRef[0] = it
-            it.isNotEmpty()
-        }
 
-        assertTrue(listRef.isNotEmpty() && listRef[0] != null, "LiveData loads with callback as expected")
+        console.log("testLiveData: Inserted entity ${entity.uid} t =${Date().getTime().toLong() - startTime}ms")
+        val channel = Channel<List<ExampleEntity2>>(1)
+        val liveData = dbInstance.exampleDao2().findByMinUidLive()
+        liveData.observeForever(object :DoorObserver<List<ExampleEntity2>> {
+            override fun onChanged(t: List<ExampleEntity2>) {
+                console.log("testLiveData: got result $t ; time=${Date().getTime().toLong() - startTime}ms")
+                channel.offer(t)
+            }
+        })
+        console.log("Waiting to receive on channel")
+        val receivedList = channel.receive()
+
+        console.log("testLiveData: done - running assertion on ${receivedList.isNotEmpty()}")
+        assertTrue(receivedList.isNotEmpty() && receivedList[0] != null, "LiveData loads with callback as expected")
+        channel.close()
     }
 
     @Test
     fun testDataSourceFactory() = GlobalScope.promise {
         val syncableEntity = ExampleSyncableEntity(esNumber = 101)
-        syncableEntity.esUid = dbInstance.exampleSyncableDao().insert(syncableEntity)
+        syncableEntity.esUid = dbInstance.exampleSyncableDao().insertAsync(syncableEntity)
         val dataSource = dbInstance.exampleSyncableDao().findAllDataSource()
         val channel = Channel<List<ExampleSyncableEntity>>(1)
         (dataSource as DataSourceFactoryJs<Int, ExampleSyncableEntity>).create().load(0, 50) {e: Exception?, entities: List<ExampleSyncableEntity>? ->
@@ -92,6 +104,7 @@ class BasicTest {
         }
 
         val listReceived = withTimeout(5000) { channel.receive() }
+        channel.close()
         assertEquals(1, listReceived.size, "Got list of one entitity")
     }
 
