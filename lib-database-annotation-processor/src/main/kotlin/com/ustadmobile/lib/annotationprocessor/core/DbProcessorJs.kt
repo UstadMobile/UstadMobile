@@ -86,6 +86,10 @@ class DbProcessorJs : AbstractDbProcessor(){
                         .initializer("false").build())
                 .addType(TypeSpec.companionObjectBuilder()
                         .addFunction(FunSpec.builder("register")
+                                .addAnnotation(AnnotationSpec.builder(
+                                        ClassName("kotlin.js", "JsName"))
+                                        .addMember("%S", "register")
+                                        .build())
                                 .addCode("%T.registerImpl(%T::class, %T::class)\n",
                                         DatabaseBuilder::class, dbTypeEl,
                                         ClassName(dbTypeClassName.packageName, implFileSpec.name))
@@ -147,7 +151,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                 .addDbJsImplPropsAndConstructor()
                 .superclass(daoTypeEl.asClassName())
 
-        methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv).forEach {daoSubEl ->
+        methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv, includeImplementedMethods = true).forEach {daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
                 return@forEach
 

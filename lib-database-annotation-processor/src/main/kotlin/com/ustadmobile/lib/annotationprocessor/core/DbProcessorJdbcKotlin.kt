@@ -325,7 +325,8 @@ fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
                            processingEnv: ProcessingEnvironment): EntityFieldMap {
 
     ancestorsToList(entityTypeEl, processingEnv).forEach {
-        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD }.partition { it.getAnnotation(Embedded::class.java) == null }
+        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD && Modifier.STATIC !in it.modifiers}
+                .partition { it.getAnnotation(Embedded::class.java) == null }
         listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
         listParted.second.forEach {
             embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it))
@@ -348,7 +349,11 @@ internal fun ancestorsToList(child: TypeElement, processingEnv: ProcessingEnviro
     do {
         entityAncestors.add(nextEntity!!)
         val nextElement = processingEnv.typeUtils.asElement(nextEntity.superclass)
-        nextEntity = if(nextElement is TypeElement) { nextElement } else { null }
+        nextEntity = if(nextElement is TypeElement && nextElement.qualifiedName.toString() != "java.lang.Object") {
+            nextElement
+        } else {
+            null
+        }
     }while(nextEntity != null)
 
     return entityAncestors
@@ -406,15 +411,19 @@ fun sqlArrayComponentTypeOf(typeName: TypeName): String {
 //Limitation: this does not currently support interface inheritence
 data class MethodToImplement(val methodName: String, val paramTypes: List<TypeMirror>)
 
-fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment) :List<Element> {
+fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType,
+                       processingEnv: ProcessingEnvironment,
+                       includeImplementedMethods: Boolean = false) :List<Element> {
     return ancestorsToList(typeElement, processingEnv).flatMap {
         it.enclosedElements.filter {
-            it.kind ==  ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers //abstract methods in this class
+            it.kind ==  ElementKind.METHOD
+                    && (includeImplementedMethods || Modifier.ABSTRACT in it.modifiers) //abstract methods in this class
+                    && (Modifier.FINAL !in it.modifiers)
         } + it.interfaces.flatMap {
             processingEnv.typeUtils.asElement(it).enclosedElements.filter { it.kind == ElementKind.METHOD } //methods from the interface
         }
     }.filter {
-        !isMethodImplemented(it as ExecutableElement, typeElement, processingEnv)
+        includeImplementedMethods || !isMethodImplemented(it as ExecutableElement, typeElement, processingEnv)
     }.distinctBy {
         val signatureParamTypes = (processingEnv.typeUtils.asMemberOf(enclosing, it) as ExecutableType)
                 .parameterTypes.filter { ! isContinuationParam(it.asTypeName()) }
