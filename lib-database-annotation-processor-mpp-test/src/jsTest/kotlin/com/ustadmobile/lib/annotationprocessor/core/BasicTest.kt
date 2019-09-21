@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.door.DataSourceFactoryJs
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorObserver
@@ -131,6 +130,14 @@ class BasicTest {
         assertEquals(2, entitiesFromListParam.size, "Got expected results from list param query")
     }
 
+
+    @Test
+    fun givenNonAbstractFun_whenMethodCalled_thenShouldReturnValue() = GlobalScope.promise {
+        var e1 = ExampleSyncableEntity(esNumber = 50)
+        e1.esUid = dbInstance.exampleSyncableDao().insertAsync(e1)
+        val eAdded = dbInstance.exampleSyncableDao().findByUidAndAddOneThousand(e1.esUid)
+        assertEquals(1050, eAdded?.esNumber, "Got value back from server's own fn")
+    }
 
 
 }

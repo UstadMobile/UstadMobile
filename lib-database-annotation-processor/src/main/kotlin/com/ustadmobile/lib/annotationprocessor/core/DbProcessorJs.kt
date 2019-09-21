@@ -151,7 +151,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                 .addDbJsImplPropsAndConstructor()
                 .superclass(daoTypeEl.asClassName())
 
-        methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv).forEach {daoSubEl ->
+        methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv, includeImplementedMethods = true).forEach {daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
                 return@forEach
 
