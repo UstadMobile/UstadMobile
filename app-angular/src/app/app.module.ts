@@ -2,14 +2,13 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,MzSpinnerModule,MzProgressModule,
-   MzNavbarModule, MzChipModule, MzDatepickerModule,MzCheckboxModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule, MzModalService, MzBaseModal} from 'ngx-materialize';
+   MzNavbarModule, MzChipModule, MzDatepickerModule,MzCheckboxModule, MzToastModule, MzInputModule, MzDropdownModule, MzModalModule} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import {NgProgressInterceptor, NgProgressModule } from 'ngx-progressbar';
-import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -25,7 +24,6 @@ import { DatePipe } from '@angular/common';
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
 import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog/um-tree-node/um-tree-node.component';
-import { UmAppDatabaseService } from './com/ustadmobile/core/db/um-app-database.service';
 
 
 @NgModule({
@@ -58,8 +56,6 @@ import { UmAppDatabaseService } from './com/ustadmobile/core/db/um-app-database.
     GoogleChartsModule,
   ],
   providers: [
-    UmDbMockService,
-    UmAppDatabaseService,
     UmBaseService,
     DatePipe,
     RouteGuardService,

@@ -6,8 +6,8 @@ import { map } from 'rxjs/operators';
 import { UmAngularUtil } from '../util/UmAngularUtil';
 import db from 'UstadMobile-lib-database';
 import mpp from 'UstadMobile-lib-database-mpp';
-import ents from 'UstadMobile-lib-database-entities'
 import util from 'UstadMobile-lib-util';
+import kotlin from 'kotlin'
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +20,7 @@ export class UmBaseService {
   public ROOT_UID = 1311236
   private umObserver = new Subject <any> ();
   private directionality: string;
+  public continuation = kotlin.kotlin.coroutines.js.internal.EmptyContinuation
   systemLocale: any;
   toolBarTitle: string = ".."
   private umListener = <Observable<any>>this.umObserver;
@@ -63,14 +64,30 @@ export class UmBaseService {
       //clear table
       this.http.get("http://localhost:8087/UmAppDatabase/clearAllTables", {responseType: 'text' })
       .subscribe(clearResponse =>{
-
+        console.log("Clear DB", clearResponse)
         //get dummy data
         combineLatest([
-          this.http.get<any>("assets/entries.json").pipe(map(entries => entries)),
-          this.http.get<any>("assets/entries_parent_join.json").pipe(map(joins => joins))
-        ]).subscribe(dataResponse => {
-          //this.database.contentEntryDao.insertAsync(util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[0])[0])
-          console.log(this.database)
+          this.http.get<any>("assets/data_entries.json").pipe(map(res => res)),
+          this.http.get<any>("assets/data_entries_parent_join.json").pipe(map(res => res)),
+          this.http.get<any>("assets/data_languages.json").pipe(map(res => res)),
+          this.http.get<any>("assets/data_persons.json").pipe(map(res => res)),
+          this.http.get<any>("assets/data_statements.json").pipe(map(res => res))
+        ]).subscribe(dataResponse => { 
+          const entries = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[0])
+          this.database.contentEntryDao.insertListAsync(entries, this.continuation)
+
+          const entryParentJoins = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[1])
+          this.database.contentEntryParentChildJoinDao.insertListAsync(entryParentJoins, this.continuation)
+
+          const languages = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[2])
+          this.database.languageDao.insertListAsync(languages, this.continuation)
+
+          const persons = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[3])
+          this.database.personDao.insertListAsync(persons, this.continuation)
+          
+          const statements = util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(dataResponse[4])
+          this.database.statementDao.insertListAsync(statements, this.continuation)
+          
           return this.preloadSystemResources(fireWhenReady)
         })
       })

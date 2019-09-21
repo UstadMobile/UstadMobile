@@ -24,6 +24,10 @@ import kotlin.js.JsName
 @UmRepository
 abstract class PersonDao : BaseDao<Person> {
 
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<Person>)
+
     class PersonUidAndPasswordHash {
         var passwordHash: String = ""
 

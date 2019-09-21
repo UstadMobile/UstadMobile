@@ -86,14 +86,17 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
 
-  setContentEntryProvider(provider : Observable<any[]>){
-    this.entryListObservable = provider;
-    this.entryListObservable.subscribe(entries =>{ 
-      this.entries = entries;
+  setContentEntryProvider(provider){
+    
+    const data = provider.fetchFn(0,100, this.umService.continuation, loaded => {
+      console.log("loaded", loaded)
     })
+
+    console.log(data)  
+    
   }
 
-  openEntry(entry : db.com.ustadmobile.lib.db.entities.ContentEntry) {
+  openEntry(entry) {
     UmAngularUtil.fireTitleUpdate(entry.title)
     this.presenter.handleContentEntryClicked(entry);
   }

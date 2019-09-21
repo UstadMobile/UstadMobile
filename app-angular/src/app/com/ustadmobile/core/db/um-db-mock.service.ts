@@ -42,14 +42,7 @@ export class UmDbMockService extends db.com.ustadmobile.core.db.UmAppDatabase {
 
 export class StatementDao{
   getResults(any){
-    const data = [
-      {yAxis:50.0, xAxis: "04 2019", subgroup: "301"},
-      {yAxis:100, xAxis: "05 2019", subgroup: "300"},
-      {yAxis:25, xAxis: "05 2019", subgroup: "301"},
-      {yAxis:90, xAxis: "06 2019", subgroup: "300"},
-      {yAxis:60.0, xAxis: "06 2019", subgroup: "300"}, 
-    ]
-    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data)
+    
   }
 
   getListResults(any){

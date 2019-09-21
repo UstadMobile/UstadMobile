@@ -1,16 +1,23 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.Person
+import kotlin.js.JsName
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
 @UmRepository
 abstract class LanguageDao : BaseDao<Language> {
+
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<Language>)
 
     @Query("SELECT * FROM Language")
     abstract fun publicLanguages(): List<Language>
