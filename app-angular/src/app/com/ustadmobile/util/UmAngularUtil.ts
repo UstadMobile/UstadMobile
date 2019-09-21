@@ -1,7 +1,7 @@
-import ktorclientserial from 'ktor-ktor-client-serialization';
 import core from 'UstadMobile-core';
 import db from 'UstadMobile-lib-database';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
+import util from 'UstadMobile-lib-util';
 
 export const appRountes = {
   "entryList":"ContentEntryList", "entryDetails":"ContentEntryDetail", "register":"RegisterAccount",
@@ -18,7 +18,6 @@ export interface UmEvent extends Event{
 
 export class UmAngularUtil {
   constructor(){
-    const ktor = ktorclientserial 
   }
 
 
@@ -291,7 +290,7 @@ export class UmAngularUtil {
    * Get language specific route
    * @param languageCode lamguage standard code
    */
-  static getDifferentLanguageRoute(languageCode){
+  static getDifferentLanguageRoute(){
     var route = this.getRoutePathParam();
     const args = UmAngularUtil.queryParamsToMap();
     return {view: route.path, args: args};
@@ -303,5 +302,21 @@ export class UmAngularUtil {
   static showSplashScreen(){
     const route = this.getRoutePathParam();
     return window.location.search.length == 0 && !this.hasPath(route.path);
+  }
+
+  static jsArrayToKotlinList(data: any){
+    return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data);
+  }
+
+  static kotlinListToJsArray(data: any): any[]{
+    return util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(data);
+  }
+
+  static kotlinMapToJsArray(data: any): any[]{
+    return util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(data);
+  }
+
+  static kotlinCategoryMapToJSArray(data: any): any[]{
+    return util.com.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(data);
   }
 }
