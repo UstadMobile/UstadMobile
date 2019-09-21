@@ -416,7 +416,9 @@ fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType,
                        includeImplementedMethods: Boolean = false) :List<Element> {
     return ancestorsToList(typeElement, processingEnv).flatMap {
         it.enclosedElements.filter {
-            it.kind ==  ElementKind.METHOD && (includeImplementedMethods || Modifier.ABSTRACT in it.modifiers) //abstract methods in this class
+            it.kind ==  ElementKind.METHOD
+                    && (includeImplementedMethods || Modifier.ABSTRACT in it.modifiers) //abstract methods in this class
+                    && (Modifier.FINAL !in it.modifiers)
         } + it.interfaces.flatMap {
             processingEnv.typeUtils.asElement(it).enclosedElements.filter { it.kind == ElementKind.METHOD } //methods from the interface
         }
