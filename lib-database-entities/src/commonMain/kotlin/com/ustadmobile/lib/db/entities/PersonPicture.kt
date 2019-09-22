@@ -8,9 +8,11 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.PersonPicture.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
+@Serializable
 class PersonPicture() {
 
     @PrimaryKey(autoGenerate = true)

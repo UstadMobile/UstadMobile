@@ -1,7 +1,7 @@
 
 
 
-include ':app-android', ':lib-database-annotations', ':lib-door-runtime',
+include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-database-annotation-processor-mpp-test', ':lib-database-annotation-processor-testdb',
         ':app-angular',
         ':dbcompress',
         ':app-ktor-server',

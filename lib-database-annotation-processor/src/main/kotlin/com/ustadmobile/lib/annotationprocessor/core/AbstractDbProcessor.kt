@@ -18,17 +18,20 @@ import io.ktor.client.response.HttpResponse
 import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.DoorLiveData
 import kotlinx.coroutines.GlobalScope
 import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.PreparedStatementArrayProxy
 import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
 import org.apache.commons.text.StringEscapeUtils
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.ktor.http.HttpStatusCode
-
+import io.ktor.content.TextContent
+import io.ktor.http.ContentType
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+//here in a comment because it sometimes gets removed by 'optimization of parameters'
+// import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -170,7 +173,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
         val syncableEntityInfo = SyncableEntityInfo(it, processingEnv)
 
         """( ${syncableEntityInfo.entityMasterCsnField.name} > COALESCE((SELECT 
-            |${syncableEntityInfo.trackerCsnField.name} FROM ${syncableEntityInfo.tracker.simpleName}  
+            |MAX(${syncableEntityInfo.trackerCsnField.name}) FROM ${syncableEntityInfo.tracker.simpleName}  
             |WHERE  ${syncableEntityInfo.trackerDestField.name} = :$clientIdParamName 
             |AND ${syncableEntityInfo.trackerPkField.name} = 
             |${resultComponentClassName.simpleName}.${syncableEntityInfo.entityPkField.name} 
@@ -245,6 +248,11 @@ internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "rec
  * @param httpResultType the type of response expected from the other end (e.g. the result type of
  * the method)
  * @param params a list of the parameters (e.g. from the method signature) that need to be sent
+ * @param useKotlinxListSerialization if true, the generated code will use the Kotlinx Json object
+ * to serialize and deserialize lists. This is because the Javascript client (using Kotlinx serialization)
+ * will not automatically handle .receive<List<Entity>>
+ * @param kotlinxSerializationJsonVarName if useKotlinxListSerialization, thne this is the variable
+ * name that will be used to access the Json object to serialize or deserialize.
  */
 internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String = "_endpoint",
                                                    dbPathVarName: String,
@@ -254,7 +262,9 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    httpResultVarName: String = "_httpResult",
                                                    requestBuilderCodeBlock: CodeBlock = CodeBlock.of(""),
                                                    httpResultType: TypeName,
-                                                   params: List<ParameterSpec> ): CodeBlock {
+                                                   params: List<ParameterSpec>,
+                                                   useKotlinxListSerialization: Boolean = false,
+                                                   kotlinxSerializationJsonVarName: String = ""): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
             .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
@@ -262,29 +272,79 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                     HttpResponse::class)
             .beginControlFlow("url")
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
-            .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"", daoName, methodName)
+            .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
 
     params.filter { isQueryParam(it.type) }.forEach {
+        val paramType = it.type
+        val isList = paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()
+
+        val paramsCodeblock = CodeBlock.builder()
+        var paramVarName = it.name
+        if(isList) {
+            paramsCodeblock.add("${it.name}.forEach { ")
+            paramVarName = "it"
+            if(paramType != String::class.asClassName()) {
+                paramVarName += ".toString()"
+            }
+        }
+
+        paramsCodeblock.add("%M(%S, $paramVarName)\n",
+                MemberName("io.ktor.client.request", "parameter"),
+                it.name)
+        if(isList) {
+            paramsCodeblock.add("} ")
+        }
+        paramsCodeblock.add("\n")
         codeBlock.addWithNullCheckIfNeeded(it.name, it.type,
-                CodeBlock.of("%M(%S, ${it.name})\n",
-                        MemberName("io.ktor.client.request", "parameter"),
-                        it.name))
+                paramsCodeblock.build())
     }
 
     val requestBodyParam = getRequestBodyParam(params)
 
     if(requestBodyParam != null) {
+        val requestBodyParamType = requestBodyParam.type
+
+        val writeBodyCodeBlock = if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
+                && requestBodyParamType.rawType == List::class.asClassName()) {
+            val entityComponentType = resolveEntityFromResultType(requestBodyParamType).javaToKotlinType()
+            val serializerFnCodeBlock = if(entityComponentType in QUERY_SINGULAR_TYPES) {
+                CodeBlock.of("%M()", MemberName("kotlinx.serialization", "serializer"))
+            }else {
+                CodeBlock.of("serializer()")
+            }
+            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json)\n",
+                TextContent::class, entityComponentType,
+                    serializerFnCodeBlock,
+                    MemberName("kotlinx.serialization", "list"),
+                    ContentType::class)
+        }else {
+            CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
+                    MemberName("io.ktor.client.features.json", "defaultSerializer"))
+        }
+
         codeBlock.addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
-                CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
-                        MemberName("io.ktor.client.features.json", "defaultSerializer")))
+                writeBodyCodeBlock)
     }
 
     codeBlock.endControlFlow()
 
-    val receiveCodeBlock = CodeBlock.of("$httpResponseVarName.%M<%T>()\n",
-        CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+    val receiveCodeBlock = if(useKotlinxListSerialization && httpResultType is ParameterizedTypeName
+            && httpResultType.rawType == List::class.asClassName() ) {
+        val serializerFnCodeBlock = if(httpResultType.typeArguments[0].javaToKotlinType() in QUERY_SINGULAR_TYPES) {
+            CodeBlock.of("%M()", MemberName("kotlinx.serialization", "serializer"))
+        }else {
+            CodeBlock.of("serializer()")
+        }
+        CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.%L.%M, $httpResponseVarName.%M<String>())\n",
+                httpResultType.typeArguments[0], serializerFnCodeBlock,
+                MemberName("kotlinx.serialization", "list"),
+                CLIENT_RECEIVE_MEMBER_NAME)
+    }else{
+        CodeBlock.of("$httpResponseVarName.%M<%T>()\n",
+                CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
+    }
     if(httpResultType.isNullable) {
         codeBlock.beginControlFlow("val $httpResultVarName = if(${httpResponseVarName}.status == %T.NoContent)",
             HttpStatusCode::class)
@@ -453,6 +513,14 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * we use this so that we can match the case of the table name.
      */
     protected val allKnownEntityNames = mutableListOf<String>()
+
+    /**
+     * Used to determine if a DAO method returns a DataSource.Factory with a syncable entity type
+     * (e.g. should have a boundary callback)
+     */
+    protected val daoMethodSyncableDataSourceFactoryFilter = { returnTypeArgs : List<TypeName> ->
+        returnTypeArgs.any { it is ClassName && findSyncableEntities(it, processingEnv).isNotEmpty() }
+    }
 
     override fun init(p0: ProcessingEnvironment) {
         super.init(p0)
@@ -1064,13 +1132,27 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                          syncHelperDaoVarName: String = "_syncHelper") : CodeBlock {
         val codeBlock = CodeBlock.builder()
         val resultType = resolveQueryResultType(daoMethod.returnType!!)
+        val returnType = daoMethod.returnType
+        val isDataSourceFactory = returnType is ParameterizedTypeName
+                && returnType.rawType == DataSource.Factory::class.asClassName()
 
         daoMethod.parameters.forEach {
             codeBlock.add(generateGetParamFromRequestCodeBlock(it.type,
                     it.name, declareVariableName = it.name, declareVariableType = "val"))
         }
 
+        if(isDataSourceFactory) {
+            listOf("_offset", "_limit").forEach {
+                codeBlock.add(generateGetParamFromRequestCodeBlock(INT, it, it,
+                        declareVariableType = "val"))
+            }
+        }
+
         val queryVarsMap = daoMethod.parameters.map { it.name to it.type}.toMap().toMutableMap()
+        if(isDataSourceFactory){
+            queryVarsMap += "_offset" to INT
+            queryVarsMap += "_limit" to INT
+        }
 
         var querySql = daoMethod.annotations.first { it.className == Query::class.asClassName() }
                 .members.first { it.toString().trim().startsWith("value") || it.toString().trim().startsWith("\"") }.toString()
@@ -1107,6 +1189,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     processingEnv)
         }
 
+        if(isDataSourceFactory) {
+            querySql += " LIMIT :_limit OFFSET :_offset"
+        }
 
         codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, null))
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
@@ -1216,9 +1301,10 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
         if(addReturnDaoResult) {
-            codeBlock.add("return _dao.${daoFunSpec.name}(")
-                    .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
-                    .add(")\n")
+//            codeBlock.add("return _dao.${daoFunSpec.name}(")
+//                    .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
+//                    .add(")\n")
+            codeBlock.add("return ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
         }
 
 

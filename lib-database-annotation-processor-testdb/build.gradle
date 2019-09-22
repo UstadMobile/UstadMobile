@@ -1,0 +1,149 @@
+
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'maven-publish'
+    id 'jacoco'
+    id "org.jetbrains.kotlin.kapt"
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
+
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"
+
+kotlin {
+
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+            javaParameters = true
+        }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+
+    js {
+        nodejs()
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation project(':lib-door-runtime')
+                implementation project(":lib-database-annotations")
+                compileOnly project(":lib-room-annotations")
+
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation project(":lib-room-annotations")
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+            }
+        }
+        jsMain {
+            kotlin.srcDir("$buildDir/generated/source/door-js")
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "com.soywiz:klock-js:$version_klock"
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+
+            }
+        }
+
+    }
+
+}
+
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
+
+
+kapt {
+    arguments {
+        arg("doordb_android_out", "$buildDir/generated/source/door-android")
+        //Uncomment lines below to allow debugging on generated source code.
+//        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
+//        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
+        arg("doordb_js_out", "$buildDir/generated/source/door-js")
+        arg("doordb_source_path", project.file("src/commonMain/kotlin"))
+    }
+}
+
+
+dependencies {
+    /**
+     * Since Gradle 5.4 using kapt project(":...") does not work.
+     */
+    kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
+            "../lib-door-runtime/build/libs/lib-door-runtime-jvm.jar")
+    kapt "com.squareup:kotlinpoet:1.2.0"
+    kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+    kapt "io.ktor:ktor-server-netty:$version_ktor"
+    kapt "org.apache.commons:commons-text:$version_apache_commons_text"
+    kapt "com.google.code.gson:gson:$version_gson"
+    kapt "io.ktor:ktor-client-core:$version_ktor"
+    kapt "io.ktor:ktor-client-json:$version_ktor"
+    kapt "io.ktor:ktor-client-okhttp:$version_ktor"
+    kapt "io.ktor:ktor-client-gson:$version_ktor"
+    kapt "io.ktor:ktor-client-okhttp:$version_ktor"
+}
+
+compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
+
+compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

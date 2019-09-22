@@ -9,7 +9,7 @@ version rootProject.version
 
 
 apply plugin: "kotlin-multiplatform"
-//apply plugin: 'kotlinx-serialization'
+apply plugin: 'kotlinx-serialization'
 apply plugin: "maven-publish"
 apply plugin: "jacoco"
 apply plugin: "kotlin-kapt"
@@ -49,7 +49,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation project(":lib-util")
                 implementation project(":lib-database-entities")
@@ -63,13 +63,13 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
             }
         }
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                //implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-js:$version_klock"
             }
         }
@@ -89,6 +89,7 @@ kapt {
     arguments {
         arg("doordb_android_out", rootProject.file("lib-database-android/build/generated/source/door").absolutePath)
         arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
+        arg("doordb_js_out", rootProject.file("lib-database-mpp/build/generated/source/door-js").absolutePath)
         arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
         arg("doordb_source_path", project.file("src/commonMain/kotlin"))
     }
@@ -109,6 +110,8 @@ dependencies {
     kapt "com.google.code.gson:gson:$version_gson"
     kapt "io.ktor:ktor-client-core:$version_ktor"
     kapt "io.ktor:ktor-client-json:$version_ktor"
+    kapt "io.ktor:ktor-client-okhttp:$version_ktor"
+    kapt "io.ktor:ktor-client-gson:$version_ktor"
     kapt "io.ktor:ktor-client-okhttp:$version_ktor"
 }
 

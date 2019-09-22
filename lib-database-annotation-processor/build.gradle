@@ -3,6 +3,7 @@ plugins {
     id 'kotlin'
     id "org.jetbrains.kotlin.kapt"
     id 'maven-publish'
+    id 'com.github.psxpaul.execfork' version '0.1.11'
 }
 
 task fatJar(type: Jar) {
@@ -18,12 +19,33 @@ kapt {
     arguments {
         arg("doordb_android_out", "$buildDir/generated/source/doordb-android")
         arg("doordb_source_path", "$projectDir/src/test/kotlin")
+        arg("doordb_js_out", rootProject.file("lib-database-annotation-processor-mpp-test/build/generated/sources/doordb-js"))
 
         //Uncomment lines below to allow debugging on generated source code.
 //        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
 //        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
     }
 }
+
+
+task testWebAppRun(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'io.ktor.server.netty.EngineMain'
+    args '-port=8089'
+}
+
+
+task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
+    //outputs.upToDateWhen { false }
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'io.ktor.server.netty.EngineMain'
+    args = ['-port=8089']
+    waitForPort = 8089
+    workingDir = "$projectDir/"
+    standardOutput = "$projectDir/build/tmp/daemon.log"
+    errorOutput = "$projectDir/build/tmp/daemon-error.log"
+}
+
 
 //uncomment the line below to allow debugging on generated source code
 //sourceSets.test.java.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
@@ -74,6 +96,7 @@ dependencies {
     //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")
     kaptTest files("build/libs/lib-database-annotation-processor.jar")
+    testImplementation project(":lib-database-annotation-processor-testdb")
     testImplementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"

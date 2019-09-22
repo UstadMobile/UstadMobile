@@ -3,12 +3,12 @@ package com.ustadmobile.door
 actual abstract class DoorMigration {
 
     actual val startVersion: Int
-        get() = TODO("not implemented on Javascript")
+        get() = -1
     actual val endVersion: Int
-        get() = TODO("not implemented on Javascript")
+        get() = -1
 
     actual constructor(startVersion: Int, endVersion: Int) {
-        TODO("not implemented on Javascript")
+        //do nothing on javascript
     }
 
     actual abstract fun migrate(database: DoorSqlDatabase)

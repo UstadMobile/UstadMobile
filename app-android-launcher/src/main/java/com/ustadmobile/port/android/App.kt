@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android
 
 import android.content.Context
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 
 import com.toughra.ustadmobile.launcher.BuildConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -35,6 +37,7 @@ class App : UmBaseApplication() {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         ACRA.init(this)
+        Napier.base(DebugAntilog())
     }
 
     companion object {

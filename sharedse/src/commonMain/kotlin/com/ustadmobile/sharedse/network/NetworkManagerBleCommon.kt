@@ -193,6 +193,7 @@ abstract class NetworkManagerBleCommon(
                 knownPeerNodes[node.bluetoothMacAddress!!] = lastSeenInMills
                 GlobalScope.launch {
                     umAppDatabase.networkNodeDao.updateNodeLastSeen(nodeMap)
+                    nodeMap.clear()
                     UMLog.l(UMLog.DEBUG, 694, "Updating "
                             + knownPeerNodes.size + " nodes from the Db")
                 }
