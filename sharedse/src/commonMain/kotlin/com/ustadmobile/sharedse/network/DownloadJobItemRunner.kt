@@ -419,7 +419,7 @@ class DownloadJobItemRunner
                                             COMPRESSION_NONE
                                         }
 
-                                        length = resumableDownload.headers?.get("X-Content-Length-Uncompressed")?.get(0)?.toLong()
+                                        length = resumableDownload.headers?.get("x-content-length-uncompressed")?.get(0)?.toLong()
                                                 ?: destFile.length()
 
                                     } catch (io: IOException) {

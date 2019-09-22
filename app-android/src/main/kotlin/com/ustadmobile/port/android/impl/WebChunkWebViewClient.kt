@@ -153,7 +153,10 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
-            val entry = containerManager!!.getEntry(log.path!!)!!
+
+            val entry = containerManager!!.getEntry(log.path!!)
+                    ?: return WebResourceResponse("", "utf-8", 200, "OK", null, null)
+
             var data = containerManager!!.getInputStream(entry)
 
             // if not range header, load the file as normal
@@ -194,7 +197,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                 return WebResourceResponse(log.mimeType, "utf-8", 200,
                         "OK", mutMap, data)
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             System.err.println("did not find entry in zip for url " + log.url!!)
             e.printStackTrace()
         }
