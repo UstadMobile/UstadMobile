@@ -277,10 +277,28 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             .add(requestBuilderCodeBlock)
 
     params.filter { isQueryParam(it.type) }.forEach {
+        val paramType = it.type
+        val isList = paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()
+
+        val paramsCodeblock = CodeBlock.builder()
+        var paramVarName = it.name
+        if(isList) {
+            paramsCodeblock.add("${it.name}.forEach { ")
+            paramVarName = "it"
+            if(paramType != String::class.asClassName()) {
+                paramVarName += ".toString()"
+            }
+        }
+
+        paramsCodeblock.add("%M(%S, $paramVarName)\n",
+                MemberName("io.ktor.client.request", "parameter"),
+                it.name)
+        if(isList) {
+            paramsCodeblock.add("} ")
+        }
+        paramsCodeblock.add("\n")
         codeBlock.addWithNullCheckIfNeeded(it.name, it.type,
-                CodeBlock.of("%M(%S, ${it.name})\n",
-                        MemberName("io.ktor.client.request", "parameter"),
-                        it.name))
+                paramsCodeblock.build())
     }
 
     val requestBodyParam = getRequestBodyParam(params)

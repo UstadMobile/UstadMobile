@@ -230,7 +230,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
                 "${daoTypeElement.simpleName}")
 
-        methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
+        methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv,
+                includeImplementedMethods = true).forEach { daoSubEl ->
             val daoMethodEl = daoSubEl as ExecutableElement
             val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                     daoMethodEl) as ExecutableType
