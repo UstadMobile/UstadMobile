@@ -1,6 +1,4 @@
-package com.ustadmobile.core.controller
-
-import com.ustadmobile.core.generated.locale.MessageID
+package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,9 +16,7 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
     data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
     fun toSql(): QueryParts {
-        if (xAxis == subGroup) {
-            throw IllegalArgumentException("XAxis Selection and subGroup selection was the same")
-        }
+        require(xAxis != subGroup) { "XAxis Selection and subGroup selection was the same" }
         val paramList = mutableListOf<Any>()
 
         var sqlList = "SELECT (Person.firstNames || ' ' || Person.lastName) AS name, " +
@@ -95,34 +91,34 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
 
     companion object {
 
-        const val BAR_CHART = MessageID.bar_chart
+        const val BAR_CHART = 100
 
-        const val LINE_GRAPH = MessageID.line_graph
+        const val LINE_GRAPH = 101
 
         val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH)
 
-        const val SCORE = MessageID.score
+        const val SCORE = 200
 
-        const val DURATION = MessageID.total_duration
+        const val DURATION = 201
 
-        const val AVG_DURATION = MessageID.average_duration
+        const val AVG_DURATION = 202
 
-        const val COUNT_ACTIVITIES = MessageID.count_activity
+        const val COUNT_ACTIVITIES = 203
 
         val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)
 
-        const val DAY = MessageID.xapi_day
+        const val DAY = 300
 
-        const val WEEK = MessageID.xapi_week
+        const val WEEK = 301
 
-        const val MONTH = MessageID.xapi_month
+        const val MONTH = 302
 
-        const val CONTENT_ENTRY = MessageID.xapi_content_entry
+        const val CONTENT_ENTRY = 304
 
         //TODO to be put back when varuna merges his branch
         // private const val LOCATION = MessageID.xapi_location
 
-        const val GENDER = MessageID.xapi_gender
+        const val GENDER = 306
 
         val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER)
 

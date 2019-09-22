@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.lib.db.entities.XapiReportOptions
 import org.junit.Assert
 import org.junit.Test
 
