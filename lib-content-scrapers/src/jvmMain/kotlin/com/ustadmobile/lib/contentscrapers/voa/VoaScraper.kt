@@ -143,20 +143,20 @@ class VoaScraper : Runnable {
         val voaDirectory = File(destinationDir, lessonId)
         val modifiedFile = File(destinationDir, lessonId + ScraperConstants.LAST_MODIFIED_TXT)
         voaDirectory.mkdirs()
-        var isUpdated = false
-        try {
+        var isUpdated: Boolean
+        isUpdated = try {
             val element = driver.findElementByCssSelector("script[type*=json]")
             val scriptText = driver.executeScript("return arguments[0].innerText;", element) as String
 
             val response = gson.fromJson(scriptText, VoaResponse::class.java)
 
             val dateModified = ContentScraperUtil.parseServerDate(response.dateModified!!.replace("Z", "").replace(" ", "T"))
-            isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, dateModified.toString())
+            ContentScraperUtil.isFileContentsUpdated(modifiedFile, dateModified.toString())
 
         } catch (ignored: NoSuchElementException) {
 
             val modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"))
-            isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, modified.toString())
+            ContentScraperUtil.isFileContentsUpdated(modifiedFile, modified.toString())
 
         }
 
