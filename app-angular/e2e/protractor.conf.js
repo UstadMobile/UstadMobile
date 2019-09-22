@@ -16,7 +16,6 @@ exports.config = {
       args: ["--disable-gpu", "--window-size=1024x768"]
     }
   },
-  ignoreUncaughtExceptions: true,
   directConnect: true,
   baseUrl: 'http://localhost:4200/',
   framework: 'jasmine',

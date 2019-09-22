@@ -1,29 +1,6 @@
-import { browser, element, by } from 'protractor';
+import { browser, element, by , protractor} from 'protractor';
 
 export const sleepTime = 500;
-const fs = require("fs")
-const path = require("path")
-const https = require("https")
-
-export class TestSetup{
-  constructor(){}
-  
-  setupDb(){
-    https.get("http://localhost:8087/UmAppDatabase/clearAllTables", response => {
-      response.on('data', () => {
-        console.log("data received")
-      });
-
-    }).on("error", (err) => {
-      console.log("Error: " + err.message);
-    });
-
-  }
-
-  insertContentEntries(){
-    //entriesRaw.forEach(entry)
-  }
-}
 
 export class HomePage{
 
@@ -32,7 +9,7 @@ export class HomePage{
   baseUrl = "http://localhost:";
   launch() {
     browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid=1311236&test=true") as Promise<any>;
-    return new ElementUtils().launchAsync()
+    return browser.waitForAngularEnabled(true)
   }
 
   getPage() {
@@ -79,7 +56,7 @@ export class ReportDetails{
 
   views = {"dashboard":"ReportDashboard"}
   launch() {
-    browser.get(browser.baseUrl+'/Home/ReportPreview?entryid=0&test=true&options=%7B"chartType":100,"yAxis":200,"xAxis":301,"subGroup":306,"whoFilterList":%5B%5D,"didFilterList":%5B%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
+    browser.get(browser.baseUrl+'/Home/ReportPreview?entryid=0&options=%7B"chartType":100,"yAxis":200,"xAxis":300,"subGroup":302,"whoFilterList":%5B1%5D,"didFilterList":%5B201%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
     return new ElementUtils().launchAsync()
   }
   getPage() {
@@ -115,12 +92,14 @@ export class ElementUtils{
 
   launchAsync(){
     var currentTitle;
+    var pageDetails = this.getPageElements()
     return browser.getTitle().then(function(title) {
       currentTitle = title;
     }).then(function() {
             browser.wait(function() {
                 return browser.getTitle().then(function (title) {
-                    return title !== currentTitle;
+                  //console.log("meeeeet", title == currentTitle , expect(pageDetails.componentHome.menus.count()).toBeGreaterThan(0))
+                    return title == currentTitle;
                 });
             });
         }
