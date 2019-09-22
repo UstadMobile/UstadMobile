@@ -2,16 +2,20 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentCategorySchema.Companion.TABLE_ID
-
+import kotlinx.serialization.Serializable
 
 
 /**
  * Represents a schema (list) of categories.
  */
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
+@Serializable
 class ContentCategorySchema() {
 
     @PrimaryKey(autoGenerate = true)
@@ -21,13 +25,13 @@ class ContentCategorySchema() {
 
     var schemaUrl: String? = null
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var contentCategorySchemaLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var contentCategorySchemaMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var contentCategorySchemaLastChangedBy: Int = 0
 
     override fun equals(other: Any?): Boolean {

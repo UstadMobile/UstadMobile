@@ -125,7 +125,7 @@ class TestContainerDownloadRoute {
             httpClient.close()
 
             val downloadedBytes = FileInputStream(saveTmpFile).readBytes()
-            val containerEntryBytes = containerManager.getInputStream(firstContainerEntry).readBytes()
+            val containerEntryBytes = FileInputStream(firstContainerEntry.containerEntryFile!!.cefPath!!).readBytes()
 
             Assert.assertArrayEquals("Bytes download = bytes from files",containerEntryBytes,
                     downloadedBytes)

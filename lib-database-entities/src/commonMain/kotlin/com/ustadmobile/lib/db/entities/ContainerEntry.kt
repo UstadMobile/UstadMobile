@@ -3,19 +3,15 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
+import kotlinx.serialization.Serializable
 
-@UmEntity
 @Entity
+@Serializable
 open class ContainerEntry() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var ceUid: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var ceContainerUid: Long = 0
 

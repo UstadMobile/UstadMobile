@@ -4,21 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * Core module build script : see buildconfig.core.default.gradle for configuration
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
-        classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
-    }
-}
 
+group rootProject.group
+version rootProject.version
 
 apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
@@ -72,44 +60,48 @@ task copyTestResources(type: Copy) {
  */
 task prepareLocale {
     inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
-    if(!outFile.parentFile.exists()) {
-        outFile.parentFile.mkdirs()
-    }
-    outFile.text = ''
-    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
-    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
-    outFile << 'object MessageID{\n\n'
 
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
 
-    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
+    doFirst {
+        File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
+        if(!outFile.parentFile.exists()) {
+            outFile.parentFile.mkdirs()
+        }
+        outFile.text = ''
+        outFile << 'package com.ustadmobile.core.generated.locale\n\n'
+        outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+        outFile << 'object MessageID{\n\n'
 
-            if (!messageIds.containsKey(msgName)) {
-                Integer value;
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
+        Map<String, Integer> messageIds = new HashMap<>()
+        AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+
+        rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+            xmlDoc.string.each() { str ->
+                String msgName = str.@name
+
+                if (!messageIds.containsKey(msgName)) {
+                    Integer value;
+                    if (str.attributes().get("value") != null) {
+                        value = new Integer(str.attributes().get("value"))
+                    } else {
+                        value = new Integer(messageIdGenerator.getAndIncrement())
+                    }
+
+                    messageIds.put(msgName, value)
                 }
-
-                messageIds.put(msgName, value)
             }
         }
-    }
 
-    Iterator<String> nameIterator = messageIds.keySet().iterator()
+        Iterator<String> nameIterator = messageIds.keySet().iterator()
 
-    while (nameIterator.hasNext()) {
-        String strName = nameIterator.next()
-        Integer value = messageIds.get(strName)
-        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+        while (nameIterator.hasNext()) {
+            String strName = nameIterator.next()
+            Integer value = messageIds.get(strName)
+            outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
+        }
+        outFile << '}'
     }
-    outFile << '}'
 }
 
 
@@ -118,41 +110,44 @@ tasks.whenTaskAdded { task ->
         task.dependsOn(copyTestResources)
     }
 
-    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble") || task.name.endsWith("Jar") || task.name.startsWith("build")) {
         task.dependsOn(prepareLocale)
     }
 }
 
+gradle.projectsEvaluated {
+    preBuild.dependsOn(prepareLocale)
+}
+
+
 
 kotlin {
 
-
-    targets {
-        fromPreset(presets.jvm, 'jvm') {
-            compilations.main.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
-
-            compilations.test.kotlinOptions {
-                // Setup the Kotlin compiler options for the 'main' compilation:
-                jvmTarget = "$version_kotlin_jvmTarget"
-            }
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
 
-        fromPreset(presets.android, 'android')
-        fromPreset(presets.js, 'js') {
-            compilations.main.kotlinOptions {
-                metaInfo = true
-                sourceMap = true
-                moduleKind = "commonjs"
-                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
-            }
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
         }
-        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
-        // the project to avoid it being seen as an extra jvm variant
-        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
+
+    android()
+
+    js("js") {
+        nodejs()
+
+
+        compilations.main.kotlinOptions {
+            metaInfo = true
+            sourceMap = true
+            moduleKind = "commonjs"
+        }
+    }
+
 
 
     sourceSets {
@@ -224,6 +219,9 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+
                 /*
                   For this to work in the IDE, these need to be API instead of implementation
                  */
@@ -231,6 +229,8 @@ kotlin {
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
                 api project(":lib-database-mpp")
+                api project(":lib-test-common")
+                api project(":app-ktor-server")
 
                 // 5/June/2019 - Unfortunately, Android Studio won't load these depnendencies
                 // of sharedse when running tests in the IDE, which is why we have them here too.
@@ -242,10 +242,6 @@ kotlin {
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -273,7 +269,7 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
@@ -310,8 +306,6 @@ kotlin {
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-
-
             }
         }
 
@@ -327,10 +321,10 @@ jacoco {
  * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
  */
 project.afterEvaluate {
-    def testTaskName = "jvmJacocoTestReport"
+    def testTaskName = "jvmTest"
 
     // Create gradle task
-    task "jvm" (type:JacocoReport, dependsOn: "$testTaskName") {
+    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
         group = "Reporting"
         description = "Generate Jacoco coverage reports on the common module build."
 
@@ -358,11 +352,6 @@ project.afterEvaluate {
     }
 }
 
-
-
-def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
-Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
-
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
     compileClasspath
@@ -373,96 +362,6 @@ ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig
 if (rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
-
-
-
-/**
- * Generate locale json file whic maps code to actual string
- */
-task prepareWebLocale{
-    File outFile = null
-    if(!file(translationsOutPath).exists()){
-        file(translationsOutPath).mkdirs()
-    }
-
-    Map<String, Integer> messageIds = new HashMap<>()
-    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
-    def localeCode = "en"
-    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
-
-        Map<String, String> idToTranslationMap = new HashMap<>()
-
-        //TODO: this needs to be
-        if(file.absolutePath.split("-").size() > 1){
-            localeCode = file.absolutePath.split("-")[1].split("/")[0]
-        }
-        File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
-        if(tempFile.exists()){
-            tempFile.delete()
-        }
-        outFile = tempFile
-        if(!outFile.getParentFile().exists()) {
-            outFile.getParentFile().mkdirs()
-        }
-
-        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        def counter = 0
-        def terminator = ","
-        def fileContent = "{\n\n"
-        def value = 0
-        xmlDoc.string.each() { str ->
-            String msgName = str.@name
-            String msgValue = str
-            if (!messageIds.containsKey(msgName)) {
-                if (str.attributes().get("value") != null) {
-                    value = new Integer(str.attributes().get("value"))
-                } else {
-                    value = new Integer(messageIdGenerator.getAndIncrement())
-                }
-                messageIds.put(msgName, value as Integer)
-            }else{
-                value = messageIds.get(msgName)
-            }
-
-            if(counter == xmlDoc.string.size() -1){
-                terminator = ""
-            }
-
-            msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
-            fileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
-
-            idToTranslationMap.put(msgName,msgValue)
-            languageMapOfMaps.put(localeCode, idToTranslationMap)
-
-            counter++
-        }
-
-        fileContent <<=  '}'
-        fileContent <<= ""
-        outFile << fileContent
-    }
-
-}
-
-/**
- * Generate default XLF file to be used for other translation
- */
-task generateDefaultLocaleXlf(type: Exec){
-    def angularModulePath = "${rootDir.absolutePath}/app-angular"
-    commandLine 'npm', '--prefix', angularModulePath, 'run','um-translate'
-}
-generateDefaultLocaleXlf.dependsOn(prepareWebLocale)
-
-/**
- * Generate the rest of the all supported languages
- */
-task generateOtherLocaleXlf{
-    rootProject.fileTree(dir: translationsOutPath,include: "*.xlf").each() { File file ->
-       def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        xmlDoc.toString()
-    }
-}
-generateOtherLocaleXlf.dependsOn(generateDefaultLocaleXlf)
 
 
 publishing {

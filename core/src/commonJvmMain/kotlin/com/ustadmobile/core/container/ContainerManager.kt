@@ -161,17 +161,20 @@ actual class ContainerManager actual constructor(container: Container,
 
     actual suspend fun linkExistingItems(itemsToDownload: List<ContainerEntryWithMd5>): List<ContainerEntryWithMd5> {
         mutex.withLock {
+            val existingEntryMd5List = pathToEntryMap.values.map { it.containerEntryFile!!.cefMd5 }
             val md5ToFilesToEntryToDownloadMap = itemsToDownload.map { it.cefMd5!! to it }.toMap()
             val existingEntryFiles = db.containerEntryFileDao.findEntriesByMd5Sums(
                     md5ToFilesToEntryToDownloadMap.keys.toList())
-            val md5ToExistingEntriesMap = existingEntryFiles.map { it.cefMd5 to it }.toMap()
-            val itemsToDownloadPartitioned = itemsToDownload.partition { it.cefMd5 in md5ToExistingEntriesMap.keys }
+            val md5ToExistingEntryFilesMap = existingEntryFiles.map { it.cefMd5 to it }.toMap()
+            val itemsToDownloadPartitioned = itemsToDownload.partition {
+                it.cefMd5 in existingEntryMd5List || it.cefMd5 in md5ToExistingEntryFilesMap.keys }
 
             //these are the items that we already have here after searching by md5
-            val linksToInsert = itemsToDownloadPartitioned.first.map {
-                ContainerEntryWithContainerEntryFile(md5ToFilesToEntryToDownloadMap[it.cefMd5]!!.cePath!!,
-                        container, md5ToExistingEntriesMap[it.cefMd5]!!)
+            var linksToInsert = itemsToDownloadPartitioned.first.map {
+                ContainerEntryWithContainerEntryFile(it.cePath!!,container,
+                        md5ToExistingEntryFilesMap[it.cefMd5]!!)
             }
+            linksToInsert = linksToInsert.filter { it.containerEntryFile!!.cefMd5 !in existingEntryMd5List }
             db.containerEntryDao.insertAndSetIds(linksToInsert)
             pathToEntryMap.putAll(linksToInsert.map { it.cePath!! to it }.toMap())
 

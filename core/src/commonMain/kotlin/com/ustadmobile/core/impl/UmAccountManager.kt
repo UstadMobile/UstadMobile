@@ -2,6 +2,8 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.asRepository
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -10,6 +12,8 @@ object UmAccountManager {
 
     @Volatile
     private var activeAccount: UmAccount? = null
+
+    private var activeAccountRepository: UmAppDatabase? = null
 
     private const val PREFKEY_PERSON_ID = "umaccount.personid"
 
@@ -71,18 +75,23 @@ object UmAccountManager {
     }
 
     @JsName("getRepositoryForActiveAccount")
+    @Synchronized
     fun getRepositoryForActiveAccount(context: Any): UmAppDatabase {
-        if (activeAccount == null)
-            /*return UmAppDatabase.getInstance(context).getRepository(
-                    UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                            "http://localhost", context), "")*/
-            return UmAppDatabase.getInstance(context)
+        val serverUrl = UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
+                "http://localhost", context) ?: "http://localhost"
 
-        val activeAccount = getActiveAccount(context)
-      /*  return UmAppDatabase.getInstance(context).getRepository(activeAccount!!.endpointUrl,
-                activeAccount.auth)*/
+        val db = UmAppDatabase.getInstance(context)
+        if(activeAccountRepository == null) {
+            if (activeAccount == null) {
+                activeAccountRepository = db.asRepository(serverUrl, "", defaultHttpClient())!!
+            }else {
+                activeAccountRepository = db.asRepository(serverUrl, "", defaultHttpClient())!!
+            }
 
-        return UmAppDatabase.getInstance(context)
+
+        }
+
+        return activeAccountRepository!!
     }
 
     fun getActiveEndpoint(context: Any): String? {

@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * These tests ensure that the syncable primary key mechanism is working as expected on Android.
- * The syncable primary keys are handled by generated SQLite database triggers.
+ * The syncable primary keys are handled by generated SQLite umDatabase triggers.
  */
 class TestSyncablePkAndroid {
 

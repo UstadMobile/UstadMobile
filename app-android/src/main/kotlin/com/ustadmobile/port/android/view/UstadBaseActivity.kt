@@ -13,7 +13,9 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.MenuItem
 import android.view.View
+import android.webkit.WebView
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -38,6 +40,7 @@ import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 import androidx.core.app.ActivityCompat
+import com.ustadmobile.core.view.UstadViewWithProgress
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
@@ -48,7 +51,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener, UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -58,6 +61,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @return
      */
     protected lateinit var umToolbar: Toolbar
+
+    protected lateinit var baseProgressBar: ProgressBar
 
     /**
      * Currently running instance of NetworkManagerBleCommon
@@ -93,7 +98,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var permissions: Array<String>? = null
 
-    internal var selectedFileUri: Uri?= null
+    internal var selectedFileUri: Uri? = null
 
     internal var isOpeningFilePickerOrCamera = false
 
@@ -116,8 +121,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
             bleServiceBound = true
-            if(networkManagerBle != null){
-                UstadMobileSystemImpl.instance.networkManager = networkManagerBle
+            if (networkManagerBle != null) {
+                instance.networkManager = networkManagerBle
                 onBleNetworkServiceBound(networkManagerBle!!)
             }
             runWhenServiceConnectedQueue.setReady(true)
@@ -142,6 +147,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        //enable webview debugging
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         //bind to the LRS forwarding service
         instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
@@ -189,6 +199,12 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     }
 
+    override fun showBaseProgressBar(showProgress: Boolean) {
+        runOnUiThread {
+            baseProgressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
+        }
+    }
+
     /**
      * Display the snackbar at the bottom of the page
      *
@@ -199,7 +215,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     override fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
         val snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG)
         val impl = instance
-        if(actionMessageId != 0) {
+        if (actionMessageId != 0) {
             snackbar.setAction(impl.getString(actionMessageId, this)) { action() }
             snackbar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
         }
@@ -257,6 +273,15 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         supportActionBar!!.setHomeButtonEnabled(true)
     }
 
+    protected fun setProgressBar() {
+        baseProgressBar = findViewById(R.id.progressBar)
+        baseProgressBar.isIndeterminate = true
+        baseProgressBar.scaleY = 3f
+    }
+
+    protected fun setProgressBarDeterminate(isDeterminate: Boolean) {
+        baseProgressBar.isIndeterminate = !isDeterminate
+    }
 
     protected fun setBaseController(baseController: UstadBaseController<*>) {
         this.baseController = baseController
@@ -308,7 +333,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode == RESULT_OK){
+        if (resultCode == RESULT_OK) {
             if (requestCode == FILE_SELECTION_REQUEST_CODE) {
                 selectedFileUri = data?.data
                 runAfterFileSelection?.run()
@@ -431,10 +456,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
-    private fun permissionGranted(permissions: Array<String>) : Boolean{
+    private fun permissionGranted(permissions: Array<String>): Boolean {
         val requiredPermissions: MutableList<String> = mutableListOf<String>()
-        for(permission in permissions){
-            if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 requiredPermissions.add(permission);
             }
         }
@@ -453,7 +478,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                     allPermissionGranted = allPermissionGranted and (result == PackageManager.PERMISSION_GRANTED)
                 }
 
-                if (!allPermissionGranted && permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE) ) {
+                if (!allPermissionGranted && permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     afterPermissionMethodRunner!!.run()
                     afterPermissionMethodRunner = null
                 }
@@ -470,9 +495,9 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     /**
      * Stop current runing notification fore ground service
      */
-    open fun stopForeGroundService(jobId: Long, cancel: Boolean){
-        val notificationServiceIntent = Intent(this,DownloadNotificationService::class.java)
-        notificationServiceIntent.action = if(cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
+    open fun stopForeGroundService(jobId: Long, cancel: Boolean) {
+        val notificationServiceIntent = Intent(this, DownloadNotificationService::class.java)
+        notificationServiceIntent.action = if (cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
         else DownloadNotificationService.ACTION_PAUSE_DOWNLOAD
         notificationServiceIntent.putExtra(DownloadNotificationService.JOB_ID_TAG, jobId)
         val servicePendingIntent = PendingIntent.getService(applicationContext,

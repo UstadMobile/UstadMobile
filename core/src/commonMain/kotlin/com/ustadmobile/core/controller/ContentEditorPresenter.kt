@@ -2,11 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
 
 expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?>,
                                     view: ContentEditorView, storage: String?,
+                                    database : UmAppDatabase,repository : UmAppDatabase,
                                     mountContainer: suspend (Long) -> String)
     : ContentEditorPresenterCommon{
 

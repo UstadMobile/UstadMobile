@@ -6,7 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.defaultHttClient
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
+import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
@@ -60,8 +61,7 @@ class DownloadJobItemRunner
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
  private val numConcurrentEntryDownloads: Int = 4) {
 
-    //TODO: This should be converted to use openDownloadJobItemManager
-    private val downloadJobItemManager: DownloadJobItemManager = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)!!
+    private lateinit var downloadJobItemManager: DownloadJobItemManager
 
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
@@ -230,6 +230,7 @@ class DownloadJobItemRunner
 
 
     suspend fun download() {
+        downloadJobItemManager = networkManager.openDownloadJobItemManager(downloadItem.djiDjUid)!!
         println("Download started for  ${downloadItem.djiDjUid}")
         runnerStatus.value = JobStatus.RUNNING
         updateItemStatus(JobStatus.RUNNING)
@@ -361,7 +362,7 @@ class DownloadJobItemRunner
                 downloadEndpoint = currentNetworkNode!!.endpointUrl
             }
 
-            currentHttpClient = (if (networkManager.localHttpClient != null) networkManager.localHttpClient else defaultHttClient())!!
+            currentHttpClient = (if (networkManager.localHttpClient != null) networkManager.localHttpClient else defaultHttpClient())!!
 
 
             history.url = downloadEndpoint
@@ -420,11 +421,13 @@ class DownloadJobItemRunner
                                         `is`?.close()
                                     }
 
+
                                     containerManager.addEntries(
                                             ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
                                                     dontUpdateTotals = true),
                                             DownloadedEntrySource(entry.cePath!!, destFile,
-                                                    resumableDownload.md5Sum, destFile.getAbsolutePath(), compression))
+                                                    Base64Coder.decodeToByteArray(entry.cefMd5!!),
+                                                    destFile.getAbsolutePath(), compression))
                                 } else {
                                     numFailures.incrementAndGet()
                                 }

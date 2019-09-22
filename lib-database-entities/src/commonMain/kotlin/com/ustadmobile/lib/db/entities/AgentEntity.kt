@@ -2,14 +2,18 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.AgentEntity.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
+@Serializable
 class AgentEntity {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey(autoGenerate = true)
     var agentUid: Long = 0
 
@@ -25,13 +29,13 @@ class AgentEntity {
 
     var agentPersonUid: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var statementMasterChangeSeqNum: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var statementLocalChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var statementLastChangedBy: Int = 0
 
     companion object {

@@ -23,10 +23,10 @@ abstract class EntryStatusResponseDao {
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(responses: List<EntryStatusResponse>): Array<Long>
+    abstract fun insertList(responses: List<EntryStatusResponse>): Array<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(response: EntryStatusResponse): Long
+    abstract fun replace(response: EntryStatusResponse): Long
 
     @Query("DELETE FROM EntryStatusResponse")
     abstract suspend fun deleteAllAsync()

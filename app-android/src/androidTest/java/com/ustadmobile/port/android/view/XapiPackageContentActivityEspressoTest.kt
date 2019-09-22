@@ -4,11 +4,11 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.web.assertion.WebViewAssertions.webContent
 import androidx.test.espresso.web.matcher.DomMatchers.hasElementWithId
 import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -26,7 +26,6 @@ class XapiPackageContentActivityEspressoTest {
     @get:Rule
     var mActivityRule = IntentsTestRule(XapiPackageContentActivity::class.java, false, false)
 
-
     private var db: UmAppDatabase? = null
 
     private var repo: UmAppDatabase? = null
@@ -39,7 +38,7 @@ class XapiPackageContentActivityEspressoTest {
     @Throws(IOException::class)
     fun setup() {
         db = UmAppDatabase.getInstance(context)
-        repo = db //db!!.getRepository("http://localhost/dummy/", "")
+        repo = db //db!!.getUmRepository("http://localhost/dummy/", "")
         db!!.clearAllTables()
 
         val storageDir = ContextCompat.getExternalFilesDirs(

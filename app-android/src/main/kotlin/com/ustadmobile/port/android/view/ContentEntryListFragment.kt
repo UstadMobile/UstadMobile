@@ -20,15 +20,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.db.dao.ContentEntryDao_Repo
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
-import com.ustadmobile.lib.db.entities.DistinctCategorySchema
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -174,8 +173,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             recyclerAdapter!!.addListeners()
             recyclerAdapter!!.setEmptyStateListener(this)
 
+            val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
-                    bundleToMap(arguments), this)
+                    bundleToMap(arguments), this, umRepoDb.contentEntryDao)
             entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
         }
     }
@@ -185,10 +185,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         this.contentEntryListener = null
     }
 
-    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>) {
+    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .contentEntryDaoBoundaryCallbacks.getChildrenByParentUidWithCategoryFilter(entryProvider)
+        val data = LivePagedListBuilder(entryProvider, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
-        val data = LivePagedListBuilder(entryProvider, 20).build()
-        data.observe(this, Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
+        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> { recyclerAdapter!!.submitList(it) })
 
         recyclerView!!.adapter = recyclerAdapter
     }

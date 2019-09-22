@@ -7,6 +7,9 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContainerDao
+import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
@@ -26,8 +29,10 @@ import kotlin.text.Charsets.UTF_8
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
                                                        view: ContentEditorView, val storage: String?,
+                                                       val database : UmAppDatabase,
+                                                       private val repository : UmAppDatabase ,
                                                        mountContainer: suspend (Long) -> String)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
+    :ContentEditorPresenterCommon(context,arguments,view,storage,database,mountContainer){
 
 
     private var nextNavItem: EpubNavItem? = null
@@ -49,18 +54,18 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         container.containerContentEntryUid = contentEntryUid
         container.lastModified = System.currentTimeMillis()
         container.mimeType = MIME_TYPE_DOCUMENT
-        container.containerUid = umAppRepo.containerDao.insert(container)
+        container.containerUid = repository.containerDao.insert(container)
         containerUid = container.containerUid
 
-        var status = umDatabase.contentEntryStatusDao.findByUidAsync(contentEntryUid)
+        var status = database.contentEntryStatusDao.findByUidAsync(contentEntryUid)
         if (status == null) {
             status = ContentEntryStatus(contentEntryUid, true,
                     container.fileSize)
             status.locallyAvailable = true
-            umDatabase.contentEntryStatusDao.insert(status)
+            database.contentEntryStatusDao.insert(status)
         }
         documentPath = getDocumentPath(storage)
-        containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath)
+        containerManager = ContainerManager(container, database, repository, documentPath)
         val tmpFile: File = File.createTempFile(TEMP_FILE_PREFIX, ".zip")
         try {
             FileOutputStream(tmpFile).use{
@@ -78,7 +83,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             val pageTitle = impl.getString(MessageID.content_untitled_page, context)
             val pageAdded = addPageToDocument(pageTitle)
             if(pageAdded){
-                val contentEntry = umAppRepo.containerDao.getMostRecentContainerForContentEntryAsync(contentEntryUid)
+                val contentEntry = repository.containerDao.getMostRecentContainerForContentEntryAsync(contentEntryUid)
                 if(contentEntry != null){
                     mountedFileAccessibleUrl = mountContainer(contentEntry.containerUid)
                 }
@@ -94,7 +99,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         containerUid = container.containerUid
         documentPath = getDocumentPath(storage)
         mountedFileAccessibleUrl = mountContainer(containerUid)
-        containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath)
+        containerManager = ContainerManager(container, database, repository, documentPath)
         return  mountedFileAccessibleUrl != null
     }
 
@@ -145,9 +150,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         try {
             if (updateOpfMetadataInfo(documentTitle, description,
                             if (isNewDocument) UUID.randomUUID().toString() else null)) {
-                val entry = umDatabase.contentEntryDao.findByEntryId(contentEntryUid)!!
+                val entry = database.contentEntryDao.findByEntryId(contentEntryUid)!!
                 entry.title = documentTitle
-                umDatabase.contentEntryDao.update(entry)
+                database.contentEntryDao.update(entry)
                 return documentTitle
             }
         } catch (e: IOException) {

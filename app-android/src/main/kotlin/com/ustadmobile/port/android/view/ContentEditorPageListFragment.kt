@@ -26,9 +26,11 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.ContentEditorPageActionDelegate
 import com.ustadmobile.core.controller.ContentEditorPageListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.port.android.umeditor.UmOnStartDragListener
@@ -53,6 +55,8 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
     private var adapter: PageListAdapter? = null
 
     private var presenter: ContentEditorPageListPresenter? = null
+
+    private val umDb: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(activity!!)
 
     private var isScrollDirectionUp = false
 
@@ -164,7 +168,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
     fun setUmFileHelper(pageDelegate: ContentEditorPageActionDelegate) {
         adapter = PageListAdapter(this)
         presenter = ContentEditorPageListPresenter(this,
-                UMAndroidUtil.bundleToMap(arguments), this, pageDelegate)
+                UMAndroidUtil.bundleToMap(arguments), this,umDb.contentEntryDao, pageDelegate)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 

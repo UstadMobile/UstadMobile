@@ -25,13 +25,13 @@ abstract class NetworkNodeDao {
     abstract fun findNodeByBluetoothAddress(bluetoothAddress: String): NetworkNode?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(node: NetworkNode): Long
+    abstract fun replace(node: NetworkNode): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertAsync(node: NetworkNode): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(nodeList: List<NetworkNode>): Array<Long>
+    abstract fun insertList(nodeList: List<NetworkNode>): Array<Long>
 
     @Update
     abstract fun update(node: NetworkNode)
@@ -77,13 +77,11 @@ abstract class NetworkNodeDao {
     abstract fun getEndpointUrlByGroupSsid(ssid: String): String?
 
     @Transaction
-    open suspend fun updateNodeLastSeen(knownNodes: MutableMap<String, Long>) {
+    open suspend fun updateNodeLastSeen(knownNodes: Map<String, Long>) {
         val nodeIterator = knownNodes.entries.iterator()
         while (nodeIterator.hasNext()) {
             val nodeUpdates = nodeIterator.next()
             updateLastSeenAsync(nodeUpdates.key, nodeUpdates.value)
-            nodeIterator.remove()
-
         }
     }
 

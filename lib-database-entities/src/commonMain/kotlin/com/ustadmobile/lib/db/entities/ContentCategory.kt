@@ -2,8 +2,12 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -11,9 +15,10 @@ import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
  * * "level1" in the schema of "African Storybooks Reading Level"). This allows us to present the user
  * * with a dropdown list for each different schema.
  */
-@UmEntity(tableId = TABLE_ID)
 @Entity
+@SyncableEntity(tableId = TABLE_ID)
 //shortcode = ctnCat
+@Serializable
 class ContentCategory() {
 
     @PrimaryKey(autoGenerate = true)
@@ -23,13 +28,13 @@ class ContentCategory() {
 
     var name: String? = null
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var contentCategoryLocalChangeSeqNum: Long = 0
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var contentCategoryMasterChangeSeqNum: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var contentCategoryLastChangedBy: Int = 0
 
     override fun equals(other: Any?): Boolean {

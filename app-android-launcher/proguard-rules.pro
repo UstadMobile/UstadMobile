@@ -24,7 +24,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# database entities
+# umDatabase entities
 -keep public class com.ustadmobile.lib.db.entities.**{
        *;
 }

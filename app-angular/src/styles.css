@@ -51,8 +51,16 @@ main {
   padding-top: 16px !important;
 }
 
+.default-padding-bottom{
+  padding-bottom: 16px !important;
+}
+
 .default-margin-top{
   margin-top: 20px !important;
+}
+
+.default-margin-bottom{
+  margin-bottom: 20px !important;
 }
 
 .top-nav-height {
@@ -73,12 +81,28 @@ main {
 }
 
 
-/*
-  #Device = laptop
-  #Screen = 1025px to higher resolution desktops
-*/
-@media (min-width: 1025px) {
+.avatar{
+  padding-left: 0 !important;
+}
+.collection-item{
+  padding-right: 0 !important;
+}
 
+.collection-rtl{
+ padding-right: 0 !important;
+}
+ul{
+  padding-inline-start: 0 !important;
+}
+
+
+
+/* 
+  ##Device = Tablets, Ipads (portrait)
+  ##Screen = B/w 768px to 1024px
+*/
+
+@media (min-width: 769px){
   header,
   main,
   footer {
@@ -97,28 +121,57 @@ main {
 
   }
 
-}
-
-/*
-  #Device = Desktop
-*/
-
-@media screen and (min-width: 1400px) {
-  main {
-    margin-top: -10px;
-    background: #ffffff;
-    padding-bottom: 20px;
-    min-height: 900px !important;
+  .brand-logo-ltr{
+    margin-top: 1% !important;
+    left: 1% !important;
   }
 
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: 0 !important;
+  }
+
+  .title-label.empty {
+    font-weight: 800;
+    font-size: 2.2em;
+  }
+  
+}
+
+/* 
+  ##Device = Tablets, Ipads (landscape)
+  ##Screen = B/w 768px to 1024px
+*/
+
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  
+  
   header,
   main,
   footer {
-    padding-left: 350px;
+    padding-left: 0px;
   }
 
   .content-data {
-    min-height: 700px !important;
+    min-height: 400px !important;
+  } 
+
+  .empty-state-view {
+    background: white;
+    min-height: 520px !important;
+    padding-top: 20% !important;
+    padding-bottom: 100px;
+
+  }
+
+  .brand-logo-ltr{
+    margin-top: 1% !important;
+    left: 33% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: -80% !important;  
   }
 
   .title-label.empty {
@@ -127,14 +180,29 @@ main {
   }
 }
 
-
-/*
-  #Device = Most of the Smartphones Mobiles (Portrait)
-  #Screen = B/w 320px to 479px
+/* 
+  ##Device = Low Resolution Tablets, Mobiles (Landscape)
+  ##Screen = B/w 481px to 767px
 */
 
-@media (min-width: 320px) and (max-width: 1024px) {
+@media (min-width: 481px) and (max-width: 767px) {
+  .brand-logo-ltr{
+    margin-top: 1% !important;
+    left: 90% !important;
+  }
 
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: -90% !important;  
+  }
+}
+
+/* 
+  ##Device = Most of the Smartphones Mobiles (Portrait)
+  ##Screen = B/w 359px to 479px
+*/
+
+@media (min-width: 359px) and (max-width: 480px) {
   header,
   main,
   footer {
@@ -148,4 +216,46 @@ main {
     padding-bottom: 50px;
   }
 
+  .brand-logo-ltr{
+    margin-top: 4% !important;
+    left: 85% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 4% !important;
+    right: -70% !important;
+  }
+  
 }
+
+/* 
+  ##Device = Most of the Smartphones Mobiles (Portrait)
+  ##Screen = B/w 320px to 479px
+*/
+
+@media (min-width: 320px) and (max-width: 359px){
+  header,
+  main,
+  footer {
+    padding-left: 0;
+  }
+
+  .empty-state-view {
+    min-height: 200px !important;
+    background: white;
+    padding-top: 100px;
+    padding-bottom: 50px;
+  }
+
+  .brand-logo-ltr{
+    margin-top: 4% !important;
+    left: 98% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 4% !important;
+    right: -90% !important;
+  }
+  
+}
+

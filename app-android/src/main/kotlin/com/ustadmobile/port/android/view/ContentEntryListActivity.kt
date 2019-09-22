@@ -14,11 +14,13 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.sharedse.network.NetworkManagerBle
@@ -35,8 +37,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     lateinit var managerBle: NetworkManagerBle
 
-    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+    private var showControls = false
 
 
     private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
@@ -55,8 +56,11 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
 
+        showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+
         presenter = ContentEntryListPresenter(getContext(),
-                UMAndroidUtil.bundleToMap(intent.extras),   this)
+                UMAndroidUtil.bundleToMap(intent.extras), this)
         presenter!!.handleShowContentEditorOptios(showControls)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
@@ -79,6 +83,8 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         findViewById<View>(R.id.content_import_file).setOnClickListener(this)
 
         findViewById<View>(R.id.content_create_content).setOnClickListener(this)
+
+        findViewById<View>(R.id.content_import_link).setOnClickListener(this)
 
         val currentFrag = ContentEntryListFragment.newInstance(intent.extras!!)
         if (savedInstanceState == null) {
@@ -190,8 +196,9 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.create_new_content).isVisible = showOptions
-        menu.findItem(R.id.edit_category_content).isVisible = showOptions
+        val account = UmAccountManager.getActiveAccount(this)
+        menu.findItem(R.id.create_new_content).isVisible = showOptions && account != null && account.personUid != 0L
+        menu.findItem(R.id.edit_category_content).isVisible = showOptions && account != null && account.personUid != 0L
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -214,6 +221,8 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
                 presenter!!.handleContentCreation(CONTENT_IMPORT_FILE, true)
             view.id == R.id.content_create_content ->
                 presenter!!.handleContentCreation(CONTENT_CREATE_CONTENT, true)
+            view.id == R.id.content_import_link ->
+                presenter!!.handleContentCreation(CONTENT_IMPORT_LINK, true)
         }
         contentCreationOptionBehaviour!!.state = BottomSheetBehavior.STATE_COLLAPSED
     }

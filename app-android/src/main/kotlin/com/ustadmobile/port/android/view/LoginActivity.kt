@@ -9,6 +9,7 @@ import android.widget.TextView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 

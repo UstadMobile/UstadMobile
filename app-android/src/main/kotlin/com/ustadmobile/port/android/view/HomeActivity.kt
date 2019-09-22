@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -21,6 +22,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
@@ -30,15 +32,18 @@ import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
 
-    private var presenter: HomePresenter ? = null
+    private lateinit var presenter: HomePresenter
 
     private lateinit var downloadAllBtn: FloatingTextButton
+
+    private lateinit var profileImage: CircleImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +53,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
+        profileImage = findViewById(R.id.profile_image)
         setSupportActionBar(toolbar)
-        supportActionBar!!.setTitle(R.string.app_name)
+        findViewById<TextView>(R.id.toolBarTitle).setText(R.string.app_name)
 
         val viewPager = findViewById<ViewPager>(R.id.library_viewpager)
         viewPager.adapter = LibraryPagerAdapter(supportFragmentManager, this)
@@ -57,13 +63,21 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         tabLayout.setupWithViewPager(viewPager)
 
         downloadAllBtn.setOnClickListener {
-            presenter!!.handleDownloadAllClicked()
+            presenter.handleDownloadAllClicked()
         }
 
         viewPager.addOnPageChangeListener(this)
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
-        presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
+        profileImage.setOnClickListener {
+            presenter.handleClickPersonIcon()
+        }
+    }
+
+    override fun loadProfileIcon(profileUrl: String) {
+        UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp,profileImage)
     }
 
     override fun showDownloadAllButton(show: Boolean) {
@@ -71,10 +85,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val account = UmAccountManager.getActiveAccount(this)
         val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
                 AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
         menuInflater.inflate(R.menu.menu_home_activity, menu)
-        menu.findItem(R.id.create_new_content).isVisible = showControls
+        menu.findItem(R.id.create_new_content).isVisible = showControls && account != null && account.personUid != 0L
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -84,7 +99,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
     override fun onPageSelected(position: Int) {
-        presenter!!.handleShowDownloadButton(position == 0)
+        presenter.handleShowDownloadButton(position == 0)
     }
 
 

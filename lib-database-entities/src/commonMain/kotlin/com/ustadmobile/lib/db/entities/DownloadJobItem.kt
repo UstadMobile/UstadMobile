@@ -3,9 +3,7 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * A DownloadJobItem is a specific DownloadRun of a specific item. It corresponds with a given
@@ -13,11 +11,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * download run. Each DownloadSetItem can be downloaded multiple times (e.g. it can be downloaded,
  * updated, re-downloaded after the user deletes it, etc)
  */
-@UmEntity
 @Entity
+@Serializable
 open class DownloadJobItem() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var djiUid: Int = 0
 
@@ -35,13 +32,11 @@ open class DownloadJobItem() {
 
     var currentSpeed: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var timeStarted: Long = 0
 
     var timeFinished: Long = 0
 
-    @UmIndexField
     @ColumnInfo(index = true)
     var djiStatus: Int = 0
 

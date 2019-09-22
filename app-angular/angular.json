@@ -41,14 +41,8 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "baseHref": "/en/",
-              "i18nFile": "src/assets/locale/messages.xlf",
-              "i18nFormat": "xlf",
-              "i18nLocale": "en",
-              "i18nMissingTranslation": "error",
               "optimization": true,
               "outputHashing": "all",
-              "outputPath": "dist/en/",
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
@@ -64,91 +58,26 @@
                 }
               ]
             },
-            "production-en": {
-              "optimization": true,
-              "outputHashing": "all",
-              "outputPath": "dist/en/",
-              "sourceMap": false,
-              "extractCss": true,
-              "namedChunks": false,
+
+            "en": {
               "aot": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "10mb",
-                  "maximumError": "15mb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
-              "baseHref": "/en/",
+              "outputPath": "dist/en/",
               "i18nFile": "src/assets/locale/messages.en.xlf",
               "i18nFormat": "xlf",
               "i18nLocale": "en",
               "i18nMissingTranslation": "error"
             },
-            "production-ps": {
-              "optimization": true,
-              "outputHashing": "all",
-              "outputPath": "dist/ps/",
-              "sourceMap": false,
-              "extractCss": true,
-              "namedChunks": false,
+            "ps": {
               "aot": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "10mb",
-                  "maximumError": "15mb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
-              "baseHref": "/ps/",
+              "outputPath": "dist/ps/",
               "i18nFile": "src/assets/locale/messages.ps.xlf",
               "i18nFormat": "xlf",
               "i18nLocale": "ps",
               "i18nMissingTranslation": "error"
             },
-            "production-fa": {
-              "optimization": true,
-              "outputHashing": "all",
-              "outputPath": "dist/fa/",
-              "sourceMap": false,
-              "extractCss": true,
-              "namedChunks": false,
+            "fa": {
               "aot": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "10mb",
-                  "maximumError": "15mb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
-              "baseHref": "/fa/",
+              "outputPath": "dist/fa/",
               "i18nFile": "src/assets/locale/messages.fa.xlf",
               "i18nFormat": "xlf",
               "i18nLocale": "fa",
@@ -166,14 +95,14 @@
               "browserTarget": "sample:build:production"
             },
             "en": {
-              "browserTarget": "sample:build:production-en"
-            },
-            "fa": {
-              "browserTarget": "sample:build:production-fa"
+               "browserTarget": "sample:build:en"
             },
             "ps": {
-              "browserTarget": "sample:build:production-ps"
-            }
+              "browserTarget": "sample:build:ps"
+           },
+           "fa": {
+            "browserTarget": "sample:build:fa"
+         }
           }
         },
         "extract-i18n": {

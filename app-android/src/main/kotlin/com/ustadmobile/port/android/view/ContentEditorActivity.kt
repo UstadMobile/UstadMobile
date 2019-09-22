@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -160,7 +161,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
         embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
         presenter = ContentEditorPresenter(this, args!!, this,
-                args!![CONTENT_STORAGE_OPTION]) {
+                args!![CONTENT_STORAGE_OPTION], UmAppDatabase.getInstance(this),
+                UmAccountManager.getRepositoryForActiveAccount(this)) {
 
             val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
             val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
@@ -798,6 +800,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mWebView!!.addJavascriptInterface(
                 UmWebContentEditorInterface(this, this), "UmEditor")
         mWebView!!.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
     }
 
 

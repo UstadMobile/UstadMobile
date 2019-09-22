@@ -10,6 +10,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.WorkManager
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -30,8 +31,8 @@ class UmAppDatabaseSyncService : Service(), LifecycleObserver {
         super.onCreate()
         isInForeground = true
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG)
-        //dont pollute my logs
-        //UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+
+        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 

@@ -2,8 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * A DownloadJob represents a specific run of downloading a DownloadSet. The DownloadSet contains
@@ -11,11 +10,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * one DownloadJob that initially downloads it, and then further DownloadJobs when it is updated, when
  * new entries become available, etc.
  */
-@UmEntity
 @Entity
+@Serializable
 open class DownloadJob() {
 
-    @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
     var djUid: Int = 0
 

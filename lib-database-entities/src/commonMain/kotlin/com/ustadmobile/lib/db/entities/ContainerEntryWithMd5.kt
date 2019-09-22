@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
-class ContainerEntryWithMd5() : ContainerEntry() {
+import kotlinx.serialization.Serializable
 
-    var cefMd5: String? = null
-}
+@Serializable
+class ContainerEntryWithMd5(var cefMd5: String? = null) : ContainerEntry()
+

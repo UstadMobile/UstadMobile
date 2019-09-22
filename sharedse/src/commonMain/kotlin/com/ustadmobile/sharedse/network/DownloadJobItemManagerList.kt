@@ -56,11 +56,15 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
      */
     suspend fun openDownloadJobItemManager(downloadJobId: Int): DownloadJobItemManager? {
         return mutex.withLock {
-            val downloadJob = appDatabase.downloadJobDao.findByUid(downloadJobId) ?: return null
+            var downloadJobItemManager = getDownloadJobItemManager(downloadJobId)
+            if(downloadJobItemManager == null) {
+                val downloadJob = appDatabase.downloadJobDao.findByUid(downloadJobId) ?: return null
 
-            val downloadJobItemManager = DownloadJobItemManager(appDatabase, downloadJobId,
-                    coroutineDispatcher)
-            managerMap[downloadJob.djUid] = downloadJobItemManager
+                downloadJobItemManager = DownloadJobItemManager(appDatabase, downloadJobId,
+                        coroutineDispatcher)
+                managerMap[downloadJob.djUid] = downloadJobItemManager
+            }
+
             downloadJobItemManager
         }
     }

@@ -52,15 +52,27 @@ android {
     }
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group rootProject.group
+version rootProject.version
 
 kotlin {
-    targets {
-        fromPreset(presets.jvm, 'jvm')
-        fromPreset(presets.android, 'android')
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
 
-        //Uncomment the line below if you want autocomplete etc. to work in the IDE. Comment out again before building.
-        //fromPreset(presets.jvm, 'commonJvm')
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
     }
+
+    android()
+
 
     jvm {
         compilations.main.kotlinOptions {
@@ -100,6 +112,7 @@ kotlin {
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
             }
         }
 
@@ -200,7 +213,7 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"

@@ -2,10 +2,15 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
-@UmEntity(tableId = 45)
 @Entity
+@SyncableEntity(tableId = 45)
+@Serializable
 class Role() {
 
     @PrimaryKey(autoGenerate = true)
@@ -13,13 +18,13 @@ class Role() {
 
     var roleName: String? = null
 
-    @UmSyncMasterChangeSeqNum
+    @MasterChangeSeqNum
     var roleMasterCsn: Long = 0
 
-    @UmSyncLocalChangeSeqNum
+    @LocalChangeSeqNum
     var roleLocalCsn: Long = 0
 
-    @UmSyncLastChangedBy
+    @LastChangedBy
     var roleLastChangedBy: Int = 0
 
     //bit flags made of up PERMISSION_ constants

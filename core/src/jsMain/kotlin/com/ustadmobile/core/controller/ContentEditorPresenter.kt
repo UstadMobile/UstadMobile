@@ -2,13 +2,16 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
-                                                       view: ContentEditorView, storage: String?,
+                                                       view: ContentEditorView, val storage: String?,
+                                                       val database : UmAppDatabase,
+                                                       private val repository : UmAppDatabase,
                                                        mountContainer: suspend (Long) -> String)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
+    :ContentEditorPresenterCommon(context,arguments,view,storage,database,mountContainer){
 
 
     actual override suspend fun createDocument(title: String, description: String): Boolean {

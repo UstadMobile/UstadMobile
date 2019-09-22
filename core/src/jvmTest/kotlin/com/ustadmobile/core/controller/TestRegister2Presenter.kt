@@ -7,7 +7,7 @@
 //import com.ustadmobile.core.impl.UmAccountManager
 //import com.ustadmobile.core.impl.UstadMobileSystemImpl
 //import com.ustadmobile.core.view.Register2View
-//import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer
+//import com.ustadmobile.lib.umDatabase.jdbc.DriverConnectionPoolInitializer
 //import com.ustadmobile.lib.db.entities.Person
 //import com.ustadmobile.lib.db.entities.UmAccount
 //import com.ustadmobile.test.core.impl.PlatformTestUtil
@@ -55,7 +55,7 @@
 //
 //        val db = UmAppDatabase.getInstance(Any())
 //        clientDb = UmAppDatabase.getInstance(Any(), "db1")
-//        repo = db //db.getRepository(TEST_URI, "")
+//        repo = db //db.getUmRepository(TEST_URI, "")
 //
 //        db.clearAllTables()
 //        clientDb!!.clearAllTables()

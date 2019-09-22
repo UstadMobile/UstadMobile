@@ -2,14 +2,13 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
+import kotlinx.serialization.Serializable
 
-@UmEntity
+
 @Entity
-class DiscussionMessage() : SyncableEntity {
+@Serializable
+class DiscussionMessage() {
 
-    @UmPrimaryKey
     @PrimaryKey
     var discussionMessageUid: Long = 0
 
@@ -17,7 +16,4 @@ class DiscussionMessage() : SyncableEntity {
 
     var message: String? = null
 
-    override var masterChangeSeqNum: Long = 0
-
-    override var localChangeSeqNum: Long = 0
 }

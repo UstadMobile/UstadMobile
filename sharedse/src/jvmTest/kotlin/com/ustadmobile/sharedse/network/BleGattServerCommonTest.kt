@@ -72,7 +72,7 @@ class BleGattServerCommonTest {
             entryFile.lastModified = currentTimeStamp
             containerList.add(entryFile)
         }
-        containerUids.addAll(listOf(*umAppDatabase!!.containerDao.insert(containerList)))
+        containerUids.addAll(listOf(*umAppDatabase!!.containerDao.insertListAndReturnIds(containerList)))
 
     }
 

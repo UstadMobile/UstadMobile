@@ -1,0 +1,68 @@
+<div class="row white default-padding-top default-content-padding-bottom 
+default-content-padding-right default-content-padding-left">
+
+  <div class="col s12 l12 m12  white default-padding-top default-padding-bottom">
+
+    <mz-chip *ngFor="let tag of tagList" id="{{tag.replace(' ','')}}" [close]="true" (click)="onSelectTag($event)"
+      (delete)="onDeleteTag($event)">
+      {{tag}}
+    </mz-chip>
+
+
+  </div>
+
+  <div class="col s12 l5 m5 default-margin z-depth-1 white default-padding-top default-padding-bottom" *ngFor="let grapItem of graphList">
+
+    <mz-dropdown [id]="'report-option'" [align]="'left'" [belowOrigin]="false" [constrainWidth]="true"
+      [dropdownButtonId]="'report1'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
+      [stopPropagation]="true">
+      <mz-dropdown-item><a (click)="deleteOption.openModal()">Delete</a></mz-dropdown-item>
+      <mz-dropdown-item><a href="#!">Add Tag</a></mz-dropdown-item>
+      <mz-dropdown-item><a href="#!">Edit</a></mz-dropdown-item>
+    </mz-dropdown>
+    <i id="report1" class="material-icons grey-text text-darken-2 right options">more_vert</i>
+    <h2 class="grey-text text-lighten-1 center">Performance report for me</h2>
+    <google-chart #chart [title]="title" [type]="type" [data]="data" [columnNames]="columnNames" [options]="options"
+      [width]="width" [height]="height">
+    </google-chart>
+
+    <a (click)="onViewMore(89)" class="waves-effect waves-light btn-flat right {{env.colorPrimaryText }}"><i
+        class="material-icons right">arrow_forward</i>view more</a>
+    <!-- delete confirmation modal-->
+    <mz-modal #deleteOption [fixedFooter]="false" [bottomSheet]="false" [options]="modalOptions">
+      <mz-modal-header>
+        <h4>Delete Report</h4>
+      </mz-modal-header>
+      <mz-modal-content>
+        You are about to delete this report from the dashbord, would you like to proceed?
+      </mz-modal-content>
+      <mz-modal-footer>
+        <button mz-button [flat]="true" mz-modal-close>Cancel</button>
+        <button mz-button [flat]="true" mz-modal-close>Proceed</button>
+      </mz-modal-footer>
+    </mz-modal>
+
+    <!-- add tag modal-->
+    <mz-modal #deleteOption [fixedFooter]="false" [bottomSheet]="false" [options]="modalOptions">
+      <mz-modal-header>
+        <h4>Tags</h4>
+      </mz-modal-header>
+      <mz-modal-content>
+
+        <mz-chip-input [placeholder]="'Add Tag'" [secondaryPlaceholder]="'+Tag'" (add)="onAddTag($event)"
+          (delete)="onDeleteTag($event)" (select)="onSelectTag($event)">
+        </mz-chip-input>
+
+      </mz-modal-content>
+      <mz-modal-footer>
+        <button mz-button [flat]="true" mz-modal-close>Dismiss</button>
+      </mz-modal-footer>
+    </mz-modal>
+  </div>
+
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large {{env.colorAcent}}">
+      <i class="large material-icons">add</i>
+    </a>
+  </div>
+</div>
