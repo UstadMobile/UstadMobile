@@ -25,7 +25,6 @@ export class AppComponent extends UmBaseComponent {
 
   constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService,router: Router,route: ActivatedRoute) {
     super(localeService, router, route);
-    this.umService.setEnvironment(document.location.search.indexOf("test") == -1)
     if (this.locale.startsWith('en')) {
       this.dir = "ltr";
     } else {

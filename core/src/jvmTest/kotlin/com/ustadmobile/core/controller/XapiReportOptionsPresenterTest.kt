@@ -29,6 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class XapiReportOptionsPresenterTest : AbstractXapiReportOptionsTest() {
 
@@ -58,6 +59,7 @@ class XapiReportOptionsPresenterTest : AbstractXapiReportOptionsTest() {
             db.clearAllTables()
 
             insertXapi(db)
+            Thread.sleep(TimeUnit.SECONDS.toMillis(3))
 
             reportOptionsWithDataFilled = XapiReportOptions(BAR_CHART, SCORE, MONTH, GENDER, listOf(100), listOf(200), listOf(300), listOf(400),
                     DateTime(2019, 4, 10).unixMillisLong, DateTime(2019, 6, 11).unixMillisLong)

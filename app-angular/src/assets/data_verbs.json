@@ -1,5 +1,5 @@
 [
-    {"verbLangMapUid":1,"objectLangMapUid":1,"languageLangMapUid":1,"languageVariantLangMapUid":0, "valueLangMap":"Do What"},
-    {"verbLangMapUid":2,"objectLangMapUid":2,"languageLangMapUid":2,"languageVariantLangMapUid":0, "valueLangMap":"Doo Whatt"},
-    {"verbLangMapUid":3,"objectLangMapUid":3,"languageLangMapUid":3,"languageVariantLangMapUid":0, "valueLangMap":"Dooo Whattt"}
+    {"verbUid":200,"urlId":"Did"},
+    {"verbUid":201,"urlId":"Does"},
+    {"verbUid":202,"urlId":"Done"}
 ]

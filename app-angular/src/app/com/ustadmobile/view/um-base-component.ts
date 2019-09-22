@@ -17,12 +17,13 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   public toolBarTitle: string = '...';
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
+    this.umService.setEnvironment(document.location.search.indexOf("test") != -1)
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
     this.viewContext = this.context;
-    this.umService.initDb(this)
+    this.umService.init(this) 
   }
 
   setToolbarTitle(title){
@@ -32,7 +33,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   ngOnInit(): void {}
 
   onCreate(){
-    this.umService.appName = this.getString(this.MessageID.app_name) 
+    this.umService.appName = this.getString(this.MessageID.app_name)
   }
 
   runOnUiThread(runnable){

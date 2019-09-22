@@ -50,14 +50,12 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe( _ => {
       this.entryList = []; 
-      console.log("navigation end")
       UmAngularUtil.registerResourceReadyListener(this)
     }); 
   }
 
   onCreate(){
     super.onCreate()
-    console.log("create called")
     this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
       this.context, UmAngularUtil.queryParamsToMap(), this,this.umService.getDbInstance().contentEntryDao);
     this.presenter.onCreate(null);

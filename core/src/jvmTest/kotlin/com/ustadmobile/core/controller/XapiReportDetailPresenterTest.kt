@@ -20,7 +20,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
+import org.mockito.ArgumentMatchers
 import java.util.*
 
 class XapiReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
@@ -73,12 +73,12 @@ class XapiReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
 
 
             mockImpl = spy()
-            mockView = Mockito.mock(XapiReportDetailView::class.java)
-
-            doAnswer {
-                Thread(it.arguments[0] as Runnable).run()
-                return@doAnswer // or you can type return@doAnswer null ​
-            }.`when`(mockView).runOnUiThread(any())
+            mockView = mock{
+                on { runOnUiThread(ArgumentMatchers.any()) }.doAnswer { invocation ->
+                    Thread(invocation.getArgument<Any>(0) as Runnable).start()
+                    Unit
+                }
+            }
 
             doAnswer {
                 return@doAnswer stringMap[it.arguments[0] as Int]
@@ -153,7 +153,6 @@ class XapiReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
         val presenter = XapiReportDetailPresenter(context,
                 args, mockView, mockImpl, repo.statementDao, repo.xLangMapEntryDao)
         presenter.onCreate(args)
-
 
         verify(mockView, timeout(15000)).setChartYAxisLabel("# of activities")
         verify(mockView, timeout(15000)).setChartData(any(), any(),
