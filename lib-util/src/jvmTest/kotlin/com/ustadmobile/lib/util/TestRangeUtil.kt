@@ -8,12 +8,22 @@ class TestRangeUtil  {
     @Test
     fun givenValidRangeHeader_whenParseRangeRequestHeaderCalled_thenShouldReturnRange() {
         val rangeResponse = parseRangeRequestHeader("bytes=0-1023", 2048)
+        assertEquals(206, rangeResponse.statusCode, "Valid range request provides 206 response code")
         assertEquals(0, rangeResponse.fromByte, "Range response first byte = 0")
         assertEquals(1023, rangeResponse.toByte, "Range response last byte = 1023")
         assertEquals("1024", rangeResponse.responseHeaders["Content-Length"],
                 "Content-Length = 1024")
         assertEquals( "bytes 0-1023/2048", rangeResponse.responseHeaders["Content-Range"])
         assertEquals("bytes", rangeResponse.responseHeaders["Accept-Ranges"])
+    }
+
+    @Test
+    fun givenZeroToEndRangeHeader_whenParseRangeRequestHeaderCalled_thenShouldReturnWholeFileRange() {
+        val rangeResponse = parseRangeRequestHeader("bytes=0-", 23328)
+        assertEquals(206, rangeResponse.statusCode, "Valid range request provides 206 response code")
+        assertEquals(0, rangeResponse.fromByte, "Range response first byte = 0")
+        assertEquals(23327, rangeResponse.toByte, "Range response last byte = 23327")
+        assertEquals( "bytes 0-23327/23328", rangeResponse.responseHeaders["Content-Range"])
     }
 
     @Test

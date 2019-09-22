@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 /**
  * This is a 1:1 relationship with Person. It avoids synchronizing login credentials with any other
@@ -19,6 +20,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  * Currently, as PersonAuthDao does not extend syncable dao, it will not sync
  */
 @Entity
+@Serializable
 class PersonAuth() {
 
     @PrimaryKey

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.XLangMapEntry
+import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
 @Dao
@@ -30,6 +31,7 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
             "verbLangMapUid IN (:uidList)")
     abstract suspend fun getAllVerbsInList(uidList: List<Long>): List<Verb>
 
+    @Serializable
     data class Verb(var verbLangMapUid: Long = 0, var valueLangMap: String = "") {
 
         override fun toString(): String {
@@ -37,6 +39,7 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
         }
     }
 
+    @Serializable
     data class XObject(var objectLangMapUid: Long = 0, var valueLangMap: String = "") {
 
         override fun toString(): String {

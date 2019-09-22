@@ -65,7 +65,9 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                     methodsToImplement(dbTypeEl, dbTypeEl.asType() as DeclaredType, processingEnv).forEach {
                         val execEl = it as ExecutableElement
                         val returnTypeEl = processingEnv.typeUtils.asElement(execEl.returnType)
-                        if(returnTypeEl != null && returnTypeEl is TypeElement && returnTypeEl.hasDataSourceFactory()) {
+
+                        if(returnTypeEl != null && returnTypeEl is TypeElement
+                                && returnTypeEl.hasDataSourceFactory(daoMethodSyncableDataSourceFactoryFilter) ) {
                             val returnTypeClass = returnTypeEl.asClassName()
                             val boundaryCallbackQualifiedName = "${returnTypeClass.packageName}.${returnTypeClass.simpleName}${DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS}"
                             if(it.simpleName.toString().startsWith("get")) {

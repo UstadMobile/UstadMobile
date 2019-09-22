@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class DistinctCategorySchema() {
 
     var contentCategoryUid: Long = 0
