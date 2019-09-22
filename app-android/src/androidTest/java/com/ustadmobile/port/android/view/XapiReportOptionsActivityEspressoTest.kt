@@ -187,6 +187,8 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
         IdlingRegistry.getInstance().register(idleProgress)
 
         UmAndroidTestUtil.swipeScreenDown()
+        UmAndroidTestUtil.swipeScreenDown()
+        UmAndroidTestUtil.swipeScreenDown()
         onView(withId(R.id.whenEditText)).perform(click())
         onView(Matchers.allOf(withId(R.id.fragment_select_daterange_dialog_from_time), isDisplayed())).check(matches(withText("10/04/2019")))
         onView(Matchers.allOf(withId(R.id.fragment_select_daterange_dialog_to_time), isDisplayed())).check(matches(withText("11/06/2019")))
