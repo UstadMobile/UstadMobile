@@ -1,7 +1,4 @@
-import { browser, element, by, protractor } from 'protractor';
-import db from 'UstadMobile-lib-database';
-import mpp from 'UstadMobile-lib-database-mpp';
-import { UmAppDatabaseService } from 'src/app/com/ustadmobile/core/db/um-app-database.service';
+import { browser, element, by } from 'protractor';
 
 export const sleepTime = 500;
 const fs = require("fs")
@@ -13,7 +10,7 @@ export class TestSetup{
   
   setupDb(){
     https.get("http://localhost:8087/UmAppDatabase/clearAllTables", response => {
-      response.on('data', (chunk) => {
+      response.on('data', () => {
         console.log("data received")
       });
 
@@ -24,7 +21,6 @@ export class TestSetup{
   }
 
   insertContentEntries(){
-    const entriesRaw = JSON.parse(fs.readFileSync(path.resolve(__dirname,'assets/entries.json'))) as any[];
     //entriesRaw.forEach(entry)
   }
 }

@@ -1,6 +1,5 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.lib.db.entities
 
-import com.ustadmobile.lib.db.entities.XapiReportOptions
 import org.junit.Assert
 import org.junit.Test
 
@@ -9,7 +8,7 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithAVGScoreWithDayAsXaxisAndWeekAsSubGroup() {
 
-        var report = XapiReportOptions(0, XapiReportOptions.SCORE,
+        val report = XapiReportOptions(0, XapiReportOptions.SCORE,
                 XapiReportOptions.DAY, XapiReportOptions.WEEK)
 
         Assert.assertEquals("SELECT AVG(StatementEntity.resultScoreScaled) AS yAxis, " +
@@ -23,7 +22,7 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithSUMDurationWithMonthAsXaxisAndContentEntryAsSubGroup() {
 
-        var report = XapiReportOptions(0, XapiReportOptions.DURATION,
+        val report = XapiReportOptions(0, XapiReportOptions.DURATION,
                 XapiReportOptions.MONTH, XapiReportOptions.CONTENT_ENTRY)
 
         Assert.assertEquals("SELECT SUM(StatementEntity.resultDuration) AS yAxis, " +
@@ -36,7 +35,7 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroup() {
 
-        var report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
+        val report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
                 XapiReportOptions.GENDER, XapiReportOptions.CONTENT_ENTRY)
 
         Assert.assertEquals("SELECT COUNT(*) AS yAxis, " +
@@ -49,7 +48,7 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroupWithWhoListAndVerbList() {
 
-        var report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
+        val report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
                 XapiReportOptions.GENDER, XapiReportOptions.CONTENT_ENTRY, mutableListOf(1,2), mutableListOf(1,2))
 
         Assert.assertEquals("SELECT COUNT(*) AS yAxis, " +
@@ -63,7 +62,7 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroupAndAllFilters() {
 
-        var report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
+        val report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
                 XapiReportOptions.GENDER, XapiReportOptions.CONTENT_ENTRY,
                 mutableListOf(1,2), mutableListOf(1,2), mutableListOf(1,2), mutableListOf(1,3),
                 1L, 1L, mutableListOf(1,3))

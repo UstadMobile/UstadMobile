@@ -3,7 +3,6 @@ import { UmAngularUtil } from './com/ustadmobile/util/UmAngularUtil';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { Component, Inject, LOCALE_ID, HostBinding } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
 
 @Component({

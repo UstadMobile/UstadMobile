@@ -133,6 +133,10 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long
 
+    @JsName("getAllPerson")
+    @Query("SELECT * FROM Person")
+    abstract fun getAllPerson(): List<Person>
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +

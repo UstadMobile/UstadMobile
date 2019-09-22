@@ -14,10 +14,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.flexbox.FlexboxLayout
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.XapiReportOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
+import com.ustadmobile.lib.db.entities.XapiReportOptions
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.core.impl.ProgressIdlingResource
 import com.ustadmobile.test.port.android.UmAndroidTestUtil

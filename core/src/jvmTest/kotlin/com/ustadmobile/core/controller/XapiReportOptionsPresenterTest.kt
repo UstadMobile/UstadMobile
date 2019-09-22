@@ -2,15 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.BAR_CHART
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.CONTENT_ENTRY
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.GENDER
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.MONTH
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.SCORE
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.WEEK
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.listOfGraphs
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.xAxisList
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.yAxisList
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.BAR_CHART
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.CONTENT_ENTRY
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.GENDER
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.MONTH
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.SCORE
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.WEEK
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.listOfGraphs
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.xAxisList
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.yAxisList
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
@@ -18,6 +18,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
+import com.ustadmobile.lib.db.entities.XapiReportOptions
 import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.GlobalScope

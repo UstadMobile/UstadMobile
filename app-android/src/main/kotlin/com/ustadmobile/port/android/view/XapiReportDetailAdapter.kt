@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.XapiReportOptions
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.XapiReportOptions
 import java.text.DateFormat
 import java.util.*
 

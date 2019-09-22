@@ -1,4 +1,3 @@
-import { UmDbMockService } from './../../core/db/um-db-mock.service';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { Component } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
@@ -108,9 +107,9 @@ setDownloadButtonClickableListener() {}
 
 showDownloadOptionsDialog() {}
 
-startMonitoringAvailability(monitor, entryUidsToMonitor){}
+startMonitoringAvailability(){}
 
-stopMonitoringAvailability(monitor){}
+stopMonitoringAvailability(){}
 
 ngOnDestroy() {
   super.ngOnDestroy() 

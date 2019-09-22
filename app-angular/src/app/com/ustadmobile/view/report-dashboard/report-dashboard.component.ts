@@ -1,9 +1,8 @@
-import { UmAngularUtil, appRountes } from './../../util/UmAngularUtil';
+import { UmAngularUtil } from './../../util/UmAngularUtil';
 import { Component, Renderer2, ElementRef } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 
 @Component({
   selector: 'app-report-dashboard',
@@ -73,7 +72,7 @@ export class ReportDashboardComponent extends UmBaseComponent {
     this.renderer.addClass(event.target, "selected-chip");
   }
 
-  onAddTag(event) {}
+  onAddTag() {}
 
   handleNewGraphCreated() {
     this.systemImpl.go(this.routes.reportOptions, UmAngularUtil.getRouteArgs(

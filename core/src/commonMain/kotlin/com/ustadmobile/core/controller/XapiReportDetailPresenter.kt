@@ -1,25 +1,26 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.AVG_DURATION
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.CONTENT_ENTRY
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.COUNT_ACTIVITIES
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.DAY
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.DURATION
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.GENDER
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.MONTH
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.SCORE
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.WEEK
+
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportDetailView.Companion.ARG_REPORT_OPTIONS
-import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_OTHER
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
+import com.ustadmobile.lib.db.entities.XapiReportOptions
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.AVG_DURATION
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.CONTENT_ENTRY
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.COUNT_ACTIVITIES
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.DAY
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.DURATION
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.GENDER
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.MONTH
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.SCORE
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.WEEK
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -43,8 +44,8 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
         reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
         view.showBaseProgressBar(true)
         GlobalScope.launch {
-            val sql = reportOptions.toSql()
-            var data = statementDao.getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
+
+            var data = statementDao.getResultsFromOptions(reportOptions)
             var time = SECS
             if (reportOptions.yAxis == DURATION || reportOptions.yAxis == AVG_DURATION) {
                 time = getMeasureTime(data)
@@ -57,7 +58,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
                 view.setChartData(data, reportOptions, xAxisLabel, subgroupLabel)
                 view.setChartYAxisLabel(yAxisLabel)
             })
-            val results = statementDao.getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
+            val results = statementDao.getResultsListFromOptions(reportOptions)
             view.runOnUiThread(Runnable {
                 view.setReportListData(results)
                 view.showBaseProgressBar(false)

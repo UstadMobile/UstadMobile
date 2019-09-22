@@ -1,5 +1,4 @@
 import { OnInit, Component } from '@angular/core';
-import { UmDbMockService, ContentEntryDao } from '../../core/db/um-db-mock.service';
 import core from 'UstadMobile-core';
 import { UmBaseService } from '../../service/um-base.service';
 import { MzBaseModal } from 'ngx-materialize';
@@ -33,23 +32,21 @@ core.com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView{
   nodes: UmTreeNode[] = []
   selectedNodeList = []
 
-  constructor(private umService: UmBaseService, private umDb: UmDbMockService) {
+  constructor(private umService: UmBaseService) {
     super();
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
-    this.umService.preloadResources(true).subscribe(responses =>{
-      this.umDb.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
-      this.onCreate()
-    })
   }
 
   onCreate(){
     this.presenter = new core.com.ustadmobile.core.controller.SelectMultipleEntriesTreeDialogPresenter(
       this.umService.getContextWrapper(), UmAngularUtil.queryParamsToMap(document.location.search+"&entriesSelected=0", false), this,
-      this.umDb.contentEntryParentChildJoinDao)
+      this.umService.getDbInstance().contentEntryParentChildJoinDao)
     this.presenter.onCreate(null)
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.onCreate()
+  }
 
   runOnUiThread(runnable){
     runnable.run();
@@ -73,7 +70,7 @@ core.com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView{
 
   private createTreeNodes(parentEntryUid: number, nodes:any[], level: number): any[]{ 
     const entryNodeList = []
-    const entryList = this.umDb.contentEntryDao.getChildrenByParentAsync(parentEntryUid)
+    const entryList = this.umService.getDbInstance().contentEntryDao.getChildrenByParentAsync(parentEntryUid, this.umService.continuation)
     util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(entryList).forEach(entry => {
       const entryNode = new UmDataTreeNode()
       entryNode.nodeId = entry.contentEntryUid

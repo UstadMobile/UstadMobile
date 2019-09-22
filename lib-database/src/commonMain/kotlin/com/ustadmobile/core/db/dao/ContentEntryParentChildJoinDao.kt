@@ -62,5 +62,5 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid) " +
             "AND EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjParentContentEntryUid = ContentEntry.contentEntryUid)")
-    abstract fun selectTopEntries(): List<ContentEntry>
+    abstract suspend fun selectTopEntries(): List<ContentEntry>
 }

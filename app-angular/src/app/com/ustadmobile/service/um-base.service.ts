@@ -6,7 +6,6 @@ import { map } from 'rxjs/operators';
 import { UmAngularUtil } from '../util/UmAngularUtil';
 import db from 'UstadMobile-lib-database';
 import mpp from 'UstadMobile-lib-database-mpp';
-import util from 'UstadMobile-lib-util';
 import kotlin from 'kotlin'
 
 @Injectable({
@@ -15,7 +14,7 @@ import kotlin from 'kotlin'
 export class UmBaseService {
 
   private database: db.com.ustadmobile.core.db.UmAppDatabase
-  private environment: boolean = false
+  private isTestEnv: boolean = false
   private component: any
   public ROOT_UID = 1311236
   private umObserver = new Subject <any> ();
@@ -33,10 +32,10 @@ export class UmBaseService {
 
   /**
    * Set application environment
-   * @param test true when is in test mode otherwise false
+   * @param isTestEnv true when is in test mode otherwise false
    */
-  setEnvironment(test){
-    this.environment = test
+  setEnvironment(isTestEnv){
+    this.isTestEnv = isTestEnv
   }
 
   /**
@@ -60,7 +59,7 @@ export class UmBaseService {
    * @param fireWhenReady fire when true otherwise don't fire any event
    */
   preloadResources(fireWhenReady = true){
-    if(this.environment){
+    if(this.isTestEnv){
       //clear table
       this.http.get("http://localhost:8087/UmAppDatabase/clearAllTables", {responseType: 'text' })
       .subscribe(clearResponse =>{
@@ -71,7 +70,8 @@ export class UmBaseService {
           this.http.get<any>("assets/data_entries_parent_join.json").pipe(map(res => res)),
           this.http.get<any>("assets/data_languages.json").pipe(map(res => res)),
           this.http.get<any>("assets/data_persons.json").pipe(map(res => res)),
-          this.http.get<any>("assets/data_statements.json").pipe(map(res => res))
+          this.http.get<any>("assets/data_statements.json").pipe(map(res => res)),
+          this.http.get<any>("assets/data_verbs.json").pipe(map(res => res)),
         ]).subscribe(dataResponse => { 
 
           this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[0]), this.continuation)
@@ -83,6 +83,8 @@ export class UmBaseService {
           this.database.personDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[3]), this.continuation)
           
           this.database.statementDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[4]), this.continuation)
+          console.log(UmAngularUtil.jsArrayToKotlinList(dataResponse[5]))
+          this.database.xLangMapEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[5]), this.continuation)
 
           return this.preloadSystemResources(fireWhenReady)
         })

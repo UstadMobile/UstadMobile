@@ -3,7 +3,6 @@ import { Component, ElementRef, Output, EventEmitter } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import core from 'UstadMobile-core';
 import util from 'UstadMobile-lib-util';
 import { Subscription } from 'rxjs';
@@ -105,10 +104,10 @@ onChanges() {
     const valueChange = $(event.target).get(0).value
     switch($(event.target).parent().attr('id')){
       case 'graph_who':
-          scope.presenter.handleWhoDataTyped(valueChange,UmAngularUtil.jsArrayToKotlinList([1,2]))
+          scope.presenter.handleWhoDataTyped(valueChange,UmAngularUtil.jsArrayToKotlinList(this.getSelectedPersonIds()))
         break;
       case 'graph_did':
-          scope.presenter.handleDidDataTyped(valueChange,UmAngularUtil.jsArrayToKotlinList([0])) 
+          scope.presenter.handleDidDataTyped(valueChange,UmAngularUtil.jsArrayToKotlinList(this.getSelectedDidUIds())) 
           break;
     }
   }, false);
@@ -185,30 +184,25 @@ handleWhatClicked() {
 }
 
 updateWhoDataAdapter(whoList) {
-  this.inMemoryWhoList = whoList;
-  whoList.forEach(person => {
+  const whoArray = UmAngularUtil.kotlinListToJsArray(whoList)
+  this.inMemoryWhoList = whoArray
+  whoArray.forEach(person => {
     this.whoAutoComplete.data[person.name] = null
   }); 
 }
 
 updateDidDataAdapter(didList) {
-  this.inMemoryDidList = didList
-  didList.forEach(verb => {
+  const didArray = UmAngularUtil.kotlinListToJsArray(didList)
+  this.inMemoryDidList = didArray
+  didArray.forEach(verb => {
     this.didAutoComplete.data[verb.valueLangMap] = null 
   });
 }
 
 onAddPerson(event){
-  const person = UmAngularUtil.getElementFromObject(this.inMemoryWhoList,"name",event.tag)
+  const person: any = UmAngularUtil.getElementFromObject(this.inMemoryWhoList,"name",event.tag)
   if(person){
     this.selectedWhoList.push(person);
-  }
-}
-
-onAddVerb(event){
-  const verb = UmAngularUtil.getElementFromObject(this.inMemoryDidList,"valueLangMap",event.tag)
-  if(verb){
-    this.selectedDidList.push(verb);
   }
 }
 
@@ -216,6 +210,30 @@ onDeletePerson(event){
   const person = UmAngularUtil.getElementFromObject(this.inMemoryWhoList,"name",event.tag)
   if(person){
     this.deleteChip(this.selectedWhoList, person);
+    
+  }
+}
+
+private getSelectedPersonIds(){
+  const personUids = []
+  this.selectedWhoList.forEach(person => {
+    personUids.push(parseInt(person.personUid))
+  })
+  return personUids
+}
+
+private getSelectedDidUIds(){
+  const verbUids = []
+  this.selectedDidList.forEach(verb => {
+    verbUids.push(parseInt(verb.verbLangMapUid))
+  })
+  return verbUids
+}
+
+onAddVerb(event){
+  const verb = UmAngularUtil.getElementFromObject(this.inMemoryDidList,"valueLangMap",event.tag)
+  if(verb){
+    this.selectedDidList.push(verb);
   }
 }
 
@@ -232,23 +250,23 @@ private deleteChip(list: any[], element: any){
   }
 }
 
-updateFromDialogText(fromDate) {}
+updateFromDialogText() {}
 
-updateToDialogText(toDate) {}
+updateToDialogText() {}
 
-updateWhenRangeText(rangeText) {}
+updateWhenRangeText() {}
 
-updateChartTypeSelected(indexChart) {}
+updateChartTypeSelected() {}
 
-updateYAxisTypeSelected(indexYAxis) {}
+updateYAxisTypeSelected() {}
 
-updateXAxisTypeSelected(indexXAxis) {}
+updateXAxisTypeSelected() {}
 
-updateSubgroupTypeSelected(indexSubgroup) {}
+updateSubgroupTypeSelected() {}
 
-updateWhoListSelected(personList) {}
+updateWhoListSelected() {}
 
-updateDidListSelected(verbs) {}
+updateDidListSelected() {}
 
 handleDoneSelected() {
   const didList = []
@@ -266,7 +284,7 @@ handleDoneSelected() {
    util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(whoList))
 }
 
-showBaseProgressBar(showProgress){}
+showBaseProgressBar(){}
 
 ngOnDestroy() {
   super.ngOnDestroy()

@@ -3,7 +3,6 @@ import core from 'UstadMobile-core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import util from 'UstadMobile-lib-util';
 
@@ -60,7 +59,7 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
     this.presenter.onCreate(null)
   }
 
-  setChartData(chartData: any, options: any, xAxisLabels: any, subgroupLabels: any) {
+  setChartData(chartData: any) {
     const rawData = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(chartData)
     const formattedData = UmAngularUtil.getGoogleChartFormattedData(rawData, this)
     this.inMemoryChartData = formattedData.data
@@ -88,7 +87,7 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
     this.presenter.handleAddDashboardClicked("S")
   }
 
-  showBaseProgressBar(showProgress){
+  showBaseProgressBar(){
     
   }
 
