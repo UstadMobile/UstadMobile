@@ -28,8 +28,8 @@ import java.util.regex.Pattern
 class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter, context: Any) : WebViewClient() {
 
 
-    private var containerManager: ContainerManager? = null
-    private var presenter: WebChunkPresenter? = null
+    private lateinit var containerManager: ContainerManager
+    private lateinit var presenter: WebChunkPresenter
     private val indexMap = HashMap<String, IndexLog.IndexEntry>()
     private val linkPatterns = HashMap<Pattern, String>()
     var url: String? = null
@@ -42,9 +42,9 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
             containerManager = ContainerManager(pathToZip, appDatabase, repoAppDatabase)
 
-            val index = containerManager!!.getEntry("index.json")
+            val index = containerManager.getEntry("index.json")
 
-            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager!!.getInputStream(index!!)), IndexLog::class.java)
+            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index!!)), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
             url = firstUrlToOpen.url
@@ -68,7 +68,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         val requestUrl = checkWithPattern(request.url.toString())
         if (requestUrl != null) {
-            presenter!!.handleUrlLinkToContentEntry(requestUrl)
+            presenter.handleUrlLinkToContentEntry(requestUrl)
             return true
         }
         return super.shouldOverrideUrlLoading(view, request)
@@ -79,7 +79,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         val requestUrl = StringBuilder(request.url.toString())
         val sourceUrl = checkWithPattern(requestUrl.toString())
         if (sourceUrl != null) {
-            presenter!!.handleUrlLinkToContentEntry(sourceUrl)
+            presenter.handleUrlLinkToContentEntry(sourceUrl)
             Handler(Looper.getMainLooper()).post { view.loadUrl(url) }
             return WebResourceResponse("text/html", "utf-8", null)
         }
@@ -154,10 +154,10 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         }
         try {
 
-            val entry = containerManager!!.getEntry(log.path!!)
-                    ?: return WebResourceResponse("", "utf-8", 200, "OK", null, null)
+            val entry = containerManager.getEntry(log.path!!)
+                    ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
 
-            var data = containerManager!!.getInputStream(entry)
+            var data = containerManager.getInputStream(entry)
 
             // if not range header, load the file as normal
             var rangeHeader: String? = request.requestHeaders["Range"]
