@@ -25,6 +25,7 @@ export class ReportDashboardComponent extends UmBaseComponent {
   options = {};
   width = 370;
   height = 400;
+  hideFirst: boolean = false
 
   modalOptions: Materialize.ModalOptions = {
     dismissible: false,

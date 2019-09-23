@@ -10,9 +10,9 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   public env = environment;
   protected systemImpl: any;
-  protected readonly context: UmContextWrapper;
+  protected readonly context: any;
   public readonly MessageID = null;
-  protected viewContext: UmContextWrapper;
+  protected viewContext: any;
   public routes = appRountes;
   public toolBarTitle: string = '...';
 
@@ -20,9 +20,8 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.umService.setEnvironment(document.location.search.indexOf("test") != -1)
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
-    this.context = new UmContextWrapper(router);
+    this.viewContext = this.context = new UmContextWrapper(router) 
     this.context.setActiveRoute(this.route);
-    this.viewContext = this.context;
     this.umService.init(this) 
   }
 

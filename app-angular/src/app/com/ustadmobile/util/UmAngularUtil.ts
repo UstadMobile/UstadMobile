@@ -221,6 +221,12 @@ export class UmAngularUtil {
     return foundEntries;
   }
 
+  static getActiveMenu(routes): boolean[]{
+    const libActive = window.location.pathname.includes(routes.entryList)
+     || window.location.pathname.includes(routes.entryDetails)
+    return [libActive, !libActive] 
+  }
+
   /**
    * Get route path
    */

@@ -4,7 +4,6 @@ import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import core from 'UstadMobile-core';
 import db from 'UstadMobile-lib-database';
-import util from 'UstadMobile-lib-util';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';

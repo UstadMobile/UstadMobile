@@ -7,7 +7,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e --watch=false --browsers=ChromeHeadless"
+    "e2e": "ng e2e --watch=false --browsers=ChromeHeadless",
+    "webpack": "webpack --config webpack.config.js"
   },
   "private": true,
   "dependencies": {
@@ -86,7 +87,8 @@
     "ts-mockito": "^2.3.1",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
-    "typescript": "~3.2.2"
+    "typescript": "~3.2.2",
+    "webpack": "^4.40.2"
   },
   "browser": {
     "http": false,

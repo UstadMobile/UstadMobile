@@ -267,6 +267,10 @@ task ngTest{
   }else if(moduleName != null && moduleName != "e2e"){
     generateLocaleFiles.finalizedBy(executeModuleTest)
   }
+
+  if(moduleName != null){
+    packPreparedModules.finalizedBy(":app-ktor-server:testWebAppRunFork")
+  }
 }
 
 ngTest.dependsOn(build)

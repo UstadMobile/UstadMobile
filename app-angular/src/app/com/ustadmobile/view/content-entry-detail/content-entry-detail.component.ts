@@ -6,6 +6,7 @@ import { UmBaseService } from '../../service/um-base.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import core from 'UstadMobile-core';
 import util from 'UstadMobile-lib-util';
+import entities from 'UstadMobile-lib-database-entities'
 import 'rxjs/add/operator/filter';
 
 @Component({
@@ -15,7 +16,9 @@ import 'rxjs/add/operator/filter';
 })
 export class ContentEntryDetailComponent extends UmBaseComponent implements
  core.com.ustadmobile.core.view.ContentEntryDetailView, 
- core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor {
+ core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor,
+ entities.com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider {
+
 env = environment;
 contentEntryUid = "";
 entryTitle = "";
@@ -43,7 +46,7 @@ constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
 onCreate() {
   super.onCreate()
   this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
-      UmAngularUtil.queryParamsToMap(), this,this,this,this.umService.getDbInstance());
+      UmAngularUtil.queryParamsToMap(), this,this, this,this.umService.getDbInstance());
     this.presenter.onCreate(null);
 }
 
@@ -78,6 +81,12 @@ setDownloadSize() {}
 setAvailableTranslations(result) {
   this.translations = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(result);
 }
+
+findDownloadJobItemStatusByContentEntryUid(){}
+
+addDownloadChangeListener(){}
+
+removeDownloadChangeListener(){}
 
 updateDownloadProgress() {}
 

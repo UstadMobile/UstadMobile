@@ -1,6 +1,7 @@
 package com.ustadmobile.core.networkmanager
 
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import kotlin.js.JsName
 
 /**
  * Interface for core presenters to access download status related methods (implemented in
@@ -16,6 +17,7 @@ interface DownloadJobItemStatusProvider {
      * @param callback Callback that will receive the status. The callback value will be null if the
      * given contententry is not part of any active download job.
      */
+    @JsName("findDownloadJobItemStatusByContentEntryUid")
     suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long) : DownloadJobItemStatus?
 
     /**
@@ -23,6 +25,7 @@ interface DownloadJobItemStatusProvider {
      *
      * @param listener listener to add
      */
+    @JsName("addDownloadChangeListener")
     fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
 
     /**
@@ -30,6 +33,7 @@ interface DownloadJobItemStatusProvider {
      *
      * @param listener listener to remove
      */
+    @JsName("removeDownloadChangeListener")
     fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
 
 

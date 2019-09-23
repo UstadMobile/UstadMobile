@@ -6,6 +6,8 @@ import { map } from 'rxjs/operators';
 import { UmAngularUtil } from '../util/UmAngularUtil';
 import db from 'UstadMobile-lib-database';
 import mpp from 'UstadMobile-lib-database-mpp';
+import core from 'UstadMobile-core'
+import entities  from 'UstadMobile-lib-database-entities'
 import kotlin from 'kotlin' 
 
 @Injectable({
@@ -72,6 +74,8 @@ export class UmBaseService {
         this.http.get<any>("assets/data_xlangmap.json").pipe(map(res => res)),
         this.http.get<any>("assets/data_verbs.json").pipe(map(res => res)),
       ]).subscribe(dataResponse => { 
+        const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl:localStorage["doordb.endpoint.url"]} 
+        core.com.ustadmobile.core.impl.UmAccountManager.setActiveAccountWithContext(account, this.component.context)
         this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
 
         this.database.contentEntryParentChildJoinDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[2]), this.continuation)
