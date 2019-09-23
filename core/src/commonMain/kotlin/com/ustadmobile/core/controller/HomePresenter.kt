@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -7,9 +8,12 @@ import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
-class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeView)
+class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeView,
+                    val personDao: PersonDao)
     : UstadBaseController<HomeView>(context, arguments, view) {
 
     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
@@ -26,6 +30,18 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         handleShowDownloadButton(showDownloadAll)
 
         account = UmAccountManager.getActiveAccount(context)
+
+        GlobalScope.launch {
+            if(account != null){
+                val person = personDao.findByUid(account!!.personUid)
+                if(person != null){
+                    view.runOnUiThread(Runnable {
+                        view.showReportMenu(person.admin)
+                        view.setLoggedPerson(person)
+                    })
+                }
+            }
+        }
 
         view.runOnUiThread(Runnable {
             view.loadProfileIcon(if(account == null) "" else "")

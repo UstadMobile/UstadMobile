@@ -31,6 +31,7 @@ import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LE
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.GlobalScope
@@ -38,6 +39,7 @@ import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
+
 
     private lateinit var presenter: HomePresenter
 
@@ -68,7 +70,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         viewPager.addOnPageChangeListener(this)
 
-        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
+        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UmAppDatabase.getInstance(this).personDao)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         profileImage.setOnClickListener {
@@ -93,6 +96,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun setLoggedPerson(person: Person) {}
+
+    override fun showReportMenu(show: Boolean) {}
 
     override fun onPageScrollStateChanged(state: Int) {}
 
