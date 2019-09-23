@@ -13,8 +13,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.util.parseRangeRequestHeader
+import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
+import fi.iki.elonen.NanoHTTPD
 import java.io.ByteArrayInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
@@ -23,8 +28,8 @@ import java.util.regex.Pattern
 class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter, context: Any) : WebViewClient() {
 
 
-    private var containerManager: ContainerManager? = null
-    private var presenter: WebChunkPresenter? = null
+    private lateinit var containerManager: ContainerManager
+    private lateinit var presenter: WebChunkPresenter
     private val indexMap = HashMap<String, IndexLog.IndexEntry>()
     private val linkPatterns = HashMap<Pattern, String>()
     var url: String? = null
@@ -37,9 +42,9 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
             containerManager = ContainerManager(pathToZip, appDatabase, repoAppDatabase)
 
-            val index = containerManager!!.getEntry("index.json")
+            val index = containerManager.getEntry("index.json")
 
-            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager!!.getInputStream(index!!)), IndexLog::class.java)
+            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index!!)), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
             url = firstUrlToOpen.url
@@ -63,7 +68,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         val requestUrl = checkWithPattern(request.url.toString())
         if (requestUrl != null) {
-            presenter!!.handleUrlLinkToContentEntry(requestUrl)
+            presenter.handleUrlLinkToContentEntry(requestUrl)
             return true
         }
         return super.shouldOverrideUrlLoading(view, request)
@@ -74,7 +79,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         val requestUrl = StringBuilder(request.url.toString())
         val sourceUrl = checkWithPattern(requestUrl.toString())
         if (sourceUrl != null) {
-            presenter!!.handleUrlLinkToContentEntry(sourceUrl)
+            presenter.handleUrlLinkToContentEntry(sourceUrl)
             Handler(Looper.getMainLooper()).post { view.loadUrl(url) }
             return WebResourceResponse("text/html", "utf-8", null)
         }
@@ -148,10 +153,51 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
-            val data = containerManager!!.getInputStream(containerManager!!.getEntry(log.path!!)!!)
 
-            return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data)
-        } catch (e: IOException) {
+            val entry = containerManager.getEntry(log.path!!)
+                    ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
+
+            var data = containerManager.getInputStream(entry)
+
+            // if not range header, load the file as normal
+            var rangeHeader: String? = request.requestHeaders["Range"]
+                    ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data)
+
+            val totalLength = entry.containerEntryFile!!.ceTotalSize
+            val isHEADRequest = request.method == "HEAD"
+
+            var range = if (rangeHeader != null) {
+                parseRangeRequestHeader(rangeHeader, totalLength)
+            } else {
+                null
+            }
+            if (range != null && range.statusCode == 206) {
+                if(!isHEADRequest){
+                    data = RangeInputStream(data, range.fromByte, range.toByte)
+                }
+                var mutMap = mutableMapOf<String, String>()
+                if (log.headers != null) {
+                    mutMap.putAll(log.headers!!)
+                }
+                range.responseHeaders.forEach { mutMap[it.key] = it.value }
+                return WebResourceResponse(log.mimeType, "utf-8", HttpURLConnection.HTTP_PARTIAL,
+                        "Partial Content", mutMap, if(isHEADRequest) null else data)
+
+            } else if (range?.statusCode == 416) {
+                return WebResourceResponse("text/plain", "utf-8",416,
+                        if (isHEADRequest) "" else "Range request not satisfiable", null, null)
+            } else {
+
+                var mutMap = mutableMapOf<String, String>()
+                if (log.headers != null) {
+                    mutMap.putAll(log.headers!!)
+                }
+                mutMap["Content-Length"] = totalLength.toString()
+                mutMap["Connection"] = "close"
+                return WebResourceResponse(log.mimeType, "utf-8", 200,
+                        "OK", mutMap, data)
+            }
+        } catch (e: Exception) {
             System.err.println("did not find entry in zip for url " + log.url!!)
             e.printStackTrace()
         }
