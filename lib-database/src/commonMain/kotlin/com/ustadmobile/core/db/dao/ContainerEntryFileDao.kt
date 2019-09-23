@@ -35,4 +35,10 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("UPDATE ContainerEntryFile SET compression = :compression, ceCompressedSize = :ceCompressedSize WHERE cefUid = :cefUid")
     abstract fun updateCompressedFile(compression: Int, ceCompressedSize: Long, cefUid: Long)
 
+    @Query("SELECT * FROM ContainerEntryFile WHERE compression = 1 AND ceTotalSize = ceCompressedSize")
+    abstract  fun getAllFilesToFixUnCompressLength(): List<ContainerEntryFile>
+
+    @Query("UPDATE ContainerEntryFile SET  ceTotalSize = :totalSize WHERE cefUid = :cefUid")
+    abstract fun updateTotalLength(totalSize: Long, cefUid: Long)
+
 }
