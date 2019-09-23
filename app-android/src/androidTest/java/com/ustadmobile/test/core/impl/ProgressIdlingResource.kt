@@ -18,7 +18,7 @@ class ProgressIdlingResource(var activity: Activity) : IdlingResource {
         if (isIdle) return true
 
         var progressBar = activity.findViewById<View>(R.id.progressBar)
-        isIdle = progressBar.visibility == View.INVISIBLE
+        isIdle = progressBar.visibility == View.INVISIBLE || progressBar.visibility == View.GONE
         if (isIdle) {
             resourceCallback?.onTransitionToIdle()
         }
