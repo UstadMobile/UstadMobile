@@ -11,6 +11,7 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.filter
+import io.ktor.util.toMap
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.io.ByteBuffer
@@ -39,6 +40,8 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                          private val calcMd5: Boolean = true, val httpClient: HttpClient = defaultHttpClient()) {
 
     var onDownloadProgress: (Long) -> Unit = {}
+
+    var headers: Map<String, List<String>>?= null
 
     private val bytesDownloaded = atomic(0L)
 
@@ -94,6 +97,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     requestBuilder.url(httpUrl)
                     val requestStart = getSystemTimeInMillis()
                     httpResponse = httpClient.get<HttpResponse>(requestBuilder)
+                    this.headers = httpResponse.headers.toMap()
                     responseTime = getSystemTimeInMillis() - requestStart
 
 

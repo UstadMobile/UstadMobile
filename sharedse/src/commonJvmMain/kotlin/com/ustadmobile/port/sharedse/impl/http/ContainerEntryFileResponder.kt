@@ -30,7 +30,7 @@ class ContainerEntryFileResponder : FileResponder(), RouterNanoHTTPD.UriResponde
 
             val file = File(entryFile.cefPath!!)
 
-
+            session.headers["X-Content-Length-Uncompressed"] = entryFile.ceTotalSize.toString()
             return newResponseFromFile(uriResource, session, FileSource(file))
         } catch (ne: NumberFormatException) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
