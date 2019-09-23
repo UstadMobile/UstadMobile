@@ -186,8 +186,8 @@ abstract class DownloadJobItemDao {
             " FROM ContentEntryParentChildJoin " +
             " LEFT JOIN Container ON Container.containerContentEntryUid = " +
             "   ContentEntryParentChildJoin.cepcjChildContentEntryUid" +
-            "   AND Container.lastModified = " +
-            "   (SELECT MAX(lastModified) FROM Container WHERE containerContentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid) " +
+            "   AND Container.cntLastModified = " +
+            "   (SELECT MAX(cntLastModified) FROM Container WHERE containerContentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid) " +
             "WHERE " +
             "ContentEntryParentChildJoin.cepcjParentContentEntryUid in (:parentContentEntryUids)")
     abstract fun findByParentContentEntryUuids(

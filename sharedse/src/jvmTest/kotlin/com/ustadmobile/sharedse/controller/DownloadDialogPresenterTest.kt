@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -95,7 +96,7 @@ class DownloadDialogPresenterTest {
 
         container = Container()
         container.containerContentEntryUid = rootEntry.contentEntryUid
-        container.lastModified = System.currentTimeMillis()
+        container.cntLastModified = System.currentTimeMillis()
         container.fileSize = 0
         container.containerUid = umAppDatabase.containerDao.insert(container)
 
@@ -109,13 +110,13 @@ class DownloadDialogPresenterTest {
 
         val cEntry2 = Container()
         cEntry2.containerContentEntryUid = entry2.contentEntryUid
-        cEntry2.lastModified = System.currentTimeMillis()
+        cEntry2.cntLastModified = System.currentTimeMillis()
         cEntry2.fileSize = 500
         cEntry2.containerUid = umAppDatabase.containerDao.insert(cEntry2)
 
         val cEntry4 = Container()
         cEntry4.containerContentEntryUid = entry4.contentEntryUid
-        cEntry4.lastModified = System.currentTimeMillis()
+        cEntry4.cntLastModified = System.currentTimeMillis()
         cEntry4.fileSize = 500
         cEntry4.containerUid = umAppDatabase.containerDao.insert(cEntry4)
 
@@ -150,7 +151,42 @@ class DownloadDialogPresenterTest {
     }
 
     @Test
-    fun givenNoExistingDownloadJob_whenContinueButtonIsPressed_shouldCreateDownloadJobAndJobItems() = runBlocking {
+    fun givenNoExistingDownloadJob_whenViewCreated_shouldRequestTotalSizeFromServer() {
+        val contentEntryDaoSpy = spy(umAppDatabase.contentEntryDao) {
+            onBlocking {getRecursiveDownloadTotals(eq(rootEntry.contentEntryUid)) } doReturn DownloadJobSizeInfo(2, 1000)
+        }
+        umAppDatabaseRepo = spy(umAppDatabaseRepo) {
+            on { contentEntryDao } doReturn contentEntryDaoSpy
+        }
+        presenter = DownloadDialogPresenter(context, mockedNetworkManager,
+                mapOf(ARG_CONTENT_ENTRY_UID to rootEntry.contentEntryUid.toString()),
+                mockedDialogView, umAppDatabase, umAppDatabaseRepo)
+
+        presenter.onCreate(mapOf())
+        presenter.onStart()
+
+        verifyBlocking(contentEntryDaoSpy, timeout(5000)) { getRecursiveDownloadTotals(rootEntry.contentEntryUid) }
+        verify(mockedDialogView, timeout(5000)).setStatusText(any(),
+                eq(2), eq(UMFileUtil.formatFileSize(1000)))
+    }
+
+    @Test
+    fun givenExistingDownloadJobNotStarted_whenViewCreated_shouldGetSizeFromDatabase() {
+        insertDownloadJobAndJobItems(status = JobStatus.NOT_QUEUED)
+
+        presenter = DownloadDialogPresenter(context, mockedNetworkManager,
+                mapOf(ARG_CONTENT_ENTRY_UID to rootEntry.contentEntryUid.toString()),
+                mockedDialogView, umAppDatabase, umAppDatabaseRepo)
+
+        presenter.onCreate(mapOf())
+        presenter.onStart()
+
+        verify(mockedDialogView, timeout(5000)).setStatusText(any(),
+                eq(4), eq(UMFileUtil.formatFileSize(totalBytesToDownload)))
+    }
+
+    @Test
+    fun givenNoExistingDownloadJob_whenContinueButtonIsPressed_shouldCreateDownloadJobAndJobItemsAndSetStatusToQueued() = runBlocking {
         val viewReadyLatch = CountDownLatch(1)
         doAnswer {
             viewReadyLatch.countDown()
@@ -190,6 +226,8 @@ class DownloadDialogPresenterTest {
                 totalBytesToDownload,
                 umAppDatabase.downloadJobItemDao
                         .findByContentEntryUid2(rootEntry.contentEntryUid)!!.downloadLength)
+
+        //TODO: Add assertion that the status is QUEUED
         Unit
     }
 
@@ -197,6 +235,7 @@ class DownloadDialogPresenterTest {
     @Throws(InterruptedException::class)
     fun givenDownloadJobCreated_whenHandleClickCalled_shouldSetStatusToQueued() {
         runBlocking {
+            //TODO insert the downloadjobitems into the database
             val viewReadyLatch = CountDownLatch(1)
             doAnswer {
                 viewReadyLatch.countDown()

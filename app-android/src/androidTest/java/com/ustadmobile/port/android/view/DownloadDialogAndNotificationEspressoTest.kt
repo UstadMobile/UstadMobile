@@ -12,11 +12,9 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
-import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
@@ -25,7 +23,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
@@ -45,7 +42,6 @@ import org.json.JSONObject
 import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.runner.RunWith
 import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -212,7 +208,7 @@ class DownloadDialogAndNotificationEspressoTest {
         val container = Container(entry2)
         container.containerUid = entry2.contentEntryUid
         container.fileSize = 4678063L
-        container.lastModified = System.currentTimeMillis()
+        container.cntLastModified = System.currentTimeMillis()
         container.cntNumEntries = 1
 
         umRepo.containerDao.insert(container)

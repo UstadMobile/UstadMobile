@@ -44,11 +44,11 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     @Query("WITH RECURSIVE ContentEntryRecursive(contentEntryUid,containerSize) AS " +
             "(VALUES (:contentEntryUid,  " +
             "(SELECT Container.fileSize FROM Container WHERE Container.containerContentEntryUid = :contentEntryUid " +
-            "ORDER BY Container.lastModified DESC LIMIT 1 )) " +
+            "ORDER BY Container.cntLastModified DESC LIMIT 1 )) " +
             "UNION ALL " +
             "SELECT inner_pcj.cepcjChildContentEntryUid as contentEntryUid," +
             "(SELECT Container.fileSize FROM Container WHERE Container.containerContentEntryUid = inner_pcj.cepcjChildContentEntryUid " +
-            "ORDER BY Container.lastModified DESC LIMIT 1 ) AS containerSize FROM ContentEntryParentChildJoin as inner_pcj " +
+            "ORDER BY Container.cntLastModified DESC LIMIT 1 ) AS containerSize FROM ContentEntryParentChildJoin as inner_pcj " +
             "JOIN ContentEntryRecursive  AS outer_pcj ON outer_pcj.contentEntryUid = inner_pcj.cepcjParentContentEntryUid) " +
             " SELECT sum(ContentEntryRecursive.containerSize) as fileSize, count(*) as numEntries FROM ContentEntryRecursive WHERE containerSize != 0")
     abstract suspend fun getParentChildContainerRecursiveAsync(contentEntryUid: Long) : UmContentEntriesWithFileSize ?

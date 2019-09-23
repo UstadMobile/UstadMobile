@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer : ContentEntryWithContentEntryStatus() {
+class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid : ContentEntryWithContentEntryStatus() {
 
     var mostRecentContainer: Long = 0
 

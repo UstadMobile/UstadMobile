@@ -4,6 +4,7 @@ import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 
 /**
  * DAO for the DownloadJob class
@@ -92,8 +93,9 @@ abstract class DownloadJobDao {
     abstract fun update(djUid: Int, djStatus: Int)
 
 
-    @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
-    abstract suspend fun updateAsync(djUid: Int, djStatus: Int)
+    @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid " +
+            "AND djStatus BETWEEN :statusFrom AND :statusTo")
+    abstract suspend fun updateAsync(djUid: Int, djStatus: Int, statusFrom: Int, statusTo: Int)
 
 
     @Query("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " + "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
@@ -102,7 +104,8 @@ abstract class DownloadJobDao {
 
     @Transaction
     open suspend fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
-                          completeJobItemStatus: Int = -1) {
+                          completeJobItemStatus: Int = -1, jobStatusFrom: Int = 0,
+                                       jobStatusTo: Int = JobStatus.COMPLETE_MAX) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
         if (activeJobItemsStatus != -1)
@@ -111,7 +114,7 @@ abstract class DownloadJobDao {
         if (completeJobItemStatus != -1)
             updateJobItems(djUid, completeJobItemStatus, JobStatus.COMPLETE_MIN, JobStatus.COMPLETE_MAX)
 
-        updateAsync(djUid, djStatus)
+        updateAsync(djUid, djStatus, jobStatusFrom, jobStatusTo)
     }
 
     @Query("UPDATE DownloadJob SET bytesDownloadedSoFar = " +
@@ -162,5 +165,10 @@ abstract class DownloadJobDao {
     @Query("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = "
             + JobStatus.NOT_QUEUED + " OR djStatus = " + JobStatus.CANCELED)
     abstract fun deleteUnusedDownloadJob(downloadJobUid: Int)
+
+    @Query("SELECT (SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) AS numEntries, " +
+            "(SELECT downloadLength FROM DownloadJobItem WHERE djiDjUid = :downloadJobId AND " +
+            " djiContentEntryUid = (SELECT djRootContentEntryUid FROM DownloadJob WHERE djUid = :downloadJobId)) AS totalSize" )
+    abstract suspend fun getDownloadSizeInfo(downloadJobId: Int): DownloadJobSizeInfo?
 
 }

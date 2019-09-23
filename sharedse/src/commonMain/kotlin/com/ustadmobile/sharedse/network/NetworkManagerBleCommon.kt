@@ -538,10 +538,6 @@ abstract class NetworkManagerBleCommon(
 
     suspend fun openDownloadJobItemManager(downloadJobUid: Int) = jobItemManagerList!!.openDownloadJobItemManager(downloadJobUid)
 
-    fun deleteUnusedDownloadJob(downloadJobUid: Int) {
-        GlobalScope.launch { jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid) }
-    }
-
     override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long) = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)
 
     override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) = jobItemManagerList!!.addDownloadChangeListener(listener)
