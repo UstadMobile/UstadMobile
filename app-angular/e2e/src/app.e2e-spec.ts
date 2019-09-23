@@ -1,4 +1,4 @@
-import {HomePage, DashboardPage, ReportOptions, ReportDetails } from './app.po';
+import {HomePage, DashboardPage, ReportOptions, ReportDetails, EntryListPage } from './app.po';
 import { browser } from 'protractor';
 const DEFAULT_TIMEOUT_INTERVAL: number = 5000
 describe('Default App behaviours', () => {
@@ -34,6 +34,28 @@ describe('Default App behaviours', () => {
     });
   });
 });
+
+describe('Content entry list', () => {
+  let pageEntryList: EntryListPage
+  beforeAll(() => {
+    pageEntryList = new EntryListPage()
+  });
+
+  it('givenApplicationLaunched_whenNavigateToEntryList_shouldShowEntryList', () => {
+    pageEntryList.launch();
+    expect(pageEntryList.getPage().entries.count()).toBeGreaterThanOrEqual(4)
+  });
+
+  it('givenEntryList_whenLeafEntryClicked_shouldShowEntryDetails', () => {
+    pageEntryList.launch();
+    pageEntryList.getPage().entries.count().then(count => {
+      pageEntryList.getPage().entries.get(count -1).click()
+      expect(browser.getCurrentUrl()).toContain(pageEntryList.views.details);
+    });
+    
+  });
+
+})
 
 
 describe('Report Dashboard', () => {
@@ -110,6 +132,7 @@ describe('Report Details', () => {
 
   it('givenApplication_whenOpen_shouldShowGoodleChartsAndTables', () => {
     pageDetails.launch();
+    browser.sleep(2000)
     expect(pageDetails.getPage().graph.count()).toEqual(1);
     expect(pageDetails.getPage().tableRows.count()).toBeGreaterThan(0);
   });

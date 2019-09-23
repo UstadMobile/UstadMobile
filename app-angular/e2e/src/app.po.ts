@@ -17,6 +17,20 @@ export class HomePage{
   }
 }
 
+export class EntryListPage{
+
+  views = {details:"ContentEntryDetail"}
+  
+  launch(){
+    const pageHome = new HomePage()
+    pageHome.launch()
+  }
+
+  getPage() {
+    return new ElementUtils().getPageElements().entryList
+  }
+}
+
 export class DashboardPage{
 
   views = {"dashboard":"ReportDashboard", "options":"ReportOptions"};
@@ -38,7 +52,6 @@ export class ReportOptions{
     const pageDashboard = new DashboardPage()
     pageDashboard.launch()
     pageDashboard.getPage().newReport.click()
-    browser.sleep(sleepTime);
   }
 
   selectDropDown(dropdownIndex, optionIndex){
@@ -56,7 +69,7 @@ export class ReportDetails{
 
   views = {"dashboard":"ReportDashboard"}
   launch() {
-    browser.get(browser.baseUrl+'/Home/ReportPreview?entryid=0&options=%7B"chartType":100,"yAxis":200,"xAxis":300,"subGroup":302,"whoFilterList":%5B1%5D,"didFilterList":%5B201%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
+    browser.get(browser.baseUrl+'/Home/ReportPreview?entryid=0&test=true&options=%7B"chartType":100,"yAxis":200,"xAxis":300,"subGroup":302,"whoFilterList":%5B1%5D,"didFilterList":%5B201%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
     return new ElementUtils().launchAsync()
   }
   getPage() {
@@ -70,6 +83,9 @@ export class ElementUtils{
       componentHome:{
         title: browser.getTitle() as Promise<any>,
         menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span'))
+      },
+      entryList: {
+        entries: element.all(by.css('app-root app-content-entry-list > div ul li.open-content'))
       },
       componentReportDashboard: {
         newReport: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn')),
