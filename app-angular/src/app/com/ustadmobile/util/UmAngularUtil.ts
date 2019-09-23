@@ -1,5 +1,4 @@
 import core from 'UstadMobile-core';
-import db from 'UstadMobile-lib-database';
 import {Observable} from 'rxjs';
 import util from 'UstadMobile-lib-util';
 
@@ -21,7 +20,7 @@ export class UmAngularUtil {
   }
 
 
-   static localStorageHandler: any= {};
+  private static localStorageHandler: any= {};
 
   /**
    * Key to be used when toolbar title value changes
@@ -80,7 +79,8 @@ export class UmAngularUtil {
     });
   }
 
-  static createEvent(eventType: any, component){
+
+  private static createEvent(eventType: any, component){
     var originalSetItem = localStorage.setItem;
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
@@ -108,6 +108,10 @@ export class UmAngularUtil {
     };
   }
 
+  /**
+   * register resource ready listener
+   * @param component current opened component
+   */
   static registerResourceReadyListener(component) {
     this.createEvent(this.DISPATCH_RESOURCE, component)
     document.addEventListener(this.DISPATCH_RESOURCE, this.localStorageHandler[this.DISPATCH_RESOURCE], false); 
@@ -116,28 +120,53 @@ export class UmAngularUtil {
     }
   }
 
+  /**
+   * Register title change listener
+   * @param component current opened component
+   */
   static registerTitleChangeListener(component) {
     this.createEvent(this.DISPATCH_TITLE, component)
     document.addEventListener(this.DISPATCH_TITLE, this.localStorageHandler[this.DISPATCH_TITLE], false); 
   }
 
+  /**
+   * Register data change listener
+   * @param component current opened component
+   */
   static registerDataChangeListener(component){
     this.createEvent(this.DISPATCH_DATA_CHANGE, component)
     document.addEventListener(this.DISPATCH_DATA_CHANGE, this.localStorageHandler[this.DISPATCH_DATA_CHANGE], false); 
   }
 
+  /**
+   * Dispatch update when resources are ready, this will load the application
+   * @param ready indicated if resources are ready or not.
+   */
   static fireResouceReady(ready: boolean){
     localStorage.setItem(this.DISPATCH_RESOURCE,ready+"")
   }
 
+  /**
+   * Disptach update when data set changes
+   * @param data data to be associated with the event
+   */
   static fireOnDataChanged(data){
     localStorage.setItem(this.DISPATCH_DATA_CHANGE,data);
   }
 
+  /**
+   * Dispatch update when title changes
+   * @param title new title
+   */
   static fireTitleUpdate(title: string){
      localStorage.setItem(this.DISPATCH_TITLE,title)
   }
 
+  /**
+   * Structure data received to be used for GOOGLE charts
+   * @param dataList data list as recevived from kotlin
+   * @param component current component context
+   */
   static getGoogleChartFormattedData(dataList: any[], component): any{
     const dataGroups = [];
     const plotAgainst = []
@@ -172,7 +201,8 @@ export class UmAngularUtil {
     return {data: formattedDataList,columns: columnNames};
   }
 
-  static getDataToFill(maxSize: number){
+
+  private static getDataToFill(maxSize: number){
     const fillData = []
     if(maxSize != 0){
       for(let i = 0; i < maxSize; i++){
@@ -182,7 +212,7 @@ export class UmAngularUtil {
     return fillData;
   }
 
-  static maxColumsNumber(dataList: any[]){
+  private static maxColumsNumber(dataList: any[]){
     let dataListLength = 0;
     dataList.forEach(data => {
       if(data.length > dataListLength){
@@ -192,35 +222,10 @@ export class UmAngularUtil {
     return dataListLength
   }
 
-
-  static findEntry = function (entries,entryUid) {
-    var foundEntry: any = null;
-    entries.forEach(entry => {
-      if (entry.contentEntryUid as number == entryUid as number) {
-        foundEntry = entry;
-        return;
-      }
-    });
-    return foundEntry as db.com.ustadmobile.lib.db.entities.ContentEntry;
-  }
-
-  static findChildrenByParentUid(joins: any[], entries: any[], parentEntryUid) {
-    var foundEntryUids = [];
-    var foundEntries = [];
-
-    joins.forEach(join =>{
-      if(join.cepcjParentContentEntryUid == parentEntryUid){
-        foundEntryUids.push(join.cepcjChildContentEntryUid);
-      }
-    });
-
-    foundEntryUids.forEach(entryUid => {
-      foundEntries.push(this.findEntry(entries,entryUid));
-    });
-
-    return foundEntries;
-  }
-
+  /**
+   * Decide which menu to be highlited based on current opened section
+   * @param routes route map
+   */
   static getActiveMenu(routes): boolean[]{
     const libActive = window.location.pathname.includes(routes.entryList)
      || window.location.pathname.includes(routes.entryDetails)
@@ -310,18 +315,34 @@ export class UmAngularUtil {
     return window.location.search.length == 0 && !this.hasPath(route.path);
   }
 
+  /**
+   * Convert JS array to Kotlin list
+   * @param data array to be converted
+   */
   static jsArrayToKotlinList(data: any){
     return util.com.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(data);
   }
 
+  /**
+   * Convert kotlin list to JS array
+   * @param data data list to be converted
+   */
   static kotlinListToJsArray(data: any): any[]{
     return util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(data);
   }
 
+  /**
+   * Covert kotlin map to JS array
+   * @param data map to be converted
+   */
   static kotlinMapToJsArray(data: any): any[]{
     return util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(data);
   }
 
+  /**
+   * Conevert category map from kotlin to JS array
+   * @param data category map to be converted
+   */
   static kotlinCategoryMapToJSArray(data: any): any[]{
     return util.com.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(data);
   }

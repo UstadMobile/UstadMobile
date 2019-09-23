@@ -1,6 +1,6 @@
 import {HomePage, DashboardPage, ReportOptions, ReportDetails, EntryListPage } from './app.po';
 import { browser } from 'protractor';
-const DEFAULT_TIMEOUT_INTERVAL: number = 5000
+
 describe('Default App behaviours', () => {
   let pageHome: HomePage;
   browser.ignoreSynchronization = true

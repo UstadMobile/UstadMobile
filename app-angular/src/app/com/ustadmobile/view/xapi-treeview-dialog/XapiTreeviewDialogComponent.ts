@@ -39,7 +39,7 @@ core.com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView{
 
   onCreate(){
     this.presenter = new core.com.ustadmobile.core.controller.SelectMultipleEntriesTreeDialogPresenter(
-      this.umService.getContextWrapper(), UmAngularUtil.queryParamsToMap(document.location.search+"&entriesSelected=0", false), this,
+      this.umService.getContext(), UmAngularUtil.queryParamsToMap(document.location.search+"&entriesSelected=0", false), this,
       this.umService.getDbInstance().contentEntryParentChildJoinDao)
     this.presenter.onCreate(null)
   }

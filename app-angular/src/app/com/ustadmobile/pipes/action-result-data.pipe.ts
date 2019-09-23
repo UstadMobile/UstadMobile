@@ -19,9 +19,9 @@ export class ActionResultDataPipe implements PipeTransform {
 
   transform(value: any, args?: any): any {
     if(value == this.vals.RESULT_SUCCESS){
-      return this.systemImpl.getString(this.MessageID.success, this.umService.getContextWrapper())
+      return this.systemImpl.getString(this.MessageID.success, this.umService.getContext())
     }else if(value == this.vals.RESULT_FAILURE){
-      return this.systemImpl.getString(this.MessageID.failed, this.umService.getContextWrapper())
+      return this.systemImpl.getString(this.MessageID.failed, this.umService.getContext())
     }
     return "-";
   }

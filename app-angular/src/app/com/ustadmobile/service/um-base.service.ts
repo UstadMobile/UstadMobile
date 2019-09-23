@@ -7,7 +7,6 @@ import { UmAngularUtil } from '../util/UmAngularUtil';
 import db from 'UstadMobile-lib-database';
 import mpp from 'UstadMobile-lib-database-mpp';
 import core from 'UstadMobile-core'
-import entities  from 'UstadMobile-lib-database-entities'
 import kotlin from 'kotlin' 
 
 @Injectable({
@@ -24,14 +23,16 @@ export class UmBaseService {
   public continuation = kotlin.kotlin.coroutines.js.internal.EmptyContinuation
   systemLocale: any;
   toolBarTitle: string = ".."
-  private umListener = <Observable<any>>this.umObserver;
   public appName: string  = "..." 
 
   constructor(private http: HttpClient, private toastService: MzToastService) {
-    UmAngularUtil.fireResouceReady(false); 
-     
+    UmAngularUtil.fireResouceReady(false);  
   }
-
+  
+  /**
+   * Initialize base service
+   * @param component current opened component
+   */
   init(component: any){
     this.component = component
     this.loadAppConfig().subscribe( configs => {
@@ -41,6 +42,13 @@ export class UmBaseService {
         mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
         this.database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(this.component.context)
     });
+  }
+
+  /**
+   * Get context instance
+   */
+  getContext(){
+    return this.component.context;
   }
 
   /**
@@ -135,17 +143,13 @@ export class UmBaseService {
     this.umObserver.next(content);
   }
 
+  /**
+   * Get toast service for showing feedback
+   */
   getToastService(){
     return this.toastService;
   }
 
-  getUmObserver(): Observable < any > {
-    return this.umListener;
-  }
-
-  getContextWrapper(){
-    return this.component.context;
-  }
 
   /**
    * Loading string map from json file
@@ -156,6 +160,9 @@ export class UmBaseService {
     return this.http.get<Map < number, String >>(localeUrl).pipe(map(strings => strings));
   }
 
+  /**
+   * Load app config content
+   */
   loadAppConfig(){
     return this.http.get<Map < number, String >>("assets/appconfig.json").pipe(map(strings => strings));
   }
