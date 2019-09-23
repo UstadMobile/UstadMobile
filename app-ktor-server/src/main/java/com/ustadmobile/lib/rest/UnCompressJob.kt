@@ -22,22 +22,14 @@ class UnCompressJob {
             var compresssedFile = File(it.cefPath!!)
             println("compressed Size ${compresssedFile.length()}")
             var contentIn = GZIPInputStream(FileInputStream(compresssedFile))
-
-            val buf = ByteArray(8*1024)
-            var bytesRead: Int = -1
-            var size = 0
-            while ({bytesRead = contentIn.read(buf); bytesRead}() != -1) {
-                size += bytesRead
-            }
-
-            //var bout = ByteArrayOutputStream()
-            //IOUtils.copy(contentIn, bout)
-            //bout.flush()
+            var bout = ByteArrayOutputStream()
+            IOUtils.copy(contentIn, bout)
+            bout.flush()
             contentIn.close()
-            //var totalSize = bout.toByteArray().size
-            println("Total Size: $size")
-            //db.containerEntryFileDao.updateTotalLength(totalSize.toLong(), it.cefUid)
-            //bout.close()
+            var totalSize = bout.toByteArray().size
+            println("Total Size: $totalSize")
+            db.containerEntryFileDao.updateTotalLength(totalSize.toLong(), it.cefUid)
+            bout.close()
 
         }
 
