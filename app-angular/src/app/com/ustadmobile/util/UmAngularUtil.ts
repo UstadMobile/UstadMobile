@@ -307,7 +307,7 @@ export class UmAngularUtil {
       //redirect to default
       const validPath = this.hasPath(mPath.path)
       const rootParam = "?entryid=" + entryUid
-      view = validPath ? mPath.path + "/" : appRountes.entryList
+      view = validPath ? mPath.path : appRountes.entryList
       mPath.path = validPath ? mPath.path : appRountes.entryList
       args = !validPath ? UmAngularUtil.getArgumentsFromQueryParams({params:rootParam, route: mPath.path}) 
       : UmAngularUtil.getArgumentsFromQueryParams({params: document.location.search})

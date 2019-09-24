@@ -20,6 +20,7 @@ export class AppComponent extends UmBaseComponent {
   private navigationSubscription: Subscription;
   private splashScreenTimeout = () => {
     this.showLoading = false;
+    console.log(this.initialRoute.view) 
     this.systemImpl.go(this.initialRoute.view, this.initialRoute.args, this.context, 0)
   };
 
