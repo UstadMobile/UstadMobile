@@ -12,77 +12,88 @@ import core from 'UstadMobile-core';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Login2View{
 
-  subscription: Subscription;
-  umFormLogin : FormGroup;
-  formValidated : boolean = false;
-  showProgress : boolean = false;
+export class LoginComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Login2View {
+
+  private subscription: Subscription;
+  umFormLogin: FormGroup;
+  formValidated: boolean = false;
+  showProgress: boolean = false;
   serverUrl: string = "";
-  presenter: core.com.ustadmobile.core.controller.Login2Presenter;
-  private navigationSubscription;
-  btn_class : string;
+  private presenter: core.com.ustadmobile.core.controller.LoginPresenter;
+  navigationSubscription;
+  btn_class: string;
+  showRegistration: boolean = false;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
     super(umService, router, route);
 
-    this.btn_class = this.umService.isLTRDirectionality() ? "right-align":"left-align";
-
+    this.btn_class = this.umService.isLTRDirectionality() ? "right-align" : "left-align";
     this.umFormLogin = formBuilder.group({
       'username': ['', Validators.required],
       'password': ['', Validators.required]
     });
 
     this.umFormLogin.valueChanges.subscribe(
-      () => { this.formValidated = this.umFormLogin.status == "VALID";});
+      () => {
+        this.formValidated = this.umFormLogin.status == "VALID";
+      });
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe(() => {
-      UmAngularUtil.registerResourceReadyListener(this)
-    });
+      .subscribe(() => {
+        UmAngularUtil.registerResourceReadyListener(this)
+      });
   }
 
   ngOnInit() {
     super.ngOnInit();
   }
 
-  onCreate(){
+  onCreate() {
     UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.login))
-    this.presenter = new core.com.ustadmobile.core.controller.Login2Presenter(
-      this.context, UmAngularUtil.queryParamsToMap(), this);
+    this.presenter = new core.com.ustadmobile.core.controller.LoginPresenter(
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.systemImpl);
     this.presenter.onCreate(null);
   }
 
-  startLogin(){
-   this.formValidated  = false;
+  startLogin() {
+    this.formValidated = false;
     this.presenter.handleClickLogin(this.umFormLogin.value.username,
-      this.umFormLogin.value.password,this.serverUrl);
+      this.umFormLogin.value.password, this.serverUrl);
   }
-  
-  setInProgress(inProgress: boolean){
+
+  setInProgress(inProgress: boolean) {
     this.showProgress = inProgress;
   }
-  
-  setErrorMessage(errorMessage: string){
+
+  setErrorMessage(errorMessage: string) {
     this.showError(errorMessage);
   }
 
-  setServerUrl(serverUrl: string){
+  setRegistrationLinkVisible(visible){
+    this.showRegistration = visible
+  }
+
+  setServerUrl(serverUrl: string) {
     this.serverUrl = serverUrl;
   }
 
-  setUsername(username: string){
+  setUsername(username: string) {
     this.umFormLogin.value.username = username;
   }
-  
-  setPassword(password: string){
+
+  setPassword(password: string) {
     this.umFormLogin.value.password = password;
   }
 
-  ngOnDestroy(){
+  createAccount(){
+    this.presenter.handleCreateAccount()
+  }
+
+  ngOnDestroy() {
     super.ngOnDestroy()
     this.presenter.onDestroy();
-    if (this.navigationSubscription) {  
+    if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
     }
   }

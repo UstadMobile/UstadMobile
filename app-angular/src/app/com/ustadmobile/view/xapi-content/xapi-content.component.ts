@@ -13,40 +13,38 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
   styleUrls: ['./xapi-content.component.css']
 })
 
-
 export class XapiContentComponent extends UmBaseComponent {
 
   private presenter: core.com.ustadmobile.core.controller.XapiPackageContentPresenter;
-  navigationSubscription: Subscription;
+  private navigationSubscription: Subscription;
   urlToLoad: string = "https://www.ustadmobile.com/files/s4s/2-coverletter/en/EPUB/main.html";
-  
-  
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,public sanitizer: DomSanitizer) {
+
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer) {
     super(umService, router, route);
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe(() => {
-      this.presenter = new core.com.ustadmobile.core.controller
-        .XapiPackageContentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
+      .subscribe(() => {
+        this.presenter = new core.com.ustadmobile.core.controller
+          .XapiPackageContentPresenter(this.context, UmAngularUtil.getArgumentsFromQueryParams(), this);
         this.presenter.onCreate(null);
-    });
+      });
 
-    }
+  }
 
   ngOnInit() {
     super.ngOnInit();
   }
 
 
-  setTitle(title){
+  setTitle(title) {
     this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
       UmAngularUtil.DISPATCH_TITLE, title));
   }
-  loadUrl(url){
+  loadUrl(url) {
     this.urlToLoad = url;
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     super.ngOnDestroy();
     this.presenter.onDestroy()
     this.navigationSubscription.unsubscribe();

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.HomeView
 import kotlinx.io.InputStream
 import kotlin.browser.localStorage
@@ -29,7 +30,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         this.stringMap = values
     }
 
-
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -37,34 +37,22 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * UIViewController.
      *
      * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
-     * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
+     * @param args (Optional) Hashtable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        val basePath = if(args.containsKey(ARG_CONTENT_ENTRY_UID)
-                || isHomeBasePath(args)) "/${HomeView.VIEW_NAME}/" else "/"
-        umContext.router.navigate(arrayOf(basePath + viewName), mapToRouterParams(args))
-    }
-
-    private fun isHomeBasePath(args: Map<String, String?>): Boolean{
-        var isHomePath = false
-        for ((key, _) in args) {
-            if(key == "path"){
-                isHomePath = true
-            }
-        }
-        return isHomePath
+        umContext.router.navigateByUrl("/${HomeView.VIEW_NAME}/$viewName?${UMFileUtil.mapToQueryString(args)}")
     }
 
 
     private fun mapToRouterParams(args: Map<String, String?>): Any{
         val params = json()
         for ((key, value) in args) {
-            if(key != "path"){
-                params[key] = value
+            if(key == "entryid" && args["mode"] == "exclude"){
+                params[key] = null
             }else{
-                isBaseHomePath = true
+                params[key] = value
             }
         }
         return json("queryParams" to params, "queryParamsHandling" to "merge")

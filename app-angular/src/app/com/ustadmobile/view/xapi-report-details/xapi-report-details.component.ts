@@ -14,7 +14,7 @@ import util from 'UstadMobile-lib-util';
 export class XapiReportDetailsComponent extends UmBaseComponent implements
 core.com.ustadmobile.core.view.XapiReportDetailView {
 
-  presenter: core.com.ustadmobile.core.controller.XapiReportDetailPresenter
+  private presenter: core.com.ustadmobile.core.controller.XapiReportDetailPresenter
   private navigationSubscription;
 
   chartTitle: string = '';
@@ -26,7 +26,7 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
   tableDataList = []
   options = {
     title: '',
-    colors: ["#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50"], 
+    colors: ["#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50"],
     vAxis: {
       title: ''
     }
@@ -50,11 +50,11 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
   onCreate() {
     super.onCreate()
     UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.activity_preview_xapi))
-    const args = UmAngularUtil.queryParamsToMap(document.location.search, false)
+    const args = UmAngularUtil.getArgumentsFromQueryParams({params:document.location.search})
     this.chartType = JSON.parse(util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(args)[1].value).chartType == 100 ?
       'ColumnChart' : 'LineChart'
     this.presenter = new core.com.ustadmobile.core.controller.XapiReportDetailPresenter(this.context,
-      args, this, this.systemImpl, this.umService.getDbInstance().statementDao, 
+      args, this, this.systemImpl, this.umService.getDbInstance().statementDao,
       this.umService.getDbInstance().xLangMapEntryDao);
     this.presenter.onCreate(null)
   }
@@ -71,7 +71,7 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
     this.options.vAxis.title = yAxisLabel
   }
 
-  private protGraph() {
+  protGraph() {
     this.chartData = this.inMemoryChartData;
     this.columnNames = this.inMemoryColumnNames;
     this.inMemoryChartData = []
@@ -87,8 +87,8 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
     this.presenter.handleAddDashboardClicked("S")
   }
 
-  showBaseProgressBar(){
-    
+  showBaseProgressBar() {
+
   }
 
   ngOnDestroy() {

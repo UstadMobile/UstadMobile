@@ -60,7 +60,7 @@ abstract class NetworkNodeDao {
             "WHERE DownloadJobItemHistory.networkNode = NetworkNode.nodeId " +
             "AND NOT successful AND startTime > :maxFailuresFromTimestamp) < :maxFailuresInPeriod " +
             "LIMIT 1")
-    abstract fun findLocalActiveNodeByContainerUid(containerUid: Long,
+    abstract suspend fun findLocalActiveNodeByContainerUid(containerUid: Long,
                                                    minLastSeenTimestamp: Long,
                                                    maxFailuresInPeriod: Int,
                                                    maxFailuresFromTimestamp: Long): NetworkNode?

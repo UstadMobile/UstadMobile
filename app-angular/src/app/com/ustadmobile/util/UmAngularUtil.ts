@@ -38,22 +38,37 @@ export class UmAngularUtil {
   /**
    * Convert query parameters to a kotlin map to be used on presenters
    */
-  static queryParamsToMap(queryParam ? : string, notFound? :boolean) {
-    var paramString = queryParam || document.location.search + (notFound ? "":"&ref=null");
+  static getArgumentsFromQueryParams(args: any = {}) {
+    const route = args.route ? args.route : this.getRoutePathParam().path
+    const params = args.params ? args.params : null
+    const search = this.removeParam(this.isWithoutEntryUid(route) ? "entryid":"", (params ? params :document.location.search))
+    let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null"))) 
     return core.com.ustadmobile.core.util.UMFileUtil
-      .parseURLQueryString(paramString);
+      .parseURLQueryString(paramString); 
   }
 
-  /**
-   * Get URL params to be passed to other views
-   * @param route route to navifate to
-   * @param entryId entry UID to open
-   */
-  static getRouteArgs(route, entryId){
-    const args = (route != appRountes.entryList &&  route != appRountes.reportDashboard
-       && route != appRountes.reportOptions && route != appRountes.treeView) 
-     ? UmAngularUtil.queryParamsToMap("?") : UmAngularUtil.queryParamsToMap("?entryid=" + entryId+"&path=true");
-    return args;
+
+  private static removeParam(key, sourceURL) {
+    var rtn = "",param,params_arr = [],
+        queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
+    if (queryString !== "") {
+        params_arr = queryString.split("&");
+        for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+            param = params_arr[i].split("=")[0];
+            if (param === key) {
+                params_arr.splice(i, 1);
+            }
+        }
+        rtn = rtn + (params_arr.length > 0 ? "?" + params_arr.join("&"):"")
+    }
+    return rtn;
+}
+
+
+  private static isWithoutEntryUid(viewName: String): boolean{
+    return  viewName.includes("Report") ||
+            viewName.includes("Register") ||
+            viewName.includes("Login")
   }
 
   /**
@@ -267,7 +282,7 @@ export class UmAngularUtil {
     return foundElement;
   }
 
-  static getElementsFromObject(object: any[], key: string, value: string){
+  private static getElementsFromObject(object: any[], key: string, value: string){
     var foundElements = []
     object.forEach(element => {
       if(element[key] == value){
@@ -287,15 +302,19 @@ export class UmAngularUtil {
     if(mPath.size >= 4){
       //redirect as it is
       view = this.hasPath(mPath.path) ? mPath.path : appRountes.notFound+"/"
-      args = UmAngularUtil.queryParamsToMap();
+      args = UmAngularUtil.getArgumentsFromQueryParams();
     }else if(mPath.size <= 3){
       //redirect to default
-      view = this.hasPath(mPath.path) ? mPath.path + "/" : appRountes.entryList
-      args = !this.hasPath(mPath.path) ? UmAngularUtil.queryParamsToMap("?entryid=" + entryUid) 
-      : UmAngularUtil.queryParamsToMap(document.location.search.length > 0 ? document.location.search: "?")
+      const validPath = this.hasPath(mPath.path)
+      const rootParam = "?entryid=" + entryUid
+      view = validPath ? mPath.path + "/" : appRountes.entryList
+      mPath.path = validPath ? mPath.path : appRountes.entryList
+      args = !validPath ? UmAngularUtil.getArgumentsFromQueryParams({params:rootParam, route: mPath.path}) 
+      : UmAngularUtil.getArgumentsFromQueryParams({params: document.location.search})
     }
     return {view: view, args: args};
   }
+
 
   /**
    * Get language specific route
@@ -303,7 +322,7 @@ export class UmAngularUtil {
    */
   static getDifferentLanguageRoute(){
     var route = this.getRoutePathParam();
-    const args = UmAngularUtil.queryParamsToMap();
+    const args = UmAngularUtil.getArgumentsFromQueryParams();
     return {view: route.path, args: args};
   }
 

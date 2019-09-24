@@ -30,7 +30,7 @@
       <form *ngIf="supportedLanguages">
         <p class="language grey-text text-lighten-2" i18n="@@language">Languages</p>
         <mz-select-container [inline]=true *ngIf="supportedLanguages">
-          <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language">
+          <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language2">
             <option *ngFor="let language of supportedLanguages" value="{{language.key}}">{{language.value}}</option>
           </select>
         </mz-select-container>

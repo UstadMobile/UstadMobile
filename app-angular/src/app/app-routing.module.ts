@@ -27,12 +27,13 @@ const routes: Routes = [
           {path: "ReportDashboard", component: ReportDashboardComponent},
           {path: "ReportOptions", component: XapiReportOptionsComponent},
           {path: "EntriesTreeDialog",component: XapiTreeviewDialogComponent},
-          {path: "ReportPreview", component: XapiReportDetailsComponent} 
+          {path: "ReportPreview", component: XapiReportDetailsComponent},
+          {path: "**", component: NotFoundComponent}
+
         ],
         canActivate: [RouteGuardService],
         runGuardsAndResolvers: "always"
-  },
-  {path: "NotFound", component: NotFoundComponent}
+  }
 ];
 
 @NgModule({

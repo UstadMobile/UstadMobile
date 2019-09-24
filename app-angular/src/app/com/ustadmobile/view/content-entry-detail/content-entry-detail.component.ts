@@ -1,11 +1,9 @@
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { Component } from '@angular/core';
-import { environment } from 'src/environments/environment.prod';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import core from 'UstadMobile-core';
-import util from 'UstadMobile-lib-util';
 import entities from 'UstadMobile-lib-database-entities'
 import 'rxjs/add/operator/filter';
 
@@ -15,116 +13,111 @@ import 'rxjs/add/operator/filter';
   styleUrls: ['./content-entry-detail.component.css']
 })
 export class ContentEntryDetailComponent extends UmBaseComponent implements
- core.com.ustadmobile.core.view.ContentEntryDetailView, 
- core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor,
- entities.com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider {
+core.com.ustadmobile.core.view.ContentEntryDetailView,
+  core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor,
+  entities.com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider {
 
-env = environment;
-contentEntryUid = "";
-entryTitle = "";
-entryAuthor = "";
-entryLicence = "";
-entryDescription = "";
-entryThumbnail = "";
-private presenter: core.com.ustadmobile.core.controller.ContentEntryDetailPresenter;
-translations = []
-private navigationSubscription;
-entry_thumbnail_class: string;
-entry_summary_class: string;
+    private presenter: core.com.ustadmobile.core.controller.ContentEntryDetailPresenter;
+    private navigationSubscription;
+    translations = [];
+    entryLicence = "";
+    entry_thumbnail_class: string;
+    entry_summary_class: string;
+    contentEntry = new entities.com.ustadmobile.lib.db.entities.ContentEntry()
 
-constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
-  super(umService, router, route);
-  this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left";
+    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
+      super(umService, router, route);
+      this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left";
   this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
 
-  this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe(_ => {
-      UmAngularUtil.registerResourceReadyListener(this)
-    });
-}
+      this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(_ => {
+          UmAngularUtil.registerResourceReadyListener(this)
+        });
+    }
 
-onCreate() {
-  super.onCreate()
-  this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
-      UmAngularUtil.queryParamsToMap(), this,this, this,this.umService.getDbInstance());
-    this.presenter.onCreate(null);
-}
+    onCreate() {
+      super.onCreate()
+      this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
+        UmAngularUtil.getArgumentsFromQueryParams(), this, this, this, this.umService.getDbInstance());
+      this.presenter.onCreate(null);
+    }
 
-ngOnInit() {
-  super.ngOnInit();
-}
+    ngOnInit() {
+      super.ngOnInit();
+    }
 
-openEntry() {
-  this.presenter.handleDownloadButtonClick(true, this.contentEntryUid);
-}
+    openEntry() {
+      this.presenter.handleDownloadButtonClick();
+    }
 
-openTranslation(translation) {
-  this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
-}
+    openTranslation(translation) {
+      this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
+    }
 
-setContentEntry(contentEntry) {
-  this.contentEntryUid = contentEntry.contentEntryUid;
-  this.entryTitle = contentEntry.title;
-  this.entryAuthor = contentEntry.author;
-  this.entryDescription = contentEntry.description;
-  this.entryThumbnail = contentEntry.thumbnailUrl;
-}
+    setContentEntry(contentEntry) {
+      this.contentEntry = contentEntry;
+    }
 
-setContentEntryLicense(license) {
-  this.entryLicence = license;
-}
+    setContentEntryLicense(license) {
+      this.entryLicence = license;
+    }
 
-setDetailsButtonEnabled() {}
+    setDetailsButtonEnabled() {}
 
-setDownloadSize() {}
+    setDownloadSize() {}
 
-setAvailableTranslations(result) {
-  this.translations = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(result);
-}
+    setAvailableTranslations(translations) {
+      this.translations = UmAngularUtil.kotlinListToJsArray(translations) 
+    }
 
-findDownloadJobItemStatusByContentEntryUid(){}
+    findDownloadJobItemStatusByContentEntryUid() {}
 
-addDownloadChangeListener(){}
+    addDownloadChangeListener() {}
 
-removeDownloadChangeListener(){}
+    showEditButton() {}
 
-updateDownloadProgress() {}
+    removeDownloadChangeListener() {}
 
-setDownloadButtonVisible() {}
+    updateDownloadProgress() {}
 
-setButtonTextLabel() {}
+    setDownloadButtonVisible() {}
 
-showFileOpenWithMimeTypeError() {}
+    setButtonTextLabel() {}
 
-showFileOpenError(message) {
-  this.showError(message);
-}
+    showFileOpenWithMimeTypeError() {}
 
-updateLocalAvailabilityViews() {}
+    showBaseProgressBar() {}
 
-setLocalAvailabilityStatusViewVisible() {}
+    showFileOpenError(message) {
+      this.showError(message);
+    }
 
-setTranslationLabelVisible() {}
+    updateLocalAvailabilityViews() {}
 
-setFlexBoxVisible() {}
+    setLocalAvailabilityStatusViewVisible() {}
 
-setDownloadProgressVisible() {}
+    setTranslationLabelVisible() {}
 
-setDownloadProgressLabel() {}
+    setFlexBoxVisible() {}
 
-setDownloadButtonClickableListener() {}
+    setDownloadProgressVisible() {}
 
-showDownloadOptionsDialog() {}
+    setDownloadProgressLabel() {}
 
-startMonitoringAvailability(){}
+    setDownloadButtonClickableListener() {}
 
-stopMonitoringAvailability(){}
+    showDownloadOptionsDialog() {}
 
-ngOnDestroy() {
-  super.ngOnDestroy() 
-  if (this.navigationSubscription) {
-    this.navigationSubscription.unsubscribe();
+    startMonitoringAvailability() {}
+
+    stopMonitoringAvailability() {}
+
+    ngOnDestroy() {
+      super.ngOnDestroy()
+      if (this.navigationSubscription) {
+        this.navigationSubscription.unsubscribe();
+      }
+    }
+
   }
-}
-
-}

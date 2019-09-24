@@ -1,10 +1,10 @@
-import { Component, Renderer2, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { UmAngularUtil, appRountes } from '../../util/UmAngularUtil';
+import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import util from 'UstadMobile-lib-util';
 import core from 'UstadMobile-core'
@@ -14,7 +14,7 @@ import core from 'UstadMobile-core'
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.HomeView{
+export class HomeComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.HomeView {
 
   menu_libaries: string;
   menu_reports: string;
@@ -24,20 +24,18 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   toolbar_title_class: string;
   drawer_menu_class: string;
   supportedLanguages = [];
-  routes = appRountes
   umFormLanguage: FormGroup;
-  navigationSubscription: Subscription;
+  private navigationSubscription: Subscription;
   showReports = false
   userName: string = "Guest User"
   userEmail: string = "guestmail"
   userProfile: string = ""
   static toolBarTitle: string = ".."
   activeState = [true, false]
-  presenter: core.com.ustadmobile.core.controller.HomePresenter;
+  private presenter: core.com.ustadmobile.core.controller.HomePresenter;
 
   constructor(private location: Location, umService: UmBaseService,
-    router: Router, route: ActivatedRoute,formBuilder: FormBuilder, private renderer: Renderer2,
-     private elem: ElementRef) {
+    router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
     super(umService, router, route);
     this.icon_position_class = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
     this.toolbar_icon_class = this.umService.isLTRDirectionality() ? "left icon-right-spacing" : "right icon-left-spacing";
@@ -53,7 +51,7 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
         UmAngularUtil.registerTitleChangeListener(this)
-        this.activeState = UmAngularUtil.getActiveMenu(this.routes) 
+        this.activeState = UmAngularUtil.getActiveMenu(this.routes)
       });
   }
 
@@ -73,26 +71,26 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
     this.supportedLanguages = util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(
       this.systemImpl.getAllUiLanguage(this.context))
     this.presenter = new core.com.ustadmobile.core.controller.HomePresenter(
-      this.context, UmAngularUtil.queryParamsToMap(), this, this.umService.getDbInstance().personDao)
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().personDao)
     this.presenter.onCreate(null)
   }
 
-  showReportMenu(show){
+  showReportMenu(show) {
     this.showReports = show
   }
 
-  showDownloadAllButton(show){}
+  showDownloadAllButton() {}
 
-  setLoggedPerson(person){
+  setLoggedPerson(person) {
     this.userEmail = person.emailAddr
     this.userName = person.firstNames + " " + person.lastName
   }
 
-  loadProfileIcon(profile){
-    if(profile != ""){
+  loadProfileIcon(profile) {
+    if (profile != "") {
       this.userProfile = profile
-    }else{
-      this.userProfile = window.location.origin +"/assets/images/guest_user_icon.png"
+    } else {
+      this.userProfile = window.location.origin + "/assets/images/guest_user_icon.png"
     }
   }
 
@@ -104,23 +102,24 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
 
   navigateTo(route) {
     const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context)
-    const routeTo = route == "ReportDashboard" && !activeAcount  ? this.routes.login: route 
-    const args = UmAngularUtil.getRouteArgs(routeTo, this.umService.ROOT_UID) 
-    this.systemImpl.go(routeTo, args, this.context);
+    const isDashboard = route == "ReportDashboard"
+    const routeTo =  isDashboard && !activeAcount ? this.routes.login : route 
+    const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isDashboard ? "?entryid="+this.umService.ROOT_UID: null, route: routeTo})
+    this.systemImpl.go(route, args, this.context);
   }
 
-  setToolbarTitle(title){
+  setToolbarTitle(title) {
     this.toolBarTitle = title
   }
 
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
-    if(this.presenter){
-      this.presenter.onDestroy(); 
+    if (this.presenter) {
+      this.presenter.onDestroy();
     }
-    if(this.navigationSubscription){
-      this.navigationSubscription.unsubscribe(); 
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
     }
   }
 

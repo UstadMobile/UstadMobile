@@ -7,11 +7,14 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryExportView
 import com.ustadmobile.util.test.AbstractContentEntryExportTest
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -54,8 +57,8 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
         arguments[ContentEntryExportView.ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
         arguments[ContentEntryExportView.ARG_CONTENT_ENTRY_TITLE] = "Sample title"
 
-        mockView = mock {
-            on { runOnUiThread(any()) }.doAnswer {invocation ->
+        mockView = mock{
+            on { runOnUiThread(ArgumentMatchers.any()) }.doAnswer { invocation ->
                 Thread(invocation.getArgument<Any>(0) as Runnable).start()
                 Unit
             }
@@ -71,19 +74,22 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
                 umAppDatabase,umAppRepository,UstadMobileSystemImpl.instance )
         presenter.onCreate(null)
 
-        verify(mockView, times(1)).checkFilePermissions()
+        verify(mockView, timeout(TimeUnit.SECONDS.toMillis(3))).checkFilePermissions()
     }
 
 
     @Test
     fun givenExportDialogIsShown_whenPositiveButtonIsClicked_thenShouldStartExportingByShowingProgress(){
-        presenter = ContentEntryExportPresenter(context,arguments, mockView,
-                umAppDatabase,umAppRepository,UstadMobileSystemImpl.instance )
-        presenter.onCreate(null)
-        presenter.handleClickPositive()
+        runBlocking {
+            presenter = ContentEntryExportPresenter(context,arguments, mockView,
+                    umAppDatabase,umAppRepository,UstadMobileSystemImpl.instance )
+            presenter.onCreate(null)
+            delay(TimeUnit.SECONDS.toMillis(3))
+            presenter.handleClickPositive()
 
-        verify(mockView, times(1)).prepareProgressView(eq(true))
-        File(presenter.destinationZipFile).delete()
+            verify(mockView, timeout(TimeUnit.SECONDS.toMillis(3))).prepareProgressView(eq(true))
+            File(presenter.destinationZipFile).delete()
+        }
     }
 
 
@@ -93,11 +99,10 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
             presenter = ContentEntryExportPresenter(context,arguments, mockView,
                     umAppDatabase,umAppRepository,UstadMobileSystemImpl.instance )
             presenter.onCreate(null)
+            delay(TimeUnit.SECONDS.toMillis(3))
             presenter.handleClickNegative()
 
-            verify(mockView, times(0)).prepareProgressView(any())
-            delay(TimeUnit.SECONDS.toMillis(1))
-            verify(mockView, times(1)).dismissDialog()
+            verify(mockView, timeout(TimeUnit.SECONDS.toMillis(2))).dismissDialog()
             File(presenter.destinationZipFile).delete()
         }
     }

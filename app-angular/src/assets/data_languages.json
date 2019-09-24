@@ -1,10 +1,29 @@
-[
-    {
+[{
     "langUid": 1311236,
-    "name": "pellentesque at",
-    "iso_639_1_standard": "dui",
-    "iso_639_2_standard": "quis",
-    "iso_639_3_standard": "magna",
+    "name": "English",
+    "iso_639_1_standard": "en",
+    "iso_639_2_standard": "en",
+    "iso_639_3_standard": "en",
+    "langLocalChangeSeqNum": 73801,
+    "langMasterChangeSeqNum": 75240,
+    "langLastChangedBy": 1624
+  },
+  {
+    "langUid": 1311237,
+    "name": "Arabic",
+    "iso_639_1_standard": "ar",
+    "iso_639_2_standard": "ar",
+    "iso_639_3_standard": "ar",
+    "langLocalChangeSeqNum": 73801,
+    "langMasterChangeSeqNum": 75240,
+    "langLastChangedBy": 1624
+  },
+  {
+    "langUid": 1311238,
+    "name": "Farsi",
+    "iso_639_1_standard": "fa",
+    "iso_639_2_standard": "fa",
+    "iso_639_3_standard": "fa",
     "langLocalChangeSeqNum": 73801,
     "langMasterChangeSeqNum": 75240,
     "langLastChangedBy": 1624

@@ -12,15 +12,15 @@ import entity from 'UstadMobile-lib-database-entities';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Register2View{
+export class RegisterComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Register2View {
 
-  umFormRegister : FormGroup;
+  umFormRegister: FormGroup;
   label_wrong_email: string = "";
   label_password_mismatch: string = "";
-  formValidated : boolean = false;
-  showProgress : boolean = false;
+  formValidated: boolean = false;
+  showProgress: boolean = false;
   serverUrl: string = "";
-  presenter: core.com.ustadmobile.core.controller.Register2Presenter;
+  private presenter: core.com.ustadmobile.core.controller.Register2Presenter;
   private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
@@ -30,25 +30,25 @@ export class RegisterComponent extends UmBaseComponent implements core.com.ustad
       'last_name': ['', Validators.required],
       'password': ['', [Validators.required, Validators.minLength(8)]],
       'username': ['', Validators.required],
-      'email': ['', [Validators.required,Validators.pattern('[a-zA-Z0-9._-]+@[a-z]+\.+[a-z]+')]],
+      'email': ['', [Validators.required, Validators.pattern('[a-zA-Z0-9._-]+@[a-z]+\.+[a-z]+')]],
       'confirm_password': ['', [Validators.required, Validators.minLength(8)]]
     });
 
     this.umFormRegister.valueChanges.subscribe(
-      (form: any) => { 
-          this.formValidated = this.umFormRegister.valid && form.password == form.confirm_password;
+      (form: any) => {
+        this.formValidated = this.umFormRegister.valid && form.password == form.confirm_password;
       }
-  );
+    );
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe(() => {
-      UmAngularUtil.registerResourceReadyListener(this)
-    });
+      .subscribe(() => {
+        UmAngularUtil.registerResourceReadyListener(this)
+      });
   }
 
-  onCreate(){
+  onCreate() {
     this.presenter = new core.com.ustadmobile.core.controller.Register2Presenter(
-      this.context, UmAngularUtil.queryParamsToMap(), this);
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this);
     this.presenter.onCreate(null);
 
     UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.create_new_account))
@@ -60,30 +60,30 @@ export class RegisterComponent extends UmBaseComponent implements core.com.ustad
     super.ngOnInit();
   }
 
-  startRegistration(){
+  startRegistration() {
     this.formValidated = false;
     const formValues = this.umFormRegister.value;
-    const person = new entity.com.ustadmobile.lib.db.entities.Person(formValues.username, 
+    const person = new entity.com.ustadmobile.lib.db.entities.Person(formValues.username,
       formValues.first_name, formValues.last_name);
-      person.emailAddr = formValues.email;
-    this.presenter.handleClickRegister("person", formValues.password,this.serverUrl);
+    person.emailAddr = formValues.email;
+    this.presenter.handleClickRegister("person", formValues.password, this.serverUrl);
   }
-  setErrorMessageView(errorMessage: string){
+  setErrorMessageView(errorMessage: string) {
     this.showError(errorMessage);
   }
-  
-  setServerUrl(url: string){
+
+  setServerUrl(url: string) {
     this.serverUrl = url;
   }
 
-  setInProgress(inProgress: boolean){
+  setInProgress(inProgress: boolean) {
     this.showProgress = inProgress;
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     super.ngOnDestroy()
     this.presenter.onDestroy();
-    if (this.navigationSubscription) {  
+    if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
     }
   }

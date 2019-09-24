@@ -63,11 +63,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
-
         entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
-        entryLiveData!!.observe(this, this::onEntryChanged)
-
+        entryLiveData!!.observe(this, ::onEntryChanged)
         GlobalScope.launch {
+
             val result = appRepo.containerDao.findFilesByContentEntryUid(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setDetailsButtonEnabled(result.isNotEmpty())
@@ -318,7 +317,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         val currentJobId = appRepo.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
         appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
                 JobStatus.CANCELLING)
-        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        appRepo.contentEntryStatusDao.updateDownloadStatusAsync(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
         view.stopForeGroundService(currentJobId.toLong(), true)
     }

@@ -76,13 +76,12 @@ export class ReportDashboardComponent extends UmBaseComponent {
   onAddTag() {}
 
   handleNewGraphCreated() {
-    this.systemImpl.go(this.routes.reportOptions, UmAngularUtil.getRouteArgs(
-      this.routes.reportOptions, this.umService.ROOT_UID), this.context);
+    this.systemImpl.go(this.routes.reportOptions, UmAngularUtil.getArgumentsFromQueryParams(
+      {params: "?entryid="+this.umService.ROOT_UID,route: this.routes.reportOptions}), this.context);
   }
 
   onViewMore(reportId) {
-    const args = UmAngularUtil.queryParamsToMap("?reportId=" + reportId)
-    this.systemImpl.go("/ReportDetails", args, this.context, 0)
+    this.systemImpl.go("/ReportDetails", UmAngularUtil.getArgumentsFromQueryParams({params:"?reportId=" + reportId}), this.context, 0)
   }
 
 
