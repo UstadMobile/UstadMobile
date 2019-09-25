@@ -386,9 +386,9 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
         if(isListOrArrayResult) {
             var prefix = resultVarName
             it.key.forEach {embedVarName ->
-                prefix += ".map { it!!.$embedVarName }.filter { it != null }"
+                prefix += "\n.map { it!!.$embedVarName }\n.filter { it != null }"
             }
-            wrapperFnName = Pair("$prefix.map {", "}")
+            wrapperFnName = Pair("$prefix\n.map {", "}")
             varName = "it!!"
         }else {
             var accessorName = resultVarName
@@ -451,7 +451,8 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
         if(isListOrArrayResult) {
             codeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($resultVarName")
             it.key.forEach {embedVarName ->
-                codeBlock.add(".filter { it.$embedVarName != null }.map { it.$embedVarName as %T }",
+                codeBlock.add("\n.filter { it.$embedVarName != null }\n" +
+                        ".map { it.$embedVarName as %T }\n",
                         it.value)
             }
 
