@@ -19,7 +19,7 @@ export class HomePage{
 
 export class EntryListPage{
 
-  views = {details:"ContentEntryDetail"}
+  views = {details:"ContentEntryDetail", list: "ContentEntryList"}
   
   launch(){
     const pageHome = new HomePage()

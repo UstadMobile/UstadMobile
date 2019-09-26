@@ -46,6 +46,15 @@ describe('Content entry list', () => {
     expect(pageEntryList.getPage().entries.count()).toBeGreaterThanOrEqual(4)
   });
 
+  it('givenEntryList_whenEntryWithChildrenClicked_shouldShowChildEntries', () => {
+    pageEntryList.launch();
+    pageEntryList.getPage().entries.count().then(count => {
+      pageEntryList.getPage().entries.get(0).click()
+      expect(browser.getCurrentUrl()).toContain(pageEntryList.views.list);
+    });
+    
+  });
+
   it('givenEntryList_whenLeafEntryClicked_shouldShowEntryDetails', () => {
     pageEntryList.launch();
     pageEntryList.getPage().entries.count().then(count => {
