@@ -254,7 +254,10 @@ task fixNodeForgeScript{
 
 }
 
-task addTranslationConfigs{
+/**
+ * Configure localisation scripts
+ */
+task generateLocalizationScripts{
   doLast{
     def angularJson = project.file("angular.json")
     def packageJson = project.file("package.json")
@@ -304,15 +307,13 @@ task addTranslationConfigs{
  */
 task packPreparedModules{
   doLast{
-    new File("${rootProject.file("build/js/node_modules").path}").eachDir {
-      def dir = it.absolutePath, dirName = it.name
-      if(dir.indexOf("UstadMobile-") != -1 || dir.indexOf("ktor-") != -1 || dir.indexOf("kotlin-") != -1
-        || dir.indexOf("kotlinx-") != -1 || project.dependencyMap.find{ it.value == dirName}?.value != null){
-        println("Packing ${dirName}")
-        exec {
-          workingDir dir
-          commandLine 'npm', 'pack' , '--quiet'
-        }
+    new JsonSlurper().parseText(rootProject.file("build/js/package.json").text).workspaces.forEach{
+      def packageName = it.substring(it.indexOf("/") + 1)
+      packageName = packageName.lastIndexOf("/") == -1 ? packageName : packageName.substring(0,packageName.lastIndexOf("/"))
+      def packageDir = rootProject.file("build/js/node_modules/${packageName}")
+      exec {
+        workingDir packageDir
+        commandLine 'npm', 'pack' , '--quiet'
       }
     }
   }
@@ -341,6 +342,6 @@ fixRequiredImports.dependsOn(fixNodeForgeScript)
 installDependencies.dependsOn(packPreparedModules, deletePackageLockJsonFile)
 installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)
-generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,addTranslationConfigs)
+generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,generateLocalizationScripts)
 
 clean.dependsOn(deleteTempDirs)
