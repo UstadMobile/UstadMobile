@@ -23,6 +23,7 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
   inMemoryChartData: any[] = []
   columnNames: any[] = [];
   inMemoryColumnNames: any[] = []
+  data_class = ""
   tableDataList = []
   options = {
     title: '',
@@ -41,6 +42,7 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
       });
+      this.data_class = this.umService.isLTRDirectionality() ?  "left-align":"right-align";
   }
 
   ngOnInit() {

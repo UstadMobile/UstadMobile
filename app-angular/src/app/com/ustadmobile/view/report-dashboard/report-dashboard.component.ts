@@ -48,7 +48,7 @@ export class ReportDashboardComponent extends UmBaseComponent {
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
       });
-  }
+    }
 
   ngOnInit() {
     super.ngOnInit()

@@ -254,6 +254,50 @@ task fixNodeForgeScript{
 
 }
 
+task addTranslationConfigs{
+  doLast{
+    def angularJson = project.file("angular.json")
+    def packageJson = project.file("package.json")
+
+    def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
+    def angularJsonContent = new JsonSlurper().parseText(angularJson.text)
+    def configBuild = angularJsonContent.projects.ustadmobile.architect.build.configurations
+    def configServe = angularJsonContent.projects.ustadmobile.architect.serve.configurations
+    packageJsonContent.version = rootProject.version
+    def buildForProdCommandList = []
+    rootProject.fileTree (dir: "app-angular/src/assets/locale", include:'**messages.*.xlf')
+      .each(){ File message ->
+        def localeCode = message.name.substring(message.name.indexOf(".") + 1,message.name.lastIndexOf("."))
+        def configBuildObj = new JSONObject()
+        def configServeObj = new JSONObject()
+        def fileSrc = message.path.substring(message.path.lastIndexOf("src"))
+        configBuildObj.put("aot",true)
+        configBuildObj.put("outputPath","dist/${localeCode}/")
+        configBuildObj.put("i18nFile",fileSrc)
+        configBuildObj.put("i18nFormat","xlf")
+        configBuildObj.put("i18nLocale",localeCode)
+        configBuildObj.put("i18nMissingTranslation","error")
+        configServeObj.put("browserTarget","ustadmobile:build:${localeCode}")
+        configBuild[localeCode] = configBuildObj
+        configServe[localeCode] = configServeObj
+        packageJsonContent.scripts["start:" + localeCode] = "ng serve --configuration=${localeCode}"
+        packageJsonContent.scripts["build:" + localeCode] = "ng build --prod --i18n-locale ${localeCode}" +
+          " --i18n-format xlf --i18n-file ${fileSrc} --output-path=dist/${localeCode} --baseHref /${localeCode}/"
+        buildForProdCommandList.push("npm run build:${localeCode}")
+      }
+
+    packageJsonContent.scripts["build-prod"] = buildForProdCommandList.join(" && ")
+
+    FileWriter angularJsonFileWriter = new FileWriter(angularJson.path)
+    angularJsonFileWriter.write(new JsonBuilder(angularJsonContent).toPrettyString())
+    angularJsonFileWriter.flush()
+
+    FileWriter packageJsonFileWriter = new FileWriter(packageJson.path)
+    packageJsonFileWriter.write(new JsonBuilder(packageJsonContent).toPrettyString())
+    packageJsonFileWriter.flush()
+  }
+}
+
 
 /**
  * Pack all modules under node_modules/
@@ -297,6 +341,6 @@ fixRequiredImports.dependsOn(fixNodeForgeScript)
 installDependencies.dependsOn(packPreparedModules, deletePackageLockJsonFile)
 installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)
-generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile)
+generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,addTranslationConfigs)
 
 clean.dependsOn(deleteTempDirs)

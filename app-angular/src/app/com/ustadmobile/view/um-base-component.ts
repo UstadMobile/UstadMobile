@@ -15,6 +15,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   protected viewContext: any;
   public routes = appRountes;
   public toolBarTitle: string = '...';
+  floating_btn_class = ""
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
     this.umService.setEnvironment(document.location.search.indexOf("test") != -1)
@@ -22,7 +23,9 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.viewContext = this.context = new UmContextWrapper(router) 
     this.context.setActiveRoute(this.route);
-    this.umService.init(this) 
+    this.umService.init(this)   
+    this.floating_btn_class = this.umService.isLTRDirectionality() ? "fixed-action-btn-right" : "fixed-action-btn-left";
+  
   }
 
   setToolbarTitle(title){

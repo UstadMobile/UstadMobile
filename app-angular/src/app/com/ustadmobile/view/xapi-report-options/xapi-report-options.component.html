@@ -96,9 +96,10 @@
     </form>
   </div>
 
-  <div class="fixed-action-btn" (click)="handleDoneSelected()">
+  <div class="{{floating_btn_class}}" (click)="handleDoneSelected()">
     <a class="btn-floating btn-large {{env.colorAcent}}">
       <i class="large material-icons">done</i>
     </a>
   </div>
+
 </div>

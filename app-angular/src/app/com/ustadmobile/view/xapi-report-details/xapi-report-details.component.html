@@ -8,26 +8,26 @@
         <table>
             <thead>
               <tr>
-                  <th i18n="@@xapi_person_header">Person</th>
-                  <th i18n="@@xapi_verb_header">Did When</th>
-                  <th i18n="@@xapi_result_header">Result</th>
-                  <th i18n="@@xapi_when_header">When</th>
+                  <th class="{{data_class}}" i18n="@@xapi_person_header">Person</th>
+                  <th class="{{data_class}}" i18n="@@xapi_verb_header">Did When</th>
+                  <th class="{{data_class}}" i18n="@@xapi_result_header">Result</th>
+                  <th class="{{data_class}}" i18n="@@xapi_when_header">When</th>
               </tr>
             </thead>
     
             <tbody>
               <tr *ngFor="let data of tableDataList">
-                <td>{{data.name}}</td>
-                <td>{{data.verb}}</td>
-                <td>{{data.result | actionResultData}}</td>
-                <td>{{data.whenDate | date: 'mediumDate'}}</td>
+                <td class="{{data_class}}">{{data.name}}</td>
+                <td class="{{data_class}}">{{data.verb}}</td>
+                <td class="{{data_class}}">{{data.result | actionResultData}}</td>
+                <td class="{{data_class}}">{{data.whenDate | date: 'mediumDate'}}</td>
               </tr>
             </tbody>
           </table>
     </div>
   </div>
 
-  <div class="fixed-action-btn" (click)="handleAddToDashboard()">
+    <div class="{{floating_btn_class}}" (click)="handleAddToDashboard()">
       <a class="btn-floating btn-large {{env.colorAcent}}">
         <i class="large material-icons">add</i>
       </a>

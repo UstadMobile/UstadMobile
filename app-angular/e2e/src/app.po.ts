@@ -88,20 +88,20 @@ export class ElementUtils{
         entries: element.all(by.css('app-root app-content-entry-list > div ul li.open-content'))
       },
       componentReportDashboard: {
-        newReport: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn')),
+        newReport: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn-right')),
       },
       componentReportOptions:{
         formFields: element.all(by.css('app-xapi-report-options > div div.input-field')),
         selectViews: element.all(by.css('app-xapi-report-options > div mz-select-container')),
         inputViews: element.all(by.css('app-xapi-report-options > div mz-input-container')),
         selectViewsOption: element.all(by.css('app-xapi-report-options > div option')),
-        doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn')),
+        doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn-right')),
         dialog: element.all(by.css('xapi-treeview-dialog mz-modal'))
       },
       reportDetails: {
         graph: element.all(by.css('app-xapi-report-details > div google-chart')),
         tableRows: element.all(by.css('app-xapi-report-details > div div table tbody tr')),
-        addBtn: element.all(by.css('app-xapi-report-details > div div.fixed-action-btn'))
+        addBtn: element.all(by.css('app-xapi-report-details > div div.fixed-action-btn-right'))
       }
     };
   }
