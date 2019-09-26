@@ -1,5 +1,6 @@
 import com.github.eerohele.SaxonXsltTask
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.json.simple.JSONObject
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -236,6 +237,22 @@ task fixRequiredImports{
   }
 }
 
+/**
+ * Make sure when running npm install, when npm run build is run won't run any webpack script
+ */
+task fixNodeForgeScript{
+ doLast{
+   def packageJsonFile = rootProject.file("build/js/node_modules/node-forge/package.json")
+   if(packageJsonFile.exists()){
+     def packageJsonContent = new JsonSlurper().parseText(packageJsonFile.text)
+     packageJsonContent.scripts = "{}"
+     FileWriter writer = new FileWriter(packageJsonFile.path)
+     writer.write(new JsonBuilder(packageJsonContent).toPrettyString())
+     writer.flush()
+   }
+ }
+
+}
 
 
 /**
@@ -247,9 +264,10 @@ task packPreparedModules{
       def dir = it.absolutePath, dirName = it.name
       if(dir.indexOf("UstadMobile-") != -1 || dir.indexOf("ktor-") != -1 || dir.indexOf("kotlin-") != -1
         || dir.indexOf("kotlinx-") != -1 || project.dependencyMap.find{ it.value == dirName}?.value != null){
+        println("Packing ${dirName}")
         exec {
           workingDir dir
-          commandLine 'npm', 'pack'
+          commandLine 'npm', 'pack' , '--quiet'
         }
       }
     }
@@ -275,6 +293,7 @@ task ngTest{
 
 ngTest.dependsOn(build)
 build.dependsOn(installDependencies)
+fixRequiredImports.dependsOn(fixNodeForgeScript)
 installDependencies.dependsOn(packPreparedModules, deletePackageLockJsonFile)
 installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)

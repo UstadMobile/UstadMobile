@@ -7,8 +7,7 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e --watch=false --browsers=ChromeHeadless",
-    "webpack": "webpack --config webpack.config.js"
+    "e2e": "ng e2e --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
