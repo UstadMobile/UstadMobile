@@ -30,10 +30,22 @@ import entity from 'UstadMobile-lib-database-entities';
 i.e  
 const contentEntry = new entity.com.ustadmobile.lib.db.entities.ContentEntry();  
 ```  
-* Running an app locally (More info on how to customize this like specifying ports and e.t.c, check angular offical website)  
-	```  
-	ng serve  
-	```  
+* Run app locally
+
+Run with default locale
+
+```
+ng serve  or  npm run start
+```
+
+Running app locally for a specific locale
+
+```  
+npm run start:<locale code> 
+
+//i.e npm run start:en
+``` 
+
 This will create an app, to run it use http://localhost:4200/  
 
 ## Testing  
@@ -54,7 +66,15 @@ i.e
 ```
 ## Deployment  
 To create production app, you need to generate JS bundles from angular source. To achieve that run the following command on your terminal.  
-  
+
+Deploy for specific locale
 ```  
-npm build --prod  
+npm run build:<locale code> 
+//i.d npm run build:en
+```
+
+Deploy for all locales
+
+```  
+npm run build-prod 
 ```

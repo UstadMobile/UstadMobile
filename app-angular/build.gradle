@@ -238,7 +238,10 @@ task fixRequiredImports{
 }
 
 /**
- * Make sure when running npm install, when npm run build is run won't run any webpack script
+ * When executing npm install, npm run build also executes as pre-build process which execute all
+ * build scripts. This will run webpack which is configured to only run when testing js kotlin
+ * implementation on browser. To avoid that, remove all build scripts on node-forge
+ * when running app-angular build process.
  */
 task fixNodeForgeScript{
  doLast{
