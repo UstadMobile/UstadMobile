@@ -203,6 +203,7 @@ kotlin {
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
                 api project(":lib-database-mpp")
+                api project(":app-ktor-server")
 
             }
 

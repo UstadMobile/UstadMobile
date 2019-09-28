@@ -2,10 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 @Dao
@@ -109,5 +111,8 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entries: List<Container>)
 
 }

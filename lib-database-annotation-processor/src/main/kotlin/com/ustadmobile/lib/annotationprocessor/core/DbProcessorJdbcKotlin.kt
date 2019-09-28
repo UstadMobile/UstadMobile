@@ -30,6 +30,7 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.annotation.QueryLiveTables
 import kotlin.RuntimeException
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
@@ -315,13 +316,19 @@ fun getQueryNamedParameters(querySql: String): List<String> {
     return namedParams
 }
 
+data class ResultEntityComponent(val prefix: String, val fieldList: Map<String, Element>,
+                                 val enttiyType: TypeElement)
+
 /**
  * Generate a map of all the fields that can be set on the given entity
  */
-data class EntityFieldMap(val fieldMap: Map<String, Element>, val embeddedVarsList: List<Pair<String, Element>>)
+data class EntityFieldMap(val fieldMap: Map<String, Element>,
+                          val embeddedVarsList: List<Pair<String, Element>>)
+
+
 fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
                            fieldMap: MutableMap<String, Element> = mutableMapOf(),
-                           embeddedVarsList: MutableList<Pair<String, Element>> = mutableListOf(),
+                           embeddedVarsList: MutableList<Pair<String, TypeElement>> = mutableListOf(),
                            processingEnv: ProcessingEnvironment): EntityFieldMap {
 
     ancestorsToList(entityTypeEl, processingEnv).forEach {
@@ -329,7 +336,7 @@ fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
                 .partition { it.getAnnotation(Embedded::class.java) == null }
         listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
         listParted.second.forEach {
-            embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it))
+            embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it as TypeElement))
             mapEntityFields(processingEnv.typeUtils.asElement(it.asType()) as TypeElement,
                     "$prefix.${it.simpleName}!!", fieldMap, embeddedVarsList, processingEnv)
         }
@@ -856,14 +863,23 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     (returnTypeResolved as ParameterizedTypeName).typeArguments[1])
         }else if(isLiveData(returnTypeResolved)) {
             val tablesToWatch = mutableListOf<String>()
-            try {
-                val select = CCJSqlParserUtil.parse(querySql) as Select
-                val tablesNamesFinder = TablesNamesFinder()
-                tablesToWatch.addAll(tablesNamesFinder.getTableList(select))
-            }catch(e: Exception) {
-                messager?.printMessage(Diagnostic.Kind.WARNING,
-                        "Could not parse SQL to determine livedata tables to watch")
+            val specifiedLiveTables = daoMethod.getAnnotation(QueryLiveTables::class.java)
+            if(specifiedLiveTables == null) {
+                try {
+                    val select = CCJSqlParserUtil.parse(querySql) as Select
+                    val tablesNamesFinder = TablesNamesFinder()
+                    tablesToWatch.addAll(tablesNamesFinder.getTableList(select))
+                }catch(e: Exception) {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            "${makeLogPrefix(daoTypeElement, daoMethod)}: " +
+                                    "Sorry: JSQLParser could not parse the query : " +
+                                    querySql +
+                                    "Please manually specify the tables to observe using @QueryLiveTables annotation")
+                }
+            }else {
+                tablesToWatch.addAll(specifiedLiveTables.value)
             }
+
 
             val liveDataCodeBlock = CodeBlock.builder()
                     .beginControlFlow("val _result = %T<%T>(_db, listOf(%L)) ",

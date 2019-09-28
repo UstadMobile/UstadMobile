@@ -14,10 +14,12 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
+import com.ustadmobile.port.sharedse.networkmanager.IDownloadJobPreparer
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
@@ -29,7 +31,8 @@ import kotlin.jvm.Volatile
 
 class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon,
                               arguments: Map<String, String>, view: DownloadDialogView,
-                              private var appDatabase: UmAppDatabase, private val appDatabaseRepo: UmAppDatabase)
+                              private var appDatabase: UmAppDatabase, private val appDatabaseRepo: UmAppDatabase,
+                              private val downloadJobPreparerFn: IDownloadJobPreparer)
     : UstadBaseController<DownloadDialogView>(context, arguments, view), OnDownloadJobItemChangeListener {
 
     private var deleteFileOptions = false
@@ -71,7 +74,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
                 "content entry uid: " + contentEntryUid)
         view.setWifiOnlyOptionVisible(false)
 
-        impl!!.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>>{
+        impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>>{
             override fun onDone(result: List<UMStorageDir>?) {
                 destinationDir = result?.get(0)?.dirURI
                 view.runOnUiThread(Runnable{ view.showStorageOptions(result!!) })
@@ -92,20 +95,14 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             jobItemManager = networkManagerBle.openDownloadJobItemManager(currentJobId)!!
         }
 
-        startObservingJob()
-        startObservingDownloadJobMeteredState()
+        startObservingJobAndMeteredState()
     }
 
-    private fun startObservingJob() {
+    private fun startObservingJobAndMeteredState() {
         view.runOnUiThread(Runnable {
             downloadDownloadJobLive = appDatabase.downloadJobDao.getJobLive(currentJobId)
             downloadDownloadJobLive.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobStatusChange)
-        })
-    }
-
-    private fun startObservingDownloadJobMeteredState() {
-        view.runOnUiThread(Runnable {
             allowedMeteredLive = appDatabase.downloadJobDao
                     .getLiveMeteredNetworkAllowed(currentJobId)
             allowedMeteredLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
@@ -197,12 +194,15 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private suspend fun createDownloadJobRecursive() : Boolean{
+        with(view) { runOnUiThread(Runnable { setCalculatingViewVisible(true) }) }
+
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
         jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
         jobItemManager!!.awaitLoaded()
         currentJobId = jobItemManager!!.downloadJobUid
-        DownloadJobPreparer(jobItemManager!!, appDatabase, appDatabaseRepo).run()
+        downloadJobPreparerFn.prepare(jobItemManager!!, appDatabase, appDatabaseRepo)
+        with(view) { runOnUiThread(Runnable { setCalculatingViewVisible(false) })}
         return currentJobId != 0
     }
 
@@ -219,6 +219,16 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             }
         }
     }
+    /**
+     * Handle negative click. If the underlying system is already dismissing the dialog
+     * set dismissAfter to false to avoid a call to dismissDialog
+     * @param dismissAfter flag to indicate if the dialog will be dismissed after the selection
+     */
+    fun handleClickNegative(dismissAfter: Boolean = true) {
+        if(dismissAfter)
+            dismissDialog()
+    }
+
 
 
     fun handleClickStackedButton(idClicked: Int) {

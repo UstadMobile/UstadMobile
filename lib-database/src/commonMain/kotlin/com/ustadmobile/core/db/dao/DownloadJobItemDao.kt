@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.db.entities.*
 
 /**
@@ -142,6 +143,7 @@ abstract class DownloadJobItemDao {
             " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
             " AND DownloadJob.meteredNetworkAllowed) " +
             "LIMIT 1")
+    @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +

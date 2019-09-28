@@ -922,6 +922,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         }
                     }
 
+
+
+
                     if(missingPropNames.isNotEmpty()) {
                         logMessage(Diagnostic.Kind.ERROR, " Cannot map the following columns " +
                                 "from query to properties on return type of element $entityType : " +

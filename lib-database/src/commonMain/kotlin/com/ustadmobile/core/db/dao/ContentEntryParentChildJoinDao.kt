@@ -1,8 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -57,4 +55,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
             "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid) " +
             "AND EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjParentContentEntryUid = ContentEntry.contentEntryUid)")
     abstract fun selectTopEntries(): List<ContentEntry>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entries: List<ContentEntryParentChildJoin>)
 }

@@ -16,6 +16,7 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.DoorDatabaseRepository
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -98,10 +99,17 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                   addBoundaryCallbackGetters: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
+        val isDbTypeSyncable = isSyncableDb(dbTypeElement, processingEnv)
 
+        val repoInterface = if(isDbTypeSyncable) {
+            DoorDatabaseRepository::class.asClassName()
+        } else {
+            DoorDatabaseSyncRepository::class.asClassName()
+        }
 
         val dbRepoType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
                 .superclass(dbTypeElement.asClassName())
+                .addSuperinterface(repoInterface)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
@@ -116,7 +124,23 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         PropertySpec.builder("_accessToken", String::class)
                                 .initializer("_accessToken").build(),
                         PropertySpec.builder("_httpClient",
-                            HttpClient::class.asClassName()).initializer("_httpClient").build()
+                            HttpClient::class.asClassName()).initializer("_httpClient").build(),
+                        PropertySpec.builder("endpoint", String::class)
+                                .getter(FunSpec.getterBuilder().addCode("return _endpoint\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("auth", String::class)
+                                .getter(FunSpec.getterBuilder().addCode("return _accessToken\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("dbPath", String::class)
+                                .getter(FunSpec.getterBuilder().addCode("return $DB_NAME_VAR\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("httpClient", HttpClient::class)
+                                .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build()
                 ))
                 .addFunction(FunSpec.builder("clearAllTables")
                         .addModifiers(KModifier.OVERRIDE)
@@ -173,7 +197,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
         }
 
 
-        if(isSyncableDb(dbTypeElement, processingEnv)) {
+        if(isDbTypeSyncable) {
             val syncableDaoClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                     "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
             val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
@@ -189,6 +213,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
                     .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
+            dbRepoType.addProperty(PropertySpec.builder("clientId", INT)
+                    .getter(FunSpec.getterBuilder().addCode("return _clientId").build())
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
 
             dbRepoType.addProperty(PropertySpec.builder("master", BOOLEAN)
                     .addModifiers(KModifier.OVERRIDE)

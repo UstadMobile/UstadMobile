@@ -1,9 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -161,14 +159,18 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries
     ) AS (
     SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.imported, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy,
-    ContentEntryParentChildJoin.*, Container.* FROM 
+    ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy,
+	Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries
+	FROM 
     ContentEntry
     LEFT JOIN ContentEntryParentChildJoin ON ContentEntry.contentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid 
     LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0))
     WHERE ContentEntry.contentEntryUid = :contentEntryUid
     UNION
     SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.imported, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy,
-    ContentEntryParentChildJoin.*, Container.* FROM 
+    ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy, 
+	Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries
+	FROM 
     ContentEntry
     LEFT JOIN ContentEntryParentChildJoin ON ContentEntry.contentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid 
     LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0)),
@@ -176,5 +178,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
     SELECT * FROM ContentEntry_recursive""")
     abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entries: List<ContentEntry>)
 
 }

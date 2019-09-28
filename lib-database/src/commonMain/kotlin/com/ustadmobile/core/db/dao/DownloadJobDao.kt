@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 
@@ -24,6 +25,7 @@ abstract class DownloadJobDao {
 
     @Query("SELECT count(*) > 0 From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
+    @QueryLiveTables(["DownloadJob"])
     abstract fun anyActiveDownloadJob(): DoorLiveData<Boolean>
 
     /**
@@ -133,6 +135,9 @@ abstract class DownloadJobDao {
 
     @Query("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
     abstract fun findDownloadJobUidByRootContentEntryUid(rootContentEntryUid: Long): Long
+
+    @Query("SELECT * FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
+    abstract fun findDownloadJobByRootContentEntryUid(rootContentEntryUid: Long): DownloadJob?
 
     @Query("UPDATE DownloadJob SET djDestinationDir = :destinationDir WHERE djUid = :djUid")
     abstract suspend fun updateDestinationDirectoryAsync(djUid: Int, destinationDir: String): Int

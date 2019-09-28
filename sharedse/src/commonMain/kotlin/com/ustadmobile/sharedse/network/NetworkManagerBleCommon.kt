@@ -34,7 +34,9 @@ import kotlin.jvm.Synchronized
 abstract class NetworkManagerBleCommon(
         val context: Any = Any(),
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
-        private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default) : LocalAvailabilityMonitor,
+        private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
+        internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context),
+        internal var umAppDatabaseRepo: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : LocalAvailabilityMonitor,
         DownloadJobItemStatusProvider {
 
     private val knownNodesLock = Any()
@@ -67,10 +69,6 @@ abstract class NetworkManagerBleCommon(
     protected var wifiLockHolders = mutableListOf<Any>()
 
     private val knownPeerNodes = mutableMapOf<String, Long>()
-
-    private lateinit var umAppDatabase: UmAppDatabase
-
-    private lateinit var umAppDatabaseRepo: UmAppDatabase
 
     private val localAvailabilityListeners = copyOnWriteListOf<LocalAvailabilityListener>()
 
@@ -126,8 +124,6 @@ abstract class NetworkManagerBleCommon(
      * Start web server, advertising and discovery
      */
     open fun onCreate() {
-        umAppDatabase = UmAppDatabase.getInstance(context)
-        umAppDatabaseRepo = umAppDatabase
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
         downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
                 { item1, item2 -> item1.djiUid == item2.djiUid }, mainDispatcher = mainDispatcher) {

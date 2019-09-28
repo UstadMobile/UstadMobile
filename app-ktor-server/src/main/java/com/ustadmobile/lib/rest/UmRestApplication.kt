@@ -33,16 +33,16 @@ import javax.naming.InitialContext
 private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
 
 
-fun Application.umRestApplication(devMode: Boolean = false) {
+fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase = _restApplicationDb) {
 
-    val adminuser = _restApplicationDb.personDao.findByUsername("admin")
+    val adminuser = db.personDao.findByUsername("admin")
     if(adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
-        adminPerson.personUid = _restApplicationDb.personDao.insert(adminPerson)
+        adminPerson.personUid = db.personDao.insert(adminPerson)
         val adminPass = RandomStringUtils.randomAlphanumeric(8)
 
-        _restApplicationDb.personAuthDao.insert(PersonAuth(adminPerson.personUid,
+        db.personAuthDao.insert(PersonAuth(adminPerson.personUid,
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
 
 
@@ -74,16 +74,16 @@ fun Application.umRestApplication(devMode: Boolean = false) {
     }
 
     install(Routing) {
-        ContainerDownload(_restApplicationDb)
-        H5PImportRoute(_restApplicationDb) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
-            downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
+        ContainerDownload(db)
+        H5PImportRoute(db) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
+            downloadH5PUrl(db, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
 
-        LoginRoute(_restApplicationDb)
-        UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
+        LoginRoute(db)
+        UmAppDatabase_KtorRoute(db, Gson())
         if(devMode) {
             get("UmAppDatabase/clearAllTables") {
-                _restApplicationDb.clearAllTables()
+                db.clearAllTables()
                 call.respond("OK - cleared")
             }
         }
