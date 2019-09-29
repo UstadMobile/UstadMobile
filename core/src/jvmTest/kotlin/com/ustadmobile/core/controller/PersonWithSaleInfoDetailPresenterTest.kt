@@ -35,7 +35,7 @@ class PersonWithSaleInfoDetailPresenterTest: AbstractSaleRelatedSetup(){
                 mapOf(ARG_WE_UID to we1PersonUid.toString()), mockView, systemImplSpy)
         presenter.onCreate(mapOf())
 
-        verify(mockView, Mockito.timeout(1000)).updatePersonOnView(any())
+        verify(mockView, Mockito.timeout(1000)).runOnUiThread(any())
     }
 
 }

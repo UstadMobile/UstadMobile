@@ -16,6 +16,8 @@ interface UserProfileView : UstadView {
 
     fun setLanguageSet(languageSet: String)
 
+    fun setLanguageOption(languages: MutableList<String>)
+
     fun updateImageOnView(imagePath: String)
 
     fun addImageFromCamera()

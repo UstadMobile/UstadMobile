@@ -114,6 +114,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         super.onResume()
     }
 
+    override fun setLanguageOption(languages: MutableList<String>){
+        //TODO: future
+    }
+
     fun showGetImageAlertDialog() {
         val adb = AlertDialog.Builder(this)
                 .setTitle("")

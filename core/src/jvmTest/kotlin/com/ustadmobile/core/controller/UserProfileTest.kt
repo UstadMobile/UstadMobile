@@ -41,7 +41,7 @@ class UserProfileTest {
         presenter = UserProfilePresenter(context, mapOf(),view,impl)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
-                null,null), context)
+                "",""), context)
     }
 
 

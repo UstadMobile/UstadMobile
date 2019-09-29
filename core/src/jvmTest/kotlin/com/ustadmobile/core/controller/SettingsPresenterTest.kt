@@ -4,10 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.GroupListView
-import com.ustadmobile.core.view.LocationListView
-import com.ustadmobile.core.view.PersonListView
-import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.util.test.AbstractSaleRelatedSetup
 import com.ustadmobile.util.test.checkJndiSetup
@@ -70,7 +67,7 @@ class SettingsPresenterTest : AbstractSaleRelatedSetup() {
         presenter.onCreate(mapOf())
 
         presenter.goToPeopleList()
-        verify(systemImplSpy).go(eq(PersonListView.VIEW_NAME), eq(mapOf()), any())
+        verify(systemImplSpy).go(eq(PeopleListView.VIEW_NAME), eq(mapOf()), any())
     }
 
 }

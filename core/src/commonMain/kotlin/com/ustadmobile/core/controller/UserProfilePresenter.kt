@@ -20,9 +20,9 @@ import kotlinx.coroutines.launch
  * Presenter for UserProfile view
  */
 class UserProfilePresenter(context: Any,
-                           arguments: Map<String, String>?,
-                           view: UserProfileView)
-    : UstadBaseController<UserProfileView>(context, arguments!!, view) {
+                           arguments: Map<String, String?>,
+                           view: UserProfileView, val impl: UstadMobileSystemImpl)
+    : UstadBaseController<UserProfileView>(context, arguments, view) {
 
     internal var repository: UmAppDatabase =
             UmAccountManager.getRepositoryForActiveAccount(context)
@@ -32,6 +32,7 @@ class UserProfilePresenter(context: Any,
 
     var loggedInPersonUid = 0L
 
+    private val languageOptions = impl.getAllUiLanguage(context)
 
     init {
 
@@ -70,7 +71,7 @@ class UserProfilePresenter(context: Any,
         }
 
         //TODO: Get last time the device/account was synced.
-        val lastSyncedText = UstadMobileSystemImpl.instance.getString(MessageID.account_last_synced,
+        val lastSyncedText = impl.getString(MessageID.account_last_synced,
                 context)
         val lastSyncedText2 = ""
         val lastSynced = lastSyncedText + " " + lastSyncedText2
@@ -80,13 +81,11 @@ class UserProfilePresenter(context: Any,
     }
 
     fun handleClickChangePassword() {
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(ChangePasswordView.VIEW_NAME, args, context)
     }
 
     fun handleClickChangeLanguage() {
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(SelectLanguageDialogView.VIEW_NAME, args, context)
 
@@ -96,15 +95,14 @@ class UserProfilePresenter(context: Any,
         //TODO: KMP Check this
         val emptyAcccount = UmAccount(0, null, null, null)
         UmAccountManager.setActiveAccount(emptyAcccount, context)
-        UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.instance)
-        val impl = UstadMobileSystemImpl.instance
+        UmAccountManager.updatePasswordHash(null, context, impl)
         impl.setAppPref(UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME, "", context)
         val args = HashMap<String, String>()
         impl.go(LoginView.VIEW_NAME, args, context)
     }
 
+
     fun handleClickMyWomenEntrepreneurs(){
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args[ARG_LE_UID] = loggedInPersonUid.toString()
         impl.go(PersonWithSaleInfoListView.VIEW_NAME, args, context)
@@ -112,7 +110,6 @@ class UserProfilePresenter(context: Any,
 
     fun openPictureDialog(imagePath: String) {
         //Open Dialog
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         //TODO If needed:
         //        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
@@ -146,5 +143,16 @@ class UserProfilePresenter(context: Any,
 
 
         }
+    }
+
+    fun handleUserLogout(){
+        UmAccountManager.setActiveAccount(UmAccount(0,
+                "", "", ""), context)
+        val args = HashMap<String, String>()
+        impl.go(HomeView.VIEW_NAME, args, context)
+    }
+
+    fun handleShowLanguageOptions(){
+        view.setLanguageOption(languageOptions.values.sorted().toMutableList())
     }
 }
