@@ -23,6 +23,8 @@ import okio.Buffer
 import okio.Okio
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import com.ustadmobile.lib.db.entities.H5PImportData
+import com.ustadmobile.lib.rest.findSystemCommand
 import org.junit.Before
 import org.mockito.Mockito.doReturn
 

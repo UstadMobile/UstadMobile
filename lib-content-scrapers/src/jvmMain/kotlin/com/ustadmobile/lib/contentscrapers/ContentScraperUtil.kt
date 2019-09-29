@@ -99,6 +99,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
+import com.ustadmobile.lib.rest.findSystemCommand
 import kotlinx.coroutines.runBlocking
 import java.lang.System.exit
 import java.time.temporal.TemporalQuery
@@ -121,7 +122,7 @@ object ContentScraperUtil {
     const val MOGRIFY_PATH_KEY = "mogrify"
 
     val SEARCH_LOCATIONS = mapOf(
-            CHROME_PATH_KEY to listOf("//home/samih/chromedriver"),
+            CHROME_PATH_KEY to listOf("/usr/bin/chromedriver"),
             FFMPEG_PATH_KEY to listOf("/usr/bin/ffmpeg"),
             CODEC2_PATH_KEY to listOf("/usr/local/bin/c2enc"),
             WEBP_PATH_KEY to listOf("/usr/bin/cwebp"),

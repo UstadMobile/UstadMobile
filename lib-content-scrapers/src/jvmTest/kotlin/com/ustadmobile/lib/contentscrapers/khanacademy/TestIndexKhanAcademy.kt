@@ -25,11 +25,6 @@ import java.nio.file.Files
 
 class TestIndexKhanAcademy {
 
-    @Before
-    fun setup(){
-        ContentScraperUtil.checkIfPathsToDriversExist()
-    }
-
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {
 
@@ -78,6 +73,7 @@ class TestIndexKhanAcademy {
     @Before
     @Throws(Exception::class)
     fun setUpDriver() {
+        ContentScraperUtil.checkIfPathsToDriversExist()
         mockWebServer = MockWebServer()
         mockWebServer!!.setDispatcher(dispatcher)
 

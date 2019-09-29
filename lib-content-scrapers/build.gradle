@@ -41,6 +41,7 @@ kotlin {
                     implementation project(":lib-door-runtime")
                     implementation project(":sharedse")
                     implementation project(":lib-util")
+                    implementation project(":app-ktor-server")
 
                     implementation "org.jsoup:jsoup:$version_jsoup"
                     implementation "com.google.code.gson:gson:$version_gson"
