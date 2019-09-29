@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.app.Activity
 import android.content.Intent
 import android.os.SystemClock
 import android.view.Gravity
@@ -8,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.DrawerActions
@@ -29,6 +31,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.test.core.impl.ProgressIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.core.AllOf.allOf
@@ -61,6 +64,8 @@ class EpubContentActivityEspressoTest {
     private var opfDocument: OpfDocument? = null
 
     private var navDocument: EpubNavDocument? = null
+
+    private var idleProgress: ProgressIdlingResource? = null
 
     @Before
     @Throws(IOException::class, XmlPullParserException::class)
@@ -105,18 +110,24 @@ class EpubContentActivityEspressoTest {
     fun tearDown() {
         epubTmpFile!!.delete()
         UmFileUtilSe.deleteRecursively(containerTmpDir!!)
+        IdlingRegistry.getInstance().unregister(idleProgress)
     }
 
-    fun launchActivity() {
+    fun launchActivity(): Activity {
         val launchIntent = Intent()
         launchIntent.putExtra(EpubContentView.ARG_CONTAINER_UID,
                 epubContainer!!.containerUid.toString())
         mActivityRule.launchActivity(launchIntent)
+        return mActivityRule.activity
     }
 
     @Test
     fun givenValidEpub_whenOpened_thenShouldShowContentAndMenu() {
-        launchActivity()
+        var activity = launchActivity()
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
 
         //Ensure that Espresso can see the progress bar - so it waits for this to be idle
         SystemClock.sleep(1000)
@@ -133,7 +144,11 @@ class EpubContentActivityEspressoTest {
 
     @Test
     fun givenValidEpubOpen_whenClickOnNavigationDrawItem_thenShouldOpenPage() {
-        launchActivity()
+        var activity = launchActivity()
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
 
         //Ensure that Espresso can see the progress bar - so it waits for this to be idle
         SystemClock.sleep(1000)
@@ -147,34 +162,5 @@ class EpubContentActivityEspressoTest {
                 .withElement(findElement(Locator.CLASS_NAME, "page_number"))
                 .check(webMatches(getText(), containsString("3")))
     }
-
-    @Test
-    fun givenValidEpubOpen_whenSingleTapOnContent_thenActionBarShouldHideAndShow() {
-        launchActivity()
-
-        //Ensure that Espresso can see the progress bar - so it waits for this to be idle
-        SystemClock.sleep(1000)
-        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
-                .check(matches(withText(opfDocument!!.title)))
-
-        //When we single tap on the content, the toolbar should go away
-        onView(allOf<View>(withId(R.id.fragment_container_page_webview), withTagValue(equalTo(0))))
-                .perform(UmViewActions.singleTap(200f, 200f))
-
-        SystemClock.sleep(1000)
-        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
-                .check(matches(not<View>(isDisplayed())))
-
-        //When we single tap again, the toolbar should come back
-        SystemClock.sleep(1000)
-        onView(allOf<View>(withId(R.id.fragment_container_page_webview), withTagValue(equalTo(0))))
-                .perform(UmViewActions.singleTap(200f, 200f))
-
-        SystemClock.sleep(1000)
-        onView(allOf<View>(instanceOf<View>(AppCompatTextView::class.java), withParent(withId(R.id.um_toolbar))))
-                .check(matches(isDisplayed()))
-
-    }
-
 
 }

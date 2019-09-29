@@ -40,29 +40,9 @@ class EpubContentPageFragment : Fragment() {
      */
     private var viewGroup: ViewGroup? = null
 
-    private var mTapToHideToolbarHandler: TapToHideToolbarHandler? = null
-
     private var webViewTouchHandler: Handler? = null
 
-    private val touchDownEvent: MotionEvent? = null
-
-    private val touchDownTime: Long = 0
-
     private var gestureDetector: GestureDetectorCompat? = null
-
-    private val webViewClickCallback = Handler.Callback{ msg ->
-        if (msg.what == HANDLER_CLICK_ON_VIEW) {
-            mTapToHideToolbarHandler!!.onTap(mPageIndex)
-        }
-
-        true
-    }
-
-    internal interface TapToHideToolbarHandler {
-
-        fun onTap(pageIndex: Int)
-
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,8 +87,6 @@ class EpubContentPageFragment : Fragment() {
             downloadManager.enqueue(request)
         }
 
-        webViewTouchHandler = Handler(webViewClickCallback)
-
         gestureDetector = GestureDetectorCompat(webView!!.context,
                 object : GestureDetector.SimpleOnGestureListener() {
                     override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -137,28 +115,17 @@ class EpubContentPageFragment : Fragment() {
         }
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (context is TapToHideToolbarHandler)
-            mTapToHideToolbarHandler = context
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        mTapToHideToolbarHandler = null
-    }
-
     companion object {
 
         /**
          * Argument with the entire, absolute url for this page
          */
-        val ARG_PAGE_URL = "pg_url"
+        const val ARG_PAGE_URL = "pg_url"
 
         /**
          * Page index argument: used to tag the webview so it can be specified during testing
          */
-        val ARG_PAGE_INDEX = "pg_index"
+        const val ARG_PAGE_INDEX = "pg_index"
 
         val HANDLER_CLICK_ON_LINK = 1
 
