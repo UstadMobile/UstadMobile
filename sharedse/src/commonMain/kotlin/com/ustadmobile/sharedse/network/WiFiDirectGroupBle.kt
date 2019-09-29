@@ -58,7 +58,7 @@ open class WiFiDirectGroupBle {
     var port: Int? = 0
 
     /**
-     * @return Node ip address
+     * @return Node ip personAddress
      */
     var ipAddress: String? = ""
 

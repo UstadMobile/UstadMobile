@@ -169,7 +169,7 @@ abstract class NetworkManagerBleCommon(
                 knownPeerNodes[node.bluetoothMacAddress!!] = node.lastUpdateTimeStamp
                 if (result == 0) {
                     networkNodeDao.insertAsync(node)
-                    UMLog.l(UMLog.DEBUG, 694, "New node with address "
+                    UMLog.l(UMLog.DEBUG, 694, "New node with personAddress "
                             + node.bluetoothMacAddress + " found, added to the Db")
 
                     val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
@@ -456,7 +456,7 @@ abstract class NetworkManagerBleCommon(
 
     /**
      * Handle node connection history, delete node which failed to connect for over 5 attempts
-     * @param bluetoothAddress node bluetooth address
+     * @param bluetoothAddress node bluetooth personAddress
      * @param success connection status , True if the connection was made successfully,
      * otherwise false
      */
@@ -477,20 +477,20 @@ abstract class NetworkManagerBleCommon(
 
         if ((knownBadNodeTrackList[bluetoothAddress] ?: 0) > 5) {
             UMLog.l(UMLog.DEBUG, 694,
-                    "Bad node counter exceeded threshold (5), removing node with address "
+                    "Bad node counter exceeded threshold (5), removing node with personAddress "
                             + bluetoothAddress + " from the list")
             knownBadNodeTrackList.remove(bluetoothAddress)
             knownPeerNodes.remove(bluetoothAddress)
             umAppDatabase.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
 
-            UMLog.l(UMLog.DEBUG, 694, "Node with address "
+            UMLog.l(UMLog.DEBUG, 694, "Node with personAddress "
                     + bluetoothAddress + " removed from the list")
         }
     }
 
     /**
-     * Get bad node by bluetooth address
-     * @param bluetoothAddress node bluetooth address
+     * Get bad node by bluetooth personAddress
+     * @param bluetoothAddress node bluetooth personAddress
      * @return bad node
      */
     fun getBadNodeTracker(bluetoothAddress: String): Int? {
@@ -552,9 +552,9 @@ abstract class NetworkManagerBleCommon(
     companion object {
 
         /**
-         * Convert decimal representation of an ip address back to IPV4 format.
+         * Convert decimal representation of an ip personAddress back to IPV4 format.
          * @param ip decimal representation
-         * @return IPV4 address
+         * @return IPV4 personAddress
          */
         fun convertIpAddressToString(ip: Int): String {
             return ((ip shr 24 and 0xFF).toString() + "." + (ip shr 16 and 0xFF) + "."
@@ -563,9 +563,9 @@ abstract class NetworkManagerBleCommon(
 
 
         /**
-         * Convert IP address to decimals
-         * @param address IPV4 address
-         * @return decimal representation of an IP address
+         * Convert IP personAddress to decimals
+         * @param address IPV4 personAddress
+         * @return decimal representation of an IP personAddress
          */
         fun convertIpAddressToInteger(address: String): Int {
             var result = 0

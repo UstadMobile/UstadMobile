@@ -132,32 +132,32 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_ASC)
-    abstract fun findAllSaleFilterAllSortNameAscProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_DEC)
-    abstract fun findAllSaleFilterAllSortNameDescProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_DESC)
-    abstract fun findAllSaleFilterAllSortTotalAscProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_ASC)
-    abstract fun findAllSaleFilterAllSortTotalDescProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_DESC)
-    abstract fun findAllSaleFilterAllSortDateAscProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_ASC)
-    abstract fun findAllSaleFilterAllSortDateDescProvider(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
 
     fun filterAndSortSale(sort:Int, weUid:Long): DataSource.Factory<Int, SaleListDetail>{
         when(sort) {
-            SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider(weUid)
-            SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider(weUid)
-            SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider(weUid)
-            SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider(weUid)
-            SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider(weUid)
-            SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProvider(weUid)
+            SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProviderByWeUid(weUid)
+            SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProviderByWeUid(weUid)
+            SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid)
+            SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid)
+            SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProviderByWeUid(weUid)
+            SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProviderByWeUid(weUid)
         }
         return findAllActiveAsSaleListDetailProvider()
     }

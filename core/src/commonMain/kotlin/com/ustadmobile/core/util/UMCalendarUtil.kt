@@ -132,6 +132,20 @@ object UMCalendarUtil {
 
     }
 
+    fun getToday000000():Long{
+        val cal = DateTime.now()
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth, hour = 0,
+                minute = 0, second = 0, milliseconds = 0)
+        return ntcal.unixMillisLong
+    }
+
+    fun getToday235959():Long{
+        val cal = DateTime.now()
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth, hour = 23,
+                minute = 59, second = 59)
+        return ntcal.unixMillisLong
+    }
+
     /**
      * Checks if a given long date is today or not.
      *
@@ -176,6 +190,53 @@ object UMCalendarUtil {
         val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth, hour = 0,
                 minute = 0, second = 0, milliseconds = 0)
         return ntcal.unixMillisLong
+    }
+
+    fun changeDatetoThis(thisDate:Long, startTimeMins: Long):Long{
+
+        val cal = DateTime(thisDate)
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth,
+                hour = (startTimeMins / 60).toInt(), minute = (startTimeMins % 60).toInt(),
+                second = 0, milliseconds = 0)
+        return ntcal.unixMillisLong
+    }
+
+    fun normalizeSecondsAndMillis(thisDate: Long):Long{
+        val cal = DateTime(thisDate)
+        val ntcal = DateTime(year = cal.year, month = cal.month, day = cal.dayOfMonth, hour = cal.hours,
+                minute = cal.minutes, second = 0, milliseconds = 0)
+        return ntcal.unixMillisLong
+    }
+
+    fun getHourOfDay24(thisDate: Long): Int{
+        val cal = DateTime(thisDate)
+        return cal.hours
+    }
+
+    fun getMinuteOfDay(thisDate: Long): Int{
+        val cal = DateTime(thisDate)
+        return cal.minutes
+    }
+
+    fun getDayOfWeek(thisDate: Long):Int {
+        val cal = DateTime(thisDate)
+        return cal.dayOfWeekInt
+    }
+
+    fun setDayOfWeek(thisDate:Long, dow:Int):Long{
+        val cal = DateTime(thisDate)
+        val currentDOW = cal.dayOfWeekInt
+        if(currentDOW == dow){
+            return getDateInMilliPlusDaysRelativeTo(thisDate, 7)
+        }
+        else if (currentDOW<dow){
+            return getDateInMilliPlusDaysRelativeTo(thisDate, dow - currentDOW)
+        }else if(currentDOW>dow){
+            val plus = 7 - currentDOW + dow
+            return getDateInMilliPlusDaysRelativeTo(thisDate, plus)
+        }else{
+            return getDateInMilliPlusDaysRelativeTo(thisDate, 0)
+        }
     }
 
     fun getPrettyTimeFromLong(thisDate: Long, locale: Any?): String {
@@ -244,5 +305,68 @@ object UMCalendarUtil {
 
     }
 
+
+    /**
+     * Advance a calendar to the next occurence of a particular day (e.g. Monday, Tuesday, etc).
+     *
+     * @param calendar the calendar to use as the start time
+     * @param dayOfWeek the day of the week to go to as per Calendar constants
+     * @param incToday if true, then if the start date matches the end date, make no changes. If false,
+     * and the input calendar is already on the same day of the week, then return 7
+     *
+     * @return A new calendar instance advanced to the next occurence of the given day of the week
+     */
+    fun copyCalendarAndAdvanceTo(dateTime: Long , dayOfWeek: Int, incToday: Boolean): Long {
+
+        //Note: calendar is the calendar in the phone's time zone. The phone's timezone can be
+        // different from the Class's timezone. Since all times are in the Class's time zone,
+        // a phone 9 am is in fact intended to be Class TimeZone's 9 am.
+        //
+        // The return Calendar is the calendar where the next occurence should be. This should
+        // match with the right day of the week. Hence this has to be in the Local time zone.
+        // (ie: to avoid situations where next occurence clazz timezone = previous day device.
+        // Since theis method is called every midnight of the phone device, we need the time to be
+        // the right day (ie phone device's timezone). For this purpose we will advance to the phone
+        // timezone and can set its timezone to Clazz outside this method.
+
+        val calendar = DateTime(dateTime)
+        var comparisonCalendarLong = calendar.unixMillisLong
+        var comparisonCalendar = DateTime(comparisonCalendarLong)
+        //TODO: Set timezone as well.
+
+        val today = getDayOfWeek(dateTime)
+
+        if (today == dayOfWeek){
+            if (!incToday){
+                val newLong = dateTime + 7 * 1000 * 60 * 60 * 24
+                comparisonCalendar = DateTime(newLong)
+            }
+
+            //Addition:
+            // Calendar without Time Zone's day = time zoned calendar's day = expected day of week
+            if ( comparisonCalendar.dayOfWeekInt == calendar.dayOfWeekInt &&
+                    calendar.dayOfWeekInt == dayOfWeek){
+                return comparisonCalendar.unixMillisLong
+            }
+
+            //shit
+            comparisonCalendarLong = setDayOfWeek(comparisonCalendar.unixMillisLong, dayOfWeek)
+            return comparisonCalendarLong
+
+
+        }
+
+
+        val deltaDays: Int
+        if (dayOfWeek > today) {
+            deltaDays = dayOfWeek - today
+        } else {
+            deltaDays = 7 - today + dayOfWeek
+        }
+
+        comparisonCalendarLong = calendar.unixMillisLong + deltaDays * 1000 * 60 * 60 * 24
+
+        return comparisonCalendarLong
+    }
 
 }

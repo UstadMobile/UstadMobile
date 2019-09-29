@@ -264,11 +264,12 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
-    abstract suspend fun personHasPermission(accountPersonUid: Long, permission: Long): Boolean
+    abstract fun personHasPermissionLive(accountPersonUid: Long, permission: Long)
+            : DoorLiveData<Boolean>
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
-    abstract fun personHasPermissionLive(accountPersonUid: Long, permission: Long): DoorLiveData<Boolean>
+    abstract suspend fun personHasPermission(accountPersonUid: Long, permission: Long): Boolean
 
     @Query("SELECT Clazz.*," +
             "Location.timeZone " +

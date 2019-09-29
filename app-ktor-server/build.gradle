@@ -6,6 +6,7 @@ plugins {
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
     id 'com.github.johnrengelman.shadow'
     id 'kotlinx-serialization'
+    id 'com.github.psxpaul.execfork' version '0.1.11'
 }
 
 configurations {
@@ -38,7 +39,25 @@ task appRun(type: JavaExec) {
     args '-port', '8087'
 }
 
+task appRunDevMode(type: JavaExec) {
+    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
+    main = 'io.ktor.server.netty.EngineMain'
+    args = ['-port=8087', "-config=$projectDir/devserver-application.conf"]
+}
+
+task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
+    outputs.upToDateWhen { false }
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'io.ktor.server.netty.EngineMain'
+    args = ['-port=8087', "-config=$projectDir/devserver-application.conf"]
+    waitForPort = 8087
+    workingDir = "$projectDir/"
+    standardOutput = "$projectDir/build/tmp/daemon.log"
+    errorOutput = "$projectDir/build/tmp/daemon-error.log"
+}
+
 appRun.dependsOn(shadowJar)
+appRunDevMode.dependsOn(shadowJar)
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

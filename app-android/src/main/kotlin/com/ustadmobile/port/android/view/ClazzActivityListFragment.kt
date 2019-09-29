@@ -25,6 +25,8 @@ import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.utils.ViewPortHandler
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzActivityListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -131,7 +133,9 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         dataSetBar1.setValueTextColor(Color.WHITE)
         dataSetBar1.setDrawValues(true)
 
-        dataSetBar1.setValueFormatter { value, entry, dataSetIndex, viewPortHandler -> "" }
+        dataSetBar1.setValueFormatter(fun(value: Float, entry: Entry, dataSetIndex: Int, viewPortHandler: ViewPortHandler): String {
+            return ""
+        })
 
         dataSetBar1.setColors(ContextCompat.getColor(context!!,
                 R.color.traffic_green),

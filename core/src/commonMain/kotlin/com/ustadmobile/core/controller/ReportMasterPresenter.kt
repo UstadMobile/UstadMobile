@@ -85,11 +85,13 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
 
     }
 
+    val z = ZipUtil()
+
     fun dataToXLSX(title: String, xlsxReportPath: String, workingDir: String,
                    tableTextData: MutableList<Array<String?>>) {
 
         try {
-            ZipUtil.createEmptyZipFile(xlsxReportPath)
+            z.createEmptyZipFile(xlsxReportPath)
 
             val umXLSX = UmXLSX(title, xlsxReportPath, workingDir)
 

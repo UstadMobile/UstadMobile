@@ -12,7 +12,9 @@ import java.util.zip.ZipOutputStream
 /**
  * Zip util
  */
-class ZipUtil {
+actual class ZipUtil {
+
+    actual constructor()
 
     fun zipThisFoldersContents(sourcePath: String, toLocation: String): Boolean {
         val folder = File(sourcePath)
@@ -134,8 +136,15 @@ class ZipUtil {
         return if (segments.size == 0) "" else segments[segments.size - 1]
     }
 
+
+    actual fun createEmptyZipFile(zipPath:String){
+        createEmptyZipFile1(zipPath)
+    }
+
     companion object {
         private val BUFFER = 2048
+
+
 
 
         /**
@@ -145,15 +154,15 @@ class ZipUtil {
          * @throws IOException  File exception
          */
         @Throws(IOException::class)
-        fun createEmptyZipFile(zipPath: String): File? {
+        fun createEmptyZipFile1(zipPath: String){
 
             //Create the file.
             val output = File(zipPath)
             if (output.createNewFile()) {
                 createZip(zipPath)
-                return File(zipPath)
+                //return File(zipPath)
             } else {
-                return null
+                //return null
             }
         }
 

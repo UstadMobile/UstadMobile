@@ -115,7 +115,7 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
 
         //Populate the provider
         providerList = repository.clazzMemberDao
-                .findAllPeopleWithPersonPictureInClassUid(currentClazzUid, currentClazzMemberUid)
+                .findAllPeopleWithPersonPictureInClassUid2(currentClazzUid, currentClazzMemberUid)
 
         //set Provider.
         setPeopleProviderToView()

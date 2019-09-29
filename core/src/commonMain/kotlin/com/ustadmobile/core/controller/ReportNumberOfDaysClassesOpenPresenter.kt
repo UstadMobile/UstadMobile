@@ -84,11 +84,13 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
         view.generateCSVReport()
     }
 
+    val z = ZipUtil()
+
     fun dataToXLSX(title: String, xlsxReportPath: String, theWorkingPath: String,
                    tableTextData: MutableList<Array<String?>>) {
 
         try {
-            ZipUtil.createEmptyZipFile(xlsxReportPath)
+            z.createEmptyZipFile(xlsxReportPath)
 
             val umXLSX = UmXLSX(title, xlsxReportPath, theWorkingPath)
 

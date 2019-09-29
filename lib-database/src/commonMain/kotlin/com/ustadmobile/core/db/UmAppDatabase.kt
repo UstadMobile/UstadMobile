@@ -21,7 +21,7 @@ import com.ustadmobile.core.db.dao.SaleDao
 @Database(entities = [
     NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
-    PersonCustomField::class, ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class,
+    ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class,
     ContentCategory::class, Language::class, LanguageVariant::class, Container::class,
     ContainerEntry::class, ContainerEntryFile::class, VerbEntity::class, XObjectEntity::class,
     StatementEntity::class, ContextXObjectStatementJoin::class, AgentEntity::class,

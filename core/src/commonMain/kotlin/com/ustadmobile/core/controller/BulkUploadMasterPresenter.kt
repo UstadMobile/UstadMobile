@@ -859,7 +859,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
                         "motherNum" -> INDEX_MOTHER_NUMBER = colIndex
                         "fatherName" -> INDEX_FATHER_NAME = colIndex
                         "fatherNumber" -> INDEX_FATHER_NUMBER = colIndex
-                        "address" -> INDEX_ADDRESS = colIndex
+                        "personAddress" -> INDEX_ADDRESS = colIndex
                         else ->
                             //Lookup custom field
                             findCustomField(everyHeader.substring("student ".length), Person.TABLE_ID, colIndex, CUSTOM_FIELD_STUDENT)

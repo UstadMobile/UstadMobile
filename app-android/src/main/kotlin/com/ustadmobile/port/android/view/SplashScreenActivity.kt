@@ -179,9 +179,10 @@ class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterf
         }, if(showSplash || !launched) TimeUnit.SECONDS.toMillis(2) else 0)
 
 
+
     }
 
-    fun queueClazzLogScheduleWorker(){
+    private fun queueClazzLogScheduleWorker(){
         WorkManager.getInstance().cancelAllWorkByTag(ClazzLogScheduleWorker.TAG)
         ClazzLogScheduleWorker.queueClazzLogScheduleWorker(
                 ClazzLogScheduleWorker.getNextClazzLogScheduleDueTime())

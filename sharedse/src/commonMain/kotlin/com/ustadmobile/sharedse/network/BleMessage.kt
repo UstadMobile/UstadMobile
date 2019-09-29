@@ -349,7 +349,7 @@ class BleMessage {
 
         /**
          * Generate next message identifier for the node
-         * @param receiverAddr bluetooth address
+         * @param receiverAddr bluetooth personAddress
          * @return unique message identifier
          */
         fun getNextMessageIdForReceiver(receiverAddr: String): Byte {

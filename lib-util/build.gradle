@@ -140,6 +140,7 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
                 implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "com.github.aakira:napier-android:$version_napier"
             }
 
             dependsOn commonJvmMain

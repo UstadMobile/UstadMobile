@@ -182,7 +182,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "AND ClazzMember.clazzMemberActive = 1 " +
             " AND ClazzMember.clazzMemberRole = 1 AND ClazzMember.clazzMemberUid != :currentClazzMemberUid)" +
             " AND Person.active = 1 ")
-    abstract fun findAllPeopleWithPersonPictureInClassUid(
+    abstract fun findAllPeopleWithPersonPictureInClassUid2(
             clazzUid: Long, currentClazzMemberUid: Long): DataSource.Factory<Int, PersonWithPersonPicture>
 
     @Query("SELECT * FROM Person where personUid IN ( " +
@@ -450,7 +450,6 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     @Query("SELECT coalesce(AVG(clazzMemberAttendancePercentage),0) FROM ClazzMember " +
             " WHERE clazzMemberPersonUid = :personUid")
     abstract fun getAverageAttendancePercentageByPersonUidLive(personUid: Long): DoorLiveData<Float>
-
 
     @Query("SELECT " +
             " (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +

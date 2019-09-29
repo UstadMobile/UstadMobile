@@ -20,6 +20,9 @@ abstract class ExampleDao2 {
     abstract fun insertList(entityList: List<ExampleEntity2>)
 
     @Insert
+    abstract suspend fun insertListAsync(entityList: List<ExampleEntity2>)
+
+    @Insert
     abstract fun insertOtherList(entityList: List<ExampleEntity2>)
 
     @Insert
@@ -33,6 +36,9 @@ abstract class ExampleDao2 {
 
     @Query("SELECT * FROM ExampleEntity2 WHERE uid = :uid")
     abstract fun findByUid(uid: Long): ExampleEntity2?
+
+    @Query("SELECT * FROM ExampleEntity2 WHERE uid = :uid")
+    abstract suspend fun findByUidAsync(uid: Long): ExampleEntity2?
 
     @Query("SELECT * FROM ExampleEntity2 WHERE uid > :uid AND someNumber > :min")
     abstract suspend fun findLarge(uid: Long, min: Long): ExampleEntity2?
@@ -55,7 +61,7 @@ abstract class ExampleDao2 {
     abstract fun findAll(): List<ExampleEntity2>
 
     @Query("SELECT * FROM ExampleEntity2")
-    abstract suspend fun findAllAsync(): List<ExampleEntity2WithExampleLinkEntity>
+    abstract suspend fun findAllAsync(): List<ExampleEntity2>
 
     @Update
     abstract fun updateSingleItem(entity: ExampleEntity2)
@@ -83,6 +89,9 @@ abstract class ExampleDao2 {
 
     @Query("SELECT COUNT(*) FROM ExampleEntity2")
     abstract fun countNumEntities(): Int
+
+    @Query("SELECT COUNT(*) FROM ExampleEntity2")
+    abstract suspend fun countNumEntitiesAsync(): Int
 
     @Query("SELECT * FROM ExampleEntity2 WHERE uid IN (:uidList)")
     abstract fun queryUsingArray(uidList: List<Long>): List<ExampleEntity2>
