@@ -165,7 +165,7 @@ object IndexEdraakK12Content {
 
 
         val scrapePrecessor = 1
-        scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE, scrapePrecessor),
+        scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
 
