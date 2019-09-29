@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.controller.ContentEntryDetailPresenterCommon.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.HomeView
 import kotlinx.io.InputStream

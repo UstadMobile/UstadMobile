@@ -72,7 +72,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
         val impl = UstadMobileSystemImpl.instance
 
-        ContentEntryUtil.goToContentEntryByViewDestination(
+        ContentEntryUtil.instance.goToContentEntryByViewDestination(
                 sourceUrl,
                 appRepo, impl,
                 true,
