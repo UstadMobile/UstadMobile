@@ -2,7 +2,7 @@ import { browser, element, by} from 'protractor';
 
 export const sleepTime = 500;
 
-export const rootUid = -4103245208651563007
+export const rootUid = "-4103245208651563007"
 
 export class HomePage{
 
