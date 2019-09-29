@@ -22,13 +22,15 @@ core.com.ustadmobile.core.view.ContentEntryDetailView,
     translations = [];
     entryLicence = "";
     entry_thumbnail_class: string;
-    entry_summary_class: string;
+    entry_summary_class: string; 
+    class_availability_label: string; 
     contentEntry = new entities.com.ustadmobile.lib.db.entities.ContentEntry()
 
     constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
       super(umService, router, route);
       this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left";
-  this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
+      this.class_availability_label = this.umService.isLTRDirectionality() ? "left" : "right";
+      this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
 
       this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(_ => {
@@ -56,7 +58,8 @@ core.com.ustadmobile.core.view.ContentEntryDetailView,
     }
 
     setContentEntry(contentEntry) {
-      this.contentEntry = contentEntry;
+      this.contentEntry = contentEntry; 
+      UmAngularUtil.fireTitleUpdate(this.contentEntry.title)
     }
 
     setContentEntryLicense(license) {

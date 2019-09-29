@@ -21,6 +21,7 @@ import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-o
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
 import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
 import { DatePipe } from '@angular/common';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
 import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog/um-tree-node/um-tree-node.component';
@@ -52,6 +53,7 @@ import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog
     MzChipModule,MzSpinnerModule,MzModalModule,MzToastModule,MzInputModule,MzProgressModule,MzDropdownModule,
     MzDatepickerModule,
     FormsModule,
+    InfiniteScrollModule,
     ReactiveFormsModule,
     GoogleChartsModule,
   ],

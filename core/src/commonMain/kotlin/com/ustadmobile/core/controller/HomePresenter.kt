@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeView,
                     val personDao: PersonDao)
@@ -70,6 +71,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
 
 
     companion object {
+        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
     }
 }

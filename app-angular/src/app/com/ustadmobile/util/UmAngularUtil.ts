@@ -41,7 +41,7 @@ export class UmAngularUtil {
   static getArgumentsFromQueryParams(args: any = {}) {
     const route = args.route ? args.route : this.getRoutePathParam().path
     const params = args.params ? args.params : null
-    const search = this.removeParam(this.isWithoutEntryUid(route) ? "entryid":"", (params ? params :document.location.search))
+    const search = this.removeParam(this.isWithoutEntryUid(route) ? "entryid":"", (params ? params : document.location.search))
     let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null"))) 
     return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString); 
@@ -296,7 +296,7 @@ export class UmAngularUtil {
    * Get the first route to be directed when application starts
    * @param entryUid root entry
    */
-  static getInitialRoute(entryUid ? : number) {
+  static getInitialRoute(entryUid) {
     var args, view = null
     const mPath = this.getRoutePathParam();
     if(mPath.size >= 4){

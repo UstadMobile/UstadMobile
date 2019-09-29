@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, Subject, combineLatest} from 'rxjs';
+import {Subject, combineLatest} from 'rxjs';
 import { MzToastService } from 'ngx-materialize';
 import { map } from 'rxjs/operators';
 import { UmAngularUtil } from '../util/UmAngularUtil';
@@ -17,7 +17,7 @@ export class UmBaseService {
   private database: db.com.ustadmobile.core.db.UmAppDatabase
   private isTestEnv: boolean = false
   private component: any
-  public ROOT_UID = 1311236
+  public ROOT_UID = 0
   private umObserver = new Subject <any> ();
   private directionality: string;
   public continuation = kotlin.kotlin.coroutines.js.internal.EmptyContinuation
@@ -25,7 +25,8 @@ export class UmBaseService {
   toolBarTitle: string = ".."
   public appName: string  = "..." 
 
-  constructor(private http: HttpClient, private toastService: MzToastService) {
+  constructor(private http: HttpClient, private toastService: MzToastService) { 
+    this.ROOT_UID = core.com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID.toString()
     UmAngularUtil.fireResouceReady(false);  
   }
   
@@ -101,6 +102,7 @@ export class UmBaseService {
         return this.preloadSystemResources(fireWhenReady)
       })
     }else{
+      localStorage.removeItem("umaccount.personid")
       return  this.preloadSystemResources(fireWhenReady)
     }
   }

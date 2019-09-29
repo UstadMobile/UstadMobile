@@ -1,6 +1,8 @@
-import { browser, element, by , protractor} from 'protractor';
+import { browser, element, by} from 'protractor';
 
 export const sleepTime = 500;
+
+export const rootUid = -4103245208651563007
 
 export class HomePage{
 
@@ -8,7 +10,7 @@ export class HomePage{
   title = 'Ustad Mobile'
   baseUrl = "http://localhost:";
   launch() {
-    browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid=1311236&test=true") as Promise<any>;
+    browser.get(browser.baseUrl+"/Home/ContentEntryList?entryid="+rootUid+"&test=true") as Promise<any>;
     return browser.waitForAngularEnabled(true)
   }
 
@@ -108,7 +110,6 @@ export class ElementUtils{
 
   launchAsync(){
     var currentTitle;
-    var pageDetails = this.getPageElements()
     return browser.getTitle().then(function(title) {
       currentTitle = title;
     }).then(function() {
