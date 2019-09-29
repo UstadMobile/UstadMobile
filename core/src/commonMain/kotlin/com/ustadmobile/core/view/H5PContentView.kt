@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.impl.UmCallback
-
 /**
  * Created by mike on 2/15/18.
  */
@@ -16,7 +14,7 @@ interface H5PContentView : UstadView {
 
         const val VIEW_NAME = "H5PContentView"
 
-        val ANDROID_ASSETS_PATH = "/android-assets/"
+        const val ANDROID_ASSETS_PATH = "/android-assets/"
     }
 
 

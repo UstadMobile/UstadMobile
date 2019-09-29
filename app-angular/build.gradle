@@ -335,7 +335,7 @@ task ngTest{
   }
 
   if(moduleName != null){
-    packPreparedModules.finalizedBy(":app-ktor-server:testWebAppRunFork")
+    tasks.findByPath(":app-ktor-server:testWebAppRunFork").mustRunAfter(fixRequiredImports)
   }
 }
 

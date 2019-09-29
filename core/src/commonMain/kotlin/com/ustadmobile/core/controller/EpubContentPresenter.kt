@@ -86,7 +86,7 @@ import org.kmp.io.KMPXmlParser
 class EpubContentPresenter(context: Any,
                            args: Map<String, String>?,
                            private val epubContentView: EpubContentView)
-    : UstadBaseController<EpubContentView>(context, args!!, epubContentView!!) {
+    : UstadBaseController<EpubContentView>(context, args!!, epubContentView) {
 
     private var ocf: OcfDocument? = null
 
@@ -200,7 +200,7 @@ class EpubContentPresenter(context: Any,
             val navItemUrl = UMFileUtil.resolveLink(opfBaseUrl!!, navItem.href!!)
             val hrefIndex = listOf(*linearSpineUrls!!).indexOf(navItemUrl)
             if (hrefIndex != -1) {
-                epubContentView!!.goToLinearSpinePosition(hrefIndex)
+                epubContentView.goToLinearSpinePosition(hrefIndex)
             }
         }
     }

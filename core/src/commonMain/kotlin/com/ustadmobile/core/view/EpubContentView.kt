@@ -80,7 +80,7 @@ interface EpubContentView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "Container"
+        const val VIEW_NAME = "EpubContent"
 
         const val ARG_CONTAINER_UID = "containerUid"
 
