@@ -238,7 +238,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 val boundaryCallbackVarName = "_${daoTypeEl.simpleName}$SUFFIX_BOUNDARY_CALLBACKS"
                 dbRepoType.addProperty(PropertySpec.builder(boundaryCallbackVarName,
                         boundaryCallbackClassName)
-                        .delegate("lazy { %T(_${daoTypeEl.simpleName}::getBoundaryCallback) }", boundaryCallbackClassName)
+//                        .delegate("lazy { %T(_${daoTypeEl.simpleName}::getBoundaryCallback) }", boundaryCallbackClassName)
+                        .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_${daoTypeEl.simpleName}::getBoundaryCallback)", boundaryCallbackClassName)
+                                .endControlFlow().build())
                         .build())
                 dbRepoType.addAccessorOverride("${it.simpleName}$SUFFIX_BOUNDARY_CALLBACKS",
                         boundaryCallbackClassName, CodeBlock.of("return $boundaryCallbackVarName\n"))
