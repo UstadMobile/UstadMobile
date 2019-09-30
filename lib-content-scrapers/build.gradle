@@ -13,6 +13,7 @@ buildscript {
 apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
 apply plugin: "jacoco"
 
 
