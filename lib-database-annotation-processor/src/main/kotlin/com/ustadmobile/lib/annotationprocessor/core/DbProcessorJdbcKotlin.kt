@@ -333,7 +333,10 @@ class ResultEntityField(val parentField: ResultEntityField?, val name: String,
     init {
         if(embeddedType != null) {
             val ancestorClasses = ancestorsToList(embeddedType, processingEnv)
-            val allFields = ancestorClasses.flatMap { it.enclosedElements.filter { it.kind == ElementKind.FIELD  && Modifier.STATIC !in it.modifiers} }
+            val allFields = ancestorClasses
+                    .flatMap { it.enclosedElements.filter {
+                        it.kind == ElementKind.FIELD  && Modifier.STATIC !in it.modifiers && Modifier.TRANSIENT !in it.modifiers
+                    } }
 
             childFields = allFields.map { ResultEntityField(this, it.simpleName.toString(),
                     it.asType().asTypeName(),
