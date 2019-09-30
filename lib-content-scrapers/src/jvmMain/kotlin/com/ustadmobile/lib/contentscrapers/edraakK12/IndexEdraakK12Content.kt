@@ -16,6 +16,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer.Companion.scrapeFromRoot
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.ALL_RIGHTS_RESERVED
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
@@ -58,11 +59,8 @@ import java.net.URL
  * until the component type found is ImportedComponent. Once it is found, EdraakK12ContentScraper
  * will decide if its a quiz or course and scrap its content
  */
-object IndexEdraakK12Content {
+class IndexEdraakK12Content {
 
-    private const val ROOT_URL = "https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41"
-
-    const val EDRAAK = "Edraak"
     private var url: URL? = null
     private var destinationDirectory: File? = null
     private var response: ContentResponse? = null
@@ -71,35 +69,9 @@ object IndexEdraakK12Content {
     private lateinit var arabicLang: Language
     private lateinit var queueDao: ScrapeQueueItemDao
     private lateinit var scrapeWorkQueue: LiveDataWorkQueue<ScrapeQueueItem>
-    private var runId: Int = 0
+
     private lateinit var containerDirectory: File
 
-
-    @JvmStatic
-    fun main(args: Array<String>) {
-        if (args.size < 2) {
-            System.err.println("Usage: <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>")
-            System.exit(1)
-        }
-        UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
-        UMLogUtil.logInfo(args[0])
-
-        try {
-            val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
-
-            runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_EDRAAK)
-            if (runId == 0) {
-                runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_EDRAAK,
-                        ScrapeQueueItemDao.STATUS_PENDING)).toInt()
-            }
-
-            scrapeFromRoot(File(args[0]), File(args[1]), runId)
-        } catch (e: Exception) {
-            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Main method exception catch khan")
-        }
-
-    }
 
     @Throws(IOException::class)
     fun scrapeFromRoot(dest: File, containerDir: File, runId: Int) {
@@ -244,6 +216,44 @@ object IndexEdraakK12Content {
             UMLogUtil.logError("License type not matched for license: $license")
             return ALL_RIGHTS_RESERVED
         }
+    }
+
+    companion object{
+
+        var runId: Int = 0
+
+        private const val ROOT_URL = "https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41"
+
+        const val EDRAAK = "Edraak"
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            if (args.size < 2) {
+                System.err.println("Usage: <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>")
+                System.exit(1)
+            }
+            UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
+            UMLogUtil.logInfo(args[0])
+
+            try {
+                val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
+
+                runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_EDRAAK)
+                if (runId == 0) {
+                    runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_EDRAAK,
+                            ScrapeQueueItemDao.STATUS_PENDING)).toInt()
+                }
+
+                val index = IndexEdraakK12Content()
+
+                index.scrapeFromRoot(File(args[0]), File(args[1]), runId)
+            } catch (e: Exception) {
+                UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
+                UMLogUtil.logError("Main method exception catch khan")
+            }
+
+        }
+
     }
 
 }
