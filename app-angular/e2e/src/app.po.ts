@@ -26,6 +26,7 @@ export class EntryListPage{
   launch(){
     const pageHome = new HomePage()
     pageHome.launch()
+    browser.sleep(sleepTime * 8)
   }
 
   getPage() {
@@ -58,7 +59,7 @@ export class ReportOptions{
 
   selectDropDown(dropdownIndex, optionIndex){
     this.getPage().selectViews.get(dropdownIndex).click()
-    browser.sleep(1000)
+    browser.sleep(sleepTime * 2)
     return new ElementUtils().selectDropDown('app-xapi-report-options',dropdownIndex,optionIndex);
   }
 
@@ -115,8 +116,7 @@ export class ElementUtils{
     }).then(function() {
             browser.wait(function() {
                 return browser.getTitle().then(function (title) {
-                  //console.log("meeeeet", title == currentTitle , expect(pageDetails.componentHome.menus.count()).toBeGreaterThan(0))
-                    return title == currentTitle;
+                  return title == currentTitle;
                 });
             });
         }
