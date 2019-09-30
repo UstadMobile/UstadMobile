@@ -316,33 +316,125 @@ fun getQueryNamedParameters(querySql: String): List<String> {
     return namedParams
 }
 
-data class ResultEntityComponent(val prefix: String, val fieldList: Map<String, Element>,
-                                 val enttiyType: TypeElement)
 
 /**
- * Generate a map of all the fields that can be set on the given entity
+ * This class represents a POKO object in the result. It is a tree like structure (e.g. each item
+ * has oen parent, and can have multiple children). The root object has no parent.
+ *
+ * This class gathers up all properties from the class itself and ancestors. It will also recursively
+ * search through any fields with the @Embedded annotation
  */
-data class EntityFieldMap(val fieldMap: Map<String, Element>,
-                          val embeddedVarsList: List<Pair<String, Element>>)
+class ResultEntityField(val parentField: ResultEntityField?, val name: String,
+                        val type: TypeName, val embeddedType: TypeElement?,
+                        processingEnv: ProcessingEnvironment){
 
+    val childFields: List<ResultEntityField>
 
-fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
-                           fieldMap: MutableMap<String, Element> = mutableMapOf(),
-                           embeddedVarsList: MutableList<Pair<String, TypeElement>> = mutableListOf(),
-                           processingEnv: ProcessingEnvironment): EntityFieldMap {
+    init {
+        if(embeddedType != null) {
+            val ancestorClasses = ancestorsToList(embeddedType, processingEnv)
+            val allFields = ancestorClasses.flatMap { it.enclosedElements.filter { it.kind == ElementKind.FIELD  && Modifier.STATIC !in it.modifiers} }
 
-    ancestorsToList(entityTypeEl, processingEnv).forEach {
-        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD && Modifier.STATIC !in it.modifiers}
-                .partition { it.getAnnotation(Embedded::class.java) == null }
-        listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
-        listParted.second.forEach {
-            embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it as TypeElement))
-            mapEntityFields(processingEnv.typeUtils.asElement(it.asType()) as TypeElement,
-                    "$prefix.${it.simpleName}!!", fieldMap, embeddedVarsList, processingEnv)
+            childFields = allFields.map { ResultEntityField(this, it.simpleName.toString(),
+                    it.asType().asTypeName(),
+                    if(it.getAnnotation(Embedded::class.java) != null) {
+                        processingEnv.typeUtils.asElement(it.asType()) as TypeElement?
+                    }else {
+                        null
+                    }, processingEnv)
+            }
+        }else {
+            childFields = listOf()
         }
     }
 
-    return EntityFieldMap(fieldMap, embeddedVarsList)
+    fun createSetterCodeBlock(rawQuery: Boolean = false, resultSetVarName: String = "_resultSet",
+                              colIndexVarName: String? = null): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val checkForNullEmbeddedObject = parentField != null
+        val nullFieldCountVarName = "_${name}_nullFieldCount"
+
+        if(checkForNullEmbeddedObject) {
+            codeBlock.add("var $nullFieldCountVarName = 0\n")
+        }
+        childFields.filter { it.embeddedType == null }.forEach {
+            val getterName = "get${getPreparedStatementSetterGetterTypeName(it.type) }"
+            codeBlock.add("val tmp_${it.name}")
+
+            val setValAndCheckForNullBlock = CodeBlock.builder().add(" = ${resultSetVarName}.$getterName(%S)\n",
+                    it.name)
+            if(checkForNullEmbeddedObject){
+                setValAndCheckForNullBlock.add("if(${resultSetVarName}.wasNull())·{·$nullFieldCountVarName++·}\n")
+            }
+
+            if(rawQuery) {
+                val valType = it.type.javaToKotlinType()
+                codeBlock.add(": %T\n", valType.copy(nullable = valType == String::class.asClassName()))
+                        .beginControlFlow("if($colIndexVarName.containsKey(%S))", it.name)
+                        .add("tmp_${it.name} ").add(setValAndCheckForNullBlock.build())
+                        .nextControlFlow("else")
+                if(checkForNullEmbeddedObject) {
+                    codeBlock.add("$nullFieldCountVarName++\n")
+                }
+                codeBlock.add("tmp_${it.name} = ${defaultVal(it.type)}\n")
+                        .endControlFlow()
+            }else {
+                codeBlock.add(setValAndCheckForNullBlock.build())
+            }
+        }
+
+        if(checkForNullEmbeddedObject) {
+            codeBlock.beginControlFlow("if($nullFieldCountVarName < ${childFields.size})")
+        }
+
+        //check the embedded path of parents
+        val parentsList = mutableListOf<ResultEntityField>(this)
+
+
+        var nextParent = parentField
+        while(nextParent != null) {
+            parentsList.add(nextParent)
+            nextParent = nextParent.parentField
+        }
+
+
+        parentsList.reverse()
+        val rootItem = parentsList[0]
+        var entityPath  = ""
+
+        if(parentField == null) {
+            //this is the root item
+            codeBlock.add("val $name = %T()\n", embeddedType)
+            entityPath = name
+        }else {
+            val predecessorsList = parentsList.subList(1, parentsList.size)
+            predecessorsList.forEachIndexed { index, parent ->
+                val predecessors = predecessorsList.subList(0, index + 1)
+                entityPath = "${rootItem.name}.${predecessors.joinToString(separator = "!!.") { it.name }}"
+                codeBlock.beginControlFlow("if($entityPath == null)")
+                        .add("$entityPath = %T()\n", parent.embeddedType)
+                        .endControlFlow()
+                entityPath += "!!"
+            }
+        }
+
+        childFields.filter { it.embeddedType == null }.forEach {
+            codeBlock.add("${entityPath}.${it.name} = tmp_${it.name}\n")
+        }
+
+
+        if(checkForNullEmbeddedObject) {
+            codeBlock.endControlFlow()
+        }
+
+        childFields.filter { it.embeddedType != null }.forEach {
+            codeBlock.add(it.createSetterCodeBlock(rawQuery = rawQuery, resultSetVarName = resultSetVarName,
+                    colIndexVarName = colIndexVarName))
+        }
+
+        return codeBlock.build()
+    }
+
 }
 
 /**
