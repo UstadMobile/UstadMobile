@@ -25,6 +25,7 @@ import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.apache.commons.pool2.impl.GenericObjectPool
 import org.jsoup.Jsoup
@@ -429,7 +430,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                 try {
                     queueUrl = URL(it.scrapeUrl!!)
                     KhanContentIndexer(queueUrl, parent!!, File(it.destDir!!),
-                            it.contentType!!, it.sqiUid, runId)
+                            it.contentType!!, it.sqiUid, runId).run()
                 } catch (ignored: IOException) {
                     //Must never happen
                     throw RuntimeException("SEVERE: invalid URL to index: should not be in queue:" + it.scrapeUrl!!)
@@ -453,7 +454,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                     scrapeUrl = URL(it.scrapeUrl!!)
                     KhanContentScraper(scrapeUrl, File(it.destDir!!),
                             containerDir, parent!!,
-                            it.contentType!!, it.sqiUid, factory)
+                            it.contentType!!, it.sqiUid, factory).run()
                 } catch (ignored: IOException) {
                     throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it!!.scrapeUrl!!)
                 }
@@ -461,6 +462,8 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             GlobalScope.launch {
                 scrapeWorkQueue.start()
             }
+
+            ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
 
             factory.close()
 

@@ -13,6 +13,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.PUBLIC_DOMAIN
@@ -291,7 +292,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
                     VoaScraper(scrapeContentUrl,
                             File(it.destDir!!),
                             containerDir,
-                            parent!!, it.sqiUid)
+                            parent!!, it.sqiUid).run()
                 } catch (ignored: IOException) {
                     throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it!!.scrapeUrl!!)
                 }
@@ -315,7 +316,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
                     VoaScraper(scrapeContentUrl,
                             File(it.destDir!!),
                             containerDir,
-                            parent!!, it.sqiUid)
+                            parent!!, it.sqiUid).run()
                 } catch (ignored: IOException) {
                     throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!)
                 }
@@ -324,6 +325,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
                 scrapeWorkQueue.start()
             }
 
+            ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
 
         }
     }

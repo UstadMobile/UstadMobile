@@ -15,6 +15,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.ALL_RIGHTS_RESERVED
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
@@ -178,7 +179,7 @@ object IndexEdraakK12Content {
                 EdraakK12ContentScraper(scrapeContentUrl,
                         File(it.destDir!!),
                         containerDir,
-                        parent!!, it.sqiUid)
+                        parent!!, it.sqiUid).run()
             } catch (ignored: IOException) {
                 throw RuntimeException(("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!))
             }
@@ -190,6 +191,9 @@ object IndexEdraakK12Content {
         }
 
         findImportedComponent(response!!, edraakParentEntry)
+
+        ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
+
     }
 
     @Throws(MalformedURLException::class)

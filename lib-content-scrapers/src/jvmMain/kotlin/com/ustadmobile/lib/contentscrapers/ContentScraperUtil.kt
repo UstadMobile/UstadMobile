@@ -99,6 +99,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer
 import com.ustadmobile.lib.rest.findSystemCommand
 import kotlinx.coroutines.runBlocking
 import java.lang.System.exit
@@ -132,11 +133,11 @@ object ContentScraperUtil {
 
     fun checkIfPathsToDriversExist() {
         driversList.forEach { driver ->
-            if(System.getProperty(driver) == null){
+            if (System.getProperty(driver) == null) {
                 val location = SEARCH_LOCATIONS.getValue(driver).firstOrNull { File(it).exists() }
-                if(location != null)
+                if (location != null)
                     System.setProperty(driver, location)
-                else{
+                else {
                     println("$driver path is not set")
                     exitProcess(0)
                 }
@@ -1178,9 +1179,9 @@ object ContentScraperUtil {
         val js = driver as JavascriptExecutor
         js.executeScript("console.clear()")
 
-       /* while (driver.manage().logs().get(LogType.PERFORMANCE).all.size != 0) {
-            driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS)
-        }*/
+        /* while (driver.manage().logs().get(LogType.PERFORMANCE).all.size != 0) {
+             driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS)
+         }*/
     }
 
     fun loginKhanAcademy(): ChromeDriver {
@@ -1314,5 +1315,13 @@ object ContentScraperUtil {
             container.lastModified
         } else -1
 
+    }
+
+    fun waitForQueueToFinish(queueDao: ScrapeQueueItemDao, runId: Int) {
+        var count: Int
+        do {
+            count = queueDao.getQueueCount(runId)
+            Thread.sleep(3000)
+        } while (count != 0)
     }
 }
