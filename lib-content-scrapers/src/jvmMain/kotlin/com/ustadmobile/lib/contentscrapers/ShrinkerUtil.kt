@@ -205,7 +205,7 @@ object ShrinkerUtil {
                         doc.outputSettings().prettyPrint(false)
                         doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml)
 
-                        doc = options?.editor?.invoke(doc)?: doc
+                        doc = options?.editor?.invoke(doc) ?: doc
 
                         if (replacedFiles.size != 0) {
                             val elements = doc.select("[src]")
@@ -215,7 +215,8 @@ object ShrinkerUtil {
                         }
                         val styleList = doc.select("style[type=text/css]")
                         for (style in styleList) {
-                            val styleAction = options?.styleElementHelper?.invoke(style)?: STYLE_OUTSOURCE_TO_LINKED_CSS
+                            val styleAction = options?.styleElementHelper?.invoke(style)
+                                    ?: STYLE_OUTSOURCE_TO_LINKED_CSS
 
                             if (styleAction == STYLE_DROP) {
                                 continue

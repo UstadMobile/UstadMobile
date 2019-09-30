@@ -235,6 +235,7 @@ class IndexEdraakK12Content {
             }
             UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
             UMLogUtil.logInfo(args[0])
+            ContentScraperUtil.checkIfPathsToDriversExist()
 
             try {
                 val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao

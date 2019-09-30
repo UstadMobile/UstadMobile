@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 buildscript {
     repositories {
         maven {
@@ -13,7 +15,6 @@ buildscript {
 apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
 apply plugin: "jacoco"
 
 
@@ -29,58 +30,64 @@ kotlin {
         }
     }
 
+    sourceSets {
+        jvmMain {
+            dependencies {
 
-        sourceSets {
-            jvmMain {
-                dependencies {
+                implementation fileTree(dir: 'libs', include: ['*.jar'])
+                implementation project(":core")
+                implementation project(':lib-database')
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-door-runtime")
+                implementation project(":sharedse")
+                implementation project(":lib-util")
+                implementation project(":app-ktor-server")
 
-                    implementation fileTree(dir: 'libs', include: ['*.jar'])
-                    implementation project(":core")
-                    implementation project(':lib-database')
-                    implementation project(":lib-database-mpp")
-                    implementation project(":lib-database-entities")
-                    implementation project(":lib-door-runtime")
-                    implementation project(":sharedse")
-                    implementation project(":lib-util")
-                    implementation project(":app-ktor-server")
+                implementation "org.jsoup:jsoup:$version_jsoup"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "commons-io:commons-io:$version_commons_io"
+                implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
+                implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+                implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+                implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
+                implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
+                implementation "org.apache.logging.log4j:log4j-core:$version_log4j"
+                implementation "org.apache.logging.log4j:log4j-api:$version_log4j"
 
-                    implementation "org.jsoup:jsoup:$version_jsoup"
-                    implementation "com.google.code.gson:gson:$version_gson"
-                    implementation "commons-io:commons-io:$version_commons_io"
-                    implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
-                    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
-                    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
-                    implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
-                    implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
-                    implementation "org.apache.logging.log4j:log4j-core:$version_log4j"
-                    implementation "org.apache.logging.log4j:log4j-api:$version_log4j"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
-                    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                    implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
-                    implementation "org.postgresql:postgresql:$version_postgres_jdbc"
-                    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                    implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                    implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-                    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-
-                }
             }
-
-            jvmTest {
-                dependencies {
-                    implementation "junit:junit:$version_junit"
-                    implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-                    implementation "org.mockito:mockito-core:$version_android_mockito"
-                    implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
-                    implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-                }
-            }
-
         }
 
+        jvmTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "org.mockito:mockito-core:$version_android_mockito"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+            }
+        }
+
+    }
+
 }
+
+task shadowJar(type: ShadowJar, dependsOn: [jvmJar]) {
+    from jvmJar.archiveFile
+    configurations = [project.configurations.jvmRuntimeClasspath]
+}
+
+
 
 task copyTestResources(type: Copy) {
     from "${projectDir}/src/jvmMain/resources"
