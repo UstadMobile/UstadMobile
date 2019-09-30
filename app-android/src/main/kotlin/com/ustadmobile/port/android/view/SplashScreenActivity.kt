@@ -166,7 +166,7 @@ class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterf
         val repo = UmAppDatabase.getInstance(viewContext)
         val dd = DummyData(viewContext, repo)
         GlobalScope.launch {
-            dd.loadInitialData()
+            //dd.loadInitialData()
         }
 
         val showSplash = impl.getAppConfigString(

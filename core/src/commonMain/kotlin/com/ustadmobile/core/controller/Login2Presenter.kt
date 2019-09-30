@@ -14,7 +14,14 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.client.call.receive
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.response.HttpResponse
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.takeFrom
 
 class Login2Presenter(context: Any, arguments: Map<String, String?>, view: LoginView)
     : UstadBaseController<LoginView>(context, arguments, view) {
@@ -54,6 +61,48 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
             view.updateUsername(username)
         }
     }
+
+    @JsName("handleClickLogin")
+    fun handleClickLogin(username: String, password: String, serverUrl: String) {
+        view.setInProgress(true)
+        view.setErrorMessage("")
+        val impl = UstadMobileSystemImpl.instance
+        GlobalScope.launch {
+            try {
+                val loginResponse = defaultHttpClient().get<HttpResponse>() {
+                    url {
+                        takeFrom(serverUrl)
+                        encodedPath = "${encodedPath}Login/login"
+                    }
+                    parameter("username", username)
+                    parameter("password", password)
+                }
+
+                if(loginResponse.status == HttpStatusCode.OK) {
+                    val account = loginResponse.receive<UmAccount>()
+                    account.endpointUrl = serverUrl
+                    view.runOnUiThread(Runnable { view.setInProgress(false) })
+                    UmAccountManager.setActiveAccount(account, context)
+                    impl.go(mNextDest, context)
+                }else {
+                    view.runOnUiThread(Runnable {
+                        view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
+                                context))
+                        view.setPassword("")
+                        view.setInProgress(false)
+                    })
+                }
+            } catch (e: Exception) {
+                view.runOnUiThread(Runnable {
+                    view.setErrorMessage(impl.getString(
+                            MessageID.login_network_error, context))
+                    view.setInProgress(false)
+                })
+            }
+        }
+    }
+
+
 
     @JsName("handleClickLogin")
     fun handleClickLogin(username: String, password: String, serverUrl: String,

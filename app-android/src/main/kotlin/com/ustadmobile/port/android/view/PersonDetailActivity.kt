@@ -316,6 +316,10 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             label = impl.getString(field.messageLabel, this)
         }
 
+        /*Possible workaround is search by the MessaeID.thisBit
+
+         */
+
         when (field.fieldType) {
             FIELD_TYPE_HEADER -> {
 
