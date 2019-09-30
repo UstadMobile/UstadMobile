@@ -54,7 +54,7 @@ class TestEdraakContentScraper {
     internal val COMPONENT_API_PREFIX = "/api/component/"
 
     @Before
-    fun setup(){
+    fun setup() {
         checkIfPathsToDriversExist()
     }
 

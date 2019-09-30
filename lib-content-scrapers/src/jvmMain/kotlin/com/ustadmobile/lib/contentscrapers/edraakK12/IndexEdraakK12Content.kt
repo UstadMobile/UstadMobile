@@ -158,11 +158,12 @@ class IndexEdraakK12Content {
 
 
         }
+
+        findImportedComponent(response!!, edraakParentEntry)
+
         GlobalScope.launch {
             scrapeWorkQueue.start()
         }
-
-        findImportedComponent(response!!, edraakParentEntry)
 
         ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
 
@@ -181,7 +182,7 @@ class IndexEdraakK12Content {
                         "") + "/api/"), parentContent.id!!,
                     if (parentContent.program == 0) response!!.program else parentContent.program)
 
-            ContentScraperUtil.createQueueItem(queueDao!!, URL(scrapeUrl), parentEntry,
+            ContentScraperUtil.createQueueItem(queueDao, URL(scrapeUrl), parentEntry,
                     File(destinationDirectory, parentContent.id!!), "",
                     runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
 

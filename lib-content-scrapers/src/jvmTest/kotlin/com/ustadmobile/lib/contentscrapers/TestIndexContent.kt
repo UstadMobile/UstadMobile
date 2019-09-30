@@ -107,7 +107,7 @@ class TestIndexContent {
         val tmpDir = Files.createTempDirectory("testedxcontentindexscraper").toFile()
         val containerDir = Files.createTempDirectory("container").toFile()
 
-        IndexEdraakK12Content.startScrape(mockWebServer.url("/api/component/$MAIN_CONTENT_CONTENT_FILE").toString(), tmpDir, containerDir, 943)
+        IndexEdraakK12Content().startScrape(mockWebServer.url("/api/component/$MAIN_CONTENT_CONTENT_FILE").toString(), tmpDir, containerDir, 943)
 
         val contentEntryDao = repo.contentEntryDao
         val parentChildDaoJoin = repo.contentEntryParentChildJoinDao

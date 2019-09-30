@@ -87,8 +87,8 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
         }
 
-        queueDao!!.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
-        queueDao!!.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
+        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
 
@@ -97,10 +97,10 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
         val jsonString = getJsonStringFromScript(url.toString())
 
-        var response: TopicListResponse? = gson!!.fromJson(jsonString, TopicListResponse::class.java)
+        var response: TopicListResponse? = gson.fromJson(jsonString, TopicListResponse::class.java)
         if (response!!.componentProps ==
                 null) {
-            response = gson!!.fromJson(jsonString, PropsTopiclistResponse::class.java).props
+            response = gson.fromJson(jsonString, PropsTopiclistResponse::class.java).props
         }
 
         val modulesList = response!!.componentProps!!.modules
@@ -126,7 +126,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parent, topicEntry,
                         topicCount++)
 
-                ContentScraperUtil.createQueueItem(queueDao!!, topicUrl, topicEntry, fileLocation,
+                ContentScraperUtil.createQueueItem(queueDao, topicUrl, topicEntry, fileLocation,
                         ScraperConstants.KhanContentType.SUBJECT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
             }
@@ -140,9 +140,9 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
         val subjectJson = getJsonStringFromScript(topicUrl.toString())
 
-        var response: SubjectListResponse? = gson!!.fromJson(subjectJson, SubjectListResponse::class.java)
+        var response: SubjectListResponse? = gson.fromJson(subjectJson, SubjectListResponse::class.java)
         if (response!!.componentProps == null) {
-            response = gson!!.fromJson(subjectJson, PropsSubjectResponse::class.java).props
+            response = gson.fromJson(subjectJson, PropsSubjectResponse::class.java).props
         }
 
         // one page on the website doesn't follow standard code
@@ -184,7 +184,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
                             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry, subjectEntry, subjectCount++)
 
-                            ContentScraperUtil.createQueueItem(queueDao!!, subjectUrl, subjectEntry, topicFolder,
+                            ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, topicFolder,
                                     ScraperConstants.KhanContentType.SUBJECT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
                         }
@@ -269,13 +269,13 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             val subjectUrl = URL(topicUrl, hrefLink)
 
             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title,
-                    subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, description, false, EMPTY_STRING, URL(topicUrl, imageSrc).toString(),
-                    EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                    subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, description, false, EMPTY_STRING, URL(topicUrl, imageSrc).toString(),
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry,
                     subjectEntry, hourOfCode++)
 
-            ContentScraperUtil.createQueueItem(queueDao!!, subjectUrl, subjectEntry, topicFolder,
+            ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, topicFolder,
                     ScraperConstants.KhanContentType.SUBJECT.type, runId,
                     ScrapeQueueItem.ITEM_TYPE_INDEX)
 
@@ -413,14 +413,14 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             val englishFolder = File(destDir, "en")
             englishFolder.mkdirs()
 
-            ContentScraperUtil.createQueueItem(queueDao!!, url, khanAcademyEntry, englishFolder, ScraperConstants.KhanContentType.TOPICS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
+            ContentScraperUtil.createQueueItem(queueDao, url, khanAcademyEntry, englishFolder, ScraperConstants.KhanContentType.TOPICS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
 
             factory = GenericObjectPool(KhanDriverFactory())
             //start the indexing work queue
 
             val indexProcessor = 4
-            val indexWorkQueue = LiveDataWorkQueue(queueDao!!.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
+            val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessor) {
                 queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)

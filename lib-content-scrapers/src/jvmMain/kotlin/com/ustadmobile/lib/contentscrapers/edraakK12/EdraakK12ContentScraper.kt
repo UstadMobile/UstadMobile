@@ -125,7 +125,7 @@ class EdraakK12ContentScraper : Runnable {
         var urlConnection: HttpURLConnection? = null
         try {
             urlConnection = scrapUrl!!.openConnection() as HttpURLConnection
-            urlConnection!!.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01")
+            urlConnection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01")
             response = GsonBuilder().create().fromJson<ContentResponse>(IOUtils.toString(urlConnection!!.getInputStream(), UTF_ENCODING), ContentResponse::class.java!!)
 
             val lastModified = File(destinationDirectory!!.getParentFile(), destinationDirectory!!.getName() + LAST_MODIFIED_TXT)
