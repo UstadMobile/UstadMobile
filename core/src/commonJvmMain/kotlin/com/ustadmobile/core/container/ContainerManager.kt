@@ -127,7 +127,7 @@ actual class ContainerManager actual constructor(container: Container,
                 }
 
                 val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
-                        destFile.length(), destFile.length(), compressionSetting, getSystemTimeInMillis())
+                        it.length, destFile.length(), compressionSetting, getSystemTimeInMillis())
                 containerEntryFile.cefPath = destFile.absolutePath
                 containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
                 newContainerEntries.add(ContainerEntryWithContainerEntryFile(it.pathInContainer, container,

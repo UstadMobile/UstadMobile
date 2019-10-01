@@ -24,7 +24,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.EpubContentView
 import java.util.*
 
-class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener, EpubContentPageFragment.TapToHideToolbarHandler {
+class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener {
 
 
     /** The ViewPager used to swipe between epub pages  */
@@ -84,15 +84,6 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_epub_content, menu)
         return true
-    }
-
-
-    override fun onTap(pageIndex: Int) {
-        if (supportActionBar!!.isShowing) {
-            supportActionBar!!.hide()
-        } else {
-            supportActionBar!!.show()
-        }
     }
 
     /**
