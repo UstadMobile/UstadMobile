@@ -92,7 +92,7 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
     this.loadPage(nextIndex)
   }
 
-  goToPrevPage(){
+  getToPrevPage(){
     let prevIndex = this.currentIndex - 1
     prevIndex = prevIndex <= 0 ? 0: prevIndex
     this.loadPage(prevIndex)
