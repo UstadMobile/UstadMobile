@@ -1,9 +1,15 @@
 package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.controller.ContentEntryDetailPresenterCommon.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.HomeView
+import io.ktor.client.request.get
 import kotlinx.io.InputStream
+import kotlinx.io.StringReader
+import kotlinx.io.charsets.Charsets
+import kotlinx.io.core.toByteArray
+import org.w3c.files.FileReader
 import kotlin.browser.localStorage
 import kotlin.browser.window
 import kotlin.js.json
@@ -224,7 +230,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val client = defaultHttpClient()
+        val content = client.get<String>( "${localStorage.getItem("doordb.endpoint.url")}H5PResources/$path")
+        return content.toByteArray(Charsets.UTF_8)
     }
 
 

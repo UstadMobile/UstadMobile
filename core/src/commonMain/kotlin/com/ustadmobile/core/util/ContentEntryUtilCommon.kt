@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 

@@ -26,6 +26,9 @@ import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data
 import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog/um-tree-node/um-tree-node.component';
 import { EpubContentComponent } from './com/ustadmobile/view/epub-content/epub-content.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { VideoPlayerComponent } from './com/ustadmobile/view/video-player/video-player.component';
+import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
+import { H5pContentComponent } from './com/ustadmobile/view/h5p-content/h5p-content.component';
 
 
 @NgModule({
@@ -43,7 +46,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     XapiTreeviewDialogComponent,
     ActionResultDataPipe,
     UmTreeNodeComponent,
-    EpubContentComponent
+    EpubContentComponent,
+    VideoPlayerComponent,
+    XapiContentComponent,
+    H5pContentComponent
   ],
   imports: [
     BrowserModule,

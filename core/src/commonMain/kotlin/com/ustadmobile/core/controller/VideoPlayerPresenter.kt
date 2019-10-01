@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -75,7 +74,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         contentEntryDao = db.contentEntryDao
 
         navigation = arguments[ARG_REFERRER] ?: ""
-        var entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
+        val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
         containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
 
         GlobalScope.launch {

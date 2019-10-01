@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.application.Application
+import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
@@ -21,9 +22,9 @@ import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.response.respond
+import io.ktor.response.respondText
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import io.ktor.routing.route
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 import java.nio.file.Files
@@ -32,7 +33,6 @@ import javax.naming.InitialContext
 
 
 private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
-
 
 fun Application.umRestApplication(devMode: Boolean = false) {
 
@@ -80,9 +80,11 @@ fun Application.umRestApplication(devMode: Boolean = false) {
             downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
 
+        FileResourcesRoute()
         LoginRoute(_restApplicationDb)
-        ContainerMount(_restApplicationDb)
+        ContainerMountRoute(_restApplicationDb)
         UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
+
         if(devMode) {
 
             get("UmAppDatabase/clearAllTables") {
@@ -90,44 +92,75 @@ fun Application.umRestApplication(devMode: Boolean = false) {
                 call.respond("OK - cleared")
             }
 
-            route("UmContainer"){
-                get("/addEpub") {
-                    val resourceName = call.request.queryParameters["resource"]
-                    val entryUid = call.request.queryParameters["entryid"]
-                    if(resourceName != null && resourceName.isNotEmpty()){
-                        val epubContainer = Container()
+            get("test"){
+                call.respondText { "OK"}
+            }
 
-                        if(entryUid!= null && entryUid.isNotEmpty()){
-                            epubContainer.containerContentEntryUid = entryUid.toLong()
-                        }
+            get("UmContainer/addContainer"){
 
-                        val epubTmpFile = File.createTempFile("testepub", "epubTmpFile$entryUid")
+                val indexTempDir = 0; val indexTempFile = 1; val indexContainer = 2
 
-                        epubContainer.lastModified = epubTmpFile.lastModified()
-                        epubContainer.mimeType = "application/epub+zip"
-                        epubContainer.containerUid = _restApplicationDb.containerDao.insert(epubContainer)
-
-                        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub", epubTmpFile)
-
-                        val containerDirTmp = UmFileUtilSe.makeTempDir("testepub", "containerDirTmp")
-                        val containerManager = ContainerManager(epubContainer, _restApplicationDb, _restApplicationDb,
-                                containerDirTmp!!.absolutePath)
-
-                        val epubZipFile = ZipFile(epubTmpFile)
-                        addEntriesFromZipToContainer(epubTmpFile.absolutePath, containerManager)
-                        epubZipFile.close()
-                        call.respond(epubContainer.containerUid)
-
-                    }else{
-                        call.respond("Invalid request make sure you have include resource param")
-                    }
+                val resourceName = call.request.queryParameters["resource"]
+                val entryUid = call.request.queryParameters["entryid"]
+                val contentTye = call.request.queryParameters["type"]
+                val mimeType = when (contentTye) {
+                    "video" -> "video/mp4"
+                    "tincan" -> "application/tincan+zip"
+                    "epub" -> "application/epub+zip"
+                    "h5p" -> "application/h5p+zip"
+                    "webchunk" -> "application/webchunk+zip"
+                    else -> ""
                 }
 
-                get("/addVideo"){
-                    val resourceName = call.request.queryParameters["resource"]
-                    val entryUid = call.request.queryParameters["entryid"]
+                handleInvalidRequest(resourceName, entryUid, call)
+
+                val preparedRes = prepareResources(resourceName,contentTye!!, entryUid, mimeType)
+
+                if(contentTye == "video"){
+
+                    val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
+                            (preparedRes[indexTempDir] as File).absolutePath)
+                    containerManager.addEntries(ContainerManager.FileEntrySource(preparedRes[indexTempFile] as File, resourceName!!))
+
+                    call.respond((preparedRes[indexContainer] as Container).containerUid)
+                }else{
+
+                    val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
+                            (preparedRes[indexTempDir] as File).absolutePath)
+
+                    val epubZipFile = ZipFile(preparedRes[indexTempFile] as File)
+                    addEntriesFromZipToContainer((preparedRes[indexTempFile] as File).absolutePath, containerManager)
+                    epubZipFile.close()
+                    val containerUid = (preparedRes[indexContainer] as Container).containerUid
+                    call.respond(containerUid)
                 }
             }
         }
     }
+}
+
+private suspend fun handleInvalidRequest(resourceName: String?, entryId: String?, call: ApplicationCall){
+    if((resourceName != null && resourceName.isEmpty()) || resourceName == null  || (entryId != null && entryId.isEmpty()) || entryId == null){
+        call.respond("Invalid request make sure you have include resource param")
+        return
+    }
+}
+
+
+private fun prepareResources(resourceName: String?, path: String, entryId: String?, mimetype: String): Array<Any>{
+    val epubContainer = Container()
+
+    if(entryId!= null && entryId.isNotEmpty()){
+        epubContainer.containerContentEntryUid = entryId.toLong()
+    }
+
+    val tempFile = File.createTempFile("testFile", "tempFile$entryId")
+
+    epubContainer.lastModified = tempFile.lastModified()
+    epubContainer.mimeType = mimetype
+    epubContainer.containerUid = _restApplicationDb.containerDao.insert(epubContainer)
+
+    UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/$path/${resourceName}", tempFile)
+    val tempDir = UmFileUtilSe.makeTempDir("testFile", "containerDirTmp")
+    return arrayOf(tempDir, tempFile, epubContainer)
 }

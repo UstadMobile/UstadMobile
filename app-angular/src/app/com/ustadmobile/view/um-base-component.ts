@@ -19,7 +19,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   floating_btn_class_left = ""
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
-    this.umService.setEnvironment(document.location.search.indexOf("test") != -1) 
+    this.umService.setEnvironment(document.location.search.indexOf("test") == -1) 
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.viewContext = this.context = new UmContextWrapper(router) 

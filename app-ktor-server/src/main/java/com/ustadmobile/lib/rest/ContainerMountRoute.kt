@@ -2,11 +2,11 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.application.call
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.header
 import io.ktor.response.header
@@ -22,7 +22,7 @@ import java.util.zip.GZIPInputStream
 import javax.naming.InitialContext
 
 
-fun Route.ContainerMount(db: UmAppDatabase) {
+fun Route.ContainerMountRoute(db: UmAppDatabase) {
 
     route("ContainerMount"){
         get("/{containerUid}/{paths...}") {
@@ -33,8 +33,6 @@ fun Route.ContainerMount(db: UmAppDatabase) {
             val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
             val containerDir = File(containerDirPath)
             containerDir.mkdirs()
-
-            println(containerDir.absoluteFile)
 
             val container = db.containerDao.findByUid(containerUid)
             if(container != null){
@@ -55,7 +53,7 @@ fun Route.ContainerMount(db: UmAppDatabase) {
                     if(entryFile.compression == ContainerEntryFile.COMPRESSION_GZIP){
                         inputStream = GZIPInputStream(inputStream)
                     }
-                    call.respondBytes(inputStream.readBytes(), getContentType(pathInContainer), HttpStatusCode(rangeResponse.statusCode,""))
+                    call.respondBytes(inputStream.readBytes(), UMFileUtil.getContentType(pathInContainer), HttpStatusCode(rangeResponse.statusCode,""))
 
                 }else{
                     call.respond(HttpStatusCode.NotFound, "No such file in specified container${containerManager.allEntries.size}")
@@ -66,16 +64,6 @@ fun Route.ContainerMount(db: UmAppDatabase) {
             }
         }
     }
+
 }
 
-fun getContentType(filePath: String): ContentType {
-    val extension = filePath.substring(filePath.lastIndexOf("."))
-    val extensionMap = mapOf(
-            ".html" to ContentType.Text.Html,".xml" to ContentType.Text.Xml,
-            ".css" to ContentType.Text.CSS, ".js" to ContentType.Text.JavaScript,
-            ".txt" to ContentType.Text.Html, ".xhtml" to ContentType.Text.Html,
-            ".jpg" to ContentType.Image.JPEG,".png" to ContentType.Image.PNG,
-            ".gif" to ContentType.Image.GIF, ".mp4" to ContentType.Video.MP4,
-            ".mpeg" to ContentType.Video.MPEG)
-    return extensionMap[extension] ?: ContentType.Any
-}

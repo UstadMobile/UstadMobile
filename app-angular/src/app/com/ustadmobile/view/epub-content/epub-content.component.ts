@@ -21,8 +21,6 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
   currentIndex = 0;
   private inMemoryUrls = [] 
 
-  options = { fullWidth: false };
-
   constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) {
     super(umservice,router, route)
 
@@ -44,7 +42,7 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
     super.ngOnInit()
     $(document).ready(function() {
       //$('iframe').contents().find('img').addClass("responsive-img")
-  });
+    });
   }
 
 
@@ -75,7 +73,7 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
   setAuthorName(name){}
 
   mountContainer(containerUid, callback){
-    callback.onSuccess(localStorage.getItem(this.umService.baseUrlTag)+"ContainerMount/"+containerUid+"/")
+    callback.onSuccess(UmAngularUtil.getMountPath(containerUid))
   }
 
   unmountContainer(mountUrl){}
@@ -92,7 +90,7 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
     this.loadPage(nextIndex)
   }
 
-  getToPrevPage(){
+  goToPrevPage(){
     let prevIndex = this.currentIndex - 1
     prevIndex = prevIndex <= 0 ? 0: prevIndex
     this.loadPage(prevIndex)
