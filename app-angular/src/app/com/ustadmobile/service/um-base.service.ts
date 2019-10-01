@@ -80,7 +80,7 @@ export class UmBaseService {
   
     if(this.isTestEnv == true){
       combineLatest([
-        this.http.get(localStorage.getItem(this.baseUrlTag)+"UmContainer/addContainer", {responseType: 'text' }),
+        this.http.get("http://localhost:8087/UmAppDatabase/clearAllTables", {responseType: 'text' }),
         this.http.get<any>("assets/data_entries.json").pipe(map(res => res)),
         this.http.get<any>("assets/data_entries_parent_join.json").pipe(map(res => res)),
         this.http.get<any>("assets/data_languages.json").pipe(map(res => res)),
