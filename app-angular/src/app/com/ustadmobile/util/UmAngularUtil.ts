@@ -357,6 +357,11 @@ export class UmAngularUtil {
     return util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(data);
   }
 
+  static getMountPath(containerUid: any){
+    const uid = containerUid.toString()
+    return localStorage.getItem("contentUrl") + uid +"/"
+  }
+
   /**
    * Conevert category map from kotlin to JS array
    * @param data category map to be converted

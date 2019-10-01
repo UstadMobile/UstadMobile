@@ -17,7 +17,7 @@ export class UmBaseService {
   private database: db.com.ustadmobile.core.db.UmAppDatabase
   private isTestEnv: boolean = false
   private component: any
-  public ROOT_UID = 0
+  public ROOT_UID = "0"
   private umObserver = new Subject <any> ();
   private directionality: string;
   public continuation = kotlin.kotlin.coroutines.js.internal.EmptyContinuation
@@ -25,7 +25,7 @@ export class UmBaseService {
   httpClient: HttpClient;
   toolBarTitle: string = ".."
   public appName: string  = "..." 
-  baseUrlTag = "doordb.endpoint.url"
+  public baseUrlTag: string = "doordb.endpoint.url"
 
   constructor(private http: HttpClient, private toastService: MzToastService) { 
     this.ROOT_UID = core.com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID.toString()
@@ -75,9 +75,12 @@ export class UmBaseService {
    * @param fireWhenReady fire when true otherwise don't fire any event
    */
   preloadResources(fireWhenReady = true){
+
+    localStorage.setItem("contentUrl", localStorage.getItem("doordb.endpoint.url")+"ContainerMount/")
+  
     if(this.isTestEnv == true){
       combineLatest([
-        this.http.get("http://localhost:8087/UmAppDatabase/clearAllTables", {responseType: 'text' }),
+        this.http.get(localStorage.getItem(this.baseUrlTag)+"UmContainer/addContainer", {responseType: 'text' }),
         this.http.get<any>("assets/data_entries.json").pipe(map(res => res)),
         this.http.get<any>("assets/data_entries_parent_join.json").pipe(map(res => res)),
         this.http.get<any>("assets/data_languages.json").pipe(map(res => res)),

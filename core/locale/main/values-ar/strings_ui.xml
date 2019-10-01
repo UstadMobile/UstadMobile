@@ -38,6 +38,7 @@
     <string name='download_all'>Download all</string>
     <string name='nothing_selected'>Nothing selected!</string>
     <string name='next'>Next</string>
+    <string name='previous'>Previous</string>
     <string name='back'>Back</string>
     <string name='username'>Username</string>
     <string name='password'>Password</string>

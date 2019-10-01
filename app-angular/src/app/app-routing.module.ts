@@ -12,6 +12,8 @@ import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-d
 import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { EpubContentComponent } from './com/ustadmobile/view/epub-content/epub-content.component';
+import { VideoPlayerComponent } from './com/ustadmobile/view/video-player/video-player.component';
+import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -21,6 +23,8 @@ const routes: Routes = [
           {path: 'RegisterAccount', component: RegisterComponent},
           {path: 'Login', component: LoginComponent},
           {path: "EpubContent", component: EpubContentComponent},
+          {path: "VideoPlayer", component: VideoPlayerComponent},
+          {path: "XapiContent", component: XapiContentComponent},
           {path: "ReportDashboard", component: ReportDashboardComponent},
           {path: "ReportOptions", component: XapiReportOptionsComponent},
           {path: "EntriesTreeDialog",component: XapiTreeviewDialogComponent},
