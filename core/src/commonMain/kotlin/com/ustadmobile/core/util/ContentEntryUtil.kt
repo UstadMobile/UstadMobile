@@ -3,12 +3,11 @@ package com.ustadmobile.core.util
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus
 import kotlin.jvm.JvmStatic
 
 expect class ContentEntryUtil : ContentEntryUtilCommon{
 
-    override suspend fun goToViewIfDownloaded(entryStatus: ContentEntryWithContentEntryStatus,
+    override suspend fun goToViewIfDownloaded(entryUid: Long?, sourceUrl: String?,
                                               dbRepo: UmAppDatabase, impl: UstadMobileSystemImpl,
                                               openEntryIfNotDownloaded: Boolean, context: Any,
                                               callback: UmCallback<Any>)

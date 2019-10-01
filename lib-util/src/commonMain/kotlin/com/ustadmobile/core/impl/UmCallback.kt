@@ -1,5 +1,7 @@
 package com.ustadmobile.core.impl
 
+import kotlin.js.JsName
+
 /**
  * Generic callback wrapper
  */
@@ -11,6 +13,7 @@ interface UmCallback<T> {
      *
      * @param result result of the operation
      */
+    @JsName("onSuccess")
     fun onSuccess(result: T?)
 
     /**
@@ -18,5 +21,6 @@ interface UmCallback<T> {
      *
      * @param exception exception thrown (if any)
      */
+    @JsName("onFailure")
     fun onFailure(exception: Throwable?)
 }

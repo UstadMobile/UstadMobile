@@ -10,8 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -19,23 +18,21 @@ import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.response.HttpResponse
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.*
+import org.mockito.Mockito.timeout
+import org.mockito.Mockito.verify
 import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
-import com.ustadmobile.core.util.UMFileUtil.joinPaths
-import kotlinx.coroutines.runBlocking
 
 class EpubContentPresenterTest {
 

@@ -1,4 +1,3 @@
-import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
@@ -12,6 +11,7 @@ import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-o
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
 import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
+import { EpubContentComponent } from './com/ustadmobile/view/epub-content/epub-content.component';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -20,10 +20,7 @@ const routes: Routes = [
           {path: 'ContentEntryDetail', component: ContentEntryDetailComponent},
           {path: 'RegisterAccount', component: RegisterComponent},
           {path: 'Login', component: LoginComponent},
-          {path: "XapiPackage", component: XapiContentComponent},
-          {path: "VideoPlayer", component: XapiContentComponent},
-          {path: "webChunk", component: XapiContentComponent},
-          {path: "Container", component: XapiContentComponent},
+          {path: "EpubContent", component: EpubContentComponent},
           {path: "ReportDashboard", component: ReportDashboardComponent},
           {path: "ReportOptions", component: XapiReportOptionsComponent},
           {path: "EntriesTreeDialog",component: XapiTreeviewDialogComponent},

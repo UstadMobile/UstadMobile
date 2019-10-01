@@ -22,12 +22,15 @@ export class UmBaseService {
   private directionality: string;
   public continuation = kotlin.kotlin.coroutines.js.internal.EmptyContinuation
   systemLocale: any;
+  httpClient: HttpClient;
   toolBarTitle: string = ".."
   public appName: string  = "..." 
+  baseUrlTag = "doordb.endpoint.url"
 
   constructor(private http: HttpClient, private toastService: MzToastService) { 
     this.ROOT_UID = core.com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID.toString()
-    UmAngularUtil.fireResouceReady(false);  
+    UmAngularUtil.fireResouceReady(false); 
+    this.httpClient = http 
   }
   
   /**

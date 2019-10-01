@@ -14,7 +14,6 @@ import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.co
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
-import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboard/report-dashboard.component';
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
@@ -25,6 +24,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
 import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog/um-tree-node/um-tree-node.component';
+import { EpubContentComponent } from './com/ustadmobile/view/epub-content/epub-content.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -36,16 +37,17 @@ import { UmTreeNodeComponent } from './com/ustadmobile/view/xapi-treeview-dialog
     NotFoundComponent,
     RegisterComponent,
     LoginComponent,
-    XapiContentComponent,
     ReportDashboardComponent,
     XapiReportOptionsComponent,
     XapiReportDetailsComponent,
     XapiTreeviewDialogComponent,
     ActionResultDataPipe,
-    UmTreeNodeComponent
+    UmTreeNodeComponent,
+    EpubContentComponent
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     NgProgressModule,
     HttpClientModule,

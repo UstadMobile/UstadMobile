@@ -74,6 +74,7 @@ dependencies {
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
 
     implementation project(path: ":core", configuration: "jvmDefault")
+    implementation project(":sharedse")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
     implementation project(":lib-door-runtime")

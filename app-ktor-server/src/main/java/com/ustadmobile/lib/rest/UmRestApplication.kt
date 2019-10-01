@@ -1,32 +1,33 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseCallback
-import com.ustadmobile.door.DoorSqlDatabase
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.util.encryptPassword
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
-import io.ktor.features.DefaultHeaders
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import io.ktor.routing.route
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 import java.nio.file.Files
+import java.util.zip.ZipFile
 import javax.naming.InitialContext
 
 
@@ -80,11 +81,52 @@ fun Application.umRestApplication(devMode: Boolean = false) {
         }
 
         LoginRoute(_restApplicationDb)
+        ContainerMount(_restApplicationDb)
         UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
         if(devMode) {
+
             get("UmAppDatabase/clearAllTables") {
                 _restApplicationDb.clearAllTables()
                 call.respond("OK - cleared")
+            }
+
+            route("UmContainer"){
+                get("/addEpub") {
+                    val resourceName = call.request.queryParameters["resource"]
+                    val entryUid = call.request.queryParameters["entryid"]
+                    if(resourceName != null && resourceName.isNotEmpty()){
+                        val epubContainer = Container()
+
+                        if(entryUid!= null && entryUid.isNotEmpty()){
+                            epubContainer.containerContentEntryUid = entryUid.toLong()
+                        }
+
+                        val epubTmpFile = File.createTempFile("testepub", "epubTmpFile$entryUid")
+
+                        epubContainer.lastModified = epubTmpFile.lastModified()
+                        epubContainer.mimeType = "application/epub+zip"
+                        epubContainer.containerUid = _restApplicationDb.containerDao.insert(epubContainer)
+
+                        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub", epubTmpFile)
+
+                        val containerDirTmp = UmFileUtilSe.makeTempDir("testepub", "containerDirTmp")
+                        val containerManager = ContainerManager(epubContainer, _restApplicationDb, _restApplicationDb,
+                                containerDirTmp!!.absolutePath)
+
+                        val epubZipFile = ZipFile(epubTmpFile)
+                        addEntriesFromZipToContainer(epubTmpFile.absolutePath, containerManager)
+                        epubZipFile.close()
+                        call.respond(epubContainer.containerUid)
+
+                    }else{
+                        call.respond("Invalid request make sure you have include resource param")
+                    }
+                }
+
+                get("/addVideo"){
+                    val resourceName = call.request.queryParameters["resource"]
+                    val entryUid = call.request.queryParameters["entryid"]
+                }
             }
         }
     }

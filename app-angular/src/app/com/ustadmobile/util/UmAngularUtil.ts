@@ -242,9 +242,8 @@ export class UmAngularUtil {
    * @param routes route map
    */
   static getActiveMenu(routes): boolean[]{
-    const libActive = window.location.pathname.includes(routes.entryList)
-     || window.location.pathname.includes(routes.entryDetails)
-    return [libActive, !libActive] 
+    const reportActive = window.location.pathname.includes("Report")
+    return [!reportActive, reportActive]
   }
 
   /**

@@ -34,8 +34,7 @@ abstract class ContentEntryUtilCommon {
         mimeTypeToPlayStoreIdMap["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = "com.microsoft.office.word"
     }
 
-    abstract suspend fun goToViewIfDownloaded(entryStatus: ContentEntryWithContentEntryStatus,
-                                      dbRepo: UmAppDatabase,
+    abstract suspend fun goToViewIfDownloaded(entryUid: Long?, sourceUrl: String?, dbRepo: UmAppDatabase,
                                       impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                       context: Any,
                                       callback: UmCallback<Any>)
@@ -48,8 +47,7 @@ abstract class ContentEntryUtilCommon {
 
         GlobalScope.launch {
             try {
-                val result = dbRepo.contentEntryDao.findByUidWithContentEntryStatusAsync(contentEntryUid)
-                goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
+                goToViewIfDownloaded(contentEntryUid,null, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             } catch (e: Exception) {
                 callback.onFailure(e)
             }
@@ -114,8 +112,7 @@ abstract class ContentEntryUtilCommon {
 
         GlobalScope.launch {
             try {
-                val result = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(sourceUrl)
-                goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
+                goToViewIfDownloaded(null,sourceUrl, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             } catch (e: Exception) {
                 callback.onFailure(e)
             }

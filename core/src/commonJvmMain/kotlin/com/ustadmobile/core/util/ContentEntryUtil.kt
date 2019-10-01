@@ -10,10 +10,20 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus
 
 actual class ContentEntryUtil: ContentEntryUtilCommon() {
 
-    actual override suspend fun goToViewIfDownloaded(entryStatus: ContentEntryWithContentEntryStatus,
+    actual override suspend fun goToViewIfDownloaded(entryUid: Long?, sourceUrl: String?,
                                                      dbRepo: UmAppDatabase, impl: UstadMobileSystemImpl,
                                                      openEntryIfNotDownloaded: Boolean, context: Any,
                                                      callback: UmCallback<Any>) {
+
+        var entryStatus = ContentEntryWithContentEntryStatus()
+        if(entryUid != null){
+            entryStatus = dbRepo.contentEntryDao.findByUidWithContentEntryStatusAsync(entryUid)!!
+        }
+
+        if(sourceUrl != null){
+            entryStatus = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(sourceUrl)!!
+
+        }
         val contentEntryStatus = entryStatus.contentEntryStatus
 
         this.dbRepo = dbRepo; this.impl = impl; this.context = context; this.callback = callback

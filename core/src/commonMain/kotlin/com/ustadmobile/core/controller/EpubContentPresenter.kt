@@ -77,6 +77,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
+import kotlin.js.JsName
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -195,6 +196,7 @@ class EpubContentPresenter(context: Any,
         view.mountContainer(containerUid, mountedCallbackHandler)
     }
 
+    @JsName("handleClickNavItem")
     fun handleClickNavItem(navItem: EpubNavItem) {
         if (opfBaseUrl != null && linearSpineUrls != null) {
             val navItemUrl = UMFileUtil.resolveLink(opfBaseUrl!!, navItem.href!!)

@@ -32,6 +32,8 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.impl.UmCallback
+import kotlinx.serialization.json.JSON
+import kotlin.js.JsName
 
 /**
  *
@@ -39,20 +41,28 @@ import com.ustadmobile.core.impl.UmCallback
  */
 interface EpubContentView : UstadView {
 
+    @JsName("setContainerTitle")
     fun setContainerTitle(containerTitle: String)
 
+    @JsName("setSpineUrls")
     fun setSpineUrls(urls: Array<String>?, index :Int)
 
+    @JsName("setPageTitle")
     fun setPageTitle(pageTitle: String?)
 
+    @JsName("setTableOfContents")
     fun setTableOfContents(tocNavItem: EpubNavItem)
 
+    @JsName("setCoverImage")
     fun setCoverImage(imageUrl: String)
 
+    @JsName("setAuthorName")
     fun setAuthorName(authorName: String)
 
+    @JsName("mountContainer")
     fun mountContainer(containerUid: Long, callback: UmCallback<String>?)
 
+    @JsName("unmountContainer")
     fun unmountContainer(mountedUrl: String?)
 
     /**
@@ -61,6 +71,7 @@ interface EpubContentView : UstadView {
      * @param progressVisible true for the progress bar to be visible (e.g. container is being mounted/parsed),
      * false otherwise.
      */
+    @JsName("setProgressBarVisible")
     fun setProgressBarVisible(progressVisible: Boolean)
 
     /**
@@ -70,12 +81,14 @@ interface EpubContentView : UstadView {
      *
      * @return
      */
+    @JsName("setProgressBarProgress")
     fun setProgressBarProgress(progress: Int)
 
     /**
      *
      * @param spinePos
      */
+    @JsName("goToLinearSpinePosition")
     fun goToLinearSpinePosition(spinePos: Int)
 
     companion object {
