@@ -126,9 +126,9 @@ class EdraakK12ContentScraper : Runnable {
         try {
             urlConnection = scrapUrl!!.openConnection() as HttpURLConnection
             urlConnection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01")
-            response = GsonBuilder().create().fromJson<ContentResponse>(IOUtils.toString(urlConnection!!.getInputStream(), UTF_ENCODING), ContentResponse::class.java!!)
+            response = GsonBuilder().create().fromJson<ContentResponse>(IOUtils.toString(urlConnection.inputStream, UTF_ENCODING), ContentResponse::class.java)
 
-            val lastModified = File(destinationDirectory!!.getParentFile(), destinationDirectory!!.getName() + LAST_MODIFIED_TXT)
+            val lastModified = File(destinationDirectory!!.parentFile, destinationDirectory!!.name + LAST_MODIFIED_TXT)
             contentUpdated = ContentScraperUtil.isFileContentsUpdated(lastModified, if ((response.updated != null && !response.updated!!.isEmpty()))
                 response.updated!!
             else if ((response.created != null && !response.created!!.isEmpty()))
@@ -140,14 +140,11 @@ class EdraakK12ContentScraper : Runnable {
                 return
             }
 
-        } catch (e: IOException) {
-            throw IllegalArgumentException("JSON INVALID for url " + scrapUrl!!.toString(), e.cause)
-        } catch (e: JsonSyntaxException) {
+        } catch (e: Exception) {
+            UMLogUtil.logDebug(e.message + "\n" + e.stackTrace + e.cause)
             throw IllegalArgumentException("JSON INVALID for url " + scrapUrl!!.toString(), e.cause)
         } finally {
-            if (urlConnection != null) {
-                urlConnection!!.disconnect()
-            }
+            urlConnection?.disconnect()
         }
 
 

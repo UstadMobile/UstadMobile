@@ -117,9 +117,9 @@ class IndexEdraakK12Content {
         }
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
-                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, arabicLang!!.langUid, null,
+                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, arabicLang.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao)
 
         var description = ("تعليم مجانيّ\n" +
                 "إلكترونيّ باللغة العربيّة!" +
@@ -131,10 +131,10 @@ class IndexEdraakK12Content {
         val edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
                 "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang.langUid, null,
                 description, false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao)
 
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, edraakParentEntry, 0)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0)
 
 
         val scrapePrecessor = 1
