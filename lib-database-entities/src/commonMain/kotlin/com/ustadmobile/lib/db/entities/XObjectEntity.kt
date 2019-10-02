@@ -6,11 +6,14 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
-class XObjectEntity() {
+@Serializable
+class XObjectEntity {
 
     @PrimaryKey(autoGenerate = true)
     var xObjectUid: Long = 0
@@ -36,8 +39,11 @@ class XObjectEntity() {
     @LastChangedBy
     var xObjectLastChangedBy: Int = 0
 
-    constructor(id: String?, objectType: String?, type: String?, interactionType: String?,
-                responsePattern: String?, objectContentEntryUid: Long = 0): this() {
+    constructor() {
+
+    }
+
+    constructor(id: String?, objectType: String?, type: String?, interactionType: String?, responsePattern: String?, objectContentEntryUid: Long = 0) {
         this.objectId = id
         this.objectType = objectType
         this.definitionType = type

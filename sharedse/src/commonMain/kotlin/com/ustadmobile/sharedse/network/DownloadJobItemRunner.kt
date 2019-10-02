@@ -117,11 +117,13 @@ class DownloadJobItemRunner
 
     class DownloadedEntrySource(override val pathInContainer: String,
                                 private val file: FileSe,
+                                var unCompressedLength: Long,
                                 override val md5Sum: ByteArray,
                                 override val filePath: String,
-                                override val compression: Int = 0) : ContainerManagerCommon.EntrySource {
+                                override val compression: Int = 0)
+                                : ContainerManagerCommon.EntrySource {
         override val length: Long
-            get() = file.length()
+            get() = unCompressedLength
 
         override val inputStream = FileInputStreamSe(file)
 
@@ -406,6 +408,7 @@ class DownloadJobItemRunner
 
                                     var `is`: FileInputStreamSe? = null
                                     var compression = COMPRESSION_NONE
+                                    var length = 0L
                                     try {
                                         val sign = ByteArray(2)
                                         `is` = FileInputStreamSe(destFile)
@@ -415,6 +418,10 @@ class DownloadJobItemRunner
                                         } else {
                                             COMPRESSION_NONE
                                         }
+
+                                        length = resumableDownload.headers?.get("x-content-length-uncompressed")?.get(0)?.toLong()
+                                                ?: destFile.length()
+
                                     } catch (io: IOException) {
 
                                     } finally {
@@ -425,7 +432,7 @@ class DownloadJobItemRunner
                                     containerManager.addEntries(
                                             ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
                                                     dontUpdateTotals = true),
-                                            DownloadedEntrySource(entry.cePath!!, destFile,
+                                            DownloadedEntrySource(entry.cePath!!, destFile, length,
                                                     Base64Coder.decodeToByteArray(entry.cefMd5!!),
                                                     destFile.getAbsolutePath(), compression))
                                 } else {

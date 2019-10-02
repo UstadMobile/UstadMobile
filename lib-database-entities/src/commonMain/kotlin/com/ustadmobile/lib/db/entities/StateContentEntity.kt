@@ -7,10 +7,12 @@ import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.StateContentEntity.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
-class StateContentEntity() {
+@Serializable
+class StateContentEntity {
 
     @PrimaryKey(autoGenerate = true)
     var stateContentUid: Long = 0
@@ -32,11 +34,15 @@ class StateContentEntity() {
     @LastChangedBy
     var stateContentLastChangedBy: Int = 0
 
-    constructor(key: String, stateUid: Long, valueOf: String, isActive: Boolean): this() {
+    constructor(key: String, stateUid: Long, valueOf: String, isActive: Boolean) {
         this.stateContentKey = key
         this.stateContentValue = valueOf
         this.stateContentStateUid = stateUid
         this.isIsactive = isActive
+    }
+
+    constructor() {
+
     }
 
     override fun equals(o: Any?): Boolean {

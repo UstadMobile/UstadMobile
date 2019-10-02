@@ -1,10 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * A DownloadJob with the total number of items and the total number of bytes to be download by
  * all DownloadJobItem entities in the DownloadJob. This is used with DAO method SQL that uses
  * the SQL sum function.
  */
+@Serializable
 class DownloadJobWithTotals() : DownloadJob() {
 
     /**

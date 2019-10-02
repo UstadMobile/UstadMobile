@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
 
@@ -378,6 +379,8 @@ abstract class PersonDao : BaseDao<Person> {
         const val QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC "
     }
 
+
+    @Serializable
     data class PersonNameAndUid(var personUid: Long = 0L, var name: String = ""){
 
         override fun toString(): String {

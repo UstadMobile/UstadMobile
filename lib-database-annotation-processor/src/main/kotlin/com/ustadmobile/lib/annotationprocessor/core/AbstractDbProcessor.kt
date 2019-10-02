@@ -283,10 +283,28 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             .add(requestBuilderCodeBlock)
 
     params.filter { isQueryParam(it.type) }.forEach {
+        val paramType = it.type
+        val isList = paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()
+
+        val paramsCodeblock = CodeBlock.builder()
+        var paramVarName = it.name
+        if(isList) {
+            paramsCodeblock.add("${it.name}.forEach { ")
+            paramVarName = "it"
+            if(paramType != String::class.asClassName()) {
+                paramVarName += ".toString()"
+            }
+        }
+
+        paramsCodeblock.add("%M(%S, $paramVarName)\n",
+                MemberName("io.ktor.client.request", "parameter"),
+                it.name)
+        if(isList) {
+            paramsCodeblock.add("} ")
+        }
+        paramsCodeblock.add("\n")
         codeBlock.addWithNullCheckIfNeeded(it.name, it.type,
-                CodeBlock.of("%M(%S, ${it.name})\n",
-                        MemberName("io.ktor.client.request", "parameter"),
-                        it.name))
+                paramsCodeblock.build())
     }
 
     val requestBodyParam = getRequestBodyParam(params)
@@ -296,9 +314,15 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
 
         val writeBodyCodeBlock = if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
                 && requestBodyParamType.rawType == List::class.asClassName()) {
-            val entityComponentType = resolveEntityFromResultType(requestBodyParamType)
-            CodeBlock.of("body = %T(_json.stringify(%T.serializer().%M, ${requestBodyParam.name}), %T.Application.Json)\n",
+            val entityComponentType = resolveEntityFromResultType(requestBodyParamType).javaToKotlinType()
+            val serializerFnCodeBlock = if(entityComponentType in QUERY_SINGULAR_TYPES) {
+                CodeBlock.of("%M()", MemberName("kotlinx.serialization", "serializer"))
+            }else {
+                CodeBlock.of("serializer()")
+            }
+            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json)\n",
                 TextContent::class, entityComponentType,
+                    serializerFnCodeBlock,
                     MemberName("kotlinx.serialization", "list"),
                     ContentType::class)
         }else {
@@ -314,8 +338,14 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
 
     val receiveCodeBlock = if(useKotlinxListSerialization && httpResultType is ParameterizedTypeName
             && httpResultType.rawType == List::class.asClassName() ) {
-        CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.serializer().%M, $httpResponseVarName.%M<String>())\n",
-                httpResultType.typeArguments[0], MemberName("kotlinx.serialization", "list"),
+        val serializerFnCodeBlock = if(httpResultType.typeArguments[0].javaToKotlinType() in QUERY_SINGULAR_TYPES) {
+            CodeBlock.of("%M()", MemberName("kotlinx.serialization", "serializer"))
+        }else {
+            CodeBlock.of("serializer()")
+        }
+        CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.%L.%M, $httpResponseVarName.%M<String>())\n",
+                httpResultType.typeArguments[0], serializerFnCodeBlock,
+                MemberName("kotlinx.serialization", "list"),
                 CLIENT_RECEIVE_MEMBER_NAME)
     }else{
         CodeBlock.of("$httpResponseVarName.%M<%T>()\n",

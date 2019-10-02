@@ -6,7 +6,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-
+import kotlinx.serialization.Serializable
 
 /**
  * Represents one session (e.g. day) in the class log book. This is related to attendance records, but
@@ -15,6 +15,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 
 @SyncableEntity(tableId = 14)
 @Entity
+@Serializable
 open class ClazzLog()  {
 
     @PrimaryKey(autoGenerate = true)

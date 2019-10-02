@@ -3,11 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * Created by mike on 1/29/18.
  */
 @Entity
+@Serializable
 class NetworkNode() {
 
     @PrimaryKey(autoGenerate = true)
