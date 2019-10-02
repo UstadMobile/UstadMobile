@@ -5,7 +5,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 
-actual class PlatformHttpClient {
+actual class PlatformHttpClient actual constructor(){
 
     actual fun headRequest(urlString: String): HeadResponse {
         val url = URL(urlString)

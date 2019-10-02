@@ -2,7 +2,7 @@ package com.ustadmobile.core.networkmanager
 
 import com.ustadmobile.core.model.HeadResponse
 
-expect class PlatformHttpClient {
+expect class PlatformHttpClient() {
 
     fun headRequest(urlString: String): HeadResponse
 
