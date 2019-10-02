@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonDao.Companion.SESSION_LENGTH
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -32,52 +33,39 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
     @Query("SELECT admin from Person WHERE personUid = :uid")
     abstract fun isPersonAdmin(uid: Long): Boolean
 
-    //TODO: Undo when ready
-//    @Query("UPDATE PersonAuth set passwordHash = :passwordHash " +
-//            " WHERE personAuthUid = :personUid")
-//    abstract fun updatePasswordForPersonUid(personUid: Long, passwordHash: String,
-//                                            resultCallback: UmCallback<Int>)
-//
-//    @UmRestAccessible
-//    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-//    fun resetPassword(personUid: Long, password: String,
-//                      @UmRestAuthorizedUidParam loggedInPersonUid: Long,
-//                      resetCallback: UmCallback<Int>) {
-//        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptThisPassword(password)
-//
-//        if (loggedInPersonUid != personUid) {
-//            if (isPersonAdmin(loggedInPersonUid)) {
-//                val personAuth = PersonAuth(personUid, passwordHash)
-//                val existingPersonAuth = findByUid(personUid)
-//                if (existingPersonAuth == null) {
-//                    insert(personAuth)
-//                }
-//                updatePasswordForPersonUid(personUid, passwordHash,
-//                        object : UmCallback<Int> {
-//                            override fun onSuccess(result: Int?) {
-//                                if (result!! > 0) {
-//                                    println("Update password success")
-//                                    resetCallback.onSuccess(1)
-//                                } else {
-//                                    resetCallback.onFailure(Exception())
-//                                }
-//                            }
-//
-//                            override fun onFailure(exception: Throwable?) {
-//                                println("Update password fail")
-//                                resetCallback.onFailure(Exception())
-//                            }
-//                        })
-//            } else {
-//                println("Update password fail2")
-//                resetCallback.onFailure(Exception())
-//            }
-//        } else {
-//            println("Update password fail3")
-//            resetCallback.onFailure(Exception())
-//        }
-//
-//    }
+    @Query("UPDATE PersonAuth set passwordHash = :passwordHash " +
+            " WHERE personAuthUid = :personUid")
+    abstract suspend fun updatePasswordForPersonUid(personUid: Long, passwordHash: String): Int
+
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    open suspend fun resetPassword(personUid: Long, password: String, loggedInPersonUid: Long): Int {
+        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptThisPassword(password)
+
+        if (loggedInPersonUid != personUid) {
+            if (isPersonAdmin(loggedInPersonUid)) {
+                val personAuth = PersonAuth(personUid, passwordHash)
+                val existingPersonAuth = findByUid(personUid)
+                if (existingPersonAuth == null) {
+                    insert(personAuth)
+                }
+                val result = updatePasswordForPersonUid(personUid, passwordHash)
+                if (result > 0) {
+                    println("Update password success")
+                    return 1
+                } else {
+                    return 0
+                }
+
+            } else {
+                println("Update password fail2")
+                return -1
+            }
+        } else {
+            println("Update password fail3")
+            return -2
+        }
+
+    }
 
     @Insert
     abstract fun insertAccessToken(token: AccessToken)
@@ -187,22 +175,6 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
         fun encryptThisPassword(originalPassword: String): String {
             return encryptPassword(originalPassword)
-
-            //Update: Done. Part of Encrypt.kt thingi
-            //TODOne: Implement/Fix this.
-            /*
-            val keySpec = PBEKeySpec(originalPassword.toCharArray(), SALT.toByteArray(),
-                    ITERATIONS, KEY_LENGTH)
-            try {
-                val keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-                return String(Base64Coder.encode(keyFactory.generateSecret(keySpec).getEncoded()))
-            } catch (e: NoSuchAlgorithmException) {
-                //should not happen
-                throw AssertionError("Error hashing password" + e.message, e)
-            } catch (e: InvalidKeySpecException) {
-                throw AssertionError("Error hashing password" + e.message, e)
-            }
-            */
         }
 
         fun authenticateThisEncryptedPassword(providedPassword: String,
