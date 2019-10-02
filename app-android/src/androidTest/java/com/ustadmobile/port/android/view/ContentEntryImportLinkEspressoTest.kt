@@ -13,6 +13,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.GsonBuilder
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.GOOGLE_DRIVE_LINK
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -59,7 +60,6 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         serverDb = UmAppDatabase.getInstance(context, "serverdb")
         defaultDb = UmAppDatabase.getInstance(context)
-
 
 
         repo = defaultDb //db!!.getRepository("http://localhost/dummy/", "")
@@ -116,6 +116,9 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
 
+        mockWebServer.close()
+
+
     }
 
     //@Test
@@ -142,6 +145,8 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error.isNullOrBlank())
+        mockWebServer.close()
+
 
     }
 
@@ -197,12 +202,15 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
-        
+
         onView(withId(R.id.import_link_done)).perform(click())
         Assert.assertTrue(defaultDb.contentEntryParentChildJoinDao.findListOfChildsByParentUuid(-101).isNotEmpty())
+
+        mockWebServer.close()
+
     }
 
-    //@Test
+   // @Test
     fun givenUserTypesVideoLink_thenShowVideoTitle() {
 
         mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
@@ -233,12 +241,57 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         onView(withId(R.id.import_link_done)).check(matches(isEnabled()))
 
+        mockWebServer.close()
+
+
+    }
+
+
+    //@Test
+    fun givenUserTypesGoogleDrive_whenLinkNotValid_showError() {
+
+
+        mockWebServer.start()
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "video/")
+                .setHeader("location", mockWebServer.url("/noVideoHere"))
+                .setResponseCode(302))
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "audio/")
+                .setResponseCode(200))
+
+
+        val intent = Intent()
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
+        GOOGLE_DRIVE_LINK = mockWebServer.url("/drive.google.com&id=abcde").toString()
+
+        var urlString = mockWebServer.url("/drive.google.com&id=abcde").toString()
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
+
+        val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
+        Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
+
+
+        mockWebServer.close()
+
+
     }
 
     //@Test
     fun givenUserTypesVideoLink_whenFileSizeTooBig_showError() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 104857600).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-length", 104857600).setHeader("content-type", "video/").setResponseCode(200))
         mockWebServer.start()
 
         val intent = Intent()
@@ -263,6 +316,92 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
         Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
+
+
+    }
+
+
+    //@Test
+    fun givenUserTypesGoogleDriveShareLink_whenLinkNotValid_showError() {
+
+
+        mockWebServer.start()
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "video/")
+                .setHeader("location", mockWebServer.url("/noVideoHere"))
+                .setResponseCode(302))
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "audio/")
+                .setResponseCode(200))
+
+
+        val intent = Intent()
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
+        GOOGLE_DRIVE_LINK = mockWebServer.url("/drive.google.com&id=abcde").toString()
+
+        var urlString = "https://drive.google.com/file/d/16wa2sh7pwQgnpR2H0X_EC9XFM5G0wISR/view?usp=sharing"
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
+
+        val textInput = activity.findViewById<TextInputLayout>(R.id.entry_import_link_textInput)
+        Assert.assertTrue(textInput.error == UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
+
+
+        mockWebServer.close()
+
+
+    }
+
+    @Test
+    fun givenUserTypesGoogleDriveShareLink_whenLinkValid_clickDone() {
+
+        mockWebServer.start()
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("content-type", "video/")
+                .setHeader("location", mockWebServer.url("/noVideoHere"))
+                .setResponseCode(302))
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("content-type", "video/")
+                .setResponseCode(200))
+
+
+        val intent = Intent()
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        mActivityRule.launchActivity(intent)
+        var activity = mActivityRule.activity
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
+        GOOGLE_DRIVE_LINK = mockWebServer.url("/drive.google.com&id=abcde").toString()
+
+        var urlString = "https://drive.google.com/file/d/16wa2sh7pwQgnpR2H0X_EC9XFM5G0wISR/view?usp=sharing"
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
+
+        onView(withId(R.id.entry_import_link_titleInput)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.import_link_done)).check(matches(not(isEnabled())))
+
+        onView(withId(R.id.entry_import_link_title_editText)).perform(replaceText("Video Title"), ViewActions.closeSoftKeyboard())
+
+        onView(withId(R.id.import_link_done)).check(matches(isEnabled()))
+
+        mockWebServer.close()
 
 
     }
