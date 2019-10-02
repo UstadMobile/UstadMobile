@@ -25,7 +25,7 @@ actual class DatabaseBuilder<T: DoorDatabase>(private val roomBuilder: RoomDatab
 
 
 
-    actual fun build(): T = roomBuilder.allowMainThreadQueries().build()
+    actual fun build(): T = roomBuilder.allowMainThreadQueries().fallbackToDestructiveMigration().build()
 
     actual fun addCallback(callback: DoorDatabaseCallback) : DatabaseBuilder<T> {
         roomBuilder.addCallback(object: RoomDatabase.Callback() {

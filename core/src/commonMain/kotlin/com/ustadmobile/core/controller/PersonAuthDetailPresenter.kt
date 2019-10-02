@@ -59,7 +59,7 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
 
                 val result2 = personAuthDao.findByUidAsync(currentPersonUid)
                 currentPersonAuth = result2
-                if (result == null) {
+                if (result2 == null) {
                     currentPersonAuth = PersonAuth()
                     currentPersonAuth!!.personAuthUid = currentPersonUid
                     currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
@@ -84,18 +84,12 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
             GlobalScope.launch {
                 personDao.updateAsync(currentPerson!!)
 
-
-                //TODO: KMP: Reset password when Ready ?
                 val result = personAuthDao.updateAsync(currentPersonAuth!!)
-                //personAuthDao.resetPassword(currentPersonUid, passwordSet, loggedInPersonUid)
-                personAuthDao.updateAsync(currentPersonAuth!!)
-                view.finish()
-
-
-//                override fun onFailure(exception: Throwable?) {
-//                    print(exception!!.message)
-//                    view.sendMessage(MessageID.unable_to_update_password)
-//                }
+                val reset = personAuthDao.resetPassword(currentPersonUid, passwordSet!!, loggedInPersonUid)
+                val result2 = personAuthDao.updateAsync(currentPersonAuth!!)
+                if(result2 > 0) {
+                    view.finish()
+                }
             }
         }
     }
