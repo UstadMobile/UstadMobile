@@ -20,11 +20,13 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.port.sharedse.R
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import com.ustadmobile.core.impl.UmAccountManager
 
 /**
  * This services monitors the download job statuses and act accordingly
@@ -37,11 +39,23 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
+            val channelNetworkManager = networkManagerBle!!
             networkManagerBle?.addDownloadChangeListener(this@DownloadNotificationService)
             val activeDownloadManagers = networkManagerBle?.activeDownloadJobItemManagers!!
             for (manager in activeDownloadManagers) {
                 if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
                     onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
+                }
+            }
+
+
+            GlobalScope.launch {
+                for(jobUid in downloadJobPreparerChannel) {
+                    val jobItemManager = channelNetworkManager.openDownloadJobItemManager(jobUid)
+                    if(jobItemManager != null) {
+                        jobItemManager.awaitLoaded()
+                        DownloadJobPreparer().prepare(jobItemManager, umAppDatabase, umAppDatabaseRepo)
+                    }
                 }
             }
         }
@@ -73,7 +87,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val MAX_UPDATE_TIME_DELAY = TimeUnit.SECONDS.toMillis(2)
 
-    private var umAppDatabase: UmAppDatabase? = null
+    private lateinit var umAppDatabase: UmAppDatabase
+
+    private lateinit var umAppDatabaseRepo: UmAppDatabase
 
     private var impl: UstadMobileSystemImpl? = null
 
@@ -81,6 +97,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val stopped = AtomicBoolean(false)
 
+    private var foregroundActive: Boolean = false
+
+    private lateinit var downloadJobPreparerChannel: Channel<Int>
 
     /**
      * Holder class for the entire notification
@@ -118,13 +137,15 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         createChannel()
 
         umAppDatabase = UmAppDatabase.getInstance(this)
-
+        umAppDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(this)
         //bind to network service
         val networkServiceIntent = Intent(applicationContext,
                 NetworkManagerBleAndroidService::class.java)
         bindService(networkServiceIntent, mNetworkServiceConnection, Context.BIND_AUTO_CREATE)
 
         impl = UstadMobileSystemImpl.instance
+
+        downloadJobPreparerChannel = Channel(capacity = Channel.UNLIMITED)
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -132,14 +153,15 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        if (intent != null && intent.action != null && intent.extras != null) {
-            val action = intent.action
-            val downloadJobId = intent.extras!!.getInt(JOB_ID_TAG)
+        val intentAction = intent?.action
+        val intentExtras = intent?.extras
+        if (intent != null && intentAction != null && intentExtras != null) {
+            //val action = intent.action
+            val downloadJobId = intentExtras.getInt(JOB_ID_TAG)
             val notificationHolder = downloadJobIdToNotificationMap[downloadJobId]
 
-            when (action) {
-                ACTION_START_FOREGROUND_SERVICE -> {
+            when {
+                (intentAction in listOf(ACTION_START_FOREGROUND_SERVICE, ACTION_PREPARE_DOWNLOAD)) && !foregroundActive -> {
                     timeLastUpdate = System.currentTimeMillis()
                     val contentTitle = impl!!.getString(MessageID.downloading,
                             applicationContext)
@@ -147,31 +169,40 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                             notificationIdRef.get(), contentTitle, "", "",
                             canCreateGroupedNotification())
                     startForeground(notificationIdRef.get(), notification.build())
-                }
+                    foregroundActive = true
 
-                ACTION_STOP_FOREGROUND_SERVICE -> stopForegroundService()
-
-                ACTION_PAUSE_DOWNLOAD -> if (notificationHolder != null) {
-                    GlobalScope.launch {
-                        umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobId, JobStatus.PAUSED,
-                                        JobStatus.PAUSING)
-                        networkManagerBle!!.removeDownloadChangeListener(this@DownloadNotificationService)
+                    if(intentAction == ACTION_PREPARE_DOWNLOAD) {
+                        downloadJobPreparerChannel.offer(intentExtras.getInt(EXTRA_PREPARE_JOB_UID))
                     }
-                }else{
-                    stopForegroundService()
                 }
 
-                ACTION_CANCEL_DOWNLOAD -> if (notificationHolder != null) {
-                    GlobalScope.launch {
-                        umAppDatabase!!.downloadJobDao
-                                .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
-                                        JobStatus.CANCELLING)
-                        if(downloadJobIdToNotificationMap.size == 1){
-                            stopForegroundService()
+                intentAction == ACTION_STOP_FOREGROUND_SERVICE -> stopForegroundService()
+
+                intentAction == ACTION_PAUSE_DOWNLOAD -> {
+                    if (notificationHolder != null) {
+                        GlobalScope.launch {
+                            umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobId, JobStatus.PAUSED,
+                                    JobStatus.PAUSING)
+                            networkManagerBle!!.removeDownloadChangeListener(this@DownloadNotificationService)
                         }
+                    }else{
+                        stopForegroundService()
                     }
-                }else{
-                    stopForegroundService()
+                }
+
+                intentAction == ACTION_CANCEL_DOWNLOAD -> {
+                    if (notificationHolder != null) {
+                        GlobalScope.launch {
+                            umAppDatabase!!.downloadJobDao
+                                    .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
+                                            JobStatus.CANCELLING)
+                            if(downloadJobIdToNotificationMap.size == 1){
+                                stopForegroundService()
+                            }
+                        }
+                    }else{
+                        stopForegroundService()
+                    }
                 }
             }
         }
@@ -381,6 +412,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
      */
     private fun stopForegroundService() {
         if (!stopped.getAndSet(true)) {
+            foregroundActive = false
             networkManagerBle?.removeDownloadChangeListener(this)
 
             downloadJobIdToNotificationMap.clear()
@@ -394,6 +426,10 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         super.onDestroy()
         if (mNetworkServiceBound.get())
             unbindService(mNetworkServiceConnection)
+
+        if(!downloadJobPreparerChannel.isClosedForSend) {
+            downloadJobPreparerChannel.close()
+        }
     }
 
     private fun canCreateGroupedNotification(): Boolean {
@@ -410,9 +446,13 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
         const val ACTION_CANCEL_DOWNLOAD = "ACTION_CANCEL_DOWNLOAD"
 
+        const val ACTION_PREPARE_DOWNLOAD = "ACTION_PREPARE_DOWNLOAD"
+
         const val NOTIFICATION_CHANNEL_ID = "UM_NOTIFICATION_CHANNEL_ID"
 
         const val JOB_ID_TAG = "UM_JOB_ID"
+
+        const val EXTRA_PREPARE_JOB_UID = "EXTRA_PREPARE_JOB_UID"
 
         const val NOTIFICATION_GROUP_KEY = "com.android.example.UstadMobile"
 

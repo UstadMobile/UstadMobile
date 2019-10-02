@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DownloadJobItemDao
@@ -18,26 +18,36 @@ import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.takeFrom
 
+
 interface IDownloadJobPreparer {
     suspend fun prepare(jobItemManager: DownloadJobItemManager, appDatabase: UmAppDatabase,
                         appDatabaseRepo: UmAppDatabase, onProgress: (Int) -> Unit = {})
 }
 
 /**
+ * This function is responsible to get the Download Job preparer running. On Android this should be
+ * done using WorkManager. On other systems this may be done as a normal coroutine launch. This can
+ * be a job that will take some time (e.g. when
+ */
+expect fun requestDownloadPreparation(downloadJobUid: Int, context: Any)
+
+/**
  * This runnable sets up a download job so it's ready to run. It starts from a root content entry uid,
  * and then adds all
  */
-class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(), val _endpoint: String) : IDownloadJobPreparer {
+class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient()) : IDownloadJobPreparer {
 
     private val fetchEntitiesLimit = 1000
 
     suspend fun downloadJobContentEntries(contentEntryUid: Long, db: UmAppDatabase, dbRepo: UmAppDatabase): Int {
         val repo = dbRepo as DoorDatabaseSyncRepository
+        val endpoint = (dbRepo as DoorDatabaseRepository).endpoint
         var numEntriesReceived = -1
+
         try {
             val _httpResponse = _httpClient.get<HttpResponse> {
                 url {
-                    takeFrom(_endpoint)
+                    takeFrom(endpoint)
                     encodedPath =
                             "${encodedPath}${repo.dbPath}/ContentEntryDao/getAllEntriesRecursively"
                 }
@@ -56,7 +66,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(), val
             )
             _httpClient.get<Unit> {
                 url {
-                    takeFrom(_endpoint)
+                    takeFrom(endpoint)
                     encodedPath =
                             "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContainer_trkReceived"
                 }
@@ -68,7 +78,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(), val
             )
             _httpClient.get<Unit> {
                 url {
-                    takeFrom(_endpoint)
+                    takeFrom(endpoint)
                     encodedPath =
                             "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntryParentChildJoin_trkReceived"
                 }
@@ -77,7 +87,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(), val
             db.contentEntryDao.replaceList(_httpResult)
             _httpClient.get<Unit> {
                 url {
-                    takeFrom(_endpoint)
+                    takeFrom(endpoint)
                     encodedPath =
                             "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntry_trkReceived"
                 }

@@ -140,7 +140,7 @@ class NetworkManagerBleAndroidService : Service() {
                                 0,TimeUnit.MILLISECONDS)
                     }else{
                         val isServiceManagerActive =
-                                managerAndroidBle.activeDownloadJobItemManagers.size > 1
+                                managerAndroidBle.activeDownloadJobItemManagers.isNotEmpty()
                         notificationServiceManager.setEnabled(isServiceManagerActive)
                     }
                 }

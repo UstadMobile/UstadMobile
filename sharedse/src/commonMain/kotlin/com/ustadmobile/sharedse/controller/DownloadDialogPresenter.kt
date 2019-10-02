@@ -14,15 +14,13 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
-import com.ustadmobile.port.sharedse.networkmanager.IDownloadJobPreparer
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
+import com.ustadmobile.sharedse.network.requestDownloadPreparation
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -32,7 +30,7 @@ import kotlin.jvm.Volatile
 class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               private var appDatabase: UmAppDatabase, private val appDatabaseRepo: UmAppDatabase,
-                              private val downloadJobPreparerFn: IDownloadJobPreparer)
+                              private val downloadJobPreparationRequester: (Int, Any) -> Unit = ::requestDownloadPreparation)
     : UstadBaseController<DownloadDialogView>(context, arguments, view), OnDownloadJobItemChangeListener {
 
     private var deleteFileOptions = false
@@ -193,16 +191,14 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     }
 
-    private suspend fun createDownloadJobRecursive() : Boolean{
-        with(view) { runOnUiThread(Runnable { setCalculatingViewVisible(true) }) }
-
+    private suspend fun createDownloadJobAndRequestPreparation() : Boolean{
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
+        newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
         jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
         jobItemManager!!.awaitLoaded()
         currentJobId = jobItemManager!!.downloadJobUid
-        downloadJobPreparerFn.prepare(jobItemManager!!, appDatabase, appDatabaseRepo)
-        with(view) { runOnUiThread(Runnable { setCalculatingViewVisible(false) })}
+        downloadJobPreparationRequester(currentJobId, context)
         return currentJobId != 0
     }
 
@@ -212,10 +208,12 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             if(deleteFileOptions) {
                 networkManagerBle.cancelAndDeleteDownloadJob(currentJobId)
             }else {
-                if(currentJobId == 0)
-                    createDownloadJobRecursive()
+                if(currentJobId == 0) {
+                    createDownloadJobAndRequestPreparation()
+                }else {
+                    continueDownloading()
+                }
 
-                continueDownloading()
             }
         }
     }

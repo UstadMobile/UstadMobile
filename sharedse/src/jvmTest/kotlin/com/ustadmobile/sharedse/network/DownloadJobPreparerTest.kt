@@ -41,7 +41,7 @@ class DownloadJobPreparerTest {
                 System.currentTimeMillis())
         val itemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob)
         itemManager.awaitLoaded()
-        val downloadJobPreparer = DownloadJobPreparer(_endpoint = "http://localhost:8087/")
+        val downloadJobPreparer = DownloadJobPreparer()
         downloadJobPreparer.prepare(itemManager, clientDb, clientRepo)
 
 

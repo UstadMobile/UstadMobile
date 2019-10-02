@@ -4,19 +4,17 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
-import com.ustadmobile.sharedse.network.DeleteJobTaskRunner
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
-import com.ustadmobile.sharedse.network.RecursiveContentEntrySet
-import com.ustadmobile.sharedse.network.insertTestContentEntries
+import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -55,8 +53,6 @@ class DownloadDialogPresenterTest {
 
     private var TEST_ROOT_CONTENT_ENTRY_UID: Long = 0
 
-    private var downloadJobPreparer: DownloadJobPreparer? = null
-
     private lateinit var contentEntrySet: RecursiveContentEntrySet
 
 
@@ -75,7 +71,8 @@ class DownloadDialogPresenterTest {
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase.clearAllTables()
 
-        umAppDatabaseRepo = umAppDatabase
+        umAppDatabaseRepo = umAppDatabase.asRepository("http://localhost/dummy/", "",
+                defaultHttpClient())
 
         val httpd = EmbeddedHTTPD(0, context)
         httpd.start()
@@ -85,47 +82,6 @@ class DownloadDialogPresenterTest {
         mockedNetworkManager.onCreate()
 
         contentEntrySet = insertTestContentEntries(umAppDatabase, System.currentTimeMillis())
-
-//        rootEntry = ContentEntry("Lorem ipsum title",
-//                "Lorem ipsum description", leaf = false, publik = true)
-//        rootEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(rootEntry)
-//        println("Insert root entry uid = ${rootEntry.contentEntryUid}")
-//        TEST_ROOT_CONTENT_ENTRY_UID = rootEntry.contentEntryUid
-//
-//
-//        container = Container()
-//        container.containerContentEntryUid = rootEntry.contentEntryUid
-//        container.cntLastModified = System.currentTimeMillis()
-//        container.fileSize = 0
-//        container.containerUid = umAppDatabase.containerDao.insert(container)
-//
-//        val entry2 = ContentEntry("title 2", "title 2", leaf = true, publik = true)
-//        val entry3 = ContentEntry("title 2", "title 2", leaf = false, publik = true)
-//        val entry4 = ContentEntry("title 4", "title 4", leaf = true, publik = false)
-//
-//        entry2.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry2)
-//        entry3.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry3)
-//        entry4.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry4)
-//
-//        val cEntry2 = Container()
-//        cEntry2.containerContentEntryUid = entry2.contentEntryUid
-//        cEntry2.cntLastModified = System.currentTimeMillis()
-//        cEntry2.fileSize = 500
-//        cEntry2.containerUid = umAppDatabase.containerDao.insert(cEntry2)
-//
-//        val cEntry4 = Container()
-//        cEntry4.containerContentEntryUid = entry4.contentEntryUid
-//        cEntry4.cntLastModified = System.currentTimeMillis()
-//        cEntry4.fileSize = 500
-//        cEntry4.containerUid = umAppDatabase.containerDao.insert(cEntry4)
-//
-//        totalBytesToDownload = cEntry2.fileSize + cEntry4.fileSize
-//
-//        umAppDatabase.contentEntryParentChildJoinDao.insertList(
-//                listOf(ContentEntryParentChildJoin(rootEntry, entry2, 0),
-//                        ContentEntryParentChildJoin(rootEntry, entry3, 0),
-//                        ContentEntryParentChildJoin(entry3, entry4, 0)))
-
     }
 
     private fun insertDownloadJobAndJobItems(meteredNetworkAllowed: Boolean = false, status: Int) {
@@ -142,8 +98,8 @@ class DownloadDialogPresenterTest {
                     .createNewDownloadJobItemManager(downloadJob)
             println("Item manager content entry uid = ${itemManager.rootContentEntryUid}")
             runBlocking {
-                downloadJobPreparer = DownloadJobPreparer(_endpoint = "")//TODO: fix this to use the actual server instead
-                downloadJobPreparer!!.prepare(itemManager, umAppDatabase, umAppDatabaseRepo)
+                val downloadJobPreparer = DownloadJobPreparer(_endpoint = "")//TODO: fix this to use the actual server instead
+                downloadJobPreparer.prepare(itemManager, umAppDatabase, umAppDatabaseRepo)
             }
             println("job prepared")
         }
@@ -159,7 +115,7 @@ class DownloadDialogPresenterTest {
         }
         presenter = DownloadDialogPresenter(context, mockedNetworkManager,
                 mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                mockedDialogView, umAppDatabase, umAppDatabaseRepo, mock<DownloadJobPreparer>())
+                mockedDialogView, umAppDatabase, umAppDatabaseRepo)
 
         presenter.onCreate(mapOf())
         presenter.onStart()
@@ -178,9 +134,10 @@ class DownloadDialogPresenterTest {
     fun givenExistingDownloadJobNotStarted_whenViewCreated_shouldGetSizeFromDatabase() {
         insertDownloadJobAndJobItems(status = JobStatus.NOT_QUEUED)
 
+        val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
         presenter = DownloadDialogPresenter(context, mockedNetworkManager,
                 mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                mockedDialogView, umAppDatabase, umAppDatabaseRepo, mock<DownloadJobPreparer>())
+                mockedDialogView, umAppDatabase, umAppDatabaseRepo, preparerFn)
 
         presenter.onCreate(mapOf())
         presenter.onStart()
@@ -190,7 +147,7 @@ class DownloadDialogPresenterTest {
     }
 
     @Test
-    fun givenNoExistingDownloadJob_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerAndStatusToQueued() = runBlocking {
+    fun givenNoExistingDownloadJob_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerRequesterAndSetStatusToNeedsPrepared() = runBlocking {
         val viewReadyLatch = CountDownLatch(1)
         doAnswer {
             viewReadyLatch.countDown()
@@ -201,10 +158,13 @@ class DownloadDialogPresenterTest {
                 ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()
         )
 
-        val downloadJobPreparer = mock<DownloadJobPreparer> { }
+        var preparationRequested = false
+        val downloadJobPreparerRequester = {downloadJobUid: Int, context: Any ->
+            preparationRequested = true
+        }
 
         presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
-                umAppDatabase, umAppDatabaseRepo, downloadJobPreparer)
+                umAppDatabase, umAppDatabaseRepo, downloadJobPreparerRequester)
         presenter.onCreate(mapOf())
         presenter.onStart()
 
@@ -218,38 +178,23 @@ class DownloadDialogPresenterTest {
         assertTrue("Download job was with root content entry uid was created dby presenter",
                 downloadJobUid > 0)
         waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(downloadJobUid.toInt()), 5000) {
-            downloadJob -> downloadJob != null && downloadJob.djStatus == JobStatus.QUEUED
+            downloadJob -> downloadJob != null && downloadJob.djStatus == JobStatus.NEEDS_PREPARED
         }
 
-        verifyBlocking(downloadJobPreparer, timeout(5000)) { prepare(any(), eq(umAppDatabase), eq(umAppDatabaseRepo), any())}
-
-//        waitForLiveData(umAppDatabase.downloadJobItemDao.findByContentEntryUidLive(
-//                rootEntry.contentEntryUid), 5000) {
-//            dji -> dji != null && dji.downloadLength == totalBytesToDownload
-//                && umAppDatabase.downloadJobItemDao.findAll().size == 4
-//        }
-
-
+        assertTrue("Preparer requester was invoked", preparationRequested)
 
         val downloadJobCreated = umAppDatabase.downloadJobDao.findDownloadJobByRootContentEntryUid(
                 contentEntrySet.rootEntry.contentEntryUid)
         assertNotNull("DownloadJob was created", downloadJobCreated)
-        assertEquals("Download status is set to queued", JobStatus.QUEUED,
+        assertEquals("Download status is set to needs prepared", JobStatus.NEEDS_PREPARED,
                 downloadJobCreated!!.djStatus)
-
-        //This is to be done in testing downloadjobpreparer - not here.
-//        assertEquals("Total bytes to be downloaded was updated",
-//                totalBytesToDownload,
-//                umAppDatabase.downloadJobItemDao
-//                        .findByContentEntryUid2(rootEntry.contentEntryUid)!!.downloadLength)
         Unit
     }
 
     @Test
-    @Throws(InterruptedException::class)
     fun givenDownloadJobCreated_whenHandleClickCalled_shouldSetStatusToQueued() {
         runBlocking {
-            //TODO insert the downloadjobitems into the database
+            insertDownloadJobAndJobItems(true, JobStatus.NOT_QUEUED)
             val viewReadyLatch = CountDownLatch(1)
             doAnswer {
                 viewReadyLatch.countDown()
@@ -260,7 +205,7 @@ class DownloadDialogPresenterTest {
 
             args[ARG_CONTENT_ENTRY_UID] = contentEntrySet.rootEntry.contentEntryUid.toString()
             presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
-                    umAppDatabase, umAppDatabaseRepo, DownloadJobPreparer(_endpoint = ""))
+                    umAppDatabase, umAppDatabaseRepo, {Int, Any -> Unit})
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
@@ -293,7 +238,7 @@ class DownloadDialogPresenterTest {
 
         val args = mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString())
         presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
-                umAppDatabase, umAppDatabaseRepo, DownloadJobPreparer(_endpoint = ""))
+                umAppDatabase, umAppDatabaseRepo, {Int, Any -> Unit})
         presenter.onCreate(HashMap<String, String>())
         presenter.onStart()
 
@@ -316,7 +261,7 @@ class DownloadDialogPresenterTest {
 
             args[ARG_CONTENT_ENTRY_UID] = contentEntrySet.rootEntry.contentEntryUid.toString()
             presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
-                    umAppDatabase, umAppDatabaseRepo, DownloadJobPreparer(_endpoint = ""))
+                    umAppDatabase, umAppDatabaseRepo, {Int, Any -> Unit})
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
@@ -352,7 +297,7 @@ class DownloadDialogPresenterTest {
 
             args[ARG_CONTENT_ENTRY_UID] = contentEntrySet.rootEntry.contentEntryUid.toString()
             presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
-                    umAppDatabase, umAppDatabaseRepo, DownloadJobPreparer(_endpoint = ""))
+                    umAppDatabase, umAppDatabaseRepo, {Int, Any -> Unit})
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
