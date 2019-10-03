@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 /**
  * This entity represents all the fields including the headers and extra information that will
@@ -15,6 +16,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 @SyncableEntity(tableId = 19)
 @Entity
+@Serializable
 class PersonDetailPresenterField {
 
     //PK

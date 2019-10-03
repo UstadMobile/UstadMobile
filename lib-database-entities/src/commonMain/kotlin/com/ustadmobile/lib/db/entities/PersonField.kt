@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -26,6 +27,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 @SyncableEntity(tableId = 20)
 @Entity
+@Serializable
 open class PersonField {
 
     @PrimaryKey(autoGenerate = true)

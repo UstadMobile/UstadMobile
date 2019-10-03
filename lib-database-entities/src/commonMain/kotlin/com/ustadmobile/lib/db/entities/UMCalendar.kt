@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a Caledar which will be liked to multiple holidays, schedules etc
@@ -13,6 +14,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 @SyncableEntity(tableId = 28)
 @Entity
+@Serializable
 open class UMCalendar() {
 
     @PrimaryKey(autoGenerate = true)

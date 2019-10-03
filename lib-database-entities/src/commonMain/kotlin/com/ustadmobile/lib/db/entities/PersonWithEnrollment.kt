@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class PersonWithEnrollment : Person() {
 
     var clazzUid: Long = 0

@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class ReportTopLEs {
     var leName: String? = null
     var totalSalesValue: Long = 0

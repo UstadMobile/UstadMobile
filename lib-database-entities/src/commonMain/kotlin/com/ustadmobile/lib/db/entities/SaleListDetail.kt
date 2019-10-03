@@ -1,8 +1,11 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * Sale 's POJO for representing itself on the view (and recycler views)
  */
+@Serializable
 class SaleListDetail() : Sale() {
 
     //String categoryName;

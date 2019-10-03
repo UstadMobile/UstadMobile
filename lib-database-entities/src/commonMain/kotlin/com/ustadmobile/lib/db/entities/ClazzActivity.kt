@@ -6,9 +6,12 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
+
 
 @SyncableEntity(tableId = 11)
 @Entity
+@Serializable
 open class ClazzActivity() {
 
     @PrimaryKey(autoGenerate = true)

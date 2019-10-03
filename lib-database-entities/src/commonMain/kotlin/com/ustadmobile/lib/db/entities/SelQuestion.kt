@@ -6,6 +6,7 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 /**
  * Represents the question within a question set.
@@ -14,6 +15,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
  */
 @SyncableEntity(tableId = 22)
 @Entity
+@Serializable
 class SelQuestion {
 
     @PrimaryKey(autoGenerate = true)

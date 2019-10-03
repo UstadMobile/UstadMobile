@@ -17,6 +17,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = 65)
+@Serializable
 open class ClazzMember()  {
 
     /**
