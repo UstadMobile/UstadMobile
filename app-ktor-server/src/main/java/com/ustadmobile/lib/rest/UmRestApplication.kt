@@ -80,7 +80,6 @@ fun Application.umRestApplication(devMode: Boolean = false) {
             downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
 
-        FileResourcesRoute()
         LoginRoute(_restApplicationDb)
         ContainerMountRoute(_restApplicationDb)
         UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
@@ -107,7 +106,6 @@ fun Application.umRestApplication(devMode: Boolean = false) {
                     "video" -> "video/mp4"
                     "tincan" -> "application/tincan+zip"
                     "epub" -> "application/epub+zip"
-                    "h5p" -> "application/h5p+zip"
                     "webchunk" -> "application/webchunk+zip"
                     else -> ""
                 }

@@ -19,7 +19,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   floating_btn_class_left = ""
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
-    this.umService.setEnvironment(document.location.search.indexOf("test") != -1) 
+    this.umService.setEnvironment(document.location.search.indexOf("test") == -1) 
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.viewContext = this.context = new UmContextWrapper(router) 
@@ -27,7 +27,6 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.umService.init(this)   
     this.floating_btn_class_right = this.umService.isLTRDirectionality() ? "fixed-action-btn-right" : "fixed-action-btn-left";
     this.floating_btn_class_left = this.umService.isLTRDirectionality() ? "fixed-action-btn-left":"fixed-action-btn-right"
-  
   }
 
   setToolbarTitle(title){

@@ -80,12 +80,6 @@ abstract class ContentEntryUtilCommon {
 
                 args[EpubContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
                 viewName = EpubContentView.VIEW_NAME
-            }
-
-            "application/h5p+zip" -> {
-                args[UstadView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                viewName = H5PContentView.VIEW_NAME
-
             }else -> {
 
                 val container = dbRepo.containerEntryDao.findByContainerAsync(result.containerUid)
