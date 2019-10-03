@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = 17)
 @Entity
 @Serializable
-class DateRange(var dateRangeActive: Boolean = true) {
+class DateRange() {
 
     @PrimaryKey(autoGenerate = true)
     var dateRangeUid: Long = 0
@@ -25,6 +25,8 @@ class DateRange(var dateRangeActive: Boolean = true) {
     @LastChangedBy
     var dateRangLastChangedBy: Int = 0
 
+    var dateRangeActive: Boolean = true
+
     var dateRangeFromDate: Long = 0
 
     var dateRangeToDate: Long = 0
@@ -35,12 +37,12 @@ class DateRange(var dateRangeActive: Boolean = true) {
 
     var dateRangeDesc: String? = null
 
-    constructor(fromDate: Long, toDate: Long): this(true) {
+    constructor(fromDate: Long, toDate: Long): this() {
         this.dateRangeFromDate = fromDate
         this.dateRangeToDate = toDate
     }
 
-    constructor(fromDate: Long): this(true) {
+    constructor(fromDate: Long): this() {
         this.dateRangeFromDate = fromDate
     }
 
