@@ -7,9 +7,11 @@ import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.XLangMapEntry.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
+@Serializable
 data class XLangMapEntry(
         var verbLangMapUid: Long = 0L,
         var objectLangMapUid: Long = 0L,

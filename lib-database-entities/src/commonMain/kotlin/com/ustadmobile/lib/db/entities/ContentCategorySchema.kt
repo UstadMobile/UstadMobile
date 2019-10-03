@@ -7,12 +7,15 @@ import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.ContentCategorySchema.Companion.TABLE_ID
+import kotlinx.serialization.Serializable
+
 
 /**
  * Represents a schema (list) of categories.
  */
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
+@Serializable
 class ContentCategorySchema() {
 
     @PrimaryKey(autoGenerate = true)

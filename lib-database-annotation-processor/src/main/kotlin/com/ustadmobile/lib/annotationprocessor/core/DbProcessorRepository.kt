@@ -178,9 +178,11 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
             val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
             if(syncDaoMode == REPO_SYNCABLE_DAO_CONSTRUCT) {
-                syncDaoProperty.delegate("lazy {%T(_db) }",
-                        ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
-                                "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+                syncDaoProperty.delegate(
+                        CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_db) ", ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
+                                        "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+                                .endControlFlow().build())
             }else if(syncDaoMode == REPO_SYNCABLE_DAO_FROMDB) {
                 syncDaoProperty.delegate("lazy {_db._syncDao() }")
             }
@@ -199,7 +201,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
-                    .delegate("lazy { %T(_syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) }", repoImplClassName).build())
+                    .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                            .add("%T(_syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) ", repoImplClassName)
+                            .endControlFlow().build())
+                    .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
             dbRepoType.addFunction(FunSpec.builder("sync")
                     .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
@@ -227,8 +232,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
             }
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
-                    .delegate("lazy { %T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
-                            repoImplClassName, it.makeAccessorCodeBlock()).build())
+                    .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                            .add("%T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) ",
+                                repoImplClassName, it.makeAccessorCodeBlock())
+                            .endControlFlow()
+                            .build())
+                    .build())
             dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
 
             if(addBoundaryCallbackGetters
@@ -238,7 +247,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 val boundaryCallbackVarName = "_${daoTypeEl.simpleName}$SUFFIX_BOUNDARY_CALLBACKS"
                 dbRepoType.addProperty(PropertySpec.builder(boundaryCallbackVarName,
                         boundaryCallbackClassName)
-//                        .delegate("lazy { %T(_${daoTypeEl.simpleName}::getBoundaryCallback) }", boundaryCallbackClassName)
                         .delegate(CodeBlock.builder().beginControlFlow("lazy")
                                 .add("%T(_${daoTypeEl.simpleName}::getBoundaryCallback)", boundaryCallbackClassName)
                                 .endControlFlow().build())

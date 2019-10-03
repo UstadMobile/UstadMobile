@@ -443,7 +443,9 @@ suspend fun getResponseFromUrl(http: HttpClient, url: String, requestHeaders: Ma
     return http.get(url) {
         if (requestHeaders != null) {
             for (e in requestHeaders.entries) {
-                if (e.key.equals("Accept-Encoding", ignoreCase = true)) {
+                if (e.key.equals("Accept-Encoding", ignoreCase = true) ||
+                        e.key.equals("Range", ignoreCase = true) ||
+                        e.key.equals("Content-Range", ignoreCase = true)) {
                     continue
                 }
                 header(e.key.replace(":", ""), e.value)

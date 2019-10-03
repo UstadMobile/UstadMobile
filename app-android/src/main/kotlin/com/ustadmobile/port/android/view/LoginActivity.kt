@@ -148,8 +148,8 @@ class LoginActivity : UstadBaseActivity(), LoginView,
         mLoginButton = findViewById(R.id.activity_login_button_login)
         mErrorTextView = findViewById(R.id.activity_login_errormessage)
         mProgressBar = findViewById(R.id.progressBar)
-        mProgressBar!!.isIndeterminate = true
-        mProgressBar!!.scaleY = 3f
+        mProgressBar.isIndeterminate = true
+        mProgressBar.scaleY = 3f
 
         assignToFingerprintCB = findViewById(R.id.activity_login2_assign_fingerprint_checbox)
         assignToFingerprintCB.setOnCheckedChangeListener(
@@ -159,12 +159,12 @@ class LoginActivity : UstadBaseActivity(), LoginView,
         findViewById<View>(R.id.activity_login_button_login).setOnClickListener { evt ->
 //            mPresenter!!.handleClickLogin(mUsernameTextView!!.text.toString(),
 //                    mPasswordTextView!!.text.toString(), mServerUrl!!, assignToFingerprint)
-            mPresenter!!.handleClickLogin(mUsernameTextView!!.text.toString(),
-                    mPasswordTextView!!.text.toString(), mServerUrl!!)
+            mPresenter!!.handleClickLogin(mUsernameTextView.text.toString(),
+                    mPasswordTextView.text.toString(), mServerUrl!!)
         }
 
         fingerprintIV = findViewById(R.id.activity_login2_fingerprint_imageview)
-        fingerprintIV!!.setOnClickListener({ v: View -> mPresenter!!.handleClickFingerPrint() })
+        fingerprintIV.setOnClickListener({ v: View -> mPresenter!!.handleClickFingerPrint() })
 
         checkFingerprint()
     }
@@ -178,8 +178,8 @@ class LoginActivity : UstadBaseActivity(), LoginView,
             if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
             {
                 //Check whether the device has a fingerprint sensor//
-                fingerprintIV!!.setVisibility(View.GONE)
-                assignToFingerprintCB!!.setVisibility(View.GONE)
+                fingerprintIV.setVisibility(View.GONE)
+                assignToFingerprintCB.setVisibility(View.GONE)
                 //("Your device doesn't support fingerprint authentication");
             }
             else
@@ -191,8 +191,8 @@ class LoginActivity : UstadBaseActivity(), LoginView,
                 }
                 else
                 {
-                    fingerprintIV!!.setVisibility(View.VISIBLE)
-                    assignToFingerprintCB!!.setVisibility(View.VISIBLE)
+                    fingerprintIV.setVisibility(View.VISIBLE)
+                    assignToFingerprintCB.setVisibility(View.VISIBLE)
                     fpok = true
                     //Check that the user has registered at least one fingerprint//
                 }

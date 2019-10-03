@@ -27,6 +27,7 @@ import org.junit.After
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import kotlinx.coroutines.runBlocking
+import kotlin.test.assertEquals
 
 
 class TestDbRepo {
@@ -259,6 +260,28 @@ class TestDbRepo {
             Assert.assertEquals("Syncing after change made on server, value on server is udpated",
                     53, serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)!!.esNumber)
         }
+    }
+
+    @Test
+    fun givenSyncableEntityWithListParam_whenGetCalled_thenShouldBeReturned(){
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+                httpClient) as ExampleDatabase2
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>("http://localhost/dummy", "token",
+                httpClient) as ExampleDatabase2
+        val e1 = ExampleSyncableEntity(esNumber = 42)
+        var e2 = ExampleSyncableEntity(esNumber = 43)
+        e1.esUid = serverRepo.exampleSyncableDao().insert(e1)
+        e2.esUid = serverRepo.exampleSyncableDao().insert(e2)
+
+        runBlocking {
+            val entitiesFromListParam = clientRepo.exampleSyncableDao().findByListParam(
+                    listOf(42, 43))
+            assertEquals(2, entitiesFromListParam.size, "Got expected results from list param query")
+        }
+
     }
 
 

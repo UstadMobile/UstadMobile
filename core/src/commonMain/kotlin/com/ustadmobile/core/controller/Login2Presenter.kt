@@ -80,10 +80,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
 
                 if(loginResponse.status == HttpStatusCode.OK) {
                     val account = loginResponse.receive<UmAccount>()
-                    account.endpointUrl = serverUrl
-                    view.runOnUiThread(Runnable { view.setInProgress(false) })
-                    UmAccountManager.setActiveAccount(account, context)
-                    impl.go(mNextDest, context)
+                    loginOK(account, serverUrl)
                 }else {
                     view.runOnUiThread(Runnable {
                         view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
@@ -161,11 +158,13 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
 
     fun loginOK(result: UmAccount, serverUrl:String){
         val systemImpl = UstadMobileSystemImpl.instance
+
         if(serverUrl != null && !serverUrl.isEmpty()){
             result.endpointUrl = serverUrl
         }
         view.runOnUiThread(Runnable { view.setInProgress(false) })
         UmAccountManager.setActiveAccount(result, context)
+
         view.forceSync()
         view.updateLastActive()
         view.setFinishAfficinityOnView()

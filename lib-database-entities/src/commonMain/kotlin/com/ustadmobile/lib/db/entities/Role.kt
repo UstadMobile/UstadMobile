@@ -6,15 +6,20 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 
 @Entity
 @SyncableEntity(tableId = 45)
-class Role(var roleActive: Boolean = true) {
+@Serializable
+class Role() {
+
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
 
     var roleName: String? = null
+
+    var roleActive: Boolean = true
 
     @MasterChangeSeqNum
     var roleMasterCsn: Long = 0

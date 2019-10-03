@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.db.UmAppDatabase
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
+import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.response.respondFile
 import io.ktor.routing.Route
@@ -29,6 +30,7 @@ fun Route.ContainerDownload(db: UmAppDatabase) {
         val entryFile = db.containerEntryFileDao.findByUid(entryFileUid)
         val filePath = entryFile?.cefPath
         if(filePath != null) {
+            call.response.header("X-Content-Length-Uncompressed", entryFile?.ceTotalSize.toString())
             call.respondFile(File(filePath))
         }else {
             call.respond(HttpStatusCode.NotFound, "No such file: $entryFileUid")
