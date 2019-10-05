@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import java.io.ByteArrayInputStream
@@ -155,11 +156,21 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             val entry = containerManager.getEntry(log.path!!)
                     ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
 
+            var mutMap = mutableMapOf<String, String>()
+            if (log.headers != null) {
+                mutMap.putAll(log.headers!!)
+            }
+            if(entry.containerEntryFile!!.compression == COMPRESSION_GZIP){
+                mutMap["Content-Encoding"] = "gzip"
+                mutMap["Content-Length"] = entry.containerEntryFile!!.ceCompressedSize.toString()
+            }
+
+
             var data = containerManager.getInputStream(entry)
 
             // if not range header, load the file as normal
             var rangeHeader: String? = request.requestHeaders["Range"]
-                    ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data)
+                    ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", mutMap, data)
 
             val totalLength = entry.containerEntryFile!!.ceTotalSize
             val isHEADRequest = request.method == "HEAD"
@@ -173,10 +184,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                 if(!isHEADRequest){
                     data = RangeInputStream(data, range.fromByte, range.toByte)
                 }
-                var mutMap = mutableMapOf<String, String>()
-                if (log.headers != null) {
-                    mutMap.putAll(log.headers!!)
-                }
+
                 range.responseHeaders.forEach { mutMap[it.key] = it.value }
                 return WebResourceResponse(log.mimeType, "utf-8", HttpURLConnection.HTTP_PARTIAL,
                         "Partial Content", mutMap, if(isHEADRequest) null else data)
@@ -186,10 +194,6 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                         if (isHEADRequest) "" else "Range request not satisfiable", null, null)
             } else {
 
-                var mutMap = mutableMapOf<String, String>()
-                if (log.headers != null) {
-                    mutMap.putAll(log.headers!!)
-                }
                 mutMap["Content-Length"] = totalLength.toString()
                 mutMap["Connection"] = "close"
                 return WebResourceResponse(log.mimeType, "utf-8", 200,

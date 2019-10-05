@@ -100,7 +100,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             if (headers["Content-Type"]?.startsWith("video/") == true) {
 
-                if (headers["Content-Length"]?.toInt() ?: FILE_SIZE >= FILE_SIZE) {
+                if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
                     call.respond(HttpStatusCode.BadRequest, "File size too big")
                     return@get
                 }
@@ -163,7 +163,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
     try {
         runBlocking {
 
-            System.setProperty("webdriver.chrome.driver", findSystemCommand("chromedriver","webdriver.chrome.driver"))
+            System.setProperty("webdriver.chrome.driver", findSystemCommand("chromedriver", "webdriver.chrome.driver"))
             val driver = setupLogIndexChromeDriver()
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
