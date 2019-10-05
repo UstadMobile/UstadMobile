@@ -145,7 +145,6 @@ abstract class DownloadJobDao {
     @Query("SELECT djDestinationDir FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getDestinationDir(djUid: Int): String?
 
-
     @Query("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
     abstract suspend fun setMeteredConnectionAllowedByJobUidAsync(djUid: Int, meteredNetworkAllowed: Boolean): Int
 
@@ -155,21 +154,8 @@ abstract class DownloadJobDao {
     @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
-    @Transaction
-    open fun cleanupUnused(downloadJobUid: Int) {
-        deleteUnusedDownloadJobItems(downloadJobUid)
-        deleteUnusedDownloadJob(downloadJobUid)
-    }
-
-    @Query("DELETE FROM DownloadJobItem " +
-            "WHERE djiDjUid = :downloadJobUid " +
-            "AND (djiStatus = " + JobStatus.NOT_QUEUED +
-            " OR djiStatus = " + JobStatus.CANCELED + ")")
-    abstract fun deleteUnusedDownloadJobItems(downloadJobUid: Int)
-
-    @Query("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = "
-            + JobStatus.NOT_QUEUED + " OR djStatus = " + JobStatus.CANCELED)
-    abstract fun deleteUnusedDownloadJob(downloadJobUid: Int)
+    @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
+    abstract suspend fun getMeteredNetworkAllowed(djUid: Int): Boolean
 
     @Query("SELECT (SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) AS numEntries, " +
             "(SELECT downloadLength FROM DownloadJobItem WHERE djiDjUid = :downloadJobId AND " +

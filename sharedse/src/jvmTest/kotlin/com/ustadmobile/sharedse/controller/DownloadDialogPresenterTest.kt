@@ -16,6 +16,7 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.util.test.checkJndiSetup
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Assert.*
@@ -98,7 +99,7 @@ class DownloadDialogPresenterTest {
                     .createNewDownloadJobItemManager(downloadJob)
             println("Item manager content entry uid = ${itemManager.rootContentEntryUid}")
             runBlocking {
-                val downloadJobPreparer = DownloadJobPreparer(_endpoint = "")//TODO: fix this to use the actual server instead
+                val downloadJobPreparer = DownloadJobPreparer(statusAfterPreparation = status)//TODO: fix this to use the actual server instead
                 downloadJobPreparer.prepare(itemManager, umAppDatabase, umAppDatabaseRepo)
             }
             println("job prepared")
@@ -146,8 +147,7 @@ class DownloadDialogPresenterTest {
                 eq(4), eq(UMFileUtil.formatFileSize(contentEntrySet.totalBytesToDownload)))
     }
 
-    @Test
-    fun givenNoExistingDownloadJob_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerRequesterAndSetStatusToNeedsPrepared() = runBlocking {
+    private fun givenNoExistingDownloadJob_whenContinueIsPressed_shouldCreateDownloadJobAndInvokePreparerAndSetStatusToNeedsPrepared(meteredNetworkAllowed: Boolean) = runBlocking{
         val viewReadyLatch = CountDownLatch(1)
         doAnswer {
             viewReadyLatch.countDown()
@@ -167,6 +167,7 @@ class DownloadDialogPresenterTest {
                 umAppDatabase, umAppDatabaseRepo, downloadJobPreparerRequester)
         presenter.onCreate(mapOf())
         presenter.onStart()
+        presenter.handleClickWiFiOnlyOption(!meteredNetworkAllowed)
 
         presenter.handleClickPositive()
 
@@ -188,7 +189,19 @@ class DownloadDialogPresenterTest {
         assertNotNull("DownloadJob was created", downloadJobCreated)
         assertEquals("Download status is set to needs prepared", JobStatus.NEEDS_PREPARED,
                 downloadJobCreated!!.djStatus)
+        assertEquals("Metered data allowed is $meteredNetworkAllowed", meteredNetworkAllowed,
+                downloadJobCreated.meteredNetworkAllowed)
         Unit
+    }
+
+    @Test
+    fun givenNoExistingDownloadJobNoMeteredDataAllowed_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerRequesterAndSetStatusToNeedsPrepared() = runBlocking {
+        givenNoExistingDownloadJob_whenContinueIsPressed_shouldCreateDownloadJobAndInvokePreparerAndSetStatusToNeedsPrepared(false)
+    }
+
+    @Test
+    fun givenNoExistingDownloadJobMeteredDataAllowed_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerRequesterAndSetStatusToNeedsPrepared() = runBlocking {
+        givenNoExistingDownloadJob_whenContinueIsPressed_shouldCreateDownloadJobAndInvokePreparerAndSetStatusToNeedsPrepared(true)
     }
 
     @Test

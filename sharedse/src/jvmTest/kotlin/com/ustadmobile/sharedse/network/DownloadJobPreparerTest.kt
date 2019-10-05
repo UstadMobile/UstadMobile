@@ -2,18 +2,18 @@ package com.ustadmobile.sharedse.network
 
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.spy
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.rest.umRestApplication
-import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import org.junit.*
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import java.util.concurrent.TimeUnit
 
 class DownloadJobPreparerTest {
@@ -49,6 +49,14 @@ class DownloadJobPreparerTest {
                 contentEntrySet.totalBytesToDownload,
                 clientDb.downloadJobItemDao.findByContentEntryUid2(
                         contentEntrySet.rootEntry.contentEntryUid)!!.downloadLength)
+        val downloadJobInDb = clientDb.downloadJobDao.findByUid(itemManager.downloadJobUid)
+        assertNotNull("Download job in db is not null", downloadJobInDb)
+        assertEquals("DownloadJob status is QUEUED after preparation is finished",
+                JobStatus.QUEUED, downloadJobInDb!!.djStatus)
+        val downloadJobItems = clientDb.downloadJobItemDao.findByDownloadJobUid(downloadJobInDb.djUid)
+        assertTrue("All items status are now QUEUED:",
+                downloadJobItems.all { it.djiStatus == JobStatus.QUEUED })
+
         Unit
     }
 

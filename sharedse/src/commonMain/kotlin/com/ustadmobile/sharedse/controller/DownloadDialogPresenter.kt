@@ -39,8 +39,6 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private lateinit var downloadDownloadJobLive: DoorLiveData<DownloadJob?>
 
-    private var allowedMeteredLive: DoorLiveData<Boolean>? = null
-
     /**
      * Testing purpose
      */
@@ -61,6 +59,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private val jobSizeLoading = atomic(false)
 
     private val jobSizeTotals = atomic(null as DownloadJobSizeInfo?)
+
+    private val wifiOnlyChecked = atomic(false)
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -97,19 +97,22 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private fun startObservingJobAndMeteredState() {
+        if(currentJobId != 0) {
+            GlobalScope.launch {
+                val isWifiOnly = !appDatabase.downloadJobDao
+                        .getMeteredNetworkAllowed(currentJobId)
+                wifiOnlyChecked.value = isWifiOnly
+                with(view) {
+                    runOnUiThread(Runnable { setDownloadOverWifiOnly(isWifiOnly) })
+                }
+            }
+        }
+
         view.runOnUiThread(Runnable {
             downloadDownloadJobLive = appDatabase.downloadJobDao.getJobLive(currentJobId)
             downloadDownloadJobLive.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobStatusChange)
-            allowedMeteredLive = appDatabase.downloadJobDao
-                    .getLiveMeteredNetworkAllowed(currentJobId)
-            allowedMeteredLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
-                    this@DownloadDialogPresenter::handleDownloadJobMeteredStateChange)
         })
-    }
-
-    private fun handleDownloadJobMeteredStateChange(meteredConnection: Boolean?) {
-        view.setDownloadOverWifiOnly(meteredConnection != null && !meteredConnection)
     }
 
     private fun handleDownloadJobStatusChange(downloadJob: DownloadJob?) {
@@ -195,6 +198,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
+        val isWifiOnlyChecked = wifiOnlyChecked.value
+        newDownloadJob.meteredNetworkAllowed = !isWifiOnlyChecked
         jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
         jobItemManager!!.awaitLoaded()
         currentJobId = jobItemManager!!.downloadJobUid
@@ -267,12 +272,14 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
         }
     }
 
-    fun handleWiFiOnlyOption(wifiOnly: Boolean) {
-        GlobalScope.launch {
-            appDatabase.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId,
-                    !wifiOnly)
+    fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
+        wifiOnlyChecked.value = wifiOnly
+        if(currentJobId != 0) {
+            GlobalScope.launch {
+                appDatabase.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId,
+                        !wifiOnly)
+            }
         }
-
     }
 
     fun handleStorageOptionSelection(selectedDir: String) {

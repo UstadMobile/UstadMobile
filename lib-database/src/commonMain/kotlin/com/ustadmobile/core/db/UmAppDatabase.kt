@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 24)
+], version = 25)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -1215,6 +1215,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }
 
+            },
+
+            object : DoorMigration(24, 25) {
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                }
             })
             return builder
         }

@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DownloadJobItemDao
 import com.ustadmobile.core.impl.UMLog
@@ -35,7 +36,8 @@ expect fun requestDownloadPreparation(downloadJobUid: Int, context: Any)
  * This runnable sets up a download job so it's ready to run. It starts from a root content entry uid,
  * and then adds all
  */
-class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient()) : IDownloadJobPreparer {
+class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
+                          val statusAfterPreparation: Int = JobStatus.QUEUED) : IDownloadJobPreparer {
 
     private val fetchEntitiesLimit = 1000
 
@@ -191,5 +193,6 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient()) : I
                 " items. Time to prepare download job: " +
                 (getSystemTimeInMillis() - startTime) + "ms")
         jobItemManager.commit()
+        jobItemManager.updateJobAndItemStatus(statusAfterPreparation)
     }
 }

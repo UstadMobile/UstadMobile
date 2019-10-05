@@ -205,4 +205,7 @@ abstract class DownloadJobItemDao {
         }
     }
 
+    @Query("SELECT * FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid")
+    abstract fun findByDownloadJobUid(downloadJobUid: Int): List<DownloadJobItem>
+
 }
