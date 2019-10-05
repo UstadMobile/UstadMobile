@@ -23,7 +23,6 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
 
   constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) {
     super(umservice,router, route)
-
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
@@ -61,9 +60,15 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
   setCoverImage(url){
     let allUrls = []
     allUrls.push(url)
-    this.urlsToLoad = allUrls.concat(this.inMemoryUrls)
-    console.log(this.urlsToLoad)
-    this.loadPage(0)
+    if(this.showIframe == true){
+      this.urlsToLoad = allUrls.concat(this.inMemoryUrls)
+      this.loadPage(0)
+    }else{
+      this.inMemoryUrls.forEach(url =>{
+        super.openOnNewtab(url) 
+      })
+    }
+    
   }
 
   private loadPage(index){

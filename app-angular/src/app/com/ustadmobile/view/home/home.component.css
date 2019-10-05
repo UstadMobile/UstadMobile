@@ -31,3 +31,7 @@
   .language{
     margin: 4% !important;
   }
+
+  .open-profile{
+    cursor: pointer; 
+  }

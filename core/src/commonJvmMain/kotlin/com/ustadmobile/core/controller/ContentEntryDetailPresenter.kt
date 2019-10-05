@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
@@ -30,7 +31,7 @@ actual class ContentEntryDetailPresenter actual constructor(context: Any, argume
                 impl.go(LoginView.VIEW_NAME, args, view.viewContext)
             } else {
                 view.showBaseProgressBar(true)
-                ContentEntryUtil.instance.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
+                ContentEntryUtil.instance.goToContentEntry(entryUuid, arguments[ARG_NO_IFRAMES]?.toBoolean()!!,appRepo, impl, isDownloadComplete,
                         context, object : UmCallback<Any> {
 
                     override fun onSuccess(result: Any?) {

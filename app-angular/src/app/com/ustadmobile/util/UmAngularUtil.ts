@@ -4,10 +4,9 @@ import util from 'UstadMobile-lib-util';
 
 export const appRountes = {
   "entryList":"ContentEntryList", "entryDetails":"ContentEntryDetail", "register":"RegisterAccount",
-  "login":"Login", "xapi":"XapiPackage", "video":"VideoPlayer", "web":"webChunk", 
-  "container":"Container", "reportDashboard":"ReportDashboard",
+  "login":"Login", "epub":"EpubContent", "video":"VideoPlayer", "web":"webChunk", "reportDashboard":"ReportDashboard",
   "reportOptions":"ReportOptions","notFound":"NotFound", "treeView":"EntriesTreeDialog",
-  "reportPreview":"ReportPreview"
+  "reportPreview":"ReportPreview", "profile":"UserProfile"
 }
 
 export interface UmEvent extends Event{
@@ -66,9 +65,8 @@ export class UmAngularUtil {
 
 
   private static isWithoutEntryUid(viewName: String): boolean{
-    return  viewName.includes("Report") ||
-            viewName.includes("Register") ||
-            viewName.includes("Login")
+    return  viewName.includes("Report") || viewName.includes("Register") ||
+            viewName.includes("Login") || viewName.includes("Profile")
   }
 
   /**

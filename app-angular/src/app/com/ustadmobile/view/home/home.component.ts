@@ -24,7 +24,7 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   toolbar_title_class: string;
   drawer_menu_class: string;
   supportedLanguages = [];
-  umFormLanguage: FormGroup;
+  
   private navigationSubscription: Subscription;
   showReports = false
   userName: string = "Guest User"
@@ -35,16 +35,14 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   private presenter: core.com.ustadmobile.core.controller.HomePresenter;
 
   constructor(private location: Location, umService: UmBaseService,
-    router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
+    router: Router, route: ActivatedRoute) {
     super(umService, router, route);
     this.icon_position_class = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
     this.toolbar_icon_class = this.umService.isLTRDirectionality() ? "left icon-right-spacing" : "right icon-left-spacing";
     this.toolbar_arrow = this.umService.isLTRDirectionality() ? "arrow_back" : "arrow_forward";
     this.toolbar_title_class = this.umService.isLTRDirectionality() ? "brand-logo-ltr" : "brand-logo-rtl";
     this.drawer_menu_class = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
-    this.umFormLanguage = formBuilder.group({
-      'language': ['', Validators.required]
-    });
+  
 
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
@@ -58,11 +56,6 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
 
   ngOnInit() {
     super.ngOnInit()
-    this.umFormLanguage.valueChanges.subscribe((form: any) => {
-      if (form.language !== "") {
-        window.open(window.location.origin + "/" + form.language + "/", "_self")
-      }
-    });
   }
 
 
@@ -73,6 +66,10 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
     this.presenter = new core.com.ustadmobile.core.controller.HomePresenter(
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().personDao)
     this.presenter.onCreate(null)
+  }
+
+  openProfile(){
+    this.presenter.handleClickPersonIcon()
   }
 
   showReportMenu(show) {

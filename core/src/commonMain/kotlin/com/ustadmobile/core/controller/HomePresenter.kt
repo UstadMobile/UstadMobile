@@ -39,14 +39,11 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
                     view.runOnUiThread(Runnable {
                         view.showReportMenu(person.admin)
                         view.setLoggedPerson(person)
+                        view.loadProfileIcon(if(account == null) "" else "")
                     })
                 }
             }
         }
-
-        view.runOnUiThread(Runnable {
-            view.loadProfileIcon(if(account == null) "" else "")
-        })
     }
 
     fun handleShowDownloadButton(show: Boolean){
@@ -62,6 +59,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         impl.go("DownloadDialog", args, context)
     }
 
+    @JsName("handleClickPersonIcon")
     fun handleClickPersonIcon(){
         val args = HashMap<String, String?>()
         args.putAll(arguments)

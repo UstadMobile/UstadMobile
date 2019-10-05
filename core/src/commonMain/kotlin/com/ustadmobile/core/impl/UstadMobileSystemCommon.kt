@@ -156,6 +156,7 @@ open abstract class UstadMobileSystemCommon {
      */
     open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
+    @JsName("setLocale")
     fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
 
 
@@ -444,6 +445,7 @@ open abstract class UstadMobileSystemCommon {
         /**
          * The preference key where we save a string for the user's locale preference
          */
+        @JsName("PREFKEY_LOCALE")
         const val PREFKEY_LOCALE = "locale"
 
 

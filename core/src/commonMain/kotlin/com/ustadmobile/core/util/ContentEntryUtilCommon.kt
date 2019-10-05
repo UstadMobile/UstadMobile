@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -21,6 +22,8 @@ abstract class ContentEntryUtilCommon {
 
     internal lateinit var viewName: String
 
+    internal var noIframe: Boolean = false
+
     internal val args = HashMap<String, String>()
 
     init {
@@ -39,10 +42,11 @@ abstract class ContentEntryUtilCommon {
                                       callback: UmCallback<Any>)
 
 
-    fun goToContentEntry(contentEntryUid: Long, dbRepo: UmAppDatabase,
+    fun goToContentEntry(contentEntryUid: Long,noIframe: Boolean ,dbRepo: UmAppDatabase,
                          impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                          context: Any,
                          callback: UmCallback<Any>) {
+        this.noIframe = noIframe
 
         GlobalScope.launch {
             try {
@@ -59,6 +63,7 @@ abstract class ContentEntryUtilCommon {
             result.mimeType = "video/mp4"
         }
 
+        args[ARG_NO_IFRAMES] = noIframe.toString()
         when (result.mimeType) {
             "application/zip", "application/tincan+zip" -> {
                 args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
@@ -91,14 +96,13 @@ abstract class ContentEntryUtilCommon {
                 } else {
                     TODO("Show error message here")
                 }
-
             }
 
         }
     }
 
 
-    private fun goToContentEntryBySourceUrl(sourceUrl: String, dbRepo: UmAppDatabase,
+    private fun goToContentEntryBySourceUrl(sourceUrl: String,dbRepo: UmAppDatabase,
                                             impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                             context: Any,
                                             callback: UmCallback<Any>) {
@@ -124,16 +128,17 @@ abstract class ContentEntryUtilCommon {
      * @param context
      * @param callback
      */
-    fun goToContentEntryByViewDestination(viewDestination: String, dbRepo: UmAppDatabase,
+    fun goToContentEntryByViewDestination(viewDestination: String,noIframe: Boolean, dbRepo: UmAppDatabase,
                                           impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                           context: Any, callback: UmCallback<Any>) {
         //substitute for previously scraped content
         val dest = viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?")
+        this.noIframe = noIframe
 
         val params = UMFileUtil.parseURLQueryString(dest)
         if (params.containsKey("sourceUrl")) {
-            goToContentEntryBySourceUrl(params.getValue("sourceUrl")!!, dbRepo,
+            goToContentEntryBySourceUrl(params.getValue("sourceUrl")!!,dbRepo,
                     impl, openEntryIfNotDownloaded, context,
                     callback)
         }

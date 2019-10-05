@@ -29,6 +29,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { VideoPlayerComponent } from './com/ustadmobile/view/video-player/video-player.component';
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { WebChunkComponent } from './com/ustadmobile/view/web-chunk/web-chunk.component';
+import { UserProfileComponent } from './com/ustadmobile/view/user-profile/user-profile.component';
 
 
 @NgModule({
@@ -49,7 +50,8 @@ import { WebChunkComponent } from './com/ustadmobile/view/web-chunk/web-chunk.co
     EpubContentComponent,
     VideoPlayerComponent,
     XapiContentComponent,
-    WebChunkComponent
+    WebChunkComponent,
+    UserProfileComponent
   ],
   imports: [
     BrowserModule,

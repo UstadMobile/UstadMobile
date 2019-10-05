@@ -7,7 +7,7 @@ import kotlin.jvm.JvmStatic
 
 expect class ContentEntryUtil : ContentEntryUtilCommon{
 
-    override suspend fun goToViewIfDownloaded(entryUid: Long?, sourceUrl: String?,
+    override suspend fun goToViewIfDownloaded(entryUid: Long?,sourceUrl: String?,
                                               dbRepo: UmAppDatabase, impl: UstadMobileSystemImpl,
                                               openEntryIfNotDownloaded: Boolean, context: Any,
                                               callback: UmCallback<Any>)

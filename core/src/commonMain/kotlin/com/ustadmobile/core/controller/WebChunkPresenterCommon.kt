@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
@@ -88,7 +89,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
         val impl = UstadMobileSystemImpl.instance
 
         ContentEntryUtil.instance.goToContentEntryByViewDestination(
-                sourceUrl,
+                sourceUrl, arguments[ARG_NO_IFRAMES]?.toBoolean()!!,
                 appRepo, impl,
                 true,
                 context, object : UmCallback<Any> {

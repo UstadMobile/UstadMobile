@@ -44,7 +44,11 @@ export class WebChunkComponent extends UmBaseComponent implements core.com.ustad
 
   loadUrl(url){
     this.zone.run(()=>{
-      this.urlToLoad = url
+      if(this.showIframe == true){
+        this.urlToLoad = url
+      }else{
+        super.openOnNewtab(url)
+      }
     })
   }
 

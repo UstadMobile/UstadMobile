@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import core from 'UstadMobile-core'
 import { UmBaseService } from '../../service/um-base.service';
@@ -47,8 +47,11 @@ export class VideoPlayerComponent extends UmBaseComponent implements core.com.us
 
   setVideoParamsJs(videoPath, audioPath, srtLangList, srtMap){
    this.zone.run(()=>{
-     console.log(videoPath, audioPath, srtLangList, srtMap)
-    this.urlToLoad = videoPath
+     if(this.showIframe == true){
+      this.urlToLoad = videoPath
+     }else{
+       super.openOnNewtab(videoPath)
+     }
    })
   }
 

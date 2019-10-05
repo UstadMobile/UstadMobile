@@ -24,18 +24,6 @@
     <li><a (click)="navigateTo(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
     <li *ngIf="showReports"> <a (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a>
     </li>
-
-    <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
-    <mz-dropdown-item>
-      <form *ngIf="supportedLanguages">
-        <p class="language grey-text text-lighten-2" i18n="@@language">Languages</p>
-        <mz-select-container [inline]=true *ngIf="supportedLanguages">
-          <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language2">
-            <option *ngFor="let language of supportedLanguages" value="{{language.key}}">{{language.value}}</option>
-          </select>
-        </mz-select-container>
-      </form>
-    </mz-dropdown-item>
   </mz-dropdown>
 
 
@@ -43,6 +31,7 @@
 
     <mz-sidenav-header>
       <div class="user-view">
+        <i class="material-icons white-text right open-profile" (click)="openProfile()">open_in_new</i>
         <img class="circle avatar" [src]="userProfile">
         <div class="white-text name">{{userName}}</div>
         <div class="white-text email">{{userEmail}}</div>
@@ -63,15 +52,6 @@
     </mz-sidenav-link>
     <mz-sidenav-subheader></mz-sidenav-subheader>
     <mz-sidenav-divider></mz-sidenav-divider>
-
-    <form *ngIf="supportedLanguages">
-      <span class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</span>
-      <mz-select-container [inline]=true *ngIf="supportedLanguages">
-        <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language">
-          <option *ngFor="let language of supportedLanguages" value="{{language.key}}">{{language.value}}</option>
-        </select>
-      </mz-select-container>
-    </form>
 
   </mz-sidenav>
 

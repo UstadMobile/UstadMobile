@@ -6,7 +6,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
 actual class ContentEntryUtil: ContentEntryUtilCommon() {
 
-    actual override suspend fun goToViewIfDownloaded(entryUid: Long?, sourceUrl: String?,
+    actual override suspend fun goToViewIfDownloaded(entryUid: Long?,sourceUrl: String?,
                                                      dbRepo: UmAppDatabase, impl: UstadMobileSystemImpl,
                                                      openEntryIfNotDownloaded: Boolean, context: Any,
                                                      callback: UmCallback<Any>) {

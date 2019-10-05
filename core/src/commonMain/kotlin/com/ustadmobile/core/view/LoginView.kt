@@ -13,7 +13,7 @@ interface LoginView : UstadView {
     @JsName("setServerUrl")
     fun setServerUrl(serverUrl: String)
 
-    @JsName("setUsername")
+    @JsName("setUserAccount")
     fun setUsername(username: String)
 
     @JsName("setPassword")

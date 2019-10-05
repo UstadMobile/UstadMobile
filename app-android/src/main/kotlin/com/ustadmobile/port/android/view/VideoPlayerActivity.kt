@@ -43,6 +43,8 @@ import java.util.*
 
 
 class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
+
+
     private lateinit var playerView: PlayerView
 
     private var player: SimpleExoPlayer? = null
@@ -294,6 +296,10 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                 (findViewById<View>(R.id.activity_video_player_description) as TextView).text = result.description
             }
         }
+    }
+
+    override fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {

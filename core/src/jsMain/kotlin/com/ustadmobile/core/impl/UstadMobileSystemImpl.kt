@@ -1,15 +1,12 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenterCommon.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.HomeView
 import io.ktor.client.request.get
 import kotlinx.io.InputStream
-import kotlinx.io.StringReader
 import kotlinx.io.charsets.Charsets
 import kotlinx.io.core.toByteArray
-import org.w3c.files.FileReader
 import kotlin.browser.localStorage
 import kotlin.browser.window
 import kotlin.js.json
@@ -26,7 +23,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @JsName("stringMap")
     private var stringMap : Any = Any()
 
-    private var isBaseHomePath = false
 
     /**
      * Load all strings to be used in the app
@@ -49,19 +45,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
         umContext.router.navigateByUrl("/${HomeView.VIEW_NAME}/$viewName?${UMFileUtil.mapToQueryString(args)}")
-    }
-
-
-    private fun mapToRouterParams(args: Map<String, String?>): Any{
-        val params = json()
-        for ((key, value) in args) {
-            if(key == "entryid" && args["mode"] == "exclude"){
-                params[key] = null
-            }else{
-                params[key] = value
-            }
-        }
-        return json("queryParams" to params, "queryParamsHandling" to "merge")
     }
 
     /**
