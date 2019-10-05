@@ -34,10 +34,10 @@
 -keep public class com.ustadmobile.core.db.**{
     public <init>(...);
 }
--keep public class com.ustadmobile.port.android.impl.WebChunkWebViewClient$IndexLog{
+-keep public com.ustadmobile.core.controller.IndexLog{
        *;
 }
--keep public class com.ustadmobile.port.android.impl.WebChunkWebViewClient$IndexLog$IndexEntry{
+-keep public com.ustadmobile.core.controller.IndexLog$IndexEntry{
        *;
 }
 

@@ -46,8 +46,8 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
     }
 
-    override fun mountChunk(container: Container, callback: UmCallback<String>) {
-        webClient = WebChunkWebViewClient(container, mPresenter!!, this)
+    override fun mountChunk(container: Container?, callback: UmCallback<String>) {
+        webClient = WebChunkWebViewClient(container!!, mPresenter!!, this)
         runOnUiThread {
             mWebView!!.webViewClient = webClient
             callback.onSuccess(webClient!!.url)

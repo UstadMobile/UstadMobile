@@ -28,7 +28,7 @@ import { EpubContentComponent } from './com/ustadmobile/view/epub-content/epub-c
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { VideoPlayerComponent } from './com/ustadmobile/view/video-player/video-player.component';
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
-import { H5pContentComponent } from './com/ustadmobile/view/h5p-content/h5p-content.component';
+import { WebChunkComponent } from './com/ustadmobile/view/web-chunk/web-chunk.component';
 
 
 @NgModule({
@@ -49,7 +49,7 @@ import { H5pContentComponent } from './com/ustadmobile/view/h5p-content/h5p-cont
     EpubContentComponent,
     VideoPlayerComponent,
     XapiContentComponent,
-    H5pContentComponent
+    WebChunkComponent
   ],
   imports: [
     BrowserModule,

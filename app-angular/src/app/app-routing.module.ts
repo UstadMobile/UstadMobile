@@ -14,7 +14,7 @@ import { RouteGuardService } from './com/ustadmobile/service/route-guard.service
 import { EpubContentComponent } from './com/ustadmobile/view/epub-content/epub-content.component';
 import { VideoPlayerComponent } from './com/ustadmobile/view/video-player/video-player.component';
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
-import { H5pContentComponent } from './com/ustadmobile/view/h5p-content/h5p-content.component';
+import { WebChunkComponent } from './com/ustadmobile/view/web-chunk/web-chunk.component';
 
 const routes: Routes = [
   {path: 'Home', component: HomeComponent,
@@ -26,7 +26,7 @@ const routes: Routes = [
           {path: "EpubContent", component: EpubContentComponent},
           {path: "VideoPlayer", component: VideoPlayerComponent},
           {path: "XapiContent", component: XapiContentComponent},
-          {path: "H5PContent", component: H5pContentComponent},
+          {path: "WebChunk", component: WebChunkComponent},
           {path: "ReportDashboard", component: ReportDashboardComponent},
           {path: "ReportOptions", component: XapiReportOptionsComponent},
           {path: "EntriesTreeDialog",component: XapiTreeviewDialogComponent},

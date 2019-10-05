@@ -52,7 +52,7 @@ export class XapiContentComponent extends UmBaseComponent implements core.com.us
   }
 
   setTitle(title){
-
+    super.setToolbarTitle(title)
   }
 
   ngOnDestroy(): void {

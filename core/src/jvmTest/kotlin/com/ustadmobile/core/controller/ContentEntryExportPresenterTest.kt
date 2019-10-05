@@ -74,7 +74,7 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
                 umAppDatabase,umAppRepository,UstadMobileSystemImpl.instance )
         presenter.onCreate(null)
 
-        verify(mockView, timeout(TimeUnit.SECONDS.toMillis(3))).checkFilePermissions()
+        verify(mockView, timeout(TimeUnit.SECONDS.toMillis(5))).checkFilePermissions()
     }
 
 

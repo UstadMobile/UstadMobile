@@ -12,6 +12,9 @@ interface VideoPlayerView : UstadView {
     @JsName("setVideoParams")
     fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)
 
+    @JsName("setVideoParamsJs")
+    fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)
+
     companion object {
 
         const val ARG_CONTENT_ENTRY_ID = "entryid"

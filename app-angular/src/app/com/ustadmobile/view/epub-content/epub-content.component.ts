@@ -46,7 +46,9 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
   }
 
 
-  setContainerTitle(title){}
+  setContainerTitle(title){
+    super.setToolbarTitle(title)
+  }
 
   setSpineUrls(urls){
     this.inMemoryUrls = urls;
@@ -60,6 +62,7 @@ export class EpubContentComponent extends UmBaseComponent implements core.com.us
     let allUrls = []
     allUrls.push(url)
     this.urlsToLoad = allUrls.concat(this.inMemoryUrls)
+    console.log(this.urlsToLoad)
     this.loadPage(0)
   }
 

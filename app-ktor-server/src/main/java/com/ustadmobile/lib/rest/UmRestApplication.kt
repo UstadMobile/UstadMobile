@@ -16,7 +16,9 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
+import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.PartialContent
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
@@ -67,6 +69,7 @@ fun Application.umRestApplication(devMode: Boolean = false) {
         }
     }
 
+
     install(ContentNegotiation) {
         gson {
             register(ContentType.Application.Json, GsonConverter())
@@ -91,10 +94,6 @@ fun Application.umRestApplication(devMode: Boolean = false) {
                 call.respond("OK - cleared")
             }
 
-            get("test"){
-                call.respondText { "OK"}
-            }
-
             get("UmContainer/addContainer"){
 
                 val indexTempDir = 0; val indexTempFile = 1; val indexContainer = 2
@@ -103,43 +102,36 @@ fun Application.umRestApplication(devMode: Boolean = false) {
                 val entryUid = call.request.queryParameters["entryid"]
                 val contentTye = call.request.queryParameters["type"]
                 val mimeType = when (contentTye) {
-                    "video" -> "video/mp4"
                     "tincan" -> "application/tincan+zip"
                     "epub" -> "application/epub+zip"
-                    "webchunk" -> "application/webchunk+zip"
                     else -> ""
                 }
 
-                handleInvalidRequest(resourceName, entryUid, call)
+                handleInvalidRequest(call)
 
                 val preparedRes = prepareResources(resourceName,contentTye!!, entryUid, mimeType)
 
-                if(contentTye == "video"){
+                val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
+                        (preparedRes[indexTempDir] as File).absolutePath)
 
-                    val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
-                            (preparedRes[indexTempDir] as File).absolutePath)
-                    containerManager.addEntries(ContainerManager.FileEntrySource(preparedRes[indexTempFile] as File, resourceName!!))
-
-                    call.respond((preparedRes[indexContainer] as Container).containerUid)
-                }else{
-
-                    val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
-                            (preparedRes[indexTempDir] as File).absolutePath)
-
-                    val epubZipFile = ZipFile(preparedRes[indexTempFile] as File)
-                    addEntriesFromZipToContainer((preparedRes[indexTempFile] as File).absolutePath, containerManager)
-                    epubZipFile.close()
-                    val containerUid = (preparedRes[indexContainer] as Container).containerUid
-                    call.respond(containerUid)
-                }
+                val epubZipFile = ZipFile(preparedRes[indexTempFile] as File)
+                addEntriesFromZipToContainer((preparedRes[indexTempFile] as File).absolutePath, containerManager)
+                epubZipFile.close()
+                val containerUid = (preparedRes[indexContainer] as Container).containerUid
+                call.respond(containerUid)
             }
         }
     }
 }
 
-private suspend fun handleInvalidRequest(resourceName: String?, entryId: String?, call: ApplicationCall){
-    if((resourceName != null && resourceName.isEmpty()) || resourceName == null  || (entryId != null && entryId.isEmpty()) || entryId == null){
-        call.respond("Invalid request make sure you have include resource param")
+private suspend fun handleInvalidRequest(call: ApplicationCall){
+    val resourceName = call.request.queryParameters["resource"]
+    val entryId = call.request.queryParameters["entryid"]
+    val resourceType = call.request.queryParameters["type"]
+    if((resourceName != null && resourceName.isEmpty()) || resourceName == null
+            || (entryId != null && entryId.isEmpty()) || entryId == null ||
+            (resourceType != null && resourceType.isEmpty()) || resourceType == null){
+        call.respond("Invalid request make sure you have included all resource param")
         return
     }
 }

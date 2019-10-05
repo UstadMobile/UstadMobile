@@ -42,11 +42,12 @@ export class VideoPlayerComponent extends UmBaseComponent implements core.com.us
   }
 
   setVideoInfo(entry){
-
+    this.presenter.onResume()
   }
 
-  setVideoParams(videoPath, audioPath, srtLangList, srtMap){
+  setVideoParamsJs(videoPath, audioPath, srtLangList, srtMap){
    this.zone.run(()=>{
+     console.log(videoPath, audioPath, srtLangList, srtMap)
     this.urlToLoad = videoPath
    })
   }

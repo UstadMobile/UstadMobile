@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { H5pContentComponent } from './h5p-content.component';
+import { WebChunkComponent } from './web-chunk.component';
 
-describe('H5pContentComponent', () => {
-  let component: H5pContentComponent;
-  let fixture: ComponentFixture<H5pContentComponent>;
+describe('WebChunkComponent', () => {
+  let component: WebChunkComponent;
+  let fixture: ComponentFixture<WebChunkComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ H5pContentComponent ]
+      declarations: [ WebChunkComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(H5pContentComponent);
+    fixture = TestBed.createComponent(WebChunkComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

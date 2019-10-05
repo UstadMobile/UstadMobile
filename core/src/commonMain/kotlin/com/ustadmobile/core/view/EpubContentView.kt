@@ -32,7 +32,6 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.impl.UmCallback
-import kotlinx.serialization.json.JSON
 import kotlin.js.JsName
 
 /**
