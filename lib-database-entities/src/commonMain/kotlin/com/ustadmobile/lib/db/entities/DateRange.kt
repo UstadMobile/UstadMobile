@@ -6,11 +6,13 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 
 @SyncableEntity(tableId = 17)
 @Entity
-class DateRange(var dateRangeActive: Boolean = true) {
+@Serializable
+class DateRange() {
 
     @PrimaryKey(autoGenerate = true)
     var dateRangeUid: Long = 0
@@ -34,12 +36,14 @@ class DateRange(var dateRangeActive: Boolean = true) {
 
     var dateRangeDesc: String? = null
 
-    constructor(fromDate: Long, toDate: Long): this(true) {
+    var dateRangeActive: Boolean = true
+
+    constructor(fromDate: Long, toDate: Long): this() {
         this.dateRangeFromDate = fromDate
         this.dateRangeToDate = toDate
     }
 
-    constructor(fromDate: Long): this(true) {
+    constructor(fromDate: Long): this() {
         this.dateRangeFromDate = fromDate
     }
 

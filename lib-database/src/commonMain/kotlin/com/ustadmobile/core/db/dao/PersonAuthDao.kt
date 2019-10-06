@@ -39,32 +39,37 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     open suspend fun resetPassword(personUid: Long, password: String, loggedInPersonUid: Long): Int {
-        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptThisPassword(password)
 
-        if (loggedInPersonUid != personUid) {
-            if (isPersonAdmin(loggedInPersonUid)) {
-                val personAuth = PersonAuth(personUid, passwordHash)
-                val existingPersonAuth = findByUid(personUid)
-                if (existingPersonAuth == null) {
-                    insert(personAuth)
-                }
-                val result = updatePasswordForPersonUid(personUid, passwordHash)
-                if (result > 0) {
-                    println("Update password success")
-                    return 1
-                } else {
-                    return 0
-                }
+        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(password)
 
-            } else {
-                println("Update password fail2")
+        if (isPersonAdmin(loggedInPersonUid)) {
+            //Allow admin to change password of people:
+            return changePassword(personUid, passwordHash)
+        }else{
+            //Allow self to change password:
+            if (loggedInPersonUid == personUid) {
+                return changePassword(personUid, passwordHash)
+            }else{
                 return -1
             }
-        } else {
-            println("Update password fail3")
-            return -2
         }
 
+    }
+
+    open suspend fun changePassword(personUid: Long, passwordHash: String):Int {
+
+        val existingPersonAuth = findByUid(personUid)
+        if (existingPersonAuth == null) {
+            val personAuth = PersonAuth(personUid, passwordHash)
+            insert(personAuth)
+        }
+        val result = updatePasswordForPersonUid(personUid, passwordHash)
+        if (result > 0) {
+            println("Update password success")
+            return 1
+        } else {
+            return 0
+        }
     }
 
     @Insert

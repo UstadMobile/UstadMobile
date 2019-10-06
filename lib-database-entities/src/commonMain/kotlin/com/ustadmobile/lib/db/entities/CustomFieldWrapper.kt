@@ -1,9 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * POJO Representation of a custom field. This is populated from both PersonField as well as
  * ClazzCustomField
  */
+@Serializable
 class CustomFieldWrapper {
 
     var fieldName: String? = null

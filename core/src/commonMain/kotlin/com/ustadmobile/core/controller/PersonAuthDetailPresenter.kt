@@ -6,11 +6,17 @@ import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.PersonAuthDetailView
 import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.util.encryptPassword
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.response.HttpResponse
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -77,17 +83,38 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
             }
             currentPerson!!.username = usernameSet
 
-            currentPersonAuth!!.passwordHash = encryptPassword(passwordSet!!)
+            currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(passwordSet!!)
             currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
             GlobalScope.launch {
+                //Update locally
                 personDao.updateAsync(currentPerson!!)
 
-                val result = personAuthDao.updateAsync(currentPersonAuth!!)
-                val reset = personAuthDao.resetPassword(currentPersonUid, passwordSet!!, loggedInPersonUid)
-                val result2 = personAuthDao.updateAsync(currentPersonAuth!!)
-                if(result2 > 0) {
-                    view.finish()
+                //Update on server
+                try {
+                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
+                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>() {
+                        url {
+                            takeFrom(serverUrl!!)
+                            encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+                        }
+                        parameter("p0", currentPersonUid)
+                        parameter("p1", passwordSet)
+                        parameter("p2", loggedInPersonUid)
+                    }
+
+                    if(resetPasswordResponse.status == HttpStatusCode.OK) {
+                        //Update locally
+                        personAuthDao.updateAsync(currentPersonAuth!!)
+                        view.finish()
+                    }else {
+                        println("nope")
+                    }
+                } catch (e: Exception) {
+                    print("oops")
                 }
+
+
+
             }
         }
     }

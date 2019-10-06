@@ -10,6 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.serialization.Serializable
 
 
 @UmDao(permissionJoin = "INNER JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid", 
@@ -23,6 +24,7 @@ import com.ustadmobile.lib.db.entities.Role
 @Dao
 abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
+    @Serializable
     class NumberOfDaysClazzesOpen {
         var date: Long = 0
         var number: Int = 0
@@ -32,6 +34,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
      * Small POJO used by the attendance screen to get a list of valid dates for the class (to show
      * in a list) and their UID so they can be looked up.
      */
+    @Serializable
     class ClazzLogUidAndDate {
 
         var clazzLogUid: Long = 0
