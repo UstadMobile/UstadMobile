@@ -159,9 +159,11 @@ class DownloadDialogPresenterTest {
                 ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()
         )
 
+        var preparerCountdownLatch = CountDownLatch(1)
         var preparationRequested = AtomicBoolean(false)
         val downloadJobPreparerRequester = {downloadJobUid: Int, context: Any ->
             preparationRequested.set(true)
+            preparerCountdownLatch.countDown()
         }
 
         presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
@@ -183,6 +185,7 @@ class DownloadDialogPresenterTest {
             downloadJob -> downloadJob != null && downloadJob.djStatus == JobStatus.NEEDS_PREPARED
         }
 
+        preparerCountdownLatch.await(5000, TimeUnit.MILLISECONDS)
         assertTrue("Preparer requester was invoked", preparationRequested.get())
 
         val downloadJobCreated = umAppDatabase.downloadJobDao.findDownloadJobByRootContentEntryUid(
