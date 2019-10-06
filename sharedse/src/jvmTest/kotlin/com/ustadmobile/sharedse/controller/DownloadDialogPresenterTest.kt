@@ -26,6 +26,7 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 class DownloadDialogPresenterTest {
@@ -158,9 +159,9 @@ class DownloadDialogPresenterTest {
                 ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()
         )
 
-        var preparationRequested = false
+        var preparationRequested = AtomicBoolean(false)
         val downloadJobPreparerRequester = {downloadJobUid: Int, context: Any ->
-            preparationRequested = true
+            preparationRequested.set(true)
         }
 
         presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
@@ -182,7 +183,7 @@ class DownloadDialogPresenterTest {
             downloadJob -> downloadJob != null && downloadJob.djStatus == JobStatus.NEEDS_PREPARED
         }
 
-        assertTrue("Preparer requester was invoked", preparationRequested)
+        assertTrue("Preparer requester was invoked", preparationRequested.get())
 
         val downloadJobCreated = umAppDatabase.downloadJobDao.findDownloadJobByRootContentEntryUid(
                 contentEntrySet.rootEntry.contentEntryUid)
