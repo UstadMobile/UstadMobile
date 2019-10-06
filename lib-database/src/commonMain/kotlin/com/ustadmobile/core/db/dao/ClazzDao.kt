@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CO
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
@@ -24,6 +25,7 @@ import com.ustadmobile.lib.db.entities.*
 @Dao
 abstract class ClazzDao : BaseDao<Clazz> {
 
+    @QueryLiveTables(["Clazz", "ClazzMember"])
     @Query("SELECT " +
             " (SELECT COUNT(*) FROM Clazz Where Clazz.isClazzActive = 1) as numClazzes, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
@@ -262,6 +264,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun personHasPermission(accountPersonUid: Long, clazzUid: Long,
                                              permission: Long) : Boolean
 
+    @QueryLiveTables(["Person", "PersonGroupMember"])
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
     abstract fun personHasPermissionLive(accountPersonUid: Long, permission: Long)
