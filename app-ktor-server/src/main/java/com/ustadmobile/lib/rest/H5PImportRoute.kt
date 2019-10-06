@@ -19,13 +19,11 @@ import io.ktor.client.request.header
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.request.header
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.util.toMap
-import io.ktor.util.url
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
@@ -102,7 +100,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             if (headers["Content-Type"]?.startsWith("video/") == true) {
 
-                if (headers["Content-Length"]?.toInt() ?: FILE_SIZE >= FILE_SIZE) {
+                if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
                     call.respond(HttpStatusCode.BadRequest, "File size too big")
                     return@get
                 }
@@ -139,7 +137,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 FileUtils.copyInputStreamToFile(input, videoFile)
 
                 container.fileSize = videoFile.length()
-                container.lastModified = parentDir.lastModified()
+                container.cntLastModified = parentDir.lastModified()
                 container.mobileOptimized = true
                 container.containerUid = containerDao.insert(container)
 
@@ -165,7 +163,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
     try {
         runBlocking {
 
-            System.setProperty("webdriver.chrome.driver", findSystemCommand("chromedriver","webdriver.chrome.driver"))
+            System.setProperty("webdriver.chrome.driver", findSystemCommand("chromedriver", "webdriver.chrome.driver"))
             val driver = setupLogIndexChromeDriver()
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
@@ -273,7 +271,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
             val container = Container()
             container.mimeType = "application/webchunk+zip"
-            container.lastModified = parentDir.lastModified()
+            container.cntLastModified = parentDir.lastModified()
             container.containerContentEntryUid = contentEntryUid
             container.mobileOptimized = true
             container.containerUid = containerUid

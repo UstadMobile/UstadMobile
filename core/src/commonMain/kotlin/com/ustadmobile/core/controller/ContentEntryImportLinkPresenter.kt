@@ -3,18 +3,26 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.model.HeadResponse
+import com.ustadmobile.core.networkmanager.PlatformHttpClient
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.lib.db.entities.H5PImportData
+import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
+import io.ktor.client.features.HttpRedirect
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
+import io.ktor.http.HeaderValue
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
+import io.ktor.http.userAgent
+import io.ktor.util.toMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
@@ -22,6 +30,7 @@ import kotlinx.coroutines.launch
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
+
 
     private var videoTitle: String? = null
 
@@ -47,6 +56,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
 
     fun handleUrlTextUpdated(url: String): Job {
+        var url = url
         jobCount++
         checkProgressBar()
         return GlobalScope.launch {
@@ -54,9 +64,35 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             isDoneEnabled = false
             view.checkDoneButton()
 
-            var response: HttpResponse?
+            val isGoogleDrive = url.contains("drive.google.com")
+
+            if (isGoogleDrive) {
+                var id = url.substringAfter("id=")
+                if (id == url) {
+                    val startIndex = url.indexOf("file/d/") + 7
+                    val endIndex = url.indexOf("/", startIndex)
+                    id = url.substring(startIndex, endIndex)
+                }
+
+                url = GOOGLE_DRIVE_LINK + id
+            }
+
+
+            var headResponse: HeadResponse?
             try {
-                response = defaultHttpClient().head<HttpResponse>(url)
+
+                var client = PlatformHttpClient()
+                headResponse = client.headRequest(url)
+
+                if (headResponse.status == 302 && isGoogleDrive) {
+                    val googleDriveUrl = headResponse.headers["location"]?.get(0)!!
+                    var response = defaultHttpClient().get<HttpResponse>(googleDriveUrl)
+                    headResponse = HeadResponse(response.status.value, response.headers.toMap())
+
+                    response.discardRemaining()
+                    response.close()
+                }
+
             } catch (e: Exception) {
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
                 jobCount--
@@ -66,24 +102,21 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
             contentType = -1
 
-            if (response.status.value != 200) {
+            if (headResponse.status != 200) {
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
                 jobCount--
                 checkProgressBar()
                 return@launch
             }
 
-            var contentTypeHeader = response.headers["Content-Type"]
-            if (contentTypeHeader?.contains(";") == true) {
+            var contentTypeHeader = headResponse.headers["content-type"]?.get(0) ?: ""
+            if (contentTypeHeader.contains(";")) {
                 contentTypeHeader = contentTypeHeader.split(";")[0]
             }
 
-            val length = response.headers["Content-Length"]?.toInt() ?: FILE_SIZE
+            val length = headResponse.headers["content-length"]?.get(0)?.toInt() ?: 0
 
-            response.discardRemaining()
-            response.close()
-
-            if (contentTypeHeader?.startsWith("video/") == true) {
+            if (contentTypeHeader.startsWith("video/")) {
 
                 if (length >= FILE_SIZE) {
                     view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_big_size, context))
@@ -221,6 +254,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
         val listOfHtmlContentType = listOf("text/html", "application/xhtml+xml", "application/xml", "text/xml")
 
+        var GOOGLE_DRIVE_LINK = "https://drive.google.com/uc?export=download&id="
 
     }
 

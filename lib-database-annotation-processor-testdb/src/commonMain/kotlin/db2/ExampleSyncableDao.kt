@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.ParamName
+import com.ustadmobile.door.annotation.Repository
+
 
 @Dao
 abstract class ExampleSyncableDao {
@@ -41,6 +43,7 @@ abstract class ExampleSyncableDao {
             "esUid = :uid")
     abstract fun updateNumberByUid(uid: Long, newNumber: Long)
 
+
     open suspend fun findByUidAndAddOneThousand(@ParamName("uid") uid: Long): ExampleSyncableEntity? {
         val entity = findByUid(uid)
         if(entity != null)
@@ -49,5 +52,9 @@ abstract class ExampleSyncableDao {
         return entity
     }
 
+
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @Query("SELECT * FROM ExampleSyncableEntity LIMIT 1")
+    abstract suspend fun findOneFromWeb(): ExampleSyncableEntity?
 
 }

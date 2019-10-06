@@ -18,4 +18,5 @@ suspend fun <T> waitForLiveData(liveData: DoorLiveData<T>, timeout: Long, checke
     withTimeoutOrNull(timeout) { channel.receive() }
 
     liveData.removeObserver(observerFn)
+    channel.close()
 }

@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.db.entities.*
 
 /**
@@ -142,6 +143,7 @@ abstract class DownloadJobItemDao {
             " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
             " AND DownloadJob.meteredNetworkAllowed) " +
             "LIMIT 1")
+    @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
@@ -186,8 +188,8 @@ abstract class DownloadJobItemDao {
             " FROM ContentEntryParentChildJoin " +
             " LEFT JOIN Container ON Container.containerContentEntryUid = " +
             "   ContentEntryParentChildJoin.cepcjChildContentEntryUid" +
-            "   AND Container.lastModified = " +
-            "   (SELECT MAX(lastModified) FROM Container WHERE containerContentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid) " +
+            "   AND Container.cntLastModified = " +
+            "   (SELECT MAX(cntLastModified) FROM Container WHERE containerContentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid) " +
             "WHERE " +
             "ContentEntryParentChildJoin.cepcjParentContentEntryUid in (:parentContentEntryUids)")
     abstract fun findByParentContentEntryUuids(
@@ -202,5 +204,8 @@ abstract class DownloadJobItemDao {
             updateStatus(status.jobItemUid, status.status)
         }
     }
+
+    @Query("SELECT * FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid")
+    abstract fun findByDownloadJobUid(downloadJobUid: Int): List<DownloadJobItem>
 
 }

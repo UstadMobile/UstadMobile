@@ -122,7 +122,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
 
-    override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
+    override fun showStorageOptions(storageOptions: List<UMStorageDir>) {
         val options = ArrayList<String>()
         this.storageDirs = storageOptions
         for (umStorageDir in storageOptions) {

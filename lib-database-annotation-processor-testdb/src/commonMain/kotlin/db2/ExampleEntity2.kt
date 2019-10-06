@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 open class ExampleEntity2(
         @PrimaryKey(autoGenerate = true)
         var uid: Long = 0L,
-        var name: String = "",
+        var name: String? = "",
         @ColumnInfo(index = true)
         var someNumber: Long = 0L) {
 

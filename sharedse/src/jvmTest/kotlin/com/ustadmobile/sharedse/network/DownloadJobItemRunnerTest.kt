@@ -477,7 +477,7 @@ class DownloadJobItemRunnerTest {
 
 
             clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
-                    item.djiUid, true)
+                    item.djiDjUid, true)
 
             val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
                     cloudEndPoint, connectivityStatus)

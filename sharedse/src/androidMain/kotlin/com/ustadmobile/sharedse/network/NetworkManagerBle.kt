@@ -104,8 +104,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     private var wifiP2pManager: WifiP2pManager? = null
 
-    private val umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context)
-
     private var connectivityManager: ConnectivityManager? = null
 
     private val wifiP2PCapable = AtomicBoolean(false)
