@@ -264,22 +264,25 @@ task updateLibsVersion{
   doLast{
     def packageJson = project.file("package.json")
     def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
-    Iterator iterator = packageJsonContent.dependencies.entrySet().iterator()
-    def dependenciesObj = new JSONObject()
-    while (iterator.hasNext())  {
-      Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next()
-      if(entry.getKey().indexOf("UstadMobile-") != -1){
-        def oldVersion = entry.getValue().substring(entry.getValue().lastIndexOf("-") + 1,entry.getValue().length() - 4)
-        dependenciesObj.put(entry.getKey(),entry.getValue().replace(oldVersion,rootProject.version))
-      }else{
-        dependenciesObj.put(entry.getKey(),entry.getValue())
+
+    if(packageJsonContent.version != rootProject.version){
+      Iterator iterator = packageJsonContent.dependencies.entrySet().iterator()
+      def dependenciesObj = new JSONObject()
+      while (iterator.hasNext())  {
+        Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next()
+        if(entry.getKey().indexOf("UstadMobile-") != -1){
+          def oldVersion = entry.getValue().substring(entry.getValue().lastIndexOf("-") + 1,entry.getValue().length() - 4)
+          dependenciesObj.put(entry.getKey(),entry.getValue().replace(oldVersion,rootProject.version))
+        }else{
+          dependenciesObj.put(entry.getKey(),entry.getValue())
+        }
       }
+      packageJsonContent.version = rootProject.version
+      packageJsonContent.dependencies = dependenciesObj
+      FileWriter packageJsonFileWriter = new FileWriter(packageJson.path)
+      packageJsonFileWriter.write(new JsonBuilder(packageJsonContent).toPrettyString())
+      packageJsonFileWriter.flush()
     }
-    packageJsonContent.version = rootProject.version
-    packageJsonContent.dependencies = dependenciesObj
-    FileWriter packageJsonFileWriter = new FileWriter(packageJson.path)
-    packageJsonFileWriter.write(new JsonBuilder(packageJsonContent).toPrettyString())
-    packageJsonFileWriter.flush()
   }
 
 }
