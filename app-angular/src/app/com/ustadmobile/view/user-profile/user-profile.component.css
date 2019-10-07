@@ -1,0 +1,9 @@
+@media (min-width: 320px) and (max-width: 480px) {
+    .profile-size {
+      width: 50% !important;
+      height: 40% !important;
+      margin-top: 10%; 
+      margin-bottom: 20px;
+      margin-left: 20%;
+    }
+  }

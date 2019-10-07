@@ -143,6 +143,8 @@
 
     <!-- Update student details action button -->
     <string name="update">Update</string>
+    <string name="profile">Profile</string>
+    <string name="download_from_playstore">We do have android version, for smooth experience consider downloading it from play store. Would you like to continue?</string>
 
     <string name="catalog">Catalog</string>
     <string name="closed">Closed</string>

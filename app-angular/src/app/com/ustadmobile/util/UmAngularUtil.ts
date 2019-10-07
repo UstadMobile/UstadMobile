@@ -94,6 +94,7 @@ export class UmAngularUtil {
 
 
   private static createEvent(eventType: any, component){
+
     var originalSetItem = localStorage.setItem;
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
@@ -242,6 +243,10 @@ export class UmAngularUtil {
   static getActiveMenu(routes): boolean[]{
     const reportActive = window.location.pathname.includes("Report")
     return [!reportActive, reportActive]
+  }
+
+  static isSupportedEnvironment(keyToCheck = "android"){
+    return navigator.appVersion.toLowerCase().includes(keyToCheck)
   }
 
   /**

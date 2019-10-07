@@ -1,0 +1,15 @@
+<mz-modal [fixedFooter]="false" [options]="modalOptions">
+  <mz-modal-content>
+    <div class="row">
+      <p i18n="@@download_from_playstore">
+        We do have android version, for smooth experience consider downloading it from play store. 
+        Would you like to continue?
+        
+      </p>
+    </div>
+  </mz-modal-content>
+  <mz-modal-footer>
+    <button mz-button [flat]="true"  mz-modal-close i18n="@@cancel">Cancel</button>
+    <button mz-button [flat]="true"  (click)="openPayStore()" mz-modal-close i18n="@@download_continue_btn_label">Continue</button>
+  </mz-modal-footer>
+</mz-modal>

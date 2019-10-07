@@ -5,7 +5,6 @@ import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import util from 'UstadMobile-lib-util';
 import core from 'UstadMobile-core'
 
@@ -106,7 +105,7 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   }
 
   setToolbarTitle(title) {
-    this.toolBarTitle = title
+    this.toolBarTitle = this.umService.isMobile ? super.truncate(title, 3): title
   }
 
 

@@ -43,6 +43,10 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
         UmAngularUtil.registerResourceReadyListener(this)
       });
       this.data_class = this.umService.isLTRDirectionality() ?  "left-align":"right-align";
+      if(this.umService.isMobile){
+        this.width = 400;
+        this.height = 300;
+      }
   }
 
   ngOnInit() {

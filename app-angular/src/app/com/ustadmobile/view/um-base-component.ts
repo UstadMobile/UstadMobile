@@ -26,7 +26,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.viewContext = this.context = new UmContextWrapper(router) 
     this.context.setActiveRoute(this.route);
     this.umService.init(this)   
-    this.showIframe = this.route.snapshot.queryParams.noiframe == false
+    this.showIframe = this.route.snapshot.queryParams.noiframe == "false"
     this.floating_btn_class_right = this.umService.isLTRDirectionality() ? "fixed-action-btn-right" : "fixed-action-btn-left";
     this.floating_btn_class_left = this.umService.isLTRDirectionality() ? "fixed-action-btn-left":"fixed-action-btn-right"
   }
@@ -59,6 +59,22 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     if(this.showIframe == false){
       window.open(url,'_blank')
     }
+  }
+
+  truncate(value: string, limit: number = 40, trail: String = '…'): string {
+    let result = value || '';
+    if (value) {
+      const words = value.split(/\s+/);
+      if (words.length > Math.abs(limit)) {
+        if (limit < 0) {
+          limit *= -1;
+          result = trail + words.slice(words.length - limit, words.length).join(' ');
+        } else {
+          result = words.slice(0, limit).join(' ') + trail;
+        }
+      }
+    }  
+    return result;
   }
 
   ngOnDestroy(){}

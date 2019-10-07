@@ -43,6 +43,8 @@ core.com.ustadmobile.core.view.XapiReportOptionsView {
   inMemoryWhoList = []
   inMemoryDidList = []
   inMemorySelectedNames = ""
+  depth_value = "z-depth-1"
+
   @Output()
   public domChange = new EventEmitter();
 
@@ -76,6 +78,10 @@ core.com.ustadmobile.core.view.XapiReportOptionsView {
       'graph_when_start': [currentDate, Validators.required],
       'graph_when_end': [tomorrow, Validators.required]
     });
+
+    if(this.umService.isMobile){
+      this.depth_value = "z-depth-0"
+    }
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {

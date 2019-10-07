@@ -322,6 +322,18 @@ task packPreparedModules{
   }
 }
 
+task appBuildProdMode{
+  def locale = project.hasProperty("locale") ? locale : null
+  def directory = rootProject.file("app-angular").path
+  def commandScript = locale != null ?  "build:"+locale :"build-prod"
+  doLast{
+    exec {
+      workingDir directory
+      commandLine 'npm', 'run' , commandScript
+    }
+  }
+}
+
 
 /**
  * Start angular end to end test

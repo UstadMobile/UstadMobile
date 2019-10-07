@@ -22,6 +22,8 @@ import io.ktor.features.PartialContent
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.response.respond
 import io.ktor.response.respondText
@@ -65,6 +67,7 @@ fun Application.umRestApplication(devMode: Boolean = false) {
             method(HttpMethod.Get)
             method(HttpMethod.Post)
             method(HttpMethod.Put)
+            method(HttpMethod.Options)
             anyHost()
         }
     }

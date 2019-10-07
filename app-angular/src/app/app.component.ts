@@ -4,6 +4,8 @@ import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { Component, Inject, LOCALE_ID, HostBinding } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
+import { MzModalService } from 'ngx-materialize';
+import { DownloadFromPlaystoreComponent } from './com/ustadmobile/view/download-from-playstore/download-from-playstore.component';
 
 @Component({
   selector: 'app-root',
@@ -20,11 +22,10 @@ export class AppComponent extends UmBaseComponent {
   private navigationSubscription: Subscription;
   private splashScreenTimeout = () => {
     this.showLoading = false;
-    console.log(this.initialRoute.view) 
     this.systemImpl.go(this.initialRoute.view, this.initialRoute.args, this.context, 0)
   };
 
-  constructor(@Inject(LOCALE_ID) private locale: string, localeService: UmBaseService,router: Router,route: ActivatedRoute) {
+  constructor(@Inject(LOCALE_ID) private locale: string, private modalService: MzModalService, localeService: UmBaseService,router: Router,route: ActivatedRoute) {
     super(localeService, router, route);
     if (this.locale.startsWith('en')) {
       this.dir = "ltr";
@@ -36,6 +37,10 @@ export class AppComponent extends UmBaseComponent {
     this.initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID);
     this.umService.setSystemDirectionality(this.dir);
     this.umService.setSystemLocale(this.systemImpl.getSystemLocale(this.context).split("-")[0])
+
+    if(UmAngularUtil.isSupportedEnvironment()){ 
+      this.modalService.open(DownloadFromPlaystoreComponent);
+    }
   }
 
   ngOnInit(): void {

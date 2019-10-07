@@ -30,6 +30,7 @@ import { VideoPlayerComponent } from './com/ustadmobile/view/video-player/video-
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { WebChunkComponent } from './com/ustadmobile/view/web-chunk/web-chunk.component';
 import { UserProfileComponent } from './com/ustadmobile/view/user-profile/user-profile.component';
+import { DownloadFromPlaystoreComponent } from './com/ustadmobile/view/download-from-playstore/download-from-playstore.component';
 
 
 @NgModule({
@@ -45,6 +46,7 @@ import { UserProfileComponent } from './com/ustadmobile/view/user-profile/user-p
     XapiReportOptionsComponent,
     XapiReportDetailsComponent,
     XapiTreeviewDialogComponent,
+    DownloadFromPlaystoreComponent,
     ActionResultDataPipe,
     UmTreeNodeComponent,
     EpubContentComponent,
@@ -67,6 +69,7 @@ import { UserProfileComponent } from './com/ustadmobile/view/user-profile/user-p
     ReactiveFormsModule,
     GoogleChartsModule,
   ],
+  entryComponents: [DownloadFromPlaystoreComponent],
   providers: [
     UmBaseService,
     DatePipe,

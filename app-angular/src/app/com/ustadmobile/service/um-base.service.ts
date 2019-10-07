@@ -26,11 +26,15 @@ export class UmBaseService {
   toolBarTitle: string = ".."
   public appName: string  = "..." 
   public baseUrlTag: string = "doordb.endpoint.url"
+  isMobile = false
+  isAndroidDevice = false
 
   constructor(private http: HttpClient, private toastService: MzToastService) { 
     this.ROOT_UID = core.com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID.toString()
     UmAngularUtil.fireResouceReady(false); 
     this.httpClient = http 
+    this.isMobile = UmAngularUtil.isSupportedEnvironment("mobile")
+    this.isAndroidDevice = UmAngularUtil.isSupportedEnvironment("android")
   }
   
   /**

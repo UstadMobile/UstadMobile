@@ -1,0 +1,35 @@
+import { Component, OnInit } from '@angular/core';
+import { MzBaseModal } from 'ngx-materialize';
+
+@Component({
+  selector: 'app-download-from-playstore',
+  templateUrl: './download-from-playstore.component.html',
+  styleUrls: ['./download-from-playstore.component.css']
+})
+
+export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnInit {
+
+  barge_img =""
+
+  public modalOptions: Materialize.ModalOptions = {
+    dismissible: false,
+    opacity: .5, 
+    inDuration: 300,
+    outDuration: 200, 
+    startingTop: '100%', 
+    endingTop: '30%' 
+  };
+
+  constructor() { 
+    super();
+  }
+
+  ngOnInit() {
+    this.barge_img = window.location.origin + "/assets/images/get_from_playtore.jpg";
+  }
+
+  openPayStore(){
+    window.open('https://play.google.com/store/apps/details?id=com.toughra.ustadmobile',"_self")
+  }
+
+}
