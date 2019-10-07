@@ -122,7 +122,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
 
-    override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
+    override fun showStorageOptions(storageOptions: List<UMStorageDir>) {
         val options = ArrayList<String>()
         this.storageDirs = storageOptions
         for (umStorageDir in storageOptions) {
@@ -213,12 +213,12 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         } else if (viewId == R.id.wifi_only_option_holder) {
             val checkboxState = !wifiOnlyView!!.isChecked
             wifiOnlyView!!.isChecked = checkboxState
-            mPresenter!!.handleWiFiOnlyOption(checkboxState)
+            mPresenter!!.handleClickWiFiOnlyOption(checkboxState)
         }
     }
 
     override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        mPresenter!!.handleWiFiOnlyOption(isChecked)
+        mPresenter!!.handleClickWiFiOnlyOption(isChecked)
     }
 
 

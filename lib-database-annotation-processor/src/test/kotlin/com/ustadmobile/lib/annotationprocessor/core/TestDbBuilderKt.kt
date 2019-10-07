@@ -84,6 +84,18 @@ class TestDbBuilderKt {
     }
 
     @Test
+    fun givenEntityInsertedWithNoCorrespondingEmbeddedEntity_whenQueryWithEmbeddedValueRuns_embeddedObjectShouldBeNull() {
+        val entityToInsert = ExampleEntity2(0, "Not Linked", 50)
+        entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
+
+        val entityWithEmbedded = exampleDb2.exampleDao2().findByUidWithLinkEntity(entityToInsert.uid)
+
+        Assert.assertNull("Embedded entity is null where there is no matching entity on the right hand side of join",
+                entityWithEmbedded!!.link)
+    }
+
+
+    @Test
     fun givenEntitiesInserted_whenFindAllCalled_shouldReturnBoth(){
         val entities = listOf(ExampleEntity2(name = "e1", someNumber = 42),
                 ExampleEntity2(name = "e2", someNumber = 43))

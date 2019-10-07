@@ -187,14 +187,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         this.contentEntryListener = null
     }
 
-    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
+    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>) {
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
                 .contentEntryDaoBoundaryCallbacks.getChildrenByParentUidWithCategoryFilter(entryProvider)
         val data = LivePagedListBuilder(entryProvider, 20)
                 .setBoundaryCallback(boundaryCallback)
                 .build()
 
-        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> { recyclerAdapter!!.submitList(it) })
+        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
 
         recyclerView!!.adapter = recyclerAdapter
     }

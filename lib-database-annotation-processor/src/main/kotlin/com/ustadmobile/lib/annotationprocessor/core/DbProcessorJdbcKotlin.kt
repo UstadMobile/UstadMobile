@@ -30,6 +30,7 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.annotation.QueryLiveTables
 import kotlin.RuntimeException
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
@@ -315,27 +316,128 @@ fun getQueryNamedParameters(querySql: String): List<String> {
     return namedParams
 }
 
-/**
- * Generate a map of all the fields that can be set on the given entity
- */
-data class EntityFieldMap(val fieldMap: Map<String, Element>, val embeddedVarsList: List<Pair<String, Element>>)
-fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
-                           fieldMap: MutableMap<String, Element> = mutableMapOf(),
-                           embeddedVarsList: MutableList<Pair<String, Element>> = mutableListOf(),
-                           processingEnv: ProcessingEnvironment): EntityFieldMap {
 
-    ancestorsToList(entityTypeEl, processingEnv).forEach {
-        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD && Modifier.STATIC !in it.modifiers}
-                .partition { it.getAnnotation(Embedded::class.java) == null }
-        listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
-        listParted.second.forEach {
-            embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it))
-            mapEntityFields(processingEnv.typeUtils.asElement(it.asType()) as TypeElement,
-                    "$prefix.${it.simpleName}!!", fieldMap, embeddedVarsList, processingEnv)
+/**
+ * This class represents a POKO object in the result. It is a tree like structure (e.g. each item
+ * has oen parent, and can have multiple children). The root object has no parent.
+ *
+ * This class gathers up all properties from the class itself and ancestors. It will also recursively
+ * search through any fields with the @Embedded annotation
+ */
+class ResultEntityField(val parentField: ResultEntityField?, val name: String,
+                        val type: TypeName, val embeddedType: TypeElement?,
+                        processingEnv: ProcessingEnvironment){
+
+    val childFields: List<ResultEntityField>
+
+    init {
+        if(embeddedType != null) {
+            val ancestorClasses = ancestorsToList(embeddedType, processingEnv)
+            val allFields = ancestorClasses
+                    .flatMap { it.enclosedElements.filter {
+                        it.kind == ElementKind.FIELD  && Modifier.STATIC !in it.modifiers && Modifier.TRANSIENT !in it.modifiers
+                    } }
+
+            childFields = allFields.map { ResultEntityField(this, it.simpleName.toString(),
+                    it.asType().asTypeName(),
+                    if(it.getAnnotation(Embedded::class.java) != null) {
+                        processingEnv.typeUtils.asElement(it.asType()) as TypeElement?
+                    }else {
+                        null
+                    }, processingEnv)
+            }
+        }else {
+            childFields = listOf()
         }
     }
 
-    return EntityFieldMap(fieldMap, embeddedVarsList)
+    fun createSetterCodeBlock(rawQuery: Boolean = false, resultSetVarName: String = "_resultSet",
+                              colIndexVarName: String? = null): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val checkForNullEmbeddedObject = parentField != null
+        val nullFieldCountVarName = "_${name}_nullFieldCount"
+
+        if(checkForNullEmbeddedObject) {
+            codeBlock.add("var $nullFieldCountVarName = 0\n")
+        }
+        childFields.filter { it.embeddedType == null }.forEach {
+            val getterName = "get${getPreparedStatementSetterGetterTypeName(it.type) }"
+            codeBlock.add("val tmp_${it.name}")
+
+            val setValAndCheckForNullBlock = CodeBlock.builder().add(" = ${resultSetVarName}.$getterName(%S)\n",
+                    it.name)
+            if(checkForNullEmbeddedObject){
+                setValAndCheckForNullBlock.add("if(${resultSetVarName}.wasNull())·{·$nullFieldCountVarName++·}\n")
+            }
+
+            if(rawQuery) {
+                val valType = it.type.javaToKotlinType()
+                codeBlock.add(": %T\n", valType.copy(nullable = valType == String::class.asClassName()))
+                        .beginControlFlow("if($colIndexVarName.containsKey(%S))", it.name)
+                        .add("tmp_${it.name} ").add(setValAndCheckForNullBlock.build())
+                        .nextControlFlow("else")
+                if(checkForNullEmbeddedObject) {
+                    codeBlock.add("$nullFieldCountVarName++\n")
+                }
+                codeBlock.add("tmp_${it.name} = ${defaultVal(it.type)}\n")
+                        .endControlFlow()
+            }else {
+                codeBlock.add(setValAndCheckForNullBlock.build())
+            }
+        }
+
+        if(checkForNullEmbeddedObject) {
+            codeBlock.beginControlFlow("if($nullFieldCountVarName < ${childFields.size})")
+        }
+
+        //check the embedded path of parents
+        val parentsList = mutableListOf<ResultEntityField>(this)
+
+
+        var nextParent = parentField
+        while(nextParent != null) {
+            parentsList.add(nextParent)
+            nextParent = nextParent.parentField
+        }
+
+
+        parentsList.reverse()
+        val rootItem = parentsList[0]
+        var entityPath  = ""
+
+        if(parentField == null) {
+            //this is the root item
+            codeBlock.add("val $name = %T()\n", embeddedType)
+            entityPath = name
+        }else {
+            val predecessorsList = parentsList.subList(1, parentsList.size)
+            predecessorsList.forEachIndexed { index, parent ->
+                val predecessors = predecessorsList.subList(0, index + 1)
+                entityPath = "${rootItem.name}.${predecessors.joinToString(separator = "!!.") { it.name }}"
+                codeBlock.beginControlFlow("if($entityPath == null)")
+                        .add("$entityPath = %T()\n", parent.embeddedType)
+                        .endControlFlow()
+                entityPath += "!!"
+            }
+        }
+
+        childFields.filter { it.embeddedType == null }.forEach {
+            codeBlock.add("${entityPath}.${it.name} = tmp_${it.name}\n")
+        }
+
+
+        if(checkForNullEmbeddedObject) {
+            codeBlock.endControlFlow()
+        }
+
+        childFields.filter { it.embeddedType != null }.forEach {
+            codeBlock.add(it.createSetterCodeBlock(rawQuery = rawQuery, resultSetVarName = resultSetVarName,
+                    colIndexVarName = colIndexVarName))
+        }
+
+        return codeBlock.build()
+    }
+
 }
 
 /**
@@ -856,14 +958,23 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     (returnTypeResolved as ParameterizedTypeName).typeArguments[1])
         }else if(isLiveData(returnTypeResolved)) {
             val tablesToWatch = mutableListOf<String>()
-            try {
-                val select = CCJSqlParserUtil.parse(querySql) as Select
-                val tablesNamesFinder = TablesNamesFinder()
-                tablesToWatch.addAll(tablesNamesFinder.getTableList(select))
-            }catch(e: Exception) {
-                messager?.printMessage(Diagnostic.Kind.WARNING,
-                        "Could not parse SQL to determine livedata tables to watch")
+            val specifiedLiveTables = daoMethod.getAnnotation(QueryLiveTables::class.java)
+            if(specifiedLiveTables == null) {
+                try {
+                    val select = CCJSqlParserUtil.parse(querySql) as Select
+                    val tablesNamesFinder = TablesNamesFinder()
+                    tablesToWatch.addAll(tablesNamesFinder.getTableList(select))
+                }catch(e: Exception) {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            "${makeLogPrefix(daoTypeElement, daoMethod)}: " +
+                                    "Sorry: JSQLParser could not parse the query : " +
+                                    querySql +
+                                    "Please manually specify the tables to observe using @QueryLiveTables annotation")
+                }
+            }else {
+                tablesToWatch.addAll(specifiedLiveTables.value)
             }
+
 
             val liveDataCodeBlock = CodeBlock.builder()
                     .beginControlFlow("val _result = %T<%T>(_db, listOf(%L)) ",

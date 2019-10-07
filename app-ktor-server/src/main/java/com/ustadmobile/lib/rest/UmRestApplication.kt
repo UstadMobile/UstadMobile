@@ -16,17 +16,12 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
-import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
-import io.ktor.features.PartialContent
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 import org.apache.commons.lang3.RandomStringUtils
@@ -38,16 +33,17 @@ import javax.naming.InitialContext
 
 private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
 
-fun Application.umRestApplication(devMode: Boolean = false) {
 
-    val adminuser = _restApplicationDb.personDao.findByUsername("admin")
+fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase = _restApplicationDb) {
+
+    val adminuser = db.personDao.findByUsername("admin")
     if(adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
-        adminPerson.personUid = _restApplicationDb.personDao.insert(adminPerson)
+        adminPerson.personUid = db.personDao.insert(adminPerson)
         val adminPass = RandomStringUtils.randomAlphanumeric(8)
 
-        _restApplicationDb.personAuthDao.insert(PersonAuth(adminPerson.personUid,
+        db.personAuthDao.insert(PersonAuth(adminPerson.personUid,
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
 
 
@@ -81,19 +77,19 @@ fun Application.umRestApplication(devMode: Boolean = false) {
     }
 
     install(Routing) {
-        ContainerDownload(_restApplicationDb)
-        H5PImportRoute(_restApplicationDb) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
-            downloadH5PUrl(_restApplicationDb, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
+        ContainerDownload(db)
+        H5PImportRoute(db) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
+            downloadH5PUrl(db, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
 
-        LoginRoute(_restApplicationDb)
-        ContainerMountRoute(_restApplicationDb)
-        UmAppDatabase_KtorRoute(_restApplicationDb, Gson())
+        LoginRoute(db)
+        ContainerMountRoute(db)
+        UmAppDatabase_KtorRoute(db, Gson())
 
         if(devMode) {
 
             get("UmAppDatabase/clearAllTables") {
-                _restApplicationDb.clearAllTables()
+                db.clearAllTables()
                 call.respond("OK - cleared")
             }
 
@@ -149,7 +145,7 @@ private fun prepareResources(resourceName: String?, path: String, entryId: Strin
 
     val tempFile = File.createTempFile("testFile", "tempFile$entryId")
 
-    epubContainer.lastModified = tempFile.lastModified()
+    epubContainer.cntLastModified = tempFile.lastModified()
     epubContainer.mimeType = mimetype
     epubContainer.containerUid = _restApplicationDb.containerDao.insert(epubContainer)
 

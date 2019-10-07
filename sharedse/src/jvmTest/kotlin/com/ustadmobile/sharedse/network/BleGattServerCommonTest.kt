@@ -69,7 +69,7 @@ class BleGattServerCommonTest {
         for (i in 0 until MAX_ENTITIES_NUMBER) {
             val currentTimeStamp = Calendar.getInstance().timeInMillis
             val entryFile = Container()
-            entryFile.lastModified = currentTimeStamp
+            entryFile.cntLastModified = currentTimeStamp
             containerList.add(entryFile)
         }
         containerUids.addAll(listOf(*umAppDatabase!!.containerDao.insertListAndReturnIds(containerList)))

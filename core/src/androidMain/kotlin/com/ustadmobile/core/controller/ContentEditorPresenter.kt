@@ -64,7 +64,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
         val container = Container()
         container.containerContentEntryUid = contentEntryUid
-        container.lastModified = System.currentTimeMillis()
+        container.cntLastModified = System.currentTimeMillis()
         container.mimeType = MIME_TYPE_DOCUMENT
         container.containerUid = repository.containerDao.insert(container)
         containerUid = container.containerUid

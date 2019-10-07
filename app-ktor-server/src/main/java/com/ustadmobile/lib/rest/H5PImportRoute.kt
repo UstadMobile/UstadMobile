@@ -137,7 +137,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 FileUtils.copyInputStreamToFile(input, videoFile)
 
                 container.fileSize = videoFile.length()
-                container.lastModified = parentDir.lastModified()
+                container.cntLastModified = parentDir.lastModified()
                 container.mobileOptimized = true
                 container.containerUid = containerDao.insert(container)
 
@@ -271,7 +271,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
             val container = Container()
             container.mimeType = "application/webchunk+zip"
-            container.lastModified = parentDir.lastModified()
+            container.cntLastModified = parentDir.lastModified()
             container.containerContentEntryUid = contentEntryUid
             container.mobileOptimized = true
             container.containerUid = containerUid

@@ -97,22 +97,4 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
         }
     }
 
-    suspend fun deleteUnusedDownloadJob(downloadJobUid: Int) {
-        mutex.withLock {
-            val downloadJobManager = managerMap[downloadJobUid]
-            val rootItemStatus = downloadJobManager?.rootItemStatus
-            if (downloadJobManager != null && rootItemStatus != null) {
-                //TODO: fix this
-                //downloadJobManager.updateStatus(rootItemStatus.jobItemUid, JobStatus.CANCELED, null)
-            }
-
-            if (downloadJobManager != null) {
-                managerMap.remove(downloadJobUid)
-            }
-
-            appDatabase.downloadJobDao.cleanupUnused(downloadJobUid)
-        }
-
-    }
-
 }

@@ -25,7 +25,7 @@ interface DownloadDialogView : UstadView {
 
     fun setCalculatingViewVisible(visible: Boolean)
 
-    fun setUpStorageOptions(storageOptions: List<UMStorageDir>)
+    fun showStorageOptions(storageOptions: List<UMStorageDir>)
 
     fun cancelOrPauseDownload(jobId: Long, cancel: Boolean)
 

@@ -5,23 +5,14 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.H5PImportData
-import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
-import io.ktor.features.ContentNegotiation
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import okhttp3.mockwebserver.Dispatcher
@@ -40,8 +31,8 @@ import java.io.IOException
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.util.test.AbstractImportLinkTest
-import io.ktor.client.request.header
-import org.apache.commons.io.FilenameUtils
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class TestH5PImportRoute : AbstractImportLinkTest() {
 
@@ -205,7 +196,7 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.mimeType = "text/html"
             container.fileSize = 11
-            container.lastModified = 1212
+            container.cntLastModified = 1212
             container.mobileOptimized = true
             container.containerUid = db.containerDao.insert(container)
 
@@ -224,7 +215,7 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
     @Test
     fun givenValidH5P_whenContentDownloaded_checkContainerIsCreated() {
 
-        runBlocking {
+        GlobalScope.launch {
             mockServer.setDispatcher(dispatcher)
             mockServer.start()
 
@@ -240,7 +231,7 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.mimeType = "text/html"
             container.fileSize = 11
-            container.lastModified = 1212
+            container.cntLastModified = 1212
             container.mobileOptimized = true
             container.containerUid = db.containerDao.insert(container)
 

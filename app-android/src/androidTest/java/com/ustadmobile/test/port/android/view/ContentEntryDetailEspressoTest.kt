@@ -125,7 +125,7 @@ class ContentEntryDetailEspressoTest {
         val contentEntryFile = Container()
         contentEntryFile.mimeType = "application/zip"
         contentEntryFile.fileSize = 10
-        contentEntryFile.lastModified = 1540728217
+        contentEntryFile.cntLastModified = 1540728217
         contentEntryFile.containerContentEntryUid = 8
         containerDao.insert(contentEntryFile)
 
@@ -144,7 +144,7 @@ class ContentEntryDetailEspressoTest {
         val updatedFile = Container()
         updatedFile.mimeType = "application/zip"
         updatedFile.fileSize = 10
-        updatedFile.lastModified = 1540728218
+        updatedFile.cntLastModified = 1540728218
         updatedFile.containerContentEntryUid = 11
         containerDao.insert(updatedFile)
 
@@ -170,7 +170,7 @@ class ContentEntryDetailEspressoTest {
         val spanishFile = Container()
         spanishFile.mimeType = "application/zip"
         spanishFile.fileSize = 10
-        spanishFile.lastModified = 1540728218
+        spanishFile.cntLastModified = 1540728218
         spanishFile.containerContentEntryUid = 15
         containerDao.insert(spanishFile)
 
@@ -208,7 +208,7 @@ class ContentEntryDetailEspressoTest {
 
         val file = Container()
         file.mimeType = "application/webchunk+zip"
-        file.lastModified = System.currentTimeMillis()
+        file.cntLastModified = System.currentTimeMillis()
         file.containerContentEntryUid = 14L
         file.containerUid = 18L
         containerDao.insert(file)
