@@ -26,6 +26,8 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val numProcessors: Int = 1,
                            private val coroutineScope: CoroutineScope = GlobalScope,
                            private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
+                           private val onItemStarted: (T) -> Unit = {},
+                           private val onItemFinished: (T) -> Unit = {},
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
     private val channel: Channel<T> = Channel<T>(capacity = UNLIMITED)
@@ -41,8 +43,10 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                 launch {
                     while(isActive) {
                         val nextItem = channel.receive()
+                        onItemStarted.invoke(nextItem)
                         itemRunner(nextItem)
                         queuedOrActiveItems.remove(nextItem)
+                        onItemFinished(nextItem)
                     }
                 }
             }
