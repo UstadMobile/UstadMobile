@@ -288,12 +288,14 @@ task updateLibsVersion{
 }
 
 /**
- * Configure localisation scripts
+ * Configure localization scripts which will help on generating
+ * bundles for production/development purpose
  */
 task generateLocalizationScripts{
   doLast{
     def angularJson = project.file("angular.json")
     def packageJson = project.file("package.json")
+    def href = project.hasProperty("baseHref") ? baseHref + "/" : ""
 
     def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
     def angularJsonContent = new JsonSlurper().parseText(angularJson.text)
@@ -318,7 +320,7 @@ task generateLocalizationScripts{
         configServe[localeCode] = configServeObj
         packageJsonContent.scripts["start:" + localeCode] = "ng serve --configuration=${localeCode}"
         packageJsonContent.scripts["build:" + localeCode] = "ng build --prod --i18n-locale ${localeCode}" +
-          " --i18n-format xlf --i18n-file ${fileSrc} --output-path=dist/${localeCode} --baseHref /${localeCode}/"
+          " --i18n-format xlf --i18n-file ${fileSrc} --output-path=dist/${localeCode} --baseHref /${href}${localeCode}/"
         buildForProdCommandList.push("npm run build:${localeCode}")
       }
 
@@ -352,7 +354,10 @@ task packPreparedModules{
   }
 }
 
-task appBuildProdMode{
+/**
+ * Generate JS bundles for production purpose
+ */
+task buildProd{
   def locale = project.hasProperty("locale") ? locale : null
   def directory = rootProject.file("app-angular").path
   def commandScript = locale != null ?  "build:"+locale :"build-prod"
@@ -378,6 +383,7 @@ task ngTest{
 }
 
 ngTest.dependsOn(build)
+buildProd.dependsOn(build)
 build.dependsOn(installDependencies)
 fixRequiredImports.dependsOn(fixNodeForgeScript)
 installDependencies.dependsOn(packPreparedModules, updateLibsVersion, deletePackageLockJsonFile)

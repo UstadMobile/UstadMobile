@@ -71,10 +71,22 @@ Deploy for specific locale
 ```  
 npm run build:<locale code> 
 //i.d npm run build:en
+
+or 
+
+./gradlew app-angular:buildProd -Plocale=en
 ```
 
 Deploy for all locales
 
 ```  
 npm run build-prod 
+
+or
+
+./gradlew app-angular:buildProd
+
+//In case it will be deployed on a specific directory then add base href
+
+./gradlew app-angular:buildProd -PbaseHref=<Base href>
 ```
