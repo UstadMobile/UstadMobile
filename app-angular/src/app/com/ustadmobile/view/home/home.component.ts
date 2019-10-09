@@ -89,7 +89,7 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   }
 
   goBack() {
-    if (!window.location.search.includes(this.umService.ROOT_UID + "")) {
+    if (!UmAngularUtil.getRoutePathParam().search.includes(this.umService.ROOT_UID + "")) {
       this.location.back();
     }
   }

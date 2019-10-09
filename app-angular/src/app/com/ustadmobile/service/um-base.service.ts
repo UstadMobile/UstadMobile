@@ -127,7 +127,7 @@ export class UmBaseService {
     }
     return loader
   }
-
+  
   /**
    * Set current system language directionality
    * @param directionality current system language directionality

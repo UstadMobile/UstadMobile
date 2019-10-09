@@ -40,7 +40,7 @@ export class UmAngularUtil {
   static getArgumentsFromQueryParams(args: any = {}) {
     const route = args.route ? args.route : this.getRoutePathParam().path
     const params = args.params ? args.params : null
-    const search = this.removeParam(this.isWithoutEntryUid(route) ? "entryid":"", (params ? params : document.location.search))
+    const search = this.removeParam(this.isWithoutEntryUid(route) ? "entryid":"", (params ? params : this.getRoutePathParam().search))
     let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null"))) 
     return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString); 
@@ -241,7 +241,7 @@ export class UmAngularUtil {
    * @param routes route map
    */
   static getActiveMenu(routes): boolean[]{
-    const reportActive = window.location.pathname.includes("Report")
+    const reportActive = this.getRoutePathParam().path.includes("Report")
     return [!reportActive, reportActive]
   }
 
@@ -252,10 +252,13 @@ export class UmAngularUtil {
   /**
    * Get route path
    */
-  private static getRoutePathParam(){
-    var routePath = document.location.pathname;
+  static getRoutePathParam(){
+    const docLoc = window.location
+    const urlProps =  docLoc.hash.replace("#","")
+    const routePath = urlProps.substring(0,urlProps.indexOf("?"))
+    const searchParams =  urlProps.indexOf("?") == -1 ? "": urlProps.substring(urlProps.indexOf("?"))
     const mPaths = routePath.split("/");
-    return {completePath: routePath, path: mPaths[mPaths.length - 1], size:  mPaths.length};
+    return {completePath: routePath, path: mPaths[mPaths.length - 1], size:  mPaths.length, search: searchParams};
   }
 
   /**
@@ -301,10 +304,9 @@ export class UmAngularUtil {
   static getInitialRoute(entryUid) {
     var args, view = null
     const mPath = this.getRoutePathParam();
-    console.log(mPath, mPath.completePath.includes(appRountes.home))
     if(mPath.completePath.includes(appRountes.home)){
       view = mPath.path
-      args = UmAngularUtil.getArgumentsFromQueryParams({params: document.location.search})
+      args = UmAngularUtil.getArgumentsFromQueryParams({params: this.getRoutePathParam().search})
     }else{
       view = mPath.path.includes(appRountes.notFound) ? appRountes.notFound+"/": appRountes.entryList
       args = mPath.path.includes(appRountes.notFound) ? UmAngularUtil.getArgumentsFromQueryParams()
@@ -328,8 +330,8 @@ export class UmAngularUtil {
    * Show splash screen when opening the application
    */
   static showSplashScreen(){
-    const route = this.getRoutePathParam();
-    return window.location.search.length == 0 && !this.hasPath(route.path);
+    const route = this.getRoutePathParam().path;
+    return this.getRoutePathParam().search.length == 0 && !this.hasPath(route);
   }
 
   /**

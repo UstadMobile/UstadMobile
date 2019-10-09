@@ -51,7 +51,8 @@ export class AppComponent extends UmBaseComponent {
 
   onCreate() {
     super.onCreate()
-    this.showLoading = window.location.pathname.includes(this.routes.notFound) ? false: window.location.search == "";
+    this.showLoading = UmAngularUtil.getRoutePathParam().path.includes(this.routes.notFound)
+     ? false: UmAngularUtil.getRoutePathParam().search == "";
     if(UmAngularUtil.showSplashScreen()) {
       window.setTimeout(this.splashScreenTimeout, 2000) 
     }
