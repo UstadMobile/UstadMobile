@@ -26,10 +26,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.DistinctCategorySchema
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -50,6 +47,7 @@ import kotlinx.coroutines.launch
 class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor,
         ContentEntryListRecyclerViewAdapter.EmptyStateListener {
+
 
     override val viewContext: Any
         get() = context!!
@@ -186,6 +184,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         super.onDetach()
         this.contentEntryListener = null
     }
+
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>) {
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)

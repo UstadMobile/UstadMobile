@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.Person
 import kotlin.js.JsName
 
-interface HomeView : UstadView {
+interface HomeView : LanguageOptionView {
 
     @JsName("showDownloadAllButton")
     fun showDownloadAllButton(show:Boolean)
@@ -16,6 +16,7 @@ interface HomeView : UstadView {
 
     @JsName("showReportMenu")
     fun showReportMenu(show: Boolean)
+
 
     companion object {
 

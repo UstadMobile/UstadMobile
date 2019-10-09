@@ -18,7 +18,8 @@ export class NotFoundComponent extends UmBaseComponent {
 
   goBack(){
      this.systemImpl.go(this.routes.entryList, 
-      UmAngularUtil.getArgumentsFromQueryParams({params: "?entryid="+this.umService.ROOT_UID}), this.context)
+      UmAngularUtil.getArgumentsFromQueryParams({params: "?" 
+      + UmAngularUtil.ARG_CONTENT_ENTRY_UID + "="+this.umService.ROOT_UID}), this.context)
   }
 
   ngOnInit() {

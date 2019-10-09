@@ -163,6 +163,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     companion object {
 
+        @JsName("ARG_CONTENT_ENTRY_UID")
         const val ARG_CONTENT_ENTRY_UID = "entryid"
 
         const val ARG_NO_IFRAMES = "noiframe"

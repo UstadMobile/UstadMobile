@@ -40,7 +40,6 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
 
-
     private lateinit var presenter: HomePresenter
 
     private lateinit var downloadAllBtn: FloatingTextButton
@@ -71,7 +70,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         viewPager.addOnPageChangeListener(this)
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAppDatabase.getInstance(this).personDao)
+                this, UmAppDatabase.getInstance(this).personDao,
+                UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         profileImage.setOnClickListener {
@@ -107,6 +107,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onPageSelected(position: Int) {
         presenter.handleShowDownloadButton(position == 0)
     }
+
+    override fun restartUI() {}
+
+    override fun showLanguageOptions() {}
+
+    override fun setCurrentLanguage(language: String?) {}
+
+    override fun setLanguageOption(languages: MutableList<String>) { }
+
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

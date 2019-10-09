@@ -95,7 +95,7 @@ abstract class ContentEntryDetailPresenterCommon (context: Any, arguments: Map<S
 
     private fun onEntryChanged(entry: ContentEntry?) {
         if (entry != null) {
-            val licenseType = getLicenseType(entry)
+            val licenseType = getLicenseType(entry.licenseType)
             view.runOnUiThread(Runnable {
                 if (currentContentEntry != entry) {
                     currentContentEntry = entry
@@ -110,20 +110,6 @@ abstract class ContentEntryDetailPresenterCommon (context: Any, arguments: Map<S
             })
         }
     }
-
-    private fun getLicenseType(result: ContentEntry): String {
-        when (result.licenseType) {
-            ContentEntry.LICENSE_TYPE_CC_BY -> return "CC BY"
-            ContentEntry.LICENSE_TYPE_CC_BY_SA -> return "CC BY SA"
-            ContentEntry.LICENSE_TYPE_CC_BY_SA_NC -> return "CC BY SA NC"
-            ContentEntry.LICENSE_TYPE_CC_BY_NC -> return "CC BY NC"
-            ContentEntry.LICESNE_TYPE_CC_BY_NC_SA -> return "CC BY NC SA"
-            ContentEntry.PUBLIC_DOMAIN -> return "Public Domain"
-            ContentEntry.ALL_RIGHTS_RESERVED -> return "All Rights Reserved"
-        }
-        return ""
-    }
-
 
     private fun onEntryStatusChanged(status: ContentEntryStatus?) {
 
@@ -335,5 +321,19 @@ abstract class ContentEntryDetailPresenterCommon (context: Any, arguments: Map<S
         const val LOCALLY_NOT_AVAILABLE_ICON = 2
 
         private const val BAD_NODE_FAILURE_THRESHOLD = 3
+
+        @JsName("getLicenseType")
+        fun getLicenseType(licenseType: Int): String {
+            when (licenseType) {
+                ContentEntry.LICENSE_TYPE_CC_BY -> return "CC BY"
+                ContentEntry.LICENSE_TYPE_CC_BY_SA -> return "CC BY SA"
+                ContentEntry.LICENSE_TYPE_CC_BY_SA_NC -> return "CC BY SA NC"
+                ContentEntry.LICENSE_TYPE_CC_BY_NC -> return "CC BY NC"
+                ContentEntry.LICESNE_TYPE_CC_BY_NC_SA -> return "CC BY NC SA"
+                ContentEntry.PUBLIC_DOMAIN -> return "Public Domain"
+                ContentEntry.ALL_RIGHTS_RESERVED -> return "All Rights Reserved"
+            }
+            return ""
+        }
     }
 }

@@ -53,6 +53,21 @@
     <mz-sidenav-subheader></mz-sidenav-subheader>
     <mz-sidenav-divider></mz-sidenav-divider>
 
+    <mz-sidenav-link>
+        <div class="row">
+          <form *ngIf="supportedLanguages" class="col s12">
+              <div class="row default-content-padding-left ">
+                  <label class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</label>
+                  <mz-select-container [inline]=true *ngIf="supportedLanguages">
+                    <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language">
+                      <option *ngFor="let language of supportedLanguages" value="{{language}}">{{language}}</option>
+                    </select>
+                  </mz-select-container>
+                </div>
+          </form>
+        </div>
+      </mz-sidenav-link>
+
   </mz-sidenav>
 
   <!-- side nav ends here-->

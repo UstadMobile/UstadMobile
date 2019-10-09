@@ -26,6 +26,8 @@ export class UmBaseService {
   toolBarTitle: string = ".."
   public appName: string  = "..." 
   public baseUrlTag: string = "doordb.endpoint.url"
+  public localeTag: string = "tracked.locale"
+
   isMobile = false
   isAndroidDevice = false
 

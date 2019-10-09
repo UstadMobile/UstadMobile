@@ -13,13 +13,13 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeView,
-                    val personDao: PersonDao)
-    : UstadBaseController<HomeView>(context, arguments, view) {
-
-    val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
+class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
+                    val personDao: PersonDao, impl: UstadMobileSystemImpl)
+    : LanguageOptionPresenter(context, arguments, view, impl) {
 
     private var account: UmAccount? = null
+
+    private val homeView = view
 
     private var showDownloadAll = false
 
@@ -37,9 +37,9 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
                 val person = personDao.findByUid(account!!.personUid)
                 if(person != null){
                     view.runOnUiThread(Runnable {
-                        view.showReportMenu(person.admin)
-                        view.setLoggedPerson(person)
-                        view.loadProfileIcon(if(account == null) "" else "")
+                        homeView.showReportMenu(person.admin)
+                        homeView.setLoggedPerson(person)
+                        homeView.loadProfileIcon(if(account == null) "" else "")
                     })
                 }
             }
@@ -48,7 +48,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
 
     fun handleShowDownloadButton(show: Boolean){
         view.runOnUiThread(Runnable {
-            view.showDownloadAllButton(show && showDownloadAll)
+            homeView.showDownloadAllButton(show && showDownloadAll)
         })
     }
 
@@ -65,6 +65,9 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         args.putAll(arguments)
         impl.go(if(account != null && account!!.personUid != 0L) UserProfileView.VIEW_NAME
         else LoginView.VIEW_NAME , args, context)
+    }
+
+    override fun handleNavigation() {
     }
 
 

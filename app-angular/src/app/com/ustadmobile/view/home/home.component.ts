@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import util from 'UstadMobile-lib-util';
 import core from 'UstadMobile-core'
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +25,8 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   class_drawer_menu: string;
   class_open_profile: string;
   supportedLanguages = [];
+
+  umFormLanguage: FormGroup;
   
   private navigationSubscription: Subscription;
   showReports = false
@@ -34,7 +37,7 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   private presenter: core.com.ustadmobile.core.controller.HomePresenter;
 
   constructor(private location: Location, umService: UmBaseService,
-    router: Router, route: ActivatedRoute) {
+    router: Router, route: ActivatedRoute, private zone:NgZone, formBuilder: FormBuilder) {
     super(umService, router, route);
     this.class_icon_position = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
     this.class_icon_toolbar = this.umService.isLTRDirectionality() ? "left icon-right-spacing" : "right icon-left-spacing";
@@ -50,11 +53,20 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
         UmAngularUtil.registerTitleChangeListener(this)
         this.activeState = UmAngularUtil.getActiveMenu(this.routes)
       });
+      const currentLocale = this.systemImpl.getAllUiLanguage(this.context)[core.com.ustadmobile.core.impl.UstadMobileSystemCommon.PREFKEY_LOCALE]
+      this.umFormLanguage = formBuilder.group({
+        'language': [currentLocale, Validators.required]
+      }); 
   }
 
 
   ngOnInit() {
     super.ngOnInit()
+    this.umFormLanguage.valueChanges.subscribe((form: any) => {
+      if (form.language !== "") {
+        this.presenter.handleLanguageSelected(this.supportedLanguages.indexOf(form.language)) 
+      }
+    });
   }
 
 
@@ -63,8 +75,9 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
     this.supportedLanguages = util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(
       this.systemImpl.getAllUiLanguage(this.context))
     this.presenter = new core.com.ustadmobile.core.controller.HomePresenter(
-      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().personDao)
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().personDao, this.systemImpl)
     this.presenter.onCreate(null)
+    this.presenter.handleShowLanguageOptions()
   }
 
   openProfile(){
@@ -98,13 +111,33 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
     const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context)
     const isDashboard = route == "ReportDashboard"
     const routeTo =  isDashboard && !activeAcount ? this.routes.login : route 
-    const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isDashboard ? "?entryid="+this.umService.ROOT_UID: null, route: routeTo})
+    const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isDashboard ? 
+      "?" + UmAngularUtil.ARG_CONTENT_ENTRY_UID + "=" + this.umService.ROOT_UID: null, route: routeTo})
     this.systemImpl.go(route, args, this.context);
   }
 
   setToolbarTitle(title) {
     this.toolBarTitle = this.umService.isMobile ? super.truncate(title, 3): title
   }
+
+  setCurrentLanguage(language){}
+
+  setLanguageOption(languageOptions){
+    this.zone.run(()=>{
+      this.supportedLanguages = UmAngularUtil.kotlinListToJsArray(languageOptions)
+    })
+  }
+
+  restartUI(){
+    UmAngularUtil.kotlinMapToJsArray(this.systemImpl.getAllUiLanguage(this.context)).forEach(language =>{
+      if(language.value == this.umFormLanguage.value.language){
+        localStorage.setItem(this.umService.localeTag, language.key)
+        window.open(window.location.origin + "/" + language.key + "/", "_self")
+      }
+    })
+  }
+
+  showLanguageOptions(){}
 
 
   ngOnDestroy(): void {

@@ -18,6 +18,7 @@ export class UmAngularUtil {
   constructor(){
   }
 
+  public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID.toString()
 
   private static localStorageHandler: any= {};
 
@@ -40,7 +41,8 @@ export class UmAngularUtil {
   static getArgumentsFromQueryParams(args: any = {}) {
     const route = args.route ? args.route : this.getRoutePathParam().path
     const params = args.params ? args.params : null
-    const search = this.removeParam(this.isWithoutEntryUid(route) ? "entryid":"", (params ? params : this.getRoutePathParam().search))
+    const search = this.removeParam(this.isWithoutEntryUid(route) 
+    ? this.ARG_CONTENT_ENTRY_UID:"", (params ? params : this.getRoutePathParam().search))
     let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null"))) 
     return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString); 
@@ -310,7 +312,8 @@ export class UmAngularUtil {
     }else{
       view = mPath.path.includes(appRountes.notFound) ? appRountes.notFound+"/": appRountes.entryList
       args = mPath.path.includes(appRountes.notFound) ? UmAngularUtil.getArgumentsFromQueryParams()
-      :UmAngularUtil.getArgumentsFromQueryParams({params: "?entryid=" + entryUid, route: view});
+      :UmAngularUtil.getArgumentsFromQueryParams({params:
+         "?"+this.ARG_CONTENT_ENTRY_UID+"=" + entryUid, route: view});
     }
     return {view: view, args: args};
   }

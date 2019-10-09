@@ -1,5 +1,5 @@
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import {Component, NgZone} from '@angular/core';
+import {Component, NgZone, OnDestroy} from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import core from 'UstadMobile-core';
 import db from 'UstadMobile-lib-database';
@@ -14,16 +14,15 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 })
 
 export class ContentEntryListComponent extends UmBaseComponent implements
-core.com.ustadmobile.core.view.ContentEntryListFragmentView {
+core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
 
   entryList = [];
   label_language_options: string = "";
   label_reading_level: string = "";
   presenter: core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
-  languages: db.com.ustadmobile.lib.db.entities.Language[]
-  categories: db.com.ustadmobile.lib.db.entities.DistinctCategorySchema[][] = []
-  umFormLanguage: FormGroup;
-  umFormCategories: FormGroup;
+  languages = []
+  categories = []
+  umFilterForm: FormGroup;
   navigationSubscription;
   class_entry_thumbnail: string;
   class_entry_summary: string;
@@ -35,23 +34,24 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   pageIndex = 1 
   private provider: any = null;
 
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder, private zone:NgZone) {
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
+     formBuilder: FormBuilder, private zone:NgZone) {
     super(umService, router, route);
     this.class_entry_summary = this.umService.isLTRDirectionality() ? "right" : "left entry-summary-left";
     this.class_entry_options = this.umService.isLTRDirectionality() ? "right" : "left";
     this.class_entry_thumbnail = this.umService.isLTRDirectionality() ? "left entry-ltr" : "right entry-rtl";
     this.class_entry_collection = this.umService.isLTRDirectionality() ? "" : "collection-rtl";
 
-    this.umFormLanguage = formBuilder.group({
-      'language': ['-1', Validators.required]
-    });
-
-    this.umFormCategories = formBuilder.group({
+    this.umFilterForm = formBuilder.group({
+      'language': ['-1', Validators.required],
       'category': ['-1', Validators.required]
     });
+
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
         this.entryList = [];
+        this.categories = []
+        this.languages = []
         UmAngularUtil.registerResourceReadyListener(this)
       });
   }
@@ -71,15 +71,12 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     super.ngOnInit();
 
     //setup language spinner/select listener
-    this.umFormLanguage.valueChanges.subscribe((form: any) => {
-      if (form.language > -1) {
+    this.umFilterForm.valueChanges.subscribe((form: any) => {
+      if (form.language != -1) {
         this.presenter.handleClickFilterByLanguage(form.language);
       }
-    });
 
-    //setup category spinner/select listener
-    this.umFormCategories.valueChanges.subscribe((form: any) => {
-      if (form.category > -1) {
+       if (form.category != -1) { 
         this.presenter.handleClickFilterByCategory(form.category);
       }
     });
@@ -93,6 +90,10 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
 
   setContentEntryProvider(provider: any) {
     this.provider = provider.create()
+    if(this.umFilterForm.value.language != -1 || this.umFilterForm.value.category != -1){
+      this.entryList = []
+      this.pageIndex = 1 
+    }
     this.loadPaggedList()
   }
 
@@ -110,9 +111,15 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
     
   }
 
+  getLicenceType(licenseType){ 
+    return core.com.ustadmobile.core.controller.ContentEntryDetailPresenterCommon.Companion.getLicenseType(licenseType)
+  }
+
   setLanguageOptions(languages: any) {
     const languageList = UmAngularUtil.kotlinListToJsArray(languages)
-    this.languages = languageList.splice(1, languageList.length);
+    this.zone.run(() =>{
+      this.languages = languageList.splice(1, languageList.length);
+    })
   }
 
   setCategorySchemaSpinner(map: any) {
@@ -123,7 +130,9 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
       categoryMap[counter] = categories.splice(1, 4)
       counter++;
     }) 
-    this.categories = categoryMap    
+   this.zone.run(() =>{
+    this.categories = categoryMap 
+   })  
   }
 
   openEntry(entry) {

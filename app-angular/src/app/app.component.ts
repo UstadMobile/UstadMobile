@@ -33,7 +33,8 @@ export class AppComponent extends UmBaseComponent {
       this.dir = "rtl";
     }
 
-    this.systemImpl.setLocale(locale, this.context)
+    const storedLocale = localStorage.getItem(this.umService.localeTag)
+     this.systemImpl.setLocale(storedLocale ? storedLocale : locale, this.context)
     this.initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID);
     this.umService.setSystemDirectionality(this.dir);
     this.umService.setSystemLocale(this.systemImpl.getSystemLocale(this.context).split("-")[0])
