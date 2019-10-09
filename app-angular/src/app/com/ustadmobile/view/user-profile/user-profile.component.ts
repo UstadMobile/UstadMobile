@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import core from 'UstadMobile-core'
 import { Subscription } from 'rxjs';
 import { UmBaseService } from '../../service/um-base.service';
@@ -12,7 +12,8 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css']
 })
-export class UserProfileComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.UserProfileView {
+export class UserProfileComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.UserProfileView {
 
   private presenter: core.com.ustadmobile.core.controller.UserProfilePresenter
   private navigationSubscription: Subscription;
@@ -87,7 +88,7 @@ export class UserProfileComponent extends UmBaseComponent implements core.com.us
     UmAngularUtil.kotlinMapToJsArray(this.systemImpl.getAllUiLanguage(this.context)).forEach(language =>{
       if(language.value == this.umFormLanguage.value.language){
         localStorage.setItem(this.umService.localeTag, language.key)
-        window.open(window.location.origin + "/" + language.key + "/", "_self")
+        window.open(UmAngularUtil.getRoutePathParam().origin + "/" + language.key + "/", "_self")
       }
     })
   }

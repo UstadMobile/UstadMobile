@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MzBaseModal } from 'ngx-materialize';
 
 @Component({
@@ -7,7 +7,7 @@ import { MzBaseModal } from 'ngx-materialize';
   styleUrls: ['./download-from-playstore.component.css']
 })
 
-export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnInit {
+export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnInit, OnDestroy {
 
   barge_img =""
 
@@ -30,6 +30,10 @@ export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnIni
 
   openPayStore(){
     window.open('https://play.google.com/store/apps/details?id=com.toughra.ustadmobile',"_self")
+  }
+
+  ngOnDestroy(): void {
+    throw new Error("Method not implemented.");
   }
 
 }

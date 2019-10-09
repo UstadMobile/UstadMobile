@@ -1,5 +1,5 @@
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { Component, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -16,12 +16,11 @@ import { DatePipe } from '@angular/common';
   templateUrl: './xapi-report-options.component.html',
   styleUrls: ['./xapi-report-options.component.css']
 })
-export class XapiReportOptionsComponent extends UmBaseComponent implements
+export class XapiReportOptionsComponent extends UmBaseComponent implements OnDestroy,
 core.com.ustadmobile.core.view.XapiReportOptionsView {
   
   private presenter: core.com.ustadmobile.core.controller.XapiReportOptionsPresenter;
   private navigationSubscription;
-  private subscription: Subscription;
   umFormReportOptions: FormGroup;
   translatedYAxisList = []
   translatedGraphList = []

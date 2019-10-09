@@ -257,10 +257,12 @@ export class UmAngularUtil {
   static getRoutePathParam(){
     const docLoc = window.location
     const urlProps =  docLoc.hash.replace("#","")
+    let paths = docLoc.pathname.split("/").filter(function (el) {return el != "";})
+    paths = paths.slice(0, paths.length - 1);
     const routePath = urlProps.substring(0,urlProps.indexOf("?"))
     const searchParams =  urlProps.indexOf("?") == -1 ? "": urlProps.substring(urlProps.indexOf("?"))
     const mPaths = routePath.split("/");
-    return {completePath: routePath, path: mPaths[mPaths.length - 1], size:  mPaths.length, search: searchParams};
+    return {origin: docLoc.origin + "/" + paths.join("/") ,completePath: routePath, path: mPaths[mPaths.length - 1], size:  mPaths.length, search: searchParams};
   }
 
   /**

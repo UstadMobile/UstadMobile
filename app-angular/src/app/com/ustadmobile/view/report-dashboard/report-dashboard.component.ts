@@ -1,5 +1,5 @@
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { Component, Renderer2, ElementRef } from '@angular/core';
+import { Component, Renderer2, ElementRef, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -9,7 +9,7 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
   templateUrl: './report-dashboard.component.html',
   styleUrls: ['./report-dashboard.component.css']
 })
-export class ReportDashboardComponent extends UmBaseComponent {
+export class ReportDashboardComponent extends UmBaseComponent implements OnDestroy{
 
   tagList = ["All Tags", "Session", "Perfomance", "Session", "Performance", "Session", "Perfomance", "20+ More"]
   title = '';

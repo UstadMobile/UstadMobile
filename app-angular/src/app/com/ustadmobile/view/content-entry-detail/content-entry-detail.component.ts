@@ -1,5 +1,5 @@
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
@@ -13,7 +13,7 @@ import 'rxjs/add/operator/filter';
   styleUrls: ['./content-entry-detail.component.css']
 })
 export class ContentEntryDetailComponent extends UmBaseComponent implements
-core.com.ustadmobile.core.view.ContentEntryDetailView,
+core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
   core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor,
   entities.com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider {
 

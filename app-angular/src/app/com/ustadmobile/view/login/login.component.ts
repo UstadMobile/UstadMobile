@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { Subscription } from 'rxjs';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -13,7 +13,7 @@ import core from 'UstadMobile-core';
   styleUrls: ['./login.component.css']
 })
 
-export class LoginComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Login2View {
+export class LoginComponent extends UmBaseComponent implements OnDestroy, core.com.ustadmobile.core.view.Login2View {
 
   umFormLogin: FormGroup;
   formValidated: boolean = false;

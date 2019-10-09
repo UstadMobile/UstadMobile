@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import core from 'UstadMobile-core'
 import { UmBaseComponent } from '../um-base-component';
 import { Subscription } from 'rxjs';
@@ -11,7 +11,8 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
   templateUrl: './web-chunk.component.html',
   styleUrls: ['./web-chunk.component.css']
 })
-export class WebChunkComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.WebChunkView {
+export class WebChunkComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.WebChunkView {
 
   
   private presenter: core.com.ustadmobile.core.controller.WebChunkPresenter;

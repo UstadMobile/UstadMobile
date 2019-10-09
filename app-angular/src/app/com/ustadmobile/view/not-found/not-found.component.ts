@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
@@ -9,7 +9,7 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
   templateUrl: './not-found.component.html',
   styleUrls: ['./not-found.component.css']
 })
-export class NotFoundComponent extends UmBaseComponent {
+export class NotFoundComponent extends UmBaseComponent implements OnDestroy {
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
     

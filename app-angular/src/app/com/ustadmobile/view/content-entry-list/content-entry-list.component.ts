@@ -13,7 +13,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   styleUrls: ['./content-entry-list.component.css']
 })
 
-export class ContentEntryListComponent extends UmBaseComponent implements
+export class ContentEntryListComponent extends UmBaseComponent implements OnDestroy,
 core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
 
   entryList = [];

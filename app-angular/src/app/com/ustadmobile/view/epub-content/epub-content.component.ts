@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -12,7 +12,8 @@ import {  DomSanitizer } from '@angular/platform-browser';
   templateUrl: './epub-content.component.html',
   styleUrls: ['./epub-content.component.css']
 })
-export class EpubContentComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.EpubContentView{
+export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.EpubContentView{
 
   private presenter: core.com.ustadmobile.core.controller.EpubContentPresenter;
   private navigationSubscription: Subscription;

@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
@@ -14,7 +14,8 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.HomeView {
+export class HomeComponent extends UmBaseComponent implements
+ core.com.ustadmobile.core.view.HomeView {
 
   menu_libaries: string;
   menu_reports: string;
@@ -132,7 +133,7 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
     UmAngularUtil.kotlinMapToJsArray(this.systemImpl.getAllUiLanguage(this.context)).forEach(language =>{
       if(language.value == this.umFormLanguage.value.language){
         localStorage.setItem(this.umService.localeTag, language.key)
-        window.open(window.location.origin + "/" + language.key + "/", "_self")
+        window.open(UmAngularUtil.getRoutePathParam().origin + "/" + language.key + "/", "_self")
       }
     })
   }

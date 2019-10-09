@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component, OnDestroy} from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -12,7 +12,8 @@ import entity from 'UstadMobile-lib-database-entities';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Register2View {
+export class RegisterComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.Register2View {
 
   umFormRegister: FormGroup;
   label_wrong_email: string = "";

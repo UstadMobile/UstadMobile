@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import core from 'UstadMobile-core'
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
@@ -14,7 +14,8 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 })
 
 
-export class XapiContentComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.XapiPackageContentView {
+export class XapiContentComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.XapiPackageContentView {
 
   private presenter: core.com.ustadmobile.core.controller.XapiPackageContentPresenter
   private navigationSubscription: Subscription;

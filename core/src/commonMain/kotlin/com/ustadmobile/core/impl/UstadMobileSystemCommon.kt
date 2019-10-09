@@ -225,7 +225,8 @@ open abstract class UstadMobileSystemCommon {
                 "",context)!!.split(",")
         val languageMap = HashMap<String,String>()
         for(language in languageList){
-            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?: error("English")
+            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?:
+                    UstadMobileConstants.LANGUAGE_NAMES["en"]!!
         }
         return languageMap
     }

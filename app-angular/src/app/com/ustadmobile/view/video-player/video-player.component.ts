@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import core from 'UstadMobile-core'
 import { UmBaseService } from '../../service/um-base.service';
@@ -12,7 +12,8 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.css']
 })
-export class VideoPlayerComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.VideoPlayerView{
+export class VideoPlayerComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.VideoPlayerView{
 
   private presenter: core.com.ustadmobile.core.controller.VideoPlayerPresenter
   private navigationSubscription: Subscription;

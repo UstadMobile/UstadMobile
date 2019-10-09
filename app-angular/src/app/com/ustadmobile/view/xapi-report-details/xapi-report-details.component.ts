@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import core from 'UstadMobile-core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
@@ -11,7 +11,7 @@ import util from 'UstadMobile-lib-util';
   templateUrl: './xapi-report-details.component.html',
   styleUrls: ['./xapi-report-details.component.css']
 })
-export class XapiReportDetailsComponent extends UmBaseComponent implements
+export class XapiReportDetailsComponent extends UmBaseComponent implements OnDestroy,
 core.com.ustadmobile.core.view.XapiReportDetailView {
 
   private presenter: core.com.ustadmobile.core.controller.XapiReportDetailPresenter
