@@ -19,7 +19,7 @@ import { ReportDashboardComponent } from './com/ustadmobile/view/report-dashboar
 import { XapiReportOptionsComponent } from './com/ustadmobile/view/xapi-report-options/xapi-report-options.component';
 import { XapiReportDetailsComponent } from './com/ustadmobile/view/xapi-report-details/xapi-report-details.component';
 import { XapiTreeviewDialogComponent } from "./com/ustadmobile/view/xapi-treeview-dialog/XapiTreeviewDialogComponent";
-import { DatePipe } from '@angular/common';
+import { DatePipe, LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { RouteGuardService } from './com/ustadmobile/service/route-guard.service';
 import { ActionResultDataPipe } from './com/ustadmobile/pipes/action-result-data.pipe';
@@ -74,6 +74,7 @@ import { DownloadFromPlaystoreComponent } from './com/ustadmobile/view/download-
     UmBaseService,
     DatePipe,
     RouteGuardService,
+    {provide: LocationStrategy, useClass: HashLocationStrategy},
     { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
