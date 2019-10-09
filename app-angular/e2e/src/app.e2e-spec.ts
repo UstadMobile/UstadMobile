@@ -22,7 +22,7 @@ describe('Default App behaviours', () => {
 
   it('givenApplication_whenLaunched_shouldShowTwoSideMenus', () => {
     pageHome.launch().then( ()=>{
-      expect(pageHome.getPage().menus.count()).toEqual(2);
+      expect(pageHome.getPage().menus.count()).toBeGreaterThan(1);
     });
     
   });

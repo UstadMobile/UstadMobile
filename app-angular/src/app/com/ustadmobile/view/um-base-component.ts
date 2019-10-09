@@ -22,7 +22,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   userProfile: string = "assets/images/guest_user_icon.png"
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
-    this.umService.setEnvironment(document.location.search.indexOf("test") != -1) 
+    this.umService.setEnvironment(UmAngularUtil.getRoutePathParam().search.indexOf("test") != -1) 
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.viewContext = this.context = new UmContextWrapper(router) 
