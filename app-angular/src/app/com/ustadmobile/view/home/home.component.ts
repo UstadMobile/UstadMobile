@@ -17,18 +17,18 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
 
   menu_libaries: string;
   menu_reports: string;
-  icon_position_class: string;
-  toolbar_icon_class: string;
-  toolbar_arrow: string;
-  toolbar_title_class: string;
-  drawer_menu_class: string;
+  class_icon_position: string;
+  class_icon_toolbar: string;
+  class_toolbar_arrow: string;
+  class_toolbar_title: string;
+  class_drawer_menu: string;
+  class_open_profile: string;
   supportedLanguages = [];
   
   private navigationSubscription: Subscription;
   showReports = false
   userName: string = "Guest User"
   userEmail: string = "guestmail"
-  userProfile: string = ""
   static toolBarTitle: string = ".."
   activeState = [true, false]
   private presenter: core.com.ustadmobile.core.controller.HomePresenter;
@@ -36,12 +36,12 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   constructor(private location: Location, umService: UmBaseService,
     router: Router, route: ActivatedRoute) {
     super(umService, router, route);
-    this.icon_position_class = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
-    this.toolbar_icon_class = this.umService.isLTRDirectionality() ? "left icon-right-spacing" : "right icon-left-spacing";
-    this.toolbar_arrow = this.umService.isLTRDirectionality() ? "arrow_back" : "arrow_forward";
-    this.toolbar_title_class = this.umService.isLTRDirectionality() ? "brand-logo-ltr" : "brand-logo-rtl";
-    this.drawer_menu_class = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
-  
+    this.class_icon_position = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
+    this.class_icon_toolbar = this.umService.isLTRDirectionality() ? "left icon-right-spacing" : "right icon-left-spacing";
+    this.class_toolbar_arrow = this.umService.isLTRDirectionality() ? "arrow_back" : "arrow_forward";
+    this.class_toolbar_title = this.umService.isLTRDirectionality() ? "brand-logo-ltr" : "brand-logo-rtl";
+    this.class_drawer_menu = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
+    this.class_open_profile = this.umService.isLTRDirectionality() ? "right":"left"
 
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
@@ -85,8 +85,6 @@ export class HomeComponent extends UmBaseComponent implements core.com.ustadmobi
   loadProfileIcon(profile) {
     if (profile != "") {
       this.userProfile = profile
-    } else {
-      this.userProfile = window.location.origin + "/assets/images/guest_user_icon.png"
     }
   }
 

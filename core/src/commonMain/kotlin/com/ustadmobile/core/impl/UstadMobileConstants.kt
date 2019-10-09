@@ -51,16 +51,14 @@ object UstadMobileConstants {
     /**
      * Map of all supported UI language
      */
+
     val LANGUAGE_NAMES = mapOf(
             "en" to "English",
+            "en-US" to "English (US)",
+            "ps-AF" to "\u067e\u069a\u062a\u0648",
             "ps" to "\u067e\u069a\u062a\u0648",
+            "fa-AF" to "\u062f\u0631\u06cc",
             "fa" to "\u062f\u0631\u06cc",
-            "ar" to "العربية (الإمارات)")
-
-    /*val LANGUAGE_NAMES = mapOf(
-            "en" to "English", "en-US" to "English (US)",
-            "ps-AF" to "\u067e\u069a\u062a\u0648", "ps" to "\u067e\u069a\u062a\u0648",
-            "fa-AF" to "\u062f\u0631\u06cc", "fa" to "\u062f\u0631\u06cc",
-            "ar-AE" to "العربية (الإمارات)")*/
+            "ar-AE" to "العربية (الإمارات)")
 
 }

@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
+import { UmAngularUtil } from '../../util/UmAngularUtil';
 
 @Component({
   selector: 'app-not-found',
@@ -13,6 +14,11 @@ export class NotFoundComponent extends UmBaseComponent {
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
     
     super(umService, router, route);
+  }
+
+  goBack(){
+     this.systemImpl.go(this.routes.entryList, 
+      UmAngularUtil.getArgumentsFromQueryParams({params: "?entryid="+this.umService.ROOT_UID}), this.context)
   }
 
   ngOnInit() {

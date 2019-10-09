@@ -6,7 +6,7 @@ export const appRountes = {
   "entryList":"ContentEntryList", "entryDetails":"ContentEntryDetail", "register":"RegisterAccount",
   "login":"Login", "epub":"EpubContent", "video":"VideoPlayer", "web":"webChunk", "reportDashboard":"ReportDashboard",
   "reportOptions":"ReportOptions","notFound":"NotFound", "treeView":"EntriesTreeDialog",
-  "reportPreview":"ReportPreview", "profile":"UserProfile"
+  "reportPreview":"ReportPreview", "profile":"UserProfile", "home":"Home"
 }
 
 export interface UmEvent extends Event{
@@ -301,18 +301,14 @@ export class UmAngularUtil {
   static getInitialRoute(entryUid) {
     var args, view = null
     const mPath = this.getRoutePathParam();
-    if(mPath.size >= 4){
-      //redirect as it is
-      view = this.hasPath(mPath.path) ? mPath.path : appRountes.notFound+"/"
-      args = UmAngularUtil.getArgumentsFromQueryParams();
-    }else if(mPath.size <= 3){
-      //redirect to default
-      const validPath = this.hasPath(mPath.path)
-      const rootParam = "?entryid=" + entryUid
-      view = validPath ? mPath.path : appRountes.entryList
-      mPath.path = validPath ? mPath.path : appRountes.entryList
-      args = !validPath ? UmAngularUtil.getArgumentsFromQueryParams({params:rootParam, route: mPath.path}) 
-      : UmAngularUtil.getArgumentsFromQueryParams({params: document.location.search})
+    console.log(mPath, mPath.completePath.includes(appRountes.home))
+    if(mPath.completePath.includes(appRountes.home)){
+      view = mPath.path
+      args = UmAngularUtil.getArgumentsFromQueryParams({params: document.location.search})
+    }else{
+      view = mPath.path.includes(appRountes.notFound) ? appRountes.notFound+"/": appRountes.entryList
+      args = mPath.path.includes(appRountes.notFound) ? UmAngularUtil.getArgumentsFromQueryParams()
+      :UmAngularUtil.getArgumentsFromQueryParams({params: "?entryid=" + entryUid, route: view});
     }
     return {view: view, args: args};
   }

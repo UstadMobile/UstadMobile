@@ -18,6 +18,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   floating_btn_class_right = ""
   floating_btn_class_left = ""
   showIframe: boolean = true 
+  userProfile: string = "assets/images/guest_user_icon.png"
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
     this.umService.setEnvironment(document.location.search.indexOf("test") != -1) 

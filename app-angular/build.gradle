@@ -296,6 +296,7 @@ task generateLocalizationScripts{
     def angularJson = project.file("angular.json")
     def packageJson = project.file("package.json")
     def href = project.hasProperty("baseHref") ? baseHref + "/" : ""
+    println("Base href "+href)
 
     def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
     def angularJsonContent = new JsonSlurper().parseText(angularJson.text)
@@ -358,9 +359,8 @@ task packPreparedModules{
  * Generate JS bundles for production purpose
  */
 task buildProd{
-  def locale = project.hasProperty("locale") ? locale : null
   def directory = rootProject.file("app-angular").path
-  def commandScript = locale != null ?  "build:"+locale :"build-prod"
+  def commandScript = project.hasProperty("locale") ?  "build:"+locale :"build-prod"
   doLast{
     exec {
       workingDir directory

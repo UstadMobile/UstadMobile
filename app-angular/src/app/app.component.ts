@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs/internal/Subscription';
-import { UmAngularUtil } from './com/ustadmobile/util/UmAngularUtil';
+import { UmAngularUtil, appRountes } from './com/ustadmobile/util/UmAngularUtil';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { Component, Inject, LOCALE_ID, HostBinding } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -32,7 +32,7 @@ export class AppComponent extends UmBaseComponent {
     } else {
       this.dir = "rtl";
     }
-    
+
     this.systemImpl.setLocale(locale, this.context)
     this.initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID);
     this.umService.setSystemDirectionality(this.dir);
@@ -51,7 +51,7 @@ export class AppComponent extends UmBaseComponent {
 
   onCreate() {
     super.onCreate()
-    this.showLoading = window.location.search == "";
+    this.showLoading = window.location.pathname.includes(this.routes.notFound) ? false: window.location.search == "";
     if(UmAngularUtil.showSplashScreen()) {
       window.setTimeout(this.splashScreenTimeout, 2000) 
     }

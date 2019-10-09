@@ -1,12 +1,12 @@
 <div
   class="row white default-padding-top default-content-padding-bottom default-content-padding-left default-content-padding-right">
 
-  <div class="col s12 l5 {{entry_thumbnail_class}} center-align">
+  <div class="col s12 l5 {{class_entry_thumbnail}} center-align">
     <img class="responsive-img img-margin-top" [src]="contentEntry.thumbnailUrl" />
 
   </div>
 
-  <div class="col s12 l7 {{entry_summary_class}} default-margin-bottom">
+  <div class="col s12 l7 {{class_entry_summary}} default-margin-bottom">
     <p class="entry-title">{{contentEntry.title}}</p>
     <p *ngIf="contentEntry.author" class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author">
         Author</span>: {{contentEntry.author}}</p>

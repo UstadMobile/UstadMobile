@@ -299,7 +299,7 @@
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="no_account">Don\'t have an account?</string>
+    <string name="no_account">You do not have an account?</string>
 
     <string name="xapi_clear" >Clear</string>
     <string name="xapi_today" >Today</string>
@@ -308,6 +308,8 @@
     <string name="select_locations">Select Locations</string>
     <string name="select_entries">Select Entries</string>
     <string name='new_tab'>Displaying on new Tab</string>
+    <string name="error_not_found_status">404 !</string>
+    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
 
 
 

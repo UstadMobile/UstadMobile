@@ -15,20 +15,20 @@ import core from 'UstadMobile-core';
 
 export class LoginComponent extends UmBaseComponent implements core.com.ustadmobile.core.view.Login2View {
 
-  private subscription: Subscription;
   umFormLogin: FormGroup;
   formValidated: boolean = false;
   showProgress: boolean = false;
-  serverUrl: string = "";
+  class_login_tbn: string;
   private presenter: core.com.ustadmobile.core.controller.LoginPresenter;
   navigationSubscription;
-  btn_class: string;
+  class_login_button: string;
+  serverUrl: string;
   showRegistration: boolean = false;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder) {
     super(umService, router, route);
 
-    this.btn_class = this.umService.isLTRDirectionality() ? "right-align" : "left-align";
+    this.class_login_button = this.umService.isLTRDirectionality() ? "right-align" : "left-align";
     this.umFormLogin = formBuilder.group({
       'username': ['', Validators.required],
       'password': ['', Validators.required]

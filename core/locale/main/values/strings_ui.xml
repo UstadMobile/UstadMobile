@@ -362,13 +362,16 @@
     <string name="import_title_not_entered">Title not entered</string>
 
 
-    <string name="no_account">Don\'t have an account?</string>
+    <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
 
     <string name="import_link_invalid_url">Invalid Url</string>
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
+    <string name="error_not_found_status">404 !</string>
+    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
+
 
 
 </resources>

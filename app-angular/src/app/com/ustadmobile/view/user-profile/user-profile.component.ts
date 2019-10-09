@@ -16,9 +16,11 @@ export class UserProfileComponent extends UmBaseComponent implements core.com.us
 
   private presenter: core.com.ustadmobile.core.controller.UserProfilePresenter
   private navigationSubscription: Subscription;
-  userProfile: string = ""
   umFormLanguage: FormGroup;
   supportedLanguages = []
+  class_profile_holder: string;
+  class_details_holder: string;
+  class_logout_button: string;
 
   loggedPerson
 
@@ -30,6 +32,10 @@ export class UserProfileComponent extends UmBaseComponent implements core.com.us
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
       });
+
+      this.class_logout_button = this.umService.isLTRDirectionality() ? 'right':'left'
+      this.class_profile_holder = this.umService.isLTRDirectionality() ? 'left':'right'
+      this.class_details_holder = this.umService.isLTRDirectionality() ? 'right':'left'
 
       const currentLocale = this.systemImpl.getAllUiLanguage(this.context)[core.com.ustadmobile.core.impl.UstadMobileSystemCommon.PREFKEY_LOCALE]
       this.umFormLanguage = formBuilder.group({
@@ -76,8 +82,6 @@ export class UserProfileComponent extends UmBaseComponent implements core.com.us
   loadProfileIcon(profile){
     if (profile != "") {
       this.userProfile = profile
-    } else {
-      this.userProfile = window.location.origin + "/assets/images/guest_user_icon.png"
     }
   }
 

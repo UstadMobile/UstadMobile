@@ -1,11 +1,11 @@
 <header>
   <div class="navbar-fixed">
     <mz-navbar navbarClass="top-nav-height  z-depth-2 {{env.colorPrimary}}">
-      <p class="brand-logo {{toolbar_title_class}}">
+      <p class="brand-logo {{class_toolbar_title}}">
         <span (click)="goBack()" class="open-content"><i
-            class="material-icons {{toolbar_icon_class}}">{{toolbar_arrow}}</i></span>
+            class="material-icons {{class_icon_toolbar}}">{{class_toolbar_arrow}}</i></span>
         <span class="truncate">{{toolBarTitle}}</span></p>
-      <p class="show-on-small  open-content drawer-menu {{drawer_menu_class}}">
+      <p class="show-on-small  open-content drawer-menu {{class_drawer_menu}}">
         <a mz-button [flat]=true id="um-drawer" (click)="dropwdown.open()">
           <i class="material-icons white-text">menu</i>
         </a>
@@ -30,8 +30,8 @@
   <mz-sidenav #sidenav [fixed]=true [edge]="'left'" class="show-on-medium-and-up">
 
     <mz-sidenav-header>
-      <div class="user-view">
-        <i class="material-icons white-text right open-profile" (click)="openProfile()">open_in_new</i>
+      <div class="user-view" style="background: url('assets/images/top_header_bg.jpg')">
+        <i class="material-icons white-text {{class_open_profile}} open-profile" (click)="openProfile()">open_in_new</i>
         <img class="circle avatar" [src]="userProfile">
         <div class="white-text name">{{userName}}</div>
         <div class="white-text email">{{userEmail}}</div>
@@ -41,13 +41,13 @@
     <mz-sidenav-link [active]="activeState[0]">
       <a class="collapsible-header" id="libs" (click)="navigateTo(routes.entryList)"><span
           i18n="@@libraries">Libraries</span>
-        <i class="material-icons {{icon_position_class}}">library_books</i>
+        <i class="material-icons {{class_icon_position}}">library_books</i>
       </a>
     </mz-sidenav-link>
 
     <mz-sidenav-link *ngIf="showReports" [active]="activeState[1]">
       <a class="collapsible-header" (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
-        <i class="material-icons {{icon_position_class}}">pie_chart</i>
+        <i class="material-icons {{class_icon_position}}">pie_chart</i>
       </a>
     </mz-sidenav-link>
     <mz-sidenav-subheader></mz-sidenav-subheader>

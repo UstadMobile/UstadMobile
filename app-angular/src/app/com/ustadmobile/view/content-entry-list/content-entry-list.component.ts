@@ -25,10 +25,10 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
   umFormLanguage: FormGroup;
   umFormCategories: FormGroup;
   navigationSubscription;
-  entry_thumbnail_class: string;
-  entry_summary_class: string;
-  entry_collection_class: string;
-  entry_options_class: string;
+  class_entry_thumbnail: string;
+  class_entry_summary: string;
+  class_entry_collection: string;
+  class_entry_options: string;
   scrollDistance = 2
   scrollThrottle = 300
   maxItemsPerPage = 20 
@@ -37,10 +37,10 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView {
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, formBuilder: FormBuilder, private zone:NgZone) {
     super(umService, router, route);
-    this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left entry-summary-left";
-    this.entry_options_class = this.umService.isLTRDirectionality() ? "right" : "left";
-    this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left entry-ltr" : "right entry-rtl";
-    this.entry_collection_class = this.umService.isLTRDirectionality() ? "" : "collection-rtl";
+    this.class_entry_summary = this.umService.isLTRDirectionality() ? "right" : "left entry-summary-left";
+    this.class_entry_options = this.umService.isLTRDirectionality() ? "right" : "left";
+    this.class_entry_thumbnail = this.umService.isLTRDirectionality() ? "left entry-ltr" : "right entry-rtl";
+    this.class_entry_collection = this.umService.isLTRDirectionality() ? "" : "collection-rtl";
 
     this.umFormLanguage = formBuilder.group({
       'language': ['-1', Validators.required]

@@ -73,6 +73,10 @@ main {
   padding-top: 16px !important;
 }
 
+.content-paddint-top{
+  padding-top: 5% !important;
+}
+
 .default-padding-bottom{
   padding-bottom: 16px !important;
 }
