@@ -239,6 +239,6 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
     }
 
     override fun cancelOrPauseDownload(jobId: Long, cancel: Boolean) {
-        activity.stopForeGroundService(jobId, cancel)
+        //TODO: this should be handled using the downloadjobitemmanager, not sent back to the view
     }
 }

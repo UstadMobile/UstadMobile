@@ -509,19 +509,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
     /**
-     * Stop current runing notification fore ground service
-     */
-    open fun stopForeGroundService(jobId: Long, cancel: Boolean) {
-        val notificationServiceIntent = Intent(this, DownloadNotificationService::class.java)
-        notificationServiceIntent.action = if (cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
-        else DownloadNotificationService.ACTION_PAUSE_DOWNLOAD
-        notificationServiceIntent.putExtra(DownloadNotificationService.JOB_ID_TAG, jobId)
-        val servicePendingIntent = PendingIntent.getService(applicationContext,
-                0, notificationServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        servicePendingIntent.send()
-    }
-
-    /**
      * Make sure NetworkManagerBleCommon is not null when running a certain logic
      *
      * @param runnable Future task to be executed
