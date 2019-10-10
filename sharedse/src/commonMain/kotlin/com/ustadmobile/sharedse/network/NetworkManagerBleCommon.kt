@@ -360,7 +360,7 @@ abstract class NetworkManagerBleCommon(
      */
     fun sendMessage(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode,
                     responseListener: BleMessageResponseListener) {
-        makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.run()
+        makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.sendRequest()
     }
 
 
