@@ -372,6 +372,9 @@ dependencies {
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
 
+    //Implements app-wide rotation for presentation mode
+    implementation "rongi.rotate-layout:rotate-layout:$version_android_rotatelayout"
+
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"
