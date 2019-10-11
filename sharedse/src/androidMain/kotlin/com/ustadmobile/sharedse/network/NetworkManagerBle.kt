@@ -786,11 +786,10 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     /**
      * {@inheritDoc}
      */
-    actual override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>,
-                                            peerToCheck: NetworkNode?): BleEntryStatusTask? {
+    actual override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask? {
         if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val entryStatusTask = BleEntryStatusTaskAndroid(
-                    context as Context, this, entryUidsToCheck, peerToCheck!!)
+                    context as Context, this, containerUidsToCheck, networkNode)
             entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
             return entryStatusTask
         }

@@ -111,6 +111,10 @@ abstract class NetworkManagerBleCommon(
     val activeDownloadJobItemManagers
         get() = jobItemManagerList!!.activeDownloadJobItemManagers
 
+
+    val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
+            this::makeEntryStatusTask, singleThreadDispatcher)
+
     /**
      * Only for testing - allows the unit test to set this without running the main onCreate method
      *
@@ -158,49 +162,56 @@ abstract class NetworkManagerBleCommon(
      */
     @Synchronized
     fun handleNodeDiscovered(node: NetworkNode) {
-        val networkNodeDao = umAppDatabase.networkNodeDao
-
-        if (!knownPeerNodes.containsKey(node.bluetoothMacAddress)) {
-
-            node.lastUpdateTimeStamp = getSystemTimeInMillis()
-
-            GlobalScope.launch {
-                val result = networkNodeDao.updateLastSeenAsync(node.bluetoothMacAddress!!,
-                        node.lastUpdateTimeStamp)
-                knownPeerNodes[node.bluetoothMacAddress!!] = node.lastUpdateTimeStamp
-                if (result == 0) {
-                    networkNodeDao.insertAsync(node)
-                    UMLog.l(UMLog.DEBUG, 694, "New node with address "
-                            + node.bluetoothMacAddress + " found, added to the Db")
-
-                    val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
-
-                    if (!isStopMonitoring) {
-                        if (entryUidsToMonitor.size > 0) {
-                            val entryStatusTask = makeEntryStatusTask(context, entryUidsToMonitor, node)
-                            entryStatusTasks.add(entryStatusTask!!)
-                            entryStatusTaskExecutor.execute(entryStatusTask)
-                        }
-                    }
-                }
-
-
+        GlobalScope.launch {
+            withContext(singleThreadDispatcher) {
+                localAvailabilityManager.handleNodeDiscovered(node.bluetoothMacAddress ?: "")
             }
-        } else {
-            val lastSeenInMills = getSystemTimeInMillis()
-            val canUpdate = (lastSeenInMills - knownPeerNodes[node.bluetoothMacAddress!!]!!) >= (20 * 1000).toLong()
-            if(canUpdate){
-                val nodeMap = HashMap(knownPeerNodes)
-                knownPeerNodes[node.bluetoothMacAddress!!] = lastSeenInMills
-                GlobalScope.launch {
-                    umAppDatabase.networkNodeDao.updateNodeLastSeen(nodeMap)
-                    nodeMap.clear()
-                    UMLog.l(UMLog.DEBUG, 694, "Updating "
-                            + knownPeerNodes.size + " nodes from the Db")
-                }
-            }
-
         }
+
+//        val networkNodeDao = umAppDatabase.networkNodeDao
+//
+//        if (!knownPeerNodes.containsKey(node.bluetoothMacAddress)) {
+//
+//            node.lastUpdateTimeStamp = getSystemTimeInMillis()
+//
+//            GlobalScope.launch {
+//                val result = networkNodeDao.updateLastSeenAsync(node.bluetoothMacAddress!!,
+//                        node.lastUpdateTimeStamp)
+//                knownPeerNodes[node.bluetoothMacAddress!!] = node.lastUpdateTimeStamp
+//                if (result == 0) {
+//                    networkNodeDao.insertAsync(node)
+//                    UMLog.l(UMLog.DEBUG, 694, "New node with address "
+//                            + node.bluetoothMacAddress + " found, added to the Db")
+//
+//                    val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
+//
+//                    if (!isStopMonitoring) {
+//                        if (entryUidsToMonitor.size > 0) {
+//                            val entryStatusTask = makeEntryStatusTask(context, entryUidsToMonitor, node)
+//                            entryStatusTasks.add(entryStatusTask!!)
+//                            entryStatusTaskExecutor.execute(entryStatusTask)
+//                        }
+//                    }
+//                }
+//
+//
+//            }
+//        } else {
+//            val lastSeenInMills = getSystemTimeInMillis()
+//            val canUpdate = (lastSeenInMills - knownPeerNodes[node.bluetoothMacAddress!!]!!) >= (20 * 1000).toLong()
+//            if(canUpdate){
+//                val nodeMap = HashMap(knownPeerNodes)
+//                knownPeerNodes[node.bluetoothMacAddress!!] = lastSeenInMills
+//                GlobalScope.launch {
+//                    umAppDatabase.networkNodeDao.updateNodeLastSeen(nodeMap)
+//                    nodeMap.clear()
+//                    UMLog.l(UMLog.DEBUG, 694, "Updating "
+//                            + knownPeerNodes.size + " nodes from the Db")
+//                }
+//            }
+//
+//        }
+//        }
 
     }
 
@@ -226,60 +237,60 @@ abstract class NetworkManagerBleCommon(
      * @param entryUidsToMonitor List of entries to be monitored
      */
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        try {
-            isStopMonitoring = false
-            availabilityMonitoringRequests[monitor] = entryUidsToMonitor
-            UMLog.l(UMLog.DEBUG, 694, "Registered a monitor with "
-                    + entryUidsToMonitor.size + " entry(s) to be monitored")
-
-            val networkNodeDao = umAppDatabase.networkNodeDao
-            val responseDao = umAppDatabase.entryStatusResponseDao
-
-            val lastUpdateTime = getSystemTimeInMillis() - (60 * 1000)
-
-            val uniqueEntryUidsToMonitor = ArrayList(allUidsToBeMonitored)
-            val knownNetworkNodes = getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime, 1))
-
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Found total of   " + uniqueEntryUidsToMonitor.size +
-                            " uids to check their availability status")
-
-            val entryWithoutRecentResponses = responseDao.findEntriesWithoutRecentResponse(
-                    uniqueEntryUidsToMonitor, knownNetworkNodes,
-                    getSystemTimeInMillis() - (2 * 60 * 1000))
-
-            //Group entryUUid by node where their status will be checked from
-            val nodeToCheckEntryList = LinkedHashMap<Int, MutableList<Long>>()
-
-            for (entryResponse in entryWithoutRecentResponses) {
-
-                val nodeIdToCheckFrom = entryResponse.nodeId
-                if (!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
-                    nodeToCheckEntryList[nodeIdToCheckFrom] = arrayListOf()
-
-                nodeToCheckEntryList[nodeIdToCheckFrom]!!.add(entryResponse.containerUid)
-            }
-
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Created total of  " + nodeToCheckEntryList.entries.size
-                            + " entry(s) to be checked from")
-
-            //Make entryStatusTask as per node list and entryUuids found
-            for (nodeId in nodeToCheckEntryList.keys) {
-                val networkNode = networkNodeDao.findNodeById(nodeId.toLong())
-                val entryStatusTask = makeEntryStatusTask(context,
-                        nodeToCheckEntryList[nodeId]!!, networkNode)
-                entryStatusTasks.add(entryStatusTask!!)
-                GlobalScope.launch {
-                    entryStatusTaskExecutor.execute(entryStatusTask)
-                }
-                UMLog.l(UMLog.DEBUG, 694,
-                        "Status check started for " + nodeToCheckEntryList[nodeId]!!.size
-                                + " entry(s) task from " + networkNode!!.bluetoothMacAddress)
-            }
-        } catch (e: Exception) {
-            UMLog.l(UMLog.ERROR,694,e.message,e)
-        }
+//        try {
+//            isStopMonitoring = false
+//            availabilityMonitoringRequests[monitor] = entryUidsToMonitor
+//            UMLog.l(UMLog.DEBUG, 694, "Registered a monitor with "
+//                    + entryUidsToMonitor.size + " entry(s) to be monitored")
+//
+//            val networkNodeDao = umAppDatabase.networkNodeDao
+//            val responseDao = umAppDatabase.entryStatusResponseDao
+//
+//            val lastUpdateTime = getSystemTimeInMillis() - (60 * 1000)
+//
+//            val uniqueEntryUidsToMonitor = ArrayList(allUidsToBeMonitored)
+//            val knownNetworkNodes = getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime, 1))
+//
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Found total of   " + uniqueEntryUidsToMonitor.size +
+//                            " uids to check their availability status")
+//
+//            val entryWithoutRecentResponses = responseDao.findEntriesWithoutRecentResponse(
+//                    uniqueEntryUidsToMonitor, knownNetworkNodes,
+//                    getSystemTimeInMillis() - (2 * 60 * 1000))
+//
+//            //Group entryUUid by node where their status will be checked from
+//            val nodeToCheckEntryList = LinkedHashMap<Int, MutableList<Long>>()
+//
+//            for (entryResponse in entryWithoutRecentResponses) {
+//
+//                val nodeIdToCheckFrom = entryResponse.nodeId
+//                if (!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
+//                    nodeToCheckEntryList[nodeIdToCheckFrom] = arrayListOf()
+//
+//                nodeToCheckEntryList[nodeIdToCheckFrom]!!.add(entryResponse.containerUid)
+//            }
+//
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Created total of  " + nodeToCheckEntryList.entries.size
+//                            + " entry(s) to be checked from")
+//
+//            //Make entryStatusTask as per node list and entryUuids found
+//            for (nodeId in nodeToCheckEntryList.keys) {
+//                val networkNode = networkNodeDao.findNodeById(nodeId.toLong())
+//                val entryStatusTask = makeEntryStatusTask(context,
+//                        nodeToCheckEntryList[nodeId]!!, networkNode)
+//                entryStatusTasks.add(entryStatusTask!!)
+//                GlobalScope.launch {
+//                    entryStatusTaskExecutor.execute(entryStatusTask)
+//                }
+//                UMLog.l(UMLog.DEBUG, 694,
+//                        "Status check started for " + nodeToCheckEntryList[nodeId]!!.size
+//                                + " entry(s) task from " + networkNode!!.bluetoothMacAddress)
+//            }
+//        } catch (e: Exception) {
+//            UMLog.l(UMLog.ERROR,694,e.message,e)
+//        }
 
     }
 
@@ -288,8 +299,8 @@ abstract class NetworkManagerBleCommon(
      * @param monitor Monitor object which created a monitor (e.g Presenter)
      */
     override fun stopMonitoringAvailability(monitor: Any) {
-        availabilityMonitoringRequests.remove(monitor)
-        isStopMonitoring = availabilityMonitoringRequests.isEmpty()
+//        availabilityMonitoringRequests.remove(monitor)
+//        isStopMonitoring = availabilityMonitoringRequests.isEmpty()
     }
 
     /**
@@ -332,7 +343,7 @@ abstract class NetworkManagerBleCommon(
      *
      * @see BleEntryStatusTask
      */
-    abstract fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>, peerToCheck: NetworkNode?): BleEntryStatusTask?
+    abstract suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask?
 
     /**
      * Create entry status task for a specific peer device,

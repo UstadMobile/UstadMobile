@@ -41,9 +41,9 @@ import kotlinx.coroutines.launch
 
 class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
-        LocalAvailabilityMonitor, LocalAvailabilityListener , DownloadProgressView.OnStopDownloadListener {
+        DownloadProgressView.OnStopDownloadListener {
 
-    private var presenter: ContentEntryDetailPresenter? = null
+    private lateinit var presenter: ContentEntryDetailPresenter
 
     private lateinit var managerAndroidBle: NetworkManagerBle
 
@@ -92,12 +92,12 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
-                this, networkManagerBle, umAppRepository)
-        presenter!!.onCreate(bundleToMap(Bundle()))
+                networkManagerBle, umAppRepository, networkManagerBle.localAvailabilityManager)
+        presenter.onCreate(bundleToMap(Bundle()))
 
-        presenter!!.onStart()
-        managerAndroidBle.addLocalAvailabilityListener(this)
-        presenter!!.handleShowEditButton(showControls)
+        presenter.onStart()
+        //managerAndroidBle.addLocalAvailabilityListener(this)
+        presenter.handleShowEditButton(showControls)
 
     }
 
@@ -146,10 +146,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         }
 
         editButton.setOnClickListener {
-            presenter!!.handleStartEditingContent()
+            presenter.handleStartEditingContent()
         }
         downloadButton.setOnClickListener {
-            presenter!!.handleDownloadButtonClick()
+            presenter.handleDownloadButtonClick()
         }
 
     }
@@ -175,9 +175,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private fun clickUpNavigation() {
         runOnUiThread {
-            if (presenter != null) {
-                presenter!!.handleUpNavigation()
-            }
+            presenter.handleUpNavigation()
         }
     }
 
@@ -280,28 +278,25 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
-        presenter!!.handleClickTranslatedEntry(contentEntryUid)
+        presenter.handleClickTranslatedEntry(contentEntryUid)
     }
 
-    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
-    }
-
-    override fun stopMonitoringAvailability(monitor: Any) {
-        managerAndroidBle.stopMonitoringAvailability(monitor)
-    }
+//    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
+//        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
+//    }
+//
+//    override fun stopMonitoringAvailability(monitor: Any) {
+//        managerAndroidBle.stopMonitoringAvailability(monitor)
+//    }
 
     override fun onDestroy() {
-        if(presenter != null){
-            presenter!!.onDestroy()
-            managerAndroidBle.removeLocalAvailabilityListener(this)
-        }
+        presenter.onDestroy()
         super.onDestroy()
     }
 
-    override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
-        presenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
-    }
+//    override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
+//        presenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
+//    }
 
     override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long) {
         val flexboxLayoutManager = FlexboxLayoutManager(applicationContext)
@@ -315,7 +310,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onClickStopDownload(view: DownloadProgressView) {
         GlobalScope.launch {
-            presenter!!.handleCancelDownload()
+            presenter.handleCancelDownload()
         }
     }
 }
