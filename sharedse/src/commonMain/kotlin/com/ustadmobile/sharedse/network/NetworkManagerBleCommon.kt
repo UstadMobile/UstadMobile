@@ -134,7 +134,8 @@ abstract class NetworkManagerBleCommon(
                 onItemStarted = this::onDownloadJobItemStarted) {
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
                     umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
-                    connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher).download()
+                    connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
+                    localAvailabilityManager = localAvailabilityManager).download()
         }
         GlobalScope.launch { downloadJobItemWorkQueue.start() }
     }

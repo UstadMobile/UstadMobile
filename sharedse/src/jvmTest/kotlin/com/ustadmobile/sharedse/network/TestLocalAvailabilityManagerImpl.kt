@@ -1,6 +1,8 @@
 package com.ustadmobile.sharedse.network
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import kotlinx.coroutines.channels.Channel
@@ -37,7 +39,7 @@ class TestLocalAvailabilityManagerImpl  {
             }
 
             val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
-            managerImpl.addMonitoringRequest(LocalAvailabilityManagerImpl.AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+            managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
             managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
 
 
@@ -75,7 +77,7 @@ class TestLocalAvailabilityManagerImpl  {
             managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
             managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
 
-            managerImpl.addMonitoringRequest(LocalAvailabilityManagerImpl.AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+            managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
 
             val task1 = taskChannel.receive()
             val task2 = taskChannel.receive()
@@ -113,11 +115,11 @@ class TestLocalAvailabilityManagerImpl  {
                 val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
                 managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
                 managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
-                managerImpl.addMonitoringRequest(LocalAvailabilityManagerImpl.AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+                managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
 
                 val numTasksMadeBeforeSecondRequest = tasksMade.size
 
-                managerImpl.addMonitoringRequest(LocalAvailabilityManagerImpl.AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+                managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
 
                 Assert.assertEquals("No new tasks made after creating an availability monitor with the same UID",
                         numTasksMadeBeforeSecondRequest, tasksMade.size)

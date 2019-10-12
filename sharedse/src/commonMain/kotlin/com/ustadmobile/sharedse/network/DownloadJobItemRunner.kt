@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
@@ -59,7 +60,8 @@ class DownloadJobItemRunner
  private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val numConcurrentEntryDownloads: Int = 4) {
+ private val numConcurrentEntryDownloads: Int = 4,
+ private val localAvailabilityManager: LocalAvailabilityManager) {
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
@@ -240,8 +242,8 @@ class DownloadJobItemRunner
         val downloadJobId = downloadItem.djiDjUid
         appDb.downloadJobDao.update(downloadJobId, JobStatus.RUNNING)
 
-        networkManager.startMonitoringAvailability(this,
-                listOf(downloadItem.djiContainerUid))
+//        networkManager.startMonitoringAvailability(this,
+//                listOf(downloadItem.djiContainerUid))
 
         statusLiveData = appDb.connectivityStatusDao.statusLive()
         downloadJobItemLiveData = appDb.downloadJobItemDao.getLiveStatus(downloadItem.djiUid)
@@ -323,10 +325,13 @@ class DownloadJobItemRunner
         for (attemptNum in attemptsRemaining downTo 1) {
             numEntriesToDownload = -1
             numFailures.value = 0
-            //TODO: if the content is available on the node we already connected to, take that one
-            currentNetworkNode = appDb.networkNodeDao
-                    .findLocalActiveNodeByContainerUid(downloadItem.djiContainerUid,
-                            minLastSeen, BAD_PEER_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
+//            //TODO: if the content is available on the node we already connected to, take that one
+//            currentNetworkNode = appDb.networkNodeDao
+//                    .findLocalActiveNodeByContainerUid(downloadItem.djiContainerUid,
+//                            minLastSeen, BAD_PEER_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
+
+            currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
+                    downloadItem.djiContainerUid)
 
             val isFromCloud = currentNetworkNode == null
             val history = DownloadJobItemHistory()
@@ -354,13 +359,13 @@ class DownloadJobItemRunner
                 }
                 downloadEndpoint = endpointUrl
             } else {
-                if (currentNetworkNode!!.groupSsid == null || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
+                if (currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
 
                     if (!connectToLocalNodeNetwork()) {
                         //recording failure will push the node towards the bad threshold, after which
                         // the download will be attempted from the cloud
                         recordHistoryFinished(history, false)
-                        //continue
+                        continue
                     }
                 }
 

@@ -454,8 +454,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" + prettyPrintNetwork(networkInfo))
 
         val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
-        val status = ConnectivityStatus(state, true,
-                ssid)
+        val status = ConnectivityStatus(state, true, ssid)
         addLogs("changed to $state")
         connectivityStatusRef.value = status
 
