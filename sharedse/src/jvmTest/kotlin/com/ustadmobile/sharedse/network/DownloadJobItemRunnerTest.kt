@@ -179,6 +179,8 @@ class DownloadJobItemRunnerTest {
                 val bleResponseListener = invocation.arguments[3] as BleMessageResponseListener
                 val destinationNode = invocation.arguments[2] as NetworkNode
                 peerServer.start()
+                groupBle.port = peerServer.listeningPort
+                groupBle.ipAddress = "127.0.0.1"
                 Thread.sleep(2000)
 
 
@@ -539,8 +541,11 @@ class DownloadJobItemRunnerTest {
         runBlocking {
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
+            val mockAvailabilityManager = mock<LocalAvailabilityManager> {
+                onBlocking { findBestLocalNodeForContentEntryDownload(any()) }.thenReturn(networkNode)
+            }
             val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
-                    cloudEndPoint, connectivityStatus, localAvailabilityManager = mock<LocalAvailabilityManager>())
+                    cloudEndPoint, connectivityStatus, localAvailabilityManager = mockAvailabilityManager)
 
             val startTime = System.currentTimeMillis()
             jobItemRunner.download()
@@ -549,6 +554,14 @@ class DownloadJobItemRunnerTest {
 
             item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
+
+            val downloadJobItemHistory = clientDb.downloadJobItemHistoryDao
+                    .findHistoryItemsByDownloadJobItem(downloadJobItem.djiUid)
+            Assert.assertEquals("Download history recorded as being local download",
+                    DownloadJobItemHistory.MODE_LOCAL, downloadJobItemHistory[0].mode)
+
+            //TODO: verify the correct message was sent
+            verify(mockedNetworkManager).connectToWiFi(groupBle.ssid, groupBle.passphrase)
 
             Assert.assertEquals("File download task completed successfully",
                     JobStatus.COMPLETE.toLong(), item.djiStatus.toLong())

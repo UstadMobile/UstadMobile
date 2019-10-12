@@ -88,7 +88,7 @@ class DownloadJobItemRunner
 
     private val meteredConnectionAllowed = atomic(-1)
 
-    private var lWiFiConnectionTimeout = 30
+    private var lWiFiConnectionTimeout = 30000
 
     private val wiFiDirectGroupBle = atomic<WiFiDirectGroupBle?>(null)
 
@@ -359,8 +359,8 @@ class DownloadJobItemRunner
                 }
                 downloadEndpoint = endpointUrl
             } else {
-                if (currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
-
+                if (currentNetworkNode!!.groupSsid == null
+                        || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
                     if (!connectToLocalNodeNetwork()) {
                         //recording failure will push the node towards the bad threshold, after which
                         // the download will be attempted from the cloud
@@ -587,11 +587,9 @@ class DownloadJobItemRunner
                 wiFiDirectGroupBle.value!!.passphrase)
 
 
-        launch(mainCoroutineDispatcher) {
-            waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong()) {
-                statusRef.value = it
-                it != null && isExpectedWifiDirectGroup(it)
-            }
+        waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout * 50).toLong()) {
+            statusRef.value = it
+            it != null && isExpectedWifiDirectGroup(it)
         }
 
         waitingForLocalConnection.value = false
