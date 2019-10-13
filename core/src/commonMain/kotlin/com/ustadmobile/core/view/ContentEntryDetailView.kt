@@ -66,8 +66,6 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("showDownloadOptionsDialog")
     fun showDownloadOptionsDialog(map: HashMap<String, String>)
 
-    fun stopForeGroundService(jobId: Long,cancel: Boolean)
-
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetail"

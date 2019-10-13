@@ -386,9 +386,9 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
         if(isListOrArrayResult) {
             var prefix = resultVarName
             it.key.forEach {embedVarName ->
-                prefix += ".map { it!!.$embedVarName }.filter { it != null }"
+                prefix += "\n.map { it!!.$embedVarName }\n.filter { it != null }"
             }
-            wrapperFnName = Pair("$prefix.map {", "}")
+            wrapperFnName = Pair("$prefix\n.map {", "}")
             varName = "it!!"
         }else {
             var accessorName = resultVarName
@@ -451,7 +451,8 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
         if(isListOrArrayResult) {
             codeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($resultVarName")
             it.key.forEach {embedVarName ->
-                codeBlock.add(".filter { it.$embedVarName != null }.map { it.$embedVarName as %T }",
+                codeBlock.add("\n.filter { it.$embedVarName != null }\n" +
+                        ".map { it.$embedVarName as %T }\n",
                         it.value)
             }
 
@@ -728,8 +729,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             null
         }
 
-        val entityFieldMap = if(entityTypeElement != null) {
-            mapEntityFields(entityTypeEl = entityTypeElement, processingEnv = processingEnv)
+        val resultEntityField = if(entityTypeElement != null) {
+            ResultEntityField(null, "_entity", entityTypeElement.asClassName(),
+                    entityTypeElement, processingEnv)
         }else {
             null
         }
@@ -862,7 +864,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         colNames.add(metaData.getColumnName(i))
                     }
                 }else {
-                    colNames.addAll(entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') })
+                    //colNames.addAll(entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') })
                 }
 
                 val entityVarName = "_entity"
@@ -887,45 +889,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 if(QUERY_SINGULAR_TYPES.contains(entityType)) {
                     codeBlock.add("val $entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
                 }else {
-                    codeBlock.add("val _entity =")
-                            .add(entityInitializerBlock)
-                            .add("\n")
-
-                    // Map of the last prop name (e.g. name) to the full property name as it will
-                    // be generated (e.g. embedded!!.name)
-                    val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()
-
-                    entityFieldMap.embeddedVarsList.forEach {
-                        codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
-                    }
-
-                    val missingPropNames = mutableListOf<String>()
-                    colNames.forEach {colName ->
-                        val fullPropName = colNameLastToFullMap[colName]
-                        if(!fullPropName.isNullOrBlank()) {
-                            val propType = entityFieldMap.fieldMap[fullPropName]
-                            val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
-
-                            if(rawQueryVarName != null) {
-                                codeBlock.beginControlFlow("if(_columnIndexMap.containsKey(%S))",
-                                        colName)
-                            }
-
-                            codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
-                            if(rawQueryVarName != null) {
-                                codeBlock.endControlFlow()
-                            }
-
-                        }else {
-                            missingPropNames.add(colName)
-                        }
-                    }
-
-                    if(missingPropNames.isNotEmpty()) {
-                        logMessage(Diagnostic.Kind.ERROR, " Cannot map the following columns " +
-                                "from query to properties on return type of element $entityType : " +
-                                "$missingPropNames", enclosing, method)
-                    }
+                    codeBlock.add(resultEntityField!!.createSetterCodeBlock(rawQuery = rawQueryVarName != null,
+                            colIndexVarName = "_columnIndexMap"))
                 }
 
                 if(isListOrArray(resultType)) {
@@ -1301,9 +1266,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
         if(addReturnDaoResult) {
-//            codeBlock.add("return _dao.${daoFunSpec.name}(")
-//                    .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
-//                    .add(")\n")
             codeBlock.add("return ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
         }
 

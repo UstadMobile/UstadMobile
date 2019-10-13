@@ -49,8 +49,8 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
                 time = getMeasureTime(data)
                 data = changeUnitInList(data, time)
             }
-            val xAxisLabel = getLabelList(reportOptions.xAxis, data.map { it.xAxis }.distinct())
-            val subgroupLabel = getLabelList(reportOptions.subGroup, data.map { it.subgroup }.distinct())
+            val xAxisLabel = getLabelList(reportOptions.xAxis, data.map { it.xAxis!! }.distinct())
+            val subgroupLabel = getLabelList(reportOptions.subGroup, data.map { it.subgroup!! }.distinct())
             val yAxisLabel = getLabel(reportOptions.yAxis, time)
             view.runOnUiThread(Runnable {
                 view.setChartData(data, reportOptions, xAxisLabel, subgroupLabel)

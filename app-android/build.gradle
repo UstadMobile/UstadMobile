@@ -309,7 +309,7 @@ dependencies {
     implementation "androidx.paging:paging-runtime:$version_androidx_paging"
 
     //Work manager
-    implementation "android.arch.work:work-runtime:$version_android_workmanager"
+    implementation "androidx.work:work-runtime:$version_android_workmanager"
 
     //Klock
     implementation "com.soywiz:klock-android:$version_klock"
@@ -370,7 +370,10 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
 
     //Codec2 (low bitrate voice) Android library
-    implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
+    implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
+
+    //Implements app-wide rotation for presentation mode
+    implementation "rongi.rotate-layout:rotate-layout:$version_android_rotatelayout"
 
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"

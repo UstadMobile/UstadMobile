@@ -111,7 +111,7 @@ class DownloadJobItemRunner
 
     private val statusRef = atomic<ConnectivityStatus?>(null)
 
-    var startDownloadFnJob: Job? = null
+    val startDownloadFnJobRef = atomic<Job?>(null)
 
     private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
 
@@ -214,6 +214,7 @@ class DownloadJobItemRunner
     suspend fun stop(newStatus: Int, cancel: Boolean = false) {
         if (!runnerStatus.compareAndSet(JobStatus.STOPPED, JobStatus.STOPPED)) {
             if (cancel) {
+                val startDownloadFnJob = startDownloadFnJobRef.value
                 println("===CANCELLING $startDownloadFnJob===")
                 startDownloadFnJob?.cancel()
             }
@@ -280,8 +281,10 @@ class DownloadJobItemRunner
         }
 
         withContext(coroutineContext) {
-            startDownloadFnJob = launch { startDownload() }
-            startDownloadFnJob!!.join()
+            val startDownloadFnJob = launch { startDownload() }
+            startDownloadFnJobRef.value = startDownloadFnJob
+            UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} launched download job and got reference")
+            startDownloadFnJob.join()
         }
     }
 

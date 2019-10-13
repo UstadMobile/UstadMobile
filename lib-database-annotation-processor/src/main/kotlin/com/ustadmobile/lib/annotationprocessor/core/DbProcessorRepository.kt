@@ -16,6 +16,7 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.DoorDatabaseRepository
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -98,10 +99,17 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                   addBoundaryCallbackGetters: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
+        val isDbTypeSyncable = isSyncableDb(dbTypeElement, processingEnv)
 
+        val repoInterface = if(isDbTypeSyncable) {
+            DoorDatabaseRepository::class.asClassName()
+        } else {
+            DoorDatabaseSyncRepository::class.asClassName()
+        }
 
         val dbRepoType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
                 .superclass(dbTypeElement.asClassName())
+                .addSuperinterface(repoInterface)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
@@ -116,7 +124,23 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         PropertySpec.builder("_accessToken", String::class)
                                 .initializer("_accessToken").build(),
                         PropertySpec.builder("_httpClient",
-                            HttpClient::class.asClassName()).initializer("_httpClient").build()
+                            HttpClient::class.asClassName()).initializer("_httpClient").build(),
+                        PropertySpec.builder("endpoint", String::class)
+                                .getter(FunSpec.getterBuilder().addCode("return _endpoint\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("auth", String::class)
+                                .getter(FunSpec.getterBuilder().addCode("return _accessToken\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("dbPath", String::class)
+                                .getter(FunSpec.getterBuilder().addCode("return $DB_NAME_VAR\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("httpClient", HttpClient::class)
+                                .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build()
                 ))
                 .addFunction(FunSpec.builder("clearAllTables")
                         .addModifiers(KModifier.OVERRIDE)
@@ -173,14 +197,16 @@ class DbProcessorRepository: AbstractDbProcessor() {
         }
 
 
-        if(isSyncableDb(dbTypeElement, processingEnv)) {
+        if(isDbTypeSyncable) {
             val syncableDaoClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                     "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
             val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
             if(syncDaoMode == REPO_SYNCABLE_DAO_CONSTRUCT) {
-                syncDaoProperty.delegate("lazy {%T(_db) }",
-                        ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
-                                "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+                syncDaoProperty.delegate(
+                        CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_db) ", ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
+                                        "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+                                .endControlFlow().build())
             }else if(syncDaoMode == REPO_SYNCABLE_DAO_FROMDB) {
                 syncDaoProperty.delegate("lazy {_db._syncDao() }")
             }
@@ -189,6 +215,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
                     .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
+            dbRepoType.addProperty(PropertySpec.builder("clientId", INT)
+                    .getter(FunSpec.getterBuilder().addCode("return _clientId").build())
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
 
             dbRepoType.addProperty(PropertySpec.builder("master", BOOLEAN)
                     .addModifiers(KModifier.OVERRIDE)
@@ -199,7 +229,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
-                    .delegate("lazy { %T(_syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) }", repoImplClassName).build())
+                    .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                            .add("%T(_syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) ", repoImplClassName)
+                            .endControlFlow().build())
+                    .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
             dbRepoType.addFunction(FunSpec.builder("sync")
                     .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
@@ -227,8 +260,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
             }
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
-                    .delegate("lazy { %T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) }",
-                            repoImplClassName, it.makeAccessorCodeBlock()).build())
+                    .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                            .add("%T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) ",
+                                repoImplClassName, it.makeAccessorCodeBlock())
+                            .endControlFlow()
+                            .build())
+                    .build())
             dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
 
             if(addBoundaryCallbackGetters
@@ -238,7 +275,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 val boundaryCallbackVarName = "_${daoTypeEl.simpleName}$SUFFIX_BOUNDARY_CALLBACKS"
                 dbRepoType.addProperty(PropertySpec.builder(boundaryCallbackVarName,
                         boundaryCallbackClassName)
-                        .delegate("lazy { %T(_${daoTypeEl.simpleName}::getBoundaryCallback) }", boundaryCallbackClassName)
+                        .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_${daoTypeEl.simpleName}::getBoundaryCallback)", boundaryCallbackClassName)
+                                .endControlFlow().build())
                         .build())
                 dbRepoType.addAccessorOverride("${it.simpleName}$SUFFIX_BOUNDARY_CALLBACKS",
                         boundaryCallbackClassName, CodeBlock.of("return $boundaryCallbackVarName\n"))
@@ -329,9 +368,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             val codeBlock = CodeBlock.builder()
 
+            val daoFunSpecBuilt = daoFunSpec.build()
             when(repoMethodType) {
                 Repository.METHOD_SYNCABLE_GET -> {
-                    codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+                    codeBlock.add(generateRepositoryGetSyncableEntitiesFun(daoFunSpecBuilt,
                             daoTypeElement.simpleName.toString(), addReturnDaoResult = !generateBoundaryCallback))
                 }
                 Repository.METHOD_DELEGATE_TO_DAO -> {
@@ -393,6 +433,21 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .add("return _dataSource\n")
                     }else {
                         codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
+                    }
+                }
+
+                Repository.METHOD_DELEGATE_TO_WEB -> {
+                    codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                            daoName = daoTypeElement.simpleName.toString(),
+                            dbPathVarName = "_dbPath",
+                            methodName = daoFunSpecBuilt.name,
+                            httpResultType = resultType,
+                            requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
+                                    MemberName("io.ktor.client.request", "header"),
+                                    "X-nid"),
+                            params = daoFunSpecBuilt.parameters))
+                    if(returnTypeResolved != UNIT) {
+                        codeBlock.add("return _httpResult\n")
                     }
                 }
             }

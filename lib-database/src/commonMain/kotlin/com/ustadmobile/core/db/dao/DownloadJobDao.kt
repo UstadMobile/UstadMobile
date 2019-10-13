@@ -3,7 +3,9 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 
 /**
  * DAO for the DownloadJob class
@@ -23,6 +25,7 @@ abstract class DownloadJobDao {
 
     @Query("SELECT count(*) > 0 From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
+    @QueryLiveTables(["DownloadJob"])
     abstract fun anyActiveDownloadJob(): DoorLiveData<Boolean>
 
     /**
@@ -92,8 +95,9 @@ abstract class DownloadJobDao {
     abstract fun update(djUid: Int, djStatus: Int)
 
 
-    @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
-    abstract suspend fun updateAsync(djUid: Int, djStatus: Int)
+    @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid " +
+            "AND djStatus BETWEEN :statusFrom AND :statusTo")
+    abstract suspend fun updateAsync(djUid: Int, djStatus: Int, statusFrom: Int, statusTo: Int)
 
 
     @Query("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " + "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
@@ -102,7 +106,8 @@ abstract class DownloadJobDao {
 
     @Transaction
     open suspend fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
-                          completeJobItemStatus: Int = -1) {
+                          completeJobItemStatus: Int = -1, jobStatusFrom: Int = 0,
+                                       jobStatusTo: Int = JobStatus.COMPLETE_MAX) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
         if (activeJobItemsStatus != -1)
@@ -111,7 +116,7 @@ abstract class DownloadJobDao {
         if (completeJobItemStatus != -1)
             updateJobItems(djUid, completeJobItemStatus, JobStatus.COMPLETE_MIN, JobStatus.COMPLETE_MAX)
 
-        updateAsync(djUid, djStatus)
+        updateAsync(djUid, djStatus, jobStatusFrom, jobStatusTo)
     }
 
     @Query("UPDATE DownloadJob SET bytesDownloadedSoFar = " +
@@ -131,12 +136,14 @@ abstract class DownloadJobDao {
     @Query("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
     abstract fun findDownloadJobUidByRootContentEntryUid(rootContentEntryUid: Long): Long
 
+    @Query("SELECT * FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
+    abstract fun findDownloadJobByRootContentEntryUid(rootContentEntryUid: Long): DownloadJob?
+
     @Query("UPDATE DownloadJob SET djDestinationDir = :destinationDir WHERE djUid = :djUid")
     abstract suspend fun updateDestinationDirectoryAsync(djUid: Int, destinationDir: String): Int
 
     @Query("SELECT djDestinationDir FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getDestinationDir(djUid: Int): String?
-
 
     @Query("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
     abstract suspend fun setMeteredConnectionAllowedByJobUidAsync(djUid: Int, meteredNetworkAllowed: Boolean): Int
@@ -147,20 +154,12 @@ abstract class DownloadJobDao {
     @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
-    @Transaction
-    open fun cleanupUnused(downloadJobUid: Int) {
-        deleteUnusedDownloadJobItems(downloadJobUid)
-        deleteUnusedDownloadJob(downloadJobUid)
-    }
+    @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
+    abstract suspend fun getMeteredNetworkAllowed(djUid: Int): Boolean
 
-    @Query("DELETE FROM DownloadJobItem " +
-            "WHERE djiDjUid = :downloadJobUid " +
-            "AND (djiStatus = " + JobStatus.NOT_QUEUED +
-            " OR djiStatus = " + JobStatus.CANCELED + ")")
-    abstract fun deleteUnusedDownloadJobItems(downloadJobUid: Int)
-
-    @Query("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = "
-            + JobStatus.NOT_QUEUED + " OR djStatus = " + JobStatus.CANCELED)
-    abstract fun deleteUnusedDownloadJob(downloadJobUid: Int)
+    @Query("SELECT (SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) AS numEntries, " +
+            "(SELECT downloadLength FROM DownloadJobItem WHERE djiDjUid = :downloadJobId AND " +
+            " djiContentEntryUid = (SELECT djRootContentEntryUid FROM DownloadJob WHERE djUid = :downloadJobId)) AS totalSize" )
+    abstract suspend fun getDownloadSizeInfo(downloadJobId: Int): DownloadJobSizeInfo?
 
 }

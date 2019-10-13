@@ -27,8 +27,13 @@ class TestLiveDataWorkQueue {
     fun givenListOfWorkItems_whenOnChangeCalled_thenAllItemsRunOnce() {
         var mockLiveData = mock<DoorLiveData<List<TestWorkItem>>> {}
         runBlocking {
-            val queue = LiveDataWorkQueue<TestWorkItem>(mockLiveData, {item1, item2 ->  item1.uid == item2.uid}
-            ,numProcessors = 3) {
+            val onStartCounter = AtomicInteger(0)
+            val onStartFn: (TestWorkItem) -> Unit = { onStartCounter.incrementAndGet() }
+            val onFinishCounter = AtomicInteger(0)
+            val onEndFn: (TestWorkItem) -> Unit = { onFinishCounter.incrementAndGet() }
+            val queue = LiveDataWorkQueue<TestWorkItem>(mockLiveData,
+                    {item1, item2 ->  item1.uid == item2.uid},
+                    numProcessors = 3, onItemStarted =  onStartFn, onItemFinished = onEndFn) {
                 it.runMe()
             }
 
@@ -42,6 +47,12 @@ class TestLiveDataWorkQueue {
 
             Assert.assertTrue("All items have been run once",
                     firstListVals.all { it.runCount.get() == 1 })
+
+            Assert.assertEquals("On start fn called for each item in list",
+                    firstListVals.size, onStartCounter.get())
+
+            Assert.assertEquals("On finish fn called for each item in list",
+                    firstListVals.size, onFinishCounter.get())
         }
     }
 

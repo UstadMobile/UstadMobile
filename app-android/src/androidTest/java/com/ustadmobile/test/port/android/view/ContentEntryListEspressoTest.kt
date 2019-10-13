@@ -26,7 +26,6 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import org.hamcrest.Matchers
 import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.IsEqual.equalTo
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -299,7 +298,7 @@ class ContentEntryListEspressoTest {
         val contentEntryFile = Container()
         contentEntryFile.mimeType = "application/zip"
         contentEntryFile.fileSize = 10000
-        contentEntryFile.lastModified = 1540728217
+        contentEntryFile.cntLastModified = 1540728217
         contentEntryFile.containerContentEntryUid = 8
         containerDao.insert(contentEntryFile)
 
@@ -323,7 +322,7 @@ class ContentEntryListEspressoTest {
         val updatedFile = Container()
         updatedFile.mimeType = "application/zip"
         updatedFile.fileSize = 10
-        updatedFile.lastModified = 1540728218
+        updatedFile.cntLastModified = 1540728218
         updatedFile.containerContentEntryUid = 11
         containerDao.insert(updatedFile)
 
@@ -347,7 +346,7 @@ class ContentEntryListEspressoTest {
         val spanishFile = Container()
         spanishFile.mimeType = "application/zip"
         spanishFile.fileSize = 10000
-        spanishFile.lastModified = 1540728218
+        spanishFile.cntLastModified = 1540728218
         spanishFile.containerContentEntryUid = 15
         containerDao.insert(spanishFile)
 

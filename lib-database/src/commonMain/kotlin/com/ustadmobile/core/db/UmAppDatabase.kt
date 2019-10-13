@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 24)
+], version = 25)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -216,8 +216,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     // Content Entry
                     database.execSQL("ALTER TABLE ContentEntry ADD COLUMN imported BOOL")
                     database.execSQL("ALTER TABLE ContentEntry RENAME to ContentEntry_OLD")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContentEntry (  title  TEXT , description  TEXT , entryId  TEXT , author  TEXT , publisher  TEXT , licenseType  INTEGER , licenseName  TEXT , licenseUrl  TEXT , sourceUrl  TEXT , thumbnailUrl  TEXT , lastModified  BIGINT , primaryLanguageUid  BIGINT , languageVariantUid  BIGINT , leaf  BOOL , imported  BOOL , publik  BOOL , contentTypeFlag  INTEGER , contentEntryLocalChangeSeqNum  BIGINT , contentEntryMasterChangeSeqNum  BIGINT , contentEntryLastChangedBy  INTEGER , contentEntryUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("INSERT INTO ContentEntry (contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, imported, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy) SELECT contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, imported, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy FROM ContentEntry_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContentEntry (  title  TEXT , description  TEXT , entryId  TEXT , author  TEXT , publisher  TEXT , licenseType  INTEGER , licenseName  TEXT , licenseUrl  TEXT , sourceUrl  TEXT , thumbnailUrl  TEXT , cntLastModified  BIGINT , primaryLanguageUid  BIGINT , languageVariantUid  BIGINT , leaf  BOOL , imported  BOOL , publik  BOOL , contentTypeFlag  INTEGER , contentEntryLocalChangeSeqNum  BIGINT , contentEntryMasterChangeSeqNum  BIGINT , contentEntryLastChangedBy  INTEGER , contentEntryUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO ContentEntry (contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, cntLastModified, primaryLanguageUid, languageVariantUid, leaf, imported, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy) SELECT contentEntryUid, title, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, cntLastModified, primaryLanguageUid, languageVariantUid, leaf, imported, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy FROM ContentEntry_OLD")
                     database.execSQL("DROP TABLE ContentEntry_OLD")
                     database.execSQL("DROP FUNCTION IF EXISTS inc_csn_42_fn")
                     database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_42")
@@ -591,15 +591,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     // Container
                     database.execSQL("ALTER TABLE Container RENAME to Container_OLD")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Container (  cntLocalCsn  BIGINT , cntMasterCsn  BIGINT , cntLastModBy  INTEGER , fileSize  BIGINT , containerContentEntryUid  BIGINT , lastModified  BIGINT , mimeType  TEXT , remarks  TEXT , mobileOptimized  BOOL , cntNumEntries  INTEGER , containerUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("INSERT INTO Container (containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, lastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, lastModified, mimeType, remarks, mobileOptimized, cntNumEntries FROM Container_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Container (  cntLocalCsn  BIGINT , cntMasterCsn  BIGINT , cntLastModBy  INTEGER , fileSize  BIGINT , containerContentEntryUid  BIGINT , cntLastModified  BIGINT , mimeType  TEXT , remarks  TEXT , mobileOptimized  BOOL , cntNumEntries  INTEGER , containerUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO Container (containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries) SELECT containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries FROM Container_OLD")
                     database.execSQL("DROP TABLE Container_OLD")
                     database.execSQL("DROP FUNCTION IF EXISTS inc_csn_51_fn")
                     database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_51")
                     database.execSQL("""
                     |CREATE 
                     | INDEX cnt_uid_to_most_recent 
-                    |ON Container (containerContentEntryUid, lastModified)
+                    |ON Container (containerContentEntryUid, cntLastModified)
                     """.trimMargin())
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS Container_mcsn_seq")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS Container_lcsn_seq")
@@ -1215,6 +1215,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }
 
+            },
+
+            object : DoorMigration(24, 25) {
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                }
             })
             return builder
         }
@@ -1580,11 +1586,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                           // BEGIN Create Container
                           db.execSql("CREATE SEQUENCE spk_seq_51 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                          db.execSql("CREATE TABLE IF NOT EXISTS  Container  ( containerUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_51') ,  cntLocalCsn  BIGINT,  cntMasterCsn  BIGINT,  cntLastModBy  INTEGER,  fileSize  BIGINT,  containerContentEntryUid  BIGINT,  lastModified  BIGINT,  mimeType  TEXT,  remarks  TEXT,  mobileOptimized  BOOL)")
+                          db.execSql("CREATE TABLE IF NOT EXISTS  Container  ( containerUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_51') ,  cntLocalCsn  BIGINT,  cntMasterCsn  BIGINT,  cntLastModBy  INTEGER,  fileSize  BIGINT,  containerContentEntryUid  BIGINT,  cntLastModified  BIGINT,  mimeType  TEXT,  remarks  TEXT,  mobileOptimized  BOOL)")
                           db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (51, 1, 0, 0)")
                           db.execSql("CREATE OR REPLACE FUNCTION inc_csn_51_fn() RETURNS trigger AS $$ BEGIN UPDATE Container SET cntLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cntLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 51) END),cntMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 51) ELSE NEW.cntMasterCsn END) WHERE containerUid = NEW.containerUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 51; RETURN null; END $\$LANGUAGE plpgsql")
                           db.execSql("CREATE TRIGGER inc_csn_51_trig AFTER UPDATE OR INSERT ON Container FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_51_fn()")
-                          db.execSql("CREATE INDEX  index_Container_lastModified  ON  Container  ( lastModified  )")
+                          db.execSql("CREATE INDEX  index_Container_lastModified  ON  Container  ( cntLastModified  )")
                           //END Create Container (
 
                           //BEGIN Create ContainerEntry
@@ -1661,7 +1667,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                    UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
 
                     UmDbType.TYPE_POSTGRES -> {
-                             db.execSql("ALTER TABLE ContainerEntryFile ADD COLUMN lastModified BIGINT");
+                             db.execSql("ALTER TABLE ContainerEntryFile ADD COLUMN cntLastModified BIGINT");
                       }
                 }
 

@@ -175,6 +175,7 @@
     <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
     <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
+    <string name="download_summary_title">%1$s active downloads</string>
     <string name="download_cancel_all">CANCEL ALL</string>
     <string name="download_cancel_label">Cancel download</string>
     <string name="download_pause_all">PAUSE ALL</string>

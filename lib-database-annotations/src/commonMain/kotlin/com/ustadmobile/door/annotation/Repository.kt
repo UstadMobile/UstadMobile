@@ -1,7 +1,7 @@
 package com.ustadmobile.door.annotation
 
 @Retention(AnnotationRetention.BINARY)
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 
 annotation class Repository(val methodType: Int = 0) {
 
