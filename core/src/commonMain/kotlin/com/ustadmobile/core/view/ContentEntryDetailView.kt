@@ -69,8 +69,6 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("showExportContentIcon")
     fun showExportContentIcon(visible: Boolean)
 
-    fun stopForeGroundService(jobId: Long,cancel: Boolean)
-
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetail"

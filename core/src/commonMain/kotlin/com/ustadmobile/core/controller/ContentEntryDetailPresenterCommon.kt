@@ -267,7 +267,6 @@ abstract class ContentEntryDetailPresenterCommon (context: Any, arguments: Map<S
                 JobStatus.CANCELLING)
         appRepo.contentEntryStatusDao.updateDownloadStatusAsync(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
-        view.stopForeGroundService(currentJobId.toLong(), true)
     }
 
 

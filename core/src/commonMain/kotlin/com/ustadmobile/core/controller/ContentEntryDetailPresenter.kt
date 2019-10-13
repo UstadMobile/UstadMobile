@@ -13,4 +13,5 @@ expect class ContentEntryDetailPresenter (context: Any, arguments: Map<String, S
     :ContentEntryDetailPresenterCommon{
 
     override fun handleDownloadButtonClick()
+
 }
