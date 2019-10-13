@@ -13,21 +13,20 @@ import androidx.core.app.NotificationManagerCompat
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.port.sharedse.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.lib.util.copyOnWriteListOf
-import kotlinx.coroutines.delay
 
 /**
  * This services monitors the download job statuses and act accordingly
@@ -128,11 +127,14 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                     //TODO: set the color
                     //.setColor(ContextCompat.getColor(this, R.color.primary))
                     .setOngoing(true)
-                    .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                     .setAutoCancel(true)
                     .setContentIntent(mNotificationPendingIntent)
                     .setDefaults(Notification.DEFAULT_SOUND)
-                    .setGroup(NOTIFICATION_GROUP_KEY)
+
+            if(canCreateGroupedNotification()) {
+                builder.setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
+                        .setGroup(NOTIFICATION_GROUP_KEY)
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
@@ -221,13 +223,15 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
                 val progress = (status.bytesSoFar.toDouble() / status.totalBytes * 100).toInt()
                 builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
-                builder.setContentText(String.format(impl.getString(
+                contentText = String.format(impl.getString(
                         MessageID.download_downloading_placeholder, this@DownloadNotificationService),
                         UMFileUtil.formatFileSize(bytesSoFar),
-                        UMFileUtil.formatFileSize(totalBytes)))
+                        UMFileUtil.formatFileSize(totalBytes))
+                builder.setContentText(contentText)
 
-                if(doNotifyAfter)
+                if(doNotifyAfter) {
                     doNotify()
+                }
             }
         }
     }
@@ -254,9 +258,6 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         }
 
         fun updateSummary() {
-            val summaryLabel = impl.getString(MessageID.download_downloading_placeholder,
-                    applicationContext)
-
             val totalBytes = activeDownloadJobNotifications.fold(0L, {count, jobNotification ->
                 count + jobNotification.totalBytes
             })
@@ -264,13 +265,26 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 count + jobNotification.bytesSoFar
             })
 
+
             contentTitle = String.format(impl.getString(MessageID.download_summary_title,
                     applicationContext), activeDownloadJobNotifications.size)
+
+            val summaryLabel = impl.getString(MessageID.download_downloading_placeholder,
+                    applicationContext)
             contentText = String.format(summaryLabel,
                     UMFileUtil.formatFileSize(bytesSoFar),
                     UMFileUtil.formatFileSize(totalBytes))
 
-            builder.setSubText(contentTitle)
+
+            builder.setStyle(NotificationCompat.InboxStyle()
+                    .setBigContentTitle(contentTitle)
+                    .setSummaryText(contentText)
+                    .also { inboxStyle ->
+                        activeDownloadJobNotifications.forEach {
+                            inboxStyle.addLine("${it.contentTitle} - ${it.contentText}")
+                        }
+                    })
+
             doNotify()
         }
 
@@ -304,14 +318,13 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         if(intentAction == null)
             return START_STICKY
 
+        var foregroundNotificationHolder = null as NotificationHolder2?
+
         //TODO: for pre-N (non grouped) notifications: should we call startForeground more than once?
         if(intentAction in listOf(ACTION_DOWNLOADJOBITEM_STARTED, ACTION_PREPARE_DOWNLOAD) && !foregroundActive) {
             if(canCreateGroupedNotification()) {
-                summaryNotificationHolder = SummaryNotificationHolder().also {
-                    startForeground(it.notificationId, it.build())
-                }
-
-                foregroundActive = true
+                summaryNotificationHolder = SummaryNotificationHolder()
+                foregroundNotificationHolder = summaryNotificationHolder
             }
         }
 
@@ -320,6 +333,10 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: 0
                 val downloadJobPreparationHolder = DownloadJobPreparerNotificationHolder(downloadJobUid)
                 downloadJobPreparerChannel.offer(downloadJobPreparationHolder)
+
+                if(!foregroundActive && foregroundNotificationHolder == null) {
+                    foregroundNotificationHolder = downloadJobPreparationHolder
+                }
             }
 
             ACTION_DOWNLOADJOBITEM_STARTED -> {
@@ -329,9 +346,19 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 if(downloadJobNotificationHolder == null) {
                     downloadJobNotificationHolder = DownloadJobNotificationHolder(downloadJobUid)
                     activeDownloadJobNotifications.add(downloadJobNotificationHolder)
+                }
+
+                if(!foregroundActive && foregroundNotificationHolder == null) {
+                    foregroundNotificationHolder = downloadJobNotificationHolder
+                }else {
                     downloadJobNotificationHolder.doNotify()
                 }
             }
+        }
+
+        if(!foregroundActive && foregroundNotificationHolder != null) {
+            startForeground(foregroundNotificationHolder.notificationId,
+                    foregroundNotificationHolder.build())
         }
 
         return START_STICKY
