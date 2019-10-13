@@ -235,7 +235,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    fun handleDownloadButtonClick() {
+    fun handleDownloadButtonClick(packageName: String) {
         if (isDownloadComplete) {
 
             val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
@@ -246,13 +246,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             } else {
                 view.showBaseProgressBar(true)
                 ContentEntryUtil.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
-                        context, object : UmCallback<Any> {
+                        context, packageName, object : UmCallback<Any> {
 
                     override fun onSuccess(result: Any?) {
                         view.showBaseProgressBar(false)
                     }
 
                     override fun onFailure(exception: Throwable?) {
+                        view.showBaseProgressBar(false)
                         if (exception != null) {
                             val message = exception.message
                             if (exception is NoAppFoundException) {
@@ -262,7 +263,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                             exception.mimeType!!)
                                 })
                             } else {
-                                view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+
+                                view.runOnUiThread(Runnable {
+                                    view.showFileOpenError(message!!)
+                                })
                             }
                         }
                     }

@@ -30,6 +30,7 @@
  */
 
 package com.ustadmobile.core.impl
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import kotlinx.io.InputStream
 import kotlin.jvm.JvmStatic
 
@@ -163,8 +164,9 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun getManifestPreference(key: String, context: Any): String?
 
 
-    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                         callback: UmCallback<Any>)
+    fun openFileInDefaultViewer(context: Any, path: String?, mimeType: String?, packageName: String?,
+                                compression: Int,
+                                callback: UmCallback<Any>)
 
     /**
      * Get an asset Synchronously

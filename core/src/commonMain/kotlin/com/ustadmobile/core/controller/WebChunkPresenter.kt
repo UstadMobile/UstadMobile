@@ -69,14 +69,14 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
         }
     }
 
-    fun handleUrlLinkToContentEntry(sourceUrl: String) {
+    fun handleUrlLinkToContentEntry(sourceUrl: String, packageName: String) {
         val impl = UstadMobileSystemImpl.instance
 
         ContentEntryUtil.goToContentEntryByViewDestination(
                 sourceUrl,
                 appRepo, impl,
                 true,
-                context, object : UmCallback<Any> {
+                context, packageName, object : UmCallback<Any> {
             override fun onSuccess(result: Any?) {
 
             }
