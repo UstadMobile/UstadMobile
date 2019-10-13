@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
@@ -25,6 +26,7 @@ class LocalAvailabilityManagerImpl(private val context: Any,
             val existingNode = activeNodes.firstOrNull { it.bluetoothMacAddress == bluetoothAddr }
             if(existingNode != null) {
                 existingNode.lastUpdateTimeStamp = getSystemTimeInMillis()
+                UMLog.l(UMLog.INFO, 0, "AvailabilityManager: Discovered node: $bluetoothAddr")
             }else {
                 val networkNode = NetworkNodeWithStatusResponsesAndHistory()
                 networkNode.bluetoothMacAddress = bluetoothAddr

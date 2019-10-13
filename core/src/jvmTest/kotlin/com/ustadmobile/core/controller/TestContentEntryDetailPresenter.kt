@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -66,7 +67,7 @@ class TestContentEntryDetailPresenter {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_FULL_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!, monitor!!, statusProvider!!,umAppRepository)
+                args, mockView!!, statusProvider!!, umAppRepository, mock())
         presenter.onCreate(args)
 
         val argsresult = Hashtable<String,String>()
@@ -89,7 +90,7 @@ class TestContentEntryDetailPresenter {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_NO_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!, monitor!!, statusProvider!!,umAppRepository)
+                args, mockView!!, statusProvider!!,umAppRepository, mock())
         presenter.onCreate(args)
 
         args.remove(UstadMobileSystemCommon.ARG_REFERRER)

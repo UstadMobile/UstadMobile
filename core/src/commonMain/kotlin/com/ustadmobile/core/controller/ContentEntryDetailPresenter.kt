@@ -178,37 +178,25 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
         if (!isDownloadComplete) {
-            val currentTimeStamp = getSystemTimeInMillis()
-//            val minLastSeen = currentTimeStamp - 60000
-//            val maxFailureFromTimeStamp = currentTimeStamp - 300000
-
             GlobalScope.launch {
                 val container = appRepo.containerDao.getMostRecentContainerForContentEntry(entryUuid)
                 if (container != null) {
                     containerUid = container.containerUid
+                    val containerUidList = listOf(containerUid!!)
+                    val availableNowMap = if(localAvailabilityManager != null) {
+                        localAvailabilityManager.areContentEntriesLocallyAvailable(containerUidList)
+                    }else {
+                        mapOf()
+                    }
+
                     view.runOnUiThread(Runnable {
+                        handleLocalAvailabilityStatus(availableNowMap)
                         val request = AvailabilityMonitorRequest(listOf(container.containerUid),
                                 onEntityAvailabilityChanged = this@ContentEntryDetailPresenter::handleLocalAvailabilityStatus)
                         availabilityMonitorRequest = request
                         localAvailabilityManager?.addMonitoringRequest(request)
                     })
-//                    val localNetworkNode = appRepo.networkNodeDao.findLocalActiveNodeByContainerUid(
-//                            containerUid!!, minLastSeen, BAD_NODE_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
-//
-//                    if (localNetworkNode == null && !monitorStatus.value) {
-//                        monitorStatus.value = true
-//                        monitor.startMonitoringAvailability(this,
-//                                listOf(containerUid!!))
-//                    }
-//
-//                    val monitorSet: MutableSet<Long> = view.allKnowAvailabilityStatus as MutableSet<Long>
-//
-//                    monitorSet.add((if (localNetworkNode != null) containerUid else 0L)!!)
-//
-//                    handleLocalAvailabilityStatus(monitorSet)
                 }
-
-
             }
         }
 
