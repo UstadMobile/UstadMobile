@@ -64,7 +64,7 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
         UmAngularUtil.registerTitleChangeListener(this)
-        this.activeState = UmAngularUtil.getActiveMenu(this.routes)
+        this.activeState = UmAngularUtil.getActiveMenu() 
       });
       const currentLocale = this.systemImpl.getAllUiLanguage(this.context)[core.com.ustadmobile.core.impl.UstadMobileSystemCommon.PREFKEY_LOCALE]
       this.umFormLanguage = formBuilder.group({

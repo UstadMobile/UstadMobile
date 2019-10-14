@@ -20,7 +20,7 @@ export class UmAngularUtil {
 
   public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID.toString()
 
-  private static localStorageHandler: any= {};
+  private static storageEventHandler: any = {};
 
   /**
    * Key to be used when toolbar title value changes
@@ -94,27 +94,19 @@ export class UmAngularUtil {
     });
   }
 
-
+  /**
+   * Create custom event to be fired within the app
+   * @param eventType type of event to be fired 
+   * @param component active component
+   */
   private static createEvent(eventType: any, component){
-
-    var originalSetItem = localStorage.setItem;
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
     const dataKey = this.DISPATCH_DATA_CHANGE;
-    localStorage.setItem = function (key, value) {
-      if(key == resourceKey || key == titleKey || key == dataKey){
-        const event = new Event(key);
-        (<any>event).key = key;
-        (<any>event).value = value; 
-        document.dispatchEvent(event);
-      }
-      originalSetItem.apply(this, arguments);
-    };
-
-    this.localStorageHandler[eventType] = event => {
+    this.storageEventHandler[eventType] = function(event) {
       if (event.key == resourceKey) {
-        document.removeEventListener(eventType,this.localStorageHandler[eventType])
-        this.localStorageHandler[eventType] = null;
+        document.removeEventListener(eventType,UmAngularUtil.storageEventHandler[eventType])
+        UmAngularUtil.storageEventHandler[eventType] = null;
         component.onCreate()
       }else if(event.key == titleKey){
         component.setToolbarTitle(event.value)
@@ -130,7 +122,7 @@ export class UmAngularUtil {
    */
   static registerResourceReadyListener(component) {
     this.createEvent(this.DISPATCH_RESOURCE, component)
-    document.addEventListener(this.DISPATCH_RESOURCE, this.localStorageHandler[this.DISPATCH_RESOURCE], false); 
+    document.addEventListener(this.DISPATCH_RESOURCE, this.storageEventHandler[this.DISPATCH_RESOURCE], false); 
     if(component.systemImpl.getString(component.MessageID.app_name, component.context) != ''){
       this.fireResouceReady(true)
     }
@@ -142,7 +134,7 @@ export class UmAngularUtil {
    */
   static registerTitleChangeListener(component) {
     this.createEvent(this.DISPATCH_TITLE, component)
-    document.addEventListener(this.DISPATCH_TITLE, this.localStorageHandler[this.DISPATCH_TITLE], false); 
+    document.addEventListener(this.DISPATCH_TITLE, this.storageEventHandler[this.DISPATCH_TITLE], false); 
   }
 
   /**
@@ -151,7 +143,7 @@ export class UmAngularUtil {
    */
   static registerDataChangeListener(component){
     this.createEvent(this.DISPATCH_DATA_CHANGE, component)
-    document.addEventListener(this.DISPATCH_DATA_CHANGE, this.localStorageHandler[this.DISPATCH_DATA_CHANGE], false); 
+    document.addEventListener(this.DISPATCH_DATA_CHANGE, this.storageEventHandler[this.DISPATCH_DATA_CHANGE], false); 
   }
 
   /**
@@ -159,7 +151,7 @@ export class UmAngularUtil {
    * @param ready indicated if resources are ready or not.
    */
   static fireResouceReady(ready: boolean){
-    localStorage.setItem(this.DISPATCH_RESOURCE,ready+"")
+    this.setItem(this.DISPATCH_RESOURCE, ready+"")
   }
 
   /**
@@ -167,7 +159,29 @@ export class UmAngularUtil {
    * @param data data to be associated with the event
    */
   static fireOnDataChanged(data){
-    localStorage.setItem(this.DISPATCH_DATA_CHANGE,data);
+    this.setItem(this.DISPATCH_DATA_CHANGE,data);
+  }
+
+  static setItem(itemKey, itemValue){
+    const resourceKey = this.DISPATCH_RESOURCE;
+    const titleKey = this.DISPATCH_TITLE;
+    const dataKey = this.DISPATCH_DATA_CHANGE;
+
+    localStorage.setItem(itemKey, itemValue)
+    if(itemKey == resourceKey || itemKey == titleKey || itemKey == dataKey){
+        const event = new Event(itemKey);
+        (<any>event).key = itemKey;
+        (<any>event).value = itemValue; 
+        document.dispatchEvent(event);
+      }
+  }
+
+  static getItem(itemKey): string{
+    return localStorage.getItem(itemKey)
+  }
+
+  static removeItem(itemkey){
+    localStorage.removeItem(itemkey)
   }
 
   /**
@@ -175,7 +189,7 @@ export class UmAngularUtil {
    * @param title new title
    */
   static fireTitleUpdate(title: string){
-     localStorage.setItem(this.DISPATCH_TITLE,title)
+     this.setItem(this.DISPATCH_TITLE,title)
   }
 
   /**
@@ -240,9 +254,8 @@ export class UmAngularUtil {
 
   /**
    * Decide which menu to be highlited based on current opened section
-   * @param routes route map
    */
-  static getActiveMenu(routes): boolean[]{
+  static getActiveMenu(): boolean[]{
     const reportActive = this.getRoutePathParam().path.includes("Report")
     return [!reportActive, reportActive]
   }
@@ -365,7 +378,7 @@ export class UmAngularUtil {
 
   static getMountPath(containerUid: any){
     const uid = containerUid.toString()
-    return localStorage.getItem("contentUrl") + uid +"/"
+    return UmAngularUtil.getItem("contentUrl") + uid +"/"
   }
 
   /**

@@ -47,7 +47,7 @@ export class UmBaseService {
     this.component = component
     this.loadAppConfig().subscribe( configs => {
         Object.keys(configs).forEach(key => {
-          localStorage.setItem(key, configs[key])  
+          UmAngularUtil.setItem(key, configs[key])  
         });
         mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
         this.database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(this.component.context)
@@ -82,7 +82,7 @@ export class UmBaseService {
    */
   preloadResources(fireWhenReady = true){
 
-    localStorage.setItem("contentUrl", localStorage.getItem("doordb.endpoint.url")+"ContainerMount/")
+    UmAngularUtil.setItem("contentUrl", UmAngularUtil.getItem("doordb.endpoint.url")+"ContainerMount/")
   
     if(this.isTestEnv == true){
       combineLatest([
@@ -95,7 +95,7 @@ export class UmBaseService {
         this.http.get<any>("assets/data_xlangmap.json").pipe(map(res => res)),
         this.http.get<any>("assets/data_verbs.json").pipe(map(res => res)),
       ]).subscribe(dataResponse => { 
-        const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl:localStorage["doordb.endpoint.url"]} 
+        const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl: UmAngularUtil.getItem("doordb.endpoint.url")} 
         core.com.ustadmobile.core.impl.UmAccountManager.setActiveAccountWithContext(account, this.component.context)
         this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
 
@@ -114,7 +114,7 @@ export class UmBaseService {
         return this.preloadSystemResources(fireWhenReady)
       })
     }else{
-      localStorage.removeItem("umaccount.personid")
+      UmAngularUtil.removeItem("umaccount.personid")
       return  this.preloadSystemResources(fireWhenReady)
     }
   }
