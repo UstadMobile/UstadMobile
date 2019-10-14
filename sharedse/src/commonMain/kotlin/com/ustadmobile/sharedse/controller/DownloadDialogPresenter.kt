@@ -54,8 +54,6 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private var jobItemManager: DownloadJobItemManager? = null
 
-    private val downloadJobStatus = atomic(0)
-
     private val jobSizeLoading = atomic(false)
 
     private val jobSizeTotals = atomic(null as DownloadJobSizeInfo?)
@@ -86,8 +84,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private suspend fun setup() {
-        currentJobId = appDatabase.downloadJobDao
-                .getLatestDownloadJobUidForContentEntryUid(contentEntryUid)
+        currentJobId = appDatabase.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(contentEntryUid)
 
         if (currentJobId != 0) {
             jobItemManager = networkManagerBle.openDownloadJobItemManager(currentJobId)!!

@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
@@ -14,7 +14,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent extends UmBaseComponent implements
+export class HomeComponent extends UmBaseComponent implements OnDestroy,
  core.com.ustadmobile.core.view.HomeView {
 
   menu_libaries: string;
@@ -27,6 +27,18 @@ export class HomeComponent extends UmBaseComponent implements
   class_open_profile: string;
   supportedLanguages = [];
 
+  public modalOptions: Materialize.ModalOptions = {
+    dismissible: true,
+    opacity: .5, 
+    inDuration: 300,
+    outDuration: 200, 
+    startingTop: '100%', 
+    endingTop: '30%',
+    ready: (modal, trigger) => {
+      this.onDialogReady()
+    } 
+  };
+
   umFormLanguage: FormGroup;
   
   private navigationSubscription: Subscription;
@@ -37,7 +49,7 @@ export class HomeComponent extends UmBaseComponent implements
   activeState = [true, false]
   private presenter: core.com.ustadmobile.core.controller.HomePresenter;
 
-  constructor(private location: Location, umService: UmBaseService,
+  constructor(private location: Location, umService: UmBaseService, private elem: ElementRef,private renderer: Renderer2,
     router: Router, route: ActivatedRoute, private zone:NgZone, formBuilder: FormBuilder) {
     super(umService, router, route);
     this.class_icon_position = this.umService.isLTRDirectionality() ? "left" : "right icon-left-spacing";
@@ -60,14 +72,31 @@ export class HomeComponent extends UmBaseComponent implements
       }); 
   }
 
+  onDialogReady(){
+    let footerElements = this.elem.nativeElement.querySelectorAll('.modal-footer');
+    let dialogContet = this.elem.nativeElement.querySelectorAll('.modal-content');
+    footerElements.forEach(element => {
+      this.renderer.removeChild(this.elem.nativeElement, element)
+    })
+    dialogContet.forEach(element => {
+      this.renderer.removeClass(element, "modal-content");
+    })
+  }
+
 
   ngOnInit() {
     super.ngOnInit()
     this.umFormLanguage.valueChanges.subscribe((form: any) => {
       if (form.language !== "") {
-        this.presenter.handleLanguageSelected(this.supportedLanguages.indexOf(form.language)) 
+        this.onLanguageSelected(form.language)
       }
     });
+  }
+
+  onLanguageSelected(language, bottomSheetModal = null){
+    this.zone.run(()=>{
+      this.presenter.handleLanguageSelected(this.supportedLanguages.indexOf(language))
+    })
   }
 
 
@@ -126,15 +155,6 @@ export class HomeComponent extends UmBaseComponent implements
   setLanguageOption(languageOptions){
     this.zone.run(()=>{
       this.supportedLanguages = UmAngularUtil.kotlinListToJsArray(languageOptions)
-    })
-  }
-
-  restartUI(){
-    UmAngularUtil.kotlinMapToJsArray(this.systemImpl.getAllUiLanguage(this.context)).forEach(language =>{
-      if(language.value == this.umFormLanguage.value.language){
-        localStorage.setItem(this.umService.localeTag, language.key)
-        window.open(UmAngularUtil.getRoutePathParam().origin + "/" + language.key + "/", "_self")
-      }
     })
   }
 

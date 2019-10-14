@@ -33,3 +33,13 @@
   .open-profile{
     cursor: pointer; 
   }
+  .collection-item{
+    border: 0px solid white; 
+    cursor: pointer;
+  }
+
+  .margin-modal{
+    border: 0px solid white !important;
+    margin: 10px !important; 
+  }
+

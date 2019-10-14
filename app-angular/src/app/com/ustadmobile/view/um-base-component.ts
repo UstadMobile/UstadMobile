@@ -20,6 +20,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   showIframe: boolean = true 
   changeColor: boolean = false 
   userProfile: string = "assets/images/guest_user_icon.png"
+  
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
     this.umService.setEnvironment(UmAngularUtil.getRoutePathParam().search.indexOf("test") != -1) 
@@ -61,6 +62,10 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     if(this.showIframe == false){
       window.open(url,'_blank')
     }
+  }
+
+  restartUI(){
+    window.open(UmAngularUtil.getRoutePathParam().origin + "/" + this.systemImpl.getLocale(this.context) + "/", "_self")
   }
 
   truncate(value: string, limit: number = 40, trail: String = '…'): string {

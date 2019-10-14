@@ -18,7 +18,7 @@ export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnIni
     outDuration: 200, 
     startingTop: '100%', 
     endingTop: '30%' 
-  };
+  }; 
 
   constructor() { 
     super();
@@ -32,8 +32,6 @@ export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnIni
     window.open('https://play.google.com/store/apps/details?id=com.toughra.ustadmobile',"_self")
   }
 
-  ngOnDestroy(): void {
-    throw new Error("Method not implemented.");
-  }
+  ngOnDestroy(): void {}
 
 }

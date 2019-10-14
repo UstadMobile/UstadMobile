@@ -24,7 +24,17 @@
     <li><a (click)="navigateTo(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
     <li *ngIf="showReports"> <a (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
     <li > <a (click)="openProfile()"> <span i18n="@@profile">Profile</span></a></li>
+    <li > <a (click)="bottomSheetModal.openModal()"> <span i18n="@@language">Language</span></a></li>
   </mz-dropdown> 
+
+
+  <mz-modal #bottomSheetModal [fixedFooter]="false" [bottomSheet]="false" [options]="modalOptions">
+    <mz-modal-content class="black">
+      <div class="collection margin-modal">
+        <a (click)="onLanguageSelected(language, bottomSheetModal)" class="collection-item" *ngFor="let language of supportedLanguages">{{language}}</a>
+      </div>
+    </mz-modal-content>
+  </mz-modal>
 
 
   <mz-sidenav #sidenav [fixed]=true [edge]="'left'" class="show-on-medium-and-up">

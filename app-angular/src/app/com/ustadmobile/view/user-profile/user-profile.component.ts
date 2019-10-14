@@ -84,15 +84,6 @@ export class UserProfileComponent extends UmBaseComponent implements OnDestroy,
     })
   }
 
-  restartUI(){
-    UmAngularUtil.kotlinMapToJsArray(this.systemImpl.getAllUiLanguage(this.context)).forEach(language =>{
-      if(language.value == this.umFormLanguage.value.language){
-        localStorage.setItem(this.umService.localeTag, language.key)
-        window.open(UmAngularUtil.getRoutePathParam().origin + "/" + language.key + "/", "_self")
-      }
-    })
-  }
-
   showLanguageOptions(){}
 
   logoutUser(){

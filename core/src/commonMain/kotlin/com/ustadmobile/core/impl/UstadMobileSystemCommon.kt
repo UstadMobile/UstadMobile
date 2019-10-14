@@ -154,6 +154,7 @@ open abstract class UstadMobileSystemCommon {
      *
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
+    @JsName("getLocale")
     open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
     @JsName("setLocale")
