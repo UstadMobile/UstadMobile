@@ -126,12 +126,17 @@ abstract class NetworkManagerBleCommon(
     open fun onCreate() {
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
         downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
-                { item1, item2 -> item1.djiUid == item2.djiUid }, mainDispatcher = mainDispatcher) {
+                { item1, item2 -> item1.djiUid == item2.djiUid }, mainDispatcher = mainDispatcher,
+                onItemStarted = this::onDownloadJobItemStarted) {
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
                     umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher).download()
         }
         GlobalScope.launch { downloadJobItemWorkQueue.start() }
+    }
+
+    protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
+
     }
 
     /*override */fun onQueueEmpty() {

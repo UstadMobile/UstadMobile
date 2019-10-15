@@ -59,12 +59,13 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.2.14"
+
+version = "0.2.12.4"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 157
+    ustadVersionCode = 165
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"
@@ -143,6 +144,7 @@ ext {
     version_android_twitter_login = "3.3.0"
     version_android_seismic = "1.0.2"
     version_android_fab_extended = "0.0.4"
+    version_android_rotatelayout = "3.0.0"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

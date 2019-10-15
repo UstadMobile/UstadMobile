@@ -83,7 +83,8 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
             }
             currentPerson!!.username = usernameSet
 
-            currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(passwordSet!!)
+            currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                    encryptPassword(passwordSet!!)
             currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
             GlobalScope.launch {
                 //Update locally
@@ -92,7 +93,8 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
                 //Update on server
                 try {
                     val serverUrl = UmAccountManager.getActiveEndpoint(context)
-                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>() {
+                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+                    {
                         url {
                             takeFrom(serverUrl!!)
                             encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"

@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -43,15 +44,16 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
         registerMessage = findViewById(R.id.activity_register_label)
         registerNow = findViewById(R.id.activity_register_now)
-
-        mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
         mUsernameTextView = findViewById(R.id.activity_login_username)
         mPasswordTextView = findViewById(R.id.activity_login_password)
         mLoginButton = findViewById(R.id.activity_login_button_login)
         mErrorTextView = findViewById(R.id.activity_login_errormessage)
         mProgressBar = findViewById(R.id.progressBar)
+
+        mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
+                this, UstadMobileSystemImpl.instance)
+        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+
         mProgressBar!!.isIndeterminate = true
         mProgressBar!!.scaleY = 3f
         findViewById<View>(R.id.activity_login_button_login).setOnClickListener { evt ->
@@ -70,6 +72,14 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         mUsernameTextView!!.isEnabled = !inProgress
         mLoginButton!!.isEnabled = !inProgress
         mLoginButton!!.background.alpha = if (inProgress) 128 else 255
+    }
+
+    override fun setMessage(message: String) {
+        Toast.makeText(
+                applicationContext,
+                message,
+                Toast.LENGTH_SHORT
+        ).show()
     }
 
     override fun setErrorMessage(errorMessage: String) {

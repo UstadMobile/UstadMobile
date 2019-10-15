@@ -30,6 +30,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
                     "http://localhost", context)!!)
         }
 
+        if(arguments != null && arguments!!.containsKey(ARG_MESSAGE)){
+            view.setErrorMessage(arguments[ARG_MESSAGE]!!)
+        }
+
         val version = impl.getVersion(context)
         view.updateVersionOnLogin(version)
     }
@@ -83,6 +87,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
         private val ARG_NEXT = "next"
 
         val ARG_SERVER_URL = "apiUrl"
+
+        val ARG_MESSAGE = "message"
     }
 
 

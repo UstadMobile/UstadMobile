@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
@@ -24,7 +25,10 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         UmAccountManager.setActiveAccount(UmAccount(0,
                 null, null, null), context)
         val args = HashMap<String, String>()
-        impl.go(HomeView.VIEW_NAME, args, context)
+
+        val firstDest = impl.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, "BasePoint", context)
+        impl.go(firstDest!!, args, context)
     }
 
     fun handleShowLanguageOptions(){

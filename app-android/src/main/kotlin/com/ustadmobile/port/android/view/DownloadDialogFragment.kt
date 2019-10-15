@@ -213,12 +213,12 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         } else if (viewId == R.id.wifi_only_option_holder) {
             val checkboxState = !wifiOnlyView!!.isChecked
             wifiOnlyView!!.isChecked = checkboxState
-            mPresenter!!.handleWiFiOnlyOption(checkboxState)
+            mPresenter!!.handleClickWiFiOnlyOption(checkboxState)
         }
     }
 
     override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        mPresenter!!.handleWiFiOnlyOption(isChecked)
+        mPresenter!!.handleClickWiFiOnlyOption(isChecked)
     }
 
 
@@ -241,6 +241,6 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
     override fun cancelOrPauseDownload(jobId: Long, cancel: Boolean) {
-        activity.stopForeGroundService(jobId, cancel)
+        //TODO: this should be handled using the downloadjobitemmanager, not sent back to the view
     }
 }

@@ -79,6 +79,16 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     var messageIdMap: Map<Int, Int> = mapOf()
 
+    /**
+     * The rotation option is used for app demonstrations where a projector is used. The device
+     * must be in landscape mode when connected to HDMI output. Therefor to project portrait, the
+     * app itself must rotate it's views, and then the projector itself can be placed at a 90
+     * degree angle
+     *
+     * This is implemented by overrinding the setContentView method on UstadBaseActivity
+     */
+    var rotationEnabled: Boolean? = false
+        internal set
 
     private val viewNameToAndroidImplMap = mapOf<String, Any>(
             "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
