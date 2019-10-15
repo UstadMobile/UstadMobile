@@ -850,7 +850,7 @@ object ContentScraperUtil {
 
         val container = Container()
         container.mimeType = fileType
-        container.lastModified = lastModified
+        container.cntLastModified = lastModified
         container.containerContentEntryUid = contentEntry.contentEntryUid
         container.mobileOptimized = mobileOptimized
         container.containerUid = containerDao.insert(container)
@@ -1311,9 +1311,7 @@ object ContentScraperUtil {
     fun getLastModifiedOfFileFromContentEntry(childEntry: ContentEntry, containerDao: ContainerDao): Long {
 
         val container = containerDao.getMostRecentContainerForContentEntry(childEntry.contentEntryUid)
-        return if (container != null) {
-            container.lastModified
-        } else -1
+        return container?.cntLastModified ?: -1
 
     }
 

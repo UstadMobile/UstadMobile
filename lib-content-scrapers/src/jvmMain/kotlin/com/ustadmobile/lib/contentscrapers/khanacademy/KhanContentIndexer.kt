@@ -351,8 +351,6 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             UMLogUtil.logDebug(args[0])
             UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
 
-            // UMLogUtil.logError(args[1]);
-
             try {
                 val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
 

@@ -211,6 +211,7 @@ object ScraperConstants {
     const val EMPTY_SPACE = " "
     const val FORWARD_SLASH = "/"
     const val KHAN = "Khan Academy"
+    const val GDL = "Global Digital Library"
 
     const val TIME_OUT_SELENIUM = 500
 
@@ -253,6 +254,13 @@ object ScraperConstants {
         VIDEO("Video"),
         EXERCISE("Exercise"),
         ARTICLE("Article")
+    }
+
+    enum class GDLContentType constructor(val type: String){
+        ROOT("ROOT"),
+        ENTRY("ENTRY"),
+        LANGPAGE("LANG_PAGE"),
+        CONTENT("CONTENT")
     }
 
     enum class VoaContentType private constructor(val type: String) {
