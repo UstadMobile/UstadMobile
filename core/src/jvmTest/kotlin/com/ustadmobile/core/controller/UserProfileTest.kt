@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -52,7 +53,10 @@ class UserProfileTest {
 
         presenter.handleUserLogout()
 
-        verify(impl).go(eq(HomeView.VIEW_NAME), any(), any())
+        val firstDest = impl.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, "BasePoint", context)
+
+        verify(impl).go(eq(firstDest!!), any(), any())
     }
 
 
