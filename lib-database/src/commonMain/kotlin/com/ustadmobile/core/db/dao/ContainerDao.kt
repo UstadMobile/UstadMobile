@@ -2,10 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 @Dao
@@ -18,19 +20,19 @@ abstract class ContainerDao : BaseDao<Container> {
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
            // "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
-            "ORDER BY Container.lastModified DESC LIMIT 1")
+            "ORDER BY Container.cntLastModified DESC LIMIT 1")
     @JsName("getMostRecentDownloadedContainerForContentEntryAsync")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "ORDER BY Container.lastModified DESC LIMIT 1")
+            "ORDER BY Container.cntLastModified DESC LIMIT 1")
     @JsName("getMostRecentContainerForContentEntry")
     abstract fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
 
     @Query("SELECT Container.fileSize FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +
-            "ORDER BY Container.lastModified DESC LIMIT 1")
+            "ORDER BY Container.cntLastModified DESC LIMIT 1")
     @JsName("getFileSizeOfMostRecentContainerForContentEntry")
     abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long
 
@@ -42,7 +44,7 @@ abstract class ContainerDao : BaseDao<Container> {
     @Query("SELECT recent.* " +
             "FROM Container recent LEFT JOIN Container old " +
             "ON (recent.containerContentEntryUid = old.containerContentEntryUid " +
-            "AND recent.lastModified < old.lastModified) " +
+            "AND recent.cntLastModified < old.cntLastModified) " +
             "WHERE old.containerUid IS NULL " +
             "AND recent.containerContentEntryUid IN (:contentEntries)")
     @JsName("findRecentContainerToBeMonitoredWithEntriesUid")
@@ -50,7 +52,7 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +
-            "ORDER BY Container.lastModified DESC")
+            "ORDER BY Container.cntLastModified DESC")
     @JsName("findFilesByContentEntryUid")
     abstract suspend fun findFilesByContentEntryUid(contentEntryUid: Long): List<Container>
 
@@ -107,7 +109,10 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "ORDER BY Container.lastModified DESC LIMIT 1")
+            "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entries: List<Container>)
 
 }

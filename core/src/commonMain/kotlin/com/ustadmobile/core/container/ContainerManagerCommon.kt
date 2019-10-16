@@ -75,7 +75,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
     fun copyToNewContainer(): ContainerManager {
         val newContainer = Container()
         newContainer.fileSize = container.fileSize
-        newContainer.lastModified = getSystemTimeInMillis()
+        newContainer.cntLastModified = getSystemTimeInMillis()
         newContainer.cntNumEntries = pathToEntryMap.size
         newContainer.containerContentEntryUid = container.containerContentEntryUid
         newContainer.mimeType = container.mimeType

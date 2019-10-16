@@ -11,7 +11,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
-        value = ["containerContentEntryUid", "lastModified"])))
+        value = ["containerContentEntryUid", "cntLastModified"])))
 @SyncableEntity(tableId = 51)
 @Serializable
 open class Container() {
@@ -33,7 +33,7 @@ open class Container() {
     var containerContentEntryUid: Long = 0
 
     @ColumnInfo(index = true)
-    var lastModified: Long = 0
+    var cntLastModified: Long = 0
 
     var mimeType: String? = null
 

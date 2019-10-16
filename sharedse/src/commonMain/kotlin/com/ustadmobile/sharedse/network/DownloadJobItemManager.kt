@@ -45,7 +45,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             withContext(coroutineScope) {
                 while (true) {
                     delay(1000)
-                    doCommit()
+                    commit()
                 }
             }
         }
@@ -115,7 +115,6 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     }
 
     suspend fun updateStatus(djiUid: Int, status: Int) {
-        //executor.execute {
         withContext(coroutineScope) {
             val updatedItems = mutableListOf<DownloadJobItemStatus>()
             val djStatus = jobItemUidToStatusMap[djiUid]
@@ -144,6 +143,18 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                     db.downloadJobDao.updateStatus(downloadJobUid, updatedRoot.status)
                 }
             }
+        }
+    }
+
+    suspend fun updateJobAndItemStatus(newInactiveStatus: Int, newActiveStatus: Int = -1) {
+        withContext(coroutineScope) {
+            jobItemUidToStatusMap.forEach {
+                if(newInactiveStatus != -1 && it.value.status < JobStatus.WAITING_MIN) {
+                    it.value.status = newInactiveStatus
+                }
+            }
+            db.downloadJobDao.updateStatus(downloadJobUid, newInactiveStatus)
+            db.downloadJobItemDao.updateJobItemStatusList(jobItemUidToStatusMap.values.toList())
         }
     }
 
@@ -251,13 +262,13 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     suspend fun commit() {
         withContext(coroutineScope) {
-            doCommit()
+            doCommit(progressChangedItems.toList())
+            progressChangedItems.clear()
         }
     }
 
-    private fun doCommit() {
-        db.downloadJobItemDao.updateDownloadJobItemsProgress(progressChangedItems.toList())
-        progressChangedItems.clear()
+    private fun doCommit(itemsToCommit: List<DownloadJobItemStatus>) {
+        db.downloadJobItemDao.updateDownloadJobItemsProgress(itemsToCommit)
     }
 
     fun close() {

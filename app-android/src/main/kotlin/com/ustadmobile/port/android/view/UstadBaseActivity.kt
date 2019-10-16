@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -186,6 +187,21 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         shakeDetector = ShakeDetector(this)
 
+    }
+
+    /**
+     * We intercept this to implement app-wide rotation for presentation purposes.
+     *
+     * See UstadMobileSystemImpl.rotationEnabled for details
+     */
+    override fun setContentView(layoutResID: Int) {
+        if(UstadMobileSystemImpl.instance.rotationEnabled ?: false) {
+            super.setContentView(R.layout.activity_rotatelayoutroot)
+            LayoutInflater.from(this).inflate(layoutResID,
+                    findViewById(R.id.activity_rotatelayout), true)
+        }else {
+            super.setContentView(layoutResID)
+        }
     }
 
     override fun hearShake() {
@@ -566,19 +582,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
                 }
             }
         }
-    }
-
-    /**
-     * Stop current runing notification fore ground service
-     */
-    open fun stopForeGroundService(jobId: Long, cancel: Boolean) {
-        val notificationServiceIntent = Intent(this, DownloadNotificationService::class.java)
-        notificationServiceIntent.action = if (cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
-        else DownloadNotificationService.ACTION_PAUSE_DOWNLOAD
-        notificationServiceIntent.putExtra(DownloadNotificationService.JOB_ID_TAG, jobId)
-        val servicePendingIntent = PendingIntent.getService(applicationContext,
-                0, notificationServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        servicePendingIntent.send()
     }
 
     /**

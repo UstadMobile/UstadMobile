@@ -12,6 +12,7 @@ import io.ktor.routing.Route
 import javax.tools.Diagnostic
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorDatabase
+import io.ktor.client.HttpClient
 import kotlin.reflect.KClass
 
 /**
@@ -234,6 +235,26 @@ class DbProcessorSync: AbstractDbProcessor() {
                 "${dbClassName.simpleName}$SUFFIX_SYNCDAO_ABSTRACT")
         val repoTypeSpec = newRepositoryClassBuilder(daoClassName, false)
                 .addSuperinterface(DoorDatabaseSyncRepository::class as KClass<*>)
+                .addProperty(PropertySpec.builder("auth", String::class)
+                        .getter(FunSpec.getterBuilder().addCode("return %S\n", "").build())
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
+                .addProperty(PropertySpec.builder("clientId", INT)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder().addCode("return _findSyncNodeClientId()\n")
+                        .build()).build())
+                .addProperty(PropertySpec.builder("dbPath", String::class)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder().addCode("return _dbPath\n").build())
+                        .build())
+                .addProperty(PropertySpec.builder("endpoint", String::class)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder().addCode("return _endpoint\n").build())
+                        .build())
+                .addProperty(PropertySpec.builder("httpClient", HttpClient::class)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
+                        .build())
 
         val syncFnCodeBlock = CodeBlock.builder()
 

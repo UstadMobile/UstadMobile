@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
@@ -147,9 +148,12 @@ class UserProfilePresenter(context: Any,
 
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
-                "", "", ""), context)
+                null, null, null), context)
         val args = HashMap<String, String>()
-        impl.go(HomeView.VIEW_NAME, args, context)
+
+        val firstDest = impl.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, "BasePoint", context)
+        impl.go(firstDest!!, args, context)
     }
 
     fun handleShowLanguageOptions(){

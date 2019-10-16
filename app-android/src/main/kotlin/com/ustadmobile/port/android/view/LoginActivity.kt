@@ -157,7 +157,7 @@ class LoginActivity : UstadBaseActivity(), LoginView,
                     assignToFingerprint = isChecked})
 
         findViewById<View>(R.id.activity_login_button_login).setOnClickListener { evt ->
-//            mPresenter!!.handleClickLogin(mUsernameTextView!!.text.toString(),
+            //            mPresenter!!.handleClickLogin(mUsernameTextView!!.text.toString(),
 //                    mPasswordTextView!!.text.toString(), mServerUrl!!, assignToFingerprint)
             mPresenter!!.handleClickLogin(mUsernameTextView.text.toString(),
                     mPasswordTextView.text.toString(), mServerUrl!!)

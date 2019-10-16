@@ -128,13 +128,12 @@ kotlin {
                 implementation project(":lib-database-android")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-                implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+                implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation project(":lib-database-android")
 
                 implementation "androidx.room:room-runtime:$version_android_room"
-
-                implementation "android.arch.work:work-runtime:$version_android_workmanager"
 
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
@@ -203,6 +202,7 @@ kotlin {
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
                 api project(":lib-database-mpp")
+                api project(":app-ktor-server")
 
             }
 

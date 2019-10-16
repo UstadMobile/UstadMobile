@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
+import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.GOOGLE_DRIVE_LINK
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -118,6 +119,30 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     }
 
     @Test
+    fun givenWhenHandleUrlTextUpdated_whenInvalidGoogleDriveLink_showUnSupportedContent() {
+
+
+        mockWebServer.start()
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "video/")
+                .setHeader("location", mockWebServer.url("/noVideoHere"))
+                .setResponseCode(302))
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "audio/")
+                .setResponseCode(200))
+
+        GOOGLE_DRIVE_LINK = mockWebServer.url("/google.drive.com").toString()
+
+        presenter.handleUrlTextUpdated(mockWebServer.url("/google.drive.com").toString())
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_content_not_supported, context))
+
+
+    }
+
+
+    @Test
     fun givenWhenHandleUrlTextUpdated_whenContentSupportedButNotH5P_showInvalidUrl() {
 
         mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
@@ -154,7 +179,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.enqueue(MockResponse().setBody("no h5p here"))
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
-        
+
         presenter.handleUrlTextUpdated(url)
         verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
 
@@ -164,7 +189,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @Test
     fun givenWhenHandleUrlTextUpdated_whenVideoSizeIsTooBig_showErrorMessageWithFileSize() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", FILE_SIZE).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-length", FILE_SIZE).setHeader("Content-Type", "video/").setResponseCode(200))
         mockWebServer.start()
 
         presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
@@ -175,7 +200,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @Test
     fun givenWhenHandleUrlTextUpdated_whenValidVideo_showEditTitleToUser() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-length", 11).setHeader("content-type", "video/").setResponseCode(200))
         mockWebServer.start()
 
         presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
@@ -187,7 +212,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @Test
     fun givenWhenHandleUrlTextUpdated_whenHp5_showValidAndNoMessage() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-type", "text/html; charset=utf-8").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration"))
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
@@ -206,7 +231,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @Test
     fun givenUserClicksDone_whenH5PLinkIsValid_thenDownloadContent() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "text/html; charset=utf-8").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-type", "text/html; charset=utf-8").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
@@ -229,7 +254,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @Test
     fun givenUserClicksDone_whenVideoLinkValid_thenShowErrorIfUserDidntEnterTitle() {
 
-        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setHeader("content-length", 11).setHeader("content-type", "video/").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
@@ -247,8 +272,8 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @Test
     fun givenUserClicksDone_whenVideoLinkValidAndTitleEntered_thenDownloadContent() {
 
-        mockWebServer.enqueue(MockResponse().addHeader("Content-Length", 11).addHeader("Content-Type", "video/").setResponseCode(200))
-        mockWebServer.enqueue(MockResponse().addHeader("Content-Length", 11).addHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().addHeader("content-length", 11).addHeader("content-type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().addHeader("content-length", 11).addHeader("content-type", "video/").setResponseCode(200))
         mockWebServer.enqueue(MockResponse().setBody("data"))
         mockWebServer.start()
         val url = mockWebServer.url("/somehp5here").toString()
@@ -290,7 +315,6 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             verify(mockView, timeout(5000)).enableDisableEditText(true)
             verify(mockView, timeout(5000)).showHideErrorMessage(true)
         }
-
 
 
     }

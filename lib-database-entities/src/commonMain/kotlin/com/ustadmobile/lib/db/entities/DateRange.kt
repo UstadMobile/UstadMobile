@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
+
 @SyncableEntity(tableId = 17)
 @Entity
 @Serializable
@@ -25,8 +26,6 @@ class DateRange() {
     @LastChangedBy
     var dateRangLastChangedBy: Int = 0
 
-    var dateRangeActive: Boolean = true
-
     var dateRangeFromDate: Long = 0
 
     var dateRangeToDate: Long = 0
@@ -36,6 +35,8 @@ class DateRange() {
     var dateRangeName: String? = null
 
     var dateRangeDesc: String? = null
+
+    var dateRangeActive: Boolean = true
 
     constructor(fromDate: Long, toDate: Long): this() {
         this.dateRangeFromDate = fromDate

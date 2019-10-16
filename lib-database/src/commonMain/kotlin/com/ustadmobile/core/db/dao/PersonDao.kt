@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -52,8 +53,7 @@ abstract class  PersonDao : BaseDao<Person> {
         }
     }
 
-    @UmRestAccessible
-    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {
         if (newPerson.username.isNullOrBlank())
             throw IllegalArgumentException("New person to be registered has null or blank username")
@@ -68,6 +68,38 @@ abstract class  PersonDao : BaseDao<Person> {
             return onSuccessCreateAccessTokenAsync(newPerson.personUid, newPerson.username!!)
         } else {
             throw IllegalArgumentException("Username already exists")
+        }
+    }
+
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    open suspend fun registerUser(firstName: String, lastName: String, email:String,
+                                  username:String, password: String): Long {
+        val newPerson = Person()
+        newPerson.firstNames = firstName
+        newPerson.lastName = lastName
+        newPerson.emailAddr = email
+        newPerson.username = username
+
+        if (newPerson.username.isNullOrBlank()) {
+            print("New person to be registered has null or blank username")
+            return 0
+
+        }else {
+
+            val person = findUidAndPasswordHashAsync(newPerson.username ?: "")
+            if (person == null) {
+                //OK to go ahead and create
+                newPerson.personUid = insert(newPerson)
+                val newPersonAuth = PersonAuth(newPerson.personUid,
+                        ENCRYPTED_PASS_PREFIX + encryptPassword(password))
+                insertPersonAuth(newPersonAuth)
+                println("New Person uid: " + newPerson.personUid)
+
+                return newPerson.personUid
+            } else {
+                print("Username already exists")
+                return 0
+            }
         }
     }
 

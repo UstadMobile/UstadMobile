@@ -17,8 +17,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +30,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                                                                private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
                                                                private val managerAndroidBle: NetworkManagerBle)
-    : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
+    : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
         LocalAvailabilityListener, OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
@@ -45,7 +44,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
      */
     private val uniqueContainerUidsListTobeMonitored: List<Long>
         get() {
-            val currentDisplayedEntryList = if (currentList == null) ArrayList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() else currentList
+            val currentDisplayedEntryList = if (currentList == null) ArrayList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>() else currentList
             val uidsToMonitor = ArrayList<Long>()
             for (entry in currentDisplayedEntryList!!) {
 
@@ -333,14 +332,14 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.ARTICLE_TYPE] = R.drawable.ic_newspaper
         }
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {
-            override fun areItemsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
-                                         newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>() {
+            override fun areItemsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid,
+                                         newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid): Boolean {
                 return oldItem.contentEntryUid == newItem.contentEntryUid
             }
 
-            override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
-                                            newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
+            override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid,
+                                            newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid): Boolean {
                 if (if (oldItem.title != null) oldItem.title != newItem.title else newItem.title != null) {
                     return false
                 }

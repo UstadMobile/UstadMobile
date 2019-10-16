@@ -67,7 +67,7 @@ object ContentTypeUtil {
                 contentEntry.imported = true
 
                 val container = Container(contentEntry)
-                container.lastModified = System.currentTimeMillis()
+                container.cntLastModified = System.currentTimeMillis()
                 container.fileSize = file.length()
                 container.mimeType = mimeType
                 container.containerUid = appRepo.containerDao.insert(container)

@@ -26,7 +26,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @RawQuery
     abstract fun getListResults(query: DoorQuery): List<ReportListData>
 
-    data class ReportData(var yAxis: Float = 0f, var xAxis: String = "", var subgroup: String = "")
+    data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
 
-    data class ReportListData(var name: String = "", var verb: String = "", var result: Byte = 0.toByte(), var whenDate: Long = 0L)
+    data class ReportListData(var name: String? = "", var verb: String? = "", var result: Byte = 0.toByte(), var whenDate: Long = 0L)
 }

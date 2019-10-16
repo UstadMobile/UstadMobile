@@ -8,8 +8,6 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
@@ -52,7 +50,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
         val container = Container()
         container.containerContentEntryUid = contentEntryUid
-        container.lastModified = System.currentTimeMillis()
+        container.cntLastModified = System.currentTimeMillis()
         container.mimeType = MIME_TYPE_DOCUMENT
         container.containerUid = repository.containerDao.insert(container)
         containerUid = container.containerUid

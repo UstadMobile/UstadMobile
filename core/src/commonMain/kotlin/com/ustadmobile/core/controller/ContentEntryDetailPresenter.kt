@@ -307,7 +307,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 JobStatus.CANCELLING)
         appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
-        view.stopForeGroundService(currentJobId.toLong(), true)
     }
 
 

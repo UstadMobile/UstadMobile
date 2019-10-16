@@ -100,6 +100,9 @@ abstract class ExampleDao2 {
     abstract fun rawQueryForList(query: DoorQuery): List<ExampleEntity2>
 
     @RawQuery
+    abstract fun rawQueryForListWithEmbeddedVals(query: DoorQuery): List<ExampleEntity2WithExampleLinkEntity>
+
+    @RawQuery
     abstract fun rawQueryForSingleValue(query: DoorQuery): ExampleEntity2?
 
     @Query("SELECT * FROM ExampleEntity2")

@@ -8,7 +8,6 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-
 @SyncableEntity(tableId = 11)
 @Entity
 @Serializable

@@ -16,29 +16,32 @@ object JobStatus {
 
     //Waiting type statuses - 1-10
 
+    const val NEEDS_PREPARED = 1
 
-    const val PAUSED = 1
+    const val PREPARING = 2
+
+    const val PAUSED = 3
 
     /**
      * The minimum value of waiting type statuses e.g. queued, waiting for connection, etc. (inclusive)
      */
-    const val WAITING_MIN = 2
+    const val WAITING_MIN = 4
 
     /**
      * The maximum value of waiting type statuses - e.g.
      */
     const val WAITING_MAX = 10
 
-    const val QUEUED = 3
+    const val QUEUED = 4
 
     /**
      * Waiting for a connection. Could be waiting for Wifi / p2p availability if the download job
      * should complete without using mobile data. Could also be waiting for any kind of network if
      * the job does not depend on wifi.
      */
-    const val WAITING_FOR_CONNECTION = 4
+    const val WAITING_FOR_CONNECTION = 5
 
-    const val WAIT_FOR_RETRY = 5
+    const val WAIT_FOR_RETRY = 6
 
     //Running statuses - 11-20
 
