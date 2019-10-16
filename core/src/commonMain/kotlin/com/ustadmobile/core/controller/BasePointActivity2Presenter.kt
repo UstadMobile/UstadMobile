@@ -97,7 +97,7 @@ class BasePointActivity2Presenter
     fun handleLogOut() {
         UmAccountManager.setActiveAccount(null!!, context)
         val args = HashMap<String, String>()
-        impl.go(Login2View.VIEW_NAME, args, context)
+        impl.go(LoginView.VIEW_NAME, args, context)
     }
 
     /**

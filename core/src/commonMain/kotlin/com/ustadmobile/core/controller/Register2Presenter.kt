@@ -130,7 +130,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
                         val args = HashMap<String, String?>()
                         val userCreatedString = systemImpl.getString(
                                 MessageID.created_user, context) + " : " + person.username
-                        args.put(Login2Presenter.ARG_MESSAGE, userCreatedString)
+                        args.put(LoginPresenter.ARG_MESSAGE, userCreatedString)
                         systemImpl.go(LoginView.VIEW_NAME, args, context)
                     }
 

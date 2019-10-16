@@ -49,6 +49,9 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER, "false", context)!!.toBoolean()
 
         view.setRegistrationLinkVisible(showRegisterLink)
+
+        val version = impl.getVersion(context)
+        view.updateVersionOnLogin(version)
     }
 
     @JsName("handleClickLogin")

@@ -24,6 +24,12 @@ interface LoginView : UstadView {
 
     fun setMessage(message:String)
 
+    fun setFinishAfficinityOnView()
+
+    fun forceSync()
+
+    fun updateVersionOnLogin(version: String)
+
     companion object {
 
         const val VIEW_NAME = "Login"

@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -7,12 +8,17 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
+import org.acra.util.ToastSender
+import java.util.concurrent.TimeUnit
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
@@ -26,6 +32,8 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
     private var mErrorTextView: TextView? = null
 
+    private var mVersionTextView: TextView? = null
+
     private var mProgressBar: ProgressBar? = null
 
     private var mLoginButton: Button? = null
@@ -36,7 +44,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login2)
+        setContentView(R.layout.activity_login)
 
         setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
@@ -48,6 +56,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         mPasswordTextView = findViewById(R.id.activity_login_password)
         mLoginButton = findViewById(R.id.activity_login_button_login)
         mErrorTextView = findViewById(R.id.activity_login_errormessage)
+        mVersionTextView = findViewById(R.id.activity_login_version)
         mProgressBar = findViewById(R.id.progressBar)
 
         mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
@@ -83,6 +92,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
     }
 
     override fun setErrorMessage(errorMessage: String) {
+        mErrorTextView!!.setTextColor(getResources().getColor(android.R.color.holo_red_dark))
         mErrorTextView!!.visibility = View.VISIBLE
         mErrorTextView!!.text = errorMessage
     }
@@ -99,6 +109,16 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         mPasswordTextView!!.text = password
     }
 
+    override fun updateVersionOnLogin(version: String) {
+        mVersionTextView!!.visibility = View.VISIBLE
+        mVersionTextView!!.setTextColor(getResources().getColor(R.color.text_primary))
+        mVersionTextView!!.text = version
+    }
+
+    override fun setFinishAfficinityOnView() {
+        runOnUiThread { finishAffinity() }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             finish()
@@ -112,5 +132,20 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         val visibility = if(visible) View.VISIBLE else View.GONE
         registerMessage.visibility = visibility
         registerNow.visibility = visibility
+    }
+
+    override fun forceSync() {
+        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG)
+        UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(100, TimeUnit.MILLISECONDS,
+                ExistingWorkPolicy.APPEND)
+        ToastSender.sendToast(applicationContext, "Sync started", 42)
+        WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
+                this, Observer{ workInfos ->
+            for (wi in workInfos) {
+                if (wi.getState().isFinished()) {
+                    ToastSender.sendToast(applicationContext, "Sync finished", 42)
+                }
+            }
+        })
     }
 }

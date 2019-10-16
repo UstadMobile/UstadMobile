@@ -118,7 +118,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
             //IRC:
             BasePointView2.VIEW_NAME to Class.forName("${ PACKAGE_NAME}BasePointActivity2"),
-            Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
             ClassDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzDetailActivity"),
             ClassLogDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzLogDetailActivity"),
             PersonDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonDetailActivity"),

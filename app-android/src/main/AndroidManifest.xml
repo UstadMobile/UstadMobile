@@ -106,9 +106,6 @@
         <activity android:name="com.ustadmobile.port.android.view.BasePointActivity2"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
-        <activity android:name="com.ustadmobile.port.android.view.Login2Activity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
         <activity android:name="com.ustadmobile.port.android.view.DownloadDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
