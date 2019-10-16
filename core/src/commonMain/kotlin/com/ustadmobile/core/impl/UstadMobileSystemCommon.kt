@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.AddScheduleDialogView
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.PersonWithSaleInfoListView
 import kotlinx.io.InputStream

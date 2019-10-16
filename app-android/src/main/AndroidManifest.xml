@@ -176,6 +176,11 @@
             android:label="@string/users"
             android:theme="@style/Theme.UstadTheme"/>
 
+        <activity
+            android:name="com.ustadmobile.port.android.view.Login2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login" />
+
         <!-- End of Goldozi-->
 
         <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity" />
@@ -193,9 +198,6 @@
 
         <!-- IRC -->
         <activity android:name="com.ustadmobile.port.android.view.BasePointActivity2"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-        <activity android:name="com.ustadmobile.port.android.view.Login2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity android:name="com.ustadmobile.port.android.view.DownloadDialogFragment"

@@ -105,7 +105,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
-            LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}LoginActivity"),
+            LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
             AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
@@ -146,8 +146,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
 
             //IRC:
-            BasePointView2.VIEW_NAME to Class.forName("${ PACKAGE_NAME}BasePointActivity2"),
-            //Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
+            BasePointView2.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity2"),
             ClassDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzDetailActivity"),
             ClassLogDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzLogDetailActivity"),
             PersonDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonDetailActivity"),

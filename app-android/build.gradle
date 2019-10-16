@@ -372,7 +372,7 @@ dependencies {
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
 
-<<<<<<< HEAD
+
     //Goldozi specific//
 
     //Bottom Navigation
@@ -404,10 +404,9 @@ dependencies {
 
 
     //end of Goldozi speicific//
-=======
+
     //Implements app-wide rotation for presentation mode
     implementation "rongi.rotate-layout:rotate-layout:$version_android_rotatelayout"
->>>>>>> dev-kmp-irc-sprint6
 
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"

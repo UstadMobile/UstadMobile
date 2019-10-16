@@ -19,13 +19,16 @@ interface LoginView : UstadView {
     @JsName("setPassword")
     fun setPassword(password: String)
 
-    fun forceSync()
+    @JsName("setRegistrationLinkVisible")
+    fun setRegistrationLinkVisible(visible: Boolean)
 
-    fun updateLastActive()
-
-    fun updateUsername(username: String)
+    fun setMessage(message:String)
 
     fun setFinishAfficinityOnView()
+
+    fun forceSync()
+
+    fun updateVersionOnLogin(version: String)
 
     companion object {
 

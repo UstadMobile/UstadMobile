@@ -93,8 +93,7 @@ class UserProfilePresenter(context: Any,
     }
 
     fun handleClickLogout() {
-        //TODO: KMP Check this
-        val emptyAcccount = UmAccount(0, null, null, null)
+        val emptyAcccount = UmAccount(0, "", "", "")
         UmAccountManager.setActiveAccount(emptyAcccount, context)
         UmAccountManager.updatePasswordHash(null, context, impl)
         impl.setAppPref(UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME, "", context)
@@ -148,7 +147,7 @@ class UserProfilePresenter(context: Any,
 
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
-                null, null, null), context)
+                "", "", ""), context)
         val args = HashMap<String, String>()
 
         val firstDest = impl.getAppConfigString(
