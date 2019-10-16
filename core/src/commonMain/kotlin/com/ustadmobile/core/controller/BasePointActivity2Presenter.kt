@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.NavigationItem
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.Login2View.Companion.ARG_STARTSYNCING
+import com.ustadmobile.core.view.LoginView.Companion.ARG_STARTSYNCING
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.Runnable
