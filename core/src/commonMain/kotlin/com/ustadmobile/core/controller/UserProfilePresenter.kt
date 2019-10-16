@@ -23,7 +23,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
 
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
-                null, null, null), context)
+                "", "", ""), context)
         val args = HashMap<String, String>()
 
         val firstDest = impl.getAppConfigString(
