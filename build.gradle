@@ -72,9 +72,9 @@ ext {
     version_kotlinx_serialization = "0.11.0"
     version_klock = "1.4.0"
     version_kmp = "0.0.2"
-    version_ktor = "1.2.2"
+    version_ktor = "1.2.3"
     version_coroutines = "1.2.2"
-    version_atomicfu = "0.12.8"
+    version_atomicfu = "0.12.9"
     version_krypto = "1.0.1"
 
     version_junit = "4.12"

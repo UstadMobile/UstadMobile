@@ -289,8 +289,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
         internal fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
             if (status != null && status.contentEntryUid == contentEntryUid) {
-                UMLog.l(UMLog.DEBUG, 420, "ContentEntryList update " +
-                        "entryUid " + status.contentEntryUid)
                 activity.runOnUiThread {
                     downloadView.progress = if (status.totalBytes > 0)
                         (status.bytesSoFar * 100 / status.totalBytes).toInt()

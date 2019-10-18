@@ -39,6 +39,7 @@ import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
@@ -113,7 +114,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     private var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager? = null
 
-    private lateinit var managerHelper : NetworkManagerBleHelper
+    internal lateinit var managerHelper : NetworkManagerBleHelper
 
     @Volatile
     private var bleAdvertisingLastStartTime: Long = 0
@@ -123,11 +124,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     private val wifiDirectRequestLastCompletedTime = AtomicLong()
 
     private val numActiveRequests = AtomicInteger()
-
-
-    init {
-        startMonitoringNetworkChanges()
-    }
 
     /**
      * Receiver to handle bluetooth state changes
@@ -295,6 +291,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             override fun onReceive(context: Context, intent: Intent) {
                 networkManager.wifiP2pManager!!.requestGroupInfo(
                         networkManager.wifiP2pChannel) { group ->
+                    UMLog.l(UMLog.DEBUG, 0, "NetworkManagerBle: WiFi direct group " +
+                            "broadcast received: group = $group")
                     wiFiDirectGroup.set(if (group != null)
                         WifiDirectGroupAndroid(group,
                                 networkManager.httpd.listeningPort)
@@ -331,10 +329,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             networkManager.wifiP2pManager!!.requestGroupInfo(networkManager.wifiP2pChannel
             ) { wifiP2pGroup ->
                 if (wifiP2pGroup != null) {
-                    wiFiDirectGroup.set(WifiDirectGroupAndroid(wifiP2pGroup,
-                            networkManager.httpd.listeningPort))
+                    val existingGroup = WifiDirectGroupAndroid(wifiP2pGroup,
+                            networkManager.httpd.listeningPort)
+                    UMLog.l(UMLog.VERBOSE, 0, "NetworkManagerBle: group already exists: $existingGroup")
+                    wiFiDirectGroup.set(existingGroup)
                     notifyStateChanged(STATE_STARTED)
                 } else {
+                    UMLog.l(UMLog.VERBOSE, 0, "NetworkManagerBle: Creating new WiFi direct group")
                     createNewGroup()
                 }
             }
@@ -344,31 +345,32 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             networkManager.wifiP2pManager!!.createGroup(networkManager.wifiP2pChannel,
                     object : WifiP2pManager.ActionListener {
                         override fun onSuccess() {
-                            UMLog.l(UMLog.INFO, 692, "Group created successfully")
+                            UMLog.l(UMLog.INFO, 692, "NetworkManagerBle: Group created successfully")
                             /* wait for the broadcast. OnSuccess might be called before the group is really ready */
                         }
 
                         override fun onFailure(reason: Int) {
                             UMLog.l(UMLog.ERROR, 692,
-                                    "Failed to create a group with error code $reason")
+                                    "NetworkManagerBle: Failed to create a group with error code: $reason")
                             notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                         }
                     })
         }
 
         override fun stop() {
+            UMLog.l(UMLog.VERBOSE, 0, "NetworkManagerBle: stopping group")
             networkManager.wifiP2pManager!!.removeGroup(
                     networkManager.wifiP2pChannel, object : WifiP2pManager.ActionListener {
                 override fun onSuccess() {
                     UMLog.l(UMLog.INFO, 693,
-                            "Group removed successfully")
+                            "NetworkManagerBle: Group removed successfully")
                     wiFiDirectGroup.set(null)
                     notifyStateChanged(STATE_STOPPED)
                 }
 
                 override fun onFailure(reason: Int) {
                     UMLog.l(UMLog.ERROR, 693,
-                            "Failed to remove a group with error code $reason")
+                            "NetworkManagerBle: Failed to remove a group with error code $reason")
 
                     //check if the group is still active
                     networkManager.wifiP2pManager!!.requestGroupInfo(
@@ -389,7 +391,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
         companion object {
 
-            private const val TIMEOUT_AFTER_GROUP_CREATION = 2 * 60 * 1000
+            private const val TIMEOUT_AFTER_GROUP_CREATION = 5 * 60 * 1000
 
             private const val TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000
 
@@ -426,9 +428,12 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     private fun handleDisconnected() {
         localHttpClient?.close()
+        localHttpClient = null
+
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
+
         GlobalScope.launch {
             addLogs("changed to ${ConnectivityStatus.STATE_DISCONNECTED}, updating DB")
             umAppDatabase.connectivityStatusDao
@@ -452,28 +457,40 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" + prettyPrintNetwork(networkInfo))
+        val networkExtraInfo = networkInfo?.extraInfo
+        val wifiManagerConnectionInfo = wifiManager?.connectionInfo
+        val ssid = when {
+            Build.VERSION.SDK_INT < 29 && networkExtraInfo != null -> normalizeAndroidWifiSsid(networkExtraInfo)
+            wifiManagerConnectionInfo != null -> normalizeAndroidWifiSsid(wifiManagerConnectionInfo.ssid)
+            else -> null
+        }
 
-        val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
+        //val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
         val status = ConnectivityStatus(state, true, ssid)
         addLogs("changed to $state")
         connectivityStatusRef.value = status
 
         //get network SSID
-        if (ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
-            status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
+        if (ssid != null /*&& ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)*/) {
+            if(ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
+                status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //only on main thread
                 //first - check if the old client exists and close it
+                val socketFactory = network!!.socketFactory
+                UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
+                        "client for $ssid using $socketFactory")
 
-
-                if(localHttpClient == null){
-                    localHttpClient = HttpClient(OkHttp) {
-                        engine {
-                            config {
-                                socketFactory(network!!.socketFactory)
-                            }
+                localHttpClient = HttpClient(OkHttp) {
+                    engine {
+                        config {
+                            socketFactory(socketFactory)
                         }
-                        install(JsonFeature)
+                    }
+                    install(JsonFeature) {
+                        serializer = GsonSerializer()
                     }
                 }
             }
@@ -505,6 +522,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
 
     override fun onCreate() {
+        managerHelper = NetworkManagerBleHelper(mContext)
+        connectivityManager = managerHelper.connectivityManager
         wifiManager = managerHelper.wifiManager
 
         if (wifiP2pManager == null) {
@@ -519,6 +538,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             mContext.registerReceiver(wifiP2pGroupServiceManager!!.wifiP2pBroadcastReceiver,
                     IntentFilter(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION))
         }
+
+        startMonitoringNetworkChanges()
 
         if (isBleDeviceSDKVersion && isBleCapable) {
 
@@ -549,6 +570,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 mBluetoothAndWifiStateChangeBroadcastReceiver.onReceive(mContext, initialBluetoothIntent)
             }
         }
+
 
         super.onCreate()
     }
@@ -681,21 +703,29 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
         var networkEnabled = false
 
-        do {
-            UMLog.l(UMLog.INFO, 693, "Trying to connect to $ssid")
-            if (!networkEnabled) {
-                managerHelper.enableWifiNetwork()
+        var lastScanTime = 0L
 
-                UMLog.l(UMLog.INFO, 693,
-                        "Network changed  to $ssid")
-                networkEnabled = true
-            } else if (isConnectedToRequiredWiFi(ssid)) {
+        var networkSeenInScan = false
+
+        do {
+            UMLog.l(UMLog.INFO, 693, "ConnectToWifi: Trying to connect to $ssid. " +
+                    "Current SSID = ${wifiManager.connectionInfo?.ssid}")
+            if (isConnectedToRequiredWiFi(ssid)) {
                 UMLog.l(UMLog.INFO, 693,
                         "ConnectToWifi: Already connected to WiFi with ssid =$ssid")
                 break
+            }else if (!networkEnabled) {
+                managerHelper.enableWifiNetwork()
+                UMLog.l(UMLog.INFO, 693,
+                        "ConnectToWifi: called enableWifiNetwork for $ssid")
+                networkEnabled = true
             } else {
                 val routeInfo = wifiManager.dhcpInfo
-                if (routeInfo != null && routeInfo.gateway > 0) {
+                val currentSsid = normalizeAndroidWifiSsid(wifiManager.connectionInfo?.ssid)
+                val isCorrectSsid = (currentSsid == ssid)
+                val hasDhcpGateway = routeInfo != null && routeInfo.gateway > 0
+
+                if (isCorrectSsid && hasDhcpGateway) {
                     @SuppressLint("DefaultLocale")
                     val gatewayIp = String.format("%d.%d.%d.%d",
                             routeInfo.gateway and 0xff,
@@ -706,15 +736,18 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                             "Trying to ping gateway IP address $gatewayIp")
                     if (ping(gatewayIp, 1000)) {
                         UMLog.l(UMLog.INFO, 693,
-                                "Ping successful!$ssid")
+                                "Ping successful! $ssid")
                         connectedOrFailed = true
                     } else {
                         UMLog.l(UMLog.INFO, 693,
                                 "ConnectToWifi: ping to $gatewayIp failed on $ssid")
                     }
-                } else {
+                } else if (!isCorrectSsid){
                     UMLog.l(UMLog.INFO, 693,
-                            "ConnectToWifi: No DHCP gateway yet on $ssid")
+                            "ConnectToWifi: Connected to wrong SSID: Got: $currentSsid Wanted: $ssid")
+                }else if(!hasDhcpGateway) {
+                    UMLog.l(UMLog.INFO, 693,
+                            "ConnectToWifi: Connected to correct network, but no DHCP gateway yet on $currentSsid")
                 }
             }
 
@@ -818,9 +851,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * Start monitoring network changes
      */
     private fun startMonitoringNetworkChanges() {
-        managerHelper = NetworkManagerBleHelper(mContext)
-        connectivityManager = managerHelper.connectivityManager
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val networkRequest = NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)

@@ -94,7 +94,6 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     suspend fun updateProgress(djiUid: Int, bytesSoFar: Long, totalBytes: Long) {
         withContext(coroutineScope) {
-            //executor.execute {
             UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
                     djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes)
             val djStatus = jobItemUidToStatusMap[djiUid]

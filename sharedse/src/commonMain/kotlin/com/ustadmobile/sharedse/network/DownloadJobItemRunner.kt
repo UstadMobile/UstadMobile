@@ -372,8 +372,14 @@ class DownloadJobItemRunner
                 downloadEndpoint = currentNetworkNode!!.endpointUrl
             }
 
-            currentHttpClient = (if (networkManager.localHttpClient != null) networkManager.localHttpClient else defaultHttpClient())!!
-
+            val localHttpClient = networkManager.localHttpClient
+            if(localHttpClient != null) {
+                UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using local http client: $localHttpClient")
+                currentHttpClient = localHttpClient
+            }else {
+                UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
+                currentHttpClient = defaultHttpClient()
+            }
 
             history.url = downloadEndpoint
 
@@ -403,7 +409,7 @@ class DownloadJobItemRunner
                                 val destFile = FileSe(FileSe(destinationDir!!),
                                         entry.ceCefUid.toString() + ".tmp")
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
-                                UMLog.l(UMLog.VERBOSE, 100, "Downloader $procNum $downloadUrl -> $destFile")
+                                UMLog.l(UMLog.VERBOSE, 100, "${mkLogPrefix()}: Downloader $procNum $downloadUrl -> $destFile")
                                 val resumableDownload = ResumableDownload2(downloadUrl,
                                         destFile.getAbsolutePath(), httpClient = currentHttpClient)
                                 resumableDownload.onDownloadProgress = { inProgressDownloadCounters[procNum].value = it }
@@ -452,8 +458,8 @@ class DownloadJobItemRunner
                 }
 
             } catch (e: Exception) {
-                UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
-                        "Failed to download a file from " + endpointUrl, e)
+                UMLog.l(UMLog.ERROR, 699,
+                        "${mkLogPrefix()} Failed to download a file from $endpointUrl", e)
             }
 
 
@@ -494,7 +500,7 @@ class DownloadJobItemRunner
      * @return true if file should be do downloaded from the cloud otherwise false.
      */
     private suspend fun connectToCloudNetwork(): Boolean {
-        UMLog.l(UMLog.DEBUG, 699, "Reconnecting cloud network")
+        UMLog.l(UMLog.DEBUG, 699, "${mkLogPrefix()} Reconnecting cloud network")
         networkManager.restoreWifi()
         waitForLiveData(statusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) {
             val checkStatus = connectivityStatus
@@ -514,6 +520,11 @@ class DownloadJobItemRunner
 
     /**
      * Start local peers connection handshake
+     *
+     * Notee: 18/Oct/2019 testing on Android 8 (Dragon 10 tablet) indicates that disconnecting from
+     * the current WiFi is not required. The intention is to call the methods as they would be called
+     * by the WiFi settings activity. The WiFi settings activity does not call disconnect before
+     * calling it's own enableNetwork method.
      *
      * @return true if successful, false otherwise
      */
@@ -544,9 +555,7 @@ class DownloadJobItemRunner
                     val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
                             + lWifiDirectGroup.port + "/")
                     currentNetworkNode!!.endpointUrl = acquiredEndPoint
-                    appDb.networkNodeDao.updateNetworkNodeGroupSsid(currentNetworkNode!!.nodeId,
-                            lWifiDirectGroup.ssid, acquiredEndPoint)
-
+                    currentNetworkNode!!.groupSsid = lWifiDirectGroup.ssid
                     UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                             "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
                     channel.offer(true)
@@ -571,29 +580,23 @@ class DownloadJobItemRunner
             return@withContext false
         }
 
-        //disconnect first
-        if (connectivityStatus!!.connectivityState != STATE_DISCONNECTED && connectivityStatus!!.wifiSsid != null) {
-            launch(mainCoroutineDispatcher) {
-                waitForLiveData(statusLiveData!!, 10 * 1000.toLong()) {
-                    it != null && it.connectivityState != ConnectivityStatus.STATE_UNMETERED
-                }
-                UMLog.l(UMLog.INFO, 699, "Disconnected existing wifi network")
-            }
-        }
-
-        UMLog.l(UMLog.INFO, 699, "Connection initiated to " + wiFiDirectGroupBle.value!!.ssid)
+        UMLog.l(UMLog.INFO, 699, "${mkLogPrefix()}: Initiating connection to " + wiFiDirectGroupBle.value!!.ssid)
 
         networkManager.connectToWiFi(wiFiDirectGroupBle.value!!.ssid,
                 wiFiDirectGroupBle.value!!.passphrase)
 
-
-        waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout * 50).toLong()) {
-            statusRef.value = it
-            it != null && isExpectedWifiDirectGroup(it)
+        withContext(mainCoroutineDispatcher) {
+            waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout).toLong()) {
+                statusRef.value = it
+                it != null && isExpectedWifiDirectGroup(it)
+            }
         }
+
 
         waitingForLocalConnection.value = false
         val currentStatus = statusRef.value
+        UMLog.l(UMLog.INFO, 699, "${mkLogPrefix()}: done asking for local connection. " +
+                "Status = $currentStatus")
         return@withContext currentStatus != null && isExpectedWifiDirectGroup(currentStatus)
     }
 

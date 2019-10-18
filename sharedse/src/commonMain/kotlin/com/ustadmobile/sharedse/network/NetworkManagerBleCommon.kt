@@ -47,9 +47,12 @@ abstract class NetworkManagerBleCommon(
     private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
 
     /**
-     * @return Active http client
+     * Android 5+ requires using a bound socketFactory from the network object to route traffic over
+     * a WiFi network that has no Internet.
+     *
+     * The underlying implementation will create this HttpClient object when connecting to a network
+     * with no Internet access.
      */
-
     var localHttpClient: HttpClient? = null
         protected set
 
@@ -633,7 +636,7 @@ abstract class NetworkManagerBleCommon(
         /**
          * Default timeout to wait for WiFi connection
          */
-        const val DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000
+        const val DEFAULT_WIFI_CONNECTION_TIMEOUT = 60 * 1000
     }
 
 }

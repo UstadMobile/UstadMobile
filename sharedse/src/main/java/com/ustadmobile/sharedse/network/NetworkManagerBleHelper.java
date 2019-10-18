@@ -179,7 +179,8 @@ public class NetworkManagerBleHelper {
 
             Method connectMethod = wifiManager.getClass().getMethod("connect",
                     int.class, actionLister);
-            connectMethod.invoke(wifiManager,addNetwork(),proxyInstance);
+            final int networkId = addNetwork();
+            connectMethod.invoke(wifiManager, networkId ,proxyInstance);
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

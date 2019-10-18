@@ -311,9 +311,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         return null
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val intentAction = intent.action
-        val intentExtras = intent.extras
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val intentAction = intent?.action
+        val intentExtras = intent?.extras
 
         if(intentAction == null)
             return START_STICKY

@@ -26,8 +26,8 @@ class LocalAvailabilityManagerImpl(private val context: Any,
             val existingNode = activeNodes.firstOrNull { it.bluetoothMacAddress == bluetoothAddr }
             if(existingNode != null) {
                 existingNode.lastUpdateTimeStamp = getSystemTimeInMillis()
-                UMLog.l(UMLog.INFO, 0, "AvailabilityManager: Discovered node: $bluetoothAddr")
             }else {
+                UMLog.l(UMLog.INFO, 0, "AvailabilityManager: discovered new node: $bluetoothAddr")
                 val networkNode = NetworkNodeWithStatusResponsesAndHistory()
                 networkNode.bluetoothMacAddress = bluetoothAddr
                 activeNodes.add(networkNode)
