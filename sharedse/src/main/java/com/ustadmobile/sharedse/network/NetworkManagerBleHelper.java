@@ -166,6 +166,8 @@ public class NetworkManagerBleHelper {
      * per the WiFi Direct spec. In theory, it should be possible to leave these settings to
      * autodetect. In reality, we should specify these to reduce the chance of the connection
      * timing out.
+     *
+     * TODO: Make this return a boolean
      */
     public void enableWifiNetwork(){
         if(isConnectedToWifi()) {

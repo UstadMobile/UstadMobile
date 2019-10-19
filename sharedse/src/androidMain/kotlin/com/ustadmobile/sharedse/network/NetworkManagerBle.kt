@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.InetAddress
 import java.util.*
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -256,6 +257,30 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             }
         }
     }
+
+    /**
+     * This is a simple broadcast receiver that can be used to wait until a given WiFi SSID appears
+     * in the scan results
+     */
+    internal inner class NetworkScanResultsReceiver(private val targetNetworkSsid: String): BroadcastReceiver() {
+
+        val latch = CountDownLatch(1)
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(latch.count > 0) {
+                val results = wifiManager.scanResults
+                if(targetNetworkSsid in results.map { normalizeAndroidWifiSsid(it.SSID) }) {
+                    UMLog.l(UMLog.DEBUG, 0, "NetworkManagerBle: Saw target in scan results: $targetNetworkSsid")
+                    latch.countDown()
+                }
+            }
+        }
+
+        fun waitForNetworkToBeSeen(timeout: Int): Boolean {
+            return latch.await(timeout.toLong(), TimeUnit.MILLISECONDS)
+        }
+    }
+
 
 
     /**
@@ -714,6 +739,27 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 UMLog.l(UMLog.INFO, 693,
                         "ConnectToWifi: Already connected to WiFi with ssid =$ssid")
                 break
+            }else if(!networkSeenInScan) {
+                val scanResults = wifiManager.scanResults
+                if(ssid in scanResults.map { normalizeAndroidWifiSsid(it.SSID) }) {
+                    networkSeenInScan = true
+                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Saw $ssid in scan results")
+                } else if(System.currentTimeMillis() - lastScanTime > 30000) {
+                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Didn't see $ssid in scan results, starting scan")
+                    lastScanTime = System.currentTimeMillis()
+                    val waitReceiver = NetworkScanResultsReceiver(ssid)
+                    try {
+                        mContext.registerReceiver(waitReceiver,
+                                IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
+                        val submitted = wifiManager.startScan()
+                        UMLog.l(UMLog.DEBUG, 693,
+                                "ConnectToWifi: requested scan: submission OK = $submitted. " +
+                                        "Waiting for network to be seen (30s timeout).")
+                        networkSeenInScan = waitReceiver.waitForNetworkToBeSeen(30000)
+                    }finally {
+                        mContext.unregisterReceiver(waitReceiver)
+                    }
+                }
             }else if (!networkEnabled) {
                 managerHelper.enableWifiNetwork()
                 UMLog.l(UMLog.INFO, 693,
