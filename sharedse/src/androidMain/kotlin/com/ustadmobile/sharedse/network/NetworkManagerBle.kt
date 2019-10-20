@@ -341,6 +341,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                         return@requestGroupInfo
                     }
 
+                    networkManager.lockWifi(this@WifiP2PGroupServiceManager)
                     notifyStateChanged(if (group != null) STATE_STARTED else STATE_STOPPED)
                 }
             }
@@ -404,6 +405,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                     UMLog.l(UMLog.INFO, 693,
                             "NetworkManagerBle: Group removed successfully")
                     wiFiDirectGroup.set(null)
+                    networkManager.releaseWifiLock(this@WifiP2PGroupServiceManager)
                     notifyStateChanged(STATE_STOPPED)
                 }
 
@@ -421,6 +423,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                             notifyStateChanged(STATE_STARTED, STATE_STARTED)
                         } else {
                             wiFiDirectGroup.set(null)
+                            networkManager.releaseWifiLock(this@WifiP2PGroupServiceManager)
                             notifyStateChanged(STATE_STOPPED)
                         }
                     }
@@ -759,34 +762,35 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 UMLog.l(UMLog.INFO, 693,
                         "ConnectToWifi: Already connected to WiFi with ssid =$ssid")
                 break
-            }else if(!networkSeenInScan) {
-                val scanResults = wifiManager.scanResults
-                if(ssid in scanResults.map { normalizeAndroidWifiSsid(it.SSID) }) {
-                    networkSeenInScan = true
-                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Saw $ssid in scan results")
-                } else if(System.currentTimeMillis() - lastScanTime > 30000) {
-                    val networkId = managerHelper.addNetwork()
-                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Didn't see $ssid in scan results, starting scan. Added network: id = $networkId")
-                    lastScanTime = System.currentTimeMillis()
-                    val waitReceiver = NetworkScanResultsReceiver(ssid)
-                    SystemClock.sleep(1000)
-                    try {
-                        mContext.registerReceiver(waitReceiver,
-                                IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
-                        val submitted = wifiManager.startScan()
-                        UMLog.l(UMLog.DEBUG, 693,
-                                "ConnectToWifi: requested scan: submission OK = $submitted. " +
-                                        "Waiting for network to be seen (30s timeout).")
-                        networkSeenInScan = waitReceiver.waitForNetworkToBeSeen(30000)
-                    }finally {
-                        mContext.unregisterReceiver(waitReceiver)
-                    }
-                }
+//            }
+//            else if(!networkSeenInScan) {
+//                val scanResults = wifiManager.scanResults
+//                if(ssid in scanResults.map { normalizeAndroidWifiSsid(it.SSID) }) {
+//                    networkSeenInScan = true
+//                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Saw $ssid in scan results")
+//                } else if(System.currentTimeMillis() - lastScanTime > 30000) {
+//                    val networkId = managerHelper.addNetwork()
+//                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Didn't see $ssid in scan results, starting scan. Added network: id = $networkId")
+//                    lastScanTime = System.currentTimeMillis()
+//                    val waitReceiver = NetworkScanResultsReceiver(ssid)
+//                    SystemClock.sleep(1000)
+//                    try {
+//                        mContext.registerReceiver(waitReceiver,
+//                                IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
+//                        val submitted = wifiManager.startScan()
+//                        UMLog.l(UMLog.DEBUG, 693,
+//                                "ConnectToWifi: requested scan: submission OK = $submitted. " +
+//                                        "Waiting for network to be seen (30s timeout).")
+//                        networkSeenInScan = waitReceiver.waitForNetworkToBeSeen(30000)
+//                    }finally {
+//                        mContext.unregisterReceiver(waitReceiver)
+//                    }
+//                }
+//                networkSeenInScan = true
             }else if (!networkEnabled) {
-                managerHelper.enableWifiNetwork()
+                networkEnabled = managerHelper.enableWifiNetwork()
                 UMLog.l(UMLog.INFO, 693,
-                        "ConnectToWifi: called enableWifiNetwork for $ssid")
-                networkEnabled = true
+                        "ConnectToWifi: called enableWifiNetwork for $ssid Result: $networkEnabled")
             } else {
                 val routeInfo = wifiManager.dhcpInfo
                 val currentSsid = normalizeAndroidWifiSsid(wifiManager.connectionInfo?.ssid)
@@ -829,11 +833,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         } while (!connectedOrFailed)
 
         scanLock.release()
+
+        UMLog.l(UMLog.DEBUG, 0, "ConnectToWifi: Finished")
     }
 
-    private fun ping(ipAddress: String, timeout: Long): Boolean {
+    private fun ping(ipAddress: String, timeout: Int): Boolean {
         try {
-            return InetAddress.getByName(ipAddress).isReachable(timeout.toInt())
+            return InetAddress.getByName(ipAddress).isReachable(timeout)
         } catch (e: IOException) {
             //ping did not succeed
         }
@@ -869,7 +875,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                     currentWifiSsid)
             if (endpoint == null) {
                 UMLog.l(UMLog.ERROR, 699,
-                        "ERROR: No endpoint url for ssid$currentWifiSsid")
+                        "ERROR: No endpoint url for ssid $currentWifiSsid")
                 return@launch
             }
 
@@ -956,9 +962,10 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         super.lockWifi(lockHolder)
 
         if (wifiLockReference.get() == null) {
-            wifiLockReference.set(wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
-                    "UstadMobile-Wifi-Lock-Tag"))
-            //TODO: This lock is never acuqired!
+            val newLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                    "UstadMobile-Wifi-Lock-Tag")
+            wifiLockReference.set(newLock)
+            newLock.acquire()
             UMLog.l(UMLog.INFO, 699, "WiFi lock acquired for $lockHolder")
         }
     }

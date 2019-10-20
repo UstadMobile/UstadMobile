@@ -130,6 +130,7 @@ android {
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/DEPENDENCIES"
             }
         }
 
@@ -328,6 +329,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$version_androidx_support_lib"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
 
+    implementation "com.google.android.gms:play-services-safetynet:17.0.0"
+
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
@@ -365,6 +368,7 @@ dependencies {
     //KTOR
     implementation "io.ktor:ktor-client-gson:$version_ktor"
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-cio:$version_ktor"
 
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"

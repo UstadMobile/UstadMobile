@@ -191,7 +191,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                 .setBoundaryCallback(boundaryCallback)
                 .build()
 
-        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
+        //try pagedList.addWeakCallback to figure out when items are loaded / unloaded
+        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>> {
+            recyclerAdapter!!.submitList(it)
+        })
 
         recyclerView!!.adapter = recyclerAdapter
     }

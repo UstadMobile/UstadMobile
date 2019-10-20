@@ -297,7 +297,7 @@
         android:id="@+id/edit_content"
         android:visibility="gone"
         android:background="@color/accent"
-        android:src="@drawable/ic_edit_black_24dp"
+        app:srcCompat="@drawable/ic_edit_black_24dp"
         android:layout_margin="@dimen/dimen_16dp"
         app:layout_anchor="@id/nested_scroll"
         android:layout_width="wrap_content"

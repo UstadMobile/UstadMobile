@@ -123,6 +123,12 @@ public class NetworkManagerBleHelper {
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+
+        /* If the config does not indicate that the network is hidden, Android will only attempt to
+         * connect once it sees the network. Because the network was likely only just create by the
+         * peer device, this would cause a delay.
+         */
+        config.hiddenSSID = true;
         final int networkId = wifiManager.addNetwork(config);
         lastNetworkIdAdded = networkId;
         return networkId;
@@ -172,9 +178,9 @@ public class NetworkManagerBleHelper {
      * autodetect. In reality, we should specify these to reduce the chance of the connection
      * timing out.
      *
-     * TODO: Make this return a boolean
+     * @return true if the enableNetwork call was made successfully (without exceptions), false otherwise
      */
-    public void enableWifiNetwork(){
+    public boolean enableWifiNetwork(){
         if(isConnectedToWifi()) {
             disableCurrentWifiNetwork();
         }
@@ -188,7 +194,7 @@ public class NetworkManagerBleHelper {
                     int.class, actionLister);
             final int networkId = lastNetworkIdAdded == -1 ? addNetwork() : lastNetworkIdAdded;
             connectMethod.invoke(wifiManager, networkId ,proxyInstance);
-
+            return true;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -198,6 +204,8 @@ public class NetworkManagerBleHelper {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
 
