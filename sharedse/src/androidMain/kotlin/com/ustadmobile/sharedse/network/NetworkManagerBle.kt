@@ -269,7 +269,21 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         override fun onReceive(context: Context?, intent: Intent?) {
             if(latch.count > 0) {
                 val results = wifiManager.scanResults
-                if(targetNetworkSsid in results.map { normalizeAndroidWifiSsid(it.SSID) }) {
+                val updated: String
+                if(Build.VERSION.SDK_INT >= 23) {
+                    updated = if(intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false) ?: false) {
+                        "Updated"
+                    }else {
+                        "Not updated"
+                    }
+                }else {
+                    updated = "Not known if updated"
+                }
+
+
+                val networksSeen = results.map { normalizeAndroidWifiSsid(it.SSID) }
+                UMLog.l(UMLog.DEBUG, 0, "NetworkManager BLE: scan results ($updated): networks found: ${networksSeen.joinToString()}")
+                if(targetNetworkSsid in networksSeen) {
                     UMLog.l(UMLog.DEBUG, 0, "NetworkManagerBle: Saw target in scan results: $targetNetworkSsid")
                     latch.countDown()
                 }
@@ -722,6 +736,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         endAnyLocalSession()
         managerHelper.setGroupInfo(ssid,passphrase)
 
+        val startTime = System.currentTimeMillis()
+
         val connectionDeadline = System.currentTimeMillis() + timeout
 
         var connectedOrFailed = false
@@ -731,6 +747,10 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         var lastScanTime = 0L
 
         var networkSeenInScan = false
+
+        val scanLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY,
+                "NetworkManagerBle-Scan")
+        scanLock.acquire()
 
         do {
             UMLog.l(UMLog.INFO, 693, "ConnectToWifi: Trying to connect to $ssid. " +
@@ -745,9 +765,11 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                     networkSeenInScan = true
                     UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Saw $ssid in scan results")
                 } else if(System.currentTimeMillis() - lastScanTime > 30000) {
-                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Didn't see $ssid in scan results, starting scan")
+                    val networkId = managerHelper.addNetwork()
+                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Didn't see $ssid in scan results, starting scan. Added network: id = $networkId")
                     lastScanTime = System.currentTimeMillis()
                     val waitReceiver = NetworkScanResultsReceiver(ssid)
+                    SystemClock.sleep(1000)
                     try {
                         mContext.registerReceiver(waitReceiver,
                                 IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
@@ -805,6 +827,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             SystemClock.sleep(1000)
 
         } while (!connectedOrFailed)
+
+        scanLock.release()
     }
 
     private fun ping(ipAddress: String, timeout: Long): Boolean {
@@ -934,6 +958,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         if (wifiLockReference.get() == null) {
             wifiLockReference.set(wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
                     "UstadMobile-Wifi-Lock-Tag"))
+            //TODO: This lock is never acuqired!
             UMLog.l(UMLog.INFO, 699, "WiFi lock acquired for $lockHolder")
         }
     }

@@ -59,6 +59,8 @@ public class NetworkManagerBleHelper {
 
     private String passphrase;
 
+    private int lastNetworkIdAdded = -1;
+
 
     /**
      * Constrictor used to create new instance of the NetworkManagerBleHelper
@@ -100,6 +102,7 @@ public class NetworkManagerBleHelper {
     public void setGroupInfo(String ssid, String passphrase){
         this.ssid = ssid;
         this.passphrase = passphrase;
+        lastNetworkIdAdded = -1;
 
         if (ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             temporaryWifiDirectSsids.add(ssid);
@@ -120,11 +123,13 @@ public class NetworkManagerBleHelper {
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-        return wifiManager.addNetwork(config);
+        final int networkId = wifiManager.addNetwork(config);
+        lastNetworkIdAdded = networkId;
+        return networkId;
     }
 
 
-    public int getNetworkId(){
+    public int getLastNetworkIdAdded(){
         List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
         for(WifiConfiguration config : configuredNetworks){
             if(UMAndroidUtil.INSTANCE.normalizeAndroidWifiSsid(config.SSID).equals(ssid)){
@@ -181,7 +186,7 @@ public class NetworkManagerBleHelper {
 
             Method connectMethod = wifiManager.getClass().getMethod("connect",
                     int.class, actionLister);
-            final int networkId = addNetwork();
+            final int networkId = lastNetworkIdAdded == -1 ? addNetwork() : lastNetworkIdAdded;
             connectMethod.invoke(wifiManager, networkId ,proxyInstance);
 
         } catch (ClassNotFoundException e) {

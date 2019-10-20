@@ -52,7 +52,7 @@ public class NetworkManagerBleHelperTest {
 
         managerBleHelper.deleteTemporaryWifiDirectSsids();
 
-        networkId = managerBleHelper.getNetworkId();
+        networkId = managerBleHelper.getLastNetworkIdAdded();
 
         Assert.assertEquals("Network Id obtained from list after remove is -1", networkId, -1);
     }
