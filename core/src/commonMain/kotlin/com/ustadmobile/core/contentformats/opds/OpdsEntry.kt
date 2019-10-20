@@ -18,6 +18,10 @@ class OpdsEntry {
 
     var summary: String? = null
 
+    var readingLevel: String? = null
+
+    var targetName: String? = null
+
     var linkList: MutableList<OpdsLink> = mutableListOf()
 
     companion object {
@@ -39,6 +43,13 @@ class OpdsEntry {
         const val ATTR_LINK = "link"
 
         const val ATTR_CREATED = "created"
+
+        const val ATTR_LRMI = "lrmi:educationalAlignment"
+
+        const val ATTR_ALIGNMENT = "alignmentType"
+
+        const val ATTR_TARGET = "targetName"
+
     }
 
 }

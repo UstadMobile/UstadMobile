@@ -1,12 +1,15 @@
 package com.ustadmobile.core.contentformats.opds
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_ALIGNMENT
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_AUTHOR
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_CREATED
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_ID
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_LINK
+import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_LRMI
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_PUBLISHER
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_SUMMARY
+import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_TARGET
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_TITLE
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_UPDATED
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -18,7 +21,6 @@ class OpdsFeed {
     lateinit var id: String
     lateinit var title: String
     var updated: DateTime? = null
-
 
     var author: String? = null
     var category: String? = null
@@ -65,6 +67,10 @@ class OpdsFeed {
                                         if (entry.updated == null) {
                                             entry.updated = UMCalendarUtil.parseOpdsDate(xpp.nextText()!!)
                                         }
+                                    }
+                                    ATTR_LRMI -> {
+                                        entry.targetName = xpp.getAttributeValue(null, ATTR_TARGET)
+                                        entry.readingLevel = xpp.getAttributeValue(null, ATTR_ALIGNMENT)
                                     }
                                 }
                             }
