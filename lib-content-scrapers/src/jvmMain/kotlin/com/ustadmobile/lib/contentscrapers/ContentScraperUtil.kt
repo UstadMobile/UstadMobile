@@ -546,15 +546,15 @@ object ContentScraperUtil {
         newJoin.cepcjParentContentEntryUid = parentEntry.contentEntryUid
         newJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid
         newJoin.childIndex = index
-        if (existingParentChildJoin == null) {
+        return if (existingParentChildJoin == null) {
             newJoin.cepcjUid = dao.insert(newJoin)
-            return newJoin
+            newJoin
         } else {
             newJoin.cepcjUid = existingParentChildJoin.cepcjUid
             if (newJoin != existingParentChildJoin) {
                 dao.update(newJoin)
             }
-            return newJoin
+            newJoin
         }
     }
 

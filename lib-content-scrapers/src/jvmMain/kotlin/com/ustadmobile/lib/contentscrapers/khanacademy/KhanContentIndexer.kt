@@ -308,12 +308,12 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             newContentFolder.mkdirs()
 
             val entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug!!, contentItem.title,
-                    KHAN_PREFIX + contentItem.contentId!!, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
-                    EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                    KHAN_PREFIX + contentItem.contentId!!, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao!!, tutorialEntry, entry, contentCount++)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, tutorialEntry, entry, contentCount++)
 
-            ContentScraperUtil.createQueueItem(queueDao!!, url, entry, newContentFolder,
+            ContentScraperUtil.createQueueItem(queueDao, url, entry, newContentFolder,
                     contentItem.kind!!, runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
 
         }

@@ -63,7 +63,6 @@ class ContentEntryParentChildJoin() {
         var result = (cepcjUid xor cepcjUid.ushr(32)).toInt()
         result = 31 * result + (cepcjChildContentEntryUid xor cepcjChildContentEntryUid.ushr(32)).toInt()
         result = 31 * result + (cepcjParentContentEntryUid xor cepcjParentContentEntryUid.ushr(32)).toInt()
-        result = 31 * result + childIndex
         return result
     }
 

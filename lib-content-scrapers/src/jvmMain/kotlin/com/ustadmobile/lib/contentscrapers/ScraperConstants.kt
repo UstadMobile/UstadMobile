@@ -180,6 +180,7 @@ object ScraperConstants {
     const val MIMETYPE_TINCAN = "application/tincan+zip"
     const val MIMETYPE_WEBM = "video/webm"
     const val MIMETYPE_KHAN = "application/khan-video+zip"
+    const val MIMETYPE_PDF = "application/pdf"
 
     const val ZIP_EXT = ".zip"
     const val PNG_EXT = ".png"
@@ -193,6 +194,8 @@ object ScraperConstants {
     const val MP3_EXT = ".mp3"
     const val WEBM_EXT = ".webm"
     const val OPUS_EXT = ".opus"
+
+
 
     val IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg")
     val VIDEO_EXTENSIONS = Arrays.asList("mp4")

@@ -177,6 +177,12 @@ open class ContentEntry() {
 
         const val LICESNE_TYPE_CC_BY_NC_SA = 6
 
+        const val LICENSE_TYPE_CC_BY_NC_ND = 7
+
+        const val LICENSE_TYPE_OTHER = 8
+
+        const val LICENSE_TYPE_CC_BY_ND = 9
+
         const val PUBLIC_DOMAIN = 7
 
         const val UNDEFINED_TYPE = 0
@@ -195,7 +201,7 @@ open class ContentEntry() {
 
         const val ARTICLE_TYPE = 7
 
-        const val LICENSE_TYPE_OTHER = 8
+
     }
 
 }

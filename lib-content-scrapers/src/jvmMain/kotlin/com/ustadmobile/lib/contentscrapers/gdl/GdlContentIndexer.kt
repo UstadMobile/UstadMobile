@@ -1,70 +1,167 @@
 package com.ustadmobile.lib.contentscrapers.gdl
 
+import com.ustadmobile.core.contentformats.opds.OpdsFeed
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
-import com.ustadmobile.core.db.dao.ScrapeRunDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.GDL
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_PDF
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
+import java.io.InputStream
 import java.net.MalformedURLException
 import java.net.URL
 import kotlin.system.exitProcess
 
 class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
-                        val contentType: String, val scrapeQueueItemUid: Int, val runId: Int): Runnable {
+                        val contentType: String, val scrapeQueueItemUid: Int, val runId: Int) : Runnable {
 
     override fun run() {
         System.gc()
         queueDao.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis())
         var successful = false
-        if (ScraperConstants.GDLContentType.ROOT.type == contentType) {
-            try {
-                browseLanguages(parentEntry, queueUrl, destLocation)
+        var feed = getFeed(queueUrl)
+        when (contentType) {
+            ScraperConstants.GDLContentType.ROOT.type -> try {
+                browseLanguages(feed, parentEntry, queueUrl, destLocation)
+                browsePages(feed, parentEntry, queueUrl, destLocation)
+                browseContent(feed, parentEntry, queueUrl, destLocation)
                 successful = true
             } catch (e: Exception) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("Error creating topics for url $queueUrl")
             }
 
-        } else if (ScraperConstants.GDLContentType.LANGPAGE.type == contentType) {
-            try {
-                browsePages(parentEntry, queueUrl, destLocation)
+            ScraperConstants.GDLContentType.LANGPAGE.type -> try {
+                browsePages(feed, parentEntry, queueUrl, destLocation)
+                browseContent(feed, parentEntry, queueUrl, destLocation)
                 successful = true
             } catch (e: Exception) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("Error creating subjects for url $queueUrl")
             }
 
+            ScraperConstants.GDLContentType.CONTENT.type -> try {
+                browseContent(feed, parentEntry, queueUrl, destLocation)
+            } catch (e: Exception) {
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+                UMLogUtil.logError("Error creating subjects for url $queueUrl")
+            }
         }
 
         queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
         queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
-    private fun browsePages(parentEntry: ContentEntry, queueUrl: URL, destLocation: File) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun browsePages(feed: OpdsFeed, parentEntry: ContentEntry, queueUrl: URL, destLocation: File) {
 
+        var lastLink = feed.linkList.find { it.rel == "last" }
+        var hrefLink = lastLink!!.href
+        var sizeOfPages = hrefLink.substringAfter("page=").toInt()
+
+        if (sizeOfPages == 1) {
+            return
+        }
+
+        for (x in 2..sizeOfPages) {
+
+            var pageLink = hrefLink.replaceAfter("page=", x.toString())
+            ContentScraperUtil.createQueueItem(queueDao, URL(pageLink), gdlEntry, destLocation, ScraperConstants.GDLContentType.CONTENT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
+
+        }
 
     }
 
-    private fun browseLanguages(parentEntry: ContentEntry, queueUrl: URL, destLocation: File) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun browseLanguages(feed: OpdsFeed, parentEntry: ContentEntry, queueUrl: URL, destLocation: File) {
+
+        feed.linkList
+                .filter { it.facetGroup == "Languages" && it.activeFacet == false }
+                .forEach { lang ->
+
+                    var parentFolder = destLocation.parentFile
+                    var langFolder = File(parentFolder, lang.title!!)
+
+                    ContentScraperUtil.createQueueItem(queueDao, URL(lang.href), gdlEntry, langFolder, ScraperConstants.GDLContentType.LANGPAGE.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
+
+                }
+    }
+
+    private fun getFeed(queueUrl: URL): OpdsFeed {
+        var opfIn: InputStream? = null
+        try {
+            opfIn = queueUrl.openStream()
+            val parser = UstadMobileSystemImpl.instance.newPullParser()
+            parser.setInput(opfIn, "UTF-8")
+            var feed = OpdsFeed()
+            feed.loadFromParser(parser)
+            return feed
+        } finally {
+            opfIn?.close()
+        }
+    }
+
+    private fun browseContent(feed: OpdsFeed, parentEntry: ContentEntry, url: URL, destLocation: File) {
+
+
+        feed.entryList.forEach {
+
+
+            var sourceUrl = it.linkList.find { type -> type.type == MIMETYPE_EPUB }
+                    ?: it.linkList.find {  otherType -> otherType.type == MIMETYPE_PDF } ?: return@forEach
+
+
+            var thumbnail = it.linkList.find { rel -> rel.rel == "http://opds-spec.org/image/thumbnail" }
+
+            var licenseType = ccMap[it.license] ?: -1
+
+            if (licenseType == -1) {
+                UMLogUtil.logError("${it.license} for book title ${it.title}")
+            }
+
+            var language = url.toString().substringAfter(".io/v1/").substringBefore("/root.xml")
+
+            var primary = language.split("-")
+
+            var lang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(langDao, primary[0])
+            var variant: LanguageVariant? = null
+            if (primary.size > 1) {
+                variant = ContentScraperUtil.insertOrUpdateLanguageVariant(langVariantDao, primary[1], lang)
+            }
+
+
+            var contentEntry = ContentScraperUtil.createOrUpdateContentEntry(it.id, it.title, sourceUrl.href, it.publisher!!, licenseType, lang.langUid, variant?.langVariantUid,
+                    it.summary, true, it.author, thumbnail?.href, "", "", contentEntryDao)
+
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, contentEntry, index++)
+
+            var contentFolder = File(destLocation, it.id)
+            contentFolder.mkdirs()
+
+            var scrapeType = if (sourceUrl.type == MIMETYPE_EPUB) MIMETYPE_EPUB else MIMETYPE_PDF
+
+            val schema = ContentScraperUtil.insertOrUpdateSchema(categorySchemeDao,
+                    "African Storybooks Reading Level", "africanstorybooks/reading/")
+
+            val category = ContentScraperUtil.insertOrUpdateCategoryContent(categoryDao, schema, it.targetName!!)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryJoinDao, category, contentEntry)
+
+            ContentScraperUtil.createQueueItem(queueDao, url, contentEntry, contentFolder,
+                    scrapeType, runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+        }
+
     }
 
 
@@ -77,7 +174,18 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
         private lateinit var englishLang: Language
         private lateinit var queueDao: ScrapeQueueItemDao
         private lateinit var gdlEntry: ContentEntry
+        private lateinit var langDao: LanguageDao
+        private lateinit var langVariantDao: LanguageVariantDao
+        private lateinit var categorySchemeDao: ContentCategorySchemaDao
+        private lateinit var categoryDao: ContentCategoryDao
+        private lateinit var contentCategoryJoinDao: ContentEntryContentCategoryJoinDao
+
+        private var index = 0
         private lateinit var scrapeWorkQueue: LiveDataWorkQueue<ScrapeQueueItem>
+
+        private val ccMap = mapOf(
+                "Creative Commons Attribution 4.0 International" to LICENSE_TYPE_CC_BY,
+                "Creative Commons Attribution Non Commercial 4.0 International" to LICENSE_TYPE_CC_BY_NC)
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -126,6 +234,8 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             containerDir.mkdirs()
             contentEntryDao = repository.contentEntryDao
             contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
+            langDao = repository.languageDao
+            langVariantDao = repository.languageVariantDao
             val languageDao = repository.languageDao
             queueDao = db.scrapeQueueItemDao
 
@@ -144,7 +254,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, gdlEntry, 8)
 
-            val englishFolder = File(destinationDir, "en")
+            val englishFolder = File(destinationDir, "English")
             englishFolder.mkdirs()
 
             ContentScraperUtil.createQueueItem(queueDao, url, gdlEntry, englishFolder, ScraperConstants.GDLContentType.ROOT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
@@ -170,6 +280,28 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             GlobalScope.launch {
                 indexWorkQueue.start()
             }
+
+            val scrapePrecessor = 6
+            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
+
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
+
+                val scrapeUrl: URL
+                try {
+                    scrapeUrl = URL(it.scrapeUrl!!)
+                    GdlContentScraper(scrapeUrl, File(it.destDir!!),
+                            containerDir, parent!!,
+                            it.contentType!!, it.sqiUid).run()
+                } catch (ignored: Exception) {
+                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!)
+                }
+            }
+            GlobalScope.launch {
+                scrapeWorkQueue.start()
+            }
+
         }
 
 

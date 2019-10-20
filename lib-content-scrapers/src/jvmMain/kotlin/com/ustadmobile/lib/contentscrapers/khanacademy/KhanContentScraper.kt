@@ -152,7 +152,7 @@ class KhanContentScraper : Runnable {
         var successful = false
         try {
             driver = factory!!.borrowObject()
-            val content = File(destinationDirectory, destinationDirectory!!.name)
+            val content = File(destinationDirectory, destinationDirectory.name)
             var mimetype = MIMETYPE_WEB_CHUNK
             if (ScraperConstants.KhanContentType.VIDEO.type == contentType) {
                 scrapeVideoContent(url.toString())
@@ -196,7 +196,7 @@ class KhanContentScraper : Runnable {
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
-        val folder = File(destinationDirectory, destinationDirectory!!.name)
+        val folder = File(destinationDirectory, destinationDirectory.name)
         folder.mkdirs()
 
         val initialJson = KhanContentIndexer.getJsonStringFromScript(scrapUrl)
@@ -236,7 +236,7 @@ class KhanContentScraper : Runnable {
                     conn.requestMethod = "HEAD"
                     mimeType = conn.contentType
 
-                    isContentUpdated = ContentScraperUtil.isFileModified(conn, destinationDirectory!!, destinationDirectory!!.name)
+                    isContentUpdated = ContentScraperUtil.isFileModified(conn, destinationDirectory, destinationDirectory.name)
 
                     if (ContentScraperUtil.fileHasContent(folder)) {
                         isContentUpdated = false
