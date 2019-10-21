@@ -46,6 +46,7 @@ class Role() {
         const val ROLE_NAME_MNE = "mne"
         const val ROLE_NAME_SEL = "sel"
         const val ROLE_NAME_SITE_STAFF = "sitestaff"
+        const val ROLE_NAME_CUSTOMER = "customer"
 
         const val PERMISSION_CLAZZ_SELECT: Long = 1
 

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
@@ -11,7 +12,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.LoginView.Companion.ARG_STARTSYNCING
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 class BasePointActivity2Presenter
 /**
@@ -27,6 +30,9 @@ class BasePointActivity2Presenter
     //Database repository
     internal lateinit var repository: UmAppDatabase
 
+    private var loggedInPersonUid: Long = 0L
+    private var personDao: PersonDao
+
     private var account: UmAccount? = null
 
     private var showDownloadAll = false
@@ -40,20 +46,21 @@ class BasePointActivity2Presenter
 
     init {
 
-        if (arguments != null && arguments!!.containsKey(ARG_STARTSYNCING)) {
-            if (arguments!!.get(ARG_STARTSYNCING) == "true") {
+        if (arguments != null && arguments.containsKey(ARG_STARTSYNCING)) {
+            if (arguments.get(ARG_STARTSYNCING) == "true") {
                 isSyncStarted = true
             }
         }
+        repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        personDao = repository.personDao
     }
 
     /**
      * Gets logged in person and observes it.
      */
     fun getLoggedInPerson() {
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
-        val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
+        val personLive = personDao.findByUidLive(loggedInPersonUid)
         personLive.observe(this, this::handlePersonValueChanged)
     }
 
@@ -152,6 +159,20 @@ class BasePointActivity2Presenter
 
         account = UmAccountManager.getActiveAccount(context)
 
+        var isAdmin: Boolean = false
+        GlobalScope.launch {
+            if (loggedInPersonUid != 0L) {
+                val loggedInPerson = personDao.findByUid(loggedInPersonUid)
+                if (loggedInPerson != null) {
+                    isAdmin = loggedInPerson.admin
+                } else {
+                    isAdmin = false
+                }
+            }else{
+                isAdmin = false
+            }
+        }
+
         view.runOnUiThread(Runnable {
             view.loadProfileIcon(if(account == null) "" else "")
         })
@@ -166,7 +187,8 @@ class BasePointActivity2Presenter
                 val navItem = NavigationItem(s, HashMap<String, String>(), "Title")
                 items.add(navItem)
             }
-            view.setupNavigation(items)
+            view.setupNavigationWithAdmin(items, isAdmin)
+
         }
     }
 

@@ -117,7 +117,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
 
             //Goldozi
-            BasePoint2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePoint2Activity"),
             SaleDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDetailActivity"),
             SaleItemDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleItemDetailActivity"),
             SelectProducerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectProducerActivity"),
@@ -143,7 +142,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PersonWithSaleInfoDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonWithSaleInfoDetailActivity"),
             SettingsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SettingsActivity"),
             PeopleListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PeopleListActivity"),
-
+            CustomerDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}CustomerDetailDialogFragment"),
+            SelectPersonDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectPersonDialogFragment"),
 
             //IRC:
             BasePointView2.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity2"),

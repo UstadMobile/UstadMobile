@@ -190,18 +190,19 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                         DEFAULT_DIVIDER_HEIGHT)
                 divider.layoutParams = dividerLayout
                 divider.setBackgroundColor(Color.parseColor(COLOR_GREY))
-                thisLinearLayout!!.addView(divider)
-
-                //Add the Header
-                val header = TextView(this)
-                header.text = label!!.toUpperCase()
-                header.textSize = HEADER_TEXT_SIZE.toFloat()
-                header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
-                thisLinearLayout.addView(header)
 
                 //Add for classes
                 val impl = UstadMobileSystemImpl.instance
                 if (label == impl.getString(MessageID.classes, applicationContext)) {
+
+                    thisLinearLayout!!.addView(divider)
+
+                    //Add the Header
+                    val header = TextView(this)
+                    header.text = label!!.toUpperCase()
+                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    thisLinearLayout.addView(header)
 
                     //Add Add new Class button
                     val addPersonToClazzHL = LinearLayout(this)
@@ -246,6 +247,16 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                     //Generate the live data and set it
                     mPresenter.generateAssignedClazzesLiveData()
+                }else{
+
+                    thisLinearLayout!!.addView(divider)
+
+                    //Add the Header
+                    val header = TextView(this)
+                    header.text = label!!.toUpperCase()
+                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    thisLinearLayout.addView(header)
                 }
             }
 
@@ -332,7 +343,8 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 }
                 if (fieldType == FIELD_TYPE_TEXT) {
-                    fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                    fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS +
+                            InputType.TYPE_TEXT_FLAG_CAP_WORDS
                 }
 
                 if (fieldType != FIELD_TYPE_DATE) {

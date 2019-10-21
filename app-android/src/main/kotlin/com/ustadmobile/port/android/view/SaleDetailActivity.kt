@@ -13,6 +13,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageButton
@@ -42,8 +43,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
-
+class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
+        CustomerDetailDialogFragment.ChoosenCustomerListener {
 
     private var toolbar: Toolbar? = null
     private var mPresenter: SaleDetailPresenter? = null
@@ -58,6 +59,8 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
     private lateinit var orderTotal: TextView
     private lateinit var totalAfterDiscount: TextView
     private lateinit var addItemCL: ConstraintLayout
+    private lateinit var customerET: EditText
+    private var customerUid : Long = 0L
 
     private lateinit var c1: TextView
     private lateinit var c2: TextView
@@ -294,6 +297,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_save, menu)
 
+
         showSaveButton(mPresenter!!.isShowSaveButton)
         return true
     }
@@ -358,6 +362,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         signatureTitleTV = findViewById(R.id.activity_sale_detail_signature_title)
         signatureIB = findViewById(R.id.activity_sale_detail_signature_button)
         signatureHLine = findViewById(R.id.hlineAfterSignature)
+        customerET = findViewById(R.id.activity_sale_detail_customer_edittext)
 
         c1 = findViewById(R.id.textView21)
         c2 = findViewById(R.id.activity_sale_detail_disc_currency4)
@@ -399,7 +404,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
             }
         })
 
-        orderNotesET!!.addTextChangedListener(object : TextWatcher {
+        orderNotesET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
@@ -409,14 +414,23 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
             }
         })
 
-        deliveredCB!!.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter!!.handleSetDelivered(isChecked) }
+        deliveredCB.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter!!.handleSetDelivered(isChecked) }
 
-        addItemCL!!.setOnClickListener { v -> mPresenter!!.handleClickAddSaleItem() }
+        addItemCL.setOnClickListener { v -> mPresenter!!.handleClickAddSaleItem() }
 
         addPaymentCL!!.setOnClickListener { v -> mPresenter!!.handleClickAddPayment() }
 
+        customerET.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+
+                if(motionEvent.action == MotionEvent.ACTION_DOWN) {
+                    mPresenter!!.handleClickCustomer();
+                }
+                true
+
+        })
+
         //Location spinner
-        locationSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 mPresenter!!.handleLocationSelected(position)
             }
@@ -452,6 +466,15 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         })
 
         signatureIB!!.setOnClickListener { v -> mPresenter!!.handleClickAddSignature() }
+    }
+
+    override fun updateCustomerNameOnView(customerName: String) {
+        customerET.setText(customerName)
+    }
+
+    override fun onSelectCustomerListener(cUid: Long, customerName: String) {
+        customerUid = cUid
+        mPresenter!!.updateCustomerUid(customerUid)
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleItemListDetail>) {
@@ -590,6 +613,10 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
                     } catch (e: SVGParseException) {
                         e.printStackTrace()
                     }
+
+                }
+
+                if(sale.saleCustomerUid != 0L){
 
                 }
             }

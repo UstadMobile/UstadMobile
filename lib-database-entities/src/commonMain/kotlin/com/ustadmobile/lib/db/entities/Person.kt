@@ -43,7 +43,7 @@ open class Person() {
     var personAddress: String? = null
 
     //Added speicifically for Goldozi : mPersonGroupUid is this person's managing group .
-    //In Goldozi's case, a Lead Entrepreneur will be managing Women Entrepreneurs group.
+    //In Goldozi's case, a Lead Entrepreneur will be managing Women Embroider's group.
     var mPersonGroupUid : Long = 0L
 
     var fatherName: String? = null
@@ -55,6 +55,9 @@ open class Person() {
     var motherNum: String? = null
 
     var dateOfBirth: Long = 0
+
+    //Added for simplicity for roles to a person directly for Goldozi.
+    var personRoleUid : Long = 0L
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

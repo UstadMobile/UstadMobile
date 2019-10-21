@@ -42,6 +42,7 @@ interface SaleDetailView : UstadView {
 
 
     fun updateSaleOnView(sale: Sale)
+    fun updateCustomerNameOnView(customerName: String)
 
     //N/A:
     fun updatePaymentTotal(paymentTotal: Long)

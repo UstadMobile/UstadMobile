@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -30,6 +31,24 @@ class PersonDetailEnrollClazzActivity : UstadBaseActivity(), PersonDetailEnrollC
     private var mRecyclerView: RecyclerView? = null
 
     private var mPresenter: PersonDetailEnrollClazzPresenter? = null
+
+
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
+     * the activity goes back when the back button is pressed.
+     *
+     * @param item The item selected
+     * @return true if accounted for
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val i = item.itemId
+        if (i == android.R.id.home) {
+            onBackPressed()
+            return true
+
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     /**
      * In Order:

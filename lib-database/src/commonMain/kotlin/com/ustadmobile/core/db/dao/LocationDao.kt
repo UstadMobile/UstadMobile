@@ -86,7 +86,7 @@ abstract class LocationDao : BaseDao<Location> {
     @Query("SELECT *, " +
             " (SELECT COUNT(*) FROM Location WHERE Location.parentLocationUid = LOC.locationUid) " +
             " AS subLocations  " +
-            "FROM Location AS LOC ORDER BY LOC.title ASC")
+            "FROM Location AS LOC WHERE LOC.locationActive = 1 ORDER BY LOC.title ASC")
     abstract fun findAllLocationsWithCount(): DataSource.Factory<Int, LocationWithSubLocationCount>
 
     @Query("UPDATE Location SET locationActive = 0 WHERE locationUid = :uid")

@@ -186,4 +186,9 @@
     <string name="hours">hours</string>
     <string name="weeks">weeks</string>
     <string name="years">years</string>
+    <string name="customer">Customer</string>
+    <string name="customer_details">Customer Details</string>
+    <string name="select_customers">Select Customers</string>
+    <string name="new_customer">New Customer</string>
+
 </resources>

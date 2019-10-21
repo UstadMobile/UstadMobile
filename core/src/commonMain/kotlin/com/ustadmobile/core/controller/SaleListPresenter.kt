@@ -96,7 +96,7 @@ class SaleListPresenter(context: Any,
 
         presetAL.add(impl.getString(MessageID.sort_by_name_asc, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_NAME_ASC)
-        presetAL.add(impl.getString(MessageID.sorT_by_name_desc, context))
+        presetAL.add(impl.getString(MessageID.sort_by_name_desc, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_NAME_DESC)
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_asc, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_AMOUNT_ASC)

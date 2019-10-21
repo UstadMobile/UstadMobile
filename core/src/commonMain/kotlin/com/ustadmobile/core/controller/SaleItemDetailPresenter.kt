@@ -134,7 +134,8 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 //Notification observer
                 val provider =
                         reminderDao!!.findBySaleItemUid(saleItemUid)
-                view.setReminderProvider(provider)
+
+                view.runOnUiThread(Runnable { view.setReminderProvider(provider) })
 
             }
         }
@@ -269,9 +270,11 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     }
 
     private fun handleReminderLive(reminders : List<SaleItemReminder>?){
-        for (everyReminder in reminders!!) {
-            val days = everyReminder!!.saleItemReminderDays
-            view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
+        if(!updatedSaleItem!!.saleItemSold || updatedSaleItem!!.saleItemPreorder) {
+            for (everyReminder in reminders!!) {
+                val days = everyReminder!!.saleItemReminderDays
+                view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
+            }
         }
         view.finish()
     }

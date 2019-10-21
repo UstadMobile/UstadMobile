@@ -186,13 +186,26 @@ abstract class  PersonDao : BaseDao<Person> {
     abstract suspend fun findByUidAsync(uid: Long) : Person?
 
 
-    @Query("SELECT * FROM Person WHERE active =1")
+    @Query("SELECT * FROM Person WHERE active =1 " +
+            "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
+            Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " )
     abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
 
-    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
+    @Query("SELECT * FROM Person WHERE active=1 " +
+            "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
+             Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " +
+            "ORDER BY firstNames ASC")
     abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person>
 
-    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
+    //TODO: Query is wrong, used while testing. Please fix this. (Varuna)
+    @Query("SELECT * FROM PERSON WHERE active = 1 AND Person.personRoleUid != :leUid " +
+            " AND Person.personRoleUid = :roleUid  ORDER BY firstNames ASC")
+    abstract fun findAllPeopleByLEAndRoleUid(leUid: Long, roleUid: Long): DataSource.Factory<Int, Person>
+
+    @Query("SELECT * FROM Person WHERE active=1 " +
+            "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
+            Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " +
+            "ORDER BY firstNames DESC")
     abstract fun findAllPeopleNameDescProvider(): DataSource.Factory<Int, Person>
 
     @Update
@@ -279,38 +292,6 @@ abstract class  PersonDao : BaseDao<Person> {
         personGroupMember.groupMemberUid = personGroupMemberUid
         return personUid
     }
-
-
-    suspend fun createPersonAndGroup(person:Person):Long{
-        //1. Insert the person if unique
-        try {
-            val personUid = insertAsync(person)
-            person.personUid = personUid
-
-            //2. Create person group
-
-            val personGroup = PersonGroup()
-            personGroup.groupName =
-                    (if (person.firstNames != null) {
-                        person.firstNames
-                    }else{
-                        person.personUid.toString() }) + "'s group"
-            val personGroupUid = insertPersonGroup(personGroup)
-
-            //3. Create person group member and assign to it
-            val personGroupMember = PersonGroupMember()
-            personGroupMember.groupMemberGroupUid = personGroupUid
-            personGroupMember.groupMemberPersonUid = personUid
-            personGroupMember.groupMemberUid = insertPersonGroupMember(personGroupMember)
-
-            return personGroupUid
-
-        }catch(e:Exception){
-            e.message
-            return 0L
-        }
-    }
-
 
     inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
 
@@ -402,7 +383,9 @@ abstract class  PersonDao : BaseDao<Person> {
                 " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
                 " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
                 " DESC LIMIT 1) AS personPictureUid, " +
-                " (0) AS enrolled FROM Person WHERE Person.active = 1 "
+                " (0) AS enrolled FROM Person WHERE Person.active = 1 " +
+                " AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '" +
+                Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) "
 
         const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
             ":searchQuery "

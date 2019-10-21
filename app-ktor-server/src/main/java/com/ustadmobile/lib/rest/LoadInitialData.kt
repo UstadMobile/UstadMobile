@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
+import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_CUSTOMER
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_MNE
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_OFFICER
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_SEL
@@ -383,6 +384,14 @@ class LoadInitialData {
                 val siteStaffPermissions = Role.PERMISSION_PERSON_SELECT or Role.PERMISSION_PERSON_PICTURE_SELECT
                 newRole.rolePermissions = siteStaffPermissions
                 roleDao.insert(newRole)
+            }
+
+            //Customer
+            val customerResult = roleDao.findByName(ROLE_NAME_CUSTOMER)
+            if(customerResult == null){
+                val customerRole = Role()
+                customerRole.roleName = ROLE_NAME_CUSTOMER
+                roleDao.insert(customerRole)
             }
 
             createOfficer()

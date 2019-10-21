@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CD_LE_UID
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_GEN_NAME
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_NAME
@@ -37,11 +38,14 @@ class SaleDetailPresenter(context: Any,
     private val saleDao: SaleDao
     private val saleVoiceNoteDao: SaleVoiceNoteDao
     private val salePaymentDao: SalePaymentDao
+    private val personDao: PersonDao
     private val currentSaleItem: SaleItem? = null
     private var currentSale: Sale? = null
     private var updatedSale: Sale? = null
+    private var customer: Person ? = null
     private val locationDao: LocationDao
     private var currentSaleName = ""
+    private var customerUid : Long = 0L
 
     private var locationLiveData: DoorLiveData<List<Location>>? = null
 
@@ -63,6 +67,7 @@ class SaleDetailPresenter(context: Any,
         saleDao = repository.saleDao
         locationDao = repository.locationDao
         saleVoiceNoteDao = UmAppDatabase.getInstance(context).saleVoiceNoteDao
+        personDao = repository.personDao
 
         positionToLocationUid = HashMap()
 
@@ -102,6 +107,87 @@ class SaleDetailPresenter(context: Any,
             }
         }
     }
+
+    fun initFromSale(saleUid: Long) {
+
+        if(saleUid != null) {
+            val thisP = this
+
+//            //Observe this sale entity
+//            val saleLiveData = saleDao.findByUidLive(saleUid)
+//
+//
+//            GlobalScope.launch(Dispatchers.Main) {
+//                saleLiveData.observe(thisP, thisP::handleSaleChanged)
+//            }
+
+            GlobalScope.launch {
+                //Get the sale entity
+                val resultLive = saleDao.findByUidLive(saleUid)
+                view.runOnUiThread(Runnable {
+                    resultLive.observe(thisP, thisP::updateSaleOnView)
+                })
+
+                startObservingLocations()
+
+
+            }
+
+            //Any voice notes
+            //TODO: Implement this on KMP
+            //        saleVoiceNoteDao.findBySaleUidAsync(saleUid, object : UmCallback<SaleVoiceNote> {
+            //            override fun onSuccess(result: SaleVoiceNote?) {
+            //                if (result != null) {
+            //                    val voiceNotePath = saleVoiceNoteDao.getAttachmentPath(result.saleVoiceNoteUid)
+            //                    if (voiceNotePath != null && !voiceNotePath!!.isEmpty()) {
+            //                        view.updateSaleVoiceNoteOnView(voiceNotePath!!)
+            //                    }
+            //                }
+            //            }
+            //            override fun onFailure(exception: Throwable?) {
+            //
+            //            }
+            //        })
+
+            getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
+            updateSaleItemProvider(saleUid)
+            updatePaymentItemProvider(saleUid)
+
+            getPaymentTotalAndUpdateView()
+        }
+    }
+
+//    private fun handleSaleChanged(sale: Sale?) {
+//        //set the og person value
+//        if (currentSale == null)
+//            currentSale = sale
+//
+//        if (updatedSale == null || updatedSale != sale) {
+//            if (sale != null) {
+//                updatedSale = sale
+//                view.updateSaleOnView(updatedSale!!)
+//
+//            }
+//        }
+//
+//    }
+
+    fun updateSaleOnView(sale:Sale?){
+        if(sale != null){
+
+            //set the og person value
+            if (currentSale == null)
+                currentSale = sale
+
+            updatedSale = sale
+            view.runOnUiThread(Runnable {
+                view.updateSaleOnView(updatedSale!!)
+            })
+
+            startObservingCustomer()
+        }
+    }
+
 
     private fun updateSaleItemProvider(saleUid: Long) {
         //Get provider
@@ -198,59 +284,7 @@ class SaleDetailPresenter(context: Any,
         }
     }
 
-    fun initFromSale(saleUid: Long) {
 
-        if(saleUid != null) {
-            //Observe this sale entity
-            val saleLiveData = saleDao.findByUidLive(saleUid)
-
-            val thisP = this
-            GlobalScope.launch(Dispatchers.Main) {
-                saleLiveData.observe(thisP, thisP::handleSaleChanged)
-            }
-
-            GlobalScope.launch {
-                //Get the sale entity
-                val resultLive = saleDao.findByUidLive(saleUid)
-                view.runOnUiThread(Runnable {
-                   resultLive.observe(thisP, thisP::updateSaleOnView)
-                })
-                startObservingLocations()
-
-            }
-
-            //Any voice notes
-            //TODO: Implement this on KMP
-            //        saleVoiceNoteDao.findBySaleUidAsync(saleUid, object : UmCallback<SaleVoiceNote> {
-            //            override fun onSuccess(result: SaleVoiceNote?) {
-            //                if (result != null) {
-            //                    val voiceNotePath = saleVoiceNoteDao.getAttachmentPath(result.saleVoiceNoteUid)
-            //                    if (voiceNotePath != null && !voiceNotePath!!.isEmpty()) {
-            //                        view.updateSaleVoiceNoteOnView(voiceNotePath!!)
-            //                    }
-            //                }
-            //            }
-            //            override fun onFailure(exception: Throwable?) {
-            //
-            //            }
-            //        })
-
-            getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
-            updateSaleItemProvider(saleUid)
-            updatePaymentItemProvider(saleUid)
-
-            getPaymentTotalAndUpdateView()
-        }
-    }
-
-    fun updateSaleOnView(sale:Sale?){
-        if(sale != null){
-            updatedSale = sale
-            view.runOnUiThread(Runnable {
-                view.updateSaleOnView(updatedSale!!)
-            })
-        }
-    }
 
 
     private fun startObservingLocations() {
@@ -261,25 +295,31 @@ class SaleDetailPresenter(context: Any,
         }
     }
 
-    private fun handleSaleChanged(sale: Sale?) {
-        //set the og person value
-        if (currentSale == null)
-            currentSale = sale
 
-        if (updatedSale == null || updatedSale != sale) {
-            if (sale != null) {
-                updatedSale = sale
-                view.updateSaleOnView(updatedSale!!)
+    private fun startObservingCustomer(){
+        val thisP = this
+        if(updatedSale!!.saleCustomerUid != 0L){
+            GlobalScope.launch(Dispatchers.Main){
+                val customerLive = personDao.findByUidLive(updatedSale!!.saleCustomerUid)
+                customerLive.observe(thisP, thisP::handleCustomerChanged)
             }
         }
-
     }
 
-    fun refreshSaleOnView() {
-        view.updateSaleOnView(updatedSale!!)
+    private fun handleCustomerChanged(changedCustomer: Person?){
+        var firstNames = ""
+        var lastName = ""
+        if(changedCustomer!= null && changedCustomer.firstNames != null){
+            firstNames = changedCustomer.firstNames!!
+        }
+        if(changedCustomer!= null && changedCustomer.lastName != null){
+            lastName = changedCustomer.lastName!!
+        }
+
+        view.updateCustomerNameOnView(firstNames + " " + lastName)
     }
 
-    fun handleLocationsChanged(changedLocations: List<Location>?) {
+    private fun handleLocationsChanged(changedLocations: List<Location>?) {
         var selectedPosition = 0
 
         var locationUid: Long = 0
@@ -377,7 +417,7 @@ class SaleDetailPresenter(context: Any,
         newSalePayment.salePaymentDone = false
         GlobalScope.launch {
             val result = salePaymentDao.insertAsync(newSalePayment)
-            newSalePayment.salePaymentUid = result!!
+            newSalePayment.salePaymentUid = result
             val impl = UstadMobileSystemImpl.instance
             val args = HashMap<String, String>()
             args.put(ARG_SALE_PAYMENT_UID, newSalePayment.salePaymentUid.toString())
@@ -385,6 +425,32 @@ class SaleDetailPresenter(context: Any,
                     (totalAfterDiscount - totalPayment).toString())
             impl.go(SalePaymentDetailView.VIEW_NAME, args, context)
         }
+    }
+
+    fun updateCustomerUid(cUid: Long){
+        customerUid = cUid
+        updatedSale!!.saleCustomerUid = customerUid
+        GlobalScope.launch {
+            customer = personDao.findByUid(customerUid)
+            var firstNames = ""
+            var lastName = ""
+            if(customer!= null && customer!!.firstNames != null){
+                firstNames = customer!!.firstNames!!
+            }
+            if(customer!= null && customer!!.lastName != null){
+                lastName = customer!!.lastName!!
+            }
+            view.updateCustomerNameOnView(firstNames +  " " + lastName)
+        }
+    }
+
+    fun handleClickCustomer(){
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        args.put(SelectPersonDialogView.ARG_SP_LE_UID,
+                UmAccountManager.getActiveAccount(context)!!.personUid.toString())
+        impl.go(SelectPersonDialogView.VIEW_NAME, args, context)
+
     }
 
     fun handleClickAddSaleItem() {
@@ -444,7 +510,6 @@ class SaleDetailPresenter(context: Any,
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args.put(ARG_SALE_PAYMENT_UID, salePaymentUid.toString())
-        //args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE, String.valueOf(totalAfterDiscount - totalPayment));
         impl.go(SalePaymentDetailView.VIEW_NAME, args, context)
     }
 

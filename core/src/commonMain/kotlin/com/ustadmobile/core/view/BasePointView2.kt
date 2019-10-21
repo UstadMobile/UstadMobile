@@ -31,7 +31,9 @@ interface BasePointView2 : UstadView {
 
     fun showMessage(message: String)
 
-    fun setupNavigation(items: List<NavigationItem>)
+    //fun setupNavigation(items: List<NavigationItem>)
+
+    fun setupNavigationWithAdmin(items: List<NavigationItem>, isAdmin: Boolean)
 
     fun showDownloadAllButton(show:Boolean)
 

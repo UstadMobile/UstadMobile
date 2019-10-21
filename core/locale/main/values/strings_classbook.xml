@@ -121,7 +121,7 @@
     <string name="last_recorded">last recorded</string>
     <string name="yesterday">Yesterday</string>
     <string name="today">Today</string>
-    <string name="sort_by">sort_by</string>
+    <string name="sort_by">Sort by</string>
     <string name="log">Log</string>
     <string name="schedule">Schedule</string>
     <string name="add_student">Add Student</string>
@@ -158,14 +158,14 @@
     <string name="test_result">test result</string>
     <string name="aser_test_result">ASER test result</string>
     <string name="current_formal_school">Current public/formal school</string>
-    <string name="first_names">First names</string>
+    <string name="first_names">First name(s)</string>
     <string name="basic_details">Basic details</string>
     <string name="home_address">Home address</string>
     <string name="add_person_to_class">Add person to class</string>
-    <string name="fathers_name">Fathers name</string>
-    <string name="fathers_number">Fathers number</string>
-    <string name="mothers_name">Mothers name</string>
-    <string name="mothers_number">Mothers number</string>
+    <string name="fathers_name">Father\'s name</string>
+    <string name="fathers_number">Father\'s number</string>
+    <string name="mothers_name">Mother\'s name</string>
+    <string name="mothers_number">Mother\'s number</string>
     <!-- DO NOT CHANGE THE ORDER TO HERE -->
 
 
@@ -254,8 +254,8 @@
     <string name="activity">Activity</string>
     <string name="sel_done_select_another_student">SEL done. You can now move to another student</string>
     <string name="sort_by_name">Sort by name</string>
-    <string name="sort_by_name_asc">name (ascending)</string>
-    <string name="sort_by_name_desc">name (descending)</string>
+    <string name="sort_by_name_asc">Name (ascending)</string>
+    <string name="sort_by_name_desc">Name (descending)</string>
     <string name="sort_by_attendance_asc">Sort by attendance(high to low)</string>
     <string name="sort_by_attendance_desc">Sort by attendance(low to high)</string>
     <string name="sort_by_text">Sort by</string>

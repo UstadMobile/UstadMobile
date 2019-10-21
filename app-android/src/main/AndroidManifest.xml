@@ -101,10 +101,6 @@
             />
 
         <!--Goldozi-->
-        <activity android:name="com.ustadmobile.port.android.view.BasePoint2Activity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/register"
-            android:theme="@style/Theme.UstadTheme"/>
         <activity android:name="com.ustadmobile.port.android.view.SaleDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/register"
@@ -175,11 +171,19 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/users"
             android:theme="@style/Theme.UstadTheme"/>
-
         <activity
             android:name="com.ustadmobile.port.android.view.Login2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.CustomerDetailDialogFragment"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.SelectPersonDialogFragment"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/login" />
+
 
         <!-- End of Goldozi-->
 

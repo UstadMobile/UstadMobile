@@ -222,8 +222,8 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
         imagePathFromCamera = output.absolutePath
 
-        val cameraImage = FileProvider.getUriForFile(this,
-                "$packageName.fileprovider", output)
+        val cameraImage = FileProvider.getUriForFile(applicationContext,
+                "$packageName.provider", output)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
 
         val resInfoList = packageManager.queryIntentActivities(cameraIntent,

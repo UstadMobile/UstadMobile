@@ -50,6 +50,8 @@ open class Sale() {
 
     var saleSignature: String? = null
 
+    var saleCustomerUid : Long = 0L
+
     @MasterChangeSeqNum
     var saleMCSN: Long = 0
 

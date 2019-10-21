@@ -248,7 +248,6 @@ open abstract class UstadMobileSystemCommon {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }
 
-//        go(PersonWithSaleInfoListView.VIEW_NAME, mapOf(), context)
     }
     /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a

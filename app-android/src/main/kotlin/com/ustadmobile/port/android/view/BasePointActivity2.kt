@@ -128,11 +128,14 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         bottomNavigation.setUseElevation(true, 16F)
     }
 
-    override fun setupNavigation(items: List<NavigationItem>) {
+    override fun setupNavigationWithAdmin(items: List<NavigationItem>, isAdmin: Boolean) {
 
         bottomNavigation.removeAllItems()
         bottomCount=0
         for (everyItem: NavigationItem in items){
+            if(everyItem.viewName == DashboardEntryListView.VIEW_NAME && !isAdmin){
+                continue
+            }
             val theFragment = viewNameToFragment[everyItem.viewName]
             val fragment = theFragment!!.newInstance() as UstadBaseFragment
 
@@ -149,7 +152,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
                     VIEW_POSITION_POSITION_CLASSES= this.bottomCount
                 everyItem.viewName == PeopleListView.VIEW_NAME ->
                     VIEW_POSITION_POSITION_PEOPLE= this.bottomCount
-                everyItem.viewName == BaseReportView.VIEW_NAME ->
+                everyItem.viewName == BaseReportView.VIEW_NAME  ->
                     VIEW_POSITION_POSITION_REPORTS= this.bottomCount
                 everyItem.viewName == ContentListView.VIEW_NAME ->
                     VIEW_POSITION_POSITION_CONTENT = this.bottomCount
