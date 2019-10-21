@@ -17,7 +17,6 @@ import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.db.dao.LanguageVariantDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig
 import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat
 import com.ustadmobile.lib.db.entities.Container
@@ -69,7 +68,6 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.HashMap
-import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.regex.Pattern
 import java.util.zip.ZipEntry
@@ -99,10 +97,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer
-import com.ustadmobile.lib.rest.findSystemCommand
 import kotlinx.coroutines.runBlocking
-import java.lang.System.exit
 import java.time.temporal.TemporalQuery
 import kotlin.system.exitProcess
 
@@ -518,12 +513,12 @@ object ContentScraperUtil {
 
         val eTagFile = File(destination, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT)
         if (fileHasContent(eTagFile)) {
-            ContentScraperUtil.deleteFile(eTagFile)
+            deleteFile(eTagFile)
         }
 
         val modifiedFile = File(destination, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT)
         if (fileHasContent(modifiedFile)) {
-            ContentScraperUtil.deleteFile(modifiedFile)
+            deleteFile(modifiedFile)
         }
 
     }
@@ -817,6 +812,47 @@ object ContentScraperUtil {
         }
         return language
     }
+
+    fun insertOrUpdateLanguageByThreeCode(langDao: LanguageDao, langThreeCode: String): Language {
+        var language = langDao.findByThreeCode(langThreeCode)
+        if (language == null) {
+            language = Language()
+            language.iso_639_3_standard = langThreeCode
+            val nameOfLang = LanguageCode.getByCode(langThreeCode)
+            if (nameOfLang != null) {
+                language.name = nameOfLang.getName()
+            }else{
+                language.name = LanguageAlpha3Code.getByCode(langThreeCode).getName()
+            }
+            language.langUid = langDao.insert(language)
+        } else {
+            val changedLang = Language()
+            changedLang.langUid = language.langUid
+            changedLang.iso_639_3_standard = langThreeCode
+            val nameOfLang = LanguageCode.getByCode(langThreeCode)
+            if (nameOfLang != null) {
+                changedLang.name = nameOfLang.getName()
+            }else{
+                var code = LanguageAlpha3Code.getByCode(langThreeCode)
+                if(code != null){
+                    language.name = LanguageAlpha3Code.getByCode(langThreeCode).getName()
+                }
+            }
+            var isChanged = false
+            if (language.iso_639_1_standard == null || language.iso_639_1_standard != changedLang.iso_639_1_standard) {
+                isChanged = true
+            }
+            if (language.name == null || language.name == changedLang.name) {
+                isChanged = true
+            }
+            if (isChanged) {
+                langDao.update(changedLang)
+            }
+            language = changedLang
+        }
+        return language
+    }
+
 
 
     @Throws(IOException::class)
@@ -1322,4 +1358,17 @@ object ContentScraperUtil {
             Thread.sleep(3000)
         } while (count != 0)
     }
+
+    fun insertOrUpdateLanguageManual(langDao: LanguageDao, langName: String, langCode: String) {
+        var lang = langDao.findByName(langName)
+
+        val newLang = Language()
+        newLang.name = langName
+        newLang.iso_639_3_standard = langCode
+        if (lang == null) {
+            newLang.langUid = langDao.insert(newLang)
+        }
+    }
+
+
 }

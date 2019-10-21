@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CODEC2_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.FFMPEG_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.WEBP_PATH_KEY
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.fileHasContent
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
@@ -294,7 +295,7 @@ object ShrinkerUtil {
             opfFileOutputStream.flush()
 
             for (replacedFile in replacedFiles.keys) {
-                if (!replacedFile.delete()) {
+                if (fileHasContent(replacedFile) && !replacedFile.delete()) {
                     throw IllegalStateException("Could not delete: $replacedFile")
                 }
             }

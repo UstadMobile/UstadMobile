@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_ALIGNME
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_AUTHOR
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_CREATED
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_ID
+import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_LICENSE
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_LINK
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_LRMI
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_PUBLISHER
@@ -71,6 +72,9 @@ class OpdsFeed {
                                     ATTR_LRMI -> {
                                         entry.targetName = xpp.getAttributeValue(null, ATTR_TARGET)
                                         entry.readingLevel = xpp.getAttributeValue(null, ATTR_ALIGNMENT)
+                                    }
+                                    ATTR_LICENSE -> {
+                                        entry.license = xpp.nextText()
                                     }
                                 }
                             }

@@ -22,6 +22,9 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("SELECT * FROM Language WHERE iso_639_1_standard = :langCode LIMIT 1")
     abstract fun findByTwoCode(langCode: String): Language?
 
+    @Query("SELECT * FROM LANGUAGE WHERE iso_639_3_standard = :langCode OR iso_639_2_standard = :langCode LIMIT 1 ")
+    abstract fun findByThreeCode(langCode: String): Language?
+
     @Query("SELECT COUNT(*) FROM LANGUAGE")
     abstract fun totalLanguageCount(): Int
 

@@ -28,20 +28,24 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
 
 
         val startTime = System.currentTimeMillis()
-        UMLogUtil.logInfo("Started scraper url $scrapeUrl at start time: $startTime")
+        UMLogUtil.logInfo("Started scraper url $scrapeUrl at start time: $startTime with squUid $sqiUid" )
         queueDao.setTimeStarted(sqiUid, startTime)
 
         var successful = false
         try {
-            val content = File(destLocation, destLocation.name)
+            var content: File
 
             when {
                 MIMETYPE_EPUB == contentType -> {
+                    content = File(destLocation, destLocation.name)
                     scrapeEpubContent(scrapeUrl.toString())
                     successful = true
                 }
                 MIMETYPE_PDF == contentType -> {
+                    content = File(destLocation, destLocation.name)
+                    content = File(content, FilenameUtils.getName(scrapeUrl.path))
                     scrapePdfContent(scrapeUrl.toString())
+                    successful = true
                 }
                 else -> {
                     UMLogUtil.logError("unsupported kind = $contentType at url = $scrapeUrl")
@@ -53,7 +57,6 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
                 ContentScraperUtil.insertContainer(containerDao, parentEntry, true,
                         contentType, content.lastModified(), content, db, repository,
                         containerDir)
-                FileUtils.deleteDirectory(content)
             }
 
         } catch (e: Exception) {
@@ -65,7 +68,7 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
         queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
-        UMLogUtil.logInfo("Ended scrape for url $scrapeUrl in duration: $duration")
+        UMLogUtil.logInfo("Ended scrape for url $scrapeUrl in duration: $duration squUid  $sqiUid")
     }
 
     private fun scrapeEpubContent(scrapeUrl: String) {
@@ -83,7 +86,6 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
 
             if (ContentScraperUtil.fileHasContent(folder)) {
                 isContentUpdated = false
-                FileUtils.deleteDirectory(folder)
             }
 
             if (!isContentUpdated) {
@@ -104,7 +106,33 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
 
 
     private fun scrapePdfContent(scrapeUrl: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val folder = File(destLocation, destLocation.name)
+        folder.mkdirs()
+
+        val url = URL(scrapeUrl)
+        var conn: HttpURLConnection? = null
+        try {
+            conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "HEAD"
+
+            isContentUpdated = ContentScraperUtil.isFileModified(conn, destLocation, destLocation.name)
+
+            if (ContentScraperUtil.fileHasContent(folder)) {
+                isContentUpdated = false
+            }
+
+            if (!isContentUpdated) {
+                return
+            }
+
+            val contentFile = File(folder, FilenameUtils.getName(url.path))
+            FileUtils.copyURLToFile(url, contentFile)
+
+        } catch (e: Exception) {
+            throw e
+        } finally {
+            conn?.disconnect()
+        }
     }
 
 

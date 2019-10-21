@@ -174,7 +174,7 @@ class EdraakK12ContentScraper : Runnable {
             // Contains children which have video
             for (children in response.target_component!!.children!!) {
 
-                if (ScraperConstants.ComponentType.VIDEO.type.equals(children.component_type!!, ignoreCase = true)) {
+                if (ComponentType.VIDEO.type.equals(children.component_type!!, ignoreCase = true)) {
 
                     try {
                         downloadVideo(children)
@@ -223,7 +223,7 @@ class EdraakK12ContentScraper : Runnable {
             if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
 
                 ContentScraperUtil.generateTinCanXMLFile(destinationDirectory!!, response.title!!, "ar",
-                        ScraperConstants.INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
+                        INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
                         scrapUrl!!.toString().substring(0, scrapUrl!!.toString().indexOf("component/")) + response.id!!,
                         "", "en")
             }
@@ -367,7 +367,7 @@ class EdraakK12ContentScraper : Runnable {
         val videoSize = Integer.MAX_VALUE
 
         for (videos in encoded_videos) {
-            if (videos.file_size > 0 && videos.file_size < videoSize) {
+            if (videos.file_size in 1 until videoSize) {
                 selectedVideo = videos
             }
         }
