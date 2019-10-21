@@ -133,9 +133,6 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         bottomNavigation.removeAllItems()
         bottomCount=0
         for (everyItem: NavigationItem in items){
-            if(everyItem.viewName == DashboardEntryListView.VIEW_NAME && !isAdmin){
-                continue
-            }
             val theFragment = viewNameToFragment[everyItem.viewName]
             val fragment = theFragment!!.newInstance() as UstadBaseFragment
 
