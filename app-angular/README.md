@@ -88,5 +88,5 @@ or
 
 //In case it will be deployed on a specific directory then add base href
 
-./gradlew app-angular:buildProd -PbaseHref=<Base href>
+./gradlew app-angular:buildProd -PbaseHref=<Directory name>
 ```

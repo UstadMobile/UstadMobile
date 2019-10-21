@@ -59,17 +59,12 @@ task prepareMessageIDMaps{
       jsonObj.put(String.valueOf(value),msgValue)
     }
 
-    try {
-      if(!outFile.getParentFile().exists()) {
-        outFile.getParentFile().mkdirs()
-      }
-      FileWriter jsonFile = new FileWriter(outFile.absolutePath)
-      jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
-      jsonFile.flush()
-
-    } catch (IOException e) {
-      e.printStackTrace()
+    if(!outFile.getParentFile().exists()) {
+      outFile.getParentFile().mkdirs()
     }
+    FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+    jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
+    jsonFile.flush()
   }
 
 }
