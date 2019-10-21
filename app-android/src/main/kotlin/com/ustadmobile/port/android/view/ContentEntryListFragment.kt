@@ -24,13 +24,20 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid
+import com.ustadmobile.lib.db.entities.DistinctCategorySchema
+import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.port.android.view.ext.activeRange
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicReference
 
 
 /**
@@ -53,7 +60,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private var entryListPresenter: ContentEntryListFragmentPresenter? = null
 
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
 
     private var contentEntryListener: ContentEntryListener? = null
 
@@ -65,9 +72,57 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private var savedInstanceState: Bundle? = null
 
-    private var rootContainer: View? = null
+    private lateinit var rootContainer: View
 
     private var emptyViewHolder: RelativeLayout? = null
+
+    internal class LocalAvailabilityPagedListCallback(val localAvailabilityManager: LocalAvailabilityManager,
+                                                      var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>?,
+                                                      val onEntityAvailabilityChanged: (Map<Long, Boolean>) -> Unit) : PagedList.Callback() {
+
+        val availabilityMonitorRequest = AtomicReference<AvailabilityMonitorRequest?>()
+
+        val activeRange = AtomicReference(Pair(-1, -1))
+
+        override fun onChanged(position: Int, count: Int) {
+            handleActiveRangeChanged()
+        }
+
+        override fun onInserted(position: Int, count: Int) {
+            handleActiveRangeChanged()
+        }
+
+        override fun onRemoved(position: Int, count: Int) {
+            handleActiveRangeChanged()
+        }
+
+        private fun handleActiveRangeChanged() {
+            val currentPagedList = pagedList
+            val currentActiveRange = currentPagedList?.activeRange()
+            if(currentPagedList != null && currentActiveRange != null
+                    && !activeRange.compareAndSet(currentActiveRange, currentActiveRange)) {
+                val containerUidsToMonitor = (currentActiveRange.first .. currentActiveRange.second-1)
+                        .fold(mutableListOf<Long>(), {uidList, index ->
+                            val contentEntry = currentPagedList.get(index)
+                            if(contentEntry != null && contentEntry.leaf) {
+                                uidList += contentEntry.mostRecentContainer
+                            }
+                            uidList
+                        })
+                val newRequest = AvailabilityMonitorRequest(containerUidsToMonitor,
+                        onEntityAvailabilityChanged)
+                val oldRequest = availabilityMonitorRequest.getAndSet(newRequest)
+                if(oldRequest != null) {
+                    localAvailabilityManager.removeMonitoringRequest(oldRequest)
+                }
+            }
+        }
+    }
+
+
+    private var listSnapShot: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid?> = listOf()
+
+    private var localAvailabilityPagedListCallback: LocalAvailabilityPagedListCallback? = null
 
     fun filterByLang(langUid: Long) {
         entryListPresenter!!.handleClickFilterByLanguage(langUid)
@@ -107,21 +162,20 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         fun setLanguageFilterSpinner(result: List<Language>)
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         rootContainer = inflater.inflate(R.layout.fragment_contententry_list, container, false)
         this.savedInstanceState = savedInstanceState
 
         // Set the adapter
-        val context = rootContainer!!.context
-        recyclerView = rootContainer!!.findViewById(R.id.content_entry_list)
-        recyclerView!!.layoutManager = LinearLayoutManager(context)
+        val context = rootContainer.context
+        recyclerView = rootContainer.findViewById(R.id.content_entry_list)
+        recyclerView.layoutManager = LinearLayoutManager(context)
 
-        emptyViewHolder = rootContainer!!.findViewById(R.id.emptyView)
+        emptyViewHolder = rootContainer.findViewById(R.id.emptyView)
 
-        val emptyViewImage :ImageView = rootContainer!!.findViewById(R.id.emptyViewImage)
-        val emptyViewText: TextView = rootContainer!!.findViewById(R.id.emptyViewText)
+        val emptyViewImage :ImageView = rootContainer.findViewById(R.id.emptyViewImage)
+        val emptyViewText: TextView = rootContainer.findViewById(R.id.emptyViewText)
 
         val isDownloadedSection = bundleToMap(arguments).containsKey(ARG_DOWNLOADED_CONTENT)
 
@@ -139,7 +193,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
         val dividerItemDecoration = DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL)
-        recyclerView!!.addItemDecoration(dividerItemDecoration)
+        recyclerView.addItemDecoration(dividerItemDecoration)
         checkReady()
 
         return rootContainer
@@ -165,12 +219,15 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
-        if (entryListPresenter == null && rootContainer != null && ::managerAndroidBle.isInitialized) {
+        if (entryListPresenter == null && ::managerAndroidBle.isInitialized) {
             //create entry adapter here to make sure bleManager is not null
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
                     managerAndroidBle)
             recyclerAdapter!!.addListeners()
             recyclerAdapter!!.setEmptyStateListener(this)
+
+            localAvailabilityPagedListCallback = LocalAvailabilityPagedListCallback(
+                    managerAndroidBle.localAvailabilityManager, null, {})
 
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
@@ -191,12 +248,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                 .setBoundaryCallback(boundaryCallback)
                 .build()
 
-        //try pagedList.addWeakCallback to figure out when items are loaded / unloaded
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>> {
             recyclerAdapter!!.submitList(it)
+            localAvailabilityPagedListCallback.pagedList = it
+            it.addWeakCallback(listSnapShot, localAvailabilityPagedListCallback!!)
         })
 
-        recyclerView!!.adapter = recyclerAdapter
+        recyclerView.adapter = recyclerAdapter
     }
 
     override fun setToolbarTitle(title: String) {
