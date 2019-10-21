@@ -20,7 +20,7 @@ describe('Default App behaviours', () => {
     });
   });
 
-  it('givenApplication_whenLaunched_shouldShowTwoSideMenus', () => {
+  it('givenApplication_whenLaunched_shouldShowSideMenus', () => {
     pageHome.launch().then( ()=>{
       expect(pageHome.getPage().menus.count()).toBeGreaterThan(1);
     });

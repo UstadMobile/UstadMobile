@@ -15,7 +15,6 @@ import kotlin from 'kotlin'
 export class UmBaseService {
 
   private database: db.com.ustadmobile.core.db.UmAppDatabase
-  private isTestEnv: boolean = false
   private component: any
   public ROOT_UID = "0"
   private umObserver = new Subject <any> ();
@@ -25,7 +24,6 @@ export class UmBaseService {
   httpClient: HttpClient;
   toolBarTitle: string = ".."
   public appName: string  = "..." 
-  public baseUrlTag: string = "doordb.endpoint.url"
   public localeTag: string = "tracked.locale"
 
   isMobile = false
@@ -62,14 +60,6 @@ export class UmBaseService {
   }
 
   /**
-   * Set application environment
-   * @param isTestEnv true when is in test mode otherwise false
-   */
-  setEnvironment(isTestEnv = false){
-    this.isTestEnv = isTestEnv
-  }
-
-  /**
    * Get database instance
    */
   getDbInstance(){
@@ -82,9 +72,9 @@ export class UmBaseService {
    */
   preloadResources(fireWhenReady = true){
 
-    UmAngularUtil.setItem("contentUrl", UmAngularUtil.getItem("doordb.endpoint.url")+"ContainerMount/")
-  
-    if(this.isTestEnv == true){
+    UmAngularUtil.setItem(UmAngularUtil.CONTENT_URL_TAG, UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG)+"ContainerMount/")
+
+    if(UmAngularUtil.TEST_ENDPOINT == UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG)){
       combineLatest([
         this.http.get("http://localhost:8087/UmAppDatabase/clearAllTables", {responseType: 'text' }),
         this.http.get<any>("assets/data_entries.json").pipe(map(res => res)),

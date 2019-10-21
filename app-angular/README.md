@@ -50,7 +50,7 @@ This will create an app, to run it use http://localhost:4200/
 
 NOTE:
 
-Make sure you run development server before executing above command, to run the server in development mode use:-
+Make sure you build and run development server before executing above command, to run the server in development mode use:-
 
 ```  
 ./gradlew app-ktor-server:appRunDevMode

@@ -22,6 +22,12 @@ export class UmAngularUtil {
 
   private static storageEventHandler: any = {};
 
+  public static CONTENT_URL_TAG = "contentUrl"
+
+  public static BASE_URL_TAG = "doordb.endpoint.url"
+
+  public static TEST_ENDPOINT = "http://localhost:8087/"
+
   /**
    * Key to be used when toolbar title value changes
    */
@@ -378,7 +384,7 @@ export class UmAngularUtil {
 
   static getMountPath(containerUid: any){
     const uid = containerUid.toString()
-    return UmAngularUtil.getItem("contentUrl") + uid +"/"
+    return UmAngularUtil.getItem(this.CONTENT_URL_TAG) + uid +"/"
   }
 
   /**
