@@ -46,10 +46,40 @@ npm run start:<locale code>
 //i.e npm run start:en
 ``` 
 
-This will create an app, to run it use http://localhost:4200/  
+This will create an app, to run it use http://localhost:4200/ 
+
+NOTE:
+
+Make sure you run development server before executing above command, to run the server in development mode use:-
+
+```  
+./gradlew app-ktor-server:appRunDevMode
+``` 
 
 ## Testing  
-To execute end to end test with Protractor use:-
+You may opt to use angular or gradle tasks to run end to end tests  with Protractor,
+ for Karma it is more preferable to use gradle tasks.
+
+* Angular test framework
+
+With angular testing framework, don't forget to run development server
+
+i.e
+```  
+./gradlew app-ktor-server:appRunDevMode
+``` 
+Then, you are good to start angular test
+
+```  
+ng e2e
+
+//In-case you need to specify a port
+ng e2e --port <port number>
+```
+* Gradle tasks
+
+With this, you don't have to start development server since it will be started when needed and shut-down when done with testing.
+
   
 ```  
 ./gradlew app-angular:ngTest -Ptestmodule=e2e 
