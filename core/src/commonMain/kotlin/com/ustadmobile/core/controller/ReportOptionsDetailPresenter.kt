@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DashboardEntryDao
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -15,7 +16,9 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.
 import com.ustadmobile.core.view.SelectMultiplePeopleView.Companion.ARG_SELECTED_PEOPLE
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.Companion.ARG_PRODUCT_SELECTED_SET
 import com.ustadmobile.lib.db.entities.DashboardEntry
+import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -30,6 +33,7 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
     internal var repository: UmAppDatabase
     private val dashboardEntryDao: DashboardEntryDao
+    private val personDao: PersonDao
 
     private var idToGroupByInteger: HashMap<Long, Int>? = null
 
@@ -39,6 +43,7 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
     internal var impl: UstadMobileSystemImpl
     private var currentDashboardEntry: DashboardEntry? = null
     private var dashboardEntryUid = 0L
+    private var loggedInPerson: Person? = null
 
     private var fromDate: Long = 0
     private var toDate: Long = 0
@@ -58,6 +63,7 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
         //Get provider Dao
         dashboardEntryDao = repository.dashboardEntryDao
+        personDao = repository.personDao
 
         impl = UstadMobileSystemImpl.instance
 
@@ -76,6 +82,26 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
+
+        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+        GlobalScope.launch {
+            loggedInPerson = personDao.findByUid(loggedInPersonUid)
+            if(loggedInPerson != null){
+                if(loggedInPerson!!.admin){
+                    view.runOnUiThread(Runnable {
+                        view.showLEsOption(true)
+                    })
+                }else{
+                    view.runOnUiThread(Runnable {
+                        view.showLEsOption(false)
+                    })
+                }
+            }else{
+                view.runOnUiThread(Runnable {
+                    view.showLEsOption(false)
+                })
+            }
+        }
 
         if (dashboardEntryUid != 0L) {
             GlobalScope.launch {
@@ -121,6 +147,12 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
         selectedLocations = reportOptions!!.locations
         selectedLEs = reportOptions!!.les
+        if(loggedInPerson!= null && !loggedInPerson!!.admin){
+            val les = ArrayList<Long>()
+            les.add(loggedInPerson!!.personUid)
+            selectedLEs = les
+
+        }
         selectedProducts = reportOptions!!.productTypes
         currentGroupBy = reportOptions!!.groupBy
 

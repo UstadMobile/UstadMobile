@@ -38,7 +38,7 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
     internal var repository: UmAppDatabase
     private val dashboardEntryDao: DashboardEntryDao
     private val tagDao: DashboardTagDao
-    private val loggedInPerson: Person? = null
+    private var loggedInPerson: Person? = null
     private var loggedInPersonUid = 0L
     private val personDao: PersonDao
     private lateinit var tagLiveData: DoorLiveData<List<DashboardTag>>
@@ -73,6 +73,21 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
                 view.runOnUiThread(Runnable {
                     view.setDashboardEntryProvider(entryProvider!!)
                 })
+
+                loggedInPerson = personDao.findByUid(loggedInPersonUid)
+                if(loggedInPerson != null){
+                    if(loggedInPerson!!.admin){
+                        view.runOnUiThread(Runnable {
+                            view.showSalesLogOption(true)
+                            view.showTopLEsOption(true)
+                        })
+                    }else{
+                        view.runOnUiThread(Runnable {
+                            view.showSalesLogOption(false)
+                            view.showTopLEsOption(false)
+                        })
+                    }
+                }
             }
 
             GlobalScope.launch {

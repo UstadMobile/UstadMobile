@@ -31,6 +31,8 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
+
+
     override val viewContext: Any
         get() = context!!
 
@@ -41,7 +43,9 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
     private lateinit var floatingActionMenu: FloatingActionMenu
     private lateinit var tags: ChipGroup
     private val tagAll: Chip ?= null
-
+    private lateinit var salesPerformance: FloatingActionButton
+    private lateinit var salesLog: FloatingActionButton
+    private lateinit var topLEs: FloatingActionButton
 
     private var recyclerAdapter: DashboardEntryListRecyclerAdapter? = null
 
@@ -85,7 +89,7 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
 
         //Set listeners
         floatingActionMenu = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu)
-        val salesPerformance = rootContainer.findViewById<FloatingActionButton>(
+        salesPerformance = rootContainer.findViewById<FloatingActionButton>(
                 R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
         salesPerformance.setOnClickListener { v ->
                     floatingActionMenu.close(true)
@@ -95,7 +99,7 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
         salesPerformance.setColorPressedResId(R.color.fab_pressed)
         salesPerformance.setColorRippleResId(R.color.fab_ripple)
 
-        val salesLog = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_sales_log)
+        salesLog = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_sales_log)
         salesLog.setOnClickListener { v ->
                     floatingActionMenu.close(true)
                     mPresenter!!.handleClickNewSalesLogReport()
@@ -104,7 +108,7 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
         salesLog.setColorPressedResId(R.color.fab_pressed)
         salesLog.setColorRippleResId(R.color.fab_ripple)
 
-        val topLEs = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_top_les)
+        topLEs = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_top_les)
         topLEs.setOnClickListener { v ->
                     floatingActionMenu.close(true)
                     mPresenter!!.handleClickTopLEsReport()
@@ -115,6 +119,23 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
 
         return rootContainer
     }
+
+    override fun showSalesLogOption(show: Boolean) {
+        if(show){
+            salesLog.visibility = View.VISIBLE
+        }else{
+            salesLog.visibility = View.GONE
+        }
+    }
+
+    override fun showTopLEsOption(show: Boolean) {
+        if(show){
+            topLEs.visibility = View.VISIBLE
+        }else{
+            topLEs.visibility = View.GONE
+        }
+    }
+
 
     override fun finish() {}
 

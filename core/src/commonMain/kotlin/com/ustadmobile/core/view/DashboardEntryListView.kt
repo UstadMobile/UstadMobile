@@ -31,6 +31,9 @@ interface DashboardEntryListView : UstadView {
 
     fun showSetTitle(existingTitle: String, entryUid: Long)
 
+    fun showSalesLogOption(show: Boolean)
+    fun showTopLEsOption(show: Boolean)
+
     companion object {
 
 

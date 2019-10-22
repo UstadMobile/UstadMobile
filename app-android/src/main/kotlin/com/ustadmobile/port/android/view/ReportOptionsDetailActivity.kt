@@ -36,6 +36,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
     internal lateinit var locationCL: ConstraintLayout
     internal lateinit var dateRangeCL: ConstraintLayout
     internal lateinit var productTypesTV: TextView
+    internal lateinit var lesHeading : TextView
     internal lateinit var lesTV: TextView
     internal lateinit var locationTV: TextView
     internal lateinit var dateRangeTV: TextView
@@ -92,6 +93,16 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
         return super.onOptionsItemSelected(item)
     }
 
+    override fun showLEsOption(show: Boolean){
+        if(show){
+            lesTV.visibility = View.VISIBLE
+            lesHeading.visibility = View.VISIBLE
+        }else{
+            lesTV.visibility = View.GONE
+            lesHeading.visibility = View.GONE
+        }
+    }
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -117,6 +128,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
         productTypesTV = findViewById(R.id.activity_report_options_detail_product_types_value)
         groupBySpinner = findViewById(R.id.activity_report_options_detail_group_by_value)
         lesTV = findViewById(R.id.activity_report_options_detail_les_value)
+        lesHeading = findViewById(R.id.activity_report_options_detail_les_heading)
         locationTV = findViewById(R.id.activity_report_options_detail_location_value)
         dateRangeTV = findViewById(R.id.activity_report_options_detail_date_range_value)
         salesPriceTV = findViewById(R.id.activity_report_options_detail_sales_price_value)

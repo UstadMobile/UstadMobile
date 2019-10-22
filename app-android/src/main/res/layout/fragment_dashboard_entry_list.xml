@@ -100,7 +100,8 @@
             app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
-            fab:fab_colorRipple="@color/fab_ripple" />
+            fab:fab_colorRipple="@color/fab_ripple"
+            android:visibility="invisible"/>
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fragment_dashboard_entry_list_fab_menu_top_les"
@@ -117,7 +118,8 @@
             app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
-            fab:fab_colorRipple="@color/fab_ripple" />
+            fab:fab_colorRipple="@color/fab_ripple"
+            android:visibility="invisible"/>
     </com.github.clans.fab.FloatingActionMenu>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

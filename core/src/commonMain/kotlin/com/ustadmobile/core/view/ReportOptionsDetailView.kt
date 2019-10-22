@@ -30,6 +30,8 @@ interface ReportOptionsDetailView : UstadView {
 
     fun setEditMode(editMode: Boolean)
 
+    fun showLEsOption(show: Boolean)
+
     companion object {
 
         // This defines the view name that is an argument value in the go() in impl.
