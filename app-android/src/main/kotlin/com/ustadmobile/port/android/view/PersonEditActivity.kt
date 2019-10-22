@@ -332,7 +332,8 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 }
                 if (fieldType == FIELD_TYPE_TEXT) {
-                    fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                    fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS +
+                            InputType.TYPE_TEXT_FLAG_CAP_WORDS
                 }
 
                 if (fieldType != FIELD_TYPE_DATE) {
