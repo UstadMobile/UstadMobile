@@ -16,7 +16,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +30,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                                                                private val monitor: LocalAvailabilityMonitor?,
                                                                private val managerAndroidBle: NetworkManagerBle,
                                                                var emptyStateListener: EmptyStateListener)
-    : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
+    : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
          OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
@@ -124,14 +124,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.availabilityStatus.text = ""
             holder.availabilityIcon.setImageDrawable(null)
         } else {
-            val available: Boolean = managerAndroidBle.isEntryLocallyAvailable(
-                    entry.mostRecentContainer)
-
-            if (entry.leaf) {
-                holder.updateLocallyAvailableStatus(available)
-            }
-
-            holder.containerUid = entry.mostRecentContainer
+            holder.containerUid = entry.mostRecentContainer?.containerUid ?: 0L
             holder.contentEntryUid = entry.contentEntryUid
 
             holder.view.tag = entry.contentEntryUid
@@ -200,7 +193,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             holder.updateLocallyAvailableStatus(
-                    localAvailabilityMap.get(entry.mostRecentContainer) ?: false)
+                    localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
             GlobalScope.launch(Dispatchers.Main) {
                 val downloadJobItemStatus = managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(
                     entry.contentEntryUid)
@@ -289,14 +282,14 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.ARTICLE_TYPE] = R.drawable.ic_newspaper
         }
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>() {
-            override fun areItemsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid,
-                                         newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid): Boolean {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {
+            override fun areItemsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+                                         newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
                 return oldItem.contentEntryUid == newItem.contentEntryUid
             }
 
-            override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid,
-                                            newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid): Boolean {
+            override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+                                            newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
                 if (if (oldItem.title != null) oldItem.title != newItem.title else newItem.title != null) {
                     return false
                 }

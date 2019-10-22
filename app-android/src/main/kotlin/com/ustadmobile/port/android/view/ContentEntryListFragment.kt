@@ -29,7 +29,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.activeRange
@@ -77,7 +77,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     private var emptyViewHolder: RelativeLayout? = null
 
     internal class LocalAvailabilityPagedListCallback(val localAvailabilityManager: LocalAvailabilityManager,
-                                                      var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>?,
+                                                      var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
                                                       val onEntityAvailabilityChanged: (Map<Long, Boolean>) -> Unit) : PagedList.Callback() {
 
         val availabilityMonitorRequest = AtomicReference<AvailabilityMonitorRequest?>()
@@ -105,7 +105,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                         .fold(mutableListOf<Long>(), {uidList, index ->
                             val contentEntry = currentPagedList.get(index)
                             if(contentEntry != null && contentEntry.leaf) {
-                                uidList += contentEntry.mostRecentContainer
+                                val mostRecentContainerUid = contentEntry.mostRecentContainer?.containerUid ?: 0L
+                                if(mostRecentContainerUid != 0L) {
+                                    uidList += mostRecentContainerUid
+                                }
                             }
                             uidList
                         })
@@ -134,7 +137,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
 
-    private var listSnapShot: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid?> = listOf()
+    private var listSnapShot: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?> = listOf()
 
     private var localAvailabilityPagedListCallback: LocalAvailabilityPagedListCallback? = null
 
@@ -256,14 +259,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         this.contentEntryListener = null
     }
 
-    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>) {
+    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
                 .contentEntryDaoBoundaryCallbacks.getChildrenByParentUidWithCategoryFilter(entryProvider)
         val data = LivePagedListBuilder(entryProvider, 20)
                 .setBoundaryCallback(boundaryCallback)
                 .build()
 
-        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>> {
+        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
             recyclerAdapter!!.submitList(it)
             localAvailabilityPagedListCallback!!.pagedList = it
             it.addWeakCallback(listSnapShot, localAvailabilityPagedListCallback!!)
