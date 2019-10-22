@@ -45,7 +45,7 @@ open class IndexLog {
 }
 
 abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>, view: WebChunkView,
-                              private val appRepo: UmAppDatabase)
+                                       private val isDownloadEnabled: Boolean,private val appRepo: UmAppDatabase)
     : UstadBaseController<WebChunkView>(context, arguments, view) {
 
     private var navigation: String? = null
@@ -92,7 +92,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 sourceUrl, arguments[ARG_NO_IFRAMES]?.toBoolean()!!,
                 appRepo, impl,
                 true,
-                context, object : UmCallback<Any> {
+                context,isDownloadEnabled, object : UmCallback<Any> {
             override fun onSuccess(result: Any?) {
 
             }

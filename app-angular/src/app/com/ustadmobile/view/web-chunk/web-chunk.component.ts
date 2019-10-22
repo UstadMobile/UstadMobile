@@ -32,7 +32,7 @@ export class WebChunkComponent extends UmBaseComponent implements OnDestroy,
   onCreate(){
     super.onCreate()
     this.presenter = new core.com.ustadmobile.core.controller.WebChunkPresenter(
-      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance())
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this,false, this.umService.getDbInstance())
     this.presenter.onCreate(null)
   }
 

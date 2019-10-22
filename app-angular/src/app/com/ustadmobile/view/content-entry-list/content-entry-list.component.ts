@@ -112,7 +112,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
   }
 
   getLicenceType(licenseType){ 
-    return core.com.ustadmobile.core.controller.ContentEntryDetailPresenterCommon.Companion.getLicenseType(licenseType)
+    return core.com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.getLicenseType(licenseType)
   }
 
   setLanguageOptions(languages: any) {

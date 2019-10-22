@@ -16,7 +16,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryDetailPresenterCommon.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*

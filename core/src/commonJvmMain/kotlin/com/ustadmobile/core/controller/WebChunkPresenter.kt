@@ -9,8 +9,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                  view: WebChunkView, private val appRepo: UmAppDatabase)
-    : WebChunkPresenterCommon(context, arguments, view, appRepo) {
+                                                  view: WebChunkView,isDownloadEnabled: Boolean, private val appRepo: UmAppDatabase)
+    : WebChunkPresenterCommon(context, arguments, view, isDownloadEnabled, appRepo) {
 
     actual override suspend fun handleMountChunk() {
         val result = appRepo.containerDao.findByUidAsync(containerUid!!)

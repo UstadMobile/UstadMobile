@@ -41,7 +41,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this, repository)
+                bundleToMap(intent.extras), this, true,repository)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }

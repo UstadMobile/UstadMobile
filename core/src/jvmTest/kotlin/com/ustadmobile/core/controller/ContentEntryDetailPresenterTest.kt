@@ -66,7 +66,7 @@ class ContentEntryDetailPresenterTest {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_FULL_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!, monitor!!, statusProvider!!,umAppRepository)
+                args, mockView!!,true, monitor!!, statusProvider!!,umAppRepository)
         presenter.onCreate(args)
 
         val argsresult = Hashtable<String,String>()
@@ -89,7 +89,7 @@ class ContentEntryDetailPresenterTest {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_NO_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!, monitor!!, statusProvider!!,umAppRepository)
+                args, mockView!!,true, monitor!!, statusProvider!!,umAppRepository)
         presenter.onCreate(args)
 
         args.remove(UstadMobileSystemCommon.ARG_REFERRER)
