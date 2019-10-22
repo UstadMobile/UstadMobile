@@ -133,16 +133,16 @@ abstract class DownloadJobItemDao {
     @Query("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
     abstract fun getDestinationFiles(djiDsiUids: List<Long>): List<String>
 
-    @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
-            "LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid " +
-            "WHERE " +
-            " DownloadJobItem.djiContainerUid != 0 " +
-            " AND DownloadJobItem.djiStatus >= " + JobStatus.WAITING_MIN +
-            " AND DownloadJobItem.djiStatus < " + JobStatus.RUNNING_MIN +
-            " AND (((SELECT connectivityState FROM ConnectivityStatus) =  " + ConnectivityStatus.STATE_UNMETERED + ") " +
-            " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
-            " AND DownloadJob.meteredNetworkAllowed) " +
-            "LIMIT 1")
+    @Query("""SELECT DownloadJobItem.* FROM DownloadJobItem 
+            LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid 
+            WHERE 
+             DownloadJobItem.djiContainerUid != 0 
+             AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
+             AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
+             AND (((SELECT connectivityState FROM ConnectivityStatus) =  ${ConnectivityStatus.STATE_UNMETERED} ) 
+             OR ((SELECT connectivityState FROM ConnectivityStatus) = ${ConnectivityStatus.STATE_METERED} ) 
+             AND DownloadJob.meteredNetworkAllowed) 
+            ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT 6""")
     @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 

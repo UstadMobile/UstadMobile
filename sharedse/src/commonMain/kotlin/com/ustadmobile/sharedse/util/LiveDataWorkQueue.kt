@@ -58,12 +58,12 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
         }
     }
 
+    //TODO: Add thread safety on JDBC/JVM. On Android: this will only ever be called on the main thread
     override fun onChanged(t: List<T>) {
-        t.filter { changedItem -> !queuedOrActiveItems.any { sameItemFn(it, changedItem) } }.forEach {
-            queuedOrActiveItems.add(it)
-            coroutineScope.launch {
-                channel.send(it)
-            }
+        val itemsToQueue = t.filter { changedItem -> !queuedOrActiveItems.any { sameItemFn(it, changedItem) } }
+        queuedOrActiveItems.addAll(itemsToQueue)
+        coroutineScope.launch {
+            itemsToQueue.forEach { channel.send(it) }
         }
     }
 
