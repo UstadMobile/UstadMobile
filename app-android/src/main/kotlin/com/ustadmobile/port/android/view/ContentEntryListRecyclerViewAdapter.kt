@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -12,8 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -29,67 +28,31 @@ import java.util.*
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
                                                                private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
-                                                               private val managerAndroidBle: NetworkManagerBle)
+                                                               private val managerAndroidBle: NetworkManagerBle,
+                                                               var emptyStateListener: EmptyStateListener)
     : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
-        LocalAvailabilityListener, OnDownloadJobItemChangeListener {
+         OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
 
-    private val boundViewHolders: MutableSet<ViewHolder>
+    private val boundViewHolders: MutableSet<ViewHolder> = HashSet()
 
-    private var emptyStateListener: EmptyStateListener? = null
-
-    /**
-     * @return List of container uids that can be monitored (Requires status).
-     */
-    private val uniqueContainerUidsListTobeMonitored: List<Long>
-        get() {
-            val currentDisplayedEntryList = if (currentList == null) ArrayList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>() else currentList
-            val uidsToMonitor = ArrayList<Long>()
-            for (entry in currentDisplayedEntryList!!) {
-
-                val canBeMonitored = (entry != null && (entry.contentEntryStatus == null || entry.contentEntryStatus!!.downloadStatus != JobStatus.COMPLETE)
-                        && !containerUidsToMonitor.contains(entry.mostRecentContainer)
-                        && entry.leaf)
-                if (canBeMonitored) {
-                    uidsToMonitor.add(entry!!.mostRecentContainer)
-                }
-
-            }
-            return uidsToMonitor
-        }
-
-    init {
-        boundViewHolders = HashSet()
-    }
-
+    private var localAvailabilityMap: Map<Long, Boolean> = mapOf()
 
     fun addListeners() {
-        managerAndroidBle.addLocalAvailabilityListener(this)
         managerAndroidBle.addDownloadChangeListener(this)
     }
 
     fun removeListeners() {
-        managerAndroidBle.removeLocalAvailabilityListener(this)
         managerAndroidBle.removeDownloadChangeListener(this)
     }
 
-    fun setEmptyStateListener(stateListener: EmptyStateListener) {
-        this.emptyStateListener = stateListener
-    }
-
-    override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
-
-        val viewHoldersToNotify: List<ViewHolder>
-        synchronized(boundViewHolders) {
-            viewHoldersToNotify = LinkedList(boundViewHolders)
-        }
-
-        for (viewHolder in viewHoldersToNotify) {
-            val available = locallyAvailableEntries.contains(viewHolder.containerUid)
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Entry status check received  $available")
-            activity.runOnUiThread { viewHolder.updateLocallyAvailabilityStatus(available) }
+    @MainThread
+    fun updateLocalAvailability(localAvailabilityMap: Map<Long, Boolean>) {
+        boundViewHolders.forEach {
+            if(localAvailabilityMap.containsKey(it.containerUid)) {
+                it.updateLocallyAvailableStatus(localAvailabilityMap.get(it.containerUid) ?: false)
+            }
         }
     }
 
@@ -142,7 +105,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position)
 
-        emptyStateListener!!.onEntriesLoaded()
+        emptyStateListener.onEntriesLoaded()
 
         synchronized(boundViewHolders) {
             boundViewHolders.add(holder)
@@ -165,7 +128,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                     entry.mostRecentContainer)
 
             if (entry.leaf) {
-                holder.updateLocallyAvailabilityStatus(available)
+                holder.updateLocallyAvailableStatus(available)
             }
 
             holder.containerUid = entry.mostRecentContainer
@@ -232,16 +195,12 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.availabilityIcon.visibility = viewVisibility
             holder.availabilityStatus.visibility = viewVisibility
 
-            val containerUidList = uniqueContainerUidsListTobeMonitored
-            if (containerUidList.isNotEmpty()) {
-                containerUidsToMonitor.addAll(containerUidList)
-                monitor!!.startMonitoringAvailability(monitor, containerUidList)
-            }
-
             holder.downloadView.imageResource!!.contentDescription = contentDescription
             holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
+            holder.updateLocallyAvailableStatus(
+                    localAvailabilityMap.get(entry.mostRecentContainer) ?: false)
             GlobalScope.launch(Dispatchers.Main) {
                 val downloadJobItemStatus = managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(
                     entry.contentEntryUid)
@@ -270,7 +229,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
         var contentEntryUid: Long = 0
 
-        internal fun updateLocallyAvailabilityStatus(available: Boolean) {
+        internal fun updateLocallyAvailableStatus(available: Boolean) {
             val icon = if (available)
                 R.drawable.ic_nearby_black_24px
             else

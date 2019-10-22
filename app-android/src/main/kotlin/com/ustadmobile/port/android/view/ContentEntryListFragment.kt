@@ -109,12 +109,26 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                             }
                             uidList
                         })
-                val newRequest = AvailabilityMonitorRequest(containerUidsToMonitor,
-                        onEntityAvailabilityChanged)
+                val newRequest = if(containerUidsToMonitor.isNotEmpty()) {
+                    AvailabilityMonitorRequest(containerUidsToMonitor, onEntityAvailabilityChanged)
+                }else {
+                    null
+                }
                 val oldRequest = availabilityMonitorRequest.getAndSet(newRequest)
                 if(oldRequest != null) {
                     localAvailabilityManager.removeMonitoringRequest(oldRequest)
                 }
+
+                if(newRequest != null) {
+                    localAvailabilityManager.addMonitoringRequest(newRequest)
+                }
+            }
+        }
+
+        fun onDestroy() {
+            val currentRequest = availabilityMonitorRequest.getAndSet(null)
+            if(currentRequest != null){
+                localAvailabilityManager.removeMonitoringRequest(currentRequest)
             }
         }
     }
@@ -222,12 +236,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         if (entryListPresenter == null && ::managerAndroidBle.isInitialized) {
             //create entry adapter here to make sure bleManager is not null
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
-                    managerAndroidBle)
+                    managerAndroidBle, this)
             recyclerAdapter!!.addListeners()
-            recyclerAdapter!!.setEmptyStateListener(this)
 
             localAvailabilityPagedListCallback = LocalAvailabilityPagedListCallback(
-                    managerAndroidBle.localAvailabilityManager, null, {})
+                    managerAndroidBle.localAvailabilityManager, null, {availabilityMap ->
+                runOnUiThread(Runnable { recyclerAdapter?.updateLocalAvailability(availabilityMap) })
+            })
 
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
@@ -250,7 +265,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainerUid>> {
             recyclerAdapter!!.submitList(it)
-            localAvailabilityPagedListCallback.pagedList = it
+            localAvailabilityPagedListCallback!!.pagedList = it
             it.addWeakCallback(listSnapShot, localAvailabilityPagedListCallback!!)
         })
 
@@ -313,8 +328,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun onDestroy() {
         super.onDestroy()
-        if (recyclerAdapter != null)
-            recyclerAdapter!!.removeListeners()
+        recyclerAdapter?.removeListeners()
+        localAvailabilityPagedListCallback?.onDestroy()
     }
 
     companion object {

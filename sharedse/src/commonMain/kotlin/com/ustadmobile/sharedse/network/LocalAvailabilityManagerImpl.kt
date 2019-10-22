@@ -6,6 +6,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.db.entities.NetworkNodeWithStatusResponsesAndHistory
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.*
 
@@ -17,7 +18,7 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
 
 
-    private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = mutableListOf()
+    private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
 
     private val activeNodes: MutableList<NetworkNodeWithStatusResponsesAndHistory> = mutableListOf()
 
@@ -74,6 +75,12 @@ class LocalAvailabilityManagerImpl(private val context: Any,
         //compute what we don't know here
         activeMonitoringRequests.add(request)
         val allMonitoredUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+
+        //provide an immediate callback to provide statuses as far as we know for this request
+        GlobalScope.launch {
+            request.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(request.entryUidsToMonitor))
+        }
+
         val responsesNeeded = activeNodes.map { node -> node to allMonitoredUids.filter { !node.statusResponses.containsKey(it) }}
                 .toMap().filter { it.value.isNotEmpty() }
         responsesNeeded.forEach { responseNeeded ->
