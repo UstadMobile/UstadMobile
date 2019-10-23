@@ -441,7 +441,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param dialogMessage Permission dialog message
      */
     fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
-                                   dialogTitle: String?, dialogMessage: String?) {
+                                   dialogTitle: String, dialogMessage: String,
+                                   dialogBuilder: () -> AlertDialog = {makePermissionDialog(permissions, dialogTitle, dialogMessage) }) {
         this.afterPermissionMethodRunner = runnable
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -457,16 +458,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
         if (!permissionGranted(permissions)) {
             if (!permissionRequestRationalesShown) {
-                val builder = AlertDialog.Builder(this)
-                builder.setTitle(permissionDialogTitle)
-                        .setMessage(permissionDialogMessage)
-                        .setNegativeButton(getString(android.R.string.cancel)
-                        ) { dialog, _ -> dialog.dismiss() }
-                        .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                            runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
-                                    permissionDialogTitle, permissionDialogMessage)
-                        }
-                val dialog = builder.create()
+                val dialog = dialogBuilder.invoke()
                 dialog.show()
                 permissionRequestRationalesShown = true
             } else {
@@ -477,6 +469,20 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             afterPermissionMethodRunner!!.run()
             afterPermissionMethodRunner = null
         }
+    }
+
+    private fun makePermissionDialog(permissions: Array<String>, dialogTitle: String,
+                                     dialogMessage: String): AlertDialog {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(permissionDialogTitle)
+                .setMessage(permissionDialogMessage)
+                .setNegativeButton(getString(android.R.string.cancel)
+                ) { dialog, _ -> dialog.dismiss() }
+                .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                    runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
+                            dialogTitle, dialogMessage)
+                }
+        return builder.create()
     }
 
 
