@@ -358,5 +358,9 @@
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
 
+    <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
+    <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
+    <string name="enable">Enable</string>
+
 
 </resources>

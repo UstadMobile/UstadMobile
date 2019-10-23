@@ -27,13 +27,12 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
-import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -96,9 +95,9 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         presenter.onCreate(bundleToMap(Bundle()))
 
         presenter.onStart()
-        //managerAndroidBle.addLocalAvailabilityListener(this)
         presenter.handleShowEditButton(showControls)
-
+        managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
+                findViewById(R.id.coordinationLayout), this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,7 +150,14 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         downloadButton.setOnClickListener {
             presenter.handleDownloadButtonClick()
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        if(::managerAndroidBle.isInitialized) {
+            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
+                    findViewById(R.id.coordinationLayout), this)
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -281,22 +287,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         presenter.handleClickTranslatedEntry(contentEntryUid)
     }
 
-//    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-//        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
-//    }
-//
-//    override fun stopMonitoringAvailability(monitor: Any) {
-//        managerAndroidBle.stopMonitoringAvailability(monitor)
-//    }
-
     override fun onDestroy() {
         presenter.onDestroy()
         super.onDestroy()
     }
-
-//    override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
-//        presenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
-//    }
 
     override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long) {
         val flexboxLayoutManager = FlexboxLayoutManager(applicationContext)

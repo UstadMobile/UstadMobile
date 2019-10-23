@@ -33,6 +33,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.activeRange
+import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -217,6 +218,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
 
+    private fun showSnackbarPromptsIfRequired() {
+        val currentContext = context
+        if(currentContext != null){
+            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer, currentContext)
+        }
+    }
+
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             this.ustadBaseActivity = context
@@ -224,6 +232,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                 ustadBaseActivity.runOnUiThread {
                     managerAndroidBle = ustadBaseActivity.networkManagerBle!!
                     checkReady()
+                    showSnackbarPromptsIfRequired()
                 }
             })
         }
@@ -235,8 +244,15 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         super.onAttach(context)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if(::managerAndroidBle.isInitialized) {
+            showSnackbarPromptsIfRequired()
+        }
+    }
+
     private fun checkReady() {
-        if (entryListPresenter == null && ::managerAndroidBle.isInitialized) {
+        if (entryListPresenter == null &&  ::managerAndroidBle.isInitialized) {
             //create entry adapter here to make sure bleManager is not null
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
                     managerAndroidBle, this)

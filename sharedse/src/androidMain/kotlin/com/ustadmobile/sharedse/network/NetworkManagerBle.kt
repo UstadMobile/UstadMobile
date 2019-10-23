@@ -28,7 +28,6 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
@@ -126,11 +125,14 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     private val numActiveRequests = AtomicInteger()
 
+    val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
+
     /**
      * Receiver to handle bluetooth state changes
      */
     private val mBluetoothAndWifiStateChangeBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            updateEnableServicesPromptsRequired()
             checkP2PBleServices()
         }
     }
@@ -613,6 +615,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             }
         }
 
+        updateEnableServicesPromptsRequired()
 
         super.onCreate()
     }
@@ -644,6 +647,14 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             numActiveRequests.decrementAndGet()
             wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis())
         }
+    }
+
+    fun updateEnableServicesPromptsRequired() {
+        val cBluetoothAdapter = bluetoothAdapter
+        enablePromptsSnackbarManager.setPromptRequired(EnablePromptsSnackbarManager.BLUETOOTH,
+                cBluetoothAdapter != null && cBluetoothAdapter.state !in BLUETOOTH_ON_OR_TURNING_ON_STATES)
+        enablePromptsSnackbarManager.setPromptRequired(EnablePromptsSnackbarManager.WIFI,
+                wifiManager.wifiState !in WIFI_ON_OR_TURNING_ON_STATES)
     }
 
     /**
@@ -1026,5 +1037,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         const val BLE_ADVERTISE_MIN_SDK_VERSION = 21
 
         const val BLE_MIN_SDK_VERSION = 18
+
+        @JvmStatic
+        private val BLUETOOTH_ON_OR_TURNING_ON_STATES = listOf(BluetoothAdapter.STATE_ON,
+                BluetoothAdapter.STATE_TURNING_ON)
+
+        @JvmStatic
+        private val WIFI_ON_OR_TURNING_ON_STATES = listOf(WifiManager.WIFI_STATE_ENABLED,
+                WifiManager.WIFI_STATE_ENABLING)
     }
 }
