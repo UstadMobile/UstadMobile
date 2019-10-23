@@ -37,7 +37,8 @@ import kotlin.coroutines.coroutineContext
  * beginning.
  */
 class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000,
-                         private val calcMd5: Boolean = true, val httpClient: HttpClient = defaultHttpClient()) {
+                         private val calcMd5: Boolean = true, val httpClient: HttpClient = defaultHttpClient(),
+                         private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Main) {
 
     var onDownloadProgress: (Long) -> Unit = {}
 
@@ -46,6 +47,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
     private val bytesDownloaded = atomic(0L)
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
+
         try {
             UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - starting download")
             val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)

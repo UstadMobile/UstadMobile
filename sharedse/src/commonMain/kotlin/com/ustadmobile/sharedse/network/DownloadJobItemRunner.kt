@@ -25,6 +25,7 @@ import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
 import io.ktor.client.HttpClient
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.atomicfu.AtomicLongArray
 import kotlinx.atomicfu.atomic
@@ -61,7 +62,8 @@ class DownloadJobItemRunner
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
  private val numConcurrentEntryDownloads: Int = 4,
- private val localAvailabilityManager: LocalAvailabilityManager) {
+ private val localAvailabilityManager: LocalAvailabilityManager,
+ private val ioCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
@@ -228,7 +230,7 @@ class DownloadJobItemRunner
             }
 
             updateItemStatus(newStatus)
-            networkManager.releaseWifiLock(this)
+            networkManager.releaseWifiLock(downloadWiFiLock)
         }
 
     }
@@ -307,6 +309,7 @@ class DownloadJobItemRunner
         val currentTimeStamp = getSystemTimeInMillis()
         val minLastSeen = currentTimeStamp - (60 * 1000)
         val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
+        var downloadStartTime = 0L
 
         var numEntriesToDownload = -1
 
@@ -325,11 +328,6 @@ class DownloadJobItemRunner
         for (attemptNum in attemptsRemaining downTo 1) {
             numEntriesToDownload = -1
             numFailures.value = 0
-//            //TODO: if the content is available on the node we already connected to, take that one
-//            currentNetworkNode = appDb.networkNodeDao
-//                    .findLocalActiveNodeByContainerUid(downloadItem.djiContainerUid,
-//                            minLastSeen, BAD_PEER_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
-
             currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
                     downloadItem.djiContainerUid)
 
@@ -357,6 +355,11 @@ class DownloadJobItemRunner
                         }
                     }
                 }
+
+                if(connectivityStatus!!.wifiSsid != null) {
+                    networkManager.lockWifi(downloadWiFiLock)
+                }
+
                 downloadEndpoint = endpointUrl
             } else {
                 if (currentNetworkNode!!.groupSsid == null
@@ -378,7 +381,7 @@ class DownloadJobItemRunner
                 currentHttpClient = localHttpClient
             }else {
                 UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
-                currentHttpClient = defaultHttpClient()
+                currentHttpClient = networkManager.downloadHttpClient!!
             }
 
             history.url = downloadEndpoint
@@ -386,6 +389,7 @@ class DownloadJobItemRunner
             UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                     " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                     " Attempts remaining= " + attemptsRemaining)
+            downloadStartTime = getSystemTimeInMillis()
 
             try {
                 appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
@@ -411,7 +415,8 @@ class DownloadJobItemRunner
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
                                 UMLog.l(UMLog.VERBOSE, 100, "${mkLogPrefix()}: Downloader $procNum $downloadUrl -> $destFile")
                                 val resumableDownload = ResumableDownload2(downloadUrl,
-                                        destFile.getAbsolutePath(), httpClient = currentHttpClient)
+                                        destFile.getAbsolutePath(), httpClient = currentHttpClient,
+                                        coroutineDispatcher = ioCoroutineDispatcher)
                                 resumableDownload.onDownloadProgress = { inProgressDownloadCounters[procNum].value = it }
                                 if (resumableDownload.download()) {
                                     entriesDownloaded.incrementAndGet()
@@ -478,10 +483,16 @@ class DownloadJobItemRunner
 
         val downloadCompleted = numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload
         if (downloadCompleted) {
+            val downloadTime = getSystemTimeInMillis() - downloadStartTime
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
 
+            val bytesDownloaded = completedEntriesBytesDownloaded.value
             downloadJobItemManager.updateProgress(downloadItem.djiUid,
-                    completedEntriesBytesDownloaded.value, downloadItem.downloadLength)
+                    bytesDownloaded, downloadItem.downloadLength)
+
+            val downloadSpeed = (bytesDownloaded / (downloadTime / 1000)) / 1024
+            UMLog.l(UMLog.VERBOSE, 0, "Completed download of ${bytesDownloaded}bytes " +
+                    "in $downloadTime ms Speed = $downloadSpeed KB/s")
         }
 
         progressUpdater.cancel()
@@ -507,7 +518,6 @@ class DownloadJobItemRunner
             when {
                 checkStatus == null -> false
                 checkStatus.connectivityState == ConnectivityStatus.STATE_UNMETERED -> {
-                    networkManager.lockWifi(downloadWiFiLock)
                     true
                 }
                 else -> checkStatus.connectivityState == STATE_METERED && meteredConnectionAllowed.value == 1

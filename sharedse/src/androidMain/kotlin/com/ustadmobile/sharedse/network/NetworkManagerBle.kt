@@ -45,6 +45,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import okhttp3.Dispatcher
 import java.io.IOException
 import java.net.InetAddress
 import java.util.*
@@ -77,7 +78,7 @@ actual open class NetworkManagerBle
  * @param context Platform specific application context
  */
 actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
-    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main), EmbeddedHTTPD.ResponseListener {
+    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO), EmbeddedHTTPD.ResponseListener {
 
     constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD) : this(context, singleThreadDispatcher) {
         this.httpd = httpd
@@ -343,7 +344,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                         return@requestGroupInfo
                     }
 
-                    networkManager.lockWifi(this@WifiP2PGroupServiceManager)
+                    if(group != null)
+                        networkManager.lockWifi(this@WifiP2PGroupServiceManager)
+
                     notifyStateChanged(if (group != null) STATE_STARTED else STATE_STOPPED)
                 }
             }
@@ -569,6 +572,23 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         managerHelper = NetworkManagerBleHelper(mContext)
         connectivityManager = managerHelper.connectivityManager
         wifiManager = managerHelper.wifiManager
+
+        downloadHttpClient = HttpClient(OkHttp) {
+            install(JsonFeature) {
+                serializer = GsonSerializer()
+            }
+
+            val dispatcher = Dispatcher()
+            dispatcher.maxRequests = 30
+            dispatcher.maxRequestsPerHost = 8
+
+            engine {
+                this.config {
+                    dispatcher(dispatcher)
+                }
+            }
+
+        }
 
         if (wifiP2pManager == null) {
             wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
@@ -977,6 +997,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                     "UstadMobile-Wifi-Lock-Tag")
             wifiLockReference.set(newLock)
             newLock.acquire()
+            wifiLockHolders.add(lockHolder)
             UMLog.l(UMLog.INFO, 699, "WiFi lock acquired for $lockHolder")
         }
     }
@@ -985,6 +1006,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         super.releaseWifiLock(lockHolder)
 
         val lock = wifiLockReference.get()
+        wifiLockHolders.remove(lockHolder)
         if (wifiLockHolders.isEmpty() && lock != null) {
             wifiLockReference.set(null)
             lock.release()

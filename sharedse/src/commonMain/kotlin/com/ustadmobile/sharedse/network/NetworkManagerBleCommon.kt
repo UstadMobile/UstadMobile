@@ -34,6 +34,7 @@ abstract class NetworkManagerBleCommon(
         val context: Any = Any(),
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
+        private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
         internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context),
         internal var umAppDatabaseRepo: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : LocalAvailabilityMonitor,
         DownloadJobItemStatusProvider {
@@ -53,6 +54,10 @@ abstract class NetworkManagerBleCommon(
      * with no Internet access.
      */
     var localHttpClient: HttpClient? = null
+        protected set
+
+
+    var downloadHttpClient: HttpClient? = null
         protected set
 
     /**
@@ -165,6 +170,7 @@ abstract class NetworkManagerBleCommon(
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
                     umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
+                    ioCoroutineDispatcher = ioDispatcher,
                     localAvailabilityManager = localAvailabilityManager).download()
         }
         nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
