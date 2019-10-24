@@ -40,13 +40,11 @@ class LocalAvailabilityManagerImpl(private val context: Any,
         }
     }
 
-    fun sendRequest(networkNode: NetworkNode, containerUids: List<Long>) {
-        GlobalScope.launch {
-            val statusTask = entryStatusTaskMaker.invoke(context, containerUids, networkNode)
-            if(statusTask != null) {
-                statusTask.statusResponseListener = this@LocalAvailabilityManagerImpl::handleBleTaskResponseReceived
-                statusTask.sendRequest()
-            }
+    suspend fun sendRequest(networkNode: NetworkNode, containerUids: List<Long>) = withContext(coroutineDispatcher) {
+        val statusTask = entryStatusTaskMaker.invoke(context, containerUids, networkNode)
+        if(statusTask != null) {
+            statusTask.statusResponseListener = this@LocalAvailabilityManagerImpl::handleBleTaskResponseReceived
+            statusTask.sendRequest()
         }
     }
 
@@ -78,13 +76,13 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
         //provide an immediate callback to provide statuses as far as we know for this request
         GlobalScope.launch {
-            request.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(request.entryUidsToMonitor))
-        }
+            val responsesNeeded = activeNodes.map { node -> node to allMonitoredUids.filter { !node.statusResponses.containsKey(it) }}
+                    .toMap().filter { it.value.isNotEmpty() }
+            responsesNeeded.forEach { responseNeeded ->
+                sendRequest(responseNeeded.key, responseNeeded.value)
+            }
 
-        val responsesNeeded = activeNodes.map { node -> node to allMonitoredUids.filter { !node.statusResponses.containsKey(it) }}
-                .toMap().filter { it.value.isNotEmpty() }
-        responsesNeeded.forEach { responseNeeded ->
-            sendRequest(responseNeeded.key, responseNeeded.value)
+            request.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(request.entryUidsToMonitor))
         }
     }
 

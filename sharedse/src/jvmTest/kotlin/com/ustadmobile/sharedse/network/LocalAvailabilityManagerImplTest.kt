@@ -1,16 +1,23 @@
 package com.ustadmobile.sharedse.network
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.timeout
+import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-class TestLocalAvailabilityManagerImpl  {
+class LocalAvailabilityManagerImplTest  {
 
     val TEST_ENTRY_UID1  = 42L
 
@@ -22,7 +29,6 @@ class TestLocalAvailabilityManagerImpl  {
     fun givenEntryMonitorActiveWithNodeThatHasEntry_whenNodeDisocvered_shouldCreateAndSendBleEntryStatusTask() {
         runBlocking {
             val tasksMade = mutableListOf<BleEntryStatusTask>()
-            val taskChannel = Channel<BleEntryStatusTask>()
 
             val statusTaskMaker: StatusTaskMakerFn = {context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode ->
                 val task = spy<BleEntryStatusTask>() {
@@ -33,29 +39,39 @@ class TestLocalAvailabilityManagerImpl  {
                     }
                 }
                 task.networkNode = networkNode
-                taskChannel.offer(task)
                 tasksMade.add(task)
                 task
             }
 
-            val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
-            managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+            val countdownLatch = CountDownLatch(1)
+
+            val coroutineContext = newSingleThreadContext("LocalAvailabilityTest")
+            val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
+                    coroutineDispatcher = coroutineContext)
+            val monitorRequest = AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1), {
+                if(it[TEST_ENTRY_UID1] ?: false)
+                    countdownLatch.countDown()
+            })
+
+            managerImpl.addMonitoringRequest(monitorRequest)
             managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
 
+            countdownLatch.await(10, TimeUnit.SECONDS)
 
-            val task1 = taskChannel.receive()
-            verify(task1, timeout(10000)).sendRequest()
+            verify(tasksMade[0]).sendRequest()
             Assert.assertEquals("Create one task", 1, tasksMade.size)
 
             val availableMap = managerImpl.areContentEntriesLocallyAvailable(listOf(TEST_ENTRY_UID1, -1))
-            Assert.assertTrue("Entry that responded as available is marked as available", availableMap[TEST_ENTRY_UID1] ?: false)
+            Assert.assertEquals("Entry that responded as available is marked as available",
+                    true, availableMap[TEST_ENTRY_UID1])
             Assert.assertFalse("Other unknown entry is marked as not available", availableMap[-1] ?: true)
+            coroutineContext.close()
         }
     }
 
     @Test
     fun givenNodesAlreadyDiscovered_whenAvailabilityStatusRequested_shouldCreateStatusTasks() {
-        val tasksMade = mutableListOf<BleEntryStatusTask>()
+        val tasksMade = copyOnWriteListOf<BleEntryStatusTask>()
         val taskChannel = Channel<BleEntryStatusTask>(capacity = Channel.UNLIMITED)
         runBlocking {
             val statusTaskMaker: StatusTaskMakerFn = {context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode ->
@@ -77,14 +93,21 @@ class TestLocalAvailabilityManagerImpl  {
             managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
             managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
 
-            managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+            val countDownLatch = CountDownLatch(1)
+            val availabilityRequest = AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1), {
+                if(it[TEST_ENTRY_UID1] ?: false)
+                    countDownLatch.countDown()
+            })
 
-            val task1 = taskChannel.receive()
-            val task2 = taskChannel.receive()
+            managerImpl.addMonitoringRequest(availabilityRequest)
+
+            val task1 = withTimeout(5000) { taskChannel.receive() }
+            val task2 = withTimeout(5000) { taskChannel.receive() }
             verify(task1, timeout(5000)).sendRequest()
             verify(task2, timeout(5000)).sendRequest()
             Assert.assertEquals("Made two tasks", 2, tasksMade.size)
 
+            countDownLatch.await(5, TimeUnit.SECONDS)
             val availableMap = managerImpl.areContentEntriesLocallyAvailable(listOf(TEST_ENTRY_UID1, -1))
             Assert.assertTrue("Entry that responded as available is marked as available", availableMap[TEST_ENTRY_UID1] ?: false)
             Assert.assertFalse("Other unknown entry is marked as not available", availableMap[-1] ?: true)
