@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 25)
+], version = 26)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -238,6 +238,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
+            builder.addMigrations(object : DoorMigration(24,25){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                }
+
+            })
             builder.addMigrations(object : DoorMigration(20, 24) {
                 override fun migrate(database: DoorSqlDatabase) {
 

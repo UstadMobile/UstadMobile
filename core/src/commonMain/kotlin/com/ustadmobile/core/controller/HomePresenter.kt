@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -33,16 +34,21 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         account = UmAccountManager.getActiveAccount(context)
 
         GlobalScope.launch {
+            var showReport = false; var person: Person? = null
             if(account != null){
-                val person = personDao.findByUid(account!!.personUid)
+                person = personDao.findByUid(account!!.personUid)
                 if(person != null){
-                    view.runOnUiThread(Runnable {
-                        homeView.showReportMenu(person.admin)
-                        homeView.setLoggedPerson(person)
-                        homeView.loadProfileIcon(if(account == null) "" else "")
-                    })
+                   showReport = person.admin
                 }
             }
+
+            view.runOnUiThread(Runnable {
+                homeView.showReportMenu(showReport)
+                if(person != null){
+                    homeView.setLoggedPerson(person)
+                }
+                homeView.loadProfileIcon(if(account == null) "" else "")
+            })
         }
     }
 

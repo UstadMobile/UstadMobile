@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IN_APP
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -104,7 +105,8 @@ class ContentEntryDetailPresenter (context: Any, arguments: Map<String, String?>
                     view.setContentEntryLicense(licenseType)
                     with(entry) {
                         view.runOnUiThread(Runnable {
-                            view.showEditButton(showEditorControls && this.inAppContent)
+                            view.showEditButton(showEditorControls
+                                    && (this.status and STATUS_IN_APP)==STATUS_IN_APP)
                         })
                         view.setContentEntry(this)
                     }
@@ -120,7 +122,8 @@ class ContentEntryDetailPresenter (context: Any, arguments: Map<String, String?>
         if(currentContentEntry.contentEntryUid != 0L){
             view.runOnUiThread(Runnable {
                 view.showExportContentIcon(showEditorControls
-                        && currentContentEntry.inAppContent && isDownloadComplete)
+                        && ((currentContentEntry.status and STATUS_IN_APP) == STATUS_IN_APP)
+                        && isDownloadComplete)
             })
         }
 
@@ -330,13 +333,15 @@ class ContentEntryDetailPresenter (context: Any, arguments: Map<String, String?>
             val entry = appRepo.contentEntryDao.findByEntryId(entryUuid)
             if (entry != null) {
                 args.putAll(arguments)
+
+                val imported = (entry.status and ContentEntry.STATUS_IMPORTED) == ContentEntry.STATUS_IMPORTED
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
-                args[ContentEntryEditView.CONTENT_TYPE] = (if (entry.imported) ContentEntryListView.CONTENT_IMPORT_FILE
+                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
-                if (entry.imported)
+                if (imported)
                     view.startFileBrowser(args)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
@@ -381,8 +386,8 @@ class ContentEntryDetailPresenter (context: Any, arguments: Map<String, String?>
                 ContentEntry.LICENSE_TYPE_CC_BY_SA -> return "CC BY SA"
                 ContentEntry.LICENSE_TYPE_CC_BY_SA_NC -> return "CC BY SA NC"
                 ContentEntry.LICENSE_TYPE_CC_BY_NC -> return "CC BY NC"
-                ContentEntry.LICESNE_TYPE_CC_BY_NC_SA -> return "CC BY NC SA"
-                ContentEntry.PUBLIC_DOMAIN -> return "Public Domain"
+                ContentEntry.LICENSE_TYPE_CC_BY_NC_SA -> return "CC BY NC SA"
+                ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN -> return "Public Domain"
                 ContentEntry.ALL_RIGHTS_RESERVED -> return "All Rights Reserved"
             }
             return ""

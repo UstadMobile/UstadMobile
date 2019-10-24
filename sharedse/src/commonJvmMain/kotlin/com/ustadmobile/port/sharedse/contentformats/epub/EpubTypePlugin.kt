@@ -34,7 +34,7 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
                         val opfDocument = OpfDocument()
                         opfDocument.loadFromOPF(xpp)
                         contentEntry = ContentEntry()
-                        contentEntry!!.imported = true
+                        contentEntry!!.status = ContentEntry.STATUS_IMPORTED
                         contentEntry!!.licenseType = LICENSE_TYPE_OTHER
                         contentEntry!!.title = opfDocument.title
                         contentEntry!!.author = opfDocument.getCreator(0).creator

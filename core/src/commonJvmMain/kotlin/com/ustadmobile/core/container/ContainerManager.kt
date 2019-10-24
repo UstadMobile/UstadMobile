@@ -191,51 +191,50 @@ actual class ContainerManager actual constructor(container: Container,
 
     actual override fun exportContainer(zipFile: String,progressListener: ExportProgressListener?){
         GlobalScope.launch{
-            lateinit var inputStream : InputStream
             destinationZipFile = zipFile
             if(File(destinationZipFile).exists()){
                 File(destinationZipFile).delete()
             }
-            val outputStream: ZipOutputStream = ZipOutputStream(BufferedOutputStream(FileOutputStream(destinationZipFile)))
-            var totalBytes = 0f
-            exporting = true
 
-            try{
-                val buffer = ByteArray(BUFFER_SIZE)
-                for ((fileName, containerEntryWithFile) in pathToEntryMap) {
-                    val entryWithFile = containerEntryWithFile.containerEntryFile!!
-                    val fileInputStream = FileInputStream(entryWithFile.cefPath!!)
-                    inputStream = if(entryWithFile.compression == COMPRESSION_GZIP) GZIPInputStream(fileInputStream)
-                    else BufferedInputStream(fileInputStream, BUFFER_SIZE)
+            val bytesToRead = ByteArray(BUFFER_SIZE)
+            var totalFilesProcessed = 0
 
-                    try{
-                        val zipEntry: ZipEntry = ZipEntry(fileName)
-                        var bytesRead = 0
-                        outputStream.putNextEntry(zipEntry)
-                        while ({ bytesRead = inputStream.read(buffer); bytesRead }() != -1 && exporting){
-                            totalBytes += bytesRead
-                            outputStream.write(buffer, 0, bytesRead)
-                            if(progressListener != null){
-                                progressListener.onProcessing((totalBytes /container.fileSize.toFloat() * 100).toInt())
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(destinationZipFile))).use {zipOut ->
+                zipOut.use {
+                    for ((fileName, containerEntryWithFile) in pathToEntryMap) {
+                        val entryWithFile = containerEntryWithFile.containerEntryFile!!
+                        val fileInputStream = FileInputStream(entryWithFile.cefPath!!)
+                        val inputStream = if(entryWithFile.compression == COMPRESSION_GZIP) GZIPInputStream(fileInputStream)
+                        else BufferedInputStream(fileInputStream, BUFFER_SIZE)
+
+                        inputStream.use { fStream ->
+                            BufferedInputStream(fStream).use { iStream ->
+                                val entry = ZipEntry(fileName)
+                                entry.time = entryWithFile.lastModified
+                                entry.size = entryWithFile.ceTotalSize
+                                zipOut.putNextEntry(entry)
+                                totalFilesProcessed += 1
+                                if(progressListener != null){
+                                    progressListener.onProcessing(((totalFilesProcessed/pathToEntryMap.size.toFloat()) * 100).toInt())
+                                }
+                                while (true) {
+                                    val bytesRead = iStream.read(bytesToRead)
+                                    if (bytesRead == -1) {
+                                        break
+                                    }
+                                    zipOut.write(bytesToRead, 0, bytesRead)
+                                }
                             }
                         }
-
-                        if(!exporting){
-                            break
-                        }
-
-                    }catch (exception: IOException){
-                        print(exception.message)
-                    }finally {
-                        inputStream.close()
+                    }
+                    zipOut.closeEntry()
+                    zipOut.close()
+                    if(progressListener != null){
+                        progressListener.onDone()
                     }
                 }
-
-            }catch (exception: IOException){
-                print(exception.message)
-            }finally {
-                outputStream.close()
             }
+
         }
     }
 
@@ -249,7 +248,7 @@ actual class ContainerManager actual constructor(container: Container,
 
     companion object {
         val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4","mkv")
-        private const  val BUFFER_SIZE = 4096
+        private const  val BUFFER_SIZE = 2048
     }
 
 }

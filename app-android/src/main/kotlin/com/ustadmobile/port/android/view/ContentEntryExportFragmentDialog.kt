@@ -35,15 +35,15 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
     override val viewContext: Any
         get() = activity!!
 
-    lateinit var  mDialog: AlertDialog
+    private lateinit var  mDialog: AlertDialog
 
     lateinit var presenter: ContentEntryExportPresenter
 
-    lateinit var baseActivity: UstadBaseActivity
+    private lateinit var baseActivity: UstadBaseActivity
 
-    lateinit var dialogTitle: TextView
+    private lateinit var dialogTitle: TextView
 
-    lateinit var dialogMessage: TextView
+    private lateinit var dialogMessage: TextView
 
     lateinit var exportProgress: ProgressBar
 

@@ -51,10 +51,13 @@ class ContentEntryExportPresenter(context: Any, arguments: Map<String, String?>,
 
     override fun onProcessing(progress: Int) {
         view.runOnUiThread(Runnable {
-            if(progress == 100){
-                view.dismissDialog()
-            }
             view.updateExportProgress(progress)
+        })
+    }
+
+    override fun onDone() {
+        view.runOnUiThread(Runnable {
+            view.dismissDialog()
         })
     }
 

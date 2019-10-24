@@ -19,6 +19,8 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IMPORTED
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IN_APP
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -48,6 +50,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
     private var isNewContent: Boolean = true
 
+    private var importedEntry = false
+
     private var importedContent =  HashMap<String, Any?>()
 
     private val licenceTypes: List<String> = mutableListOf("CC BY","CC BY SA","CC BY SA NC",
@@ -55,7 +59,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
     private val licenceIds: List<Int> = mutableListOf(ContentEntry.LICENSE_TYPE_CC_BY, ContentEntry.LICENSE_TYPE_CC_BY_SA,
             ContentEntry.LICENSE_TYPE_CC_BY_SA_NC, ContentEntry.LICENSE_TYPE_CC_BY_NC, ContentEntry.ALL_RIGHTS_RESERVED,
-            ContentEntry.LICESNE_TYPE_CC_BY_NC_SA, ContentEntry.PUBLIC_DOMAIN,LICENSE_TYPE_OTHER)
+            ContentEntry.LICENSE_TYPE_CC_BY_NC_SA, ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN,LICENSE_TYPE_OTHER)
 
     val contentType = arguments.getValue(ContentEntryEditView.CONTENT_TYPE)?.toInt()
 
@@ -67,6 +71,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         GlobalScope.launch {
             val entry = contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
+            importedEntry = (contentEntry.status and STATUS_IMPORTED) == STATUS_IMPORTED
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
                     view.runOnUiThread(Runnable {
@@ -85,7 +90,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         view.runOnUiThread(Runnable {
             view.setUpLicence(licenceTypes,if(contentEntry.contentEntryUid == 0L) 0
             else licenceIds.indexOf(contentEntry.licenseType))
-            view.showFileSelector(contentEntry.imported or (contentType == CONTENT_IMPORT_FILE))
+            view.showFileSelector(importedEntry or (contentType == CONTENT_IMPORT_FILE))
             view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_select_file, context))
             view.showStorageOptions(contentType != CONTENT_CREATE_FOLDER)
             if(contentEntry.contentEntryUid != 0L){
@@ -126,10 +131,10 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             contentEntry.description = description
             contentEntry.licenseType = licenceIds[licence]
             contentEntry.thumbnailUrl = thumbnailUrl
-            contentEntry.imported = isImportedContent
+            contentEntry.status = if(isImportedContent) STATUS_IMPORTED else 0
 
             if(isNewContent){
-                contentEntry.inAppContent = true
+                contentEntry.status = STATUS_IN_APP
                 contentEntry.leaf = isLeaf
                 contentEntry.author = if(author.isEmpty()) account.username else author
                 contentEntry.contentEntryUid = contentEntryDao.insert(contentEntry)

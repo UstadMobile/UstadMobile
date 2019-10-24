@@ -75,6 +75,8 @@ abstract class ContainerManagerCommon(protected val container: Container,
          */
         fun onProcessing(progress: Int)
 
+        fun onDone()
+
     }
 
 

@@ -33,7 +33,7 @@ object ContentTypeUtil {
         for (plugin in CONTENT_PLUGINS) {
             val contentEntry = plugin.getContentEntry(file)
             if (contentEntry != null) {
-                contentEntry.imported = true
+                contentEntry.status = ContentEntry.STATUS_IMPORTED
                 content[CONTENT_ENTRY] = contentEntry
                 content[CONTENT_MIMETYPE] = plugin.mimeTypes[0]
                 break
@@ -63,7 +63,7 @@ object ContentTypeUtil {
             if (contentEntry != null) {
                 val appDatabase = UmAppDatabase.getInstance(context)
                 val appRepo = UmAccountManager.getRepositoryForActiveAccount(context)
-                contentEntry.imported = true
+                contentEntry.status = ContentEntry.STATUS_IMPORTED
 
                 val container = Container(contentEntry)
                 container.cntLastModified = System.currentTimeMillis()
