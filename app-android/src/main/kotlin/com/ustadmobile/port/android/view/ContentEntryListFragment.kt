@@ -26,7 +26,6 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -35,9 +34,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.activeRange
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -53,7 +50,7 @@ import java.util.concurrent.atomic.AtomicReference
  * fragment (e.g. upon screen orientation changes).
  */
 class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
-        ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor,
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener,
         ContentEntryListRecyclerViewAdapter.EmptyStateListener {
 
     override val viewContext: Any
@@ -254,7 +251,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     private fun checkReady() {
         if (entryListPresenter == null &&  ::managerAndroidBle.isInitialized) {
             //create entry adapter here to make sure bleManager is not null
-            recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
+            recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this,
                     managerAndroidBle, this)
             recyclerAdapter!!.addListeners()
 
@@ -320,25 +317,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                     impl.getString(MessageID.download_storage_permission_title, context!!),
                     impl.getString(MessageID.download_storage_permission_message, context!!))
         }
-    }
-
-    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        GlobalScope.launch {
-            if (::managerAndroidBle.isInitialized) {
-                managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
-            }
-        }
-    }
-
-    override fun stopMonitoringAvailability(monitor: Any) {
-        if (::managerAndroidBle.isInitialized) {
-            managerAndroidBle.stopMonitoringAvailability(monitor)
-        }
-    }
-
-    override fun onStop() {
-        stopMonitoringAvailability(this)
-        super.onStop()
     }
 
     override fun onEntriesLoaded() {

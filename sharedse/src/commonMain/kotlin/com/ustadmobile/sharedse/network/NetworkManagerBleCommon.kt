@@ -36,7 +36,7 @@ abstract class NetworkManagerBleCommon(
         private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
         internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context),
-        internal var umAppDatabaseRepo: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : LocalAvailabilityMonitor,
+        internal var umAppDatabaseRepo: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) :
         DownloadJobItemStatusProvider {
 
     private val knownNodesLock = Any()
@@ -56,10 +56,6 @@ abstract class NetworkManagerBleCommon(
     var localHttpClient: HttpClient? = null
         protected set
 
-
-    var downloadHttpClient: HttpClient? = null
-        protected set
-
     /**
      * Holds all created entry status tasks
      */
@@ -76,8 +72,6 @@ abstract class NetworkManagerBleCommon(
     protected var wifiLockHolders = mutableListOf<Any>()
 
     private val knownPeerNodes = mutableMapOf<String, Long>()
-
-    private val localAvailabilityListeners = copyOnWriteListOf<LocalAvailabilityListener>()
 
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
@@ -223,26 +217,6 @@ abstract class NetworkManagerBleCommon(
      */
     abstract fun setWifiEnabled(enabled: Boolean): Boolean
 
-
-    /**
-     * Start monitoring availability of specific entries from peer devices
-     * @param monitor Object to monitor e.g Presenter
-     * @param entryUidsToMonitor List of entries to be monitored
-     */
-    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-
-
-    }
-
-    /**
-     * Stop monitoring the availability of entries from peer devices
-     * @param monitor Monitor object which created a monitor (e.g Presenter)
-     */
-    override fun stopMonitoringAvailability(monitor: Any) {
-//        availabilityMonitoringRequests.remove(monitor)
-//        isStopMonitoring = availabilityMonitoringRequests.isEmpty()
-    }
-
     /**
      * Get all peer network nodes that we know about
      * @param networkNodes Known NetworkNode
@@ -326,61 +300,6 @@ abstract class NetworkManagerBleCommon(
         taskArgs[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] = downloadJobUid.toString()
 
         makeDeleteJobTask(context, taskArgs).run()
-    }
-
-
-    /**
-     * Add listener to the list of local availability listeners
-     * @param listener listener object to be added.
-     */
-    fun addLocalAvailabilityListener(listener: LocalAvailabilityListener) {
-        if (!localAvailabilityListeners.contains(listener)) {
-            localAvailabilityListeners.add(listener)
-        }
-    }
-
-    /**
-     * Remove a listener from a list of all available listeners
-     * @param listener listener to be removed
-     */
-    fun removeLocalAvailabilityListener(listener: LocalAvailabilityListener) {
-        localAvailabilityListeners.remove(listener)
-    }
-
-    /**
-     * Trigger availability status change event to all listening parts
-     */
-    private fun fireLocalAvailabilityChanged() {
-        val listenerList = ArrayList(localAvailabilityListeners)
-        for (listener in listenerList) {
-            listener.onLocalAvailabilityChanged(locallyAvailableContainerUids)
-        }
-    }
-
-    /**
-     * All all availability statuses received from the peer node
-     * @param responses response received
-     */
-    @Synchronized
-    fun handleLocalAvailabilityResponsesReceived(responses: MutableList<EntryStatusResponse>) {
-        if (responses.isEmpty())
-            return
-
-        val nodeId = responses[0].erNodeId
-        if (!entryStatusResponses.containsKey(nodeId))
-            entryStatusResponses[nodeId] = mutableListOf()
-
-        entryStatusResponses[nodeId]!!.addAll(responses)
-        locallyAvailableContainerUids.clear()
-
-        for (responseList in entryStatusResponses.values) {
-            for (response in responseList) {
-                if (response.available)
-                    locallyAvailableContainerUids.add(response.erContainerUid)
-            }
-        }
-
-        fireLocalAvailabilityChanged()
     }
 
     //testing purpose only

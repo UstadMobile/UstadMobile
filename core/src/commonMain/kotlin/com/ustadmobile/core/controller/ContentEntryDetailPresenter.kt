@@ -24,7 +24,6 @@ import kotlin.js.JsName
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
-                                  //private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider?,
                                   private val appRepo: UmAppDatabase,
                                   private val localAvailabilityManager: LocalAvailabilityManager?)
@@ -37,8 +36,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         private set
 
     private var containerUid: Long? = 0L
-
-    private val monitorStatus = atomic(false)
 
     private val args = HashMap<String, String?>()
 
@@ -104,9 +101,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 if (currentContentEntry != entry) {
                     currentContentEntry = entry
                     view.setContentEntryLicense(licenseType)
-                    with(entry) {
-                        view.setContentEntry(this)
-                    }
+                    view.setContentEntry(entry)
                 }
             })
         }
@@ -331,10 +326,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
     override fun onDestroy() {
-//        if (monitorStatus.value) {
-//            monitorStatus.value = false
-//            monitor.stopMonitoringAvailability(this)
-//        }
         val monitoringRequest = availabilityMonitorRequest
         if(monitoringRequest != null) {
             localAvailabilityManager?.removeMonitoringRequest(monitoringRequest)

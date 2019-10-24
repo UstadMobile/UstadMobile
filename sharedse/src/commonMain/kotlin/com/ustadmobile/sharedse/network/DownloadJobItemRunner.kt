@@ -34,6 +34,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -70,11 +72,6 @@ class DownloadJobItemRunner
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
     private var statusObserver: DoorObserver<ConnectivityStatus?>? = null
-
-    //TODO: enable switching to local download when available after basic p2p cases complete
-    //private UmObserver<EntryStatusResponse> entryStatusObserver;
-
-    //private UmLiveData<EntryStatusResponse> entryStatusLiveData;
 
     private var downloadJobItemObserver: DoorObserver<Int>? = null
 
@@ -191,24 +188,6 @@ class DownloadJobItemRunner
         }
     }
 
-//TODO: re-enable when we add support for switching dynamically
-//    /**
-//     * Handle changes triggered when file which wasn't available locally changes
-//     * @param entryStatusResponse new file entry status
-//     */
-//    private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
-//        if(entryStatusResponse != null){
-//            availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
-//            if(availableLocally.get() == 1 && currentEntryStatusResponse!= null
-//                    && !currentEntryStatusResponse.isAvailable()){
-//                this.currentNetworkNode =
-//                        appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
-//                connectToLocalNodeNetwork();
-//            }
-//        }
-//    }
-
-
     /**
      * Stop the download task from continuing (if not already stopped). Calling stop for a second
      * time will have no effect.
@@ -244,18 +223,11 @@ class DownloadJobItemRunner
         val downloadJobId = downloadItem.djiDjUid
         appDb.downloadJobDao.update(downloadJobId, JobStatus.RUNNING)
 
-//        networkManager.startMonitoringAvailability(this,
-//                listOf(downloadItem.djiContainerUid))
-
         statusLiveData = appDb.connectivityStatusDao.statusLive()
         downloadJobItemLiveData = appDb.downloadJobItemDao.getLiveStatus(downloadItem.djiUid)
 
         //get the download set
         downloadSetConnectivityData = appDb.downloadJobDao.getLiveMeteredNetworkAllowed(downloadJobId)
-
-        //TODO: re-enable after basic p2p cases run
-        //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
-        //                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
         downloadSetConnectivityObserver = object : DoorObserver<Boolean> {
             override fun onChanged(t: Boolean) {
@@ -271,9 +243,6 @@ class DownloadJobItemRunner
             downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
             downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         }
-        //entryStatusObserver = this::handleContentEntryFileStatus;
-
-        //entryStatusLiveData.observeForever(entryStatusObserver);
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
         if (destinationDir == null) {
@@ -381,7 +350,7 @@ class DownloadJobItemRunner
                 currentHttpClient = localHttpClient
             }else {
                 UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
-                currentHttpClient = networkManager.downloadHttpClient!!
+                currentHttpClient = defaultHttpClient()
             }
 
             history.url = downloadEndpoint
@@ -467,9 +436,6 @@ class DownloadJobItemRunner
                         "${mkLogPrefix()} Failed to download a file from $endpointUrl", e)
             }
 
-
-            //delay(10000)
-
             val numFails = numFailures.value
             recordHistoryFinished(history, numFails == 0)
             if (numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload) {
@@ -490,8 +456,8 @@ class DownloadJobItemRunner
             downloadJobItemManager.updateProgress(downloadItem.djiUid,
                     bytesDownloaded, downloadItem.downloadLength)
 
-            val downloadSpeed = (bytesDownloaded / (downloadTime / 1000)) / 1024
-            UMLog.l(UMLog.VERBOSE, 0, "Completed download of ${bytesDownloaded}bytes " +
+            val downloadSpeed = ((bytesDownloaded.toFloat() / 1024f) / (downloadTime.toFloat() / 1000f))
+            UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed download of ${bytesDownloaded}bytes " +
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
         }
 

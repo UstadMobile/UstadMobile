@@ -44,7 +44,7 @@ class TestLocalAvailabilityManagerImpl  {
 
 
             val task1 = taskChannel.receive()
-            verify(task1, timeout(5000)).sendRequest()
+            verify(task1, timeout(10000)).sendRequest()
             Assert.assertEquals("Create one task", 1, tasksMade.size)
 
             val availableMap = managerImpl.areContentEntriesLocallyAvailable(listOf(TEST_ENTRY_UID1, -1))

@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -27,7 +26,6 @@ import java.util.*
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
                                                                private val listener: AdapterViewListener,
-                                                               private val monitor: LocalAvailabilityMonitor?,
                                                                private val managerAndroidBle: NetworkManagerBle,
                                                                var emptyStateListener: EmptyStateListener)
     : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
@@ -94,13 +92,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         return ViewHolder(view)
     }
 
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        if (monitor != null) {
-            containerUidsToMonitor.clear()
-        }
-        super.onDetachedFromRecyclerView(recyclerView)
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position)
