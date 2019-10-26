@@ -160,7 +160,8 @@ abstract class NetworkManagerBleCommon(
         downloadJobItemWorkQueue = LiveDataWorkQueue(nextDownloadItemsLiveData,
                 { item1, item2 -> item1.djiUid == item2.djiUid },
                 mainDispatcher = mainDispatcher,
-                onItemStarted = this::onDownloadJobItemStarted) {
+                onItemStarted = this::onDownloadJobItemStarted,
+                onQueueEmpty = this::onDownloadQueueEmpty) {
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
                     umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
@@ -176,10 +177,12 @@ abstract class NetworkManagerBleCommon(
 
     }
 
-    /*override */fun onQueueEmpty() {
-//        if (connectivityStatusRef.get() != null && connectivityStatusRef.get().connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
-//            Thread(Runnable { this.restoreWifi() }).start()
-//        }
+    protected open fun onDownloadQueueEmpty(lastDownloadJobItem: DownloadJobItem) {
+        val currentConnectivityStatus = connectivityStatusRef.value
+        if(currentConnectivityStatus != null &&
+                currentConnectivityStatus.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
+            restoreWifi()
+        }
     }
 
     /**

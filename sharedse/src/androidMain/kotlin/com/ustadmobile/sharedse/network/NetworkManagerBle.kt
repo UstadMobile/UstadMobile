@@ -573,23 +573,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         connectivityManager = managerHelper.connectivityManager
         wifiManager = managerHelper.wifiManager
 
-        downloadHttpClient = HttpClient(OkHttp) {
-            install(JsonFeature) {
-                serializer = GsonSerializer()
-            }
-
-            val dispatcher = Dispatcher()
-            dispatcher.maxRequests = 30
-            dispatcher.maxRequestsPerHost = 8
-
-            engine {
-                this.config {
-                    dispatcher(dispatcher)
-                }
-            }
-
-        }
-
         if (wifiP2pManager == null) {
             wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
         }

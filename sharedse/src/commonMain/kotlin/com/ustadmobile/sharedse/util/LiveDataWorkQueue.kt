@@ -28,6 +28,7 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
                            private val onItemStarted: (T) -> Unit = {},
                            private val onItemFinished: (T) -> Unit = {},
+                           private var onQueueEmpty: (T) -> Unit = {},
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
     private val channel: Channel<T> = Channel<T>(capacity = UNLIMITED)
@@ -47,6 +48,8 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                         itemRunner(nextItem)
                         queuedOrActiveItems.remove(nextItem)
                         onItemFinished(nextItem)
+                        if(queuedOrActiveItems.isEmpty() && channel.isEmpty)
+                            onQueueEmpty.invoke(nextItem)
                     }
                 }
             }
