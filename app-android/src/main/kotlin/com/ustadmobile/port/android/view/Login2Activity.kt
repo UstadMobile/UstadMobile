@@ -176,7 +176,7 @@ class Login2Activity : UstadBaseActivity(), Login2View,
         fingerprintIV = findViewById(R.id.activity_login2_fingerprint_imageview)
         fingerprintIV.setOnClickListener({ v: View -> mPresenter!!.handleClickFingerPrint() })
 
-        checkFingerprint()
+        //checkFingerprint()
     }
 
     private fun checkFingerprint() {
