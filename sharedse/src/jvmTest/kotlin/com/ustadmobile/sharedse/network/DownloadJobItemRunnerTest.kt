@@ -28,7 +28,6 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipFile
-import javax.naming.InitialContext
 
 
 class DownloadJobItemRunnerTest {
@@ -76,8 +75,6 @@ class DownloadJobItemRunnerTest {
     private var context = Any()
 
     private lateinit var entryStatusResponse: EntryStatusResponse
-
-    //private DownloadJobItemHistory history;
 
     private lateinit var mockedEntryStatusTask: BleEntryStatusTask
 
@@ -418,7 +415,6 @@ class DownloadJobItemRunnerTest {
     }
 
     @Test
-    @Throws(InterruptedException::class)
     fun givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
         runBlocking {
             cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
@@ -450,6 +446,62 @@ class DownloadJobItemRunnerTest {
                     JobStatus.STOPPED, item.djiStatus)
         }
     }
+
+    /**
+     * DownloadJobItemRunner should stop when connectivity is lost, and then a new
+     * DownloadJobItemRunner will be created when connectivity is restored. A DownloadJobItemRunner
+     * must be capable of picking up from where the last one left off.
+     */
+    @Test
+    fun givenDownloadJobItemRunnerStartedAndStopped_whenNextJobItemRunnerRuns_shouldFinishAndContentShouldMatch() {
+        runBlocking {
+            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
+            cloudMockDispatcher.throttlePeriod = 1000
+
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner1 = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
+                    clientRepo, cloudEndPoint, connectivityStatus,
+                    localAvailabilityManager = mock<LocalAvailabilityManager>())
+
+            launch {
+                jobItemRunner1.download()
+            }
+
+            delay(2000)
+
+            clientDb.connectivityStatusDao.updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
+
+            waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
+                    item.djiUid), MAX_LATCH_WAITING_TIME) { status ->
+                status == JobStatus.WAITING_FOR_CONNECTION
+            }
+
+            val statusAfterDisconnect = clientDb.downloadJobItemDao.findByUid(item.djiUid)!!.djiStatus
+
+
+            val downloadJobItemRunner2 = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
+                    clientRepo, cloudEndPoint, connectivityStatus,
+                    localAvailabilityManager = mock<LocalAvailabilityManager>())
+            downloadJobItemRunner2.download()
+
+            item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+
+            Assert.assertEquals("First download job item runner status was WAITING_FOR_CONNECTION after disconnect",
+                    JobStatus.WAITING_FOR_CONNECTION, statusAfterDisconnect)
+
+            Assert.assertEquals("File download task completed successfully",
+                    JobStatus.COMPLETE, item.djiStatus)
+
+            Assert.assertEquals("Correct number of ContainerEntry items available in client db",
+                    container.cntNumEntries,
+                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
+
+            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
+                    serverDb, serverRepo, clientDb, clientRepo)
+        }
+    }
+
 
     @Test
     @Throws(InterruptedException::class)
