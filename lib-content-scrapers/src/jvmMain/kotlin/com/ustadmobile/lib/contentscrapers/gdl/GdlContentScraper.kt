@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.gdl
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_PDF
@@ -28,9 +29,8 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
 
 
         val startTime = System.currentTimeMillis()
-        UMLogUtil.logInfo("Started scraper url $scrapeUrl at start time: $startTime with squUid $sqiUid" )
+        UMLogUtil.logInfo("Started scraper url $scrapeUrl at start time: $startTime with squUid $sqiUid")
         queueDao.setTimeStarted(sqiUid, startTime)
-
         var successful = false
         try {
             var content: File
@@ -57,6 +57,7 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
                 ContentScraperUtil.insertContainer(containerDao, parentEntry, true,
                         contentType, content.lastModified(), content, db, repository,
                         containerDir)
+
             }
 
         } catch (e: Exception) {
@@ -84,10 +85,6 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
 
             isContentUpdated = ContentScraperUtil.isFileModified(conn, destLocation, destLocation.name)
 
-            if (ContentScraperUtil.fileHasContent(folder)) {
-                isContentUpdated = false
-            }
-
             if (!isContentUpdated) {
                 return
             }
@@ -95,6 +92,7 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
             val contentFile = File(destLocation, FilenameUtils.getName(url.path))
             FileUtils.copyURLToFile(url, contentFile)
             ShrinkerUtil.shrinkEpub(contentFile)
+
 
         } catch (e: Exception) {
             throw e
@@ -117,16 +115,13 @@ class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containe
 
             isContentUpdated = ContentScraperUtil.isFileModified(conn, destLocation, destLocation.name)
 
-            if (ContentScraperUtil.fileHasContent(folder)) {
-                isContentUpdated = false
-            }
-
             if (!isContentUpdated) {
                 return
             }
 
             val contentFile = File(folder, FilenameUtils.getName(url.path))
             FileUtils.copyURLToFile(url, contentFile)
+
 
         } catch (e: Exception) {
             throw e
