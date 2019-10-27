@@ -18,7 +18,7 @@ import java.net.URL
 class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containerDir: File, var parentEntry: ContentEntry, var contentType: String, var sqiUid: Int) : Runnable {
 
 
-    private var isContentUpdated: Boolean = false
+    private var isContentUpdated: Boolean = true
 
     override fun run() {
         val db = UmAppDatabase.getInstance(Any())

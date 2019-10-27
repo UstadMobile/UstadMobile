@@ -37,10 +37,16 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
         System.gc()
         queueDao.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis())
         var successful = false
-        var feed = getFeed(queueUrl)
+        var feed: OpdsFeed? = null
+        try {
+            feed = getFeed(queueUrl)
+        } catch (e: Exception) {
+            queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+            queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
+        }
         when (contentType) {
             ScraperConstants.GDLContentType.ROOT.type -> try {
-                browseLanguages(feed, parentEntry, queueUrl, destLocation)
+                browseLanguages(feed!!, parentEntry, queueUrl, destLocation)
                 browsePages(feed, parentEntry, queueUrl, destLocation)
                 browseContent(feed, parentEntry, queueUrl, destLocation)
                 successful = true
@@ -50,7 +56,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             }
 
             ScraperConstants.GDLContentType.LANGPAGE.type -> try {
-                browsePages(feed, parentEntry, queueUrl, destLocation)
+                browsePages(feed!!, parentEntry, queueUrl, destLocation)
                 browseContent(feed, parentEntry, queueUrl, destLocation)
                 successful = true
             } catch (e: Exception) {
@@ -59,7 +65,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             }
 
             ScraperConstants.GDLContentType.CONTENT.type -> try {
-                browseContent(feed, parentEntry, queueUrl, destLocation)
+                browseContent(feed!!, parentEntry, queueUrl, destLocation)
                 successful = true
             } catch (e: Exception) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
@@ -263,11 +269,11 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
 
             englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 
-            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Bukusu","bxk")
-            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Lu","khb")
-            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Kalanguya","kak")
-            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Hadiyya","hdy")
-            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Gusii","guz")
+            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Bukusu", "bxk")
+            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Lu", "khb")
+            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Kalanguya", "kak")
+            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Hadiyya", "hdy")
+            ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Gusii", "guz")
             ContentScraperUtil.insertOrUpdateLanguageManual(langDao, "Wanga", "lwg")
 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, ScraperConstants.USTAD_MOBILE,
@@ -278,7 +284,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             gdlEntry = ContentScraperUtil.createOrUpdateContentEntry("https://digitallibrary.io/", GDL,
                     "https://opds.staging.digitallibrary.io/v1/en/root.xml/", GDL, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
                     "bringing books to every child in the world by 2030", false, EMPTY_STRING,
-                    "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
+                    "https://www.ustadmobile.com/files/gdl-logo.webp",
                     EMPTY_STRING, EMPTY_STRING, contentEntryDao)
 
             val englishFolder = File(destinationDir, "English")
@@ -330,6 +336,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             }
 
             ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
+            UMLogUtil.logInfo("Finished Indexer")
 
         }
 

@@ -1354,8 +1354,8 @@ object ContentScraperUtil {
     fun waitForQueueToFinish(queueDao: ScrapeQueueItemDao, runId: Int) {
         var count: Int
         do {
-            count = queueDao.getQueueCount(runId)
             Thread.sleep(3000)
+            count = queueDao.getQueueCount(runId)
         } while (count != 0)
     }
 
