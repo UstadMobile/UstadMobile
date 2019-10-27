@@ -22,6 +22,7 @@ import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -73,7 +74,7 @@ class DownloadDialogPresenterTest {
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase.clearAllTables()
 
-        umAppDatabaseRepo = umAppDatabase.asRepository("http://localhost/dummy/", "",
+        umAppDatabaseRepo = umAppDatabase.asRepository(context,"http://localhost/dummy/", "",
                 defaultHttpClient())
 
         val httpd = EmbeddedHTTPD(0, context)

@@ -39,12 +39,16 @@ import io.ktor.util.url
 import org.junit.After
 import org.junit.Assert
 import java.util.concurrent.TimeUnit
+import java.io.File
+import java.nio.file.Files
 
 class TestDbRoute  {
 
     lateinit var exampleDb: ExampleDatabase2
 
     lateinit var server: ApplicationEngine
+
+    var tmpAttachmentsDir: File? = null
 
     @Before
     fun setup() {
@@ -58,10 +62,13 @@ class TestDbRoute  {
                 register(ContentType.Any, GsonConverter())
             }
 
+            tmpAttachmentsDir = Files.createTempDirectory("TestDbRoute").toFile()
             val syncDao = ExampleDatabase2SyncDao_JdbcKt(exampleDb)
             install(Routing) {
-                ExampleDao2_KtorRoute(exampleDb.exampleDao2(), exampleDb, gson)
-                ExampleSyncableDao_KtorRoute(exampleDb.exampleSyncableDao(), exampleDb, gson, syncDao)
+                ExampleDao2_KtorRoute(exampleDb.exampleDao2(), exampleDb, gson,
+                        tmpAttachmentsDir!!.absolutePath)
+                ExampleSyncableDao_KtorRoute(exampleDb.exampleSyncableDao(), exampleDb, gson,
+                        tmpAttachmentsDir!!.absolutePath, syncDao)
             }
         }
 

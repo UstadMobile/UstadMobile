@@ -83,9 +83,9 @@ object UmAccountManager {
         val db = UmAppDatabase.getInstance(context)
         if(activeAccountRepository == null) {
             if (activeAccount == null) {
-                activeAccountRepository = db.asRepository(serverUrl, "", defaultHttpClient())!!
+                activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }else {
-                activeAccountRepository = db.asRepository(serverUrl, "", defaultHttpClient())!!
+                activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }
 
 

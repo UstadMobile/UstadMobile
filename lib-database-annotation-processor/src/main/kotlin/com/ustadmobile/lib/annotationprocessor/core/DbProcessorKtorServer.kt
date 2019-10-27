@@ -154,6 +154,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .receiver(Route::class)
                 .addParameter("_db", dbTypeElement.asClassName())
                 .addParameter("_gson", Gson::class)
+                .addParameter("_attachmentsDir", String::class)
 
         val codeBlock = CodeBlock.builder()
                 .add("val _gson = %T()\n", Gson::class)
@@ -190,7 +191,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 daoFromDbGetter += "${it.simpleName}()"
             }
 
-            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson", MemberName(daoTypeClassName.packageName,
+            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson, _attachmentsDir", MemberName(daoTypeClassName.packageName,
                     "${daoTypeEl.simpleName}_$SUFFIX_KTOR_ROUTE"))
             if(syncableEntitiesOnDao(daoTypeClassName, processingEnv).isNotEmpty()) {
                 codeBlock.add(", _syncHelperDao")
@@ -218,6 +219,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
                 .addParameter("_db", DoorDatabase::class)
                 .addParameter("_gson", Gson::class)
+                .addParameter("_attachmentsDir", String::class)
 
         if(syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).isNotEmpty()) {
             daoRouteFn.addParameter("_syncHelper",

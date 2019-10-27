@@ -10,7 +10,8 @@ import com.ustadmobile.door.SyncNode
     ExampleEntityPkInt::class, DoorDatabaseSyncInfo::class,
     SyncNode::class,
     ExampleSyncableEntity::class,
-    OtherSyncableEntity::class
+    OtherSyncableEntity::class,
+    ExampleAttachmentEntity::class
     //#DOORDB_TRACKER_ENTITIES
 
 ])
@@ -25,6 +26,8 @@ abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {
     abstract fun examlpeDaoWithInterface(): ExampleDaoWithInterface
 
     abstract fun exampleEntityPkIntDao(): ExampleEntityPkIntDao
+
+    abstract fun exampleAttachmentDao(): ExampleAttachmentDao
 
     //#DOORDB_SYNCDAO
 
