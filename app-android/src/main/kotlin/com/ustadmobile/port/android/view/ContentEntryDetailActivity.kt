@@ -99,6 +99,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
                 networkManagerBle, umAppRepository, networkManagerBle.localAvailabilityManager)
+        presenter.handleShowEditControls(showControls)
         presenter.onCreate(bundleToMap(Bundle()))
 
         managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
@@ -198,7 +199,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
             }
 
             R.id.export_content ->{
-                presenter!!.handleContentEntryExport()
+                presenter.handleContentEntryExport()
             }
         }
         return super.onOptionsItemSelected(item)

@@ -183,11 +183,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 if (container != null) {
                     containerUid = container.containerUid
                     val containerUidList = listOf(containerUid!!)
-                    val availableNowMap = if(localAvailabilityManager != null) {
-                        localAvailabilityManager.areContentEntriesLocallyAvailable(containerUidList)
-                    }else {
-                        mapOf()
-                    }
+                    val availableNowMap = localAvailabilityManager?.areContentEntriesLocallyAvailable(containerUidList)
+                            ?: mapOf()
 
                     view.runOnUiThread(Runnable {
                         handleLocalAvailabilityStatus(availableNowMap)
