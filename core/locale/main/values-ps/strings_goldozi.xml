@@ -3,19 +3,19 @@
     <!--Goldozi-->
     <string name="app_name_goldozi">ګلدوزی</string>
     <string name="sales">خرڅلاوی</string>
-    <string name="all_sales">ټول خرڅلاوی</string>
+    <string name="all_sales">ټول خرڅلاو</string>
     <string name="pre_orders">مخکینی فرمایشات</string>
-    <string name="payments_due">د غوښتنې وړ پیسې</string>
+    <string name="payments_due">پاتی پیسی</string>
     <string name="sort_by">د اڼل ترتیب</string>
-    <string name="sort_by_recent">وروستی</string>
+    <string name="sort_by_recent">اوسنی/نوی</string>
     <string name="sort_by_amount">مقدار</string>
     <string name="sort_by_location">ځای </string>
-    <string name="record_sale">د خرڅلاوی ریکارډ</string>
+    <string name="record_sale">د خرڅلاو ثبت</string>
     <string name="inventory">موجودی</string>
     <string name="items">توکی</string>
-    <string name="add_item">د توکی زیاتول</string>
+    <string name="add_item">د توکو زیاتول</string>
     <string name="select_producer">د تولید کوونکی انتخاب</string>
-    <string name="most_recent">تر ټولو وروستی</string>
+    <string name="most_recent">بیخی اوسنی</string>
     <string name="more">نور</string>
     <string name="more_caps">نور</string>
     <string name="by_category">د کټګوری په اساس</string>
@@ -28,12 +28,12 @@
     <string name="save">ثبتول</string>
     <string name="price">بیه</string>
     <string name="delivered">وسپارل شو</string>
-    <string name="payments">اداینه</string>
-    <string name="add_payment">د اداینې زیاتول</string>
+    <string name="payments">تادیات</string>
+    <string name="add_payment">د تادیاتو زیاتول</string>
     <string name="order_total">د فرمایش ټولټال:</string>
     <string name="discount">تخفیف</string>
-    <string name="balance_due">د غوښتنې وړ بیلانس</string>
-    <string name="order_notes">د فرمایش یاددښتونه</string>
+    <string name="balance_due">پاتې پیسی</string>
+    <string name="order_notes">د فرمایش یادښتونه</string>
     <string name="collections">ټولګه</string>
     <string name="by_collection">د ټولګی په اساس</string>
     <string name="sale_product">د محصول خرڅلاوی</string>
@@ -59,7 +59,7 @@
     <string name="change_password">د پټ نوم بدلول</string>
     <string name="current_password">اوسنی پټ نوم</string>
     <string name="confirm_new_password">د نوی پټ نوم تائیدول</string>
-    <string name="choose_language">د ژبې غوره کول</string>
+    <string name="choose_language">دژبې غوره کول</string>
     <string name="language_english">English</string>
     <string name="language_dari">دری</string>
     <string name="language_pashto">پښتو</string>
@@ -75,7 +75,7 @@
     <string name="syncing">هممهالی کیږی</string>
     <string name="edit">سمون</string>
     <string name="camera">کامره</string>
-    <string name="gallery">انځورغالى</string>
+    <string name="gallery">گالري</string>
     <string name="unable_open_image">د دې انځول خلاصول ترسره نه شو</string>
 
     <!-- Sprint 3 -->
@@ -85,7 +85,7 @@
     <string name="title_english">عنوان (انګلیسی) </string>
     <string name="title_dari">عنوان (دری)</string>
     <string name="title_pashto">عنوان (پښتو)</string>
-    <string name="desc_english">تشریح (انګلیسی)</string>
+    <string name="desc_english">مالومات(انګلیسي)</string>
     <string name="desc_dari">تشریح (دری)</string>
     <string name="desc_pashto">تشریح (پښتو)</string>
     <string name="parent_categories">د مور او پلار کتګوریانې</string>
@@ -93,7 +93,7 @@
     <string name="take_photo">تصویر اخیستل</string>
     <string name="choose_photo">تصویر غوره کول</string>
     <string name="create_new_item">د نوی توکی جوړول</string>
-    <string name="categories">کټګوریانې</string>
+    <string name="categories">کټګورئ</string>
     <string name="item_added_to_catalog">توکی په کټلاګ کې اضافه شو</string>
     <string name="category_added_to_catalog">کټلاګ په کټلاګ کې اضافه شو</string>
     <string name="undo">ناکړ</string>
@@ -116,16 +116,16 @@
     <string name="fingerprint_instructions">د خپل د هویت د تصدیقولو لپاره د خپل د ګوتې نښه د ګوتې د نښې په حس کوونکی باندې کیږدئ</string>
 
     <!--Sprint 4-->
-    <string name="i_have_received_order">ما فرمایش ترلاسه کړی</string>
+    <string name="i_have_received_order">دغه فرمایش مې ترلاسه کړ</string>
     <string name="i_have_received_the_order">ما دا فرمایش ترلاسه کړی</string>
     <string name="clear">پاکول</string>
-    <string name="delivery_signature">د سپارلو لاسلیک</string>
+    <string name="delivery_signature">د سپارنی لاسلیک</string>
     <string name="record_signature">د لاسلیک ثبتول</string>
     <string name="filter">فلتر</string>
     <string name="value">ارزښت</string>
     <string name="to">تر</string>
     <string name="add_signature">د لاسليک زیاتول</string>
-    <string name="add_reminder">په یاد راوړلو زیاتول</string>
+    <string name="add_reminder">د یادوني زیاتول</string>
     <string name="add_another_reminder">یو بل په یاد راوړل زیاتول</string>
     <string name="day_before">یوه ورځ مخکې</string>
     <string name="days_before">ورځي مخکی</string>
@@ -140,14 +140,14 @@
 
     <!--Sprint 5-->
     <string name="tags">نښي</string>
-    <string name="pinned">وټومبل شو</string>
+    <string name="pinned">میخ شو</string>
     <string name="dashboard">راپورځای</string>
     <string name="mne">نظارت او ارزونه</string>
     <string name="mne_dashboard">د نظارت او ارزونې راپورځای</string>
     <string name="total_sales">د خرڅلا ټولټال</string>
-    <string name="top_les">ترټولو غوره متشبثین</string>
-    <string name="sales_performance">د خرڅلا چلن</string>
-    <string name="sales_log">د خرڅلاوو ثبت/سجل</string>
+    <string name="top_les">تکړه مخکښې سوداګری</string>
+    <string name="sales_performance">د خرڅلاو فعالیت</string>
+    <string name="sales_log">د خرڅلاو مخینه</string>
     <string name="all">ټول</string>
     <string name="add_tag">د نښې زیاتول</string>
     <string name="report_options">د راپول ورکولو اختیارات</string>
@@ -165,11 +165,11 @@
     <string name="last_active_on_app">په اپلیکیشن کې وروستۍ فعالیت</string>
     <string name="products">محصولات</string>
     <string name="sale_value">د خرڅلا بیه</string>
-    <string name="set_title">د عنوان ټاکل</string>
+    <string name="set_title"> سرنوم ټاکل</string>
 
     <string name="this_language">پښتو</string>
 
-    <string name="select_image_from_camera_or_gallery">د کیمرې یا ګالر څخه انځور انتخاب کړئ</string>
+    <string name="select_image_from_camera_or_gallery">د کامرې یا ګالرئ څخه د انځور غوره کړئ</string>
     <string name="shake_feedback">د نظریاتو لپاره ځړول</string>
     <string name="feedback_hint">مهرباني وکړئ خپل نظر ولیکئ</string>
     <string name="send_feedback">غبرګون واستوئ</string>
@@ -215,4 +215,14 @@
     <string name="hours">hours</string>
     <string name="weeks">weeks</string>
     <string name="years">years</string>
+
+    <!--Sprint8-->
+    <string name="customer">Customer</string>
+    <string name="customer_details">Customer Details</string>
+    <string name="select_customers">Select Customers</string>
+    <string name="new_customer">New Customer</string>
+    <string name="select">Select</string>
+
+    <string name="sort_by_text">د ترتیب اساس</string>
+
 </resources>

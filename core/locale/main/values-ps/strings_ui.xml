@@ -9,7 +9,7 @@
     <string name="register_empty_fields">مهربانی وکړئ ټولي اړینې برخې ډکي کړئ</string>
     <string name="register_incorrect_email">بریشنایی پته سمه نه ده</string>
 
-    <string name="wrong_user_pass_combo">د کاروونکی نوم/ پټ نوم سمه نه ده: بیا هڅه وکړئ</string>
+    <string name="wrong_user_pass_combo">ناسم کارن نوم / پټ نوم: بیا هڅه وکړئ</string>
     <string name="login_network_error">چک وکری په کرښه یی د جال تیروتنه! مهربانی</string>
     <string name="authenticating">تصدیق كول</string>
     <string name="course_catalog_load_error">بخښنه! تیروتنه په بارولو کښی</string>

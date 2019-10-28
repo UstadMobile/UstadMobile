@@ -4,10 +4,10 @@
     <string name="app_name_goldozi">گلدوزی</string>
     <string name="sales">فروشات</string>
     <string name="all_sales">تمام فروشات</string>
-    <string name="pre_orders">فرمایشان قبلی</string>
-    <string name="payments_due">پرداختهای </string>
+    <string name="pre_orders">فرمایشات قبلی</string>
+    <string name="payments_due">پولهای باقی</string>
     <string name="sort_by">ترتیب</string>
-    <string name="sort_by_recent">اخیر</string>
+    <string name="sort_by_recent">جدید</string>
     <string name="sort_by_amount">مقدار</string>
     <string name="sort_by_location">موقعیت</string>
     <string name="record_sale">ثبت فروش</string>
@@ -15,8 +15,8 @@
     <string name="items">اجناس</string>
     <string name="add_item">علاوه ساختن جنس</string>
     <string name="select_producer">انتخاب تهیه کننده</string>
-    <string name="most_recent">آخرین</string>
-    <string name="more">دیگر</string>
+    <string name="most_recent">جدید ترین</string>
+    <string name="more">بیشتر</string>
     <string name="more_caps">دیگر</string>
     <string name="by_category">به اساس کتگوری</string>
     <string name="quantity">مقدار</string>
@@ -26,15 +26,15 @@
     <string name="sold">فروخته شد</string>
     <string name="pre_order">فرمایشات قبلی</string>
     <string name="save">ثبت</string>
-    <string name="price">نرخ</string>
-    <string name="delivered">تحویل داده شد</string>
+    <string name="price">قیمت</string>
+    <string name="delivered">تحویل داده شده</string>
     <string name="payments">پرداختها</string>
-    <string name="add_payment">علاوه ساختن پرداخت</string>
+    <string name="add_payment">علاوه نمودن پرداخت</string>
     <string name="order_total">مجموع فرمایش:</string>
     <string name="discount">تخفیف:</string>
-    <string name="balance_due">بیلانس</string>
-    <string name="order_notes">یادداشتهای فرمایش</string>
-    <string name="collections">مجموعه انتخاب شده</string>
+    <string name="balance_due">پول باقی مانده</string>
+    <string name="order_notes">یاد داشت فرمایش</string>
+    <string name="collections">کلکسیون</string>
     <string name="by_collection">به اساس مجموعه انتخاب شده</string>
     <string name="sale_product">محصول فروش</string>
     <string name="currency_afs">افغانی</string>
@@ -53,10 +53,10 @@
     <string name="sort_by_most_used">بیشترین استفاده شده</string>
     <string name="sort_by_name_asc">اسم (asc)</string>
     <string name="sorT_by_name_desc">اسم (desc)</string>
-    <string name="feature_coming_soon">این مشخصه به زودی فعالی خواهد گردید.</string>
+    <string name="feature_coming_soon">این بخش به زودی فعال خواهد شد</string>
 
     <!--Sprint 2-->
-    <string name="change_password">تغییر رمز عبور</string>
+    <string name="change_password">تغیر رمز</string>
     <string name="current_password">رمز عبور فعلی</string>
     <string name="confirm_new_password">تأید رمز عبور ججدید</string>
     <string name="choose_language">انتخاب زبان</string>
@@ -68,7 +68,7 @@
     <string name="payments_heading">پرداختها </string>
     <string name="payment_amount">مقدار پرداخت</string>
     <string name="payment_date">تاریخ پرداخت</string>
-    <string name="order_due_date">موعد مقرر فرمایش</string>
+    <string name="order_due_date">مهلت فرمایش</string>
     <string name="not_delivered">تحویل داده نشد</string>
     <string name="passwords_dont_match">رمزهای عبور یکسان نیست. دوباره کوشش نمائید.</string>
     <string name="unable_to_update_password">تغییر رمز عبور اجرأ گردیده نتوانست.</string>
@@ -116,18 +116,18 @@
     <string name="fingerprint_instructions">اثر انگشت خود را روی حس گر اثر انگشت بگذارید تا هویت شما تایید گردد</string>
 
     <!--Sprint 4-->
-    <string name="i_have_received_order">برایم فرمایش رسیده است</string>
+    <string name="i_have_received_order">این فرمایش را دریافت نمودم</string>
     <string name="i_have_received_the_order">برایم این فرمایش رسیده است</string>
     <string name="clear">پاک کردن</string>
-    <string name="delivery_signature">امضأ ارسال شدن</string>
+    <string name="delivery_signature">امضاْ تحویلی</string>
     <string name="record_signature">تسجیل امضأ</string>
     <string name="filter">فلتر</string>
 
     <string name="value">ارزش</string>
 
     <string name="to">الی</string>
-    <string name="add_signature">علاوه ساختن امضأ</string>
-    <string name="add_reminder">علاوه ساختن به یاد آوری</string>
+    <string name="add_signature">علاوه نمودن امضاْ</string>
+    <string name="add_reminder">علاوه نمودن یاد آور</string>
     <string name="add_another_reminder">علاوه ساختن به یاد آوری دیگر</string>
     <string name="day_before">روز قبل</string>
     <string name="days_before">روزهای قبل</string>
@@ -147,9 +147,9 @@
     <string name="mne">نظارت و ارزیابی</string>
     <string name="mne_dashboard">صفحه گزارشات نظارت و ارزیابی</string>
     <string name="total_sales">مجموع فروشات</string>
-    <string name="top_les">عالی LEs</string>
+    <string name="top_les">متشبثین پیشتاز برتر</string>
     <string name="sales_performance">کارآیی فروشات</string>
-    <string name="sales_log">یادداشتهای فروشات</string>
+    <string name="sales_log">سابقه فروشات</string>
     <string name="all">همه</string>
     <string name="add_tag">علاوه ساختن برچسب</string>
     <string name="report_options">اختیارات گزارش</string>
@@ -167,11 +167,11 @@
     <string name="last_active_on_app">آخرین زمان فعالیت در اپلیکیشن</string>
     <string name="products">محصولات</string>
     <string name="sale_value">ارزش فروش</string>
-    <string name="set_title">تنظیم عنوان</string>
+    <string name="set_title">انتخاب عنوان</string>
 
     <string name="this_language">دری</string>
 
-    <string name="select_image_from_camera_or_gallery">تصویر را از دوربین یا گالری انتخاب کنید</string>
+    <string name="select_image_from_camera_or_gallery">تصویر را از کامره یا گالری انتخاب کنید</string>
     <string name="shake_feedback">برای بازخورد لرزش</string>
     <string name="feedback_hint">لطفا نظرات خود را وارد کنید</string>
     <string name="send_feedback">ارسال بازخورد</string>
@@ -217,4 +217,14 @@
     <string name="hours">hours</string>
     <string name="weeks">weeks</string>
     <string name="years">years</string>
+
+    <string name="customer">Customer</string>
+    <string name="customer_details">Customer Details</string>
+    <string name="select_customers">Select Customers</string>
+    <string name="new_customer">New Customer</string>
+    <string name="select">Select</string>
+
+
+    <string name="sort_by_text">نحوه ترتیب</string>
+
 </resources>

@@ -186,6 +186,8 @@
     <string name="hours">hours</string>
     <string name="weeks">weeks</string>
     <string name="years">years</string>
+
+    <!--Sprint8-->
     <string name="customer">Customer</string>
     <string name="customer_details">Customer Details</string>
     <string name="select_customers">Select Customers</string>
