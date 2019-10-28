@@ -6,6 +6,7 @@
         app:showAsAction="always"
         android:id="@+id/content_action_done"
         android:title="@string/content_editor_menu_undo"
+        android:iconTint="@color/icons"
         android:orderInCategory="1"
         android:icon="@drawable/ic_done_white_24dp"
         />
@@ -13,6 +14,7 @@
         app:showAsAction="always"
         android:id="@+id/content_action_undo"
         android:title="@string/content_editor_menu_undo"
+        android:iconTint="@color/icons"
         android:orderInCategory="2"
         android:icon="@drawable/ic_undo_white_24dp"
         />
@@ -22,6 +24,7 @@
         app:showAsAction="always"
         android:id="@+id/content_action_redo"
         android:title="@string/content_editor_menu_redo"
+        android:iconTint="@color/icons"
         android:icon="@drawable/ic_redo_white_24dp"
         />
 
@@ -30,6 +33,7 @@
         app:showAsAction="always"
         android:id="@+id/content_action_format"
         android:title="@string/content_editor_menu_text_formatting"
+        android:iconTint="@color/icons"
         android:icon="@drawable/ic_text_format_white_24dp"
         />
 
@@ -38,6 +42,7 @@
         app:showAsAction="always"
         android:id="@+id/content_action_insert"
         android:title="@string/content_insert_options"
+        android:iconTint="@color/icons"
         android:icon="@drawable/ic_add_white_24dp"
         />
 
@@ -46,6 +51,7 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_format_textdirection_l_to_r_white_24dp"
         android:id="@+id/content_action_direction"
+        android:iconTint="@color/icons"
         android:title="@string/content_editor_directionality"/>
 
     <item
@@ -53,12 +59,14 @@
         app:showAsAction="always"
         android:id="@+id/content_action_pages"
         android:icon="@drawable/ic_piled_pages"
+        android:iconTint="@color/icons"
         android:title="@string/content_editor_menu_pages"
         />
 
     <item
         android:orderInCategory="8"
         app:showAsAction="always"
+        android:iconTint="@color/icons"
         android:id="@+id/content_action_preview"
         android:title="@string/content_editor_preview"
         android:icon="@drawable/ic_document_preview"

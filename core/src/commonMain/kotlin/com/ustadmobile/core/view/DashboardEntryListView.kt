@@ -33,6 +33,7 @@ interface DashboardEntryListView : UstadView {
 
     fun showSalesLogOption(show: Boolean)
     fun showTopLEsOption(show: Boolean)
+    fun showSalesPerformanceOption(show: Boolean)
 
     companion object {
 

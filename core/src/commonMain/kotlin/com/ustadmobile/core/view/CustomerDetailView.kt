@@ -15,6 +15,7 @@ interface CustomerDetailView : UstadView {
     fun updateLocationName(name:String)
     fun updatePhoneNumber(name:String)
 
+    fun updatePAB(save: Boolean)
 
     fun updateAndDismiss(personUid: Long, customerName: String)
 

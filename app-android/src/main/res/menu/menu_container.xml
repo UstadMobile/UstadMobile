@@ -4,5 +4,6 @@
     tools:context="com.ustadmobile.port.android.view.ContainerActivity">
     <item android:id="@+id/action_leavecontainer" android:title="Leave"
         android:icon="@drawable/ic_clear_white_24dp"
+        android:iconTint="@color/icons"
         android:orderInCategory="100" app:showAsAction="always" />
 </menu>

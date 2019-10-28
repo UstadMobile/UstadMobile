@@ -10,6 +10,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
+        android:theme="@style/ToolbarDark"
         android:layout_height="wrap_content">
         <include
             android:id="@+id/um_toolbar"

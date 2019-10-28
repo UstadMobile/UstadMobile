@@ -101,15 +101,23 @@ class SelectSaleProductPresenter(context: Any,
         view.setCollectionProvider(collectionProvider!!)
     }
 
+    fun handleClickProduct(productUid: Long, isCategory: Boolean){
+        handleClickProductMulti(productUid, isCategory, false)
+    }
 
-    fun handleClickProduct(productUid: Long, isCategory: Boolean) {
+    fun handleClickProductMulti(productUid: Long, isCategory: Boolean, editMode: Boolean) {
 
         val args = HashMap<String, String>()
         if (catalogMode) {
 
             if (isCategory) {
-                args.put(ARG_SALEPRODUCT_UID, productUid.toString())
-                impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
+                if(editMode){
+                    args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
+                    impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+                }else {
+                    args.put(ARG_SALEPRODUCT_UID, productUid.toString())
+                    impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
+                }
             } else {
                 args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
                 impl.go(SaleProductDetailView.VIEW_NAME, args, context)

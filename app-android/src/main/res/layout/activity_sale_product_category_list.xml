@@ -83,8 +83,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        app:menu_icon="@drawable/ic_add_black_24dp"
         android:layout_marginBottom="8dp"
-
+        app:menu_colorNormal="@color/fab"
+        app:menu_colorPressed="@color/fab_pressed"
+        app:menu_colorRipple="@color/fab_ripple"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

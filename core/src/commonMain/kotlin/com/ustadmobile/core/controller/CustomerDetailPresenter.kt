@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.SelectPersonDialogView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -78,10 +79,15 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
             currentPerson = Person()
             val customerRole = roleDao.findByName(Role.ROLE_NAME_CUSTOMER)
             currentPerson.personUid = personDao.createPersonAsync(currentPerson)
+            customerUid = currentPerson.personUid
             //Create Customer Role for this person and persist.
             if(customerRole!=null){
                 currentPerson.personRoleUid = customerRole.roleUid
             }
+
+            view.runOnUiThread(Runnable {
+                view.updatePAB(true)
+            })
 
         }
     }
@@ -118,22 +124,32 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
                 view.updatePhoneNumber("")
             }
 
+            view.runOnUiThread(Runnable {
+                view.updatePAB(false)
+            })
+
         }
     }
 
 
     fun doneSelecting(location: String, phoneNumber : String, customerName : String){
+
+        val newCustomerName = customerName.trim()
+
         //Persist any changes
         GlobalScope.launch {
             currentPerson.phoneNum = phoneNumber
 
-            if(customerName.split("\\w+").size >0){
+            if(newCustomerName != "" && newCustomerName.split(" " ).size > 1 &&
+                    newCustomerName.split("\\w+").size >0){
 
-                currentPerson.lastName = customerName.substring(customerName.lastIndexOf(" ")+1);
-                currentPerson.firstNames = customerName.substring(0, customerName.lastIndexOf(' '));
+                currentPerson.lastName =
+                        newCustomerName.substring(newCustomerName.lastIndexOf(" ")+1);
+                currentPerson.firstNames =
+                        newCustomerName.substring(0, newCustomerName.lastIndexOf(' '));
             }
             else{
-                currentPerson.firstNames = customerName;
+                currentPerson.firstNames = newCustomerName;
                 currentPerson.lastName = "";
             }
 
@@ -141,7 +157,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
             currentPerson.active = true
             personDao.updateAsync(currentPerson)
 
-            view.updateAndDismiss(customerUid, customerName)
+            view.updateAndDismiss(customerUid, newCustomerName)
         }
 
     }

@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -55,6 +56,8 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
 
     private var newCustomer : Boolean = false
 
+    private var pabMenuItem : MenuItem ?= null
+
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -88,6 +91,14 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         return drawable
     }
 
+    override fun updatePAB(save: Boolean){
+        if(save){
+            pabMenuItem!!.setTitle(R.string.save)
+        }else{
+            pabMenuItem!!.setTitle(R.string.select)
+        }
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
 
@@ -110,7 +121,9 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         toolbar.setNavigationOnClickListener { v -> dialog.dismiss() }
 
         toolbar.inflateMenu(R.menu.menu_save)
-        toolbar.menu.findItem(R.id.menu_save).isVisible = true
+        pabMenuItem = toolbar.menu.findItem(R.id.menu_save)
+        pabMenuItem!!.setTitle(R.string.select)
+        pabMenuItem!!.isVisible = true
 
         //Click the tick button on the toolbar:
         toolbar.setOnMenuItemClickListener { item ->
@@ -133,6 +146,48 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
+        locationName!!.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                updatePAB(true)
+            }
+        })
+
+        phoneNumber!!.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                updatePAB(true)
+            }
+        })
+
+        customerName!!.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                updatePAB(true)
+            }
+        })
+
         if (arguments!!.containsKey(CustomerDetailView.ARG_CUSTOMER_UID)) {
             newCustomer = false
         }else{
@@ -150,8 +205,6 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
             })
         }
 
-
-
         //Dialog stuff:
         //Set any view components and its listener (post presenter work)
         dialog = AlertDialog.Builder(context!!,
@@ -160,7 +213,6 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
                 .setTitle("")
                 .create()
         return dialog
-
 
     }
 

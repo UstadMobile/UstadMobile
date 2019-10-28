@@ -4,6 +4,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.ChangePasswordView
 import com.ustadmobile.lib.db.entities.Person
@@ -52,6 +53,8 @@ class ChangePasswordPresenter(context: Any,
                     if (personAuth == null) {
                         currentPersonAuth = PersonAuth()
                         currentPersonAuth!!.personAuthUid = loggedInPersonUid
+                    }else{
+                        currentPersonAuth = personAuth
                     }
                 }
             }
@@ -60,43 +63,33 @@ class ChangePasswordPresenter(context: Any,
 
     fun handleClickSave() {
 
-        //TODO: Undo when ready
-//        if (updatePassword != null && !updatePassword!!.isEmpty() && updatePasswordConfirm != null &&
-//                !updatePasswordConfirm!!.isEmpty() && currentPersonAuth != null && currentPerson != null) {
-//            if (updatePassword != updatePasswordConfirm) {
-//                view.sendMessage(MessageID.passwords_dont_match)
-//                return
-//            }
-//
-//            currentPersonAuth!!.passwordHash = PersonAuthDao.encryptThisPassword(updatePassword!!)
-//
-//            GlobalScope.launch {
-//                personAuthDao.updateAsync(currentPersonAuth!!)
-//
-//                personAuthDao.selfResetPassword(currentPerson!!.username!!, currentPassword!!,
-//                        updatePassword!!, loggedInPersonUid, object : UmCallback<Int> {
-//
-//                    override fun onSuccess(result: Int?) {
-//                        GlobalScope.launch {
-//                            try {
-//                                personAuthDao.updateAsync(currentPersonAuth!!)
-//
-//                            } catch (e: Exception) {
-//                                println(e!!.message)
-//                                view.sendMessage(MessageID.unable_to_update_password)
-//                            }
-//
-//                        }
-//                    }
-//
-//                    override fun onFailure(exception: Throwable?) {
-//                        println(exception!!.message)
-//                        view.sendMessage(MessageID.unable_to_update_password)
-//                    }
-//
-//                })
-//            }
-//        }
+        if (updatePassword != null && !updatePassword!!.isEmpty() && updatePasswordConfirm != null &&
+                !updatePasswordConfirm!!.isEmpty() && currentPersonAuth != null && currentPerson != null) {
+            if (updatePassword != updatePasswordConfirm) {
+                view.sendMessage(MessageID.passwords_dont_match)
+                return
+            }
+
+            currentPersonAuth!!.passwordHash = PersonAuthDao.encryptThisPassword(updatePassword!!)
+
+            GlobalScope.launch {
+                personAuthDao.updateAsync(currentPersonAuth!!)
+
+                val resetP = personAuthDao.resetPassword(currentPerson!!.personUid, updatePassword!!, currentPerson!!.personUid)
+                if(resetP > 0) {
+                    try {
+                        personAuthDao.updateAsync(currentPersonAuth!!)
+                        view.finish()
+
+                    } catch (e: Exception) {
+                        println(e!!.message)
+                        view.sendMessage(MessageID.unable_to_update_password)
+                    }
+                }else{
+                    view.sendMessage(MessageID.unable_to_update_password)
+                }
+            }
+        }
     }
 
 

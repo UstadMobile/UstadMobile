@@ -82,13 +82,18 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
         //tagAll = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_chip_all);
         //TODO: Handle tag click
 
+        floatingActionMenu = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu)
+
         //Call the Presenter
         mPresenter = DashboardEntryListPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Set listeners
-        floatingActionMenu = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu)
+
+        if(floatingActionMenu.isOpened){
+            floatingActionMenu.close(false)
+        }
         salesPerformance = rootContainer.findViewById<FloatingActionButton>(
                 R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
         salesPerformance.setOnClickListener { v ->
@@ -122,7 +127,7 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
 
     override fun showSalesLogOption(show: Boolean) {
         if(show){
-            salesLog.visibility = View.VISIBLE
+//            salesLog.visibility = View.VISIBLE
         }else{
             salesLog.visibility = View.GONE
         }
@@ -130,9 +135,17 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
 
     override fun showTopLEsOption(show: Boolean) {
         if(show){
-            topLEs.visibility = View.VISIBLE
+//            topLEs.visibility = View.VISIBLE
         }else{
             topLEs.visibility = View.GONE
+        }
+    }
+
+    override fun showSalesPerformanceOption(show: Boolean) {
+        if(show){
+//            salesPerformance.visibility = View.VISIBLE
+        }else{
+            salesPerformance.visibility = View.GONE
         }
     }
 

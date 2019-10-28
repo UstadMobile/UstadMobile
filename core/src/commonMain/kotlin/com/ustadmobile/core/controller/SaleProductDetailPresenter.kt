@@ -47,6 +47,8 @@ class SaleProductDetailPresenter(context: Any,
 
     private lateinit var pictureLiveData: DoorLiveData<SaleProductPicture?>
 
+    private var productUid : Long = 0L
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -85,14 +87,12 @@ class SaleProductDetailPresenter(context: Any,
         GlobalScope.launch {
             if (arguments.containsKey(ARG_SALE_PRODUCT_UID)) {
 
-                val product = saleProductDao.findByUidLive(arguments[ARG_SALE_PRODUCT_UID]!!.toLong())
+                productUid = arguments[ARG_SALE_PRODUCT_UID]!!.toLong()
+
+                val product = saleProductDao.findByUidLive(productUid)
                 view.runOnUiThread(Runnable {
                     product.observe(thisP, thisP::updateView)
                 })
-
-//                val result = saleProductDao.findByUidAsync((arguments[ARG_SALE_PRODUCT_UID]!!.toLong()))
-//                currentSaleProduct = result
-//                updateView()
 
             } else {
                 currentSaleProduct = SaleProduct("", "", isCategory, false)
@@ -104,9 +104,6 @@ class SaleProductDetailPresenter(context: Any,
                     product.observe(thisP, thisP::updateView)
                 })
 
-//                val result = saleProductDao.insertAsync(currentSaleProduct!!)
-//                currentSaleProduct!!.saleProductUid = result
-//                updateView()
             }
         }
 

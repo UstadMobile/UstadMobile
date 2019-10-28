@@ -86,7 +86,7 @@ class SelectSaleProductRecyclerAdapter
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickProduct(entity.productUid, listCategory)
+                            mPresenter.handleClickProductMulti(entity.productUid, listCategory, true)
                             true
                         } else if (i == R.id.delete) {
                             mPresenter.handleDelteSaleProduct(entity.productUid, listCategory)
@@ -107,7 +107,7 @@ class SelectSaleProductRecyclerAdapter
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickProduct(entity.productUid, listCategory)
+                            mPresenter.handleClickProductMulti(entity.productUid, listCategory, true)
                             true
                         } else if (i == R.id.delete) {
                             mPresenter.handleDelteSaleProduct(entity.productUid, listCategory)

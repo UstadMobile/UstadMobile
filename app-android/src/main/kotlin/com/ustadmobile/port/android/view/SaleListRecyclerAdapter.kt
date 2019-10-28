@@ -124,7 +124,11 @@ class SaleListRecyclerAdapter
             if (genTitle != null && !genTitle.isEmpty()) {
                 saleName = genTitle
             } else {
-                saleName = entity.saleTitle
+                if(entity.saleTitle != null) {
+                    saleName = entity.saleTitle
+                }else{
+                    saleName = ""
+                }
             }
             mPresenter.handleCommonPressed(entity.saleUid, saleName!!)
         }

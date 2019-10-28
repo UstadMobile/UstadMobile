@@ -113,7 +113,6 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
                 return null
             }
         }
-
     }
 
     //TODO: Undo when ready

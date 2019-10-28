@@ -190,5 +190,6 @@
     <string name="customer_details">Customer Details</string>
     <string name="select_customers">Select Customers</string>
     <string name="new_customer">New Customer</string>
+    <string name="select">Select</string>
 
 </resources>

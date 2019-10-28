@@ -80,11 +80,13 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
                         view.runOnUiThread(Runnable {
                             view.showSalesLogOption(true)
                             view.showTopLEsOption(true)
+                            view.showSalesPerformanceOption(true)
                         })
                     }else{
                         view.runOnUiThread(Runnable {
                             view.showSalesLogOption(false)
                             view.showTopLEsOption(false)
+                            view.showSalesPerformanceOption(true)
                         })
                     }
                 }
