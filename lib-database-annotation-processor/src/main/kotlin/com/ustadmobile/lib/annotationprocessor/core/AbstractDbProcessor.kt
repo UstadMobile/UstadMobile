@@ -93,7 +93,13 @@ fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
  * </pre>
  */
 fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnvironment,
-                         embedPath: List<String> = listOf()): Map<List<String>, ClassName> {
+                         embedPath: List<String> = listOf()) =
+        findEntitiesWithAnnotation(entityType, SyncableEntity::class.java, processingEnv,
+                embedPath)
+
+fun findEntitiesWithAnnotation(entityType: ClassName, annotationClass: Class<out Annotation>,
+                               processingEnv: ProcessingEnvironment,
+                               embedPath: List<String> = listOf()): Map<List<String>, ClassName> {
     if(entityType in QUERY_SINGULAR_TYPES)
         return mapOf()
 
@@ -103,10 +109,10 @@ fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnviron
         if(it.getAnnotation(SyncableEntity::class.java) != null)
             syncableEntityList.put(embedPath, it.asClassName())
 
-        it.enclosedElements.filter { it.getAnnotation(Embedded::class.java) != null}.forEach {
+        it.enclosedElements.filter { it.getAnnotation(annotationClass) != null}.forEach {
             val subEmbedPath = mutableListOf(*embedPath.toTypedArray()) + "${it.simpleName}"
-            syncableEntityList.putAll(findSyncableEntities(it.asType().asTypeName() as ClassName,
-                    processingEnv, subEmbedPath))
+            syncableEntityList.putAll(findEntitiesWithAnnotation(it.asType().asTypeName() as ClassName,
+                    annotationClass, processingEnv, subEmbedPath))
         }
     }
 

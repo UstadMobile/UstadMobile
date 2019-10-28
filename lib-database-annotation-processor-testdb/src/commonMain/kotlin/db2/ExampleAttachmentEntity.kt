@@ -11,4 +11,5 @@ class ExampleAttachmentEntity(@PrimaryKey(autoGenerate = true) var eaUid: Long =
                               @LocalChangeSeqNum var eaLcsn: Int = 0,
                               @MasterChangeSeqNum var eaMcsn: Int = 0,
                               @LastChangedBy var eaLcb: Int = 0,
+                              var eaMimeType: String = "application/octet",
                               var eaNumber: Int = 0)
