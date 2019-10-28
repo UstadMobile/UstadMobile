@@ -11,7 +11,7 @@ plugins {
     id 'com.github.psxpaul.execfork' version '0.1.11'
 }
 
-def baseDestination = "$buildDir/generated/source/angular/"
+def angularDestinationPath = "$buildDir/generated/source/angular/"
 
 configurations {
     servletRuntime.extendsFrom runtime
@@ -31,7 +31,7 @@ shadowJar {
 
 sourceSets {
     main.java.srcDirs += ["$buildDir/generated/source/door"]
-    main.resources.srcDirs += [baseDestination]
+    main.resources.srcDirs += [angularDestinationPath]
 }
 
 
@@ -74,20 +74,22 @@ task prepareResources{
     doLast{
         copy{
             from rootProject.file("app-angular/dist").path
-            into "${baseDestination}webapp"
+            into "${angularDestinationPath}webapp"
         }
 
         copy{
             from project.file("src/main/webapp").path
-            into "${baseDestination}webapp"
+            into "${angularDestinationPath}webapp"
         }
     }
 }
 
-
-task removeTemResources{
+/**
+ * Remove angular static files
+ */
+task removeTempResources{
     doLast{
-        def ngResource = file(baseDestination)
+        def ngResource = file(angularDestinationPath)
         if(ngResource.exists()){
             delete{
                 delete ngResource
@@ -116,9 +118,9 @@ task devModJar(type: Jar){
  * Create a production war with angular static files
  */
 task prodModeWar(type: War){
-    from "${baseDestination}webapp"
+    from "${angularDestinationPath}webapp"
     classpath = configurations.servletRuntime
-    webXml = file("${baseDestination}webapp/WEB-INF/web.xml")
+    webXml = file("${angularDestinationPath}webapp/WEB-INF/web.xml")
 }
 
 /**
@@ -157,10 +159,10 @@ appRunDevMode.dependsOn(shadowJar)
 prepareResources.dependsOn(addWelcomeFileToWebXml,":app-angular:buildProd")
 
 prodModeJar.dependsOn(prepareResources)
-prodModeJar.finalizedBy(removeTemResources)
+prodModeJar.finalizedBy(removeTempResources)
 
 prodModeWar.dependsOn(prepareResources)
-prodModeWar.finalizedBy(removeTemResources)
+prodModeWar.finalizedBy(removeTempResources)
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
