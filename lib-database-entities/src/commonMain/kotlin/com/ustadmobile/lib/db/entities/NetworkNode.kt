@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-class NetworkNode() {
+open class NetworkNode() {
 
     @PrimaryKey(autoGenerate = true)
     var nodeId: Long = 0

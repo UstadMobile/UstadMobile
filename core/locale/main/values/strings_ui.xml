@@ -163,8 +163,15 @@
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
     <string name="onboarding_offline_sharing">Share offline</string>
     <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
-    <string name="location_permission_title">Location permissions required</string>
+    <string name="location_permission_title">Location permission required</string>
     <string name="location_permission_message">This app requires the location permission to enable high-speed offline sharing with nearby users.</string>
+    <string name="location_permission_details">This app uses Bluetooth and WiFi scanning to find other users nearby. The app can then connect to
+        nearby users to download content at high-speed without requiring Internet access.
+        Because these scan results could be used to determine your location, you must grant the
+        location permission to enable this feature.
+        This app does not save the results of these scans and does not record your location in any way.
+        This app is built from open source code which can be checked at
+        github.com/UstadMobile/UstadMobile</string>
 
     <string name="download_delete_btn_label">Delete</string>
     <string name="download_continue_stacked_label">Continue download</string>
@@ -357,6 +364,13 @@
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
+
+    <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
+    <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
+    <string name="enable">Enable</string>
+    <string name="more_information">More information</string>
+    <string name="less_information">Less information</string>
+
 
 
 </resources>

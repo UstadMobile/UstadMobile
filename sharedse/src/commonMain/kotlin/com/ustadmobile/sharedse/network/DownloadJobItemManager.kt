@@ -94,9 +94,8 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     suspend fun updateProgress(djiUid: Int, bytesSoFar: Long, totalBytes: Long) {
         withContext(coroutineScope) {
-            //executor.execute {
-            UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
-                    djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes)
+//            UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
+//                    djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes)
             val djStatus = jobItemUidToStatusMap[djiUid]
             if (djStatus != null) {
                 val deltaBytesFoFar = bytesSoFar - djStatus.bytesSoFar
@@ -168,9 +167,9 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     private fun updateParentsProgress(djiUid: Int, parents: List<DownloadJobItemStatus>?, deltaBytesFoFar: Long,
                                       deltaTotalBytes: Long) {
-        UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
-                djiUid + " parents = " + UMUtil.debugPrintList(parents) +
-                " deltaBytesSoFar=" + deltaBytesFoFar + ", deltaTotalBytes=" + deltaTotalBytes)
+//        UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
+//                djiUid + " parents = " + UMUtil.debugPrintList(parents) +
+//                " deltaBytesSoFar=" + deltaBytesFoFar + ", deltaTotalBytes=" + deltaTotalBytes)
         runOnAllParents(djiUid, parents) { parent ->
             parent.incrementTotalBytes(deltaTotalBytes)
             parent.incrementBytesSoFar(deltaBytesFoFar)

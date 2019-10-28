@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -138,10 +140,45 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
         val impl = UstadMobileSystemImpl.instance
-        runAfterGrantingPermission(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                Runnable { networkManagerBle.checkP2PBleServices() },
-                impl.getString(MessageID.location_permission_title, this),
-                impl.getString(MessageID.location_permission_message, this))
+        val locationPermissionArr =arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+        val dialogTitle =impl.getString(MessageID.location_permission_title, this)
+        val dialogMessage =impl.getString(MessageID.location_permission_message, this)
+        val afterPermissionGrantedRunnable = Runnable { networkManagerBle.checkP2PBleServices() }
+
+        runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
+                dialogTitle, dialogMessage, {
+                    val alertDialog = AlertDialog.Builder(this@HomeActivity)
+                            .setTitle(R.string.location_permission_title)
+                            .setView(R.layout.view_locationpermission_dialogcontent)
+                            .setNegativeButton(getString(android.R.string.cancel)
+                            ) { dialog, _ -> dialog.dismiss() }
+                            .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                                runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
+                                        dialogTitle, dialogMessage)
+                            }
+                            .create()
+
+                    alertDialog.setOnShowListener {
+                        alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener {view ->
+                            val extraInfo = alertDialog.findViewById<TextView>(R.id.view_locationpermission_extra_details)!!
+                            val button = view as Button
+                            if(extraInfo.visibility == View.GONE) {
+                                extraInfo.visibility = View.VISIBLE
+                                button.text = resources.getText(R.string.less_information)
+                                button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                        R.drawable.ic_keyboard_arrow_up_black_24dp, 0)
+                            }else {
+                                extraInfo.visibility = View.GONE
+                                button.text = resources.getText(R.string.more_information)
+                                button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                        R.drawable.ic_keyboard_arrow_down_black_24dp, 0)
+                            }
+                        }
+                    }
+
+                    alertDialog
+                })
     }
 
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {

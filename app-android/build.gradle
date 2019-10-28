@@ -104,6 +104,11 @@ android {
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
         buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
+
+        packagingOptions {
+            pickFirst "META-INF/io.netty.versions.properties"
+        }
+
     }
 
     flavorDimensions "config"
@@ -130,6 +135,7 @@ android {
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/DEPENDENCIES"
             }
         }
 
@@ -142,16 +148,8 @@ android {
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
-                exclude "META-INF/ktor-http.kotlin_module"
-                exclude 'META-INF/io.netty.versions.properties'
-                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
-                exclude 'META-INF/kotlinx-io.kotlin_module'
-                exclude 'META-INF/atomicfu.kotlin_module'
-                exclude 'META-INF/ktor-utils.kotlin_module'
-                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
-                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
-                exclude 'META-INF/ktor-http-cio.kotlin_module'
-                exclude 'META-INF/ktor-*'
+                //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
+                exclude 'META-INF/*.kotlin_module'
             }
         }
     }
@@ -336,6 +334,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$version_androidx_support_lib"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
 
+    implementation "com.google.android.gms:play-services-safetynet:17.0.0"
+
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
@@ -368,6 +368,12 @@ dependencies {
 
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
+
+
+    //KTOR
+    implementation "io.ktor:ktor-client-gson:$version_ktor"
+    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-cio:$version_ktor"
 
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
