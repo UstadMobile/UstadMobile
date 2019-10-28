@@ -10,24 +10,13 @@ import kotlinx.serialization.Serializable
  */
 @Entity(indices = arrayOf(Index(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])))
 @Serializable
-open class EntryStatusResponse() {
+open class EntryStatusResponse(var erContainerUid: Long = 0L, var available: Boolean = false) {
 
     @PrimaryKey(autoGenerate = true)
     var erId: Int = 0
-
-    var erContainerUid: Long = 0
 
     var responseTime: Long = 0
 
     var erNodeId: Long = 0
 
-    var available: Boolean = false
-
-    constructor(erContainerUid: Long, responseTime: Long, erNodeId: Long,
-                available: Boolean) : this() {
-        this.erContainerUid = erContainerUid
-        this.responseTime = responseTime
-        this.erNodeId = erNodeId
-        this.available = available
-    }
 }

@@ -124,7 +124,7 @@ task prodModeWar(type: War){
 }
 
 /**
- * Create development war file without angular static files
+ * Create development war file without angular
  */
 task devModeWar(type: War){
     classpath = configurations.servletRuntime

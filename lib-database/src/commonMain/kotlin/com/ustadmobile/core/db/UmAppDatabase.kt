@@ -238,12 +238,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
-            builder.addMigrations(object : DoorMigration(24,25){
+            builder.addMigrations(object : DoorMigration(25,26){
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
                 }
 
             })
+
             builder.addMigrations(object : DoorMigration(20, 24) {
                 override fun migrate(database: DoorSqlDatabase) {
 

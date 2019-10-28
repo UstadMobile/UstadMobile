@@ -59,6 +59,8 @@ public class NetworkManagerBleHelper {
 
     private String passphrase;
 
+    private int lastNetworkIdAdded = -1;
+
 
     /**
      * Constrictor used to create new instance of the NetworkManagerBleHelper
@@ -100,6 +102,7 @@ public class NetworkManagerBleHelper {
     public void setGroupInfo(String ssid, String passphrase){
         this.ssid = ssid;
         this.passphrase = passphrase;
+        lastNetworkIdAdded = -1;
 
         if (ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             temporaryWifiDirectSsids.add(ssid);
@@ -120,11 +123,19 @@ public class NetworkManagerBleHelper {
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-        return wifiManager.addNetwork(config);
+
+        /* If the config does not indicate that the network is hidden, Android will only attempt to
+         * connect once it sees the network. Because the network was likely only just create by the
+         * peer device, this would cause a delay.
+         */
+        config.hiddenSSID = true;
+        final int networkId = wifiManager.addNetwork(config);
+        lastNetworkIdAdded = networkId;
+        return networkId;
     }
 
 
-    public int getNetworkId(){
+    public int getLastNetworkIdAdded(){
         List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
         for(WifiConfiguration config : configuredNetworks){
             if(UMAndroidUtil.INSTANCE.normalizeAndroidWifiSsid(config.SSID).equals(ssid)){
@@ -166,8 +177,10 @@ public class NetworkManagerBleHelper {
      * per the WiFi Direct spec. In theory, it should be possible to leave these settings to
      * autodetect. In reality, we should specify these to reduce the chance of the connection
      * timing out.
+     *
+     * @return true if the enableNetwork call was made successfully (without exceptions), false otherwise
      */
-    public void enableWifiNetwork(){
+    public boolean enableWifiNetwork(){
         if(isConnectedToWifi()) {
             disableCurrentWifiNetwork();
         }
@@ -179,8 +192,9 @@ public class NetworkManagerBleHelper {
 
             Method connectMethod = wifiManager.getClass().getMethod("connect",
                     int.class, actionLister);
-            connectMethod.invoke(wifiManager,addNetwork(),proxyInstance);
-
+            final int networkId = lastNetworkIdAdded == -1 ? addNetwork() : lastNetworkIdAdded;
+            connectMethod.invoke(wifiManager, networkId ,proxyInstance);
+            return true;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -190,6 +204,8 @@ public class NetworkManagerBleHelper {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
 

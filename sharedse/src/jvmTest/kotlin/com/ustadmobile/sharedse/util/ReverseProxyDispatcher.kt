@@ -13,7 +13,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-
+// Based on https://gist.github.com/paour/bf58afa8969640e36e9bd87f85a6c5df
 class ReverseProxyDispatcher(private val serverUrl: HttpUrl) : Dispatcher() {
     private val client: OkHttpClient
 

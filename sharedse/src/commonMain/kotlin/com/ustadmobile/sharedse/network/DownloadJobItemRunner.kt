@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
@@ -24,6 +25,7 @@ import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
 import io.ktor.client.HttpClient
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.atomicfu.AtomicLongArray
 import kotlinx.atomicfu.atomic
@@ -32,6 +34,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -59,18 +63,15 @@ class DownloadJobItemRunner
  private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val numConcurrentEntryDownloads: Int = 4) {
+ private val numConcurrentEntryDownloads: Int = 4,
+ private val localAvailabilityManager: LocalAvailabilityManager,
+ private val ioCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
     private var statusObserver: DoorObserver<ConnectivityStatus?>? = null
-
-    //TODO: enable switching to local download when available after basic p2p cases complete
-    //private UmObserver<EntryStatusResponse> entryStatusObserver;
-
-    //private UmLiveData<EntryStatusResponse> entryStatusLiveData;
 
     private var downloadJobItemObserver: DoorObserver<Int>? = null
 
@@ -86,7 +87,7 @@ class DownloadJobItemRunner
 
     private val meteredConnectionAllowed = atomic(-1)
 
-    private var lWiFiConnectionTimeout = 30
+    private var lWiFiConnectionTimeout = 30000
 
     private val wiFiDirectGroupBle = atomic<WiFiDirectGroupBle?>(null)
 
@@ -187,24 +188,6 @@ class DownloadJobItemRunner
         }
     }
 
-//TODO: re-enable when we add support for switching dynamically
-//    /**
-//     * Handle changes triggered when file which wasn't available locally changes
-//     * @param entryStatusResponse new file entry status
-//     */
-//    private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
-//        if(entryStatusResponse != null){
-//            availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
-//            if(availableLocally.get() == 1 && currentEntryStatusResponse!= null
-//                    && !currentEntryStatusResponse.isAvailable()){
-//                this.currentNetworkNode =
-//                        appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
-//                connectToLocalNodeNetwork();
-//            }
-//        }
-//    }
-
-
     /**
      * Stop the download task from continuing (if not already stopped). Calling stop for a second
      * time will have no effect.
@@ -226,7 +209,7 @@ class DownloadJobItemRunner
             }
 
             updateItemStatus(newStatus)
-            networkManager.releaseWifiLock(this)
+            networkManager.releaseWifiLock(downloadWiFiLock)
         }
 
     }
@@ -240,18 +223,11 @@ class DownloadJobItemRunner
         val downloadJobId = downloadItem.djiDjUid
         appDb.downloadJobDao.update(downloadJobId, JobStatus.RUNNING)
 
-        networkManager.startMonitoringAvailability(this,
-                listOf(downloadItem.djiContainerUid))
-
         statusLiveData = appDb.connectivityStatusDao.statusLive()
         downloadJobItemLiveData = appDb.downloadJobItemDao.getLiveStatus(downloadItem.djiUid)
 
         //get the download set
         downloadSetConnectivityData = appDb.downloadJobDao.getLiveMeteredNetworkAllowed(downloadJobId)
-
-        //TODO: re-enable after basic p2p cases run
-        //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
-        //                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
         downloadSetConnectivityObserver = object : DoorObserver<Boolean> {
             override fun onChanged(t: Boolean) {
@@ -267,9 +243,6 @@ class DownloadJobItemRunner
             downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
             downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         }
-        //entryStatusObserver = this::handleContentEntryFileStatus;
-
-        //entryStatusLiveData.observeForever(entryStatusObserver);
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
         if (destinationDir == null) {
@@ -305,6 +278,7 @@ class DownloadJobItemRunner
         val currentTimeStamp = getSystemTimeInMillis()
         val minLastSeen = currentTimeStamp - (60 * 1000)
         val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
+        var downloadStartTime = 0L
 
         var numEntriesToDownload = -1
 
@@ -323,10 +297,8 @@ class DownloadJobItemRunner
         for (attemptNum in attemptsRemaining downTo 1) {
             numEntriesToDownload = -1
             numFailures.value = 0
-            //TODO: if the content is available on the node we already connected to, take that one
-            currentNetworkNode = appDb.networkNodeDao
-                    .findLocalActiveNodeByContainerUid(downloadItem.djiContainerUid,
-                            minLastSeen, BAD_PEER_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
+            currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
+                    downloadItem.djiContainerUid)
 
             val isFromCloud = currentNetworkNode == null
             val history = DownloadJobItemHistory()
@@ -352,29 +324,41 @@ class DownloadJobItemRunner
                         }
                     }
                 }
+
+                if(connectivityStatus!!.wifiSsid != null) {
+                    networkManager.lockWifi(downloadWiFiLock)
+                }
+
                 downloadEndpoint = endpointUrl
             } else {
-                if (currentNetworkNode!!.groupSsid == null || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
-
+                if (currentNetworkNode!!.groupSsid == null
+                        || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
                     if (!connectToLocalNodeNetwork()) {
                         //recording failure will push the node towards the bad threshold, after which
                         // the download will be attempted from the cloud
                         recordHistoryFinished(history, false)
-                        //continue
+                        continue
                     }
                 }
 
                 downloadEndpoint = currentNetworkNode!!.endpointUrl
             }
 
-            currentHttpClient = (if (networkManager.localHttpClient != null) networkManager.localHttpClient else defaultHttpClient())!!
-
+            val localHttpClient = networkManager.localHttpClient
+            if(localHttpClient != null) {
+                UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using local http client: $localHttpClient")
+                currentHttpClient = localHttpClient
+            }else {
+                UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
+                currentHttpClient = defaultHttpClient()
+            }
 
             history.url = downloadEndpoint
 
             UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                     " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                     " Attempts remaining= " + attemptsRemaining)
+            downloadStartTime = getSystemTimeInMillis()
 
             try {
                 appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
@@ -398,9 +382,10 @@ class DownloadJobItemRunner
                                 val destFile = FileSe(FileSe(destinationDir!!),
                                         entry.ceCefUid.toString() + ".tmp")
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
-                                UMLog.l(UMLog.VERBOSE, 100, "Downloader $procNum $downloadUrl -> $destFile")
+                                UMLog.l(UMLog.VERBOSE, 100, "${mkLogPrefix()}: Downloader $procNum $downloadUrl -> $destFile")
                                 val resumableDownload = ResumableDownload2(downloadUrl,
-                                        destFile.getAbsolutePath(), httpClient = currentHttpClient)
+                                        destFile.getAbsolutePath(), httpClient = currentHttpClient,
+                                        coroutineDispatcher = ioCoroutineDispatcher)
                                 resumableDownload.onDownloadProgress = { inProgressDownloadCounters[procNum].value = it }
                                 if (resumableDownload.download()) {
                                     entriesDownloaded.incrementAndGet()
@@ -447,12 +432,9 @@ class DownloadJobItemRunner
                 }
 
             } catch (e: Exception) {
-                UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
-                        "Failed to download a file from " + endpointUrl, e)
+                UMLog.l(UMLog.ERROR, 699,
+                        "${mkLogPrefix()} Failed to download a file from $endpointUrl", e)
             }
-
-
-            //delay(10000)
 
             val numFails = numFailures.value
             recordHistoryFinished(history, numFails == 0)
@@ -467,10 +449,16 @@ class DownloadJobItemRunner
 
         val downloadCompleted = numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload
         if (downloadCompleted) {
+            val downloadTime = getSystemTimeInMillis() - downloadStartTime
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
 
+            val bytesDownloaded = completedEntriesBytesDownloaded.value
             downloadJobItemManager.updateProgress(downloadItem.djiUid,
-                    completedEntriesBytesDownloaded.value, downloadItem.downloadLength)
+                    bytesDownloaded, downloadItem.downloadLength)
+
+            val downloadSpeed = ((bytesDownloaded.toFloat() / 1024f) / (downloadTime.toFloat() / 1000f))
+            UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed download of ${bytesDownloaded}bytes " +
+                    "in $downloadTime ms Speed = $downloadSpeed KB/s")
         }
 
         progressUpdater.cancel()
@@ -489,14 +477,13 @@ class DownloadJobItemRunner
      * @return true if file should be do downloaded from the cloud otherwise false.
      */
     private suspend fun connectToCloudNetwork(): Boolean {
-        UMLog.l(UMLog.DEBUG, 699, "Reconnecting cloud network")
+        UMLog.l(UMLog.DEBUG, 699, "${mkLogPrefix()} Reconnecting cloud network")
         networkManager.restoreWifi()
         waitForLiveData(statusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) {
             val checkStatus = connectivityStatus
             when {
                 checkStatus == null -> false
                 checkStatus.connectivityState == ConnectivityStatus.STATE_UNMETERED -> {
-                    networkManager.lockWifi(downloadWiFiLock)
                     true
                 }
                 else -> checkStatus.connectivityState == STATE_METERED && meteredConnectionAllowed.value == 1
@@ -509,6 +496,11 @@ class DownloadJobItemRunner
 
     /**
      * Start local peers connection handshake
+     *
+     * Notee: 18/Oct/2019 testing on Android 8 (Dragon 10 tablet) indicates that disconnecting from
+     * the current WiFi is not required. The intention is to call the methods as they would be called
+     * by the WiFi settings activity. The WiFi settings activity does not call disconnect before
+     * calling it's own enableNetwork method.
      *
      * @return true if successful, false otherwise
      */
@@ -539,9 +531,7 @@ class DownloadJobItemRunner
                     val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
                             + lWifiDirectGroup.port + "/")
                     currentNetworkNode!!.endpointUrl = acquiredEndPoint
-                    appDb.networkNodeDao.updateNetworkNodeGroupSsid(currentNetworkNode!!.nodeId,
-                            lWifiDirectGroup.ssid, acquiredEndPoint)
-
+                    currentNetworkNode!!.groupSsid = lWifiDirectGroup.ssid
                     UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                             "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
                     channel.offer(true)
@@ -566,31 +556,23 @@ class DownloadJobItemRunner
             return@withContext false
         }
 
-        //disconnect first
-        if (connectivityStatus!!.connectivityState != STATE_DISCONNECTED && connectivityStatus!!.wifiSsid != null) {
-            launch(mainCoroutineDispatcher) {
-                waitForLiveData(statusLiveData!!, 10 * 1000.toLong()) {
-                    it != null && it.connectivityState != ConnectivityStatus.STATE_UNMETERED
-                }
-                UMLog.l(UMLog.INFO, 699, "Disconnected existing wifi network")
-            }
-        }
-
-        UMLog.l(UMLog.INFO, 699, "Connection initiated to " + wiFiDirectGroupBle.value!!.ssid)
+        UMLog.l(UMLog.INFO, 699, "${mkLogPrefix()}: Initiating connection to " + wiFiDirectGroupBle.value!!.ssid)
 
         networkManager.connectToWiFi(wiFiDirectGroupBle.value!!.ssid,
                 wiFiDirectGroupBle.value!!.passphrase)
 
-
-        launch(mainCoroutineDispatcher) {
-            waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong()) {
+        withContext(mainCoroutineDispatcher) {
+            waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout).toLong()) {
                 statusRef.value = it
                 it != null && isExpectedWifiDirectGroup(it)
             }
         }
 
+
         waitingForLocalConnection.value = false
         val currentStatus = statusRef.value
+        UMLog.l(UMLog.INFO, 699, "${mkLogPrefix()}: done asking for local connection. " +
+                "Status = $currentStatus")
         return@withContext currentStatus != null && isExpectedWifiDirectGroup(currentStatus)
     }
 
