@@ -195,11 +195,34 @@ abstract class DownloadJobItemDao {
     abstract fun findByParentContentEntryUuids(
             parentContentEntryUids: List<Long>): List<DownloadJobItemToBeCreated2>
 
+    @Query("""SELECT DownloadJobItem.* FROM DownloadJobItem 
+        LEFT JOIN DownloadJobItemParentChildJoin ON DownloadJobItemParentChildJoin.djiChildDjiUid = DownloadJobItem.djiUid
+        WHERE DownloadJobItemParentChildJoin.djiParentDjiUid IN (:parentDownloadJobUids)
+         """)
+    abstract fun findByParentDownloadJobUids(parentDownloadJobUids: List<Int>): List<DownloadJobItem>
+
+    /**
+     * Runs a given function block for each level of child download job items
+     */
+    fun forAllChildDownloadJobItemsRecursive(parentDownloadJobUid: Int, block: (batch: List<DownloadJobItem>) -> Unit) {
+        var lastParentUids = listOf(parentDownloadJobUid)
+        do {
+            val childItems = findByParentDownloadJobUids(lastParentUids)
+            block.invoke(childItems)
+            lastParentUids = childItems.filter { it.djiContainerUid == 0L }. map { it.djiUid }
+        } while(childItems.isNotEmpty())
+    }
+
+
     @Insert
     abstract fun insertDownloadJobItemParentChildJoin(dj: DownloadJobItemParentChildJoin)
 
     @Transaction
     open fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
+        forAllChildDownloadJobItemsRecursive(0) {childItems ->
+            childItems[0].djiContentEntryUid
+        }
+
         for (status in statusList) {
             updateStatus(status.jobItemUid, status.status)
         }
