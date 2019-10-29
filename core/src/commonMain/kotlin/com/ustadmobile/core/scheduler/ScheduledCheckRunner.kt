@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.FeedEntryDao
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.ClassDetailView
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.core.view.ClassLogDetailView.Companion.ARG_MOST_RECENT_BY_CLAZZ_UID
 import com.ustadmobile.core.view.ClazzListView
@@ -273,7 +273,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                     timeBit = ", $startTime - $endTime"
                 }
 
-                val feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                val feedLinkViewClass = ClazzDetailView.VIEW_NAME + "?" +
                         ClazzListView.ARG_CLAZZ_UID + "=" +
                         currentClazzLog.clazzLogClazzUid
                 val feedLinkDesc = ("No attendance recorded for class " + clazzName + " (" +
@@ -408,7 +408,7 @@ class ScheduledCheckRunner(private val scheduledCheck: ScheduledCheck?,
                         val newFeedEntries = ArrayList<FeedEntry>()
                         val updateFeedEntries = ArrayList<FeedEntry>()
 
-                        val feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                        val feedLinkViewClass = ClazzDetailView.VIEW_NAME + "?" +
                                 ClazzListView.ARG_CLAZZ_UID + "=" +
                                 currentClazzLog.clazzLogClazzUid
 

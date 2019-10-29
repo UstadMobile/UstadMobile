@@ -4,7 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClassDetailView
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.core.view.ClazzEditView
 import com.ustadmobile.core.view.ClazzListView
@@ -180,7 +180,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         val clazzUid = clazz.clazzUid
         args.put(ClazzListView.ARG_CLAZZ_UID, clazzUid.toString())
 
-        impl.go(ClassDetailView.VIEW_NAME, args, view.viewContext)
+        impl.go(ClazzDetailView.VIEW_NAME, args, view.viewContext)
     }
 
     /**

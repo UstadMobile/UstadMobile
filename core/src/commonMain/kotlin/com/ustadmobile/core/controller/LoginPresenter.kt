@@ -20,7 +20,8 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView, val impl: UstadMobileSystemImpl)
+class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+                     val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null

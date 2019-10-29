@@ -35,4 +35,9 @@ class PersonGroupMember() {
 
     @LastChangedBy
     var groupMemberLastChangedBy: Int = 0
+
+    constructor(personUid:Long, groupUid:Long) : this(){
+        this.groupMemberPersonUid = personUid
+        this.groupMemberGroupUid = groupUid
+    }
 }

@@ -91,7 +91,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         pullToRefresh!!.setOnRefreshListener{
             try {
                 Thread.sleep(300)
-                (Objects.requireNonNull(activity) as BasePointActivity2).forceSync()
+                (Objects.requireNonNull(activity) as BasePointActivity).forceSync()
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }

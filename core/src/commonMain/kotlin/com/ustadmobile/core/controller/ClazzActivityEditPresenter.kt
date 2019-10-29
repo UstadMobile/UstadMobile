@@ -111,24 +111,25 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
     private fun fillClazzActivity() {
         //Find Activity first by activity id. If it is not valid, find by clazz uid and log date.
 
-        //If activity uid given , find the ClazzActivity:
-        if (currentClazzActivityUid != 0L) {
-            GlobalScope.launch {
-                val result = clazzActivityDao.findByUidAsync(currentClazzActivityUid)
-                currentClazzUid = result!!.clazzActivityClazzUid
-                currentLogDate = result.clazzActivityLogDate
+        var result : ClazzActivity? = null
 
-                //Check if ClazzActivity exists. If it doesn't, create it (It ought to exist)
-                checkActivityCreateIfNotExist(result)
-            }
-        }else {
-            GlobalScope.launch {
-                val result = clazzActivityDao.findByClazzAndDateAsync(currentClazzUid,
-                        currentLogDate )
-                //Check if activity given exists or not - create if it doesn't.
-                checkActivityCreateIfNotExist(result)
-            }
-        }//Else find by Clazz uid and Log date given:
+        GlobalScope.launch {
+            //If activity uid given , find the ClazzActivity:
+            if (currentClazzActivityUid != 0L) {
+
+                result = clazzActivityDao.findByUidAsync(currentClazzActivityUid)
+                if (result != null) {
+                    currentClazzUid = result!!.clazzActivityClazzUid
+                    currentLogDate = result!!.clazzActivityLogDate
+                }
+            } else {
+                result = clazzActivityDao.findByClazzAndDateAsync(currentClazzUid,
+                        currentLogDate)
+            }//Else find by Clazz uid and Log date given:
+
+            //Check if ClazzActivity exists. If it doesn't, create it
+            checkActivityCreateIfNotExist(result)
+        }
     }
 
     /**

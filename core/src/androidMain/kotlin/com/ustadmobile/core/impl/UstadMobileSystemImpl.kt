@@ -116,9 +116,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
 
-            //IRC:
-            BasePointView2.VIEW_NAME to Class.forName("${ PACKAGE_NAME}BasePointActivity2"),
-            ClassDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzDetailActivity"),
+            BasePointView.VIEW_NAME to Class.forName("${ PACKAGE_NAME}BasePointActivity"),
+            ClazzDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzDetailActivity"),
             ClassLogDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzLogDetailActivity"),
             PersonDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonDetailActivity"),
             PersonEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonEditActivity"),

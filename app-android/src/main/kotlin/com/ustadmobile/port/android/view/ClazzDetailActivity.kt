@@ -14,16 +14,16 @@ import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ClassDetailView
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import java.util.*
 
 /**
  * The ClassDetail activity.
  *
- * This Activity extends UstadBaseActivity and implements ClassDetailView
+ * This Activity extends UstadBaseActivity and implements ClazzDetailView
  */
-class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTabSelectedListener {
+class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTabSelectedListener {
 
     private lateinit var mPager: ViewPager
     private lateinit var mPagerAdapter: ClassDetailViewPagerAdapter
@@ -111,8 +111,6 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
     public override fun onResume() {
         super.onResume()
 
-        //Update title
-        mPresenter!!.updateToolbarTitle()
     }
 
     /**
@@ -203,7 +201,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClassDetailView, TabLayout.OnTa
     }
 
     /**
-     * ClassDetailView's view pager adapter
+     * ClazzDetailView's view pager adapter
      */
     private inner class ClassDetailViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int {

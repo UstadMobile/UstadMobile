@@ -37,6 +37,7 @@ open class Person() {
 
     var admin: Boolean = false
 
+    var personNotes: String? = null
 
     var fatherName: String? = null
 
@@ -64,6 +65,17 @@ open class Person() {
         this.username = username
         this.firstNames = firstNames
         this.lastName = lastName
+    }
+
+    constructor(username: String, firstNames: String, lastName: String, active:Boolean = false,
+                notes:String = "", address:String = "", phone:String = "") : this() {
+        this.username = username
+        this.firstNames = firstNames
+        this.lastName = lastName
+        this.active = active
+        this.personNotes = notes
+        this.personAddress = address
+        this.phoneNum = phone
     }
 
     companion object {

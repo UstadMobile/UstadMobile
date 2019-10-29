@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClassDetailView
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEditView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonListSearchView
@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
  * want to see.
  * This is usually called first when we click on a Class from a list of Classes to get into it.
  */
-class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: ClassDetailView,
+class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: ClazzDetailView,
                            val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
-    : UstadBaseController<ClassDetailView>(context, arguments!!, view) {
+    : UstadBaseController<ClazzDetailView>(context, arguments!!, view) {
 
     //Any arguments stored as variables here
     private var currentClazzUid: Long = -1
@@ -49,10 +49,7 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        //Update toolbar title
-        updateToolbarTitle()
-
-        //Permission check
+        //Update view and Permission check
         checkPermissions()
 
     }
@@ -61,7 +58,10 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
         GlobalScope.launch {
             val result = clazzDao.findByUidAsync(currentClazzUid)
+            view.setToolbarTitle(result!!.clazzName!!)
+
             currentClazz = result
+
             val result2 = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
                     Role.PERMISSION_CLAZZ_UPDATE)
             view.setSettingsVisibility(result2!!)
@@ -79,18 +79,8 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
         }
 
-
     }
 
-    /**
-     * Updates the title of the Clazz after finding it from the database.
-     */
-    fun updateToolbarTitle() {
-        GlobalScope.launch {
-            val result = clazzDao.findByUidAsync(currentClazzUid)
-            view.setToolbarTitle(result!!.clazzName!!)
-        }
-    }
 
     /**
      * Handles what happens when Class Edit is clicked. This takes the class to the edit page.

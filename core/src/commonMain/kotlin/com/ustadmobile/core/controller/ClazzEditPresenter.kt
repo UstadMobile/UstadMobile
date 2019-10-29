@@ -133,7 +133,6 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
-
         if (arguments.containsKey(ARG_CLAZZ_UID)) {
             currentClazzUid = arguments.get(ARG_CLAZZ_UID)!!.toLong()
             initFromClazz(currentClazzUid)
@@ -277,6 +276,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         view.setLocationPresets(locationPreset, selectedPosition)
     }
 
+    /**
+     * EVent method for when Features are updated.
+     */
     fun updateFeatures(clazz: Clazz) {
         mUpdatedClazz!!.isAttendanceFeature = clazz.isAttendanceFeature
         mUpdatedClazz!!.isActivityFeature = clazz.isActivityFeature
@@ -406,6 +408,8 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                 result.title = mUpdatedClazz!!.clazzName!! + "'s default location"
                 result.locationActive = (true)
                 repository.locationDao.update(result)
+
+                //TODO: Set Temp location to false
             }
         }
 
