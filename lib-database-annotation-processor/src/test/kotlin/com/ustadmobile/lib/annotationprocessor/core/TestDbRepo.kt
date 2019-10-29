@@ -102,7 +102,7 @@ class TestDbRepo {
         val dbSyncDao = ExampleDatabase2SyncDao_JdbcKt(db)
 
         val clientNodeId = 5
-        val repo = ExampleSyncableDao_Repo(db.exampleSyncableDao(), httpClient, clientNodeId,
+        val repo = ExampleSyncableDao_Repo(db, db.exampleSyncableDao(), httpClient, clientNodeId,
                 mockServer.url("/").toString(), "ExampleDatabase2", dbSyncDao)
         val repoResult = repo.findAll()
 

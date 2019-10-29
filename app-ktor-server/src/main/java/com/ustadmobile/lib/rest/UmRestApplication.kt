@@ -62,6 +62,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
             method(HttpMethod.Get)
             method(HttpMethod.Post)
             method(HttpMethod.Put)
+            header(HttpHeaders.ContentType)
             anyHost()
         }
     }
