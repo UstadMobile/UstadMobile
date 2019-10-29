@@ -80,8 +80,8 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         val joinList = db.downloadJobItemParentChildJoinDao
                 .findParentChildJoinsByDownloadJobUids(downloadJobUid)
         for (join in joinList) {
-            val parentStatus = jobItemUidToStatusMap[join.djiParentDjiUid.toInt()]
-            val childStatus = jobItemUidToStatusMap[join.djiChildDjiUid.toInt()]
+            val parentStatus = jobItemUidToStatusMap[join.djiParentDjiUid]
+            val childStatus = jobItemUidToStatusMap[join.djiChildDjiUid]
 
             if (parentStatus == null || childStatus == null) {
                 throw IllegalStateException("Invalid parent/child join")

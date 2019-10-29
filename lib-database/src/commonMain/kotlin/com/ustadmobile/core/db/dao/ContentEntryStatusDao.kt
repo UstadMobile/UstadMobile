@@ -42,8 +42,8 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun insertOrAbort(statusList: List<ContentEntryStatus>)
 
     @Query("DELETE FROM ContentEntryStatus WHERE cesUid = :cesUid")
-    @JsName("deleteByFileUids")
-    abstract fun deleteByFileUids(cesUid: Long)
+    @JsName("deleteByContentEntryUid")
+    abstract fun deleteByContentEntryUid(cesUid: Long)
 
     @Transaction
     open fun updateDownloadStatusByList(statusList: List<DownloadJobItemStatus>) {

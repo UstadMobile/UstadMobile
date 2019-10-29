@@ -19,4 +19,7 @@ abstract class DownloadJobItemParentChildJoinDao {
     @Insert
     abstract fun insertList(joins: List<DownloadJobItemParentChildJoin>)
 
+    @Insert
+    abstract fun insert(jobRunItem: DownloadJobItemParentChildJoin): Long
+
 }

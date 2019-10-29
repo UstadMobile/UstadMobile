@@ -27,7 +27,7 @@ class DeleteJobTaskRunnerAndroid internal constructor(context: Any?, args: Map<S
         val requestData = Data.Builder()
         if (args != null && args[ARG_DOWNLOAD_JOB_UID] != null) {
             requestData.putLong(ARG_DOWNLOAD_JOB_UID,
-                    java.lang.Long.parseLong(Objects.requireNonNull<String>(args[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID])))
+                    java.lang.Long.parseLong(Objects.requireNonNull<String>(args[ARG_DOWNLOAD_JOB_UID])))
 
         }
         val request = OneTimeWorkRequest.Builder(DeleteJobTaskWorker::class.java)
@@ -46,7 +46,7 @@ class DeleteJobTaskRunnerAndroid internal constructor(context: Any?, args: Map<S
         private val downloadSetUid: Long
 
         init {
-            downloadSetUid = workerParams.inputData.getLong(DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID, 0L)
+            downloadSetUid = workerParams.inputData.getLong(ARG_DOWNLOAD_JOB_UID, 0L)
         }
 
         override fun doWork(): ListenableWorker.Result {
@@ -69,7 +69,7 @@ class DeleteJobTaskRunnerAndroid internal constructor(context: Any?, args: Map<S
                 return Result.success();
 
             umAppDatabase.getContentEntryStatusDao()
-                    .deleteByFileUids(downloadSet.getDsRootContentEntryUid());
+                    .deleteByContentEntryUid(downloadSet.getDsRootContentEntryUid());
 
             for(String destinationPath: destinationFiles){
                 File destinationFile = new File(destinationPath);

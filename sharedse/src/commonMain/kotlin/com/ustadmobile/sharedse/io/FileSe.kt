@@ -16,6 +16,8 @@ expect open class FileSe {
 
     fun getAbsolutePath(): String
 
+    fun delete(): Boolean
+
 }
 
 
