@@ -24,7 +24,9 @@ import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 
 
-class CatalogListFragment : UstadBaseFragment, SelectSaleProductView {
+class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView {
+
+
     override val viewContext: Any
         get() = context!!
 
@@ -40,6 +42,16 @@ class CatalogListFragment : UstadBaseFragment, SelectSaleProductView {
 
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+    }
+
+
+    override fun onBackPressed(): Boolean {
+        if(floatingActionMenu!!.isOpened()){
+            floatingActionMenu!!.close(true)
+            return false
+        }else{
+            return true
+        }
     }
 
 
@@ -97,8 +109,12 @@ class CatalogListFragment : UstadBaseFragment, SelectSaleProductView {
 
         collectionMore!!.setOnClickListener { v -> mPresenter!!.handleClickCollectionMore() }
 
+
+
         return rootContainer
     }
+
+
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -147,6 +163,9 @@ class CatalogListFragment : UstadBaseFragment, SelectSaleProductView {
     fun searchCatalog(searchValue: String) {
 
     }
+
+
+
 
     override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,

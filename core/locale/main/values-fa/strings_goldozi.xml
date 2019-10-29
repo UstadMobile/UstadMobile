@@ -5,7 +5,7 @@
     <string name="sales">فروشات</string>
     <string name="all_sales">تمام فروشات</string>
     <string name="pre_orders">فرمایشات قبلی</string>
-    <string name="payments_due">پولهای باقی</string>
+    <string name="payments_due">پولهای قابل پرداخت</string>
     <string name="sort_by">ترتیب</string>
     <string name="sort_by_recent">جدید</string>
     <string name="sort_by_amount">مقدار</string>

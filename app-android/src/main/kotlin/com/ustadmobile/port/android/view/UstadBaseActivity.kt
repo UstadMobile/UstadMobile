@@ -268,7 +268,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
     override fun onResume() {
         super.onResume()
 
-        checkTimeout()
+            checkTimeout()
 
         if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
             Handler().postDelayed({ this.recreate() }, 200)

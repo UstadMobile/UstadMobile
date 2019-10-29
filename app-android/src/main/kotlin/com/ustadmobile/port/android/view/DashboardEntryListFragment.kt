@@ -30,7 +30,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
+class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardEntryListView {
 
 
     override val viewContext: Any
@@ -48,6 +48,15 @@ class DashboardEntryListFragment : UstadBaseFragment, DashboardEntryListView {
     private lateinit var topLEs: FloatingActionButton
 
     private var recyclerAdapter: DashboardEntryListRecyclerAdapter? = null
+
+    override fun onBackPressed(): Boolean {
+        if(floatingActionMenu.isOpened()){
+            floatingActionMenu.close(true)
+            return false
+        }else{
+            return true
+        }
+    }
 
     @Nullable
     override fun onCreateView(inflater: LayoutInflater,

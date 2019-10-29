@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
+import com.google.android.material.appbar.AppBarLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -18,8 +20,17 @@ import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
 import org.acra.util.ToastSender
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 class LoginActivity : UstadBaseActivity(), LoginView {
+    override fun showToolbar(show: Boolean) {
+        val appBar = findViewById<AppBarLayout>(R.id.appbar)
+        if(show){
+            appBar.visibility = View.VISIBLE
+        }else{
+            appBar.visibility = View.GONE
+        }
+    }
 
     private var mPresenter: LoginPresenter? = null
 
@@ -43,6 +54,9 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        checkLogout = false
+
         setContentView(R.layout.activity_login)
 
         setUMToolbar(R.id.um_toolbar)
@@ -127,6 +141,21 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun updateLastActive() {
+        val systemTime = AtomicLong(System.currentTimeMillis())
+        updateLastActive(systemTime)
+    }
+
+    override fun updateUsername(username: String) {
+        if(mUsernameTextView != null) {
+            mUsernameTextView!!.setText(username)
+            mUsernameTextView!!.setFocusable(false)
+            mPasswordTextView!!.setFocusable(true)
+
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        }
+    }
+
     override fun setRegistrationLinkVisible(visible: Boolean) {
         val visibility = if(visible) View.VISIBLE else View.GONE
         registerMessage.visibility = visibility
@@ -138,13 +167,13 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(100, TimeUnit.MILLISECONDS,
                 ExistingWorkPolicy.APPEND)
         ToastSender.sendToast(applicationContext, "Sync started", 42)
-        WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
-                this, Observer{ workInfos ->
-            for (wi in workInfos) {
-                if (wi.getState().isFinished()) {
-                    ToastSender.sendToast(applicationContext, "Sync finished", 42)
-                }
-            }
-        })
+//        WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
+//                this, Observer{ workInfos ->
+//            for (wi in workInfos) {
+//                if (wi.getState().isFinished()) {
+//                    //ToastSender.sendToast(applicationContext, "Sync finished", 42)
+//                }
+//            }
+//        })
     }
 }

@@ -153,6 +153,8 @@ class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterf
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        checkLogout = false
+
         setTheme(R.style.ThemeOnboarding)
 
         setContentView(R.layout.activity_splash_screen)

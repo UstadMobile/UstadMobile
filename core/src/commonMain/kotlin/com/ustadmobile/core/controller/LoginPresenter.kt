@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -19,8 +20,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
+import kotlin.math.log
 
-class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView, val impl: UstadMobileSystemImpl)
+class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+                     val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null
@@ -46,18 +49,39 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
             view.setMessage(arguments.get(ARG_MESSAGE)!!)
         }
 
-        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER, "false", context)!!.toBoolean()
+        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER,
+                "false", context)!!.toBoolean()
+
+//        val loginRequired = impl.getAppPref(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
+//                "false", context)!!.toBoolean()
+        view.showToolbar(false)
 
         view.setRegistrationLinkVisible(showRegisterLink)
 
         val version = impl.getVersion(context)
         view.updateVersionOnLogin(version)
+
+        var username:String ?= null
+        if (arguments.containsKey(Login2View.ARG_LOGIN_USERNAME))
+        {
+            username = arguments.get(Login2View.ARG_LOGIN_USERNAME).toString()
+        }
+        else
+        {
+            val impl = UstadMobileSystemImpl.instance
+            username = impl.getAppPref(UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME, context)
+        }
+        if (username != null && !username.isEmpty())
+        {
+            view.updateUsername(username)
+        }
     }
 
     @JsName("handleClickLogin")
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
         view.setErrorMessage("")
+        val usernameTrim = username.trim()
         GlobalScope.launch {
             try {
                 val loginResponse = defaultHttpClient().get<HttpResponse>() {
@@ -65,7 +89,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                         takeFrom(serverUrl)
                         encodedPath = "${encodedPath}Login/login"
                     }
-                    parameter("username", username)
+                    parameter("username", usernameTrim)
                     parameter("password", password)
                 }
 
@@ -74,6 +98,12 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     account.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(account, context)
+                    view.runOnUiThread(Runnable {
+                        view.forceSync()
+                        view.updateLastActive()
+                        view.setFinishAfficinityOnView()
+                    })
+
                     impl.go(mNextDest, context)
                 }else {
                     view.runOnUiThread(Runnable {

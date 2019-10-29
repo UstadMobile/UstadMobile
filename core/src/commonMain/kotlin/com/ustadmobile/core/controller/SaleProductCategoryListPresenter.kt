@@ -182,7 +182,7 @@ class SaleProductCategoryListPresenter(context: Any,
                 args.put(ARG_PRODUCER_UID, producerUid.toString())
                 args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
                 impl.go(SaleItemDetailView.VIEW_NAME, args, context)
-
+                view.finish()
             } else {
                 //Go to product detail.
                 args.put(ARG_SALE_PRODUCT_UID, productUid.toString())

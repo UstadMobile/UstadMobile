@@ -359,7 +359,14 @@ class SaleDetailPresenter(context: Any,
         if (updatedSale != null) {
             updatedSale!!.saleActive = true
             if (updatedSale!!.saleLocationUid == 0L) {
-                updatedSale!!.saleLocationUid = positionToLocationUid!!.get(0)!!
+                if(positionToLocationUid != null && positionToLocationUid!!.size > 0) {
+
+                    if (positionToLocationUid!!.get(0) != null) {
+                        updatedSale!!.saleLocationUid = positionToLocationUid!!.get(0)!!
+                    } else {
+                        updatedSale!!.saleLocationUid = 0
+                    }
+                }
             }
 
             //Persist voice note

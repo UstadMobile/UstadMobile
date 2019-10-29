@@ -134,6 +134,7 @@ class SelectSaleProductPresenter(context: Any,
                 args.put(ARG_SALE_ITEM_PRODUCT_UID, productUid.toString())
                 args.put(ARG_PRODUCER_UID, producerUid.toString())
                 args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
+                args.put(ARG_SELECT_PRODUCT, "true")
                 impl.go(SaleItemDetailView.VIEW_NAME, args, context)
             }
             view.finish()

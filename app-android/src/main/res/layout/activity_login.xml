@@ -143,7 +143,8 @@
         android:textColor="@color/text_primary"
         app:layout_constraintStart_toStartOf="@id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints"
+        tools:visibility="invisible" />
 
     <TextView
         android:id="@+id/activity_register_now"
@@ -159,7 +160,7 @@
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/activity_register_label"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"
-        tools:layout_editor_absoluteX="231dp" />
+        tools:visibility="invisible" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

@@ -203,7 +203,7 @@ class ContentEntryListFragment : UstadBaseFragment, ContentEntryListFragmentView
     }
 
     override fun showError() {
-        Toast.makeText(context, R.string.content_entry_not_found, Toast.LENGTH_SHORT).show()
+        //Toast.makeText(context, R.string.content_entry_not_found, Toast.LENGTH_SHORT).show()
     }
 
 

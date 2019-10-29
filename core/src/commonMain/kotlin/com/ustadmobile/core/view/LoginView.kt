@@ -30,6 +30,12 @@ interface LoginView : UstadView {
 
     fun updateVersionOnLogin(version: String)
 
+    fun showToolbar(show: Boolean)
+
+    fun updateLastActive()
+
+    fun updateUsername(username: String)
+
     companion object {
 
         const val VIEW_NAME = "Login"

@@ -128,6 +128,19 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         bottomNavigation.setUseElevation(true, 16F)
     }
 
+    override fun onBackPressed() {
+        val position = mPager!!.currentItem
+        val fragment = navToFragment[position]
+        if(fragment is IOnBackPressed){
+            val toBack = (fragment as IOnBackPressed).onBackPressed()
+            if(toBack){
+                super.onBackPressed()
+            }
+        }else{
+            super.onBackPressed()
+        }
+    }
+
     override fun setupNavigationWithAdmin(items: List<NavigationItem>, isAdmin: Boolean) {
 
         bottomNavigation.removeAllItems()
