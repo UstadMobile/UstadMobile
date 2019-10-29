@@ -2,7 +2,6 @@ import { UmAngularUtil } from './../../util/UmAngularUtil';
 import {Component, NgZone, OnDestroy} from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import core from 'UstadMobile-core';
-import db from 'UstadMobile-lib-database';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -100,14 +99,16 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
   private loadPaggedList(){
     const context = this
     const startIndex = (this.pageIndex - 1) * this.maxItemsPerPage
-      const endIndex = startIndex + this.maxItemsPerPage
-      this.provider.load(startIndex, endIndex, function (error, entries) {
-        if(!error){
-          context.zone.run( ()=>{
-            context.entryList = context.entryList.concat(UmAngularUtil.kotlinListToJsArray(entries))
-          })
-        }
-      })
+    const endIndex = startIndex + this.maxItemsPerPage
+    this.provider.load(startIndex, endIndex, function (error, entries) {
+      if(!error){
+        context.zone.run( ()=>{
+          context.entryList = context.entryList.concat(UmAngularUtil.kotlinListToJsArray(entries))
+        })
+      }else{
+        console.error(error)
+      }
+    })
     
   }
 

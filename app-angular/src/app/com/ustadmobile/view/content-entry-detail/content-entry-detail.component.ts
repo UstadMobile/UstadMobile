@@ -41,7 +41,7 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
     onCreate() {
       super.onCreate()
       this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
-        UmAngularUtil.getArgumentsFromQueryParams(), this,false, this, this, this.umService.getDbInstance());
+        UmAngularUtil.getArgumentsFromQueryParams(), this,false, this, this.umService.getDbInstance(), this);
       this.presenter.onCreate(null);
     }
 
