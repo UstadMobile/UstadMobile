@@ -219,10 +219,6 @@ abstract class DownloadJobItemDao {
 
     @Transaction
     open fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
-        forAllChildDownloadJobItemsRecursive(0) {childItems ->
-            childItems[0].djiContentEntryUid
-        }
-
         for (status in statusList) {
             updateStatus(status.jobItemUid, status.status)
         }
