@@ -38,11 +38,12 @@ fun Application.ExampleDatabase2App(devMode: Boolean = true) {
     }
 
     if(devMode) {
-        HttpHeaders.AccessControlRequestMethod
+        System.err.println("WARNING: Server dev mode enabled. Clear tables allowed over http! CORS enabled")
         install(CORS) {
             method(HttpMethod.Get)
             method(HttpMethod.Post)
             method(HttpMethod.Put)
+            header(HttpHeaders.ContentType)
             anyHost()
         }
 

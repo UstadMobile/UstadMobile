@@ -20,6 +20,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.response.respond
 import io.ktor.routing.Routing
@@ -64,6 +65,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
             method(HttpMethod.Post)
             method(HttpMethod.Put)
             method(HttpMethod.Options)
+            header(HttpHeaders.ContentType)
             anyHost()
         }
     }
