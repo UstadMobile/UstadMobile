@@ -147,6 +147,36 @@ fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment, excludeDbS
 fun syncableEntityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment) =
         entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}
 
+/**
+ * Get a list of all entity result types (e.g. entity types that are returned by query functions)
+ * on a DAO where the entity type (or any of it's embedded types) has a given annotation.
+ *
+ * @param daoClass the DAO class to search on
+ * @param annotationClass the annotation to look for on an entity (or it's embedded fields)
+ * @param processingEnv annotation processing environment
+ *
+ * @return a list of all entities that have the given annotation
+ */
+fun queryResultTypesWithAnnotationOnDao(daoClass: ClassName, annotationClass: Class<out Annotation>,
+                                processingEnv: ProcessingEnvironment): List<ClassName> {
+    val daoType = processingEnv.elementUtils.getTypeElement(daoClass.canonicalName)
+    val entitiesWithAnnotationOnDao = mutableSetOf<ClassName>()
+    daoType.enclosedElements.filter { it.getAnnotation(Query::class.java) != null}.forEach {methodEl ->
+        //TODO: Add rest accessible methods
+        val querySql = methodEl.getAnnotation(Query::class.java).value.toLowerCase(Locale.ROOT).trim()
+        if(!(querySql.startsWith("update") || querySql.startsWith("delete"))) {
+            val methodResolved = processingEnv.typeUtils
+                    .asMemberOf(daoType.asType() as DeclaredType, methodEl) as ExecutableType
+            val returnType = resolveReturnTypeIfSuspended(methodResolved)
+            val entityType = resolveEntityFromResultType(resolveQueryResultType(returnType))
+            entitiesWithAnnotationOnDao.addAll(findEntitiesWithAnnotation(entityType as ClassName,
+                    annotationClass, processingEnv).values)
+        }
+    }
+
+    return entitiesWithAnnotationOnDao.toList()
+}
+
 fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
     val daoType = processingEnv.elementUtils.getTypeElement(daoClass.canonicalName)
     val syncableEntitiesOnDao = mutableSetOf<ClassName>()
@@ -1251,6 +1281,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
                 "X-reqid")
 
+        //TODO: If entity has attachments, handle that here
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
                 afterInsertCode = {
                     CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
