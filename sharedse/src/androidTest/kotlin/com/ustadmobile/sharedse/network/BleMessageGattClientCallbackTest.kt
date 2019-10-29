@@ -119,4 +119,16 @@ class BleMessageGattClientCallbackTest {
             verify<BluetoothGatt>(mockedGattClient, times(i + 1)).writeCharacteristic(mockedCharacteristic)
         }
     }
+
+    @Test
+    fun givenOnCharacteristicsWrite_whenPermissionToWriteIsDenied_thenShouldRetryAndDisconnect(){
+        val packets = messageToSend!!.getPackets(DEFAULT_MTU_SIZE)
+
+        for (i in packets.indices) {
+            gattClientCallback!!.onCharacteristicWrite(mockedGattClient!!, mockedCharacteristic!!,
+                    BluetoothGatt.GATT_FAILURE)
+        }
+        //Verify that after many trials, device disconnected from the service
+        verify<BluetoothGatt>(mockedGattClient, times(1)).disconnect()
+    }
 }

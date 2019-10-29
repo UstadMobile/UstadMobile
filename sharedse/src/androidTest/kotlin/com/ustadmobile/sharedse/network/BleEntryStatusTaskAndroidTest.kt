@@ -24,7 +24,7 @@ class BleEntryStatusTaskAndroidTest {
     private var entries: List<Long>? = null
 
 
-    private var statusTask: BleEntryStatusTaskAndroid? = null
+    private lateinit var statusTask: BleEntryStatusTaskAndroid
 
 
     @Before
@@ -40,7 +40,7 @@ class BleEntryStatusTaskAndroidTest {
         val networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:11:22:33:FF:EE"
         statusTask = BleEntryStatusTaskAndroid(mockContext, manager, entries!!, networkNode)
-        statusTask!!.setBluetoothManager(mockedBluetoothManager)
+        statusTask.setBluetoothManager(mockedBluetoothManager)
 
         //whenever(mockedBluetoothManager.adapter).thenReturn(mockedBluetoothAdapter)
 
@@ -63,20 +63,20 @@ class BleEntryStatusTaskAndroidTest {
     @Test
     fun givenEntryStatusIsCreated_whenStarted_thenShouldCreateBleClientCallback() {
 
-        statusTask!!.run()
+        statusTask.sendRequest()
 
         assertNotNull("BleClientCallback should not be null ",
-                statusTask!!.gattClientCallback)
+                statusTask.gattClientCallback)
     }
 
     @Test
     fun givenEntryStatusIsCreated_whenStartedAndBleClientCallbackIsCreated_thenItShouldHaveRightMessage() {
 
-        statusTask!!.run()
+        statusTask.sendRequest()
 
-        assertNotNull("BleClientCallback should not be null ", statusTask!!.gattClientCallback)
+        assertNotNull("BleClientCallback should not be null ", statusTask.gattClientCallback)
 
-        val receivedEntries = BleMessageUtil.bleMessageBytesToLong(statusTask!!.message!!.payload!!)
+        val receivedEntries = BleMessageUtil.bleMessageBytesToLong(statusTask.message!!.payload!!)
 
         assertEquals("Should have the same message", receivedEntries, entries)
     }

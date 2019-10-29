@@ -61,6 +61,8 @@ class BleMessageGattClientCallback
     @Volatile
     private var lastActive: Long
 
+    private var packetTransferReTryCount = 3
+
     private val mTimeoutRunnable = {
 
     }
@@ -140,6 +142,7 @@ class BleMessageGattClientCallback
         }
     }
 
+
     /**
      * Start transmitting message packets to the peer device once given permission
      * to write on the characteristic
@@ -162,6 +165,17 @@ class BleMessageGattClientCallback
                         packets.size.toString() + " packet(s) transferred successfully to " +
                                 "the remote device =" + gatt.device.address)
                 //We now expect the server to send a response
+            }
+        }else{
+            do{
+                packetTransferReTryCount--
+                onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
+            }while (packetTransferReTryCount > 0)
+
+            if(packetTransferReTryCount == 0){
+                UMLog.l(UMLog.DEBUG, 698,
+                        "Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
+                cleanup(gatt)
             }
         }
     }
