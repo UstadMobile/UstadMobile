@@ -24,6 +24,7 @@
 
     <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
     <string name='loading'>Loading</string>
+    <string name='deleting'>Deleting</string>
     <string name='error_opening_file'>Error opening file: </string>
     <string name='download_in_progress'>Download in progress...</string>
     <string name='save_to'>Save to...</string>

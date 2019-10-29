@@ -76,6 +76,8 @@ object JobStatus {
 
     const val CANCELED = 28
 
+    const val DELETED = 29
+
     fun statusToString(status: Int): String {
         when (status) {
             NOT_QUEUED -> return "NOT_QUEUED"
@@ -84,6 +86,7 @@ object JobStatus {
             RUNNING -> return "RUNNING"
             COMPLETE -> return "COMPLETE"
             FAILED -> return "FAILED"
+            DELETED -> return "DELETED"
         }
 
         return "" + status

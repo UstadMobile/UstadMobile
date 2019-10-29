@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -29,7 +30,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
             LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
             LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
-            WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) """)
+            WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} """)
     @JsName("downloadedRootItems")
     abstract fun downloadedRootItems(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 

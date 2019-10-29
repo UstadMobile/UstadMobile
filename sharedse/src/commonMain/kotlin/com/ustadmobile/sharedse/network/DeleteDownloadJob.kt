@@ -1,19 +1,29 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.sharedse.io.FileSe
 import kotlinx.coroutines.Runnable
+
+expect fun requestDelete(contentEntryUid: Long, context: Any)
 
 fun deleteDownloadJob(db: UmAppDatabase, rootContentEntryUid: Long, onprogress: (progress: Int) -> Unit) {
 
     db.runInTransaction(Runnable {
 
-        var downloadJobitem = db.downloadJobItemDao.findByContentEntryUid(rootContentEntryUid)
+        var rootDownloadJobItem = db.downloadJobItemDao.findByContentEntryUid(rootContentEntryUid)
 
-        db.downloadJobItemDao.forAllChildDownloadJobItemsRecursive(downloadJobitem!!.djiUid) { childItems ->
+        var downloadJob = db.downloadJobDao.findByUid(rootDownloadJobItem!!.djiDjUid)
+
+        if(downloadJob!!.djRootContentEntryUid == rootContentEntryUid){
+            db.downloadJobDao.changeStatus(JobStatus.DELETED, rootDownloadJobItem.djiDjUid)
+        }
+
+        db.downloadJobItemDao.forAllChildDownloadJobItemsRecursive(rootDownloadJobItem!!.djiUid) { childItems ->
             childItems.forEach {
                 db.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
                 db.contentEntryStatusDao.deleteByContentEntryUid(it.djiContentEntryUid)
+                db.downloadJobItemDao.changeStatus(JobStatus.DELETED, it.djiUid)
             }
         }
 

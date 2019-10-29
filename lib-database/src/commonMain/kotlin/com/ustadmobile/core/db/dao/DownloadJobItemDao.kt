@@ -220,10 +220,6 @@ abstract class DownloadJobItemDao {
 
     @Transaction
     open fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
-        forAllChildDownloadJobItemsRecursive(0) {childItems ->
-            childItems[0].djiContentEntryUid
-        }
-
         for (status in statusList) {
             updateStatus(status.jobItemUid, status.status)
         }
@@ -231,5 +227,11 @@ abstract class DownloadJobItemDao {
 
     @Query("SELECT * FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid")
     abstract fun findByDownloadJobUid(downloadJobUid: Int): List<DownloadJobItem>
+
+    @Delete
+    abstract fun deleteItem(it: DownloadJobItem)
+
+    @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :uid")
+    abstract fun changeStatus(status: Int, uid: Int)
 
 }
