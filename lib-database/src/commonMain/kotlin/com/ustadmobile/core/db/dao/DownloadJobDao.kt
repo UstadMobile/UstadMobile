@@ -167,7 +167,7 @@ abstract class DownloadJobDao {
     @Query("DELETE FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
     abstract fun deleteByContentEntryUid(rootContentEntryUid: Long)
 
-    @Query("UPDATE DownloadJob SET djStatus = :deleted WHERE djUid = :djiDjUid")
-    abstract fun changeStatus(deleted: Int, djiDjUid: Int)
+    @Query("UPDATE DownloadJob SET djStatus = :status WHERE djUid = :djiDjUid")
+    abstract fun changeStatus(status: Int, djiDjUid: Int)
 
 }
