@@ -30,6 +30,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import kotlinx.coroutines.Runnable
+
 //here in a comment because it sometimes gets removed by 'optimization of parameters'
 // import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
@@ -447,6 +449,8 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
 
     val syncableEntitiesList = findSyncableEntities(resultComponentType, processingEnv)
 
+    codeBlock.beginControlFlow("_db.runInTransaction(%T ", Runnable::class)
+    val runAfterCodeBlock = CodeBlock.builder()
     syncableEntitiesList.forEach {
         val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
 
@@ -476,9 +480,10 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
                 .endControlFlow()
         }
 
-        codeBlock.add(afterInsertCode(it.value))
+        runAfterCodeBlock.add(afterInsertCode(it.value))
     }
-
+    codeBlock.endControlFlow().add(")\n")
+    codeBlock.add(runAfterCodeBlock.build())
     return codeBlock.build()
 }
 

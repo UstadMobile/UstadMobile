@@ -10,6 +10,7 @@ import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
 import org.junit.After
+import org.junit.Assert
 import org.junit.Test
 
 
@@ -60,6 +61,7 @@ class BaseReportPresenterTest : AbstractSetup() {
         presenter.onCreate(mapOf())
 
         //TODO: First test here
+        Assert.assertTrue(true)
 
     }
 

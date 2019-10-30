@@ -10,6 +10,7 @@ import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
 import org.junit.After
+import org.junit.Assert
 import org.junit.Test
 
 
@@ -61,6 +62,7 @@ class ClazzDetailPresenterTest : AbstractSetup() {
         presenter.onCreate(mapOf())
 
         //TODO: First test here
+        Assert.assertTrue(true)
 
     }
 
@@ -71,6 +73,7 @@ class ClazzDetailPresenterTest : AbstractSetup() {
         presenter.onCreate(mapOf())
 
         //TODO: First test here
+        Assert.assertTrue(true)
 
     }
 
@@ -81,6 +84,7 @@ class ClazzDetailPresenterTest : AbstractSetup() {
         presenter.onCreate(mapOf())
 
         //TODO: First test here
+        Assert.assertTrue(true)
 
     }
 
@@ -91,6 +95,7 @@ class ClazzDetailPresenterTest : AbstractSetup() {
         presenter.onCreate(mapOf())
 
         //TODO: First test here
+        Assert.assertTrue(true)
 
     }
 

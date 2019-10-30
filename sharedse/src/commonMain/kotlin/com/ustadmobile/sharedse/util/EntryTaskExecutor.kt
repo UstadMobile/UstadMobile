@@ -39,7 +39,7 @@ class EntryTaskExecutor(numProcessors: Int = 1, private val scope: CoroutineScop
 
     private suspend fun start(taskChannel: ReceiveChannel<BleEntryStatusTask>){
         for(task in taskChannel){
-            task.run()
+            task.sendRequest()
             runningOrCompletedTasks[runningOrCompletedTasks.indexOf(task)].status = STATUS_RUNNING
         }
     }

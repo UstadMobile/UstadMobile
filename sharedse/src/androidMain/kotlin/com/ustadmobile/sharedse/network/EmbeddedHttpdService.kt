@@ -8,17 +8,15 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import java.io.IOException
 
-
-
 class EmbeddedHttpdService : Service() {
 
-    private var httpd: EmbeddedHTTPD? = null
+    private lateinit var httpd: EmbeddedHTTPD
 
     private val mBinder = LocalServiceBinder()
 
     inner class LocalServiceBinder : Binder() {
 
-        fun getHttpd(): EmbeddedHTTPD? {
+        fun getHttpd(): EmbeddedHTTPD {
             return httpd
         }
     }
@@ -34,10 +32,10 @@ class EmbeddedHttpdService : Service() {
     override fun onCreate() {
         super.onCreate()
         httpd = EmbeddedHTTPD(0, applicationContext)
-        httpd!!.addRoute("$ANDROID_ASSETS_PATH(.)+", AndroidAssetsHandler::class.java,
+        httpd.addRoute("$ANDROID_ASSETS_PATH(.)+", AndroidAssetsHandler::class.java,
                 applicationContext)
         try {
-            httpd!!.start()
+            httpd.start()
         } catch (e: IOException) {
             UMLog.l(UMLog.CRITICAL, 0, "Could not start httpd server")
             throw RuntimeException("Could not start httpd server", e)
@@ -46,7 +44,7 @@ class EmbeddedHttpdService : Service() {
     }
 
     override fun onDestroy() {
-        httpd!!.stop()
+        httpd.stop()
         super.onDestroy()
     }
 

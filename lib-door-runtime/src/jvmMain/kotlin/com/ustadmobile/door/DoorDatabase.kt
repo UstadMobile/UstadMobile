@@ -122,6 +122,10 @@ actual abstract class DoorDatabase {
 
     actual abstract fun clearAllTables()
 
+    actual open fun runInTransaction(runnable: Runnable) {
+        runnable.run()
+    }
+
     fun addChangeListener(changeListenerRequest: ChangeListenerRequest) {
         changeListeners.add(changeListenerRequest)
     }

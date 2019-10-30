@@ -41,13 +41,13 @@
         android:id="@+id/doc_not_found"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/not_found_icon"
             android:layout_centerInParent="true"
             android:tint="@color/divider"
             android:layout_marginLeft="@dimen/dimen_10dp"
             android:layout_marginRight="@dimen/dimen_10dp"
-            android:src="@drawable/ic_insert_drive_file_black_24dp"
+            app:srcCompat="@drawable/ic_insert_drive_file_black_24dp"
             android:layout_gravity="center"
             android:layout_width="70dp"
             android:layout_height="70dp" />

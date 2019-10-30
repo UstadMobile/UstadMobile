@@ -32,7 +32,7 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
     actual override fun restoreWifi() {
     }
 
-    actual override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>, peerToCheck: NetworkNode?): BleEntryStatusTask? {
+    actual override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

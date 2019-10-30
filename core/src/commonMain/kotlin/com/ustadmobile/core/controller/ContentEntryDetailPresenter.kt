@@ -5,9 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
-import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
-import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
-import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
+import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
@@ -26,9 +24,9 @@ import kotlin.js.JsName
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
-                                  private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider?,
-                                  private val appRepo: UmAppDatabase)
+                                  private val appRepo: UmAppDatabase,
+                                  private val localAvailabilityManager: LocalAvailabilityManager?)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
         OnDownloadJobItemChangeListener {
 
@@ -38,8 +36,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         private set
 
     private var containerUid: Long? = 0L
-
-    private val monitorStatus = atomic(false)
 
     private val args = HashMap<String, String?>()
 
@@ -54,6 +50,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     private var isDownloadComplete: Boolean = false
 
     private var currentContentEntry: ContentEntry = ContentEntry()
+
+    private var availabilityMonitorRequest: AvailabilityMonitorRequest? = null
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -92,6 +90,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
 
         statusProvider?.addDownloadChangeListener(this)
+
+
     }
 
     private fun onEntryChanged(entry: ContentEntry?) {
@@ -101,9 +101,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 if (currentContentEntry != entry) {
                     currentContentEntry = entry
                     view.setContentEntryLicense(licenseType)
-                    with(entry) {
-                        view.setContentEntry(this)
-                    }
+                    view.setContentEntry(entry)
                 }
             })
         }
@@ -175,31 +173,25 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
         if (!isDownloadComplete) {
-            val currentTimeStamp = getSystemTimeInMillis()
-            val minLastSeen = currentTimeStamp - 60000
-            val maxFailureFromTimeStamp = currentTimeStamp - 300000
-
             GlobalScope.launch {
                 val container = appRepo.containerDao.getMostRecentContainerForContentEntry(entryUuid)
                 if (container != null) {
                     containerUid = container.containerUid
-                    val localNetworkNode = appRepo.networkNodeDao.findLocalActiveNodeByContainerUid(
-                            containerUid!!, minLastSeen, BAD_NODE_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
-
-                    if (localNetworkNode == null && !monitorStatus.value) {
-                        monitorStatus.value = true
-                        monitor.startMonitoringAvailability(this,
-                                listOf(containerUid!!))
+                    val containerUidList = listOf(containerUid!!)
+                    val availableNowMap = if(localAvailabilityManager != null) {
+                        localAvailabilityManager.areContentEntriesLocallyAvailable(containerUidList)
+                    }else {
+                        mapOf()
                     }
 
-                    val monitorSet: MutableSet<Long> = view.allKnowAvailabilityStatus as MutableSet<Long>
-
-                    monitorSet.add((if (localNetworkNode != null) containerUid else 0L)!!)
-
-                    handleLocalAvailabilityStatus(monitorSet)
+                    view.runOnUiThread(Runnable {
+                        handleLocalAvailabilityStatus(availableNowMap)
+                        val request = AvailabilityMonitorRequest(listOf(container.containerUid),
+                                onEntityAvailabilityChanged = this@ContentEntryDetailPresenter::handleLocalAvailabilityStatus)
+                        availabilityMonitorRequest = request
+                        localAvailabilityManager?.addMonitoringRequest(request)
+                    })
                 }
-
-
             }
         }
 
@@ -281,15 +273,16 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
 
-    fun handleLocalAvailabilityStatus(locallyAvailableEntries: Set<Long>) {
-        val icon = if (locallyAvailableEntries.contains(
-                        containerUid))
+    fun handleLocalAvailabilityStatus(entryStatuses: Map<Long, Boolean>) {
+        val localContainerUid = containerUid
+        val isAvailable = localContainerUid != null && (entryStatuses[localContainerUid] ?: false)
+        val icon = if (isAvailable)
             LOCALLY_AVAILABLE_ICON
         else
             LOCALLY_NOT_AVAILABLE_ICON
 
         val status = impl.getString(
-                if (icon == LOCALLY_AVAILABLE_ICON)
+                if (isAvailable)
                     MessageID.download_locally_availability
                 else
                     MessageID.download_cloud_availability, context)
@@ -333,9 +326,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
     override fun onDestroy() {
-        if (monitorStatus.value) {
-            monitorStatus.value = false
-            monitor.stopMonitoringAvailability(this)
+        val monitoringRequest = availabilityMonitorRequest
+        if(monitoringRequest != null) {
+            localAvailabilityManager?.removeMonitoringRequest(monitoringRequest)
+            availabilityMonitorRequest = null
         }
 
         if (isListeningToDownloadStatus.getAndSet(false)) {

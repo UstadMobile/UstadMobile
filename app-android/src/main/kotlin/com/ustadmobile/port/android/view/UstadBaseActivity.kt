@@ -2,8 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.PendingIntent
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.net.Uri
@@ -21,6 +23,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
@@ -28,20 +31,19 @@ import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
+import com.ustadmobile.core.view.UstadViewWithProgress
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.port.android.impl.UserFeedbackException
-import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
-import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import kotlinx.coroutines.Runnable
-import androidx.core.app.ActivityCompat
-import com.ustadmobile.core.view.UstadViewWithProgress
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
@@ -119,14 +121,20 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      */
     private val bleServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
-                    .service.networkManagerBle
-            bleServiceBound = true
-            if (networkManagerBle != null) {
-                instance.networkManager = networkManagerBle
+            val serviceVal = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
+                    .service
+            serviceVal.runWhenNetworkManagerReady {
+                UMLog.l(UMLog.DEBUG, 0, "BleService Connection: service = $serviceVal")
+                networkManagerBle = serviceVal.networkManagerBle
+                bleServiceBound = true
                 onBleNetworkServiceBound(networkManagerBle!!)
+                runWhenServiceConnectedQueue.setReady(true)
+
+                //TODO: this is being used for testing purposes only and should be removed
+                if (networkManagerBle != null) {
+                    instance.networkManager = networkManagerBle
+                }
             }
-            runWhenServiceConnectedQueue.setReady(true)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -433,7 +441,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param dialogMessage Permission dialog message
      */
     fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
-                                   dialogTitle: String?, dialogMessage: String?) {
+                                   dialogTitle: String, dialogMessage: String,
+                                   dialogBuilder: () -> AlertDialog = {makePermissionDialog(permissions, dialogTitle, dialogMessage) }) {
         this.afterPermissionMethodRunner = runnable
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -449,16 +458,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
         if (!permissionGranted(permissions)) {
             if (!permissionRequestRationalesShown) {
-                val builder = AlertDialog.Builder(this)
-                builder.setTitle(permissionDialogTitle)
-                        .setMessage(permissionDialogMessage)
-                        .setNegativeButton(getString(android.R.string.cancel)
-                        ) { dialog, _ -> dialog.dismiss() }
-                        .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                            runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
-                                    permissionDialogTitle, permissionDialogMessage)
-                        }
-                val dialog = builder.create()
+                val dialog = dialogBuilder.invoke()
                 dialog.show()
                 permissionRequestRationalesShown = true
             } else {
@@ -469,6 +469,20 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             afterPermissionMethodRunner!!.run()
             afterPermissionMethodRunner = null
         }
+    }
+
+    private fun makePermissionDialog(permissions: Array<String>, dialogTitle: String,
+                                     dialogMessage: String): AlertDialog {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(permissionDialogTitle)
+                .setMessage(permissionDialogMessage)
+                .setNegativeButton(getString(android.R.string.cancel)
+                ) { dialog, _ -> dialog.dismiss() }
+                .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                    runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
+                            dialogTitle, dialogMessage)
+                }
+        return builder.create()
     }
 
 

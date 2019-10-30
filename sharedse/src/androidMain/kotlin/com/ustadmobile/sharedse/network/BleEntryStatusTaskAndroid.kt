@@ -99,7 +99,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
     /**
      * Start entry status check task
      */
-    override fun run() {
+    override fun sendRequest() {
         try {
             gattClientCallback = BleMessageGattClientCallback(message!!)
             gattClientCallback!!.setOnResponseReceived(this)
@@ -141,9 +141,12 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
     }
 
     override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-        super.onResponseReceived(sourceDeviceAddress, response, error)
-        //disconnect after finishing the task
-        if (mGattClient != null)
-            mGattClient!!.disconnect()
+        try {
+            super.onResponseReceived(sourceDeviceAddress, response, error)
+        }finally {
+            //disconnect after finishing the task
+            mGattClient?.disconnect()
+        }
+
     }
 }

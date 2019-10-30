@@ -14,6 +14,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -23,6 +24,8 @@ import kotlin.reflect.KClass
 
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
+            .addProperty(PropertySpec.builder("_db", DoorDatabase::class)
+                    .initializer("_db").build())
             .addProperty(PropertySpec.builder("_dao",
                     daoType).initializer("_dao").build())
             .addProperty(PropertySpec.builder("_httpClient",
@@ -36,6 +39,7 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .superclass(daoType)
 
     val primaryConstructorFn = FunSpec.constructorBuilder()
+            .addParameter("_db", DoorDatabase::class)
             .addParameter("_dao", daoType)
             .addParameter("_httpClient", HttpClient::class)
             .addParameter("_clientId", Int::class)
@@ -230,7 +234,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) ", repoImplClassName)
+                            .add("%T(_db, _syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) ", repoImplClassName)
                             .endControlFlow().build())
                     .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
@@ -261,7 +265,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) ",
+                            .add("%T(_db, _db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) ",
                                 repoImplClassName, it.makeAccessorCodeBlock())
                             .endControlFlow()
                             .build())
