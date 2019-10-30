@@ -476,12 +476,12 @@ abstract class NetworkManagerBleCommon(
 
 
         /**
-         * Commonly used MTU for android devices
+         * Commonly used MTU size for android devices
          */
-        const val DEFAULT_MTU_SIZE = 20
+        const val MINIMUM_MTU_SIZE = 20
 
         /**
-         * Maximum MTU for the packet transfer
+         * Maximum MTU size for the packet transfer
          */
         const val MAXIMUM_MTU_SIZE = 512
 

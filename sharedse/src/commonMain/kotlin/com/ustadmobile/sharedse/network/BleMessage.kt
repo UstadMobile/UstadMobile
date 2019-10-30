@@ -13,7 +13,7 @@ import com.ustadmobile.sharedse.io.ByteBufferSe
 import com.ustadmobile.sharedse.io.GzInputStreamConstants.GZIP_MAGIC
 import com.ustadmobile.sharedse.io.GzipInputStreamSe
 import com.ustadmobile.sharedse.io.GzipOutputStreamSe
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import kotlinx.io.ByteArrayInputStream
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.ByteBuffer
@@ -324,7 +324,7 @@ class BleMessage {
     fun reset() {
         requestType = 0
         length = 0
-        mtu = DEFAULT_MTU_SIZE
+        mtu = MINIMUM_MTU_SIZE
         payload = byteArrayOf()
     }
 
