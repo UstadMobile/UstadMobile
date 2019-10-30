@@ -86,7 +86,7 @@ class DownloadJobPreparerTest {
         fun setupClass() {
             serverDb = UmAppDatabase.getInstance(Any())
             clientDb = UmAppDatabase.getInstance(Any(), "clientdb")
-            clientRepo = clientDb.asRepository("http://localhost:8087", "",
+            clientRepo = clientDb.asRepository(Any(),"http://localhost:8087", "",
                     defaultHttpClient()) as UmAppDatabase
             server = embeddedServer(Netty, 8087) {
                 umRestApplication(devMode = false, db = serverDb)
