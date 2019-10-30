@@ -80,9 +80,9 @@
                 android:layout_height="wrap_content"
                 android:background="@color/primary">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/item_basepoint_cover_img"
-                    android:src="@drawable/cover"
+                    app:srcCompat="@drawable/cover"
                     android:scaleType="fitCenter"
                     android:adjustViewBounds="true"
                     android:layout_height="96dp"

@@ -30,7 +30,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.google.android.material.appbar.AppBarLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.BasePointActivity2Presenter
+import com.ustadmobile.core.controller.BasePointPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -60,7 +60,7 @@ import kotlin.collections.HashMap
  *
  * This Activity extends UstadBaseActivity and implements BasePointView
  */
-class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
+class BasePointActivity : UstadBaseActivity(), BasePointView {
 
 
     private var mPager: ViewPager? = null
@@ -72,7 +72,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
 
     private var shareAppDialog: AlertDialog? = null
 
-    private var mPresenter: BasePointActivity2Presenter? = null
+    private var mPresenter: BasePointPresenter? = null
 
     private var mOptionsMenu: Menu? = null
 
@@ -141,7 +141,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         }
     }
 
-    override fun setupNavigationWithAdmin(items: List<NavigationItem>, isAdmin: Boolean) {
+    override fun setupNavigation(items: List<NavigationItem>) {
 
         bottomNavigation.removeAllItems()
         bottomCount=0
@@ -242,7 +242,7 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
         //Style bottom navigation
         setupBottomNavigation()
 
-        mPresenter = BasePointActivity2Presenter(this,
+        mPresenter = BasePointPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
@@ -348,7 +348,6 @@ class BasePointActivity2 : UstadBaseActivity(), BasePointView2 {
                 mPresenter!!.handleLogOut()
             }
             R.id.menu_action_settings -> mPresenter!!.handleClickSettingsIcon()
-            R.id.menu_action_search -> mPresenter!!.handleClickSearchIcon()
             R.id.menu_action_about -> mPresenter!!.handleClickAbout()
             R.id.menu_action_sync -> forceSync()
             R.id.menu_action_clear_history -> {

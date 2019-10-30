@@ -41,8 +41,8 @@ class AddScheduleDialogPresenter
     private val scheduleCheckDao : ScheduledCheckDao
     private val appDatabaseRepo: UmAppDatabase
 
-    internal var currentClazzUid: Long = -1
-    private var currentScheduleUid = -1L
+    internal var currentClazzUid: Long = 0
+    private var currentScheduleUid = 0L
 
     init {
 
@@ -88,12 +88,6 @@ class AddScheduleDialogPresenter
         //Creates ClazzLogs for today (since ClazzLogs are automatically only created for tomorrow)
         val runAfterInsertOrUpdate = Runnable {
             createClazzlogsForToday(UmAccountManager.getActivePersonUid(context), appDatabaseRepo, context)
-//            scheduleDao.createClazzLogsForToday(
-//                    UmAccountManager.getActivePersonUid(context), appDatabaseRepo)
-
-            //If you want it to create ClazzLogs for every day of schedule (useful for testing):
-            //scheduleDao.createClazzLogsForEveryDayFromDays(5,
-            //        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
 
             impl.scheduleChecks(context)
         }
@@ -168,19 +162,8 @@ class AddScheduleDialogPresenter
 
 
         //Note this calendar is created on the device's time zone.
-//        val dayCal = Calendar.getInstance()
-//        dayCal.set(Calendar.HOUR_OF_DAY, 0)
-//        dayCal.set(Calendar.MINUTE, 0)
-//        dayCal.set(Calendar.SECOND, 0)
-//        dayCal.set(Calendar.MILLISECOND, 0)
-//        val startTime = dayCal.getTimeInMillis()
         val startTime = UMCalendarUtil.getToday000000()
 
-//        dayCal.set(Calendar.HOUR_OF_DAY, 23)
-//        dayCal.set(Calendar.MINUTE, 59)
-//        dayCal.set(Calendar.SECOND, 59)
-//        dayCal.set(Calendar.MILLISECOND, 999)
-//        val endTime = dayCal.getTimeInMillis()
         val endTime = UMCalendarUtil.getToday235959()
 
         createClazzLogs(startTime, endTime,
@@ -204,18 +187,12 @@ class AddScheduleDialogPresenter
         //This method will usually be called from the Workmanager in Android every day. Making the
         // start time 00:00 and end tim 23:59 : Note: This is the device's timzone. (not class)
         var startT: Long = UMCalendarUtil.normalizeSecondsAndMillis(startTime)
-//        val startCalendar = Calendar.getInstance()
-//        startCalendar.setTimeInMillis(startT)
 
         var endT: Long = UMCalendarUtil.normalizeSecondsAndMillis(endTime)
-//        val endCalendar = Calendar.getInstance()
-//        endCalendar.setTimeInMillis(endT)
 
         val startMsOfDay = (UMCalendarUtil.getHourOfDay24(startT) * 24 +
                 UMCalendarUtil.getMinuteOfDay(startT) * 60 * 100).toLong()
 
-//        val startMsOfDay = ((startCalendar.get(Calendar.HOUR_OF_DAY) * 24 +
-//                startCalendar.get(Calendar.MINUTE)) * 60 * 1000).toLong()
 
         //Get a list of all classes the logged in user has access to:
         val clazzList = db.clazzDao.findAllClazzesWithSelectPermission(
@@ -244,7 +221,6 @@ class AddScheduleDialogPresenter
                 var incToday = startMsOfDay <= schedule.sceduleStartTime
                 val startTimeMins = schedule.sceduleStartTime / (1000 * 60)
 
-//                var nextScheduleOccurence: Calendar? = null
                 var nextSchedule: Long = 0
 
                 if (schedule.scheduleFrequency == Schedule.SCHEDULE_FREQUENCY_DAILY) {
@@ -253,12 +229,6 @@ class AddScheduleDialogPresenter
                     val tomorrowDay = UMCalendarUtil.getDayOfWeek(tomorrowLong)
                     val today = UMCalendarUtil.getDayOfWeek(UMCalendarUtil.getDateInMilliPlusDays(0))
 
-
-//                    val tomorrow = Calendar.getInstance()
-//                    tomorrow.add(Calendar.DATE, 1)
-//                    val tomorrowDay = tomorrow.get(Calendar.DAY_OF_WEEK)
-//                    val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-
                     val dayOfWeek: Int
                     if (!incToday) {
                         dayOfWeek = tomorrowDay
@@ -266,7 +236,6 @@ class AddScheduleDialogPresenter
                         dayOfWeek = today
                     }
                     //TODO: Associate with weekend feature in the future
-//                    if (dayOfWeek == Calendar.SUNDAY) {
                     if (dayOfWeek == 0) { //Sunday in DateTime klock
                         //skip
                         println("Today is a weekend. Skipping ClazzLog creation for today.")
@@ -291,19 +260,9 @@ class AddScheduleDialogPresenter
                                 dayOfWeek, incToday)
                         nextSchedule = UMCalendarUtil.zeroOutTimeForGivenLongDate(nextSchedule)
 
-//                        //Set to 00:00
-//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, 0)
-//                        nextScheduleOccurence!!.set(Calendar.MINUTE, 0)
-//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
-//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
-
                         //Now move it to desired hour:
                         nextSchedule = UMCalendarUtil.changeDatetoThis(nextSchedule, startTimeMins)
 
-//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, (startTimeMins / 60).toInt())
-//                        nextScheduleOccurence!!.set(Calendar.MINUTE, (startTimeMins % 60).toInt())
-//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
-//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
                     }
 
                 } else if (schedule.scheduleFrequency == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
@@ -339,17 +298,9 @@ class AddScheduleDialogPresenter
 
                         //Set to 00:00
                         nextSchedule = UMCalendarUtil.zeroOutTimeForGivenLongDate(nextSchedule)
-//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, 0)
-//                        nextScheduleOccurence!!.set(Calendar.MINUTE, 0)
-//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
-//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
 
                         //Now move it to desired hour:
                         nextSchedule = UMCalendarUtil.changeDatetoThis(nextSchedule, startTimeMins)
-//                        nextScheduleOccurence!!.set(Calendar.HOUR_OF_DAY, (startTimeMins / 60).toInt())
-//                        nextScheduleOccurence!!.set(Calendar.MINUTE, (startTimeMins % 60).toInt())
-//                        nextScheduleOccurence!!.set(Calendar.SECOND, 0)
-//                        nextScheduleOccurence!!.set(Calendar.MILLISECOND, 0)
                     }
                 }
 
@@ -371,7 +322,7 @@ class AddScheduleDialogPresenter
 
 
     companion object{
-        fun findPendingLogsWithoutScheduledCheck(checkType: Int, scheduleCheckDao: ScheduledCheckDao): List<ClazzLog> {
+        private fun findPendingLogsWithoutScheduledCheck(checkType: Int, scheduleCheckDao: ScheduledCheckDao): List<ClazzLog> {
             val todayZero = UMCalendarUtil.zeroOutTimeForGivenLongDate(DateTime.now().unixMillisLong)
             return scheduleCheckDao.findPendingLogsWithoutScheduledCheck(checkType, todayZero)
         }

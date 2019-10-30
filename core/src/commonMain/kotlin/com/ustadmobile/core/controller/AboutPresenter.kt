@@ -13,14 +13,14 @@ import kotlinx.io.InputStream
  * Created by mike on 12/27/16.
  */
 
-class AboutController(context: Any, args: Map<String, String>?, view: AboutView)
+class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
+                     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<AboutView>(context, args!!, view) {
 
     private var aboutHTMLStr: String? = null
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val impl = UstadMobileSystemImpl.instance
 
         impl.getAsset(context, "com/ustadmobile/core/about.html", object : UmCallback<InputStream> {
             override fun onSuccess(result: InputStream?) {

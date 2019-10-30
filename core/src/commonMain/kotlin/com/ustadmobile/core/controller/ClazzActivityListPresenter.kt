@@ -248,7 +248,6 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
                 }
             }
 
-            //view.updateActivityBarChart(barDataMap);
             view.updateActivityBarChart(barDataMapGrouped)
         }
     }

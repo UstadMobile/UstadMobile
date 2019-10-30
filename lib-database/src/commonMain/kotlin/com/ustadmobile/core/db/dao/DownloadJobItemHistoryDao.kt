@@ -30,5 +30,5 @@ abstract class DownloadJobItemHistoryDao {
 
 
     @Query("SELECT * From DownloadJobItemHistory WHERE downloadJobItemId = :downloadJobItemId")
-    abstract fun findHistoryItemsByDownloadJobItem(downloadJobItemId: Long): List<DownloadJobItemHistory>
+    abstract fun findHistoryItemsByDownloadJobItem(downloadJobItemId: Int): List<DownloadJobItemHistory>
 }

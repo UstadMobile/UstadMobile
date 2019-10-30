@@ -27,13 +27,12 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
-import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -41,9 +40,9 @@ import kotlinx.coroutines.launch
 
 class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
-        LocalAvailabilityMonitor, LocalAvailabilityListener , DownloadProgressView.OnStopDownloadListener {
+        DownloadProgressView.OnStopDownloadListener {
 
-    private var presenter: ContentEntryDetailPresenter? = null
+    private lateinit var presenter: ContentEntryDetailPresenter
 
     private lateinit var managerAndroidBle: NetworkManagerBle
 
@@ -92,13 +91,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
-                this, networkManagerBle, umAppRepository)
-        presenter!!.onCreate(bundleToMap(Bundle()))
+                networkManagerBle, umAppRepository, networkManagerBle.localAvailabilityManager)
+        presenter.onCreate(bundleToMap(Bundle()))
 
-        presenter!!.onStart()
-        managerAndroidBle.addLocalAvailabilityListener(this)
-        presenter!!.handleShowEditButton(showControls)
-
+        presenter.onStart()
+        presenter.handleShowEditButton(showControls)
+        managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
+                findViewById(R.id.coordinationLayout), this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,12 +145,19 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         }
 
         editButton.setOnClickListener {
-            presenter!!.handleStartEditingContent()
+            presenter.handleStartEditingContent()
         }
         downloadButton.setOnClickListener {
-            presenter!!.handleDownloadButtonClick()
+            presenter.handleDownloadButtonClick()
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        if(::managerAndroidBle.isInitialized) {
+            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
+                    findViewById(R.id.coordinationLayout), this)
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -175,9 +181,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private fun clickUpNavigation() {
         runOnUiThread {
-            if (presenter != null) {
-                presenter!!.handleUpNavigation()
-            }
+            presenter.handleUpNavigation()
         }
     }
 
@@ -280,27 +284,12 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
-        presenter!!.handleClickTranslatedEntry(contentEntryUid)
-    }
-
-    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
-    }
-
-    override fun stopMonitoringAvailability(monitor: Any) {
-        managerAndroidBle.stopMonitoringAvailability(monitor)
+        presenter.handleClickTranslatedEntry(contentEntryUid)
     }
 
     override fun onDestroy() {
-        if(presenter != null){
-            presenter!!.onDestroy()
-            managerAndroidBle.removeLocalAvailabilityListener(this)
-        }
+        presenter.onDestroy()
         super.onDestroy()
-    }
-
-    override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
-        presenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
     }
 
     override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long) {
@@ -315,7 +304,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onClickStopDownload(view: DownloadProgressView) {
         GlobalScope.launch {
-            presenter!!.handleCancelDownload()
+            presenter.handleCancelDownload()
         }
     }
 }

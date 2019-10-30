@@ -30,6 +30,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import kotlinx.coroutines.Runnable
+import java.io.IOException
+
 //here in a comment because it sometimes gets removed by 'optimization of parameters'
 // import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
@@ -91,7 +94,13 @@ fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
  * </pre>
  */
 fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnvironment,
-                         embedPath: List<String> = listOf()): Map<List<String>, ClassName> {
+                         embedPath: List<String> = listOf()) =
+        findEntitiesWithAnnotation(entityType, SyncableEntity::class.java, processingEnv,
+                embedPath)
+
+fun findEntitiesWithAnnotation(entityType: ClassName, annotationClass: Class<out Annotation>,
+                               processingEnv: ProcessingEnvironment,
+                               embedPath: List<String> = listOf()): Map<List<String>, ClassName> {
     if(entityType in QUERY_SINGULAR_TYPES)
         return mapOf()
 
@@ -108,13 +117,13 @@ fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnviron
     }
 
     ancestorsToList(entityTypeEl, processingEnv).forEach {
-        if(it.getAnnotation(SyncableEntity::class.java) != null)
+        if(it.getAnnotation(annotationClass) != null)
             syncableEntityList.put(embedPath, it.asClassName())
 
-        it.enclosedElements.filter { it.getAnnotation(Embedded::class.java) != null}.forEach {
+        it.enclosedElements.filter { it.getAnnotation(annotationClass) != null}.forEach {
             val subEmbedPath = mutableListOf(*embedPath.toTypedArray()) + "${it.simpleName}"
-            syncableEntityList.putAll(findSyncableEntities(it.asType().asTypeName() as ClassName,
-                    processingEnv, subEmbedPath))
+            syncableEntityList.putAll(findEntitiesWithAnnotation(it.asType().asTypeName() as ClassName,
+                    annotationClass, processingEnv, subEmbedPath))
         }
     }
 
@@ -148,6 +157,36 @@ fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment, excludeDbS
 
 fun syncableEntityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment) =
         entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}
+
+/**
+ * Get a list of all entity result types (e.g. entity types that are returned by query functions)
+ * on a DAO where the entity type (or any of it's embedded types) has a given annotation.
+ *
+ * @param daoClass the DAO class to search on
+ * @param annotationClass the annotation to look for on an entity (or it's embedded fields)
+ * @param processingEnv annotation processing environment
+ *
+ * @return a list of all entities that have the given annotation
+ */
+fun queryResultTypesWithAnnotationOnDao(daoClass: ClassName, annotationClass: Class<out Annotation>,
+                                processingEnv: ProcessingEnvironment): List<ClassName> {
+    val daoType = processingEnv.elementUtils.getTypeElement(daoClass.canonicalName)
+    val entitiesWithAnnotationOnDao = mutableSetOf<ClassName>()
+    daoType.enclosedElements.filter { it.getAnnotation(Query::class.java) != null}.forEach {methodEl ->
+        //TODO: Add rest accessible methods
+        val querySql = methodEl.getAnnotation(Query::class.java).value.toLowerCase(Locale.ROOT).trim()
+        if(!(querySql.startsWith("update") || querySql.startsWith("delete"))) {
+            val methodResolved = processingEnv.typeUtils
+                    .asMemberOf(daoType.asType() as DeclaredType, methodEl) as ExecutableType
+            val returnType = resolveReturnTypeIfSuspended(methodResolved)
+            val entityType = resolveEntityFromResultType(resolveQueryResultType(returnType))
+            entitiesWithAnnotationOnDao.addAll(findEntitiesWithAnnotation(entityType as ClassName,
+                    annotationClass, processingEnv).values)
+        }
+    }
+
+    return entitiesWithAnnotationOnDao.toList()
+}
 
 fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironment): List<ClassName> {
     val daoType = processingEnv.elementUtils.getTypeElement(daoClass.canonicalName)
@@ -243,6 +282,9 @@ internal val CLIENT_GET_MEMBER_NAME = MemberName("io.ktor.client.request", "get"
 internal val CLIENT_POST_MEMBER_NAME = MemberName("io.ktor.client.request", "post")
 
 internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "receive")
+
+internal val CLIENT_PARAMETER_MEMBER_NAME = MemberName("io.ktor.client.request", "parameter")
+
 
 /**
  * Generates a CodeBlock that will make KTOR HTTP Client Request for a DAO method. It will set
@@ -442,6 +484,8 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
 fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: TypeName,
                                            syncHelperDaoVarName: String = "_syncHelper",
                                            afterInsertCode: (ClassName) -> CodeBlock = {CodeBlock.of("")},
+                                           beforeInsertCode: (String, ClassName, Boolean) -> CodeBlock =
+                                                   {varName, entityTypeClassName, isListOrArray -> CodeBlock.of("")},
                                            processingEnv: ProcessingEnvironment): CodeBlock {
     val codeBlock = CodeBlock.builder()
 
@@ -451,6 +495,9 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
 
     val syncableEntitiesList = findSyncableEntities(resultComponentType, processingEnv)
 
+
+    val transactionCodeBlock = CodeBlock.builder()
+    val runAfterCodeBlock = CodeBlock.builder()
     syncableEntitiesList.forEach {
         val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
 
@@ -458,8 +505,9 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
 
         val replaceEntityFnName ="_replace${sEntityInfo.syncableEntity.simpleName}"
 
+        val accessorVarName = "_se${sEntityInfo.syncableEntity.simpleName}"
+        codeBlock.add("val $accessorVarName = $resultVarName")
         if(isListOrArrayResult) {
-            codeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($resultVarName")
             it.key.forEach {embedVarName ->
                 codeBlock.add("\n.filter { it.$embedVarName != null }\n" +
                         ".map { it.$embedVarName as %T }\n",
@@ -469,20 +517,29 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
             if(it.key.isEmpty() && it.value != sEntityInfo.syncableEntity) {
                 codeBlock.add(".map { it as %T }", sEntityInfo.syncableEntity)
             }
-            codeBlock.add(")\n")
+
+            codeBlock.add("\n")
+                    .add(beforeInsertCode.invoke(accessorVarName, it.value, true))
+            transactionCodeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($accessorVarName)\n")
         }else {
-            val accessorVarName = "_se${sEntityInfo.syncableEntity.simpleName}"
-            codeBlock.add("val $accessorVarName = $resultVarName")
+            codeBlock
                 .add(it.key.joinToString (prefix = "", separator = "?.", postfix = ""))
                 .add("\n")
                 .beginControlFlow("if($accessorVarName != null)")
-                .add("${syncHelperDaoVarName}.$replaceEntityFnName(listOf($accessorVarName))\n")
+                .add(beforeInsertCode.invoke(accessorVarName, it.value, false))
                 .endControlFlow()
+            transactionCodeBlock.beginControlFlow("if($accessorVarName != null)")
+                    .add("${syncHelperDaoVarName}.$replaceEntityFnName(listOf($accessorVarName))\n")
+                    .endControlFlow()
         }
 
-        codeBlock.add(afterInsertCode(it.value))
+        runAfterCodeBlock.add(afterInsertCode(it.value))
     }
 
+    codeBlock.beginControlFlow("_db.runInTransaction(%T ", Runnable::class)
+            .add(transactionCodeBlock.build())
+            .endControlFlow().add(")\n")
+    codeBlock.add(runAfterCodeBlock.build())
     return codeBlock.build()
 }
 
@@ -1250,6 +1307,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
                 "X-reqid")
 
+        //TODO: If entity has attachments, handle that here
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
                 afterInsertCode = {
                     CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
@@ -1259,11 +1317,73 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
                                     "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
                             .endControlFlow()
-                            .add("%M(%S, _requestId)\n",
-                                    MemberName("io.ktor.client.request", "parameter"),
-                                    "reqId")
+                            .add("%M(%S, _requestId)\n", CLIENT_PARAMETER_MEMBER_NAME, "reqId")
                             .endControlFlow()
                             .build()
+                },
+                beforeInsertCode = {accessorVarName, className, isList ->
+                    if(findEntitiesWithAnnotation(className, EntityWithAttachment::class.java,
+                                    processingEnv).isNotEmpty()) {
+                        val attDirVarName = "_attDir_${className.simpleName}"
+                        val attEntityCodeBlock= CodeBlock.builder()
+                                .add("val $attDirVarName = %T(_attachmentsDir, %S)\n",
+                                        File::class, className.simpleName)
+                                .beginControlFlow("if(!$attDirVarName.exists())")
+                                .add("$attDirVarName.mkdirs()\n")
+                                .endControlFlow()
+
+                        val entityVarName = if(isList) {
+                            attEntityCodeBlock.beginControlFlow("$accessorVarName.forEach ")
+                            "it"
+                        }else {
+                            accessorVarName
+                        }
+
+                        val entityPkEl = processingEnv.elementUtils.getTypeElement(className.canonicalName)
+                                .enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
+
+                        val attRespVarName = "_attResp_${className.simpleName}"
+                        attEntityCodeBlock
+                                .add("var $attRespVarName : %T = null\n", HttpResponse::class.asClassName().copy(nullable = true))
+                                .beginControlFlow("try")
+                                .beginControlFlow("$attRespVarName = _httpClient.%M<%T>",
+                                CLIENT_GET_MEMBER_NAME, HttpResponse::class)
+                                .beginControlFlow("url")
+                                .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
+                                .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
+                                        "_get${className.simpleName}AttachmentData")
+                                .endControlFlow()
+                                .add("%M(%S, $entityVarName.%L)\n", CLIENT_PARAMETER_MEMBER_NAME,
+                                        "_pk", entityPkEl.simpleName)
+                                .endControlFlow()
+
+                        //TODO: throw an exception whne the status code != 200
+                        attEntityCodeBlock.beginControlFlow("if($attRespVarName.status == %T.OK)",
+                                HttpStatusCode::class)
+                                .add("val _attFileDest = File($attDirVarName, $entityVarName.${entityPkEl.simpleName}.toString())\n")
+                                .add("$attRespVarName.content.%M(_attFileDest.%M())\n",
+                                        MemberName("kotlinx.coroutines.io", "copyAndClose"),
+                                        MemberName("io.ktor.util.cio", "writeChannel"))
+                                .endControlFlow()
+
+                        attEntityCodeBlock.nextControlFlow("catch(e: %T)", Exception::class)
+                                .add("throw %T(" +
+                                        "\"Could·not·download·attachment·for·${className.simpleName}·PK·\${$entityVarName.${entityPkEl.simpleName}}\",e)\n",
+                                        IOException::class)
+                                .nextControlFlow("finally")
+                                .add("$attRespVarName?.close()\n")
+                                .endControlFlow()
+
+                        if(isList) {
+                            attEntityCodeBlock.endControlFlow()
+                        }
+
+
+
+                        attEntityCodeBlock.build()
+                    }else {
+                        CodeBlock.of("")
+                    }
                 },
                 resultType = resultType, processingEnv = processingEnv,
                 syncHelperDaoVarName = syncHelperDaoVarName))

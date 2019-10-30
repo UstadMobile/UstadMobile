@@ -16,16 +16,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class BasePointActivity2Presenter
+class BasePointPresenter
 /**
  * Gets arguments and initialises
  * @param context       Context
  * @param arguments     Arguments
  * @param view          View
  */
-(context: Any, arguments: Map<String, String>?, view: BasePointView2,
-        val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
-        UstadBaseController<BasePointView2>(context, arguments!!, view) {
+(context: Any, arguments: Map<String, String>?, view: BasePointView,
+ val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
+        UstadBaseController<BasePointView>(context, arguments!!, view) {
 
     //Database repository
     internal lateinit var repository: UmAppDatabase
@@ -116,16 +116,6 @@ class BasePointActivity2Presenter
     }
 
     /**
-     * Goes to Search activity. This method will not do anything. The Search will figure out
-     * where it has been clicked.
-     */
-    fun handleClickSearchIcon() {
-
-        //Update: This method will not do anything the Search will figure out where it it
-        // has been clicked.
-    }
-
-    /**
      * About menu clicked. Goes to about screen
      */
     fun handleClickAbout() {
@@ -187,7 +177,7 @@ class BasePointActivity2Presenter
                 val navItem = NavigationItem(s, HashMap<String, String>(), "Title")
                 items.add(navItem)
             }
-            view.setupNavigationWithAdmin(items, isAdmin)
+            view.setupNavigation(items)
 
         }
     }

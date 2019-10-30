@@ -2,6 +2,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.PrimaryKey
 import androidx.room.Query
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
@@ -16,6 +17,7 @@ import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.DoorDatabase
 import com.google.gson.reflect.TypeToken
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.annotation.EntityWithAttachment
 import java.util.*
 import javax.lang.model.element.ElementKind
 
@@ -123,6 +125,23 @@ internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName,
             .endControlFlow()
             .build()
 
+internal fun generateGetAttachmentDataCodeBlock(entityTypeEl: TypeElement, attachmentsDirVarName: String = "_attachmentsDir"): CodeBlock {
+    val entityPkField = entityTypeEl.enclosedElements
+            .first { it.getAnnotation(PrimaryKey::class.java) != null }
+    return CodeBlock.builder()
+            .beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
+                    "_get${entityTypeEl.simpleName}AttachmentData")
+            .add(generateGetParamFromRequestCodeBlock(entityPkField.asType().asTypeName(),
+                    "_pk", "_pk"))
+            .add("val _file = %T(\"\$${attachmentsDirVarName}/${entityTypeEl.simpleName}/\$_pk\")\n",
+                    File::class)
+            .add("%M.%M(_file)\n", DbProcessorKtorServer.CALL_MEMBER, MemberName("io.ktor.response",
+                    "respondFile"))
+            .endControlFlow()
+            .build()
+}
+
+
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
@@ -154,6 +173,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .receiver(Route::class)
                 .addParameter("_db", dbTypeElement.asClassName())
                 .addParameter("_gson", Gson::class)
+                .addParameter("_attachmentsDir", String::class)
 
         val codeBlock = CodeBlock.builder()
                 .add("val _gson = %T()\n", Gson::class)
@@ -190,7 +210,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 daoFromDbGetter += "${it.simpleName}()"
             }
 
-            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson", MemberName(daoTypeClassName.packageName,
+            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson, _attachmentsDir", MemberName(daoTypeClassName.packageName,
                     "${daoTypeEl.simpleName}_$SUFFIX_KTOR_ROUTE"))
             if(syncableEntitiesOnDao(daoTypeClassName, processingEnv).isNotEmpty()) {
                 codeBlock.add(", _syncHelperDao")
@@ -218,6 +238,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
                 .addParameter("_db", DoorDatabase::class)
                 .addParameter("_gson", Gson::class)
+                .addParameter("_attachmentsDir", String::class)
 
         if(syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).isNotEmpty()) {
             daoRouteFn.addParameter("_syncHelper",
@@ -273,6 +294,12 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val syncableEntityinfo = SyncableEntityInfo(it, processingEnv)
             codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityinfo.tracker))
         }
+        queryResultTypesWithAnnotationOnDao(daoTypeElement.asClassName(), EntityWithAttachment::class.java,
+                processingEnv).forEach {
+            val entityTypeEl = processingEnv.elementUtils.getTypeElement(it.canonicalName) as TypeElement
+            codeBlock.add(generateGetAttachmentDataCodeBlock(entityTypeEl))
+        }
+
 
         codeBlock.endControlFlow()
         daoRouteFn.addCode(codeBlock.build())

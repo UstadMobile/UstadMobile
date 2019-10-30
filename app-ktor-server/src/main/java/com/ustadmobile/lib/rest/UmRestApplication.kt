@@ -60,6 +60,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
             method(HttpMethod.Get)
             method(HttpMethod.Post)
             method(HttpMethod.Put)
+            header(HttpHeaders.ContentType)
             anyHost()
         }
     }
@@ -78,7 +79,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         }
 
         LoginRoute(db)
-        UmAppDatabase_KtorRoute(db, Gson())
+        UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
         if(devMode) {
             get("UmAppDatabase/clearAllTables") {
                 db.clearAllTables()

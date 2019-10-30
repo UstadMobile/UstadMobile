@@ -4,7 +4,7 @@ package com.ustadmobile.core.view
  * ClassDetail Core View extends Core UstadView. Will be implemented
  * on various implementations.
  */
-interface ClassDetailView : UstadView {
+interface ClazzDetailView : UstadView {
 
     /**
      * Sets the toolbar of the view.
