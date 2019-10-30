@@ -1,12 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-//import java.io.ByteArrayInputStream
-//import java.io.ByteArrayOutputStream
-//import java.io.IOException
-//import java.nio.ByteBuffer
-//import java.util.*
-//import java.util.zip.GZIPInputStream
-//import java.util.zip.GZIPOutputStream
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.sharedse.io.ByteBufferSe

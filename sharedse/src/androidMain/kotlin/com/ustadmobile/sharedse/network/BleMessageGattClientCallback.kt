@@ -242,6 +242,7 @@ class BleMessageGattClientCallback
                                     characteristic: BluetoothGattCharacteristic) {
         val messageComplete = receivedMessage.onPackageReceived(characteristic.value)
         if (messageComplete) {
+            UMLog.l(UMLog.DEBUG, 698," Message received successfully")
             responseListener!!.onResponseReceived(gatt.device.address, receivedMessage, null)
             //The server should disconnect us shortly.
         }
