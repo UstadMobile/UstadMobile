@@ -43,14 +43,19 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
         val passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(password)
 
+        println("Resetting password .. " )
+
         if (isPersonAdmin(loggedInPersonUid)) {
+            println("Password being reset by admin. Allowing.. " )
             //Allow admin to change password of people:
             return changePassword(personUid, passwordHash)
         }else{
             //Allow self to change password:
             if (loggedInPersonUid == personUid) {
+                println("Resetting password 2.. " )
                 return changePassword(personUid, passwordHash)
             }else{
+                println("Unable to reset password cause not the same user.. " )
                 return -1
             }
         }
@@ -61,14 +66,17 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
         val existingPersonAuth = findByUid(personUid)
         if (existingPersonAuth == null) {
+            println("PersonAuth doesnt exist for reset password. Creating a new one.." )
             val personAuth = PersonAuth(personUid, passwordHash)
             insert(personAuth)
+            println(" .. created new PersonAuth")
         }
         val result = updatePasswordForPersonUid(personUid, passwordHash)
         if (result > 0) {
             println("Update password success")
             return 1
         } else {
+            println("Unable to reset password")
             return 0
         }
     }

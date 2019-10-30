@@ -6,9 +6,15 @@ import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ChangePasswordView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.response.HttpResponse
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -75,19 +81,52 @@ class ChangePasswordPresenter(context: Any,
             GlobalScope.launch {
                 personAuthDao.updateAsync(currentPersonAuth!!)
 
-                val resetP = personAuthDao.resetPassword(currentPerson!!.personUid, updatePassword!!, currentPerson!!.personUid)
-                if(resetP > 0) {
-                    try {
-                        personAuthDao.updateAsync(currentPersonAuth!!)
-                        view.finish()
-
-                    } catch (e: Exception) {
-                        println(e!!.message)
-                        view.sendMessage(MessageID.unable_to_update_password)
+                //Update on server
+                try {
+                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
+                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+                    {
+                        url {
+                            takeFrom(serverUrl!!)
+                            encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+                        }
+                        parameter("p0", currentPerson!!.personUid)
+                        parameter("p1", updatePassword!!)
+                        parameter("p2", currentPerson!!.personUid)
                     }
-                }else{
-                    view.sendMessage(MessageID.unable_to_update_password)
+
+                    if(resetPasswordResponse.status == HttpStatusCode.OK) {
+
+                        try {
+                            personAuthDao.updateAsync(currentPersonAuth!!)
+                            view.finish()
+
+                        } catch (e: Exception) {
+                            println(e!!.message)
+                            view.sendMessage(MessageID.unable_to_update_password)
+                        }
+
+
+                    }else {
+                        println("nope")
+                    }
+                } catch (e: Exception) {
+                    print("oops")
                 }
+
+//                val resetP = personAuthDao.resetPassword(currentPerson!!.personUid, updatePassword!!, currentPerson!!.personUid)
+//                if(resetP > 0) {
+//                    try {
+//                        personAuthDao.updateAsync(currentPersonAuth!!)
+//                        view.finish()
+//
+//                    } catch (e: Exception) {
+//                        println(e!!.message)
+//                        view.sendMessage(MessageID.unable_to_update_password)
+//                    }
+//                }else{
+//                    view.sendMessage(MessageID.unable_to_update_password)
+//                }
             }
         }
     }
