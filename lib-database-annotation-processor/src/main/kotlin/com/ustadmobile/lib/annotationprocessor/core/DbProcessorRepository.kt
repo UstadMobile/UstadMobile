@@ -489,14 +489,17 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val codeBlock = CodeBlock.builder()
             if(funEl.getAnnotation(SetAttachmentData::class.java) != null) {
                 val dataParam = funEl.parameters[1]
-                codeBlock.add("val _destFile = File(_attachmentsDir, ${entityParam.simpleName}.${pkEl.simpleName}.toString())\n")
-                        .beginControlFlow("if(!_destFile.parentFile.exists())")
-                        .add("_destFile.parentFile.mkdirs()\n")
+                codeBlock.add("val _entityAttachmentsDir = %T(_attachmentsDir, %S)\n", File::class,
+                        entityTypeEl.simpleName)
+                        .add("val _destFile = File(_entityAttachmentsDir, ${entityParam.simpleName}.${pkEl.simpleName}.toString())\n")
+                        .beginControlFlow("if(!_entityAttachmentsDir.exists())")
+                        .add("_entityAttachmentsDir.mkdirs()\n")
                         .endControlFlow()
                         .add("%T(${dataParam.simpleName}).%M(_destFile)\n",
                             File::class, MemberName("kotlin.io", "copyTo"))
             }else if(funEl.getAnnotation(GetAttachmentData::class.java) != null) {
-                codeBlock.add("return File(_attachmentsDir, ${entityParam.simpleName}.${pkEl.simpleName}.toString()).absolutePath\n")
+                codeBlock.add("return File(_attachmentsDir, %S + %T.separator + ${entityParam.simpleName}.${pkEl.simpleName}.toString()).absolutePath\n",
+                        entityTypeEl.simpleName, File::class)
             }
 
             overridingFunSpec.addCode(codeBlock.build())

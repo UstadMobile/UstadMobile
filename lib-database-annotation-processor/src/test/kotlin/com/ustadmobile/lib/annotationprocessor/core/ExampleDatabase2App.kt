@@ -24,9 +24,7 @@ import java.io.File
 private val serverDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
     .build() as ExampleDatabase2
 
-fun Application.ExampleDatabase2App(devMode: Boolean = true) {
-
-    val dummyAttachmentDir = File("dummy-attachments")
+fun Application.ExampleDatabase2App(devMode: Boolean = true, attachmentsDir: String = "attachments") {
 
     if(serverDb.exampleDao2().findByUid(5000L) == null) {
         serverDb.exampleDao2().insertAndReturnId(ExampleEntity2(uid = 5000L, name = "Initial Entry"))
@@ -54,7 +52,7 @@ fun Application.ExampleDatabase2App(devMode: Boolean = true) {
 
     val gson = Gson()
     install(Routing) {
-        ExampleDatabase2_KtorRoute(serverDb, gson, dummyAttachmentDir.absolutePath)
+        ExampleDatabase2_KtorRoute(serverDb, gson, attachmentsDir)
         get("ExampleDatabase2/clearAllTables") {
             serverDb.clearAllTables()
             call.respond("OK - cleared")
