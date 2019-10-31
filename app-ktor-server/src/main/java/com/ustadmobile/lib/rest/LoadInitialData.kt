@@ -5,6 +5,20 @@ import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ATTENDANCE
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_BIRTHDAY
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CLASSES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FULL_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_HOME_ADDRESS
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_MNE
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_OFFICER
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_SEL
@@ -521,9 +535,7 @@ class LoadInitialData {
                 fieldIndex++
                 addNextField()
             }
-
         }
-
     }
 
     /**
@@ -545,7 +557,6 @@ class LoadInitialData {
 
         val allTheFields = ArrayList<HeadersAndFields>()
 
-
         allTheFields.add(HeadersAndFields(
                 "",
                 "",
@@ -553,7 +564,7 @@ class LoadInitialData {
                 0,
                 1,
                 PersonField.FIELD_TYPE_HEADER,
-                MessageID.profile,
+                FIELD_HEADING_PROFILE,
                 false,
                 true,
                 true
@@ -561,7 +572,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "",
                 "Full Name",
-                MessageID.field_fullname,
+                FIELD_HEADING_FULL_NAME,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FULL_NAME,
                 2,
                 PersonField.FIELD_TYPE_TEXT,
@@ -575,7 +586,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "First Names",
-                MessageID.first_names,
+                FIELD_HEADING_FIRST_NAMES,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES,
                 3,
                 PersonField.FIELD_TYPE_TEXT,
@@ -587,7 +598,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "",
                 "Last Name",
-                MessageID.last_name,
+                FIELD_HEADING_LAST_NAME,
                 PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME,
                 4,
                 PersonField.FIELD_TYPE_TEXT,
@@ -601,7 +612,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_perm_contact_calendar_black_24dp",
                 "Date of Birth",
-                MessageID.birthday,
+                FIELD_HEADING_BIRTHDAY,
                 PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
                 5,
                 PersonField.FIELD_TYPE_DATE,
@@ -614,7 +625,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "",
                 "Home Address",
-                MessageID.home_address,
+                FIELD_HEADING_HOME_ADDRESS,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS,
                 6,
                 PersonField.FIELD_TYPE_TEXT,
@@ -632,7 +643,7 @@ class LoadInitialData {
                 0,
                 7,
                 PersonField.FIELD_TYPE_HEADER,
-                MessageID.attendance,
+                FIELD_HEADING_ATTENDANCE,
                 false,
                 true,
                 false
@@ -640,7 +651,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_lens_black_24dp",
                 "Total Attendance for student and days",
-                MessageID.attendance,
+                FIELD_HEADING_ATTENDANCE,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
                 8,
                 PersonField.FIELD_TYPE_TEXT,
@@ -654,7 +665,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "Father with number",
-                MessageID.father,
+                FIELD_HEADING_FATHER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
                 11,
                 PersonField.FIELD_TYPE_PHONE_NUMBER,
@@ -666,7 +677,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "Father name",
-                MessageID.fathers_name,
+                FIELD_HEADING_FATHERS_NAME,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
                 12,
                 PersonField.FIELD_TYPE_TEXT,
@@ -678,7 +689,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "Father  number",
-                MessageID.fathers_number,
+                FIELD_HEADING_FATHERS_NUMBER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
                 13,
                 PersonField.FIELD_TYPE_PHONE_NUMBER,
@@ -690,7 +701,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "Mother name",
-                MessageID.mothers_name,
+                FIELD_HEADING_MOTHERS_NAME,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
                 14,
                 PersonField.FIELD_TYPE_TEXT,
@@ -702,7 +713,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "Mother number",
-                MessageID.mothers_number,
+                FIELD_HEADING_MOTHERS_NUMBER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
                 15,
                 PersonField.FIELD_TYPE_PHONE_NUMBER,
@@ -714,7 +725,7 @@ class LoadInitialData {
         allTheFields.add(HeadersAndFields(
                 "ic_person_black_24dp",
                 "Mother with number",
-                MessageID.mother,
+                FIELD_HEADING_MOTHER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
                 16,
                 PersonField.FIELD_TYPE_TEXT,
@@ -732,7 +743,7 @@ class LoadInitialData {
                 0,
                 17,
                 PersonField.FIELD_TYPE_HEADER,
-                MessageID.classes,
+                FIELD_HEADING_CLASSES,
                 false,
                 true,
                 true

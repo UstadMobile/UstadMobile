@@ -23,8 +23,6 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Query("SELECT * FROM PersonDetailPresenterField ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFields() : List<PersonDetailPresenterField>
 
-    //TODOne: KMP Check MutableList return type.
-    //Update: Nope. List it is.
     @Query("SELECT * FROM PersonDetailPresenterField WHERE viewModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsViewMode() :
             List<PersonDetailPresenterField>
@@ -35,6 +33,10 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Query("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
     abstract suspend fun findAllPersonDetailPresenterFieldsEditMode() :
             List<PersonDetailPresenterField>
+
+    @Query("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
+    abstract fun findAllPersonDetailPresenterFieldsEditModeLive() :
+            DoorLiveData<List<PersonDetailPresenterField>>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE fieldUid = :uid")
     abstract suspend fun findAllByFieldUid(uid: Long) : List<PersonDetailPresenterField>
