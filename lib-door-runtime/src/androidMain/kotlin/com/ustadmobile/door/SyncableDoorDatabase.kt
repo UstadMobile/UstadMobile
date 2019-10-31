@@ -13,7 +13,7 @@ actual inline fun <reified  T> SyncableDoorDatabase.asRepository(context: Any, e
     val dbName = (this as RoomDatabase).openHelper.databaseName
     val attachmentsDirToUse = if(attachmentsDir == null) {
         File(ContextCompat.getExternalFilesDirs(context as Context, null)[0],
-                "$dbName/attachments")
+                "$dbName/attachments").absolutePath
     }else {
         attachmentsDir
     }
