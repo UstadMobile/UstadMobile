@@ -70,7 +70,7 @@ object UmAccountManager {
         }
     }
 
-    fun setActiveAccount(account: UmAccount, context: Any) {
+    fun setActiveAccount(account: UmAccount?, context: Any) {
         setActiveAccount(account, context, UstadMobileSystemImpl.instance)
     }
 

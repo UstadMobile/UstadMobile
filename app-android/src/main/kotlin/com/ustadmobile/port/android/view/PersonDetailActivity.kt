@@ -218,23 +218,24 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
      * Starts the camera intent.
      */
     private fun startCameraIntent() {
-        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
-        val dir = filesDir
-        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
-        imagePathFromCamera = output.absolutePath
-
-        val cameraImage = FileProvider.getUriForFile(this,
-                "$packageName.fileprovider", output)
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
-
-        val resInfoList = packageManager.queryIntentActivities(cameraIntent,
-                PackageManager.MATCH_DEFAULT_ONLY)
-        for (resolveInfo in resInfoList) {
-            val packageName = resolveInfo.activityInfo.packageName
-            grantUriPermission(packageName, cameraImage,
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
+        //TODO: Re enable when doing KMP attachments
+//        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+//        val dir = filesDir
+//        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
+//        imagePathFromCamera = output.absolutePath
+//
+//        val cameraImage = FileProvider.getUriForFile(this,
+//                "$packageName.fileprovider", output)
+//        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
+//
+//        val resInfoList = packageManager.queryIntentActivities(cameraIntent,
+//                PackageManager.MATCH_DEFAULT_ONLY)
+//        for (resolveInfo in resInfoList) {
+//            val packageName = resolveInfo.activityInfo.packageName
+//            grantUriPermission(packageName, cameraImage,
+//                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//        }
+//        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

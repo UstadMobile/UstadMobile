@@ -65,7 +65,9 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
     fun updateRanges() {
         //Get provider
         umProvider = providerDao.findAllDatesInCalendar(currentCalendarUid)
-        view.setListProvider(umProvider!!)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider!!)
+        })
     }
 
     private fun initFromCalendar(calUid: Long) {
@@ -81,7 +83,9 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
         GlobalScope.launch {
             val result = umCalendarDao.findByUidAsync(currentCalendarUid)
             updatedCalendar = result
-            view.updateCalendarOnView(result!!)
+            view.runOnUiThread(Runnable {
+                view.updateCalendarOnView(result!!)
+            })
             updateRanges()
         }
 
@@ -93,10 +97,12 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
             currentCalendar = calendar
 
         if (updatedCalendar == null || updatedCalendar != calendar) {
-            //update class edit views
-            view.updateCalendarOnView(updatedCalendar!!)
             //Update the currently editing class object
             updatedCalendar = calendar
+            //update class edit views
+            view.runOnUiThread(Runnable {
+                view.updateCalendarOnView(updatedCalendar!!)
+            })
         }
     }
 
@@ -126,9 +132,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
         }
     }
 
-
     fun handleClickDone() {
-
         updatedCalendar!!.umCalendarActive = true
         updatedCalendar!!.umCalendarCategory = UMCalendar.CATEGORY_HOLIDAY
         GlobalScope.launch {

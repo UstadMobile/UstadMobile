@@ -60,6 +60,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         
     }
 
+    override fun callFinishAffinity(){
+        finishAffinity()
+    }
+
     override fun restartUI() {
         onResume()
     }

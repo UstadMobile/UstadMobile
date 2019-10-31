@@ -81,7 +81,9 @@ class GroupDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
             //Get provider
             umProvider = providerDao.findAllPersonWithEnrollmentWithGroupUid(currentGroupUid)
-            view.setListProvider(umProvider!!)
+            view.runOnUiThread(Runnable {
+                view.setListProvider(umProvider!!)
+            })
         }
 
     }
@@ -92,8 +94,10 @@ class GroupDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
         }
 
         if (updatedGroup == null || updatedGroup == changedGroup) {
-            view.updateGroupOnView(updatedGroup!!)
             updatedGroup = changedGroup
+            view.runOnUiThread(Runnable {
+                view.updateGroupOnView(updatedGroup!!)
+            })
         }
     }
 

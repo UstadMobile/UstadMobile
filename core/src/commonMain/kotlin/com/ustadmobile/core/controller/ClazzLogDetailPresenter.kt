@@ -89,19 +89,6 @@ class ClazzLogDetailPresenter(context: Any,
 
     }
 
-
-//    private val setTitleCallback = object : UmCallback<String> {
-//        override fun onSuccess(result: String?) {
-//            title = "$result " + UstadMobileSystemImpl.instance.getString(
-//                    MessageID.attendance, context)
-//            view.runOnUiThread(Runnable{ view.updateToolbarTitle(title!!) })
-//        }
-//
-//        override fun onFailure(exception: Throwable?) {
-//            print(exception!!.message)
-//        }
-//    }
-
     /**
      * The Presenter's onCreate. This populated the provider and sets it to the View.
      *
@@ -171,14 +158,14 @@ class ClazzLogDetailPresenter(context: Any,
             prettyDate = impl.getString(MessageID.today, context)
         }
         //TODO: KMP Locale
-//        val currentLocale = Locale.getDefault()
+        //val currentLocale = Locale.getDefault()
         val currentLocale = ""
         prettyDate += " (" +
                 UMCalendarUtil.getPrettyDateFromLong(currentClazzLog!!.logDate, currentLocale) + ")"
 
         //Add Schedule time to this pretty Date
 
-        //TODO: Fix this KMP
+
         //Add time to ClazzLog's date
         if (currentSchedule != null) {
             val startTimeLong = currentSchedule!!.sceduleStartTime
@@ -187,7 +174,7 @@ class ClazzLogDetailPresenter(context: Any,
             val startTime = UMCalendarUtil.showTimeForGivenLongDate(startTimeLong)
             val endTime = UMCalendarUtil.showTimeForGivenLongDate(endTimeLong)
 
-            prettyDate = "$prettyDate($startTime - $endTime)"
+            prettyDate = "$prettyDate ($startTime - $endTime)"
         }
 
 

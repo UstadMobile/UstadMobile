@@ -181,7 +181,7 @@ class ClazzLogDetailActivity : UstadBaseActivity(), ClassLogDetailView {
 
             override fun areContentsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson,
                                             newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
-                return oldItem.clazzLogAttendanceRecordUid == newItem.clazzLogAttendanceRecordUid
+                return oldItem.attendanceStatus == newItem.attendanceStatus
             }
         }
     }

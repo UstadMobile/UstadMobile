@@ -58,6 +58,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
     @JsName("handleClickLogin")
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
+        val usernameTrim = username.trim()
         view.setErrorMessage("")
         GlobalScope.launch {
             try {
@@ -66,7 +67,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                         takeFrom(serverUrl)
                         encodedPath = "${encodedPath}Login/login"
                     }
-                    parameter("username", username)
+                    parameter("username", usernameTrim)
                     parameter("password", password)
                 }
 

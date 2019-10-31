@@ -340,10 +340,14 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         if (mUpdatedClazz == null || mUpdatedClazz != clazz) {
             if (clazz != null) {
-                //update class edit views
-                view.updateClazzEditView(mUpdatedClazz!!)
                 //Update the currently editing class object
                 mUpdatedClazz = clazz
+
+                //update class edit views
+                view.runOnUiThread(Runnable {
+                    view.updateClazzEditView(mUpdatedClazz!!)
+                })
+
             }
         }
     }

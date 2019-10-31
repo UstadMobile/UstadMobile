@@ -547,8 +547,16 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         when (position) {
             VIEW_POSITION_POSITION_FEED -> {
             }
-            VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses(query)
-            VIEW_POSITION_POSITION_PEOPLE -> peopleListFragment!!.searchPeople(query)
+            VIEW_POSITION_POSITION_CLASSES -> {
+                if(classesFragment!=null) {
+                    classesFragment!!.searchClasses(query)
+                }
+            }
+            VIEW_POSITION_POSITION_PEOPLE -> {
+                if(peopleListFragment != null) {
+                    peopleListFragment!!.searchPeople(query)
+                }
+            }
             VIEW_POSITION_POSITION_REPORTS -> {
             }
             else -> {
@@ -610,10 +618,27 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                 return thisFragment
             }
 
+            val f = navToFragment[position]
+            this.positionMap[position] = f
+
             when (position) {
+
+                VIEW_POSITION_POSITION_FEED -> {
+                    return f
+                }
+                VIEW_POSITION_POSITION_CLASSES -> {
+                    classesFragment = f as ClazzListFragment?
+                    return f
+                }
+                VIEW_POSITION_POSITION_PEOPLE -> {
+                    peopleListFragment = f as PeopleListFragment?
+                    return f
+                }
+                VIEW_POSITION_POSITION_REPORTS -> {
+                    return f
+                }
+
                 position -> {
-                    val f = navToFragment[position]
-                    this.positionMap[position] = f
                     return f
                 }
 

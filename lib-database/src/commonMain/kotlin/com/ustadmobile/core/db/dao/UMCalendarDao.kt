@@ -36,16 +36,17 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
             " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, UMCalendarWithNumEntries>
 
-    @Query("SELECT * FROM UMCalendar")
+    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1")
     abstract fun findAllUMCalendars(): DataSource.Factory<Int, UMCalendar>
 
-    @Query("SELECT * FROM UMCalendar")
+    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1")
     abstract fun findAllUMCalendarsAsLiveDataList(): DoorLiveData<List<UMCalendar>>
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY)
+    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1 AND umCalendarCategory = "
+            + UMCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidaysLiveData(): DoorLiveData<List<UMCalendar>>
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid")
+    @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid AND umCalendarActive = 1")
     abstract fun findByUidLive(uid: Long): DoorLiveData<UMCalendar?>
 
     @Update

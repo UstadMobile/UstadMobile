@@ -224,7 +224,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         activityChangesSpinner = rootContainer.findViewById(R.id.fragment_clazz_activity_list_bar_chart_spinner)
 
         //Create the presenter and call its onCreate
-        mPresenter = ClazzActivityListPresenter(this,
+        mPresenter = ClazzActivityListPresenter(activity!!.applicationContext,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

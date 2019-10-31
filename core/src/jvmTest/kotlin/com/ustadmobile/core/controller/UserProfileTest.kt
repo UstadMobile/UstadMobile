@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.junit.Before
@@ -56,7 +57,7 @@ class UserProfileTest {
         val firstDest = impl.getAppConfigString(
                 AppConfig.KEY_FIRST_DEST, "BasePoint", context)
 
-        verify(impl).go(eq(firstDest!!), any(), any())
+        verify(impl).go(eq(LoginView.VIEW_NAME), any(), any())
     }
 
 

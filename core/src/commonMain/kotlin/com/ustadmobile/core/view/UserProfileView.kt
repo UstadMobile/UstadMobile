@@ -10,6 +10,8 @@ interface UserProfileView : UstadView {
 
     fun restartUI()
 
+    fun callFinishAffinity()
+
     fun showLanguageOptions()
 
     companion object {

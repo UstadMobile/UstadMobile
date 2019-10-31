@@ -229,7 +229,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                 ustadBaseActivity.runOnUiThread {
                     managerAndroidBle = ustadBaseActivity.networkManagerBle!!
                     checkReady()
-                    showSnackbarPromptsIfRequired()
+
                 }
             })
         }
@@ -249,7 +249,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
-        if (entryListPresenter == null &&  ::managerAndroidBle.isInitialized) {
+        if (entryListPresenter == null &&  ::managerAndroidBle.isInitialized
+                && ::rootContainer.isInitialized) {
             //create entry adapter here to make sure bleManager is not null
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this,
                     managerAndroidBle, this)
@@ -264,6 +265,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
                     bundleToMap(arguments), this, umRepoDb.contentEntryDao)
             entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
+
+            showSnackbarPromptsIfRequired()
         }
     }
 
