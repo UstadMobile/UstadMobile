@@ -34,31 +34,31 @@ class DownloadJobPreparerTest {
     }
 
 
-    @Test
-    fun givenContentEntriesExistOnServerNotClient_whenPrepareCalled_thenDownloadJobtemsAreCreated() = runBlocking{
-        val contentEntrySet = insertTestContentEntries(serverDb, System.currentTimeMillis())
-        val downloadJob = DownloadJob(contentEntrySet.rootEntry.contentEntryUid,
-                System.currentTimeMillis())
-        val itemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob)
-        itemManager.awaitLoaded()
-        val downloadJobPreparer = DownloadJobPreparer()
-        downloadJobPreparer.prepare(itemManager, clientDb, clientRepo)
-
-
-        assertEquals("Total bytes to be downloaded was updated",
-                contentEntrySet.totalBytesToDownload,
-                clientDb.downloadJobItemDao.findByContentEntryUid2(
-                        contentEntrySet.rootEntry.contentEntryUid)!!.downloadLength)
-        val downloadJobInDb = clientDb.downloadJobDao.findByUid(itemManager.downloadJobUid)
-        assertNotNull("Download job in db is not null", downloadJobInDb)
-        assertEquals("DownloadJob status is QUEUED after preparation is finished",
-                JobStatus.QUEUED, downloadJobInDb!!.djStatus)
-        val downloadJobItems = clientDb.downloadJobItemDao.findByDownloadJobUid(downloadJobInDb.djUid)
-        assertTrue("All items status are now QUEUED:",
-                downloadJobItems.all { it.djiStatus == JobStatus.QUEUED })
-
-        Unit
-    }
+//    @Test
+//    fun givenContentEntriesExistOnServerNotClient_whenPrepareCalled_thenDownloadJobtemsAreCreated() = runBlocking{
+//        val contentEntrySet = insertTestContentEntries(serverDb, System.currentTimeMillis())
+//        val downloadJob = DownloadJob(contentEntrySet.rootEntry.contentEntryUid,
+//                System.currentTimeMillis())
+//        val itemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob)
+//        itemManager.awaitLoaded()
+//        val downloadJobPreparer = DownloadJobPreparer()
+//        downloadJobPreparer.prepare(itemManager, clientDb, clientRepo)
+//
+//
+//        assertEquals("Total bytes to be downloaded was updated",
+//                contentEntrySet.totalBytesToDownload,
+//                clientDb.downloadJobItemDao.findByContentEntryUid2(
+//                        contentEntrySet.rootEntry.contentEntryUid)!!.downloadLength)
+//        val downloadJobInDb = clientDb.downloadJobDao.findByUid(itemManager.downloadJobUid)
+//        assertNotNull("Download job in db is not null", downloadJobInDb)
+//        assertEquals("DownloadJob status is QUEUED after preparation is finished",
+//                JobStatus.QUEUED, downloadJobInDb!!.djStatus)
+//        val downloadJobItems = clientDb.downloadJobItemDao.findByDownloadJobUid(downloadJobInDb.djUid)
+//        assertTrue("All items status are now QUEUED:",
+//                downloadJobItems.all { it.djiStatus == JobStatus.QUEUED })
+//
+//        Unit
+//    }
 
     //@Test
     fun givenServerUnavailable_whenPrepareCalled_thenShouldThrowException() {
