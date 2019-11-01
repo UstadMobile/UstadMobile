@@ -65,6 +65,8 @@ kotlin {
         }
 
         jvmMain {
+            //Uncomment lines below to allow debugging on generated source code
+//            kotlin.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"

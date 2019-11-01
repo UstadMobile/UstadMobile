@@ -30,6 +30,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
 import java.io.IOException
 
@@ -306,7 +307,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    httpResultType: TypeName,
                                                    params: List<ParameterSpec>,
                                                    useKotlinxListSerialization: Boolean = false,
-                                                   kotlinxSerializationJsonVarName: String = ""): CodeBlock {
+                                                   kotlinxSerializationJsonVarName: String = "",
+                                                   useMultipartPartsVarName: String? = null): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
             .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
@@ -348,7 +350,10 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
     if(requestBodyParam != null) {
         val requestBodyParamType = requestBodyParam.type
 
-        val writeBodyCodeBlock = if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
+        val writeBodyCodeBlock = if(useMultipartPartsVarName != null) {
+            CodeBlock.of("body = %T($useMultipartPartsVarName)\n",
+                     MultiPartFormDataContent::class)
+        }else if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
                 && requestBodyParamType.rawType == List::class.asClassName()) {
             val entityComponentType = resolveEntityFromResultType(requestBodyParamType).javaToKotlinType()
             val serializerFnCodeBlock = if(entityComponentType in QUERY_SINGULAR_TYPES) {
@@ -1234,14 +1239,18 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      *
      * @param daoMethod FunSpec representing the method that is being delegated
      */
-    fun generateKtorPassToDaoCodeBlock(daoMethod: FunSpec): CodeBlock {
-        val codeBlock = CodeBlock.builder()
+    fun generateKtorPassToDaoCodeBlock(daoMethod: FunSpec, mutlipartHelperVarName: String? = null,
+                                       beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                       afterDaoCallCode: CodeBlock = CodeBlock.of("")): CodeBlock {
+        val getVarsCodeBlock = CodeBlock.builder()
+        val callCodeBlock = CodeBlock.builder()
+
         val returnType = daoMethod.returnType
         if(returnType != UNIT) {
-            codeBlock.add("val _result = ")
+            callCodeBlock.add("val _result = ")
         }
 
-        codeBlock.add("_dao.${daoMethod.name}(")
+        callCodeBlock.add("_dao.${daoMethod.name}(")
         var paramOutCount = 0
         daoMethod.parameters.forEachIndexed {index, param ->
             val paramTypeName = param.type.javaToKotlinType()
@@ -1249,18 +1258,27 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 return@forEachIndexed
 
             if(paramOutCount > 0)
-                codeBlock.add(",")
+                callCodeBlock.add(",")
 
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name))
+            callCodeBlock.add("__${param.name}")
+
+            getVarsCodeBlock.add("val __${param.name} : %T = ",
+                    param.type)
+                    .add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name,
+                        multipartHelperVarName = mutlipartHelperVarName))
+                    .add("\n")
 
             paramOutCount++
         }
 
-        codeBlock.add(")\n")
-
-        codeBlock.add(generateRespondCall(returnType!!, "_result"))
-
-        return codeBlock.build()
+        callCodeBlock.add(")\n")
+        return CodeBlock.builder()
+                .add(getVarsCodeBlock.build())
+                .add(beforeDaoCallCode)
+                .add(callCodeBlock.build())
+                .add(generateRespondCall(returnType!!, "_result"))
+                .add(afterDaoCallCode)
+                .build()
     }
 
     fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String,

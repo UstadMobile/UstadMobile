@@ -31,7 +31,8 @@ import javax.lang.model.element.ElementKind
 fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
                                          declareVariableName: String? = null,
                                          declareVariableType: String = "val",
-                                         gsonVarName: String = "_gson"): CodeBlock {
+                                         gsonVarName: String = "_gson",
+                                         multipartHelperVarName: String? = null): CodeBlock {
     val codeBlock = CodeBlock.builder()
     if(declareVariableName != null) {
         codeBlock.add("%L %L =", declareVariableType, declareVariableName)
@@ -57,9 +58,15 @@ fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
             codeBlock.add(" ?: listOf()\n")
         }
     }else {
-        codeBlock.add("$gsonVarName.fromJson(%M.%M<String>(), object: %T() {}.type)",
-                    DbProcessorKtorServer.CALL_MEMBER,
-                    MemberName("io.ktor.request", "receiveOrNull"),
+        val getJsonStrCodeBlock = if(multipartHelperVarName != null) {
+            CodeBlock.of("$multipartHelperVarName.receiveJsonStr()")
+        }else {
+            CodeBlock.of("%M.%M<String>()", DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request", "receiveOrNull"))
+        }
+        codeBlock.add("$gsonVarName.fromJson(")
+                .add(getJsonStrCodeBlock)
+                .add(", object: %T() {}.type)",
                     TypeToken::class.asClassName().parameterizedBy(removeTypeProjection(typeName)))
     }
 
@@ -190,7 +197,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 dbTypeClassName.simpleName)
 
         if(isSyncableDb) {
-            codeBlock.add("%M(_syncHelperDao, _db, _gson)\n",
+            codeBlock.add("%M(_syncHelperDao, _db, _gson, _attachmentsDir)\n",
                     MemberName(dbTypeClassName.packageName,
                             "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}_$SUFFIX_KTOR_ROUTE"))
         }
