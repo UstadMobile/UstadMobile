@@ -13,6 +13,7 @@ import io.ktor.client.request.forms.InputProvider
 import io.ktor.content.TextContent
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
 import java.io.File
 import java.io.FileInputStream
@@ -235,7 +236,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                                         File::class, entityType.simpleName)
                                 .build(),
                         afterDaoCallCode = CodeBlock.builder()
-                                //TODO: respond with bad request status
+                                .nextControlFlow("else")
+                                .add("%M.%M(%T.BadRequest, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
+                                    DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
                                 .endControlFlow()
                                 .build()))
             }else {
