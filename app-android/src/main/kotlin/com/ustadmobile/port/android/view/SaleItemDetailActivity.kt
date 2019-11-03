@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleItemDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.lib.db.entities.SaleItem
@@ -89,10 +90,30 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
             return true
 
         } else if (i == R.id.menu_save) {
-            mPresenter!!.handleClickSave()
+            checkAndSave()
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun checkAndSave(){
+
+        if(!saleRB.isChecked && !preOrderRB.isChecked){
+            sendMessage(getText(R.string.please_select_sale_as_pre_order_or_sale).toString())
+        }else {
+            mPresenter!!.handleClickSave()
+        }
+    }
+
+    fun sendMessage(toast: String) {
+
+        runOnUiThread {
+            Toast.makeText(
+                    this,
+                    toast,
+                    Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

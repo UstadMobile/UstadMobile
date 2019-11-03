@@ -5,4 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PersonWithPersonPicture : Person() {
     var personPictureUid: Long = 0
+
+
 }

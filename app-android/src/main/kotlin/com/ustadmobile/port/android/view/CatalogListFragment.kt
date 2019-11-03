@@ -21,7 +21,7 @@ import com.ustadmobile.core.controller.SelectSaleProductPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
 
 
 class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView {
@@ -65,17 +65,17 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
         //Set recycler views
         //RecyclerView - Recent
-        recentRV = rootContainer!!.findViewById<RecyclerView>(R.id.activity_select_sale_product_recent_rv)
+        recentRV = rootContainer!!.findViewById(R.id.activity_select_sale_product_recent_rv)
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         recentRV!!.setLayoutManager(layoutManager)
 
         //RecyclerView - Category
-        categoryRV = rootContainer!!.findViewById<RecyclerView>(R.id.activity_select_sale_product_category_rv)
+        categoryRV = rootContainer!!.findViewById(R.id.activity_select_sale_product_category_rv)
         val layoutManager2 = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         categoryRV!!.setLayoutManager(layoutManager2)
 
         //Recyclerview - Collection
-        collectionRV = rootContainer!!.findViewById<RecyclerView>(R.id.activity_select_sale_product_collection_rv)
+        collectionRV = rootContainer!!.findViewById(R.id.activity_select_sale_product_collection_rv)
         val layoutManager3 = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         collectionRV!!.setLayoutManager(layoutManager3)
 
@@ -109,8 +109,6 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
         collectionMore!!.setOnClickListener { v -> mPresenter!!.handleClickCollectionMore() }
 
-
-
         return rootContainer
     }
 
@@ -124,11 +122,9 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
                 R.id.activity_select_sale_product_appbar).visibility = View.GONE
     }
 
-    override fun finish() {
+    override fun finish() { }
 
-    }
-
-    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this,false, true, context!!)
 
@@ -137,7 +133,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
                 LivePagedListBuilder(factory, 20).build()
         //Observe the data:
         data.observe(this,
-                Observer<PagedList<SaleNameWithImage>>
+                Observer<PagedList<SaleDescWithSaleProductPicture>>
                 { recyclerAdapter!!.submitList(it) }
                 )
 
@@ -145,7 +141,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         recentRV!!.setAdapter(recyclerAdapter)
     }
 
-    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, true, true, context!!)
 
@@ -153,7 +149,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         // A warning is expected
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleNameWithImage>>
+        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>>
         { recyclerAdapter!!.submitList(it) })
 
         //set the adapter
@@ -161,13 +157,12 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     }
 
     fun searchCatalog(searchValue: String) {
+        //TODO: this
 
     }
 
 
-
-
-    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this,true, true, context!!)
 
@@ -175,7 +170,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         // A warning is expected
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleNameWithImage>>
+        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>>
         { recyclerAdapter!!.submitList(it) })
 
         //set the adapter
@@ -217,14 +212,14 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleNameWithImage> = object :
-                DiffUtil.ItemCallback<SaleNameWithImage>() {
-            override fun areItemsTheSame(oldItem: SaleNameWithImage,
-                                         newItem: SaleNameWithImage): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture> = object :
+                DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>() {
+            override fun areItemsTheSame(oldItem: SaleDescWithSaleProductPicture,
+                                         newItem: SaleDescWithSaleProductPicture): Boolean {
                 return oldItem == newItem
             }
-            override fun areContentsTheSame(oldItem: SaleNameWithImage,
-                                   newItem: SaleNameWithImage): Boolean {
+            override fun areContentsTheSame(oldItem: SaleDescWithSaleProductPicture,
+                                   newItem: SaleDescWithSaleProductPicture): Boolean {
                 return oldItem.productUid == newItem.productUid
             }
         }

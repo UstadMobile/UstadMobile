@@ -66,7 +66,7 @@ version = "0.2.13.14"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 172
+    ustadVersionCode = 173
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"

@@ -2,14 +2,14 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
+import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = 73)
 @Entity
-class SaleProductPicture() {
+@Serializable
+@EntityWithAttachment
+open class SaleProductPicture() {
 
     @PrimaryKey(autoGenerate = true)
     var saleProductPictureUid: Long = 0
@@ -34,4 +34,7 @@ class SaleProductPicture() {
 
     @LastChangedBy
     var saleProductPictureLCB: Int = 0
+
+    //Index for which picture. Default to zero
+    var saleProductPictureIndex : Int = 0
 }

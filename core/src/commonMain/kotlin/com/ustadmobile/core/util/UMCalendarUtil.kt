@@ -241,7 +241,7 @@ object UMCalendarUtil {
 
     fun getPrettyTimeFromLong(thisDate: Long, locale: Any?): String {
         val format: DateFormat = DateFormat("HH:mm")
-        val cal = DateTime(thisDate)
+        val cal = DateTime(thisDate).local
         return cal.format(format)
     }
 

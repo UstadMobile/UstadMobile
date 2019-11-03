@@ -230,7 +230,8 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     fun findAllSaleFilterAndSearchProvider(locationUid: Long,
-                                           spl: Long, sph: Long, from: Long, to: Long, searchQuery: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
+                   spl: Long, sph: Long, from: Long, to: Long,
+                   searchQuery: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (sort) {
             SORT_MOST_RECENT -> return findAllSaleItemsWithSearchFilterOrderDateAsc(

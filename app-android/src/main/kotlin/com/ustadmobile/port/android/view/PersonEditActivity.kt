@@ -501,7 +501,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         imagePathFromCamera = output.absolutePath
 
         val cameraImage = FileProvider.getUriForFile(this,
-                "$packageName.fileprovider", output)
+                "$packageName.provider", output)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
 
 

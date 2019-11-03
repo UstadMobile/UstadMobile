@@ -19,6 +19,8 @@ interface CustomerDetailView : UstadView {
 
     fun updateAndDismiss(personUid: Long, customerName: String)
 
+    fun setLocationPresets(locationPresets: Array<String>, selectedPosition: Int)
+
     companion object {
 
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.RoleDao
 import com.ustadmobile.core.impl.UmAccountManager
@@ -9,8 +10,11 @@ import com.ustadmobile.core.view.CustomerDetailView
 import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CD_LE_UID
 import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CUSTOMER_UID
 import com.ustadmobile.core.view.SelectPersonDialogView
+import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.Sale
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -27,12 +31,16 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
     var customerUid : Long = 0L
     var customerName : String = ""
     private val personDao : PersonDao
+    private val locationDao : LocationDao
     private val roleDao : RoleDao
-    lateinit var currentPerson : Person
+    private var currentPerson : Person? = null
+    private var updatedPerson: Person ?=null
     private var leUid : Long = 0L
 
     private var locationName : String = ""
     private var phoneNumber : String = ""
+
+    private var positionToLocationUid: MutableMap<Int, Long>? = null
 
 
     init {
@@ -40,6 +48,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         personDao = repository.personDao
+        locationDao = repository.locationDao
         roleDao = repository.roleDao
         if (arguments!!.containsKey(ARG_CUSTOMER_UID)) {
             customerUid = arguments.get(ARG_CUSTOMER_UID)!!.toLong()
@@ -49,6 +58,64 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
             leUid = arguments.get(ARG_CD_LE_UID)!!.toLong()
         }
 
+        positionToLocationUid = HashMap()
+    }
+
+    private fun startObservingLocations() {
+        val locLive = locationDao.findAllActiveLocationsLive()
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            locLive.observe(thisP, thisP::handleLocationsChanged)
+        }
+    }
+
+    private fun handleLocationsChanged(changedLocations: List<Location>?) {
+        var selectedPosition = 0
+
+        var locationUid: Long = 0
+
+
+        GlobalScope.launch {
+            if (currentPerson == null) {
+                currentPerson = personDao.findByUid(customerUid)!!
+            }
+            if (currentPerson!!.personLocationUid != 0L) {
+                locationUid = currentPerson!!.personLocationUid
+            }
+
+
+            val locationList = ArrayList<String>()
+            var spinnerId = 0
+            for (el in changedLocations!!) {
+                positionToLocationUid?.set(spinnerId, el.locationUid)
+
+                val title = el.title
+                if (title != null) {
+                    locationList.add(title)
+                }
+                if (locationUid == el.locationUid) {
+                    selectedPosition = spinnerId
+                }
+                spinnerId++
+            }
+
+            var locationPreset = locationList.toTypedArray<String>()
+
+            view.runOnUiThread(Runnable {
+                view.setLocationPresets(locationPreset, selectedPosition)
+            })
+        }
+
+    }
+
+    fun handleLocationSelected(position: Int) {
+        if (position >= 0 && !positionToLocationUid!!.isEmpty()
+                && positionToLocationUid!!.containsKey(position)) {
+            val locationUid = positionToLocationUid!!.get(position)
+
+
+            currentPerson!!.personLocationUid = locationUid!!
+        }
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -58,10 +125,82 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
         view.updatePhoneNumber("")
         view.updateCustomerName("")
 
-        if (customerUid != 0L) {
-            selectedCustomer(customerUid)
+        //Old way:
+
+//        if (customerUid != 0L) {
+//            selectedCustomer(customerUid)
+//        }else{
+//            createNewCustomer()
+//        }
+
+        //New way:
+        initFromCustomer()
+
+    }
+
+    fun initFromCustomer(){
+        val thisP = this
+        GlobalScope.launch {
+            if (customerUid == 0L) {
+                currentPerson = Person()
+                val customerRole = roleDao.findByName(Role.ROLE_NAME_CUSTOMER)
+
+                //Create Customer Role for this person and persist.
+                if(customerRole!=null){
+                    currentPerson!!.personRoleUid = customerRole.roleUid
+                }
+
+
+                currentPerson!!.personUid = personDao.createPersonAsync(currentPerson!!)
+                customerUid = currentPerson!!.personUid
+
+                view.runOnUiThread(Runnable {
+                    view.updatePAB(true)
+                })
+            }else{
+                view.runOnUiThread(Runnable {
+                    view.updatePAB(false)
+                })
+            }
+
+            val resultLive = personDao.findByUidLive(customerUid)
+            view.runOnUiThread(Runnable {
+                resultLive.observe(thisP, thisP::updateCustomerOnView)
+            })
+
+            startObservingLocations()
+
+        }
+    }
+
+    private fun updateCustomerOnView(person:Person?){
+        currentPerson = person!!
+        var firstNames = ""
+        var lastName = ""
+        if(currentPerson!!.firstNames != null){
+            firstNames = currentPerson!!.firstNames!!
+        }
+        if(currentPerson!!.lastName != null){
+            lastName = currentPerson!!.lastName!!
+        }
+        if(firstNames != "" && lastName != "") {
+            view.updateCustomerName(firstNames + " " + lastName)
+        }else if(firstNames!= ""){
+            view.updateCustomerName(firstNames + " " + lastName)
         }else{
-            createNewCustomer()
+            view.updateCustomerName("")
+        }
+
+        if(currentPerson!!.personAddress != null){
+            view.updateLocationName(currentPerson!!.personAddress!!)
+        }else {
+            view.updateLocationName("")
+        }
+
+        if(currentPerson!!.phoneNum != null){
+            view.updatePhoneNumber(currentPerson!!.phoneNum.toString())
+        }else{
+            view.updatePhoneNumber("")
         }
 
     }
@@ -74,63 +213,14 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
         view.finish()
     }
 
-    fun createNewCustomer(){
-        GlobalScope.launch {
-            currentPerson = Person()
-            val customerRole = roleDao.findByName(Role.ROLE_NAME_CUSTOMER)
-            currentPerson.personUid = personDao.createPersonAsync(currentPerson)
-            customerUid = currentPerson.personUid
-            //Create Customer Role for this person and persist.
-            if(customerRole!=null){
-                currentPerson.personRoleUid = customerRole.roleUid
-            }
-
-            view.runOnUiThread(Runnable {
-                view.updatePAB(true)
-            })
-
-        }
-    }
-
     fun updatePhoneNumber(pn: String){
-        currentPerson.phoneNum = pn
+        currentPerson!!.phoneNum = pn
     }
 
-
-    fun selectedCustomer(selectedCustomerUid: Long){
-        customerUid = selectedCustomerUid
-        GlobalScope.launch {
-            val result = personDao.findByUidAsync(customerUid)
-            currentPerson = result!!
-            var firstNames = ""
-            var lastName = ""
-            if(currentPerson.firstNames != null){
-                firstNames = currentPerson.firstNames!!
-            }
-            if(currentPerson.lastName != null){
-                lastName = currentPerson.lastName!!
-            }
-            view.updateCustomerName(firstNames + " " + lastName)
-
-            if(currentPerson.personAddress != null){
-                view.updateLocationName(currentPerson.personAddress!!)
-            }else {
-                view.updateLocationName("")
-            }
-
-            if(currentPerson.phoneNum != null){
-                view.updatePhoneNumber(currentPerson.phoneNum.toString())
-            }else{
-                view.updatePhoneNumber("")
-            }
-
-            view.runOnUiThread(Runnable {
-                view.updatePAB(false)
-            })
-
-        }
+    fun updateCustomerUid(uid: Long){
+        customerUid = uid
+        initFromCustomer()
     }
-
 
     fun doneSelecting(location: String, phoneNumber : String, customerName : String){
 
@@ -138,24 +228,24 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
 
         //Persist any changes
         GlobalScope.launch {
-            currentPerson.phoneNum = phoneNumber
+            currentPerson!!.phoneNum = phoneNumber
 
             if(newCustomerName != "" && newCustomerName.split(" " ).size > 1 &&
                     newCustomerName.split("\\w+").size >0){
 
-                currentPerson.lastName =
+                currentPerson!!.lastName =
                         newCustomerName.substring(newCustomerName.lastIndexOf(" ")+1);
-                currentPerson.firstNames =
+                currentPerson!!.firstNames =
                         newCustomerName.substring(0, newCustomerName.lastIndexOf(' '));
             }
             else{
-                currentPerson.firstNames = newCustomerName;
-                currentPerson.lastName = "";
+                currentPerson!!.firstNames = newCustomerName;
+                currentPerson!!.lastName = "";
             }
 
-            currentPerson.personAddress = location
-            currentPerson.active = true
-            personDao.updateAsync(currentPerson)
+            currentPerson!!.personAddress = location
+            currentPerson!!.active = true
+            personDao.updateAsync(currentPerson!!)
 
             view.updateAndDismiss(customerUid, newCustomerName)
         }

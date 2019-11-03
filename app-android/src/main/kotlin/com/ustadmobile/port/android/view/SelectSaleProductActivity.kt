@@ -19,7 +19,7 @@ import com.ustadmobile.core.controller.SelectSaleProductPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
 
 class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
 
@@ -99,7 +99,7 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
         fam!!.visibility = View.GONE
     }
 
-    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 false, false,
                 applicationContext)
@@ -107,13 +107,13 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })
+        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         recentRV!!.adapter = recyclerAdapter
     }
 
-    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 true, false,
                 applicationContext)
@@ -122,13 +122,13 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
 
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })
+        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         categoryRV!!.adapter = recyclerAdapter
     }
 
-    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 true, false,
                 applicationContext)
@@ -136,7 +136,7 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })
+        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         collectionRV!!.adapter = recyclerAdapter
@@ -159,14 +159,14 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleNameWithImage> = object : DiffUtil.ItemCallback<SaleNameWithImage>() {
-            override fun areItemsTheSame(oldItem: SaleNameWithImage,
-                                         newItem: SaleNameWithImage): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture> = object : DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>() {
+            override fun areItemsTheSame(oldItem: SaleDescWithSaleProductPicture,
+                                         newItem: SaleDescWithSaleProductPicture): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: SaleNameWithImage,
-                                            newItem: SaleNameWithImage): Boolean {
+            override fun areContentsTheSame(oldItem: SaleDescWithSaleProductPicture,
+                                            newItem: SaleDescWithSaleProductPicture): Boolean {
                 return oldItem == newItem
             }
         }

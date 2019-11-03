@@ -239,23 +239,31 @@ class PersonEditPresenter
     /**
      * Updates the pic of the person after taken to the Person object directly
      *
-     * @param picPath    The whole path of the picture.
+     * @param imageFilePath    The whole path of the picture.
      */
-    fun updatePersonPic(picPath: String) {
+    fun updatePersonPic(imageFilePath: String) {
+
+        val personPictureDao = repository.personPictureDao
+
         //Find the person
         GlobalScope.launch {
-            val personWithPic = personDao.findByUidAsync(personUid)
+            val thisPerson = personDao.findByUidAsync(personUid)
 
-            val personPictureDao = repository.personPictureDao
-            val personPicture = personPictureDao.findByPersonUidAsync(personWithPic!!.personUid)
-
-            if (personPicture != null) {
-                //TODO: KMP attachment :
-                //personPictureDao.setAttachmentFromTmpFile(personPicture.personPictureUid, picPath)
+            var personPictureUid : Long = 0L
+            var existingPP: PersonPicture ? = null
+            existingPP = personPictureDao.findByPersonUidAsync(personUid)
+            if(existingPP == null){
+                existingPP = PersonPicture()
+                existingPP.personPicturePersonUid = personUid
+                existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+                personPictureUid = personPictureDao.insertAsync(existingPP)
+                existingPP.personPictureUid = personPictureUid
             }
 
+            personPictureDao.setAttachment(existingPP, imageFilePath)
+
             //Update personWithpic
-            personDao.updatePersonAsync(personWithPic, loggedInPersonUid!!)
+            personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)
             generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
 
         }
@@ -283,8 +291,7 @@ class PersonEditPresenter
         GlobalScope.launch {
             val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
             if (personPicture != null) {
-                //TODO: KMP Atachment
-                //view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture.personPictureUid))
+                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture))
             }
         }
 
@@ -388,8 +395,12 @@ class PersonEditPresenter
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
-                thisValue = UMCalendarUtil.getPrettyDateFromLong(
-                        thisPerson.dateOfBirth, currnetLocale)
+                if(thisPerson.dateOfBirth > 0L) {
+                    thisValue = UMCalendarUtil.getPrettyDateFromLong(
+                            thisPerson.dateOfBirth, currnetLocale)
+                }else{
+                    thisValue = ""
+                }
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 field.labelMessageId, field.fieldIcon), thisValue)

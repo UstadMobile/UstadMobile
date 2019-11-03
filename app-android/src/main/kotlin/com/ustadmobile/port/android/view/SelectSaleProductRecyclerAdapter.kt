@@ -19,19 +19,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectSaleProductPresenter
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.core.db.dao.SaleProductPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
+import kotlinx.coroutines.*
 
 import java.io.File
 
 class SelectSaleProductRecyclerAdapter
-    : PagedListAdapter<SaleNameWithImage, SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
-    private var theContext: Context? = null
+    : PagedListAdapter<SaleDescWithSaleProductPicture, SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
+    private var theContext: Context
     private var theActivity: Activity? = null
     private var theFragment: Fragment? = null
     internal var mPresenter: SelectSaleProductPresenter
 
     private var listCategory: Boolean = false
     private var isCatalog: Boolean = false
+
+    private var productPictureDao : SaleProductPictureDao ? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -49,7 +54,7 @@ class SelectSaleProductRecyclerAdapter
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .resize(0, dpToPxImagePerson())
                 .noFade()
                 .into(theImage)
     }
@@ -61,18 +66,24 @@ class SelectSaleProductRecyclerAdapter
         val name = holder.itemView.findViewById<TextView>(R.id.item_sale_product_blob_title)
         val dots = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_blob_dots)
 
-        val pictureUid = entity!!.pictureUid
-        val imagePath = ""
-        if (pictureUid != 0L) {
-            //TODO: KMP Attachments
-            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
-            //                    .getAttachmentPath(pictureUid);
+        val pictureUid = entity!!.saleProductPictureUid
+        var imagePath = ""
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+
+            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity.productUid)
+            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!);
+
+            if (!imagePath.isEmpty())
+                setPictureOnView(imagePath, imageView)
+            else
+                imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
         }
 
-        if (imagePath != null && !imagePath.isEmpty())
-            setPictureOnView(imagePath, imageView)
-        else
-            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
 
         name.text = entity.name
 
@@ -134,10 +145,10 @@ class SelectSaleProductRecyclerAdapter
 
     }
 
-    inner class SelectSaleProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
     internal constructor(
-            diffCallback: DiffUtil.ItemCallback<SaleNameWithImage>,
+            diffCallback: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>,
             thePresenter: SelectSaleProductPresenter,
             activity: Activity,
             isCategory: Boolean?,
@@ -151,7 +162,7 @@ class SelectSaleProductRecyclerAdapter
     }
 
     internal constructor(
-            diffCallback: DiffUtil.ItemCallback<SaleNameWithImage>,
+            diffCallback: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>,
             thePresenter: SelectSaleProductPresenter,
             fragment: Fragment,
             isCategory: Boolean?,
@@ -166,10 +177,10 @@ class SelectSaleProductRecyclerAdapter
 
     companion object {
 
-        private val IMAGE_WITH = 100
+        private val IMAGE_WIDTH = 100
 
         private fun dpToPxImagePerson(): Int {
-            return (IMAGE_WITH * Resources.getSystem().displayMetrics.density).toInt()
+            return (IMAGE_WIDTH * Resources.getSystem().displayMetrics.density).toInt()
         }
     }
 

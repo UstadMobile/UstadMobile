@@ -37,6 +37,8 @@ interface BasePointView : UstadView {
 
     fun loadProfileIcon(profileUrl: String);
 
+    fun loadProfileImage(imagePath: String)
+
     companion object {
 
         val VIEW_NAME = "BasePoint2"

@@ -113,14 +113,6 @@ class SaleDetailPresenter(context: Any,
         if(saleUid != null) {
             val thisP = this
 
-//            //Observe this sale entity
-//            val saleLiveData = saleDao.findByUidLive(saleUid)
-//
-//
-//            GlobalScope.launch(Dispatchers.Main) {
-//                saleLiveData.observe(thisP, thisP::handleSaleChanged)
-//            }
-
             GlobalScope.launch {
                 //Get the sale entity
                 val resultLive = saleDao.findByUidLive(saleUid)
@@ -128,26 +120,17 @@ class SaleDetailPresenter(context: Any,
                     resultLive.observe(thisP, thisP::updateSaleOnView)
                 })
 
-                startObservingLocations()
+                //startObservingLocations()
 
+                val saleVoiceNote = saleVoiceNoteDao.findByPersonUidAsync(saleUid)
+                if(saleVoiceNote != null) {
+                    val saleVoiceNotePath = saleVoiceNoteDao.getAttachmentPath(saleVoiceNote!!)
+                    if(saleVoiceNotePath != null){
+                        view.updateSaleVoiceNoteOnView(saleVoiceNotePath)
+                    }
+                }
 
             }
-
-            //Any voice notes
-            //TODO: Implement this on KMP
-            //        saleVoiceNoteDao.findBySaleUidAsync(saleUid, object : UmCallback<SaleVoiceNote> {
-            //            override fun onSuccess(result: SaleVoiceNote?) {
-            //                if (result != null) {
-            //                    val voiceNotePath = saleVoiceNoteDao.getAttachmentPath(result.saleVoiceNoteUid)
-            //                    if (voiceNotePath != null && !voiceNotePath!!.isEmpty()) {
-            //                        view.updateSaleVoiceNoteOnView(voiceNotePath!!)
-            //                    }
-            //                }
-            //            }
-            //            override fun onFailure(exception: Throwable?) {
-            //
-            //            }
-            //        })
 
             getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
             updateSaleItemProvider(saleUid)
@@ -156,21 +139,6 @@ class SaleDetailPresenter(context: Any,
             getPaymentTotalAndUpdateView()
         }
     }
-
-//    private fun handleSaleChanged(sale: Sale?) {
-//        //set the og person value
-//        if (currentSale == null)
-//            currentSale = sale
-//
-//        if (updatedSale == null || updatedSale != sale) {
-//            if (sale != null) {
-//                updatedSale = sale
-//                view.updateSaleOnView(updatedSale!!)
-//
-//            }
-//        }
-//
-//    }
 
     fun updateSaleOnView(sale:Sale?){
         if(sale != null){
@@ -185,6 +153,7 @@ class SaleDetailPresenter(context: Any,
             })
 
             startObservingCustomer()
+            startObservingLocations()
         }
     }
 
@@ -211,7 +180,6 @@ class SaleDetailPresenter(context: Any,
                     resultLive.observe(thisP, thisP::updateSaleNumbers)
                 })
 
-                //val res = saleItemDao.findTotalPaidBySaleAsync(saleUid)
                 val resLive = saleItemDao.findTotalPaidBySaleLive(saleUid)
                 view.runOnUiThread(Runnable {
                     resLive.observe(thisP, thisP::updateOrderTotal)
@@ -283,9 +251,6 @@ class SaleDetailPresenter(context: Any,
 
         }
     }
-
-
-
 
     private fun startObservingLocations() {
         val locLive = locationDao.findAllActiveLocationsLive()
@@ -377,9 +342,7 @@ class SaleDetailPresenter(context: Any,
                     try {
                         val result = saleVoiceNoteDao.insertAsync(voiceNote)
 
-                        //TODO: File stuff in KMP
-//                        val `is` = FileInputStream(voiceNoteFileName!!)
-//                        saleVoiceNoteDao.setAttachment(result, `is`)
+                        saleVoiceNoteDao.setAttachment(voiceNote, voiceNoteFileName!!)
 
                     } catch (e: IOException) {
                         println(e!!.message)
@@ -438,6 +401,8 @@ class SaleDetailPresenter(context: Any,
         customerUid = cUid
         updatedSale!!.saleCustomerUid = customerUid
         GlobalScope.launch {
+            saleDao.updateAsync(updatedSale!!)
+
             customer = personDao.findByUid(customerUid)
             var firstNames = ""
             var lastName = ""

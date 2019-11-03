@@ -221,6 +221,9 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         if (arguments.containsKey(ARG_SALE_ITEM_NAME)) {
             args.put(ARG_SALE_ITEM_NAME, arguments[ARG_SALE_ITEM_NAME].toString())
         } else {
+            if(saleProductName == null){
+                saleProductName = ""
+            }
             args.put(ARG_SALE_ITEM_NAME, saleProductName!!)
         }
         if (arguments.containsKey(ARG_SALE_ITEM_DUE_DATE)) {
@@ -273,6 +276,9 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         if(!updatedSaleItem!!.saleItemSold || updatedSaleItem!!.saleItemPreorder) {
             for (everyReminder in reminders!!) {
                 val days = everyReminder!!.saleItemReminderDays
+                if(saleTitle == null){
+                    saleTitle = ""
+                }
                 view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
             }
         }

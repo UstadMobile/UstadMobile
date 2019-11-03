@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductCategoryListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 
 import java.io.File
@@ -58,11 +59,10 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
         val desc = holder.itemView.findViewById<TextView>(R.id.item_sale_product_desc)
 
         val pictureUid = entity!!.pictureUid
-        val imagePath = ""
+        var imagePath = ""
         if (pictureUid != 0L) {
-            //TODO: KMP Attachment Dao
-            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
-            //                    .getAttachmentPath(pictureUid);
+//            imagePath = UmAppDatabase.Companion.getInstance(theContext).saleProductPictureDao
+//                            .getAttachmentPath(entity);
         }
 
         if (imagePath != null && !imagePath.isEmpty())

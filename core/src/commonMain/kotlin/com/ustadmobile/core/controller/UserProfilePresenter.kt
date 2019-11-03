@@ -53,7 +53,9 @@ class UserProfilePresenter(context: Any,
             GlobalScope.launch {
                 val result = personDao.findByUidAsync(loggedInPersonUid)
                 loggedInPerson = result
+
                 if (loggedInPerson != null) {
+
                     val personName = result!!.firstNames + " " + result.lastName
                     view.runOnUiThread(Runnable {
                         view.updateToolbarTitle(personName)
@@ -63,9 +65,7 @@ class UserProfilePresenter(context: Any,
                     val personPicture =
                             personPictureDao!!.findByPersonUidAsync(loggedInPerson!!.personUid)
                     if (personPicture != null) {
-                        //TODO: Fix for KMP
-//                                view.updateImageOnView(personPictureDao!!.getAttachmentPath
-//                                (personPicture.personPictureUid))
+                        view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture))
                     }
                 }
             }
@@ -117,31 +117,31 @@ class UserProfilePresenter(context: Any,
         //        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
-    //TODO: Changed to File path instead of File object
     fun handleCompressedImage(imageFilePath: String) {
         val personPictureDao = repository.personPictureDao
-        val personPicture = PersonPicture()
-        personPicture.personPicturePersonUid = loggedInPersonUid
-        personPicture.picTimestamp = DateTime.nowUnixLong() //Check this TODO
-
         val personDao = repository.personDao
 
         GlobalScope.launch {
             try {
-                val personPictureUid = personPictureDao.insertAsync(personPicture)
-                //TODO: fix for KMP
-                //personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile)
+
+                var existingPP = personPictureDao.findByPersonUidAsync(loggedInPersonUid)
+                if(existingPP == null){
+                    existingPP = PersonPicture()
+                    existingPP.personPicturePersonUid = loggedInPersonUid
+                    existingPP.picTimestamp = DateTime.nowUnixLong() //Check this TODO
+                    val personPictureUid = personPictureDao.insertAsync(existingPP)
+                    existingPP.personPictureUid = personPictureUid
+                }
+
+                personPictureDao.setAttachment(existingPP, imageFilePath)
 
                 //Update person and generate feeds for person
                 personDao.updateAsync(loggedInPerson!!) //TODO: Check this
 
-                //TODO: Fix for KMP
-                //view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid))
+                view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP))
             }catch(e:Exception){
                 println(e.message)
             }
-
-
         }
     }
 

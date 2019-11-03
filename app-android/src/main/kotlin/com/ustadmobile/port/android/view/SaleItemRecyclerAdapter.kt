@@ -18,8 +18,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleDetailPresenter
+import com.ustadmobile.core.db.dao.SaleProductPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 
 import java.io.File
 
@@ -28,6 +34,8 @@ class SaleItemRecyclerAdapter(
         internal var mPresenter: SaleDetailPresenter,
         internal var theActivity: Activity,
         internal var theContext: Context) : PagedListAdapter<SaleItemListDetail, SaleItemRecyclerAdapter.SaleDetailViewHolder>(diffCallback) {
+
+    private var productPictureDao : SaleProductPictureDao? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SaleDetailViewHolder {
 
@@ -45,7 +53,7 @@ class SaleItemRecyclerAdapter(
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .resize(0, dpToPxImagePerson())
                 .noFade()
                 .into(theImage)
     }
@@ -56,17 +64,33 @@ class SaleItemRecyclerAdapter(
 
         val pictureUid = entity!!.saleItemPictureUid
         val imageView = holder.itemView.findViewById<ImageView>(R.id.item_sale_item_image)
-        val imagePath = ""
-        if (pictureUid != 0L) {
-            //TODO: Fix attachment stuff KMP
-            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
-            //                    .getAttachmentPath(pictureUid);
+        var imagePath = ""
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+
+            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity.saleItemProductUid)
+            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!);
+
+            if (!imagePath.isEmpty())
+                setPictureOnView(imagePath, imageView)
+            else
+                imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
         }
 
-        if (imagePath != null && !imagePath.isEmpty())
-            setPictureOnView(imagePath, imageView)
-        else
-            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+//        if (pictureUid != 0L) {
+//            //TODO: Fix attachment stuff KMP
+//            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
+//            //                    .getAttachmentPath(pictureUid);
+//        }
+//
+//        if (imagePath != null && !imagePath.isEmpty())
+//            setPictureOnView(imagePath, imageView)
+//        else
+//            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
 
         val itemName = holder.itemView.findViewById<TextView>(R.id.item_sale_item_name)
         val itemQuantity = holder.itemView.findViewById<TextView>(R.id.item_sale_item_quantity)
@@ -101,7 +125,7 @@ class SaleItemRecyclerAdapter(
 
     }
 
-    inner class SaleDetailViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class SaleDetailViewHolder(itemView: View , var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
     companion object {
         val IMAGE_WITH = 52

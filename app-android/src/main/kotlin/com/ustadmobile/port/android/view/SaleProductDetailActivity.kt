@@ -312,7 +312,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         imagePathFromCamera = output.absolutePath
 
         val cameraImage = FileProvider.getUriForFile(this,
-                "$packageName.fileprovider", output)
+                "$packageName.provider", output)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
 
         val resInfoList = packageManager.queryIntentActivities(cameraIntent,
@@ -350,7 +350,6 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    //TODO: KMP File stuff
                     mPresenter!!.handleCompressedImage(imageFile.canonicalPath)
                 }
 
@@ -370,7 +369,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
                     val galleryFile = File(imagePathFromCamera)
                     try {
-                        //TODO: KMP : File related.
+
                         mPresenter!!.handleCompressedImage(galleryFile.canonicalPath)
                     } catch (e: IOException) {
                         e.printStackTrace()
@@ -400,8 +399,8 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                         .into(productImageView)
 
                 //Click on image - open dialog to show bigger picture
-                //productImageView.setOnClickListener(view ->
-                //        mPresenter.openPictureDialog(imagePath));
+                productImageView.setOnClickListener{view ->
+                        mPresenter!!.openPictureDialog(imagePath)};
             }
 
         }

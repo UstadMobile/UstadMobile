@@ -15,7 +15,13 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Transformation
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
+import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.PersonWithPersonPicture
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import java.io.File
 import java.util.*
 
@@ -34,7 +40,10 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
 
     private val colorMap = Hashtable<Int, String>()
 
-    class PeopleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    private var personPictureDao: PersonPictureDao ?=null
+
+    class PeopleViewHolder(itemView: View, var imageLoadJob: Job? = null) :
+            RecyclerView.ViewHolder(itemView)
 
     internal constructor(diffCallback: DiffUtil.ItemCallback<PersonWithPersonPicture>,
                          context: Context, presenter: CommonHandlerPresenter<*>) : super(diffCallback) {
@@ -57,11 +66,11 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
      * @param viewType View Type not used here.
      * @return New ViewHolder for the ClazzStudent type
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PeopleBlobListRecyclerAdapter.PeopleViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PeopleViewHolder {
 
         val clazzStudentListItem = LayoutInflater.from(theContext).inflate(
                 R.layout.item_peopleblob, parent, false)
-        return PeopleBlobListRecyclerAdapter.PeopleViewHolder(clazzStudentListItem)
+        return PeopleViewHolder(clazzStudentListItem)
     }
 
     /**
@@ -113,7 +122,7 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
      * @param position  The position in the recycler view.
      */
     override fun onBindViewHolder(
-            holder: PeopleBlobListRecyclerAdapter.PeopleViewHolder, position: Int) {
+            holder: PeopleViewHolder, position: Int) {
 
         val thisPerson = getItem(position)
 
@@ -130,14 +139,21 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
 
         assert(thisPerson != null)
 
-        val personPictureUid = thisPerson!!.personPictureUid
-        if (personPictureUid != 0L) {
-            //TODO: KMP Picture attachment thingi
-//            val imgPath = UmAppDatabase.getInstance(theContext).personPictureDao.getAttachmentPath(
-//                    personPictureUid)
-//            updateImageOnView(imgPath, studentImage)
-        } else {
-            studentImage.setImageResource(R.drawable.ic_people_black_24dp)
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            personPictureDao = UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+
+            val personPicture = personPictureDao!!.findByPersonUidAsync(thisPerson!!.personUid)
+
+            val imgPath = personPictureDao!!.getAttachmentPath(personPicture!!)
+
+            if (!imgPath.isEmpty())
+                updateImageOnView(imgPath, studentImage)
+            else
+                studentImage.setImageResource(R.drawable.ic_people_black_24dp)
         }
 
         val studentEntry = holder.itemView
@@ -197,7 +213,7 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
             }
 
 
-            mPresenter.handleCommonPressed(thisPerson.personUid)
+            mPresenter.handleCommonPressed(thisPerson!!.personUid)
         }
 
 

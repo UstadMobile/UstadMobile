@@ -6,12 +6,7 @@ import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
-import com.ustadmobile.lib.db.entities.SaleProduct
-import com.ustadmobile.lib.db.entities.SaleProductParentJoin
-import com.ustadmobile.lib.db.entities.SaleProductSelected
-
-
+import com.ustadmobile.lib.db.entities.*
 
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
@@ -60,6 +55,14 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
             " AND child.saleProductCategory = 1 ")
     abstract fun findAllCategoriesInCollection(): DataSource.Factory<Int, SaleNameWithImage>
+
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT2 +
+            " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
+            "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
+            "   WHERE SaleProduct.saleProductName = 'Collection' " +
+            "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
+            " AND child.saleProductCategory = 1 ")
+    abstract fun findAllCategoriesInCollectionWithPP(): DataSource.Factory<Int, SaleDescWithSaleProductPicture>
 
 
     @Query("SELECT * FROM SaleProductParentJoin WHERE " +
@@ -126,6 +129,15 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     companion object {
 
         const val QUERY_SELECT_ALL_SALE_PRODUCT = "SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.saleProductPictureUid as pictureUid, " +
+                " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
+                " FROM SaleProductParentJoin " +
+                " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+                " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+                " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
+                " WHERE SaleProductParentJoin.saleProductParentJoinActive = 1 AND child.saleProductActive = 1 "
+
+        const val QUERY_SELECT_ALL_SALE_PRODUCT2 =
+                "SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.* , " +
                 " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
                 " FROM SaleProductParentJoin " +
                 " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +

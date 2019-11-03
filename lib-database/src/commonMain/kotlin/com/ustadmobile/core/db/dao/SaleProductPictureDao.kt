@@ -3,6 +3,8 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.GetAttachmentData
+import com.ustadmobile.door.annotation.SetAttachmentData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleProductPicture
@@ -19,18 +21,16 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
     @Query("SELECT * FROM SaleProductPicture where saleProductPictureSaleProductUid = :uid ORDER BY " + " saleProductPictureTimestamp DESC LIMIT 1")
     abstract fun findByProductUidLive(uid: Long): DoorLiveData<SaleProductPicture?>
 
-//TODO: Fix KMP
-//    @UmDbSetAttachment
-//    abstract fun setAttachment(uid: Long, pictureAttachment: InputStream)
-//
-//    @UmDbGetAttachment
-//    abstract fun getAttachmentPath(uid: Long): String
-//
-//    @UmDbGetAttachment
-//    abstract fun getAttachmentStream(uid: Long): InputStream
-//
-//    @UmDbSetAttachment
-//    abstract fun setAttachmentFromTmpFile(uid: Long, tmpFilePath: String)
+
+    @SetAttachmentData
+    open fun setAttachment(entity: SaleProductPicture, filePath: String) {
+
+    }
+
+    @GetAttachmentData
+    open fun getAttachmentPath(entity: SaleProductPicture): String {
+        return ""
+    }
 
     @Query("SELECT * FROM SaleProductPicture where " +
             " saleProductPictureSaleProductUid = :saleProductUid " +
@@ -38,16 +38,9 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
     abstract suspend fun findBySaleProductUidAsync(saleProductUid: Long)
             :SaleProductPicture?
 
-//TODO: Fix KMP
-//    @UmDbSetAttachment
-//    @UmRestAccessible
-//    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-//    abstract fun uploadAttachment(uid: Long, attachment: InputStream)
-//
-//    @UmDbGetAttachment
-//    @UmRestAccessible
-//    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-//    abstract fun downloadAttachment(uid: Long): InputStream
+
+    @Query(""" SELECT * FROM SaleProductPicture WHERE saleProductPictureSaleProductUid = :saleProductUid AND saleProductPictureIndex = 0""")
+    abstract suspend fun findBySaleProductUidAsync2(saleProductUid: Long): SaleProductPicture?
 
 
 }

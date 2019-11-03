@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.lib.db.entities.SaleProductGroup.Companion.PRODUCT_GROUP_TYPE_PRODUCT
@@ -64,6 +65,9 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
     abstract fun findAllActiveProductsSNWIProvider(): DataSource.Factory<Int,SaleNameWithImage>
 
+    @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_PP)
+    abstract fun findAllActiveProductsSNWIProviderWithPP(): DataSource.Factory<Int,SaleDescWithSaleProductPicture>
+
     //Products not existing already in Category
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY)
     abstract fun findAllActiveProductsNotInCategorySNWIProvider(
@@ -81,6 +85,9 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
     abstract fun findAllActiveCategoriesSNWIProvider(): DataSource.Factory<Int,SaleNameWithImage>
+
+    @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_PP)
+    abstract fun findAllActiveCategoriesSNWIProviderWithPP(): DataSource.Factory<Int, SaleDescWithSaleProductPicture>
 
     //Categories not existing already in Category
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY)
@@ -138,17 +145,29 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
                 PRODUCT_GROUP_TYPE_PRODUCT + " as type " +
                 " FROM SaleProduct " +
                 "  LEFT JOIN SaleProductPicture on " +
-                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
                 " WHERE saleProductActive = 1 "
 
-        const  val ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY = "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+        const  val ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY =
+                "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
                 " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
                 " SaleProductPicture.saleProductPictureUid as pictureUid, " +
                 PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
 
                 " FROM SaleProduct " +
                 "  LEFT JOIN SaleProductPicture on " +
-                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0  " +
+                " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 0"
+
+        const  val ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_PP =
+                "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+                " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+                " SaleProductPicture.* , " +
+                PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
+
+                " FROM SaleProduct " +
+                "  LEFT JOIN SaleProductPicture on " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
                 " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 0"
 
         const val ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY = "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
@@ -158,7 +177,7 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
                 " FROM SaleProduct " +
                 "  LEFT JOIN SaleProductPicture on " +
-                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0  " +
                 " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 0 " +
                 "  AND SaleProduct.saleProductUid NOT IN (Select SaleProduct.saleProductUid FROM SaleProductParentJoin " +
                 "  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
@@ -173,7 +192,17 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
                 " FROM SaleProduct " +
                 "  LEFT JOIN SaleProductPicture on " +
-                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0  " +
+                " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 1"
+
+        const val ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_PP = "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+                " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+                " SaleProductPicture.* , " +
+                PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
+
+                " FROM SaleProduct " +
+                "  LEFT JOIN SaleProductPicture on " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0  " +
                 " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 1"
 
         const val ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY = "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
@@ -183,7 +212,7 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
                 " FROM SaleProduct " +
                 "  LEFT JOIN SaleProductPicture on " +
-                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0  " +
                 " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 1 " +
                 "  AND SaleProduct.saleProductUid NOT IN (Select SaleProduct.saleProductUid FROM SaleProductParentJoin " +
                 "  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +

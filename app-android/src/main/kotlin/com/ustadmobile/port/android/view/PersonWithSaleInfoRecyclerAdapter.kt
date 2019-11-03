@@ -19,9 +19,15 @@ import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonWithSaleInfoListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import java.io.File
 
 
@@ -34,6 +40,7 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
     internal var mPresenter: PersonWithSaleInfoListPresenter
     internal var paymentsDueTab = false
     internal var preOrderTab = false
+    private var personPictureDao: PersonPictureDao?=null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonWithSaleInfoViewHolder {
 
@@ -73,26 +80,43 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
                 theContext) + " " + topP
         topProducts.setText(topProductsBit)
 
-        //TODO: Get and update PersonPicture
-        var personPicturePath = ""
-        val personPictureUid = entity.personPictureUid
-        if(personPictureUid != null && personPictureUid != 0L){
-            //TODO: Fix attachment stuff KMP
-//            personPicturePath =
-//                    UmAppDatabase.getInstance(theContext).personPictureDao.getAttachmentPath(
-//                            personPictureUid)
-            if(personPicturePath != null && !personPicturePath.isEmpty()){
-                setPictureOnView(personPicturePath, personPicture)
-            }else{
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            personPictureDao = UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+
+            val personPictureEntity = personPictureDao!!.findByPersonUidAsync(entity!!.personUid)
+
+            val imgPath = personPictureDao!!.getAttachmentPath(personPictureEntity!!)
+
+            if (!imgPath.isEmpty())
+                setPictureOnView(imgPath, personPicture)
+            else
                 personPicture.setImageResource(R.drawable.ic_account_circle_white_36dp)
-            }
         }
+
+//        //TODO: Get and update PersonPicture
+//        var personPicturePath = ""
+//        val personPictureUid = entity.personPictureUid
+//        if(personPictureUid != null && personPictureUid != 0L){
+//            //TODO: Fix attachment stuff KMP
+////            personPicturePath =
+////                    UmAppDatabase.getInstance(theContext).personPictureDao.getAttachmentPath(
+////                            personPictureUid)
+//            if(personPicturePath != null && !personPicturePath.isEmpty()){
+//                setPictureOnView(personPicturePath, personPicture)
+//            }else{
+//                personPicture.setImageResource(R.drawable.ic_account_circle_white_36dp)
+//            }
+//        }
 
         val cl = holder.itemView.findViewById<ConstraintLayout>(R.id.item_person_cl)
         cl.setOnClickListener { mPresenter.handleClickWE(entity.personUid) }
     }
 
-    inner class PersonWithSaleInfoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class PersonWithSaleInfoViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
 
     internal constructor(

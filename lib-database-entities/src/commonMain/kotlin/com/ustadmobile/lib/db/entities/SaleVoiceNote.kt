@@ -2,14 +2,12 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 
 
 @SyncableEntity(tableId = 75)
 @Entity
+@EntityWithAttachment
 class SaleVoiceNote {
 
     @PrimaryKey(autoGenerate = true)

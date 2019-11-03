@@ -134,20 +134,22 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
          * float saleItemDiscountPerItem;
          * boolean saleItemDelivered;
          */
-        const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY = "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+        const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY =
+                "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
                 " SaleProduct.saleProductName AS saleItemProductName " +
                 "FROM SaleItem " +
                 " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
                 " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
-                "   SaleProduct.saleProductUid " +
+                "   SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
                 "WHERE saleItemActive = 1"
 
-        const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY = "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+        const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY =
+                "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
                 " SaleProduct.saleProductName AS saleItemProductName " +
                 "FROM SaleItem " +
                 " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
                 " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
-                "   SaleProduct.saleProductUid " +
+                "   SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
                 "WHERE saleItemActive = 1 AND SaleItem.saleItemSaleUid = :saleUid"
 
         //Total amount of every sale per sale uid

@@ -141,10 +141,9 @@ class SaleProductDetailPresenter(context: Any,
         //Update image on view
         GlobalScope.launch {
             val productPicture =
-                    pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
+                pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
             if (productPicture != null) {
-                //TODO: Implement this for KMP
-                //view.updateImageOnView(pictureDao.getAttachmentPath(productPicture.saleProductPictureUid))
+                view.updateImageOnView(pictureDao.getAttachmentPath(productPicture))
             }
         }
 
@@ -160,9 +159,8 @@ class SaleProductDetailPresenter(context: Any,
     private fun handleProductPictureChanged(productPicture: SaleProductPicture?) {
         if (productPicture != null) {
             view.runOnUiThread(Runnable{
-                //TODO: Implement this for KMP
-//                view.updateImageOnView(
-//                        pictureDao.getAttachmentPath(productPicture.saleProductPictureUid))
+                view.updateImageOnView(
+                        pictureDao.getAttachmentPath(productPicture))
             })
         }
     }
@@ -224,14 +222,21 @@ class SaleProductDetailPresenter(context: Any,
 
         //Create picture entry
 
-        val productPicture = SaleProductPicture()
-        productPicture.saleProductPictureSaleProductUid = currentSaleProduct!!.saleProductUid
-        productPicture.saleProductPictureTimestamp = DateTime.nowUnixLong()
+        var productPictureUid : Long = 0L
 
         GlobalScope.launch {
-            val productPictureUid = pictureDao.insertAsync(productPicture)
-            //TODO: Fix this for KMP
-//            pictureDao.setAttachmentFromTmpFile(productPictureUid, imageFile)
+            var existingPP = pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
+            if(existingPP == null){
+                existingPP = SaleProductPicture()
+                existingPP.saleProductPictureSaleProductUid = currentSaleProduct!!.saleProductUid
+                existingPP.saleProductPictureTimestamp = DateTime.nowUnixLong()
+                productPictureUid = pictureDao.insertAsync(existingPP)
+                existingPP.saleProductPictureUid = productPictureUid
+            }
+
+            if(existingPP!=null) {
+                pictureDao.setAttachment(existingPP, imageFilePath)
+            }
         }
 
     }

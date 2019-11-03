@@ -67,9 +67,7 @@ class PersonWithSaleInfoProfilePresenter(context: Any,
                 val personPicture =
                         personPictureDao.findByPersonUidAsync(thisPerson!!.personUid)
                 if (personPicture != null) {
-                    //TODO: Fix for KMP
-                    //view.updateImageOnView(personPictureDao!!.getAttachmentPath
-                    //(personPicture.personPictureUid))
+                    view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture))
                 }
             }
         }

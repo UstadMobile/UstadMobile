@@ -344,7 +344,7 @@
         app:floating_background_color="@color/accent"
         app:floating_left_icon="@drawable/ic_edit_white_24dp"
         app:floating_title="@string/edit"
-        app:floating_title_color="@android:color/white"
+        app:floating_title_color="@color/icons"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">

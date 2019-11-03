@@ -10,7 +10,10 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
@@ -58,6 +61,8 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
 
     private var pabMenuItem : MenuItem ?= null
 
+    private lateinit var locationSpinner: Spinner
+
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -79,7 +84,7 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
 
     override fun onSelectPersonListener(personUid: Long) {
         customerUid = personUid
-        mPresenter!!.selectedCustomer(customerUid!!)
+        mPresenter!!.updateCustomerUid(customerUid!!)
     }
 
 
@@ -99,6 +104,16 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         }
     }
 
+    override fun setLocationPresets(locationPresets: Array<String>, selectedPosition: Int) {
+
+        val adapter = ArrayAdapter(activity,
+                R.layout.item_simple_spinner, locationPresets)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        locationSpinner!!.adapter = adapter
+        locationSpinner!!.setSelection(selectedPosition)
+
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
 
@@ -112,6 +127,8 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         toolbar = rootView.findViewById(R.id.activity_customer_detail_toolbar)
         toolbar.setTitle(R.string.customer_details)
 
+        locationSpinner = rootView.findViewById(R.id.activity_customer_detail_location_spinner)
+
         var upIcon = AppCompatResources.getDrawable(context!!,
                 R.drawable.ic_arrow_back_white_24dp)
 
@@ -124,6 +141,7 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         pabMenuItem = toolbar.menu.findItem(R.id.menu_save)
         pabMenuItem!!.setTitle(R.string.select)
         pabMenuItem!!.isVisible = true
+
 
         //Click the tick button on the toolbar:
         toolbar.setOnMenuItemClickListener { item ->
@@ -187,6 +205,15 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
                 updatePAB(true)
             }
         })
+
+        //Location spinner
+        locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                mPresenter!!.handleLocationSelected(position)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
 
         if (arguments!!.containsKey(CustomerDetailView.ARG_CUSTOMER_UID)) {
             newCustomer = false

@@ -114,7 +114,7 @@ class SelectProducerActivity : UstadBaseActivity(), SelectProducerView {
     override fun updateSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(this,
-                R.layout.item_simple_spinner, sortSpinnerPresets)
+                R.layout.item_simple_spinner_gray, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter
     }

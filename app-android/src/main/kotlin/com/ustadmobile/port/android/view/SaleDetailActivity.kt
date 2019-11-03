@@ -116,13 +116,14 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
 
     }
 
-    fun requestPermission() {
+    private fun requestPermission() {
 
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, permissions, RECORD_AUDIO_PERMISSION_REQUEST)
+            ActivityCompat.requestPermissions(this@SaleDetailActivity, permissions, RECORD_AUDIO_PERMISSION_REQUEST)
             return
         }
+        startRecording()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
@@ -131,7 +132,9 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
         when (requestCode) {
             RECORD_AUDIO_PERMISSION_REQUEST -> permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
         }
-        if (!permissionToRecordAccepted) finish()
+        if (!permissionToRecordAccepted){
+            finish()
+        }
 
     }
 

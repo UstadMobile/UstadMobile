@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
@@ -37,6 +38,8 @@ class BasePointPresenter
 
     private var showDownloadAll = false
 
+    private var personPictureDao: PersonPictureDao? = null
+
     /**
      * Gets sync started flag
      * @return  true if syncStarted set to true, else false
@@ -53,6 +56,7 @@ class BasePointPresenter
         }
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         personDao = repository.personDao
+        personPictureDao = repository.personPictureDao
     }
 
     /**
@@ -80,6 +84,21 @@ class BasePointPresenter
                 view.showBulkUploadForAdmin(false)
                 view.showSettings(false)
             }
+
+            GlobalScope.launch {
+                val personPicture = personPictureDao!!.findByPersonUidAsync(loggedInPerson!!.personUid)
+                if (personPicture != null) {
+                    view.runOnUiThread(Runnable {
+                        val imagePath = personPictureDao!!.getAttachmentPath(personPicture)
+                        if(!imagePath.isEmpty()){
+                            view.loadProfileImage(imagePath)
+                        }else{
+                            view.loadProfileIcon("")
+                        }
+                    })
+                }
+            }
+
         }
     }
 

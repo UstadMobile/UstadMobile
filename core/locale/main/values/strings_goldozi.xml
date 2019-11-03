@@ -3,17 +3,17 @@
     <!--Goldozi-->
     <string name="app_name_goldozi">Goldozi</string>
     <string name="sales">Sales</string>
-    <string name="all_sales">All sales</string>
+    <string name="all_sales">All Sales</string>
     <string name="pre_orders">Pre-orders</string>
     <string name="payments_due">Payments due</string>
     <string name="sort_by_recent">recent</string>
     <string name="sort_by_amount">amount</string>
     <string name="sort_by_location">location</string>
-    <string name="record_sale">Record sale</string>
+    <string name="record_sale">Record Sale</string>
     <string name="inventory">Inventory</string>
     <string name="items">Items</string>
     <string name="add_item">Add item</string>
-    <string name="select_producer">Select producer</string>
+    <string name="select_producer">Select Producer</string>
     <string name="more">More</string>
     <string name="more_caps">MORE</string>
     <string name="by_category">By category</string>
@@ -167,7 +167,7 @@
     <string name="select_image_from_camera_or_gallery">Select image from Camera or Gallery</string>
 
     <!--Sprint 6-->
-    <string name="my_women_entrepreneurs">My Women Embroiders</string>
+    <string name="my_women_entrepreneurs">My Women Embroiderers</string>
     <string name="top_products">Top products</string>
     <string name="summary">Summary</string>
 
@@ -190,10 +190,11 @@
     <!--Sprint8-->
     <string name="customer">Customer</string>
     <string name="customer_details">Customer Details</string>
-    <string name="select_customers">Select Customers</string>
+    <string name="select_customers">Select Customer</string>
     <string name="new_customer">New Customer</string>
     <string name="select">Select</string>
 
     <string name="current_password_not_correct">The current password is incorrect</string>
 
+    <string name="please_select_sale_as_pre_order_or_sale">Please select item as Sold or Pre-order</string>
 </resources>

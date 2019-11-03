@@ -25,7 +25,7 @@ import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.core.view.SelectSaleProductView
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -40,9 +40,9 @@ class SelectSaleProductPresenter(context: Any,
                                  private val catalogMode: Boolean)
     : UstadBaseController<SelectSaleProductView>(context, arguments!!, view) {
 
-    private var recentProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
-    private var categoryProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
-    private var collectionProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
+    private var recentProvider: DataSource.Factory<Int, SaleDescWithSaleProductPicture>? = null
+    private var categoryProvider: DataSource.Factory<Int, SaleDescWithSaleProductPicture>? = null
+    private var collectionProvider: DataSource.Factory<Int, SaleDescWithSaleProductPicture>? = null
 
     internal var repository: UmAppDatabase
 
@@ -84,20 +84,20 @@ class SelectSaleProductPresenter(context: Any,
 
     private fun updateRecentProvider() {
 
-        recentProvider = saleProductDao.findAllActiveProductsSNWIProvider()
+        recentProvider = saleProductDao.findAllActiveProductsSNWIProviderWithPP()
         view.setRecentProvider(recentProvider!!)
 
     }
 
     private fun updateCategoryProvider() {
 
-        categoryProvider = saleProductDao.findAllActiveCategoriesSNWIProvider()
+        categoryProvider = saleProductDao.findAllActiveCategoriesSNWIProviderWithPP()
         view.setCategoryProvider(categoryProvider!!)
 
     }
 
     private fun updateCollectionProvider() {
-        collectionProvider = productParentJoinDao.findAllCategoriesInCollection()
+        collectionProvider = productParentJoinDao.findAllCategoriesInCollectionWithPP()
         view.setCollectionProvider(collectionProvider!!)
     }
 

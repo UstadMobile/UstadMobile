@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -29,6 +31,7 @@ import androidx.work.WorkManager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.google.android.material.appbar.AppBarLayout
+import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.BasePointPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
@@ -77,6 +80,8 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
     private var mOptionsMenu: Menu? = null
 
     //For search purposes:
+    private var catalogFragment: CatalogListFragment? = null
+    private var salesFragment: SaleListFragment? = null
     private var classesFragment: ClazzListFragment? = null
     private var peopleListFragment: PeopleListFragment? = null
 
@@ -156,6 +161,10 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             navToFragment[this.bottomCount] = fragment
 
             when {
+                everyItem.viewName == SaleListView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_SALES = this.bottomCount
+                everyItem.viewName == SelectSaleProductView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_CATALOG = this.bottomCount
                 everyItem.viewName == FeedListView.VIEW_NAME ->
                     VIEW_POSITION_POSITION_FEED = this.bottomCount
                 everyItem.viewName == ClazzListView.VIEW_NAME ->
@@ -208,6 +217,26 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
     override fun loadProfileIcon(profileUrl: String) {
         UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp, profileImage)
+    }
+
+
+    override fun loadProfileImage(imagePath: String) {
+        val output = File(imagePath)
+
+        if (output.exists()) {
+            val imageUri = Uri.fromFile(output)
+
+            runOnUiThread {
+                Picasso
+                        .get()
+                        .load(imageUri)
+                        .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                        .centerCrop()
+                        .into(profileImage)
+
+            }
+
+        }
     }
 
     override fun showDownloadAllButton(show: Boolean) {
@@ -326,7 +355,6 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
     }
 
     override fun updatePermissionCheck() {
-        //TODO: Check this after redo
         if (classesFragment != null) {
             classesFragment!!.forceCheckPermissions()
         }
@@ -483,6 +511,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         inflater.inflate(R.menu.menu_home, menu)
 
         //Get menu items:
+        val searchMenuItem = menu.findItem(R.id.menu_action_search)
         val shareMenuItem = menu.findItem(R.id.menu_action_share)
         val bulkUploadMenuItem = menu.findItem(R.id.menu_action_bulk_upload_master)
         val settingsMenuItem = menu.findItem(R.id.menu_action_settings)
@@ -532,10 +561,33 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         //Search stuff
         // Associate searchable configuration with the SearchView
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        val searchView = menu.findItem(R.id.menu_action_search).actionView as SearchView
+        val searchView = searchMenuItem.actionView as SearchView
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(componentName))
         searchView.maxWidth = Integer.MAX_VALUE
+
+
+
+        //Search stuff
+
+
+        searchView.setOnSearchClickListener { item ->
+            when (mPager!!.currentItem) {
+
+
+                VIEW_POSITION_POSITION_SALES ->
+                {
+                    if(salesFragment!=null && !searchView.isIconified) {
+                        salesFragment!!.goToSearch()
+                        searchView.isIconified = true
+                    }
+                }
+                else -> {
+                }
+            }
+            true
+        }
+
 
         // listening to search query text change
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -562,6 +614,12 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
     private fun searchLogic(position:Int, query:String){
         when (position) {
+            VIEW_POSITION_POSITION_SALES -> {
+                //Handled in SearchView listeners
+            }
+            VIEW_POSITION_POSITION_CATALOG -> {
+                catalogFragment!!.searchCatalog(query)
+            }
             VIEW_POSITION_POSITION_FEED -> {
             }
             VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses(query)
@@ -627,10 +685,37 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                 return thisFragment
             }
 
+            val f = navToFragment[position]
+            this.positionMap[position] = f
+
             when (position) {
+
+                VIEW_POSITION_POSITION_CATALOG -> {
+                    catalogFragment = f as CatalogListFragment?
+                    return f
+                }
+
+                VIEW_POSITION_POSITION_SALES -> {
+                    salesFragment = f as SaleListFragment?
+                    return f
+                }
+
+                VIEW_POSITION_POSITION_FEED -> {
+                    return f
+                }
+                VIEW_POSITION_POSITION_CLASSES -> {
+                    classesFragment = f as ClazzListFragment?
+                    return f
+                }
+                VIEW_POSITION_POSITION_PEOPLE -> {
+                    peopleListFragment = f as PeopleListFragment?
+                    return f
+                }
+                VIEW_POSITION_POSITION_REPORTS -> {
+                    return f
+                }
+
                 position -> {
-                    val f = navToFragment[position]
-                    this.positionMap[position] = f
                     return f
                 }
 
@@ -651,11 +736,20 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
     companion object {
 
+        var VIEW_POSITION_POSITION_SALES = -1
+        var VIEW_POSITION_POSITION_CATALOG = -1
         var VIEW_POSITION_POSITION_FEED = -1
         var VIEW_POSITION_POSITION_CLASSES = -1
         var VIEW_POSITION_POSITION_PEOPLE = -1
         var VIEW_POSITION_POSITION_REPORTS = -1
         var VIEW_POSITION_POSITION_CONTENT = -1
+
+        private val IMAGE_PERSON_THUMBNAIL_WIDTH = 26
+
+
+        private fun dpToPxImagePerson(): Int {
+            return (IMAGE_PERSON_THUMBNAIL_WIDTH * Resources.getSystem().displayMetrics.density).toInt()
+        }
 
     }
 
