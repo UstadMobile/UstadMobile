@@ -30,8 +30,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
 import java.io.IOException
+import kotlin.reflect.KClass
 
 //here in a comment because it sometimes gets removed by 'optimization of parameters'
 // import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -120,7 +122,7 @@ fun findEntitiesWithAnnotation(entityType: ClassName, annotationClass: Class<out
         if(it.getAnnotation(annotationClass) != null)
             syncableEntityList.put(embedPath, it.asClassName())
 
-        it.enclosedElements.filter { it.getAnnotation(annotationClass) != null}.forEach {
+        it.enclosedElements.filter { it.getAnnotation(Embedded::class.java) != null}.forEach {
             val subEmbedPath = mutableListOf(*embedPath.toTypedArray()) + "${it.simpleName}"
             syncableEntityList.putAll(findEntitiesWithAnnotation(it.asType().asTypeName() as ClassName,
                     annotationClass, processingEnv, subEmbedPath))
@@ -208,11 +210,14 @@ fun syncableEntitiesOnDao(daoClass: ClassName, processingEnv: ProcessingEnvironm
 }
 
 /**
- * Refactor the given SQL
+ * Refactor a SELECT statement that selects a syncable entity (or list thereof) to filter out any
+ * entities that the client has already received.
  */
 fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
                           processingEnv: ProcessingEnvironment,
-                          clientIdParamName: String = "clientId"): String {
+                          changeSeqNumType: KClass<out Annotation>,
+                          clientIdParamName: String = "clientId",
+                          addOffsetAndLimitParam: Boolean = false): String {
     val syncableEntities = findSyncableEntities(resultComponentClassName, processingEnv)
     if(syncableEntities.isEmpty())
         return sql
@@ -220,8 +225,13 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
     var newSql = "SELECT * FROM ($sql) AS ${resultComponentClassName.simpleName} WHERE "
     val whereClauses = syncableEntities.values.map {
         val syncableEntityInfo = SyncableEntityInfo(it, processingEnv)
+        val entityCsnField = if(changeSeqNumType == MasterChangeSeqNum::class) {
+            syncableEntityInfo.entityMasterCsnField
+        }else {
+            syncableEntityInfo.entityLocalCsnField
+        }
 
-        """( ${syncableEntityInfo.entityMasterCsnField.name} > COALESCE((SELECT 
+        """( ${entityCsnField.name} > COALESCE((SELECT 
             |MAX(${syncableEntityInfo.trackerCsnField.name}) FROM ${syncableEntityInfo.tracker.simpleName}  
             |WHERE  ${syncableEntityInfo.trackerDestField.name} = :$clientIdParamName 
             |AND ${syncableEntityInfo.trackerPkField.name} = 
@@ -230,6 +240,10 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
         """.trimMargin()
     }
     newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
+
+    if(addOffsetAndLimitParam) {
+        newSql += " LIMIT :_limit OFFSET :_offset"
+    }
 
     return newSql
 }
@@ -316,7 +330,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    httpResultType: TypeName,
                                                    params: List<ParameterSpec>,
                                                    useKotlinxListSerialization: Boolean = false,
-                                                   kotlinxSerializationJsonVarName: String = ""): CodeBlock {
+                                                   kotlinxSerializationJsonVarName: String = "",
+                                                   useMultipartPartsVarName: String? = null): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
             .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
@@ -358,7 +373,10 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
     if(requestBodyParam != null) {
         val requestBodyParamType = requestBodyParam.type
 
-        val writeBodyCodeBlock = if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
+        val writeBodyCodeBlock = if(useMultipartPartsVarName != null) {
+            CodeBlock.of("body = %T($useMultipartPartsVarName)\n",
+                     MultiPartFormDataContent::class)
+        }else if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
                 && requestBodyParamType.rawType == List::class.asClassName()) {
             val entityComponentType = resolveEntityFromResultType(requestBodyParamType).javaToKotlinType()
             val serializerFnCodeBlock = if(entityComponentType in QUERY_SINGULAR_TYPES) {
@@ -419,7 +437,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
  */
 fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resultType: TypeName,
                                                     syncHelperDaoVarName: String = "_syncHelper",
-                                                    clientIdVarName: String = "clientId",
+                                                    clientIdVarName: String = "__clientId",
                                                     reqIdVarName: String = "_reqId",
                                                     processingEnv: ProcessingEnvironment): CodeBlock {
     val codeBlock = CodeBlock.builder()
@@ -581,6 +599,117 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * we use this so that we can match the case of the table name.
      */
     protected val allKnownEntityNames = mutableListOf<String>()
+
+
+    /**
+     * Represents a KTOR class TypeSpec and FileSpec
+     */
+    class KtorDaoSpecBuilders(packageName: String, baseName: String,
+                              val typeSpec: TypeSpec.Builder = TypeSpec.classBuilder(baseName)) {
+
+        val fileSpec = FileSpec.builder(packageName, baseName)
+
+        fun buildType() = typeSpec.build()
+
+        fun buildFileSpec() = fileSpec.addType(typeSpec.build()).build()
+
+    }
+
+    /**
+     * Represents all the helper classes that are used with the HTTP implementation. See
+     * DbProcessorKtorServer for an explanation.
+     */
+    inner class KtorDaoSpecs(private val packageName: String, private val baseName: String) {
+        val route = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_ROUTE}")
+
+        val helperInterface = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}",
+                typeSpec = TypeSpec.interfaceBuilder("$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}"))
+        val helperInterfaceClassName = ClassName(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}")
+
+        val masterHelper = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER_MASTER}").also {
+            it.typeSpec.addModifiers(KModifier.ABSTRACT)
+            it.typeSpec.addSuperinterface(helperInterfaceClassName)
+        }
+
+        val localHelper = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER_LOCAL}").also {
+            it.typeSpec.addModifiers(KModifier.ABSTRACT)
+            it.typeSpec.addSuperinterface(helperInterfaceClassName)
+        }
+
+        /**
+         * Add a helper query function. This will:
+         *
+         * 1. Add the definition (without annotation to the interface)
+         * 2. Add the query to the local and master interfaces with the appropriate SQL refactoring
+         */
+        fun addHelperQueryFun(funSpec: FunSpec, querySql: String,
+                              componentEntityType: ClassName,
+                              addOffsetAndLimitParam: Boolean) {
+            helperInterface.typeSpec.addFunction(funSpec.toBuilder()
+                    .addModifiers(KModifier.ABSTRACT)
+                    .build())
+            localHelper.typeSpec.addFunction(funSpec.toBuilder()
+                    .addModifiers(KModifier.ABSTRACT, KModifier.OVERRIDE)
+                    .addAnnotation(AnnotationSpec.builder(Query::class)
+                            .addMember("%S", refactorSyncSelectSql(querySql, componentEntityType,
+                                    processingEnv, LocalChangeSeqNum::class,
+                                    addOffsetAndLimitParam = addOffsetAndLimitParam))
+                            .build())
+                    .build())
+            masterHelper.typeSpec.addFunction(funSpec.toBuilder()
+                    .addModifiers(KModifier.ABSTRACT, KModifier.OVERRIDE)
+                    .addAnnotation(AnnotationSpec.builder(Query::class)
+                            .addMember("%S", refactorSyncSelectSql(querySql, componentEntityType,
+                                    processingEnv, MasterChangeSeqNum::class,
+                                    addOffsetAndLimitParam = addOffsetAndLimitParam))
+                            .build())
+                    .build())
+        }
+
+        fun toBuiltFileSpecs(): KtorDaoFileSpecs {
+            val masterHelperDaoSpec = masterHelper.typeSpec.build()
+            val masterHelperImplName = "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER_MASTER}${DbProcessorJdbcKotlin.SUFFIX_JDBC_KT}"
+            val masterHelperImplSpec = generateJdbcDaoImpl(masterHelperDaoSpec,
+                    masterHelperImplName,
+                    packageName)
+
+            val localHelperDaoSpec = localHelper.typeSpec.build()
+            val localHelperImplName = "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER_LOCAL}${DbProcessorJdbcKotlin.SUFFIX_JDBC_KT}"
+            val localHelperImplSpec = generateJdbcDaoImpl(localHelperDaoSpec,
+                    localHelperImplName,
+                    packageName)
+
+            return KtorDaoFileSpecs(route.fileSpec.build(),
+                    helperInterface.buildFileSpec(),
+                    masterHelper.buildFileSpec(),
+                    FileSpec.builder(packageName, masterHelperImplName).addType(masterHelperImplSpec).build(),
+                    localHelper.buildFileSpec(),
+                    FileSpec.builder(packageName, localHelperImplName).addType(localHelperImplSpec).build())
+        }
+
+    }
+
+    inner class KtorDaoFileSpecs(val ktorRouteFileSpec: FileSpec,
+                                val ktorHelperInterfaceSpec: FileSpec,
+                                val ktorHelperMasterDaoAbstract: FileSpec,
+                                val ktorHelperMasterDaoImpl: FileSpec,
+                                val ktorHelperLocalDaoAbstract: FileSpec,
+                                val ktorHelperLocalDaoImpl: FileSpec) {
+
+        fun writeAllSpecs(writeImpl: Boolean = true, outputSpecArgName: String,
+                          useFilerAsDefault: Boolean) {
+            writeFileSpecToOutputDirs(ktorRouteFileSpec, outputSpecArgName, useFilerAsDefault)
+            writeFileSpecToOutputDirs(ktorHelperInterfaceSpec, outputSpecArgName, useFilerAsDefault)
+            writeFileSpecToOutputDirs(ktorHelperLocalDaoAbstract, outputSpecArgName, useFilerAsDefault)
+            writeFileSpecToOutputDirs(ktorHelperMasterDaoAbstract, outputSpecArgName, useFilerAsDefault)
+
+            if(writeImpl) {
+                writeFileSpecToOutputDirs(ktorHelperLocalDaoImpl, outputSpecArgName, useFilerAsDefault)
+                writeFileSpecToOutputDirs(ktorHelperMasterDaoImpl, outputSpecArgName, useFilerAsDefault)
+            }
+        }
+
+    }
 
     /**
      * Used to determine if a DAO method returns a DataSource.Factory with a syncable entity type
@@ -814,8 +943,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         if(preparedStatementSql != null) {
             val namedParams = getQueryNamedParameters(querySql!!)
             namedParams.forEach { preparedStatementSql = preparedStatementSql!!.replace(":$it", "?") }
-            namedParams.forEach { execStmtSql = execStmtSql!!.replace(":$it",
-                    defaultSqlQueryVal(queryVars[it]!!)) }
+            namedParams.forEach {
+                val queryVarTypeName = queryVars[it]
+                execStmtSql = execStmtSql!!.replace(":$it",
+                    defaultSqlQueryVal(queryVarTypeName!!))
+            }
         }
 
         if(resultType != UNIT)
@@ -1168,39 +1300,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val isDataSourceFactory = returnType is ParameterizedTypeName
                 && returnType.rawType == DataSource.Factory::class.asClassName()
 
-        daoMethod.parameters.forEach {
-            codeBlock.add(generateGetParamFromRequestCodeBlock(it.type,
-                    it.name, declareVariableName = it.name, declareVariableType = "val"))
-        }
-
-        if(isDataSourceFactory) {
-            listOf("_offset", "_limit").forEach {
-                codeBlock.add(generateGetParamFromRequestCodeBlock(INT, it, it,
-                        declareVariableType = "val"))
-            }
-        }
-
-        val queryVarsMap = daoMethod.parameters.map { it.name to it.type}.toMap().toMutableMap()
+        val queryVarsList = daoMethod.parameters.toMutableList()
         if(isDataSourceFactory){
-            queryVarsMap += "_offset" to INT
-            queryVarsMap += "_limit" to INT
+            queryVarsList += ParameterSpec.builder("_offset", INT).build()
+            queryVarsList += ParameterSpec.builder("_limit", INT).build()
         }
-
-        var querySql = daoMethod.annotations.first { it.className == Query::class.asClassName() }
-                .members.first { it.toString().trim().startsWith("value") || it.toString().trim().startsWith("\"") }.toString()
-
-
-        if(querySql.endsWith("trimMargin()")) {
-            querySql = querySql.removeSuffix(".trimMargin()")
-                    .removeSurrounding("\"\"\"").trimMargin()
-        }else {
-            querySql = querySql.removeSurrounding("\"")
-        }
-
-        querySql = StringEscapeUtils.unescapeJava(querySql)
-
-
-
 
         val componentEntityType = resolveEntityFromResultType(resultType)
         val syncableEntitiesList = if(componentEntityType is ClassName) {
@@ -1210,25 +1314,23 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
         if(syncableEntitiesList != null) {
-            codeBlock.add("val clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+            codeBlock.add("val __clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
                     DbProcessorKtorServer.CALL_MEMBER,
                     MemberName("io.ktor.request","header"),
                     "X-nid")
                     .add("val _reqId = %T().nextInt()\n", Random::class)
                     .add("%M.response.header(%S, _reqId)\n", DbProcessorKtorServer.CALL_MEMBER, "X-reqid")
-            queryVarsMap.put("clientId", INT)
-            querySql = refactorSyncSelectSql(querySql, componentEntityType as ClassName,
-                    processingEnv)
+            queryVarsList  += ParameterSpec.builder("clientId", INT).build()
         }
 
-        if(isDataSourceFactory) {
-            querySql += " LIMIT :_limit OFFSET :_offset"
-        }
 
-        codeBlock.add(generateQueryCodeBlock(resultType, queryVarsMap, querySql, daoTypeEl, null))
+        codeBlock.add(generateKtorPassToDaoCodeBlock(FunSpec.builder(daoMethod.name)
+                .addParameters(queryVarsList)
+                .returns(resultType)
+                .build(), daoVarName = "_ktorHelperDao", preexistingVarNames = listOf("clientId")))
+
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
                 processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName))
-
         codeBlock.add(generateRespondCall(resultType, "_result"))
 
         return codeBlock.build()
@@ -1243,15 +1345,27 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * call.respond(_result)
      *
      * @param daoMethod FunSpec representing the method that is being delegated
+     * @param preexistingVarNames a list of variable names that already exist in the scope being
+     * generated. The name created in scope must be the variable name prefixed with __ e.g.
+     * __paramName.
+     *
+     * This will skip generation of getting the parameter name from the call (e.g.
+     * no val __paramName = request.queryParameters["paramName"] will be generated
      */
-    fun generateKtorPassToDaoCodeBlock(daoMethod: FunSpec): CodeBlock {
-        val codeBlock = CodeBlock.builder()
+    fun generateKtorPassToDaoCodeBlock(daoMethod: FunSpec, mutlipartHelperVarName: String? = null,
+                                       beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                       afterDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                       daoVarName: String = "_dao",
+                                       preexistingVarNames: List<String> = listOf()): CodeBlock {
+        val getVarsCodeBlock = CodeBlock.builder()
+        val callCodeBlock = CodeBlock.builder()
+
         val returnType = daoMethod.returnType
         if(returnType != UNIT) {
-            codeBlock.add("val _result = ")
+            callCodeBlock.add("val _result = ")
         }
 
-        codeBlock.add("_dao.${daoMethod.name}(")
+        callCodeBlock.add("$daoVarName.${daoMethod.name}(")
         var paramOutCount = 0
         daoMethod.parameters.forEachIndexed {index, param ->
             val paramTypeName = param.type.javaToKotlinType()
@@ -1259,18 +1373,30 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 return@forEachIndexed
 
             if(paramOutCount > 0)
-                codeBlock.add(",")
+                callCodeBlock.add(",")
 
-            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name))
+            callCodeBlock.add("__${param.name}")
+
+            if(param.name !in preexistingVarNames) {
+                getVarsCodeBlock.add("val __${param.name} : %T = ",
+                        param.type)
+                        .add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name,
+                                multipartHelperVarName = mutlipartHelperVarName))
+                        .add("\n")
+            }
+
 
             paramOutCount++
         }
 
-        codeBlock.add(")\n")
-
-        codeBlock.add(generateRespondCall(returnType!!, "_result"))
-
-        return codeBlock.build()
+        callCodeBlock.add(")\n")
+        return CodeBlock.builder()
+                .add(getVarsCodeBlock.build())
+                .add(beforeDaoCallCode)
+                .add(callCodeBlock.build())
+                .add(generateRespondCall(returnType!!, "_result"))
+                .add(afterDaoCallCode)
+                .build()
     }
 
     fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String,
@@ -1402,6 +1528,38 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         return codeBlock.build()
     }
+
+    /**
+     * Given a TypeSpec for an abstract DAO class. At present this is only generating query
+     * functions but could be extended.
+     */
+    fun generateJdbcDaoImpl(daoTypeSpec: TypeSpec, implClassName: String, pkgName: String): TypeSpec {
+        val implTypeSpec =jdbcDaoTypeSpecBuilder(implClassName, ClassName(pkgName, daoTypeSpec.name!!))
+
+        daoTypeSpec.funSpecs.forEach {funSpec ->
+            if(funSpec.annotations. any { it.className == Query::class.asClassName() }) {
+                val queryAnnotation = funSpec.annotations.first { it.className == Query::class.asClassName()}
+
+                val overridingFun = funSpec.toBuilder()
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addCode(generateQueryCodeBlock(funSpec.returnType ?: UNIT,
+                                funSpec.parameters.map { it.name to it.type}.toMap(),
+                                queryAnnotation.valueMemberToString(), null, null))
+                if(funSpec.returnType != UNIT) {
+                    overridingFun.addCode("return _result\n")
+                }
+
+                overridingFun.annotations.clear()
+                overridingFun.modifiers.remove(KModifier.ABSTRACT)
+
+                implTypeSpec.addFunction(overridingFun.build())
+            }
+        }
+
+        return implTypeSpec.build()
+    }
+
+
 
 
     fun logMessage(kind: Diagnostic.Kind, message: String, enclosing: TypeElement? = null,

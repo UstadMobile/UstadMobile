@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.asRepository
 import db2.ExampleAttachmentEntity
 import db2.ExampleDatabase2
@@ -10,6 +11,7 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -46,7 +48,7 @@ class TestAttachments {
         testTmpDataFile .writeBytes(javaClass.getResourceAsStream("/testfile1.png").readBytes())
 
 
-        serverTmpAttachmentsDir = Files.createTempDirectory("TestAttachments").toFile()
+        serverTmpAttachmentsDir = Files.createTempDirectory("TestAttachmentsServer").toFile()
         clientTmpAtttachmentsDir = Files.createTempDirectory("TestAttachmentsClient").toFile()
         server = embeddedServer(Netty, port = 8089) {
             ExampleDatabase2App(attachmentsDir = serverTmpAttachmentsDir.absolutePath)
@@ -99,5 +101,28 @@ class TestAttachments {
                 testTmpDataFile.readBytes(), File(clientFilename).readBytes())
 
     }
+
+    @Test
+    fun givenAttachmentOnClient_whenSyncRuns_thenDataShouldBeAvailableOnServer() {
+        runBlocking {
+            val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
+                    "token", httpClient, clientTmpAtttachmentsDir.absolutePath)
+            val exampleAttachmentEntity = ExampleAttachmentEntity()
+            exampleAttachmentEntity.eaUid = clientRepo.exampleAttachmentDao().insert(exampleAttachmentEntity)
+            clientRepo.exampleAttachmentDao().setAttachmentData(exampleAttachmentEntity,
+                    testTmpDataFile.absolutePath)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            val serverRepo = serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
+                    "", httpClient, serverTmpAttachmentsDir.absolutePath)
+            val serverEntity = serverDb.exampleAttachmentDao().findByUid(exampleAttachmentEntity.eaUid)
+            val serverFilename = serverRepo.exampleAttachmentDao().getAttachmentDataFileName(serverEntity!!)
+            Assert.assertTrue(File(serverFilename).exists())
+        }
+
+
+    }
+
 
 }

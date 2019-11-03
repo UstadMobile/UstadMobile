@@ -622,8 +622,16 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             }
             VIEW_POSITION_POSITION_FEED -> {
             }
-            VIEW_POSITION_POSITION_CLASSES -> classesFragment!!.searchClasses(query)
-            VIEW_POSITION_POSITION_PEOPLE -> peopleListFragment!!.searchPeople(query)
+            VIEW_POSITION_POSITION_CLASSES -> {
+                if(classesFragment!=null) {
+                    classesFragment!!.searchClasses(query)
+                }
+            }
+            VIEW_POSITION_POSITION_PEOPLE -> {
+                if(peopleListFragment != null) {
+                    peopleListFragment!!.searchPeople(query)
+                }
+            }
             VIEW_POSITION_POSITION_REPORTS -> {
             }
             else -> {
@@ -689,6 +697,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             this.positionMap[position] = f
 
             when (position) {
+
 
                 VIEW_POSITION_POSITION_CATALOG -> {
                     catalogFragment = f as CatalogListFragment?

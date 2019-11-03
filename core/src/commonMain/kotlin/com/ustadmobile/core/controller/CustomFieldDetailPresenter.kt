@@ -125,8 +125,16 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
 
     fun handleEntityEntityChanged(type: Int) {
         when (type) {
-            ENTITY_TYPE_CLASS -> updatedField!!.customFieldEntityType = Clazz.TABLE_ID
-            ENTITY_TYPE_PERSON -> updatedField!!.customFieldEntityType = Person.TABLE_ID
+            ENTITY_TYPE_CLASS -> {
+                if(updatedField!=null) {
+                    updatedField!!.customFieldEntityType = Clazz.TABLE_ID
+                }
+            }
+            ENTITY_TYPE_PERSON -> {
+                if(updatedField != null) {
+                    updatedField!!.customFieldEntityType = Person.TABLE_ID
+                }
+            }
             else -> {
             }
         }

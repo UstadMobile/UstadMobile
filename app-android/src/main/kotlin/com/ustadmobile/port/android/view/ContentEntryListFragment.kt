@@ -229,6 +229,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                 ustadBaseActivity.runOnUiThread {
                     managerAndroidBle = ustadBaseActivity.networkManagerBle!!
                     checkReady()
+
                 }
             })
         }
@@ -248,6 +249,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
+
         if (entryListPresenter == null && ::managerAndroidBle.isInitialized &&
                 ::rootContainer.isInitialized) {
             //create entry adapter here to make sure bleManager is not null

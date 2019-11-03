@@ -31,7 +31,22 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ATTENDANCE
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_BIRTHDAY
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CLASSES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FULL_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_HOME_ADDRESS
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -207,33 +222,61 @@ class PersonEditPresenter
         val thisP = this
         //Get all the currently set headers and fields:
         GlobalScope.launch {
-            val result = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditMode()
+            val resultLive =
+                    personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditModeLive()
 
-            val cleanedResult = ArrayList<PersonDetailPresenterField>()
-            //Remove old custom fields
-            val fieldsIterator = result.iterator()
-            while (fieldsIterator.hasNext()) {
-                val field = fieldsIterator.next()
-                val fieldIndex = field.fieldIndex
-                if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                    //TODOne: Remove from iterator in Kotlin
-                    //fieldsIterator.remove()
-                }else{
-                    cleanedResult.add(field)
-                }
+            GlobalScope.launch(Dispatchers.Main){
+                resultLive.observe(thisP, thisP::handleFieldsLive)
             }
-
-            headersAndFields = cleanedResult
-
-            //Get person live data and observe
-            personLiveData = personDao.findByUidLive(personUid)
-            //Observe the live data
-            view.runOnUiThread(Runnable {
-                personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
-            })
+//            val cleanedResult = ArrayList<PersonDetailPresenterField>()
+//            //Remove old custom fields
+//            val fieldsIterator = result.iterator()
+//            while (fieldsIterator.hasNext()) {
+//                val field = fieldsIterator.next()
+//                val fieldIndex = field.fieldIndex
+//                if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
+//                    //TODOne: Remove from iterator in Kotlin
+//                    //fieldsIterator.remove()
+//                }else{
+//                    cleanedResult.add(field)
+//                }
+//            }
+//
+//            headersAndFields = cleanedResult
+//
+//            //Get person live data and observe
+//            personLiveData = personDao.findByUidLive(personUid)
+//            //Observe the live data
+//            view.runOnUiThread(Runnable {
+//                personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
+//            })
 
         }
+    }
 
+    private fun handleFieldsLive(fields: List<PersonDetailPresenterField>?){
+        val cleanedResult = ArrayList<PersonDetailPresenterField>()
+        //Remove old custom fields
+        val fieldsIterator = fields!!.iterator()
+        while (fieldsIterator.hasNext()) {
+            val field = fieldsIterator.next()
+            val fieldIndex = field.fieldIndex
+            if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
+                //TODOne: Remove from iterator in Kotlin
+                //fieldsIterator.remove()
+            }else{
+                cleanedResult.add(field)
+            }
+        }
+
+        headersAndFields = cleanedResult
+
+        //Get person live data and observe
+        personLiveData = personDao.findByUidLive(personUid)
+        //Observe the live data
+        view.runOnUiThread(Runnable {
+            personLiveData!!.observe(this, this::handlePersonValueChanged)
+        })
     }
 
     /**
@@ -320,12 +363,48 @@ class PersonEditPresenter
 
         for (field in allFields) {
 
+            var labelMessageId = 0
+            when(field.labelMessageId){
+                FIELD_HEADING_PROFILE -> { labelMessageId = MessageID.profile }
+                FIELD_HEADING_FULL_NAME -> { labelMessageId = MessageID.field_fullname }
+                FIELD_HEADING_FIRST_NAMES -> { labelMessageId = MessageID.first_names }
+                FIELD_HEADING_LAST_NAME -> { labelMessageId = MessageID.last_name }
+                FIELD_HEADING_BIRTHDAY -> { labelMessageId = MessageID.birthday }
+                FIELD_HEADING_HOME_ADDRESS -> { labelMessageId = MessageID.home_address }
+                FIELD_HEADING_ATTENDANCE -> { labelMessageId = MessageID. attendance}
+                FIELD_HEADING_FATHER -> { labelMessageId = MessageID.father }
+                FIELD_HEADING_FATHERS_NAME -> { labelMessageId = MessageID.fathers_name }
+                FIELD_HEADING_FATHERS_NUMBER -> { labelMessageId = MessageID.fathers_number }
+                FIELD_HEADING_MOTHERS_NAME -> { labelMessageId = MessageID.mothers_name }
+                FIELD_HEADING_MOTHERS_NUMBER -> { labelMessageId = MessageID.mothers_number }
+                FIELD_HEADING_MOTHER -> { labelMessageId = MessageID.mother }
+                FIELD_HEADING_CLASSES -> { labelMessageId = MessageID.classes }
+            }
+
+            var headerMessageId = 0
+            when(field.headerMessageId){
+                PersonField.FIELD_HEADING_PROFILE -> { headerMessageId = MessageID.profile }
+                PersonField.FIELD_HEADING_FULL_NAME -> { headerMessageId = MessageID.field_fullname }
+                PersonField.FIELD_HEADING_FIRST_NAMES -> { headerMessageId = MessageID.first_names }
+                PersonField.FIELD_HEADING_LAST_NAME -> { headerMessageId = MessageID.last_name }
+                PersonField.FIELD_HEADING_BIRTHDAY -> { headerMessageId = MessageID.birthday }
+                PersonField.FIELD_HEADING_HOME_ADDRESS -> { headerMessageId = MessageID.home_address }
+                PersonField.FIELD_HEADING_ATTENDANCE -> { headerMessageId = MessageID. attendance}
+                PersonField.FIELD_HEADING_FATHER -> { headerMessageId = MessageID.father }
+                PersonField.FIELD_HEADING_FATHERS_NAME -> { headerMessageId = MessageID.fathers_name }
+                PersonField.FIELD_HEADING_FATHERS_NUMBER -> { headerMessageId = MessageID.fathers_number }
+                PersonField.FIELD_HEADING_MOTHERS_NAME -> { headerMessageId = MessageID.mothers_name }
+                PersonField.FIELD_HEADING_MOTHERS_NUMBER -> { headerMessageId = MessageID.mothers_number }
+                PersonField.FIELD_HEADING_MOTHER -> { headerMessageId = MessageID.mother }
+                PersonField.FIELD_HEADING_CLASSES -> { headerMessageId = MessageID.classes }
+            }
+
             var thisValue: String? = ""
 
             if (field.fieldType == FIELD_TYPE_HEADER) {
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(FIELD_TYPE_HEADER,
-                                field.headerMessageId, null), field.headerMessageId)
+                                headerMessageId, null), headerMessageId)
                 continue
             }
 
@@ -333,67 +412,67 @@ class PersonEditPresenter
                 thisValue = thisPerson.firstNames + " " + thisPerson.lastName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_FIRST_NAMES.toLong()) {
                 thisValue = thisPerson.firstNames
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_LAST_NAME.toLong()) {
                 thisValue = thisPerson.lastName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_CLASSES.toLong()) {
                 thisValue = "Class Name ..."
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER.toLong()) {
                 thisValue = thisPerson.fatherName + " (" + thisPerson.fatherNumber + ")"
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
 
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER.toLong()) {
                 thisValue = thisPerson.motherName + " (" + thisPerson.motherNum + ")"
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
                 thisValue = thisPerson.fatherName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NAME.toLong()) {
                 thisValue = thisPerson.motherName
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_FATHER_NUMBER.toLong()) {
                 thisValue = thisPerson.fatherNumber
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_MOTHER_NUMBER.toLong()) {
                 thisValue = thisPerson.motherNum
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_ADDRESS.toLong()) {
                 thisValue = thisPerson.personAddress
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
                 if(thisPerson.dateOfBirth > 0L) {
                     thisValue = UMCalendarUtil.getPrettyDateFromLong(
@@ -403,7 +482,7 @@ class PersonEditPresenter
                 }
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
-                                field.labelMessageId, field.fieldIcon), thisValue)
+                                labelMessageId, field.fieldIcon), thisValue)
             } else {//this is actually a custom field
                 var messageLabel = 0
                 var iconName: String? = null

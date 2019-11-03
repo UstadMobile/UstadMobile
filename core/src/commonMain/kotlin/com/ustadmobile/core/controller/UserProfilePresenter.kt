@@ -16,6 +16,10 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.UserProfileView
+
 
 /**
  * Presenter for UserProfile view
@@ -148,11 +152,14 @@ class UserProfilePresenter(context: Any,
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
                 "", "", ""), context)
-        val args = HashMap<String, String>()
+        UmAccountManager.setActiveAccount(null, context)
 
-        val firstDest = impl.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, "BasePoint", context)
-        impl.go(firstDest!!, args, context)
+        val args = HashMap<String, String>()
+        view.runOnUiThread(Runnable {
+            view.callFinishAffinity()
+        })
+
+        impl.go(LoginView.VIEW_NAME, args, context)
     }
 
     fun handleShowLanguageOptions(){

@@ -157,7 +157,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
     override fun setClazzActivityChangesDropdownPresets(presets: Array<String?>) {
         this.changesPresets = presets
-        val adapter = ArrayAdapter(Objects.requireNonNull(context),
+        val adapter = ArrayAdapter(Objects.requireNonNull(context!!),
                 android.R.layout.simple_spinner_item, changesPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         activityChangesSpinner.adapter = adapter
@@ -225,7 +225,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         activityChangesSpinner = rootContainer.findViewById(R.id.fragment_clazz_activity_list_bar_chart_spinner)
 
         //Create the presenter and call its onCreate
-        mPresenter = ClazzActivityListPresenter(this,
+        mPresenter = ClazzActivityListPresenter(activity!!.applicationContext,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

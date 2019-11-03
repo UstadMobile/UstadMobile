@@ -17,7 +17,7 @@ class SelectableSpinner(context: Context, attrs: AttributeSet) : AppCompatSpinne
         }
     }
 
-    override fun setOnItemSelectedListener(listener: AdapterView.OnItemSelectedListener) {
-        this.listener = listener
+    override fun setOnItemSelectedListener(listener: AdapterView.OnItemSelectedListener?) {
+        this.listener = listener!!
     }
 }

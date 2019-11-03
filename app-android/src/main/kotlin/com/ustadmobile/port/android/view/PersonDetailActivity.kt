@@ -217,6 +217,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
      * Starts the camera intent.
      */
     private fun startCameraIntent() {
+
         val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
         val dir = filesDir
         val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
@@ -234,6 +235,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

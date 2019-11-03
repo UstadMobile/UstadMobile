@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzActivity
 import com.ustadmobile.lib.db.entities.ClazzActivityChange
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -242,8 +243,17 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
     fun handleChangeTrueFalseMeasurement(choosenId: Int) {
         measurementEntered = true
         when (choosenId) {
-            TRUE_ID -> currentClazzActivity!!.clazzActivityQuantity = 1
-            FALSE_ID -> currentClazzActivity!!.clazzActivityQuantity = 0
+            TRUE_ID -> {
+                if(currentClazzActivity!=null) {
+                    currentClazzActivity!!.clazzActivityQuantity = 1
+                }
+
+            }
+            FALSE_ID -> {
+                if(currentClazzActivity!=null) {
+                    currentClazzActivity!!.clazzActivityQuantity = 0
+                }
+            }
         }
     }
 
@@ -284,8 +294,11 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
         //Get activity change list live data
         val activityChangeLiveData = activityChangeDao.findAllClazzActivityChangesAsyncLive()
+        var thisP = this
         //Observing it
-        activityChangeLiveData.observe(this, this::updateActivityChangesOnView)
+        GlobalScope.launch(Dispatchers.Main) {
+            activityChangeLiveData.observe(thisP, thisP::updateActivityChangesOnView)
+        }
 
     }
     /**

@@ -68,17 +68,13 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
         view.updateAttendancePercentage(attendanceAverage.toInt())
         view.updateNumClasses(average.numClazzes)
         view.updateNumStudents(average.numStudents)
-        //TODOne: Update with attendance trend.
-        //Update: Not part of new Sprint design.
-        //view.updateAttendanceTrend(0, 0);
 
-        //checkPermissions()
     }
 
     /**
      * Checks permission and updates the view.
      */
-    fun checkPermissions() {
+    private fun checkPermissions() {
         val clazzDao = repository!!.clazzDao
         GlobalScope.launch {
             val result = clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_REPORTS_VIEW)

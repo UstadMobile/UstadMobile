@@ -59,5 +59,22 @@ open class PersonField {
         val FIELD_TYPE_DROPDOWN = 4
         val FIELD_TYPE_PHONE_NUMBER = 5
         val FIELD_TYPE_DATE = 6
+
+
+
+        const val FIELD_HEADING_PROFILE = 1
+        const val FIELD_HEADING_FULL_NAME = 2
+        const val FIELD_HEADING_FIRST_NAMES = 3
+        const val FIELD_HEADING_LAST_NAME = 4
+        const val FIELD_HEADING_BIRTHDAY = 5
+        const val FIELD_HEADING_HOME_ADDRESS = 6
+        const val FIELD_HEADING_ATTENDANCE = 7
+        const val FIELD_HEADING_FATHER = 8
+        const val FIELD_HEADING_FATHERS_NAME = 9
+        const val FIELD_HEADING_FATHERS_NUMBER = 10
+        const val FIELD_HEADING_MOTHERS_NAME = 11
+        const val FIELD_HEADING_MOTHERS_NUMBER = 12
+        const val FIELD_HEADING_MOTHER = 13
+        const val FIELD_HEADING_CLASSES = 14
     }
 }

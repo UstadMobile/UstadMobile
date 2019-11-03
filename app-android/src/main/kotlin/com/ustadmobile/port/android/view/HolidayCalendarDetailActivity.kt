@@ -121,8 +121,6 @@ class HolidayCalendarDetailActivity : UstadBaseActivity(), HolidayCalendarDetail
     }
 
     override fun updateCalendarOnView(updatedCalendar: UMCalendar) {
-        //title.setText(calendar.getUmCalendarName());
-
 
         var calendarName: String? = ""
 
@@ -130,8 +128,6 @@ class HolidayCalendarDetailActivity : UstadBaseActivity(), HolidayCalendarDetail
             if (updatedCalendar.umCalendarName != null) {
                 calendarName = updatedCalendar.umCalendarName
             }
-
-
         }
 
         val finalCalendarName = calendarName

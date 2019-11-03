@@ -46,10 +46,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
 
-    @Query("SELECT * FROM Clazz")
+    @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAllAsList(): List<Clazz>
 
-    @Query("SELECT * FROM Clazz")
+    @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAllLive(): DoorLiveData<List<Clazz>>
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
@@ -117,7 +117,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND isClazzActive = 1")
     abstract suspend fun findClazzesByUidListAsync(clazzUidList: List<Long>): List<Clazz>
 
-    @Query("SELECT * FROM Clazz WHERE isClazzActive = 1")
+    @Query(SELECT_ACTIVE_CLAZZES)
     abstract suspend fun findAllActiveClazzesAsync() : List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " + " OR clazzUid in (:allClasses) AND isClazzActive = 1")
@@ -379,6 +379,8 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 "           AND ClazzMember.clazzMemberActive = 1" +
                 "       ) " +
                 "   ) AS teacherNames "
+
+        private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE isClazzActive = 1"
     }
 
 

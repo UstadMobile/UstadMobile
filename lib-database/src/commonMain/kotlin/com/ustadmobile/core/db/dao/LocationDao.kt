@@ -80,7 +80,7 @@ abstract class LocationDao : BaseDao<Location> {
     @Query("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     abstract fun findByTitle(name: String): List<Location>
 
-    @Query("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0")
+    @Query("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0 AND locationActive = 1")
     abstract fun findAllTopLocationsWithCount(): DataSource.Factory<Int, LocationWithSubLocationCount>
 
     @Query("SELECT *, " +

@@ -69,6 +69,7 @@ object UmAccountManager {
     fun setActiveAccount(account: UmAccount?, context: Any,
                          impl: UstadMobileSystemImpl) {
         activeAccount = account
+        activeAccountRepository = null
         if (account != null) {
             impl.setAppPref(PREFKEY_PERSON_ID, account.personUid.toString(), context)
             impl.setAppPref(PREFKEY_USERNAME, account.username, context)
@@ -82,15 +83,20 @@ object UmAccountManager {
         }
     }
 
-    fun setActiveAccount(account: UmAccount, context: Any) {
+    fun setActiveAccount(account: UmAccount?, context: Any) {
         setActiveAccount(account, context, UstadMobileSystemImpl.instance)
     }
 
     @JsName("getRepositoryForActiveAccount")
     @Synchronized
     fun getRepositoryForActiveAccount(context: Any): UmAppDatabase {
-        val serverUrl = UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                "http://localhost", context) ?: "http://localhost"
+        val currentAccount = activeAccount
+        val serverUrl = if(currentAccount != null) {
+            currentAccount.endpointUrl ?: "http://localhost"
+        }else {
+            UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
+                    "http://localhost", context) ?: "http://localhost"
+        }
 
         val db = UmAppDatabase.getInstance(context)
         if(activeAccountRepository == null) {

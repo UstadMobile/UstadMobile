@@ -357,7 +357,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
                     val selectedImage = data!!.data
 
-                    val picPath = doInBackground(selectedImage)
+                    val picPath = doInBackground(selectedImage!!)
                     imagePathFromCamera = picPath
                     if (imagePathFromCamera == null) {
                         sendMessage(MessageID.unable_open_image)

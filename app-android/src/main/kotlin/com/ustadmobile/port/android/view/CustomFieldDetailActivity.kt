@@ -207,19 +207,32 @@ class CustomFieldDetailActivity : UstadBaseActivity(), CustomFieldDetailView {
         defaultET!!.setText(customField.customFieldDefaultValue)
         when (customField.customFieldType) {
             CustomField.FIELD_TYPE_TEXT -> {
-                fieldTypeSpinner!!.setSelection(CustomFieldDetailPresenter.FIELD_TYPE_TEXT)
+                runOnUiThread(Runnable {
+                    fieldTypeSpinner!!.setSelection(CustomFieldDetailPresenter.FIELD_TYPE_TEXT)
+                })
                 showOptions(false)
             }
             CustomField.FIELD_TYPE_DROPDOWN -> {
-                fieldTypeSpinner!!.setSelection(CustomFieldDetailPresenter.FIELD_TYPE_DROPDOWN)
+                runOnUiThread(Runnable {
+                    fieldTypeSpinner!!.setSelection(CustomFieldDetailPresenter.FIELD_TYPE_DROPDOWN)
+                })
                 showOptions(true)
             }
             else -> {
             }
         }
         when (customField.customFieldEntityType) {
-            Clazz.TABLE_ID -> entityTypeSpinner!!.setSelection(CustomFieldListPresenter.ENTITY_TYPE_CLASS)
-            Person.TABLE_ID -> entityTypeSpinner!!.setSelection(CustomFieldListPresenter.ENTITY_TYPE_PERSON)
+            Clazz.TABLE_ID ->
+            {
+                runOnUiThread(Runnable {
+                    entityTypeSpinner!!.setSelection(CustomFieldListPresenter.ENTITY_TYPE_CLASS)
+                })
+            }
+            Person.TABLE_ID -> {
+                runOnUiThread(Runnable {
+                    entityTypeSpinner!!.setSelection(CustomFieldListPresenter.ENTITY_TYPE_PERSON)
+                })
+            }
             else -> {
             }
         }

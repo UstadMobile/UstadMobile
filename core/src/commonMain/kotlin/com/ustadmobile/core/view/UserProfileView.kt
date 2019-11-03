@@ -28,6 +28,12 @@ interface UserProfileView : UstadView {
 
     fun updateLastSyncedText(lastSynced: String)
 
+    fun callFinishAffinity()
+
+    fun restartUI()
+
+    fun showLanguageOptions()
+
     companion object {
 
         // This defines the view name that is an argument value in the go() in impl.

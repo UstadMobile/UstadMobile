@@ -180,7 +180,7 @@ object UMCalendarUtil {
     }
 
     fun showTimeForGivenLongDate(thisDate:Long):String{
-        val format: DateFormat = DateFormat("HH:mmm")
+        val format: DateFormat = DateFormat("HH:mm")
         val cal = DateTime(thisDate)
         return cal.format(format)
     }
@@ -252,7 +252,7 @@ object UMCalendarUtil {
      * @return  The pretty date for the long date specified as string.
      */
     fun getPrettyDateFromLong(thisDate: Long, locale: Any?): String {
-        val format: DateFormat = DateFormat("EEEE, dd/MMMM/yyyy")
+        val format: DateFormat = DateFormat("EEE, dd/MMM/yyyy")
         val cal = DateTime(thisDate)
         return cal.format(format)
     }

@@ -230,7 +230,7 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
     }
 
     fun readUri(){
-        val stream: InputStream = getContentResolver().openInputStream(selectedPathUri)
+        val stream: InputStream = getContentResolver()!!.openInputStream(selectedPathUri!!)!!
         val br = BufferedReader(InputStreamReader(stream))
         val lines = ArrayList<String>()
         var line: String? = null
@@ -285,7 +285,7 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
                     selectedPathUri = data!!.data
 
                     //TODO: KMP Re did this. Check and test,etc.
-                    val sourceFile = File(data!!.data.path)
+                    val sourceFile = File(data!!.data!!.path)
 
 //                    val sourceFile = File(Objects.requireNonNull(
 //                            UmAndroidUriUtil.getPath(this, selectedUri)))

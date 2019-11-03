@@ -34,6 +34,10 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     abstract suspend fun findAllPersonDetailPresenterFieldsEditMode() :
             List<PersonDetailPresenterField>
 
+    @Query("SELECT * FROM PersonDetailPresenterField WHERE editModeVisible = 1 ORDER BY fieldIndex")
+    abstract fun findAllPersonDetailPresenterFieldsEditModeLive() :
+            DoorLiveData<List<PersonDetailPresenterField>>
+
     @Query("SELECT * FROM PersonDetailPresenterField WHERE fieldUid = :uid")
     abstract suspend fun findAllByFieldUid(uid: Long) : List<PersonDetailPresenterField>
 

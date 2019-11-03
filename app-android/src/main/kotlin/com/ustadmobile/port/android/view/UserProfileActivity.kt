@@ -72,6 +72,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun showLanguageOptions() {
+
+    }
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -239,7 +243,6 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         }
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -258,7 +261,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     val selectedImage = data!!.data
 
 
-                    val picPath = doInBackground(selectedImage)
+                    val picPath = doInBackground(selectedImage!!)
                     imagePathFromCamera = picPath
                     if (imagePathFromCamera == null) {
                         sendMessage(MessageID.unable_open_image)
@@ -274,6 +277,14 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                 }
             }
         }
+    }
+
+    override fun callFinishAffinity(){
+        finishAffinity()
+    }
+
+    override fun restartUI() {
+        onResume()
     }
 
     override fun sendMessage(messageId: Int) {

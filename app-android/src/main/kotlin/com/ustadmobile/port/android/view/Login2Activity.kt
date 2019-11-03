@@ -231,7 +231,7 @@ class Login2Activity : UstadBaseActivity(), Login2View,
                 if (initCipher())
                 {
                     //If the cipher is initialized successfully, then create a CryptoObject instance//
-                    cryptoObject = FingerprintManager.CryptoObject(cipher)
+                    cryptoObject = FingerprintManager.CryptoObject(cipher!!)
                     val helper = FingerprintAuthenticationHelper(this, this)
                     helper.startAuth(fingerprintManager!!, cryptoObject!!)
                 }

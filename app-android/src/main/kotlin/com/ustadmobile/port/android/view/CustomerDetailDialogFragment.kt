@@ -106,7 +106,7 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
 
     override fun setLocationPresets(locationPresets: Array<String>, selectedPosition: Int) {
 
-        val adapter = ArrayAdapter(activity,
+        val adapter = ArrayAdapter(activity!!,
                 R.layout.item_simple_spinner, locationPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         locationSpinner!!.adapter = adapter

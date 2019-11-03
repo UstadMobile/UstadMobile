@@ -517,6 +517,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         //cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION |Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
 
+
     }
 
     //this is how you check permission grant task result.
