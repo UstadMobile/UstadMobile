@@ -3,16 +3,24 @@ package com.ustadmobile.lib.annotationprocessor.core
 import androidx.room.*
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
-import com.ustadmobile.door.annotation.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.annotation.EntityWithAttachment
+import com.ustadmobile.door.annotation.SyncableEntity
+import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.InputProvider
+import io.ktor.content.TextContent
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.routing.Route
+import java.io.File
+import java.io.FileInputStream
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import io.ktor.routing.Route
 import javax.tools.Diagnostic
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.DoorDatabase
-import io.ktor.client.HttpClient
 import kotlin.reflect.KClass
 
 /**
@@ -113,7 +121,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                     useFilerAsDefault = false)
 
             val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-            writeFileSpecToOutputDirs(syncRouteFileSpec, AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+            syncRouteFileSpec.writeAllSpecs(writeImpl = true,
+                    outputSpecArgName = AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT,
+                    useFilerAsDefault = true)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -170,22 +180,30 @@ class DbProcessorSync: AbstractDbProcessor() {
     }
 
 
-    fun generateSyncKtorRoute(dbType: TypeElement): FileSpec {
+    fun generateSyncKtorRoute(dbType: TypeElement): KtorDaoFileSpecs {
         val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
-        val abstractDaoClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
+        val packageName = dbType.asClassName().packageName
+        val specs = KtorDaoSpecs(packageName, abstractDaoSimpleName)
+
+        val abstractDaoClassName = ClassName(packageName,
                 abstractDaoSimpleName)
-        val routeFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
-                "${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
-                .addImport("io.ktor.response", "header")
+        specs.route.fileSpec.addImport("io.ktor.response", "header")
+
+
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
                 .addParameter("_dao", abstractDaoClassName)
                 .addParameter("_db", DoorDatabase::class)
                 .addParameter("_gson", Gson::class)
+                .addParameter("_attachmentsDir", String::class)
+                .addParameter("_ktorHelperDao",
+                        ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}"))
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
                 MemberName("io.ktor.routing", "route"), abstractDaoSimpleName)
+
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityTypeListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
@@ -199,15 +217,52 @@ class DbProcessorSync: AbstractDbProcessor() {
                     "_findMasterUnsent${entityType.simpleName}")
                 .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
                 .endControlFlow()
+            val helperFunSpec = getAllFunSpec.toBuilder()
+            helperFunSpec.annotations.clear()
+            helperFunSpec.addParameter("clientId", INT)
+            specs.addHelperQueryFun(helperFunSpec.build(), getAllSql, entityType.asClassName(), false)
 
             val replaceEntityFunSpec = FunSpec.builder("_replace${entityType.simpleName}")
                     .addParameter("entities", entityTypeListClassName)
                     .returns(UNIT)
                     .build()
+
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.POST_MEMBER,
                     "_replace${entityType.simpleName}")
-                    .add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec))
-                    .endControlFlow()
+            val hasAttachments = findEntitiesWithAnnotation(entityType.asClassName(), EntityWithAttachment::class.java,
+                    processingEnv).isNotEmpty()
+
+            if(hasAttachments) {
+                val multipartHelperVarName = "_multipartHelper"
+                codeBlock.add("val $multipartHelperVarName = %T()\n",
+                        ClassName("com.ustadmobile.door", "DoorAttachmentsMultipartHelper"))
+                        .add("_multipartHelper.digestMultipart(%M.%M())\n",
+                                DbProcessorKtorServer.CALL_MEMBER,
+                                MemberName("io.ktor.request", "receiveMultipart"))
+                val entityParamName = "__" + replaceEntityFunSpec.parameters[0].name
+                val pkEl = processingEnv.elementUtils.getTypeElement(
+                    entityType.qualifiedName).enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
+                codeBlock.add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec, multipartHelperVarName,
+                        beforeDaoCallCode = CodeBlock.builder()
+                                .beginControlFlow("if(_multipartHelper.containsAllAttachments($entityParamName.map{it.${pkEl.simpleName}.toString()}))")
+                                .add("_multipartHelper.moveTmpFiles(%T(_attachmentsDir, %S))\n",
+                                        File::class, entityType.simpleName)
+                                .build(),
+                        afterDaoCallCode = CodeBlock.builder()
+                                .nextControlFlow("else")
+                                .add("%M.%M(%T.BadRequest, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
+                                    DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
+                                .endControlFlow()
+                                .build()))
+            }else {
+                codeBlock.add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec))
+            }
+
+
+
+
+
+            codeBlock.endControlFlow()
 
             codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityInfo.tracker,
                     syncHelperVarName = "_dao"))
@@ -216,8 +271,8 @@ class DbProcessorSync: AbstractDbProcessor() {
         codeBlock.endControlFlow()
 
         daoRouteFn.addCode(codeBlock.build())
-        routeFileSpec.addFunction(daoRouteFn.build())
-        return routeFileSpec.build()
+        specs.route.fileSpec.addFunction(daoRouteFn.build())
+        return specs.toBuiltFileSpecs()
     }
 
 
@@ -267,6 +322,7 @@ class DbProcessorSync: AbstractDbProcessor() {
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityListTypeName = List::class.asClassName().parameterizedBy(entityType.asClassName())
+            val entityPkEl = entityType.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
 
             val replaceEntitiesFn = FunSpec.builder("_replace${entityType.simpleName}")
                     .addParameter("_entities", List::class.asClassName().parameterizedBy(entityType.asClassName()))
@@ -305,23 +361,59 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .addAnnotation(AnnotationSpec.builder(Query::class)
                             .addMember(CodeBlock.of("%S", "SELECT * FROM ${entityType.simpleName}")).build())
 
+            val entitySyncCodeBlock = CodeBlock.builder()
+                    .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
+                            syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
+
+            val hasAttachments = entityType.getAnnotation(EntityWithAttachment::class.java) != null
+
+            entitySyncCodeBlock.add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                    .beginControlFlow("if(!_entities.isEmpty())")
+            var multipartPartsVarName: String? = null
+            if(hasAttachments) {
+                entitySyncCodeBlock.add("val _entityAttachmentsDir = %T(_attachmentsDir, %S)\n",
+                        File::class, entityType.simpleName)
+                val pkFieldName = entityPkEl.simpleName
+                entitySyncCodeBlock
+                        .add("val _multipartJsonStr = (%M().write(_entities) as %T).text\n",
+                                MemberName("io.ktor.client.features.json", "defaultSerializer"),
+                                TextContent::class)
+                        .beginControlFlow("val·_multipartParts = %M",
+                                MemberName("io.ktor.client.request.forms", "formData"))
+                        .add("append(%S, _multipartJsonStr)\n", "entities")
+                        .beginControlFlow("_entities.forEach")
+                        .add("val _pkStr = it.$pkFieldName.toString()\n")
+                        .add("val _attachFile = %T(_entityAttachmentsDir, _pkStr)\n",
+                                File::class)
+                        .beginControlFlow("val _mpHeaders = %T.build", Headers::class)
+                        .add("append(%T.ContentLength, _attachFile.length())\n", HttpHeaders::class)
+                        .add("append(%T.ContentDisposition,·\"form-data;·name=\\\"\$_pkStr\\\";·filename=\\\"\$_pkStr\\\"\")\n",
+                                HttpHeaders::class)
+                        .endControlFlow()
+                        .add("append(_attachFile.name,·%T(_attachFile.length()){%T(_attachFile).%M()}, _mpHeaders)\n",
+                                InputProvider::class, FileInputStream::class,
+                                MemberName("kotlinx.io.streams", "asInput"))
+
+                        .endControlFlow()
+                        .endControlFlow()
+                        .add("\n")
+                multipartPartsVarName = "_multipartParts"
+            }
+
+
+            entitySyncCodeBlock.add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
+                            dbPathVarName = "_dbPath",
+                            daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
+                            httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
+                            httpResultType = UNIT, params = replaceEntitiesFn.parameters,
+                            useMultipartPartsVarName = multipartPartsVarName))
+                    .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
+                            entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
+                            reqIdVarName = "0", processingEnv = processingEnv))
+                    .endControlFlow()
             val entitySyncFn = FunSpec.builder("sync${entityType.simpleName}")
                     .addModifiers(KModifier.SUSPEND, KModifier.PRIVATE)
-                    .addCode(CodeBlock.builder()
-                            .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
-                                    syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
-                            .add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
-                            .beginControlFlow("if(!_entities.isEmpty())")
-                            .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
-                                    dbPathVarName = "_dbPath",
-                                    daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
-                                    httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
-                                    httpResultType = UNIT, params = replaceEntitiesFn.parameters))
-                            .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
-                                    entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
-                                    reqIdVarName = "0", processingEnv = processingEnv))
-                            .endControlFlow()
-                            .build())
+                    .addCode(entitySyncCodeBlock.build())
 
             syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
                             entityType)
