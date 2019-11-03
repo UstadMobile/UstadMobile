@@ -121,7 +121,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                     useFilerAsDefault = false)
 
             val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-            writeFileSpecToOutputDirs(syncRouteFileSpec, AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+            syncRouteFileSpec.writeAllSpecs(writeImpl = true,
+                    outputSpecArgName = AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT,
+                    useFilerAsDefault = true)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -178,23 +180,30 @@ class DbProcessorSync: AbstractDbProcessor() {
     }
 
 
-    fun generateSyncKtorRoute(dbType: TypeElement): FileSpec {
+    fun generateSyncKtorRoute(dbType: TypeElement): KtorDaoFileSpecs {
         val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
-        val abstractDaoClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
+        val packageName = dbType.asClassName().packageName
+        val specs = KtorDaoSpecs(packageName, abstractDaoSimpleName)
+
+        val abstractDaoClassName = ClassName(packageName,
                 abstractDaoSimpleName)
-        val routeFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
-                "${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
-                .addImport("io.ktor.response", "header")
+        specs.route.fileSpec.addImport("io.ktor.response", "header")
+
+
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
                 .addParameter("_dao", abstractDaoClassName)
                 .addParameter("_db", DoorDatabase::class)
                 .addParameter("_gson", Gson::class)
                 .addParameter("_attachmentsDir", String::class)
+                .addParameter("_ktorHelperDao",
+                        ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}"))
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
                 MemberName("io.ktor.routing", "route"), abstractDaoSimpleName)
+
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityTypeListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
@@ -208,6 +217,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                     "_findMasterUnsent${entityType.simpleName}")
                 .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
                 .endControlFlow()
+            val helperFunSpec = getAllFunSpec.toBuilder()
+            helperFunSpec.annotations.clear()
+            helperFunSpec.addParameter("clientId", INT)
+            specs.addHelperQueryFun(helperFunSpec.build(), getAllSql, entityType.asClassName(), false)
 
             val replaceEntityFunSpec = FunSpec.builder("_replace${entityType.simpleName}")
                     .addParameter("entities", entityTypeListClassName)
@@ -258,8 +271,8 @@ class DbProcessorSync: AbstractDbProcessor() {
         codeBlock.endControlFlow()
 
         daoRouteFn.addCode(codeBlock.build())
-        routeFileSpec.addFunction(daoRouteFn.build())
-        return routeFileSpec.build()
+        specs.route.fileSpec.addFunction(daoRouteFn.build())
+        return specs.toBuiltFileSpecs()
     }
 
 
