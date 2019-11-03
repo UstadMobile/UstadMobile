@@ -1004,7 +1004,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 val clipboard = getSystemService(
                         Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText(EDITOR_BASE_DIR_NAME, utf8Content)
-                clipboard.primaryClip = clip
+
+                //TODO: Lukundo - please check this
+                //clipboard.primaryClip = clip
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
             }
