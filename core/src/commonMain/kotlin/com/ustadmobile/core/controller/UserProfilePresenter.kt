@@ -152,7 +152,7 @@ class UserProfilePresenter(context: Any,
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
                 "", "", ""), context)
-        UmAccountManager.setActiveAccount(null, context)
+        //UmAccountManager.setActiveAccount(null, context)
 
         val args = HashMap<String, String>()
         view.runOnUiThread(Runnable {
