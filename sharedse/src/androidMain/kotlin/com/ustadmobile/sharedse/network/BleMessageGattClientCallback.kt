@@ -9,9 +9,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle.Companion.USTADMOBILE_
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MAXIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -67,15 +65,13 @@ class BleMessageGattClientCallback
     @Volatile
     private var lastActive: Long
 
-    private var packetTransferReTryCount = 3
+    private var packetTransferAttemptsRemaining = 3
 
     private val MAX_DELAY_TIME  = 80L
 
     private var defaultMtuSizeToUse = MINIMUM_MTU_SIZE
 
-    private val mTimeoutRunnable = {
-
-    }
+    private val mtuCompletableDeferred = CompletableDeferred(MINIMUM_MTU_SIZE)
 
     init {
         receivedMessage = BleMessage()
@@ -97,6 +93,7 @@ class BleMessageGattClientCallback
         super.onMtuChanged(gatt, mtu, status)
         UMLog.l(UMLog.DEBUG, 698, "MTU changed from $defaultMtuSizeToUse to $mtu")
         defaultMtuSizeToUse = mtu
+        mtuCompletableDeferred.complete(mtu)
     }
 
     /**
@@ -157,11 +154,12 @@ class BleMessageGattClientCallback
         if (characteristic.uuid == USTADMOBILE_BLE_SERVICE_UUID_UUID) {
             characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             gatt.setCharacteristicNotification(characteristic, true)
-            GlobalScope.launch {
+            GlobalScope.launch(Dispatchers.Main) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    UMLog.l(UMLog.DEBUG, 698,
+                            "Requesting MTU changed from $defaultMtuSizeToUse to $MAXIMUM_MTU_SIZE")
                     gatt.requestMtu(MAXIMUM_MTU_SIZE)
-                    UMLog.l(UMLog.DEBUG, 698, "Requesting MTU changed from $defaultMtuSizeToUse to $MAXIMUM_MTU_SIZE")
-                    delay(MAX_DELAY_TIME)
+                    withTimeoutOrNull(MAX_DELAY_TIME) { mtuCompletableDeferred.await() }
                 }
                 onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
             }
@@ -196,22 +194,19 @@ class BleMessageGattClientCallback
                                 "the remote device =" + gatt.device.address)
                 //We now expect the server to send a response
             }
-        }else{
-            do{
-                packetTransferReTryCount--
-                UMLog.l(UMLog.DEBUG, 698, "Failed to send packet to ${gatt.device.address}" +
-                        " remain $packetTransferReTryCount trial, trying now...")
-                GlobalScope.launch {
-                    delay(MAX_DELAY_TIME)
-                    onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
-                }
-            }while (packetTransferReTryCount > 0)
-
-            if(packetTransferReTryCount == 0){
-                UMLog.l(UMLog.DEBUG, 698,
-                        "Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
-                cleanup(gatt)
+        }else if(packetTransferAttemptsRemaining > 0) {
+            packetTransferAttemptsRemaining--
+            UMLog.l(UMLog.DEBUG, 698, "Failed to send packet to ${gatt.device.address}" +
+                    " remain $packetTransferAttemptsRemaining trial, trying now...")
+            GlobalScope.launch(Dispatchers.Main) {
+                delay(MAX_DELAY_TIME)
+                onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
             }
+
+        }else {
+            UMLog.l(UMLog.DEBUG, 698,
+                    "Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
+            cleanup(gatt)
         }
     }
 
