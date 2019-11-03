@@ -18,9 +18,13 @@ interface ContentEntryImportLinkView : UstadView, UstadViewWithProgress {
 
     fun showHideErrorMessage(show: Boolean)
 
+    fun updateSourceUrl(sourceUrl: String)
+
     companion object {
 
         const val CONTENT_ENTRY_PARENT_UID = "ContentEntryParentUid"
+
+        const val CONTENT_ENTRY_UID = "ContentEntryUid"
 
         const val VIEW_NAME = "ContentEntryImportLinkView"
 
