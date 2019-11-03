@@ -19,6 +19,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
 import okio.Okio
+import org.bouncycastle.crypto.tls.ContentType
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -288,6 +289,35 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
             Assert.assertEquals("Func for h5p not called", 0, count)
         }
 
+
+    }
+
+    @Test
+    fun givenExistingContentEntryUid_whenNewLinkGiven_thenDownloadAndUpdateContent(){
+
+        mockWebServer.enqueue(MockResponse().addHeader("content-length", 11).addHeader("content-type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().addHeader("content-length", 11).addHeader("content-type", "video/").setResponseCode(200))
+        mockWebServer.enqueue(MockResponse().setBody("data"))
+        mockWebServer.start()
+        val url = mockWebServer.url("/somehp5here").toString()
+
+        val args = Hashtable<String, String>()
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_UID] = (-102).toString()
+        presenter = ContentEntryImportLinkPresenter(context,
+                args, mockView, "http://localhost:8096")
+
+        runBlocking {
+            presenter.onCreate(args)
+
+            verify(mockView, timeout(5000)).updateSourceUrl("secondUrl")
+
+            presenter.handleUrlTextUpdated(url).join()
+            presenter.handleClickImport().join()
+
+            Assert.assertEquals("source url changed", url, serverdb.contentEntryDao.findByUidAsync(-102)!!.sourceUrl)
+            Assert.assertEquals("source url changed", url, defaultDb.contentEntryDao.findByUidAsync(-102)!!.sourceUrl)
+        }
 
     }
 
