@@ -1,10 +1,8 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import kotlinx.coroutines.Runnable

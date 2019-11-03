@@ -55,15 +55,15 @@ object UMAndroidUtil {
         val iterator = keys.iterator()
 
         var key: String
-        var `val`: Any
+        var keyVal : Any?
         while (iterator.hasNext()) {
             key = iterator.next()
-            `val` = bundle.get(key)
+            keyVal = bundle.get(key)
             //TODO: could this not simply be putAll?
-            when (`val`) {
-                is String -> retVal[key] = `val`
-                is Int -> retVal[key] = `val`.toString()
-                is Long -> retVal[key] = `val`.toString()
+            when (keyVal) {
+                is String -> retVal[key] = keyVal
+                is Int -> retVal[key] = keyVal.toString()
+                is Long -> retVal[key] = keyVal.toString()
             }
         }
 

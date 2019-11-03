@@ -67,7 +67,7 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
 
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", (buffer.size().toString() + "ABC").hashCode())
-                    response.setHeader("Content-Type", if(fileLocation.endsWith(".mp4")) "video/mp4" else "text/html")
+                    response.setHeader("Content-Type", if (fileLocation.endsWith(".mp4")) "video/mp4" else "text/html")
                     response.setHeader("Content-Length", buffer.size())
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
@@ -203,11 +203,9 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
 
             Assert.assertEquals("content size matches container Entry ", 4, db.containerEntryDao.findByContainer(container.containerUid).size)
 
-
         }
 
     }
-
 
 
     @Test
@@ -310,6 +308,42 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
             Assert.assertTrue("", db.containerEntryDao.findByContainer(response.container.containerUid).map { it.cePath }.contains("video.mp4"))
 
         }
+
+    }
+
+    @Test
+    fun givenExistingContentEntry_whenValid_thenCheckContentEntryUpdated() {
+
+        runBlocking {
+
+            val httpClient = HttpClient {
+                install(JsonFeature)
+            }
+            mockServer.enqueue(MockResponse().setBody("H5PIntegration").setResponseCode(200))
+            mockServer.start()
+
+            val contentEntry = ContentEntry()
+            contentEntry.title = "test"
+            contentEntry.leaf = true
+            contentEntry.sourceUrl = "urlbefore"
+            contentEntry.contentEntryUid = -2
+
+            val response = httpClient.get<HttpResponse>("http://localhost:8096/ImportH5P/importUrl") {
+                parameter("hp5Url", mockServer.url("/somehp5here").toString())
+                parameter("parentUid", -1)
+                parameter("contentEntryUid", contentEntry.contentEntryUid)
+            }
+
+            val content = response.receive<H5PImportData>()
+
+            Assert.assertEquals("Content Valid Status 200", 200, response.status.value)
+            Assert.assertEquals("Func for h5p download called", 1, count)
+            Assert.assertTrue("got the data", content != null)
+            Assert.assertEquals("source url got updated", "http://localhost:${mockServer.port}/somehp5here", content.contentEntry.sourceUrl)
+
+
+        }
+
 
     }
 

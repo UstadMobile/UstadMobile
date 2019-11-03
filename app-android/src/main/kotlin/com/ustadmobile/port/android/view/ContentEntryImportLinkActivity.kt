@@ -6,12 +6,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
 import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
@@ -22,8 +20,6 @@ import com.ustadmobile.core.view.ContentEntryImportLinkView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
-import android.R.id
-import androidx.core.content.ContextCompat.getSystemService
 
 
 class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLinkView {
@@ -32,15 +28,13 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
     private lateinit var webView: WebView
 
-    private lateinit var textInput: TextInputLayout
+    private lateinit var linkTextInput: TextInputLayout
 
-    private lateinit var editText: EditText
+    private lateinit var linkEditText: EditText
 
-    private lateinit var titleInput: TextInputLayout
+    private lateinit var titleTextInput: TextInputLayout
 
     private lateinit var titleEdiText: EditText
-
-    private lateinit var progressBar: ProgressBar
 
     private lateinit var errorTextView: TextView
 
@@ -64,15 +58,15 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         webView.settings.allowFileAccessFromFileURLs = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
 
-        textInput = findViewById(R.id.entry_import_link_textInput)
-        editText = findViewById(R.id.entry_import_link_editText)
+        linkTextInput = findViewById(R.id.entry_import_link_textInput)
+        linkEditText = findViewById(R.id.entry_import_link_editText)
 
-        titleInput = findViewById(R.id.entry_import_link_titleInput)
+        titleTextInput = findViewById(R.id.entry_import_link_titleInput)
         titleEdiText = findViewById(R.id.entry_import_link_title_editText)
 
         errorTextView = findViewById(R.id.import_link_error_message)
 
-        editText.addTextChangedListener(textWatcher)
+        linkEditText.addTextChangedListener(textWatcher)
         titleEdiText.addTextChangedListener(titleWatcher)
 
         setProgressBar()
@@ -89,6 +83,13 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         menuInflater.inflate(R.menu.menu_h5p_import_link_action, menu)
         return super.onCreateOptionsMenu(menu)
     }
+
+    override fun updateSourceUrl(sourceUrl: String) {
+       runOnUiThread{
+           linkEditText.setText(sourceUrl)
+       }
+    }
+
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val item = menu?.findItem(R.id.import_link_done)
@@ -117,7 +118,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
     override fun showUrlStatus(isValid: Boolean, message: String) {
         runOnUiThread {
-            textInput.error = if (isValid) null else message
+            linkTextInput.error = if (isValid) null else message
         }
 
     }
@@ -134,13 +135,13 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
     override fun showHideVideoTitle(showTitle: Boolean) {
         runOnUiThread {
-            titleInput.visibility = if (showTitle) VISIBLE else GONE
+            titleTextInput.visibility = if (showTitle) VISIBLE else GONE
         }
     }
 
     override fun showNoTitleEntered(errorText: String) {
         runOnUiThread {
-            titleInput.error = errorText
+            titleTextInput.error = errorText
         }
     }
 
@@ -150,8 +151,8 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
     override fun enableDisableEditText(enable: Boolean) {
         runOnUiThread {
-            titleInput.isEnabled = enable
-            textInput.isEnabled = enable
+            titleTextInput.isEnabled = enable
+            linkTextInput.isEnabled = enable
         }
     }
 

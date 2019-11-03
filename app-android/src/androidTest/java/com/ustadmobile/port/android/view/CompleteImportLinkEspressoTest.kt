@@ -73,24 +73,26 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
         createDb(defaultDb)
         createDb(serverDb)
 
+        val testEndpoint = "http://" + BuildConfig.TEST_HOST +
+                ":" + 8087 + "/"
+
+        val testAccount = UmAccount(1, "test", "", testEndpoint)
+        UmAccountManager.setActiveAccount(testAccount, context)
+
         val intent = Intent()
         intent.putExtra(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID, (-101).toString())
         mActivityRule.launchActivity(intent)
         activity = mActivityRule.activity
 
-        val testEndpoint = "http://" + BuildConfig.TEST_HOST +
-                ":" + 8087 + "/"
 
-        val testAccount = UmAccount(0, "test", "", testEndpoint)
-        UmAccountManager.setActiveAccount(testAccount, context)
 
 
     }
 
-    //@Test
+    @Test
     fun endToEnd() {
 
-        var urlString = "https://h5p.org/h5p/embed/612"
+        var urlString = "https://h5p.org/node/615305"
 
         onView(withId(R.id.create_new_content)).perform(click())
         Thread.sleep(100)

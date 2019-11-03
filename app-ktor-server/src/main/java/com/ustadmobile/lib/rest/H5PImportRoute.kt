@@ -53,6 +53,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
         get("importUrl") {
             val urlString = call.request.queryParameters["hp5Url"] ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
+            val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong()
             val content = checkIfH5PValidAndReturnItsContent(urlString)
             val isValid = content?.contains("H5PIntegration")
             when {
@@ -63,18 +64,31 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     val parentChildJoinDao = db.contentEntryParentChildJoinDao
                     val containerDao = db.containerDao
 
+
                     val contentEntry = ContentEntry()
                     contentEntry.leaf = true
                     contentEntry.title = Jsoup.parse(content).title()
-                    contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+                    contentEntry.sourceUrl = urlString
+
 
                     val parentChildJoin = ContentEntryParentChildJoin()
                     parentChildJoin.cepcjParentContentEntryUid = parentUid
-                    parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                    parentChildJoinDao.insert(parentChildJoin)
+
+                    if (contentEntryUid == null) {
+
+                        contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+                        parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
+                        parentChildJoinDao.insert(parentChildJoin)
+
+                    } else {
+
+                        parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
+                        contentEntry.contentEntryUid = contentEntryUid
+                        entryDao.update(contentEntry)
+                    }
+
 
                     val container = Container(contentEntry)
-                    container.containerContentEntryUid = contentEntry.contentEntryUid
                     container.fileSize = 1
                     container.mimeType = "application/webchunk+zip"
                     container.containerUid = containerDao.insert(container)
@@ -93,6 +107,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
             val urlString = call.request.queryParameters["hp5Url"] ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
             val videoTitle = call.request.queryParameters["title"] ?: ""
+            val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong()
 
             val response = defaultHttpClient().head<HttpResponse>(urlString)
 
@@ -112,16 +127,22 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 val contentEntry = ContentEntry()
                 contentEntry.leaf = true
                 contentEntry.title = videoTitle
-                contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+                contentEntry.sourceUrl = urlString
 
                 val parentChildJoin = ContentEntryParentChildJoin()
                 parentChildJoin.cepcjParentContentEntryUid = parentUid
                 parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                parentChildJoinDao.insert(parentChildJoin)
+
+                if (contentEntryUid == null) {
+                    contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+                    parentChildJoinDao.insert(parentChildJoin)
+                } else {
+                    contentEntry.contentEntryUid = contentEntryUid
+                    entryDao.update(contentEntry)
+                }
+
 
                 val container = Container(contentEntry)
-                container.containerContentEntryUid = contentEntry.contentEntryUid
-
                 container.mimeType = headers["Content-Type"]!!
 
 
@@ -163,7 +184,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
     try {
         runBlocking {
 
-            System.setProperty("webdriver.chrome.driver", findSystemCommand("chromedriver", "webdriver.chrome.driver"))
+            System.setProperty("chromedriver", findSystemCommand("chromedriver", "chromedriver"))
             val driver = setupLogIndexChromeDriver()
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
