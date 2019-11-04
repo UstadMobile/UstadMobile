@@ -28,6 +28,7 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
                            private val onItemStarted: (T) -> Unit = {},
                            private val onItemFinished: (T) -> Unit = {},
+                           private var onQueueEmpty: (T) -> Unit = {},
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
     private val channel: Channel<T> = Channel<T>(capacity = UNLIMITED)
@@ -47,6 +48,8 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                         itemRunner(nextItem)
                         queuedOrActiveItems.remove(nextItem)
                         onItemFinished(nextItem)
+                        if(queuedOrActiveItems.isEmpty() && channel.isEmpty)
+                            onQueueEmpty.invoke(nextItem)
                     }
                 }
             }
@@ -58,12 +61,12 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
         }
     }
 
+    //TODO: Add thread safety on JDBC/JVM. On Android: this will only ever be called on the main thread
     override fun onChanged(t: List<T>) {
-        t.filter { changedItem -> !queuedOrActiveItems.any { sameItemFn(it, changedItem) } }.forEach {
-            queuedOrActiveItems.add(it)
-            coroutineScope.launch {
-                channel.send(it)
-            }
+        val itemsToQueue = t.filter { changedItem -> !queuedOrActiveItems.any { sameItemFn(it, changedItem) } }
+        queuedOrActiveItems.addAll(itemsToQueue)
+        coroutineScope.launch {
+            itemsToQueue.forEach { channel.send(it) }
         }
     }
 

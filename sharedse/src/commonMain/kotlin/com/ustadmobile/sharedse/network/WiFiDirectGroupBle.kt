@@ -62,4 +62,7 @@ open class WiFiDirectGroupBle {
      */
     var ipAddress: String? = ""
 
+    override fun toString(): String {
+        return "WiFiDirectGroupBle ssid='$ssid' passphrase='$passphrase' ownerIp=$ipAddress ownerPort=$port"
+    }
 }

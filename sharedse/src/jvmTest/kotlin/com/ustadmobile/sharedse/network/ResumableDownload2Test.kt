@@ -13,7 +13,6 @@ import org.junit.Test
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-// proxy - https://gist.github.com/paour/bf58afa8969640e36e9bd87f85a6c5df
 class ResumableDownload2Test {
 
     lateinit var server : RouterNanoHTTPD
@@ -40,10 +39,6 @@ class ResumableDownload2Test {
                 HttpUrl.parse("http://localhost:${server.listeningPort}/")!!)
         mockServer.setDispatcher(mockDispatcher)
         mockServer.start()
-
-//        println("NanoHTTPD running on ${server.listeningPort}")
-//        Thread.sleep(5 * 60 * 1000)
-//        println("continuing")
     }
 
     @After
@@ -77,7 +72,7 @@ class ResumableDownload2Test {
     }
 
     @Test
-    fun `GIVEN server that disconnects repeatedly WHEN download runs SHOULD fail after retry count is exceeded`() {
+    fun givenServerDisconnectsRepeatedlyWhenDownloadRunsShouldFailAfterRetryCountExceeded() {
         runBlocking {
             mockDispatcher.numTimesToFail.set(7) // each second attempt runs two get requests - HEAD and GEt
 
@@ -86,7 +81,6 @@ class ResumableDownload2Test {
             val downloader = ResumableDownload2(mockServer.url("/static/top_header_bg.jpg").toString(),
                     downloadDstFile.absolutePath, retryDelay = 100)
             val successful = downloader.download()
-
             Assert.assertFalse(successful)
 
         }

@@ -8,20 +8,15 @@ import com.ustadmobile.core.networkmanager.PlatformHttpClient
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
+import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.H5PImportData
-import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
-import io.ktor.client.features.HttpRedirect
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
-import io.ktor.client.request.head
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
-import io.ktor.http.HeaderValue
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
-import io.ktor.http.userAgent
 import io.ktor.util.toMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -32,9 +27,12 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
 
 
+    private lateinit var db: UmAppDatabase
     private var videoTitle: String? = null
 
     private var parentContentEntryUid: Long = 0
+
+    private var contentEntryUid: Long? = null
 
     private var hp5Url: String = ""
 
@@ -48,6 +46,31 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         super.onCreate(savedState)
 
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
+        contentEntryUid = arguments[CONTENT_ENTRY_UID]?.toLong()
+        db = UmAppDatabase.getInstance(context)
+        if (contentEntryUid != null) {
+            updateUIWithExistingContentEntry()
+        }
+
+
+    }
+
+    fun updateUIWithExistingContentEntry(): Job{
+        jobCount++
+        checkProgressBar()
+        return GlobalScope.launch {
+
+            val contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid!!)
+            videoTitle = contentEntry!!.title
+            handleTitleChanged(videoTitle!!)
+
+            if (contentEntry.sourceUrl != null) {
+                view.updateSourceUrl(contentEntry.sourceUrl!!)
+            }
+            jobCount--
+            checkProgressBar()
+
+        }
     }
 
     fun checkProgressBar() {
@@ -128,7 +151,10 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 contentType = VIDEO
                 hp5Url = url
                 view.showUrlStatus(true, "")
-                view.showHideVideoTitle(true)
+                view.showHideVideoTitle(contentEntryUid == null)
+                if(contentEntryUid != null){
+                    handleTitleChanged(videoTitle!!)
+                }
                 jobCount--
                 checkProgressBar()
                 return@launch
@@ -181,6 +207,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
+                            if (contentEntryUid != null) parameter("contentEntryUid", contentEntryUid)
                         }
 
                     }
@@ -197,6 +224,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
                             parameter("title", videoTitle)
+                            if (contentEntryUid != null) parameter("contentEntryUid", contentEntryUid)
                         }
                     }
                 }
@@ -211,9 +239,12 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 val content = response.receive<H5PImportData>()
                 view.enableDisableEditText(true)
 
-                val db = UmAppDatabase.getInstance(context)
-                db.contentEntryDao.insert(content.contentEntry)
-                db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
+                if (contentEntryUid == null) {
+                    db.contentEntryDao.insert(content.contentEntry)
+                    db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
+                } else {
+                    db.contentEntryDao.update(content.contentEntry)
+                }
                 db.containerDao.insert(content.container)
 
                 view.runOnUiThread(Runnable {

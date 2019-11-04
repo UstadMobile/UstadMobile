@@ -135,7 +135,10 @@ kotlin {
 
                 implementation "androidx.room:room-runtime:$version_android_room"
 
+                implementation "com.google.android.material:material:$version_androidx_support_lib"
+
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
 
 

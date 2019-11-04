@@ -1,10 +1,8 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import kotlinx.coroutines.Runnable
@@ -18,7 +16,10 @@ import kotlinx.coroutines.Runnable
  *
  * @author kileha3
  */
-abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
+
+typealias ResponseReceivedListener = (MutableList<EntryStatusResponse>, entryStatusTask: BleEntryStatusTask) -> Unit
+
+abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     /**
      * Message object which carries list of entry Ids to be checked for availability.
@@ -35,7 +36,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
      * @return Created NetworkNode
      */
     lateinit var networkNode: NetworkNode
-        protected set
+        internal set
 
     lateinit var context: Any
 
@@ -44,6 +45,8 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
     private var entryUidsToCheck: List<Long>? = null
 
     var responseListener: BleMessageResponseListener? = null
+
+    var statusResponseListener: ResponseReceivedListener? = null
 
     private lateinit var managerBle: NetworkManagerBleCommon
 
@@ -107,45 +110,33 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
         this.entryUidsToCheck = entryUidsToCheck
     }
 
+    abstract fun sendRequest()
+
     /**
      * Handle response from the entry status task
      * @param sourceDeviceAddress Server device bluetooth MAC address
      * @param response Message received as a response from the server device.
      */
     override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-
         when (response?.requestType ?: -1) {
 
             ENTRY_STATUS_RESPONSE -> {
-                val umAppDatabase = UmAppDatabase.getInstance(context)
-                val entryStatusResponseDao = umAppDatabase.entryStatusResponseDao
-                val networkNodeDao = umAppDatabase.networkNodeDao
-
-                val networkNodeId = networkNodeDao.findNodeByBluetoothAddress(sourceDeviceAddress)!!.nodeId
-                val entryFileStatusResponseList = ArrayList<EntryStatusResponse>()
-                val statusCheckResponse = bleMessageBytesToLong(response!!.payload!!)
-
-                val time = getSystemTimeInMillis()
-                if (entryUidsToCheck == null)
+                val checkEntryUids = entryUidsToCheck
+                if(checkEntryUids == null) {
+                    UMLog.l(UMLog.WARN, 0, "Entry Status task has no entry uids to check for $sourceDeviceAddress")
                     return
-
-                for (entryCounter in entryUidsToCheck!!.indices) {
-                    val containerUid = entryUidsToCheck!![entryCounter]
-
-                    entryFileStatusResponseList.add(EntryStatusResponse(containerUid, time,
-                            networkNodeId, statusCheckResponse[entryCounter] != 0L))
-
                 }
-                val rowCount = entryStatusResponseDao.insertList(entryFileStatusResponseList)
-                UMLog.l(UMLog.DEBUG, 698, rowCount.size.toString()
-                        + " response(s) logged from " + sourceDeviceAddress)
 
-                managerBle.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList)
+                val statusCheckResponse = bleMessageBytesToLong(response!!.payload!!)
+                val statusResponses = statusCheckResponse.mapIndexed { index, responseVal ->
+                    EntryStatusResponse(erContainerUid = checkEntryUids[index], available = responseVal != 0L)
+                }
+
+                statusResponseListener?.invoke(statusResponses.toMutableList(), this)
             }
         }
 
         responseListener?.onResponseReceived(sourceDeviceAddress, response, error)
-
     }
 
     companion object{

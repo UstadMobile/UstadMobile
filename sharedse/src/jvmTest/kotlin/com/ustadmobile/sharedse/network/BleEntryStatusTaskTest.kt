@@ -4,14 +4,17 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
+import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import junit.framework.TestCase.*
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.spy
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Test class which tests [BleEntryStatusTask] to make sure it behaves as expected
@@ -25,7 +28,7 @@ class BleEntryStatusTaskTest {
 
     private val localAvailabilityCheckResponse = listOf(0L, 9076137860000L, 0L, 2912543894000L)
 
-    private var mockedEntryStatusTask: BleEntryStatusTask? = null
+    private lateinit var mockedEntryStatusTask: BleEntryStatusTask
 
     private var entryStatusResponseDao: EntryStatusResponseDao? = null
 
@@ -56,9 +59,9 @@ class BleEntryStatusTaskTest {
         entryStatusResponseDao = umAppDatabase.entryStatusResponseDao
 
         mockedEntryStatusTask = spy(BleEntryStatusTask::class.java)
-        mockedEntryStatusTask!!.context = context
-        mockedEntryStatusTask!!.setManagerBle(spy(NetworkManagerBle::class.java))
-        mockedEntryStatusTask!!.setEntryUidsToCheck(containerUids)
+        mockedEntryStatusTask.context = context
+        mockedEntryStatusTask.setManagerBle(spy(NetworkManagerBle::class.java))
+        mockedEntryStatusTask.setEntryUidsToCheck(containerUids)
     }
 
     @Test
@@ -66,11 +69,20 @@ class BleEntryStatusTaskTest {
 
         val responseMessage = BleMessage(ENTRY_STATUS_RESPONSE, 42.toByte(),
                 bleMessageLongToBytes(localAvailabilityCheckResponse))
-        mockedEntryStatusTask!!.onResponseReceived(networkNode.bluetoothMacAddress!!, responseMessage, null)
 
-        assertNotNull("entry check status response will be saved to the database",
-                entryStatusResponseDao!!.findByContainerUidAndNetworkNode(containerUids[0],
-                        networkNode.nodeId))
+        val responseReceived = AtomicReference<List<EntryStatusResponse>?>()
+        mockedEntryStatusTask.statusResponseListener = {response, task ->
+            responseReceived.set(response)
+        }
+
+        mockedEntryStatusTask.onResponseReceived(networkNode.bluetoothMacAddress!!, responseMessage, null)
+        Assert.assertNotNull("Received response callback", responseReceived.get())
+        responseReceived.get()!!.forEachIndexed { index, response ->
+            Assert.assertEquals("ContainerUid matches item requested", containerUids[index],
+                    response.erContainerUid)
+            Assert.assertEquals("Availability matches as expected", localAvailabilityCheckResponse[index] != 0L,
+                    response.available)
+        }
     }
 
 

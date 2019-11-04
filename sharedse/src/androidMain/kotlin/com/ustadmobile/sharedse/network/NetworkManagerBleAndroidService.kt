@@ -7,19 +7,23 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Binder
 import android.os.IBinder
+import androidx.annotation.MainThread
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import kotlinx.coroutines.newSingleThreadContext
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
+import com.ustadmobile.lib.util.RunWhenReadyManager
 
 /**
  * Wrapper class for NetworkManagerBleCommon. A service is required as this encapsulates
  * peer discovery processes and the http server that should continue running
  * regardless of which activity is active.
+ *
+ * Note: The Network Manager object itself will not be ready until this service binds to the
+ * httpd service. This may or may not be done when an onBind returns. Use runWhenNetworkManagerReady
+ * for any function that requires the networkmanager to be initialized.
  *
  * @author Kileha3
  */
@@ -27,35 +31,31 @@ class NetworkManagerBleAndroidService : Service() {
 
     private val mBinder = this.LocalServiceBinder()
 
-    private val managerAndroidBleRef = AtomicReference<NetworkManagerBle?>()
+    @Volatile
+    var networkManagerBle: NetworkManagerBle? = null
+        private set
 
-    private val mHttpServiceBound = AtomicBoolean(false)
-
-    private val httpdRef = AtomicReference<EmbeddedHTTPD>()
+    @Volatile
+    private var httpd: EmbeddedHTTPD? = null
 
     private var umAppDatabase: UmAppDatabase? = null
 
     private var mBadNodeExecutorService: ScheduledExecutorService? = null
 
+    private val runWhenReadyManager = RunWhenReadyManager()
+
     private val mHttpdServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            mHttpServiceBound.set(true)
-            httpdRef.set((service as EmbeddedHttpdService.LocalServiceBinder).getHttpd())
-            handleHttpdServiceBound()
+            val serviceHttpd =(service as EmbeddedHttpdService.LocalServiceBinder).getHttpd()
+            httpd = serviceHttpd
+            handleHttpdServiceBound(serviceHttpd)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            mHttpServiceBound.set(false)
+            httpd = null
+            runWhenReadyManager.ready = false
         }
     }
-
-
-    /**
-     * @return Running instance of the NetworkManagerBleCommon
-     */
-    val networkManagerBle: NetworkManagerBle?
-        get() = managerAndroidBleRef.get()
-
 
     private val badNodeDeletionTask = Runnable {
         val minLastSeen = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)
@@ -80,11 +80,15 @@ class NetworkManagerBleAndroidService : Service() {
                 0, 5, TimeUnit.MINUTES)
     }
 
-    private fun handleHttpdServiceBound() {
-        val managerAndroidBle = NetworkManagerBle(this,
-                newSingleThreadContext("NetworkManager-SingleThread"),httpdRef.get())
-        managerAndroidBleRef.set(managerAndroidBle)
-        managerAndroidBle.onCreate()
+    @MainThread
+    fun runWhenNetworkManagerReady(block: () -> Unit) = runWhenReadyManager.runWhenReady(block)
+
+    private fun handleHttpdServiceBound(embeddedHTTPD: EmbeddedHTTPD) {
+        val createdNetworkManager = NetworkManagerBle(this,
+                newSingleThreadContext("NetworkManager-SingleThread"), embeddedHTTPD)
+        networkManagerBle = createdNetworkManager
+        createdNetworkManager.onCreate()
+        runWhenReadyManager.ready = true
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -93,18 +97,19 @@ class NetworkManagerBleAndroidService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mHttpServiceBound.get())
+        if (httpd != null)
             unbindService(mHttpdServiceConnection)
 
         mBadNodeExecutorService!!.shutdown()
-
-        val managerAndroidBle = managerAndroidBleRef.get()
-        managerAndroidBle?.onDestroy()
     }
 
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we won't be dealing with IPC.
+     *
+     * Note that the NetworkManagerBle object won't be ready until this service has been bound to
+     * the httpd service. Use runWhenNetworkManagerReady for any calls that require the networkManager
+     * itself.
      */
     inner class LocalServiceBinder : Binder() {
         val service: NetworkManagerBleAndroidService

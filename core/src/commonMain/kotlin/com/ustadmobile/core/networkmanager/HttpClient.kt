@@ -1,14 +1,9 @@
 package com.ustadmobile.core.networkmanager
 
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
 
 /**
- * Get default Http client to avoid creating extra thread pool
+ * Get default Http client to avoid creating extra thread pool. The client must have the JsonFeature
+ * installed.
  */
-
-private val httpClient = HttpClient(){
-    install(JsonFeature)
-}
-
-fun defaultHttpClient() = httpClient
+expect fun defaultHttpClient(): HttpClient

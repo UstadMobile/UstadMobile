@@ -48,13 +48,12 @@ public class NetworkManagerBleHelperTest {
 
         int networkId = managerBleHelper.addNetwork();
 
-        Assert.assertTrue("Network Id generated is not -1", networkId != -1);
+        Assert.assertNotEquals("Network Id generated is not -1", -1, networkId);
 
         managerBleHelper.deleteTemporaryWifiDirectSsids();
 
-        networkId = managerBleHelper.getNetworkId();
+        networkId = managerBleHelper.getLastNetworkIdAdded();
 
-        Assert.assertEquals("Network Id obtained from list is not -1", networkId, -1);
-
+        Assert.assertEquals("Network Id obtained from list after remove is -1", networkId, -1);
     }
 }
