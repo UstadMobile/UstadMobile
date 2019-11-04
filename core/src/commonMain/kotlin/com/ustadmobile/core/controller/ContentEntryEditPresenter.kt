@@ -85,14 +85,14 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_select_file, context))
             view.showStorageOptions(contentType != CONTENT_CREATE_FOLDER)
             if(contentEntry.contentEntryUid != 0L){
-                author = contentEntry.author!!
+                author = contentEntry.author?: ""
                 isNewContent = false
                 updateUi(contentEntry)
             }
         })
     }
     private fun updateUi(contentEntry: ContentEntry){
-        author = contentEntry.author!!
+        author = contentEntry.author?: ""
         view.runOnUiThread(Runnable {
             view.setDescription(contentEntry.description ?: "")
             view.setEntryTitle(contentEntry.title ?: "")
