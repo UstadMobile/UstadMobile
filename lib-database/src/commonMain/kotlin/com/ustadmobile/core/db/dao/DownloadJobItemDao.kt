@@ -206,7 +206,7 @@ abstract class DownloadJobItemDao {
      */
     fun forAllChildDownloadJobItemsRecursive(parentDownloadJobUid: Int, block: (batch: List<DownloadJobItem>) -> Unit) {
         var lastParentUids = listOf(parentDownloadJobUid)
-        block.invoke(listOf(findByUid(parentDownloadJobUid)!!))
+        block.invoke(listOf(findByUid(parentDownloadJobUid)?: throw IllegalArgumentException("Please provide the parent content Entry")))
         do {
             val childItems = findByParentDownloadJobUids(lastParentUids)
             block.invoke(childItems)
@@ -227,11 +227,5 @@ abstract class DownloadJobItemDao {
 
     @Query("SELECT * FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid")
     abstract fun findByDownloadJobUid(downloadJobUid: Int): List<DownloadJobItem>
-
-    @Delete
-    abstract fun deleteItem(it: DownloadJobItem)
-
-    @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :uid")
-    abstract fun changeStatus(status: Int, uid: Int)
 
 }

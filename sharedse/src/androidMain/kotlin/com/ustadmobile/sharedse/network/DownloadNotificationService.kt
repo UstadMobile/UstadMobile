@@ -216,7 +216,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
             if (status.status >= JobStatus.COMPLETE_MIN) {
                 activeDownloadJobNotifications.remove(this)
                 mNotificationManager.cancel(notificationId)
-                checkAfterDelete()
+                checkIfCompleteAfterDelay()
             } else {
                 bytesSoFar = status.bytesSoFar
                 totalBytes = status.totalBytes
@@ -305,7 +305,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     }
 
-    fun checkAfterDelete(){
+    fun checkIfCompleteAfterDelay(){
         GlobalScope.launch {
             delay(2000)
             if (isEmpty()) {
@@ -403,7 +403,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                     }
                     activeDeleteJobNotifications.remove(deleteNotificationHolder)
                     mNotificationManager.cancel(deleteNotificationHolder.notificationId)
-                    checkAfterDelete()
+                    checkIfCompleteAfterDelay()
                 }
 
             }

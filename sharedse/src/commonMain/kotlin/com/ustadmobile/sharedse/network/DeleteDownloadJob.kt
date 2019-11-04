@@ -15,22 +15,26 @@ fun deleteDownloadJob(db: UmAppDatabase, rootContentEntryUid: Long, onprogress: 
 
         var downloadJob = db.downloadJobDao.findByUid(rootDownloadJobItem!!.djiDjUid)
 
-        if(downloadJob!!.djRootContentEntryUid == rootContentEntryUid){
+        if (downloadJob!!.djRootContentEntryUid == rootContentEntryUid) {
             db.downloadJobDao.changeStatus(JobStatus.DELETED, rootDownloadJobItem.djiDjUid)
         }
 
-        db.downloadJobItemDao.forAllChildDownloadJobItemsRecursive(rootDownloadJobItem!!.djiUid) { childItems ->
+        db.downloadJobItemDao.forAllChildDownloadJobItemsRecursive(rootDownloadJobItem.djiUid) { childItems ->
             childItems.forEach {
                 db.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
                 db.contentEntryStatusDao.deleteByContentEntryUid(it.djiContentEntryUid)
-                db.downloadJobItemDao.changeStatus(JobStatus.DELETED, it.djiUid)
+                db.downloadJobItemDao.updateStatus(JobStatus.DELETED, it.djiUid)
             }
         }
 
-        var count = db.containerEntryFileDao.countEntriesByJoin()
+        val count = db.containerEntryFileDao.countZombieEntries()
+        if (count == 0) {
+            onprogress.invoke(100)
+            return@Runnable
+        }
         var counter = 0
         do {
-            var containerEntryFilesList = db.containerEntryFileDao.findEntriesByJoin()
+            var containerEntryFilesList = db.containerEntryFileDao.findZombieEntries()
             containerEntryFilesList.forEach {
                 var file = FileSe(it.cefPath!!)
                 file.delete()
