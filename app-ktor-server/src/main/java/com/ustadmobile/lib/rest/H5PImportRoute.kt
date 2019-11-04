@@ -19,6 +19,7 @@ import io.ktor.client.request.header
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.userAgent
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
@@ -109,7 +110,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
             val videoTitle = call.request.queryParameters["title"] ?: ""
             val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong()
 
-            val response = defaultHttpClient().head<HttpResponse>(urlString)
+            val response = defaultHttpClient().get<HttpResponse>(urlString)
 
             val headers = response.headers
 
@@ -132,13 +133,14 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                 val parentChildJoin = ContentEntryParentChildJoin()
                 parentChildJoin.cepcjParentContentEntryUid = parentUid
-                parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
 
                 if (contentEntryUid == null) {
                     contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+                    parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
                     parentChildJoinDao.insert(parentChildJoin)
                 } else {
                     contentEntry.contentEntryUid = contentEntryUid
+                    parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
                     entryDao.update(contentEntry)
                 }
 
