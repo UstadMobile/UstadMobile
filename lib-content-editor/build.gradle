@@ -60,6 +60,7 @@ task prepareUmEditorDirectories {
             "${rootPath}dist/css/UmEditorCore.min.css",
             "${rootPath}lib/jquery/jquery3.3.1.min.js",
             "${rootPath}dist/js/UmEditorCore.min.js",
+            "${rootPath}dist/js/UmXapiManager.min.js",
             "${rootPath}dist/js/UmWidgetManager.min.js" into blankDocPath }
     copy {
         from "${rootPath}src/epub/container.xml" into  "${blankDocPath}META-INF/"
