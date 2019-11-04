@@ -217,8 +217,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private fun showSnackbarPromptsIfRequired() {
         val currentContext = context
-        if(currentContext != null){
-            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer, currentContext)
+        if(currentContext != null && ::managerAndroidBle.isInitialized
+                && ::rootContainer.isInitialized){
+            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer,
+                    currentContext)
         }
     }
 
