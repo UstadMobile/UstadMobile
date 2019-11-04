@@ -28,6 +28,8 @@ let contentToSave = "";
 /**  Template dir*/
 const questionTemplatesDir = "templates/";
 
+UmEditorCore.currentLocale = "en"
+
 /**
  * Index for multiple choice template widget in the template list
  * @type {number} index
@@ -84,6 +86,7 @@ UmEditorCore.formattingCommandList = [
 UmEditorCore.onCreate  = (locale = "en", dir = "ltr", showToolbar = false, testEnv = false) => {
      testEnvironment = testEnv;
      directionality = dir;
+     UmEditorCore.currentLocale = locale
 
     //set default language directionality and its corresponding views
     $($.find(".um-editor")).attr("dir",dir);

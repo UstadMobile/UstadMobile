@@ -107,6 +107,15 @@ UmWidgetManager.handleWidgetNode =  (widgetNode , newWidget = false) => {
 };
 
 /**
+ * Make xapi statement from question widgets
+ */
+UmWidgetManager.prototype.makeXapiStatement = (widgetNode, choices, responseId, feedback,isCorrect = false, canRetry = false) => {
+    const xapiManager = new UmXapiManager()
+    xapiManager.makeStatement(widgetNode, choices, responseId, feedback, UmEditorCore.currentLocale, isCorrect, canRetry)
+    xapiManager.send()
+}
+
+/**
  * Handle all document editing and previewing events
  * @param editMode flag to indicate if the editor is in editing mode or not.
  */
@@ -344,7 +353,7 @@ UmWidgetManager.prototype.handleWidgetChoice = (widget) => {
 UmMultipleChoiceWidget.prototype.addChoice = function(event,testEnv = false){
     const choiceTemplateUrl = (testEnv ? "/":"") + questionTemplatesDir+"template-qn-choice.html";
     $.ajax({url: choiceTemplateUrl, success: (choice) => {
-        choice = $(choice).attr("id",UmWidgetManager.EXTRA_CONTENT_ID_TAG+UmWidgetManager.getNextUniqueId());
+        choice = $(choice).attr("id",UmWidgetManager.CHOICE_ID_TAG + UmWidgetManager.getNextUniqueId());
         UmWidgetManager.prototype.handleNewWidget(choice);
         UmWidgetManager.prototype.handleWidgetChoice(choice);
         let widgetNode = $($(event.target).closest("div .question")).children();
@@ -365,13 +374,22 @@ UmMultipleChoiceWidget.prototype.addChoice = function(event,testEnv = false){
 UmMultipleChoiceWidget.prototype.onQuestionAnswerChecked = function(event){
     const choiceElement = $(event.target).closest("div .question-choice");
     const widgetNode = $(event.target).closest("div div.question");
-
+    const xapiChoiceList = []
     const allChoices = $(widgetNode).find("[data-um-correct]");
+    let correctChoiceText = "";
     for(let choice in allChoices){
         if(!allChoices.hasOwnProperty(choice))
             continue;
         const choiceNode = allChoices[choice];
         if($(choiceNode).hasClass("question-choice-pointer")){
+            /** Construct Xapi choice */
+            const xapiChoice = {id: $(choiceNode).attr("id") , description: {}}
+            xapiChoice.description[UmEditorCore.currentLocale] = $(choiceNode).find(".question-choice-body p").text()
+            xapiChoiceList.push(xapiChoice)
+
+            if($(choiceNode).attr("data-um-correct") == 'true'){
+                correctChoiceText = $(choiceNode).text()
+            }
             const isClicked = $(choiceNode).attr("id") === $(choiceElement).attr("id");
             if(isClicked){
                 $(choiceNode).addClass("selected-choice");
@@ -394,6 +412,8 @@ UmMultipleChoiceWidget.prototype.onQuestionAnswerChecked = function(event){
     if(isCorrectChoice){
         $(widgetNode).find(".question-retry-btn").removeClass("show-element").addClass("hide-element");
     }
+    UmWidgetManager.prototype.makeXapiStatement(widgetNode, xapiChoiceList, isCorrectChoice, canBeRetried, 
+        correctChoiceText ,$(feedbackText).text())
 };
 
 /**
@@ -421,8 +441,8 @@ UmFillTheBlanksWidget.prototype.onQuestionAnswerChecked = (event) =>{
     defaultAnswerText = UmWidgetManager.removeSpaces(defaultAnswerText);
 
     const isCorrectChoice = defaultAnswerText === userAnswerText;
-    const message = isCorrectChoice ? correctChoiceText: wrongChoiceText;
-    $(feedbackContainer).find(".question-feedback-container-text").html(message);
+    const feedbackText = isCorrectChoice ? correctChoiceText: wrongChoiceText;
+    $(feedbackContainer).find(".question-feedback-container-text").html(feedbackText);
     $(feedbackContainer).removeClass("hide-element show-element alert-success alert-danger alert-warning alert-info");
     $(feedbackContainer).addClass((isCorrectChoice ? "alert-success":"alert-danger") + " show-element");
     const canBeRetried = widgetNode.attr("data-um-retry")==='true';
@@ -433,6 +453,9 @@ UmFillTheBlanksWidget.prototype.onQuestionAnswerChecked = (event) =>{
     if(isCorrectChoice){
         $(widgetNode).find(".question-retry-btn").removeClass("show-element").addClass("hide-element");
     }
+    UmWidgetManager.prototype.makeXapiStatement(widgetNode, null, isCorrectChoice,canBeRetried,
+         defaultAnswerText ,$(feedbackText).text())
+
 };
 
 /**
