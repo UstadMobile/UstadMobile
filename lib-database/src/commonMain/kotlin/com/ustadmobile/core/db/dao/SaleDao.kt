@@ -300,7 +300,7 @@ abstract class SaleDao : BaseDao<Sale> {
             "   '' as lastActiveOnApp, " +
             "   '' as leRank, " +
             "   LE.personUid as leUid " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1 " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
             " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
             " GROUP BY leUid " +
@@ -313,7 +313,7 @@ abstract class SaleDao : BaseDao<Sale> {
             "   '' as lastActiveOnApp, " +
             "   '' as leRank, " +
             "   LE.personUid as leUid " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1 " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
             " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
             " GROUP BY leUid " +
@@ -325,7 +325,7 @@ abstract class SaleDao : BaseDao<Sale> {
             "  Sale.saleCreationDate AS saleDate,  " +
             "  SaleProduct.saleProductName as productNames, " +
             "Location.title as locationName " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1  " +
             " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
             " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
@@ -338,7 +338,7 @@ abstract class SaleDao : BaseDao<Sale> {
             "  Sale.saleCreationDate AS saleDate,  " +
             "  SaleProduct.saleProductName as productNames, " +
             "Location.title as locationName " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid  AND SaleItem.saleItemActive = 1 " +
             " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
             " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
@@ -418,7 +418,7 @@ abstract class SaleDao : BaseDao<Sale> {
                 " SELECT sl.*, " +
                 " (SELECT SaleItem.saleItemQuantity " +
                 " FROM Sale stg " +
-                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid " +
+                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND SaleItem.saleItemActive = 1 " +
                 " WHERE stg.saleUid = sl.saleUid AND SaleItem.saleItemActive = 1 " +
                 " ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
                 " )  " +
@@ -444,11 +444,11 @@ abstract class SaleDao : BaseDao<Sale> {
                 " Location.title AS locationName, " +
                 " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
                 "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-                "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+                "            Sale.saleUid AND SaleItem.saleItemActive = 1 WHERE Sale.saleUid = sl.saleUid) ,0 " +
                 " ) AS saleAmount, " +
                 " (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
                 "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-                "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+                "            Sale.saleUid AND SaleItem.saleItemActive = 1 WHERE Sale.saleUid = sl.saleUid) ,0 " +
                 "           ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
                 "               WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
                 "                AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ," +
@@ -475,7 +475,7 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val ALL_SALE_LIST_LJ1 =
                 " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid  " +
-                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid "
+                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid AND SaleItem.saleItemActive = 1 "
         const val ALL_SALE_LIST_LJ2 =
                 " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
                 " LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid "
@@ -557,7 +557,7 @@ abstract class SaleDao : BaseDao<Sale> {
         "   LEFT JOIN SaleProduct AS PP ON SaleProductParentJoin.saleProductParentJoinParentUid = PP.saleProductUid" +
         "   WHERE SaleProductParentJoin.saleProductParentJoinChildUid = SaleItem.saleItemProductUid) as productTypeUid " +
         " FROM SALE " +
-        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
+        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1 " +
         "   LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid " +
         "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
         "   LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +

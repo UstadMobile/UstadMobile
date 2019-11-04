@@ -21,7 +21,7 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
             " (SELECT " +
             " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
             "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-            "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+            "            Sale.saleUid AND SaleItem.saleItemActive = 1 WHERE Sale.saleUid = sl.saleUid) ,0 " +
             " ) AS saleAmount, " +
             " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
             "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
@@ -96,7 +96,7 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
             " (SELECT " +
             " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
             "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-            "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+            "            Sale.saleUid AND SaleItem.saleItemActive = 1 WHERE Sale.saleUid = sl.saleUid) ,0 " +
             " ) AS saleAmount, " +
             " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
             "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +

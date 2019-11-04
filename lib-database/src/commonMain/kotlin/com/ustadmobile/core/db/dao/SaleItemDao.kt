@@ -106,7 +106,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
 
         const val GENERATE_SALE_NAME = " SELECT (SELECT SaleItem.saleItemQuantity " +
                 "  FROM Sale s " +
-                "  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = s.saleUid " +
+                "  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = s.saleUid AND SaleItem.saleItemActive = 1 " +
                 "  WHERE s.saleUid = :saleUid " +
                 "  ORDER BY s.saleCreationDate ASC LIMIT 1) || 'x ' || " +
                 "  (SELECT SaleProduct.saleProductName " +
