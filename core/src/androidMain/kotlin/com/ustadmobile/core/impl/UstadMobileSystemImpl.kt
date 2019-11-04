@@ -49,11 +49,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import kotlinx.io.InputStream
 import java.io.*
-import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.zip.GZIPInputStream
@@ -499,8 +497,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String?, mimeType: String?, packageName: String?,
-                                       compression: Int, callback: UmCallback<Any>) {
+    actual fun openFileInDefaultViewer(context: Any, path: String?, mimeType: String?, compression: Int,
+                                       callback: UmCallback<Any>) {
         var mMimeType = mimeType;
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
@@ -523,7 +521,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             }
         }
 
-        val uri = FileProvider.getUriForFile(ctx, packageName!!, file)
+        val uri = FileProvider.getUriForFile(ctx, context.packageName, file)
         if (mMimeType == null || mMimeType.isEmpty()) {
             mMimeType = "*/*"
         }

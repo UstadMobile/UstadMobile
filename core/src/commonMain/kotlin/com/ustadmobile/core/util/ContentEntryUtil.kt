@@ -27,13 +27,12 @@ object ContentEntryUtil {
 
     fun goToContentEntry(contentEntryUid: Long, dbRepo: UmAppDatabase,
                          impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                         context: Any, packageName: String?,
-                         callback: UmCallback<Any>) {
+                         context: Any, callback: UmCallback<Any>) {
 
         GlobalScope.launch {
             try {
                 val result = dbRepo.contentEntryDao.findByUidWithContentEntryStatusAsync(contentEntryUid)
-                goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, packageName, callback)
+                goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             } catch (e: Exception) {
                 callback.onFailure(e)
             }
@@ -43,8 +42,7 @@ object ContentEntryUtil {
     private suspend fun goToViewIfDownloaded(entryStatus: ContentEntryWithContentEntryStatus,
                                              dbRepo: UmAppDatabase,
                                              impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                                             context: Any, packageName: String?,
-                                             callback: UmCallback<Any>) {
+                                             context: Any, callback: UmCallback<Any>) {
         val contentEntryStatus = entryStatus.contentEntryStatus
         if (contentEntryStatus != null && contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
 
@@ -93,7 +91,7 @@ object ContentEntryUtil {
                     var containerEntryFilePath = container[0].containerEntryFile?.cefPath
                     if (containerEntryFilePath != null) {
                         impl.openFileInDefaultViewer(context, containerEntryFilePath,
-                                result.mimeType!!, packageName!!, container[0].containerEntryFile!!.compression, callback)
+                                result.mimeType!!, container[0].containerEntryFile!!.compression, callback)
                     } else {
                         TODO("Show error message here")
                     }
@@ -116,13 +114,12 @@ object ContentEntryUtil {
 
     private fun goToContentEntryBySourceUrl(sourceUrl: String, dbRepo: UmAppDatabase,
                                             impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                                            context: Any, packageName: String?,
-                                            callback: UmCallback<Any>) {
+                                            context: Any, callback: UmCallback<Any>) {
 
         GlobalScope.launch {
             try {
                 val result = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(sourceUrl)
-                goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, packageName, callback)
+                goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             } catch (e: Exception) {
                 callback.onFailure(e)
             }
@@ -143,7 +140,7 @@ object ContentEntryUtil {
      */
     fun goToContentEntryByViewDestination(viewDestination: String, dbRepo: UmAppDatabase,
                                           impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                                          context: Any, packageName: String?, callback: UmCallback<Any>) {
+                                          context: Any, callback: UmCallback<Any>) {
         //substitute for previously scraped content
         val dest = viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?")
@@ -151,8 +148,7 @@ object ContentEntryUtil {
         val params = UMFileUtil.parseURLQueryString(dest)
         if (params.containsKey("sourceUrl")) {
             goToContentEntryBySourceUrl(params.getValue("sourceUrl")!!, dbRepo,
-                    impl, openEntryIfNotDownloaded, context, packageName,
-                    callback)
+                    impl, openEntryIfNotDownloaded, context, callback)
         }
 
     }

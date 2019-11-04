@@ -14,7 +14,6 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
-import com.ustadmobile.lib.util.BuildConfig
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import java.io.ByteArrayInputStream
@@ -67,7 +66,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         val requestUrl = checkWithPattern(request.url.toString())
         if (requestUrl != null) {
-            presenter.handleUrlLinkToContentEntry(requestUrl, BuildConfig.LIBRARY_PACKAGE_NAME)
+            presenter.handleUrlLinkToContentEntry(requestUrl)
             return true
         }
         return super.shouldOverrideUrlLoading(view, request)
@@ -78,7 +77,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         val requestUrl = StringBuilder(request.url.toString())
         val sourceUrl = checkWithPattern(requestUrl.toString())
         if (sourceUrl != null) {
-            presenter.handleUrlLinkToContentEntry(sourceUrl, BuildConfig.LIBRARY_PACKAGE_NAME)
+            presenter.handleUrlLinkToContentEntry(sourceUrl)
             Handler(Looper.getMainLooper()).post { view.loadUrl(url) }
             return WebResourceResponse("text/html", "utf-8", null)
         }

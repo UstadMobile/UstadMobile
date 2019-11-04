@@ -192,7 +192,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual fun openFileInDefaultViewer(context: Any, path: String?, mimeType: String?, packageName: String?, compression: Int, callback: UmCallback<Any>) {
+    actual fun openFileInDefaultViewer(context: Any, path: String?, mimeType: String?, compression: Int, callback: UmCallback<Any>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

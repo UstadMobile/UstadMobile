@@ -15,7 +15,6 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -227,7 +226,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    fun handleDownloadButtonClick(packageName: String) {
+    fun handleDownloadButtonClick() {
         if (isDownloadComplete) {
 
             val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
@@ -238,7 +237,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             } else {
                 view.showBaseProgressBar(true)
                 ContentEntryUtil.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
-                        context, packageName, object : UmCallback<Any> {
+                        context, object : UmCallback<Any> {
 
                     override fun onSuccess(result: Any?) {
                         view.showBaseProgressBar(false)
