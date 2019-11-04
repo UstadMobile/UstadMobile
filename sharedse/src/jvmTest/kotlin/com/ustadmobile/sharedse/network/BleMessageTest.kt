@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertEquals
@@ -27,7 +27,7 @@ class BleMessageTest {
         val payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithSufficientDuplicates)
 
         val sentMessage = BleMessage(0.toByte(), 42.toByte(), payload)
-        val receivedMessage = BleMessage(sentMessage.getPackets(DEFAULT_MTU_SIZE))
+        val receivedMessage = BleMessage(sentMessage.getPackets(MINIMUM_MTU_SIZE))
 
         assertEquals("Messages have same request type", sentMessage.requestType.toLong(),
                 receivedMessage.requestType.toLong())
@@ -40,7 +40,7 @@ class BleMessageTest {
     fun givenSinglePacketPayload_whenPacketizedAndDepacketized_shouldBeEqual() {
         val payload = byteArrayOf(1, 2, 3, 4, 5, 6)
         val sentMessage = BleMessage(0.toByte(), 42.toByte(), payload)
-        val receivedMessage = BleMessage(sentMessage.getPackets(DEFAULT_MTU_SIZE))
+        val receivedMessage = BleMessage(sentMessage.getPackets(MINIMUM_MTU_SIZE))
 
         assertEquals("Messages have same request type", sentMessage.requestType.toLong(),
                 receivedMessage.requestType.toLong())
@@ -52,7 +52,7 @@ class BleMessageTest {
     @Test
     fun givenLongerPayload_whenPacketizedAndDepacketized_shouldBeEqual() {
         val sentMessage = BleMessage(0.toByte(), 42.toByte(), longerPayload)
-        val receivedMessage = BleMessage(sentMessage.getPackets(DEFAULT_MTU_SIZE))
+        val receivedMessage = BleMessage(sentMessage.getPackets(MINIMUM_MTU_SIZE))
 
         assertEquals("Messages have same request type", sentMessage.requestType.toLong(),
                 receivedMessage.requestType.toLong())
@@ -67,7 +67,7 @@ class BleMessageTest {
         val payload = "".toByteArray()
 
         val sentMessage = BleMessage(0.toByte(), 42.toByte(), payload)
-        BleMessage(sentMessage.getPackets(DEFAULT_MTU_SIZE))
+        BleMessage(sentMessage.getPackets(MINIMUM_MTU_SIZE))
     }
 
     @Test
@@ -75,7 +75,7 @@ class BleMessageTest {
         val payload = BleMessageUtil.bleMessageLongToBytes(entriesListWithSufficientDuplicates)
 
         val sentMessage = BleMessage(0.toByte(), 42.toByte(), payload)
-        val receivedMessage = BleMessage(sentMessage.getPackets(DEFAULT_MTU_SIZE))
+        val receivedMessage = BleMessage(sentMessage.getPackets(MINIMUM_MTU_SIZE))
 
         assertEquals("After depacketize the massage payload is the same after g-zipping",
                 payload.size.toLong(), receivedMessage.payload!!.size.toLong())
@@ -98,7 +98,7 @@ class BleMessageTest {
         val messageToSend = BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(), payload)
         val sentMessage = BleMessage()
 
-        val packets = messageToSend.getPackets(DEFAULT_MTU_SIZE)
+        val packets = messageToSend.getPackets(MINIMUM_MTU_SIZE)
 
         for (packet in packets) {
             sentMessage.onPackageReceived(packet)

@@ -210,7 +210,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
     }
 
-   // @Test
+    //@Test
     fun givenUserTypesVideoLink_thenShowVideoTitle() {
 
         mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
@@ -245,6 +245,38 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
 
     }
+
+    @Test
+    fun givenExistingContentEntryUid_whenUserTypesVideoLink_thenDontVideoTitle() {
+
+        mockWebServer.enqueue(MockResponse().setHeader("Content-Length", 11).setHeader("Content-Type", "video/").setResponseCode(200))
+        mockWebServer.start()
+
+        val intent = Intent()
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
+        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_UID, (-102).toString())
+        mActivityRule.launchActivity(intent)
+
+        var activity = mActivityRule.activity
+
+        idleProgress = ProgressIdlingResource(activity)
+
+        IdlingRegistry.getInstance().register(idleProgress)
+
+        var urlString = mockWebServer.url("/videohere").toString()
+
+        onView(withId(R.id.entry_import_link_editText)).perform(click())
+        onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString), ViewActions.closeSoftKeyboard())
+
+        onView(withId(R.id.entry_import_link_titleInput)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.import_link_done)).check(matches(isEnabled()))
+
+        mockWebServer.close()
+
+
+    }
+
 
 
     //@Test

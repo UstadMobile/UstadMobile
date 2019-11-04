@@ -100,7 +100,7 @@ class BleGattServer
                 if (messageReceived != null) {
                     val currentMtuSize = messageReceived.mtu
 
-                    UMLog.l(UMLog.ERROR, 691,
+                    UMLog.l(UMLog.DEBUG, 691,
                             "Request received with default MTU size of $currentMtuSize")
                     val messageToSend = handleRequest(messageReceived)
 
@@ -109,16 +109,17 @@ class BleGattServer
                     val requireConfirmation = characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE == BluetoothGattCharacteristic.PROPERTY_INDICATE
                     if (!requireConfirmation) {
                         val packets = messageToSend!!.getPackets(currentMtuSize)
+                        var packetTracker = 0
                         for (packet in packets) {
                             characteristic.value = packet
-                            val notified = gattServer!!.notifyCharacteristicChanged(device,
-                                    characteristic, false)
+                            val notified = gattServer!!.notifyCharacteristicChanged(device, characteristic, false)
                             if (notified) {
+                                packetTracker++
                                 UMLog.l(UMLog.DEBUG, 691,
-                                        "Peer device notified on characteristics change")
+                                        "Peer device notified on characteristics change for packet #${packetTracker} size ${packet.size}")
                             } else {
                                 UMLog.l(UMLog.ERROR, 691,
-                                        "Failed to notify peer device")
+                                        "Failed to notify peer device for packet #${packetTracker}")
                             }
                         }
                         UMLog.l(UMLog.DEBUG, 691,

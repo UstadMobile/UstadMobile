@@ -12,12 +12,13 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.SyncableDoorDatabase
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.annotation.GetAttachmentData
+import com.ustadmobile.door.annotation.SetAttachmentData
+import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -36,6 +37,8 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
                     .initializer("_endpoint").build())
             .addProperty(PropertySpec.builder("_dbPath", String::class)
                     .initializer("_dbPath").build())
+            .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
+                    .initializer("_attachmentsDir").build())
             .superclass(daoType)
 
     val primaryConstructorFn = FunSpec.constructorBuilder()
@@ -45,6 +48,7 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addParameter("_clientId", Int::class)
             .addParameter("_endpoint", String::class)
             .addParameter("_dbPath", String::class)
+            .addParameter("_attachmentsDir", String::class)
 
     if(addSyncHelperParam) {
         val syncHelperClassName = ClassName(daoType.packageName,
@@ -119,6 +123,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
                         .addParameter("_accessToken", String::class)
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
+                        .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
                         .build())
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
@@ -144,6 +149,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         PropertySpec.builder("httpClient", HttpClient::class)
                                 .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                                 .addModifiers(KModifier.OVERRIDE)
+                                .build(),
+                        PropertySpec.builder("_attachmentsDir", String::class)
+                                .initializer("_attachmentsDir")
                                 .build()
                 ))
                 .addFunction(FunSpec.builder("clearAllTables")
@@ -234,7 +242,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, _syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR) ", repoImplClassName)
+                            .add("%T(_db, _syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, _attachmentsDir) ", repoImplClassName)
                             .endControlFlow().build())
                     .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
@@ -265,7 +273,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, _db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR $syncDaoParam) ",
+                            .add("%T(_db, _db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, _attachmentsDir $syncDaoParam) ",
                                 repoImplClassName, it.makeAccessorCodeBlock())
                             .endControlFlow()
                             .build())
@@ -458,6 +466,44 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             overrideFunSpec.addCode(codeBlock.build())
             repoClassSpec.addFunction(overrideFunSpec.build())
+        }
+
+        val attachmentFuns =daoTypeElement.enclosedElements
+                .filter { it.getAnnotation(GetAttachmentData::class.java) != null
+                        || it.getAnnotation(SetAttachmentData::class.java) != null}
+
+        attachmentFuns.forEach {
+            val funEl = it as ExecutableElement
+            val funElResolved = processingEnv.typeUtils.asMemberOf(
+                    daoTypeElement.asType() as DeclaredType, funEl) as ExecutableType
+            val entityParam = funEl.parameters[0]
+
+            val overridingFunSpec = overrideAndConvertToKotlinTypes(funEl,
+                    daoTypeElement.asType() as DeclaredType, processingEnv)
+
+            val entityTypeMirror = entityTypeFromFirstParam(funEl, daoTypeElement.asType() as DeclaredType,
+                    processingEnv)
+            val entityTypeEl = processingEnv.typeUtils.asElement(entityTypeMirror) as TypeElement
+            val pkEl = entityTypeEl.enclosedElements
+                    .first { it.getAnnotation(PrimaryKey::class.java) != null}
+            val codeBlock = CodeBlock.builder()
+            if(funEl.getAnnotation(SetAttachmentData::class.java) != null) {
+                val dataParam = funEl.parameters[1]
+                codeBlock.add("val _entityAttachmentsDir = %T(_attachmentsDir, %S)\n", File::class,
+                        entityTypeEl.simpleName)
+                        .add("val _destFile = File(_entityAttachmentsDir, ${entityParam.simpleName}.${pkEl.simpleName}.toString())\n")
+                        .beginControlFlow("if(!_entityAttachmentsDir.exists())")
+                        .add("_entityAttachmentsDir.mkdirs()\n")
+                        .endControlFlow()
+                        .add("%T(${dataParam.simpleName}).%M(_destFile)\n",
+                            File::class, MemberName("kotlin.io", "copyTo"))
+            }else if(funEl.getAnnotation(GetAttachmentData::class.java) != null) {
+                codeBlock.add("return File(_attachmentsDir, %S + %T.separator + ${entityParam.simpleName}.${pkEl.simpleName}.toString()).absolutePath\n",
+                        entityTypeEl.simpleName, File::class)
+            }
+
+            overridingFunSpec.addCode(codeBlock.build())
+            repoClassSpec.addFunction(overridingFunSpec.build())
         }
 
         boundaryCallbackFile?.addType(boundaryCallbackClassSpec!!.build())

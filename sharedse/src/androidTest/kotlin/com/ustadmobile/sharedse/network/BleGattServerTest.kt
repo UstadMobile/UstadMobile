@@ -3,7 +3,7 @@ package com.ustadmobile.sharedse.network
 import android.bluetooth.*
 import android.content.Context
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
 import kotlinx.coroutines.Dispatchers
@@ -92,7 +92,7 @@ class BleGattServerTest {
     @Test
     fun givenOnCharacteristicWriteRequest_whenIsCharacteristicsWithSameUUID_thenShouldGrantPermission() {
         mGattServer!!.gattServerCallback.onCharacteristicWriteRequest(mockedBluetoothDevice, 0, mockedCharacteristics,
-                true, true, 0, bleMessage!!.getPackets(DEFAULT_MTU_SIZE)[0])
+                true, true, 0, bleMessage!!.getPackets(MINIMUM_MTU_SIZE)[0])
 
         //Verify that permission to write on the characteristics was granted
         verify<BluetoothGattServer>(mockedGattServer).sendResponse(mockedBluetoothDevice, 0, BluetoothGatt.GATT_SUCCESS,
