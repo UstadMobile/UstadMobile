@@ -32,6 +32,4 @@ expect open class NetworkManagerBle(context: Any = Any(),
     override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask?
 
     override fun makeEntryStatusTask(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode, responseListener: BleMessageResponseListener): BleEntryStatusTask?
-
-    override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner
 }
