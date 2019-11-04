@@ -18,6 +18,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PeopleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
@@ -121,8 +122,16 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
         val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, context!!,
                 this, mPresenter!!, false, false)
+
+        //personDao.findAllPeopleWithEnrollmentBySearch
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .personDaoBoundaryCallbacks
+                .findAllPeopleWithEnrollmentSortNameDesc(factory)
+
         //A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
         //Observe the data:
         val thisP = this

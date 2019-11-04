@@ -16,7 +16,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AddSaleProductToSaleCategoryPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.lib.db.entities.SaleProduct
 
 class AddSaleProductToSaleCategoryActivity
     : UstadBaseActivity(), AddSaleProductToSaleCategoryView {
@@ -76,7 +76,7 @@ class AddSaleProductToSaleCategoryActivity
 
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>) {
         val recyclerAdapter = SelectSaleProductToSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 false, applicationContext)
 
@@ -85,7 +85,7 @@ class AddSaleProductToSaleCategoryActivity
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
         data.observe(this,
-                Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })
+                Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         mRecyclerView!!.adapter = recyclerAdapter
@@ -104,14 +104,14 @@ class AddSaleProductToSaleCategoryActivity
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleNameWithImage> = object : DiffUtil.ItemCallback<SaleNameWithImage>() {
-            override fun areItemsTheSame(oldItem: SaleNameWithImage,
-                                         newItem: SaleNameWithImage): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleProduct> = object : DiffUtil.ItemCallback<SaleProduct>() {
+            override fun areItemsTheSame(oldItem: SaleProduct,
+                                         newItem: SaleProduct): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: SaleNameWithImage,
-                                            newItem: SaleNameWithImage): Boolean {
+            override fun areContentsTheSame(oldItem: SaleProduct,
+                                            newItem: SaleProduct): Boolean {
                 return oldItem == newItem
             }
         }

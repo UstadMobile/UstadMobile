@@ -11,7 +11,6 @@ import com.ustadmobile.core.db.dao.SaleItemReminderDao
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.db.dao.SaleVoiceNoteDao
 import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao
-import com.ustadmobile.core.db.dao.SaleProductGroupDao
 import com.ustadmobile.core.db.dao.SalePaymentDao
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.db.dao.SaleProductDao
@@ -45,7 +44,6 @@ import com.ustadmobile.core.db.dao.SaleDao
 
     //Goldozi :
     ,Sale::class, SaleItem::class, SalePayment::class,
-    SaleProductGroup::class,
     SaleProductGroupJoin::class,
     SaleProductPicture::class, SaleProduct::class,
     SaleVoiceNote::class, SaleProductParentJoin::class,
@@ -169,8 +167,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val saleProductPictureDao: SaleProductPictureDao
 
     abstract val salePaymentDao: SalePaymentDao
-
-    abstract val saleProductGroupDao: SaleProductGroupDao
 
     abstract val saleProductGroupJoinDao: SaleProductGroupJoinDao
 

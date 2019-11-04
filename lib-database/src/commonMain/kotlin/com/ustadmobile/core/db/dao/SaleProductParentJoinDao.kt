@@ -20,7 +20,8 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
      * @param childSaleProductUid   The child sale product uid
      * @param resultListCallback    Return callback of list of SaleProduct
      */
-    @Query("SELECT SaleProduct.* FROM SaleProductParentJoin LEFT JOIN SaleProduct ON " +
+    @Query("SELECT SaleProduct.* " +
+            "FROM SaleProductParentJoin LEFT JOIN SaleProduct ON " +
             " SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
             " WHERE SaleProductParentJoin.saleProductParentJoinChildUid = :childSaleProductUid")
     abstract suspend fun findAllJoinByChildSaleProductAsync(childSaleProductUid: Long):List<SaleProduct>
@@ -40,12 +41,12 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND child.saleProductCategory = 0 ")
-    abstract fun findAllItemsInACategory(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleNameWithImage>
+    abstract fun findAllItemsInACategory(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND child.saleProductCategory = 1 ")
-    abstract fun findAllCategoriesInACategory(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleNameWithImage>
+    abstract fun findAllCategoriesInACategory(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
@@ -54,15 +55,15 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "   WHERE SaleProduct.saleProductName = 'Collection' " +
             "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
             " AND child.saleProductCategory = 1 ")
-    abstract fun findAllCategoriesInCollection(): DataSource.Factory<Int, SaleNameWithImage>
+    abstract fun findAllCategoriesInCollection(): DataSource.Factory<Int, SaleProduct>
 
-    @Query(QUERY_SELECT_ALL_SALE_PRODUCT2 +
-            " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
-            "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
-            "   WHERE SaleProduct.saleProductName = 'Collection' " +
-            "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
-            " AND child.saleProductCategory = 1 ")
-    abstract fun findAllCategoriesInCollectionWithPP(): DataSource.Factory<Int, SaleDescWithSaleProductPicture>
+//    @Query(QUERY_SELECT_ALL_SALE_PRODUCT2 +
+//            " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
+//            "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
+//            "   WHERE SaleProduct.saleProductName = 'Collection' " +
+//            "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
+//            " AND child.saleProductCategory = 1 ")
+//    abstract fun findAllCategoriesInCollectionWithPP(): DataSource.Factory<Int, SaleProductWithType>
 
 
     @Query("SELECT * FROM SaleProductParentJoin WHERE " +
@@ -128,8 +129,8 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
 
     companion object {
 
-        const val QUERY_SELECT_ALL_SALE_PRODUCT = "SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.saleProductPictureUid as pictureUid, " +
-                " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
+        const val QUERY_SELECT_ALL_SALE_PRODUCT =
+                "SELECT child.* " +
                 " FROM SaleProductParentJoin " +
                 " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
                 " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
@@ -137,8 +138,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
                 " WHERE SaleProductParentJoin.saleProductParentJoinActive = 1 AND child.saleProductActive = 1 "
 
         const val QUERY_SELECT_ALL_SALE_PRODUCT2 =
-                "SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.* , " +
-                " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
+                "SELECT child.* " +
                 " FROM SaleProductParentJoin " +
                 " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
                 " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +

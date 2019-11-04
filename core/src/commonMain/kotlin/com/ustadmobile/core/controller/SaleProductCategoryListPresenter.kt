@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleProductDao
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.impl.UmAccountManager
@@ -24,7 +23,6 @@ import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELEC
 import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -38,8 +36,8 @@ class SaleProductCategoryListPresenter(context: Any,
                                        view: SaleProductCategoryListView)
     : UstadBaseController<SaleProductCategoryListView>(context, arguments!!, view) {
 
-    private lateinit var itemProvider: DataSource.Factory<Int, SaleNameWithImage>
-    private lateinit var categoryProvider: DataSource.Factory<Int, SaleNameWithImage>
+    private lateinit var itemProvider: DataSource.Factory<Int, SaleProduct>
+    private lateinit var categoryProvider: DataSource.Factory<Int, SaleProduct>
     internal var repository: UmAppDatabase
     private val productDao: SaleProductDao
     private var currentSaleProductCategory: SaleProduct? = null
@@ -141,7 +139,7 @@ class SaleProductCategoryListPresenter(context: Any,
         } else {
             view.hideEditMenu(true)
             itemProvider = productDao.findAllActiveSNWIProvider()
-            categoryProvider = productDao.findAllActiveCategoriesSNWIProvider()
+            categoryProvider = productDao.findActiveCategoriesProvider()
         }
 
         if (recent)

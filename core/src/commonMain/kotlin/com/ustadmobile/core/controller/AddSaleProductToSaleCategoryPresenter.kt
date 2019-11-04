@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_ASSIGN_TO_CATEGORY_UID
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -26,7 +26,7 @@ class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String,
                                             view: AddSaleProductToSaleCategoryView)
     : UstadBaseController<AddSaleProductToSaleCategoryView>(context, arguments, view) {
 
-    private var umProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
+    private var umProvider: DataSource.Factory<Int, SaleProduct>? = null
     internal var repository: UmAppDatabase
     private val providerDao: SaleProductDao
     private val productParentJoinDao: SaleProductParentJoinDao

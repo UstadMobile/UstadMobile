@@ -18,18 +18,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductCategoryListPresenter
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.core.db.dao.SaleProductPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.db.entities.SaleProduct
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 
 import java.io.File
 
 class SelectSaleCategoryRecyclerAdapter internal constructor(
-        diffCallback: DiffUtil.ItemCallback<SaleNameWithImage>,
+        diffCallback: DiffUtil.ItemCallback<SaleProduct>,
         internal var mPresenter: SaleProductCategoryListPresenter,
         private val theActivity: Activity?,
         private val showContextMenu: Boolean?,
         private val listCategory: Boolean?,
         private val theContext: Context)
-    : PagedListAdapter<SaleNameWithImage, SelectSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
+    : PagedListAdapter<SaleProduct, SelectSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
+
+    private var productPictureDao : SaleProductPictureDao? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -60,20 +68,26 @@ class SelectSaleCategoryRecyclerAdapter internal constructor(
         val dots = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_blob_dots)
 
         assert(entity != null)
-        val pictureUid = entity!!.pictureUid
-        val imagePath = ""
-        if (pictureUid != 0L) {
-            //TODO: KMP
-            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
-            //                    .getAttachmentPath(pictureUid);
+
+
+        var imagePath = ""
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+
+            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            if (!imagePath.isEmpty())
+                setPictureOnView(imagePath, imageView)
+            else
+                imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
         }
 
-        if (imagePath != null && !imagePath.isEmpty())
-            setPictureOnView(imagePath, imageView)
-        else
-            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
-
-        name.text = entity.name
+        name.text = entity!!.saleProductName
 
         //Options to Edit/Delete every schedule in the list
         if (showContextMenu!!) {
@@ -84,10 +98,10 @@ class SelectSaleCategoryRecyclerAdapter internal constructor(
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickEditCategory(entity.productUid)
+                            mPresenter.handleClickEditCategory(entity.saleProductUid)
                             true
                         } else if (i == R.id.delete) {
-                            mPresenter.handleDeleteCategory(entity.productUid)
+                            mPresenter.handleDeleteCategory(entity.saleProductUid)
                             true
                         } else {
                             false
@@ -106,11 +120,11 @@ class SelectSaleCategoryRecyclerAdapter internal constructor(
             dots.visibility = View.GONE
         }
 
-        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity.productUid, listCategory!!) }
+        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity.saleProductUid, listCategory!!) }
 
     }
 
-    inner class SelectSaleProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
     companion object {
 

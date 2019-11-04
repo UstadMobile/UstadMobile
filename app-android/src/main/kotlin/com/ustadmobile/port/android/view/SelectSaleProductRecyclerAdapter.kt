@@ -21,13 +21,13 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectSaleProductPresenter
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
+import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.*
 
 import java.io.File
 
 class SelectSaleProductRecyclerAdapter
-    : PagedListAdapter<SaleDescWithSaleProductPicture, SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
+    : PagedListAdapter<SaleProduct, SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
     private var theContext: Context
     private var theActivity: Activity? = null
     private var theFragment: Fragment? = null
@@ -66,7 +66,6 @@ class SelectSaleProductRecyclerAdapter
         val name = holder.itemView.findViewById<TextView>(R.id.item_sale_product_blob_title)
         val dots = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_blob_dots)
 
-        val pictureUid = entity!!.saleProductPictureUid
         var imagePath = ""
 
         holder.imageLoadJob?.cancel()
@@ -75,7 +74,7 @@ class SelectSaleProductRecyclerAdapter
 
             productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
 
-            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity.productUid)
+            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
             imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
 
             if (!imagePath.isEmpty())
@@ -85,7 +84,7 @@ class SelectSaleProductRecyclerAdapter
         }
 
 
-        name.text = entity.name
+        name.text = entity!!.saleProductName
 
         if (isCatalog) {
             dots.visibility = View.VISIBLE
@@ -97,10 +96,10 @@ class SelectSaleProductRecyclerAdapter
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickProductMulti(entity.productUid, listCategory, true)
+                            mPresenter.handleClickProductMulti(entity.saleProductUid, listCategory, true)
                             true
                         } else if (i == R.id.delete) {
-                            mPresenter.handleDelteSaleProduct(entity.productUid, listCategory)
+                            mPresenter.handleDelteSaleProduct(entity.saleProductUid, listCategory)
                             true
                         } else {
                             false
@@ -118,10 +117,10 @@ class SelectSaleProductRecyclerAdapter
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickProductMulti(entity.productUid, listCategory, true)
+                            mPresenter.handleClickProductMulti(entity.saleProductUid, listCategory, true)
                             true
                         } else if (i == R.id.delete) {
-                            mPresenter.handleDelteSaleProduct(entity.productUid, listCategory)
+                            mPresenter.handleDelteSaleProduct(entity.saleProductUid, listCategory)
                             true
                         } else {
                             false
@@ -141,14 +140,14 @@ class SelectSaleProductRecyclerAdapter
         }
 
 
-        holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.productUid, listCategory) }
+        holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.saleProductUid, listCategory) }
 
     }
 
     inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
     internal constructor(
-            diffCallback: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>,
+            diffCallback: DiffUtil.ItemCallback<SaleProduct>,
             thePresenter: SelectSaleProductPresenter,
             activity: Activity,
             isCategory: Boolean?,
@@ -162,7 +161,7 @@ class SelectSaleProductRecyclerAdapter
     }
 
     internal constructor(
-            diffCallback: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>,
+            diffCallback: DiffUtil.ItemCallback<SaleProduct>,
             thePresenter: SelectSaleProductPresenter,
             fragment: Fragment,
             isCategory: Boolean?,

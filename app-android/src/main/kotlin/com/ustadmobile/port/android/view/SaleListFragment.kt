@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
@@ -206,11 +207,16 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
                                  paymentsDueTab: Boolean,
                                  preOrderTab: Boolean) {
 
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
+                .saleDaoBoundaryCallbacks.findAllActiveAsSaleListDetailProvider(factory)
+
         val recyclerAdapter = SaleListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 paymentsDueTab, preOrderTab,this, context!!)
 
         val data =
-                LivePagedListBuilder(factory, 20).build()
+                LivePagedListBuilder(factory, 20)
+                        .setBoundaryCallback(boundaryCallback)
+                        .build()
         data.observe(this,
                 Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
 
@@ -254,7 +260,7 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
 
             override fun areContentsTheSame(oldItem: SaleListDetail,
                                             newItem: SaleListDetail): Boolean {
-                return oldItem == newItem
+                return oldItem.saleUid == newItem.saleUid
             }
         }
     }

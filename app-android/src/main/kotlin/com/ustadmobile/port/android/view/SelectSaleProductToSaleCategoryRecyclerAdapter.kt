@@ -17,17 +17,25 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AddSaleProductToSaleCategoryPresenter
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
+import com.ustadmobile.core.db.dao.SaleProductPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.db.entities.SaleProduct
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 
 import java.io.File
 
 class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
-        diffCallback: DiffUtil.ItemCallback<SaleNameWithImage>,
+        diffCallback: DiffUtil.ItemCallback<SaleProduct>,
         internal var mPresenter: AddSaleProductToSaleCategoryPresenter,
         internal var theActivity: Activity,
         private val listCategory: Boolean,
         internal var theContext: Context)
-    : PagedListAdapter<SaleNameWithImage, SelectSaleProductToSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
+    : PagedListAdapter<SaleProduct, SelectSaleProductToSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
+
+    private var productPictureDao : SaleProductPictureDao? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -58,27 +66,35 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         val desc = holder.itemView.findViewById<TextView>(R.id.item_sale_product_desc)
         desc.visibility = View.GONE
 
-        val pictureUid = entity!!.pictureUid
-        val imagePath = ""
-        if (pictureUid != 0L) {
-            //TODO: KMP Attachemnets Dao
-            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
-            //                    .getAttachmentPath(pictureUid);
+
+
+        var imagePath = ""
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+
+            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            if (!imagePath.isEmpty())
+                setPictureOnView(imagePath, imageView)
+            else
+                imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
         }
 
-        if (imagePath != null && !imagePath.isEmpty())
-            setPictureOnView(imagePath, imageView)
-        else
-            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
 
-        name.text = entity.name
-        desc.text = entity.description
 
-        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity.productUid) }
+        name.text = entity!!.saleProductName
+        desc.text = entity!!.saleProductDesc
+
+        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity!!.saleProductUid) }
 
     }
 
-    inner class SelectSaleProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
     companion object {
 

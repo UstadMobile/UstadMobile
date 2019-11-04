@@ -19,9 +19,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductCategoryListPresenter
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SaleProductCategoryListView
-import com.ustadmobile.lib.db.entities.SaleNameWithImage
 import com.ustadmobile.lib.db.entities.SaleProduct
 import java.security.AccessController.getContext
 import java.util.Objects
@@ -122,29 +122,39 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         }
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>) {
         val recyclerAdapter = SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, false, applicationContext)
 
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .saleProductParentJoinDaoBoundaryCallbacks.findAllItemsInACategory(factory)
+
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
         //Observe the data:
         data.observe(this,
-                Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })
+                Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         mRecyclerView!!.adapter = recyclerAdapter
     }
 
-    override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
+    override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleProduct>) {
 
         val recyclerAdapter = SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this, false,
                 true, applicationContext)
 
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
+
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })
+        data.observe(this, Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         cRecyclerView!!.adapter = recyclerAdapter
@@ -189,15 +199,15 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleNameWithImage> = object : DiffUtil.ItemCallback<SaleNameWithImage>() {
-            override fun areItemsTheSame(oldItem: SaleNameWithImage,
-                                         newItem: SaleNameWithImage): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleProduct> = object : DiffUtil.ItemCallback<SaleProduct>() {
+            override fun areItemsTheSame(oldItem: SaleProduct,
+                                         newItem: SaleProduct): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: SaleNameWithImage,
-                                            newItem: SaleNameWithImage): Boolean {
-                return oldItem == newItem
+            override fun areContentsTheSame(oldItem: SaleProduct,
+                                            newItem: SaleProduct): Boolean {
+                return oldItem.saleProductUid == newItem.saleProductUid
             }
         }
     }

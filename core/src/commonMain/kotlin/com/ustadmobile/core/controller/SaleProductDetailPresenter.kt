@@ -141,7 +141,7 @@ class SaleProductDetailPresenter(context: Any,
         //Update image on view
         GlobalScope.launch {
             val productPicture =
-                pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
+                pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
             if (productPicture != null) {
                 view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
             }
@@ -225,7 +225,7 @@ class SaleProductDetailPresenter(context: Any,
         var productPictureUid : Long = 0L
 
         GlobalScope.launch {
-            var existingPP = pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
+            var existingPP = pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
             if(existingPP == null){
                 existingPP = SaleProductPicture()
                 existingPP.saleProductPictureSaleProductUid = currentSaleProduct!!.saleProductUid

@@ -19,9 +19,10 @@ import com.github.clans.fab.FloatingActionMenu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectSaleProductPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
-import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
+import com.ustadmobile.lib.db.entities.SaleProduct
 
 
 class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView {
@@ -124,16 +125,22 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun finish() { }
 
-    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
+    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleProduct>) {
+
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .saleProductDaoBoundaryCallbacks.findActiveProductsProvider(factory)
+
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this,false, true, context!!)
 
         // get the provider, set , observe, etc.
         val data =
-                LivePagedListBuilder(factory, 20).build()
+                LivePagedListBuilder(factory, 20)
+                        .setBoundaryCallback(boundaryCallback)
+                        .build()
         //Observe the data:
         data.observe(this,
-                Observer<PagedList<SaleDescWithSaleProductPicture>>
+                Observer<PagedList<SaleProduct>>
                 { recyclerAdapter!!.submitList(it) }
                 )
 
@@ -141,15 +148,20 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         recentRV!!.setAdapter(recyclerAdapter)
     }
 
-    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
+    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleProduct>) {
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
+
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, true, true, context!!)
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>>
+        data.observe(this, Observer<PagedList<SaleProduct>>
         { recyclerAdapter!!.submitList(it) })
 
         //set the adapter
@@ -162,15 +174,20 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     }
 
 
-    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleDescWithSaleProductPicture>) {
+    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleProduct>) {
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this,true, true, context!!)
 
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .saleProductParentJoinDaoBoundaryCallbacks.findAllCategoriesInCollection(factory)
+
         // get the provider, set , observe, etc.
         // A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleDescWithSaleProductPicture>>
+        data.observe(this, Observer<PagedList<SaleProduct>>
         { recyclerAdapter!!.submitList(it) })
 
         //set the adapter
@@ -212,15 +229,15 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleDescWithSaleProductPicture> = object :
-                DiffUtil.ItemCallback<SaleDescWithSaleProductPicture>() {
-            override fun areItemsTheSame(oldItem: SaleDescWithSaleProductPicture,
-                                         newItem: SaleDescWithSaleProductPicture): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleProduct> = object :
+                DiffUtil.ItemCallback<SaleProduct>() {
+            override fun areItemsTheSame(oldItem: SaleProduct,
+                                         newItem: SaleProduct): Boolean {
                 return oldItem == newItem
             }
-            override fun areContentsTheSame(oldItem: SaleDescWithSaleProductPicture,
-                                   newItem: SaleDescWithSaleProductPicture): Boolean {
-                return oldItem.productUid == newItem.productUid
+            override fun areContentsTheSame(oldItem: SaleProduct,
+                                            newItem: SaleProduct): Boolean {
+                return oldItem.saleProductUid == newItem.saleProductUid
             }
         }
     }

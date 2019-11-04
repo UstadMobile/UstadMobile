@@ -2,9 +2,7 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleProductDao
-import com.ustadmobile.core.db.dao.SaleProductGroupDao
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -25,7 +23,7 @@ import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.core.view.SelectSaleProductView
-import com.ustadmobile.lib.db.entities.SaleDescWithSaleProductPicture
+import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -40,14 +38,13 @@ class SelectSaleProductPresenter(context: Any,
                                  private val catalogMode: Boolean)
     : UstadBaseController<SelectSaleProductView>(context, arguments!!, view) {
 
-    private var recentProvider: DataSource.Factory<Int, SaleDescWithSaleProductPicture>? = null
-    private var categoryProvider: DataSource.Factory<Int, SaleDescWithSaleProductPicture>? = null
-    private var collectionProvider: DataSource.Factory<Int, SaleDescWithSaleProductPicture>? = null
+    private var recentProvider: DataSource.Factory<Int, SaleProduct>? = null
+    private var categoryProvider: DataSource.Factory<Int, SaleProduct>? = null
+    private var collectionProvider: DataSource.Factory<Int, SaleProduct>? = null
 
     internal var repository: UmAppDatabase
 
     internal var saleProductDao: SaleProductDao
-    internal var saleProductGroupDao: SaleProductGroupDao
     internal var productParentJoinDao: SaleProductParentJoinDao
     internal var impl: UstadMobileSystemImpl
 
@@ -62,7 +59,6 @@ class SelectSaleProductPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         saleProductDao = repository.saleProductDao
-        saleProductGroupDao = repository.saleProductGroupDao
         productParentJoinDao = repository.saleProductParentJoinDao
 
         if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
@@ -84,20 +80,20 @@ class SelectSaleProductPresenter(context: Any,
 
     private fun updateRecentProvider() {
 
-        recentProvider = saleProductDao.findAllActiveProductsSNWIProviderWithPP()
+        recentProvider = saleProductDao.findActiveProductsProvider()
         view.setRecentProvider(recentProvider!!)
 
     }
 
     private fun updateCategoryProvider() {
 
-        categoryProvider = saleProductDao.findAllActiveCategoriesSNWIProviderWithPP()
+        categoryProvider = saleProductDao.findActiveCategoriesProvider()
         view.setCategoryProvider(categoryProvider!!)
 
     }
 
     private fun updateCollectionProvider() {
-        collectionProvider = productParentJoinDao.findAllCategoriesInCollectionWithPP()
+        collectionProvider = productParentJoinDao.findAllCategoriesInCollection()
         view.setCollectionProvider(collectionProvider!!)
     }
 

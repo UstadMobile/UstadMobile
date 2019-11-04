@@ -41,6 +41,7 @@ import com.ustadmobile.core.controller.SaleProductDetailPresenter
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -237,9 +238,15 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         val recyclerAdapter = SaleProductCategorySelectorRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this)
 
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .saleProductParentJoinDaoBoundaryCallbacks
+                .findAllSelectedCategoriesForSaleProductProvider(factory)
+
         // get the provider, set , observe, etc.
         val data =
-                LivePagedListBuilder(factory, 20).build()
+                LivePagedListBuilder(factory, 20)
+                        .setBoundaryCallback(boundaryCallback)
+                        .build()
         //Observe the data:
         data.observe(this,
                 Observer<PagedList<SaleProductSelected>> { recyclerAdapter.submitList(it) })

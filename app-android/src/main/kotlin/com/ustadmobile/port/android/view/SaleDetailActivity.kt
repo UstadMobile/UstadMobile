@@ -34,6 +34,7 @@ import com.caverock.androidsvg.SVGParseException
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
@@ -484,8 +485,14 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
         val recyclerAdapter = SaleItemRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 this)
 
+        //saleItemDao.findAllSaleItemListDetailActiveBySaleProvider
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .saleItemDaoBoundaryCallbacks.findAllSaleItemListDetailActiveBySaleProvider(factory)
+
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
 
         val customObserver = Observer{ o:PagedList<SaleItemListDetail>->
@@ -510,8 +517,14 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
         val recyclerAdapter = SalePaymentRecyclerAdapter(DIFF_CALLBACK_PAYMENT, mPresenter!!, this,
                 this)
 
+        //salePaymentDao.findBySaleProvider
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .salePaymentDaoBoundaryCallbacks.findBySaleProvider(factory)
+
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
         val customObserver = Observer{ o:PagedList<SalePayment> ->
             recyclerAdapter.submitList(o)

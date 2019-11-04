@@ -24,6 +24,7 @@ import com.github.clans.fab.FloatingActionButton
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectPersonDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectPersonDialogView
 import com.ustadmobile.lib.db.entities.Person
@@ -134,8 +135,14 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
     override fun setListProvider(factory: DataSource.Factory<Int, Person>) {
         val mAdapter = PersonSelectedRecyclerAdapter(DIFF_CALLBACK, context!!,
                 this, mPresenter!!)
+
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .personDaoBoundaryCallbacks.findAllPeopleByLEAndRoleUid(factory)
+
         //A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
         //Observe the data:
         val thisP = this
