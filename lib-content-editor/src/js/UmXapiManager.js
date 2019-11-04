@@ -78,7 +78,13 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
  * Send statement to the endpoint
  */
 UmXapiManager.prototype.send = () => {
-    console.log(UmXapiManager.xapiStatement)
+    const data = UmXapiManager.xapiStatement ? UmXapiManager.xapiStatement: {}
+    $.post(UmXapiManager.prototype.getQueryParms().endpoint, data, (response, status) => {
+        if(status !== 200){
+            console.error(response)
+        }
+        console.log(status !== 200 ? "Saved successfully": "Failed to save statement")
+    })
 }
 
 
@@ -89,14 +95,14 @@ UmXapiManager.prototype.getActor = ()=> {
     const actor = JSON.parse(UmXapiManager.prototype.getQueryParms().actor)
     let actorMBox = "", actorObjectType = "", actorName = ""
     if(actor.mbox){
-        actorMBox = actor.mbox.join(",")
+        actorMBox = actor.mbox
     }
     if(actor.objectType){
-        actorObjectType = actor.objectType.join(",")
+        actorObjectType = actor.objectType
     }
 
     if(actor.name){
-        actorName = actor.name.join(",")
+        actorName = actor.name
     }
     return {name: actorName, mbox: actorMBox, objectType: actorObjectType}
 }
@@ -118,6 +124,5 @@ UmXapiManager.prototype.getQueryParms = () =>{
             retVal[decodeURIComponent(pair[0].replace("+", "%20"))] = decodeURIComponent(pair[1].replace("+", "%20"))
         }
     }
-    console.log(retVal)
     return retVal
 }
