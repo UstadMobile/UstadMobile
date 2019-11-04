@@ -71,6 +71,13 @@ kotlin {
         }
     }
 
+    jvm("commonJvm") {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+
     android()
 
 
@@ -122,7 +129,7 @@ kotlin {
          */
         androidMain {
             dependsOn commonJvmMain
-            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
+            //kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
 
             dependencies {
                 implementation project(":lib-database-android")

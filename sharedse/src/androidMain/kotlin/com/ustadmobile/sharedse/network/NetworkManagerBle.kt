@@ -261,44 +261,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
     }
 
-    /**
-     * This is a simple broadcast receiver that can be used to wait until a given WiFi SSID appears
-     * in the scan results
-     */
-    internal inner class NetworkScanResultsReceiver(private val targetNetworkSsid: String): BroadcastReceiver() {
-
-        val latch = CountDownLatch(1)
-
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if(latch.count > 0) {
-                val results = wifiManager.scanResults
-                val updated: String
-                if(Build.VERSION.SDK_INT >= 23) {
-                    updated = if(intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false) ?: false) {
-                        "Updated"
-                    }else {
-                        "Not updated"
-                    }
-                }else {
-                    updated = "Not known if updated"
-                }
-
-
-                val networksSeen = results.map { normalizeAndroidWifiSsid(it.SSID) }
-                UMLog.l(UMLog.DEBUG, 0, "NetworkManager BLE: scan results ($updated): networks found: ${networksSeen.joinToString()}")
-                if(targetNetworkSsid in networksSeen) {
-                    UMLog.l(UMLog.DEBUG, 0, "NetworkManagerBle: Saw target in scan results: $targetNetworkSsid")
-                    latch.countDown()
-                }
-            }
-        }
-
-        fun waitForNetworkToBeSeen(timeout: Int): Boolean {
-            return latch.await(timeout.toLong(), TimeUnit.MILLISECONDS)
-        }
-    }
-
-
 
     /**
      * Check if the device needs runtime-permission

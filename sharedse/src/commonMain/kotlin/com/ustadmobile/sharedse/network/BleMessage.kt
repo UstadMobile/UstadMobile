@@ -323,6 +323,8 @@ class BleMessage {
 
     companion object {
 
+        const val MESSAGE_TYPE_HTTP = 101.toByte()
+
         private const val payloadLengthStartIndex = 3
 
         private const val payLoadStartIndex = 7
