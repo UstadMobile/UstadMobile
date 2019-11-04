@@ -156,7 +156,13 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 containerDir.mkdirs()
 
                 val parentDir = Files.createTempDirectory("video").toFile()
-                val videoFile = File(parentDir, FilenameUtils.getName(urlString))
+
+                var fileName = FilenameUtils.getName(urlString)
+                if(!fileName.contains(".")){
+                    fileName =  headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
+                }
+
+                val videoFile = File(parentDir, fileName)
                 val input = http.get<InputStream>(urlString)
                 FileUtils.copyInputStreamToFile(input, videoFile)
 
