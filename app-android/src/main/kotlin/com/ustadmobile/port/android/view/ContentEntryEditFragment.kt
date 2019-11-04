@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 
+import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.Context
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
@@ -22,10 +24,11 @@ import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
 import java.io.File
 import java.util.*
-import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
-import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
+
 
 /**
  * Fragment responsible for editing entry details
@@ -145,9 +148,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         selectFileBtn!!.setOnClickListener { v ->
-            if (actionListener != null) {
-                actionListener!!.browseFiles(null, "application/*")
-            }
+            presenter!!.handleContentButton()
         }
 
 
@@ -173,6 +174,27 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         mProgress!!.setCancelable(false)
 
         return rootView
+    }
+
+    override fun startBrowseFiles() {
+        if (actionListener != null) {
+            actionListener!!.browseFiles(null, "application/*")
+        }
+    }
+
+    override fun showUpdateContentDialog(title: String, options: List<String>){
+
+        val builder = AlertDialog.Builder(viewContext as Context)
+        builder.setTitle(title)
+        builder.setItems(options.toTypedArray()) { dialog, which ->
+            if(which == 0){
+                startBrowseFiles()
+            }else if(which == 1){
+                presenter!!.handleUpdateLink()
+            }
+        }
+        builder.show()
+
     }
 
 
