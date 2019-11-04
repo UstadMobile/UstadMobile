@@ -69,7 +69,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     contentEntry.leaf = true
                     contentEntry.title = Jsoup.parse(content).title()
                     contentEntry.sourceUrl = urlString
-
+                    contentEntry.imported = true
 
                     val parentChildJoin = ContentEntryParentChildJoin()
                     parentChildJoin.cepcjParentContentEntryUid = parentUid
@@ -128,6 +128,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 contentEntry.leaf = true
                 contentEntry.title = videoTitle
                 contentEntry.sourceUrl = urlString
+                contentEntry.imported = true
 
                 val parentChildJoin = ContentEntryParentChildJoin()
                 parentChildJoin.cepcjParentContentEntryUid = parentUid
