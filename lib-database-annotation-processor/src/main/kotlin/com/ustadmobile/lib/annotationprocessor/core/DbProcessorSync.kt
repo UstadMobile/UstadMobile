@@ -258,11 +258,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                 codeBlock.add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec))
             }
 
-
-
-
-
             codeBlock.endControlFlow()
+            if(hasAttachments) {
+                codeBlock.add(generateGetAttachmentDataCodeBlock(entityType))
+            }
 
             codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityInfo.tracker,
                     syncHelperVarName = "_dao"))
