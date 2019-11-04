@@ -1389,11 +1389,15 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }else {
             "_result"
         }
+
+        var respondResultType = resolveQueryResultType(returnType!!)
+        respondResultType = respondResultType.copy(nullable = isNullableResultType(respondResultType))
+
         return CodeBlock.builder()
                 .add(getVarsCodeBlock.build())
                 .add(beforeDaoCallCode)
                 .add(callCodeBlock.build())
-                .add(generateRespondCall(returnType!!, resultVarName))
+                .add(generateRespondCall(respondResultType, resultVarName))
                 .add(afterDaoCallCode)
                 .build()
     }
