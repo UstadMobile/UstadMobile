@@ -250,7 +250,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             val result = personDao.updateAsync(currentPerson!!)
             PersonEditPresenter.generateFeedsForPersonUpdate(repository, currentPerson!!)
 
-            view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP))
+            view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
         }
     }
 
@@ -295,7 +295,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         GlobalScope.launch {
             val personPicture = personPictureDao!!.findByPersonUidAsync(currentPerson!!.personUid)
             if (personPicture != null) {
-                view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture))
+                view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture)!!)
             }
         }
 

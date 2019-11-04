@@ -73,7 +73,7 @@ class SaleItemRecyclerAdapter(
             productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
 
             val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity.saleItemProductUid)
-            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!);
+            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
 
             if (!imagePath.isEmpty())
                 setPictureOnView(imagePath, imageView)

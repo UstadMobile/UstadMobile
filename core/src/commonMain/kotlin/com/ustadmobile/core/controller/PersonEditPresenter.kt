@@ -334,7 +334,7 @@ class PersonEditPresenter
         GlobalScope.launch {
             val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
             if (personPicture != null) {
-                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture))
+                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture)!!)
             }
         }
 

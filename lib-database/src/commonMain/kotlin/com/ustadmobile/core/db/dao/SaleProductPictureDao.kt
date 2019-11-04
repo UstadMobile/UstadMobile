@@ -28,7 +28,7 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
     }
 
     @GetAttachmentData
-    open fun getAttachmentPath(entity: SaleProductPicture): String {
+    open fun getAttachmentPath(entity: SaleProductPicture): String? {
         return ""
     }
 

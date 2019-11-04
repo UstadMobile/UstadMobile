@@ -143,7 +143,7 @@ class SaleProductDetailPresenter(context: Any,
             val productPicture =
                 pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
             if (productPicture != null) {
-                view.updateImageOnView(pictureDao.getAttachmentPath(productPicture))
+                view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
             }
         }
 
@@ -160,7 +160,7 @@ class SaleProductDetailPresenter(context: Any,
         if (productPicture != null) {
             view.runOnUiThread(Runnable{
                 view.updateImageOnView(
-                        pictureDao.getAttachmentPath(productPicture))
+                        pictureDao.getAttachmentPath(productPicture)!!)
             })
         }
     }

@@ -90,7 +90,7 @@ class BasePointPresenter
                 if (personPicture != null) {
                     view.runOnUiThread(Runnable {
                         val imagePath = personPictureDao!!.getAttachmentPath(personPicture)
-                        if(!imagePath.isEmpty()){
+                        if(!imagePath!!.isEmpty()){
                             view.loadProfileImage(imagePath)
                         }else{
                             view.loadProfileIcon("")

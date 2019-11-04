@@ -340,6 +340,7 @@ class SaleDetailPresenter(context: Any,
                 voiceNote.saleVoiceNoteSaleUid = updatedSale!!.saleUid
                 GlobalScope.launch {
                     try {
+
                         val result = saleVoiceNoteDao.insertAsync(voiceNote)
 
                         saleVoiceNoteDao.setAttachment(voiceNote, voiceNoteFileName!!)

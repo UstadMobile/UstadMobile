@@ -150,8 +150,8 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
 
             val imgPath = personPictureDao!!.getAttachmentPath(personPicture!!)
 
-            if (!imgPath.isEmpty())
-                updateImageOnView(imgPath, studentImage)
+            if (!imgPath!!.isEmpty())
+                updateImageOnView(imgPath!!, studentImage)
             else
                 studentImage.setImageResource(R.drawable.ic_people_black_24dp)
         }

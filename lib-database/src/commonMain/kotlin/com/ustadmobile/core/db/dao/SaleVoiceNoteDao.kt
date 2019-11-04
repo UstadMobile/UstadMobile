@@ -23,7 +23,7 @@ abstract class SaleVoiceNoteDao : BaseDao<SaleVoiceNote> {
     }
 
     @GetAttachmentData
-    open fun getAttachmentPath(entity: SaleVoiceNote): String {
+    open fun getAttachmentPath(entity: SaleVoiceNote): String? {
         return ""
     }
 

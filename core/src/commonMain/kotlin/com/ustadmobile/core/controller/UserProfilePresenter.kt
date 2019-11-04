@@ -69,7 +69,7 @@ class UserProfilePresenter(context: Any,
                     val personPicture =
                             personPictureDao!!.findByPersonUidAsync(loggedInPerson!!.personUid)
                     if (personPicture != null) {
-                        view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture))
+                        view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture)!!)
                     }
                 }
             }
@@ -142,7 +142,7 @@ class UserProfilePresenter(context: Any,
                 //Update person and generate feeds for person
                 personDao.updateAsync(loggedInPerson!!) //TODO: Check this
 
-                view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP))
+                view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
             }catch(e:Exception){
                 println(e.message)
             }

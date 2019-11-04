@@ -91,26 +91,11 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
 
             val imgPath = personPictureDao!!.getAttachmentPath(personPictureEntity!!)
 
-            if (!imgPath.isEmpty())
+            if (!imgPath!!.isEmpty())
                 setPictureOnView(imgPath, personPicture)
             else
                 personPicture.setImageResource(R.drawable.ic_account_circle_white_36dp)
         }
-
-//        //TODO: Get and update PersonPicture
-//        var personPicturePath = ""
-//        val personPictureUid = entity.personPictureUid
-//        if(personPictureUid != null && personPictureUid != 0L){
-//            //TODO: Fix attachment stuff KMP
-////            personPicturePath =
-////                    UmAppDatabase.getInstance(theContext).personPictureDao.getAttachmentPath(
-////                            personPictureUid)
-//            if(personPicturePath != null && !personPicturePath.isEmpty()){
-//                setPictureOnView(personPicturePath, personPicture)
-//            }else{
-//                personPicture.setImageResource(R.drawable.ic_account_circle_white_36dp)
-//            }
-//        }
 
         val cl = holder.itemView.findViewById<ConstraintLayout>(R.id.item_person_cl)
         cl.setOnClickListener { mPresenter.handleClickWE(entity.personUid) }

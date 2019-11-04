@@ -295,7 +295,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
             val imgPath = personPictureDao!!.getAttachmentPath(personPictureEntity!!)
 
-            if (!imgPath.isEmpty())
+            if (!imgPath!!.isEmpty())
                 setPictureOnView(imgPath, personPicture!!)
             else
                 personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
