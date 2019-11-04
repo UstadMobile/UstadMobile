@@ -11,16 +11,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import io.ktor.routing.Route
 import com.ustadmobile.door.*
 import db2.ExampleDao2_KtorRoute
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
 import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_KtorRoute
-import io.ktor.application.call
+import db2.ExampleDatabase2_KtorRoute
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
@@ -30,21 +27,20 @@ import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
-import io.ktor.request.header
-import io.ktor.response.header
-import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.util.url
 import org.junit.After
 import org.junit.Assert
 import java.util.concurrent.TimeUnit
+import java.io.File
+import java.nio.file.Files
 
 class TestDbRoute  {
 
     lateinit var exampleDb: ExampleDatabase2
 
     lateinit var server: ApplicationEngine
+
+    var tmpAttachmentsDir: File? = null
 
     @Before
     fun setup() {
@@ -58,10 +54,9 @@ class TestDbRoute  {
                 register(ContentType.Any, GsonConverter())
             }
 
-            val syncDao = ExampleDatabase2SyncDao_JdbcKt(exampleDb)
+            tmpAttachmentsDir = Files.createTempDirectory("TestDbRoute").toFile()
             install(Routing) {
-                ExampleDao2_KtorRoute(exampleDb.exampleDao2(), exampleDb, gson)
-                ExampleSyncableDao_KtorRoute(exampleDb.exampleSyncableDao(), exampleDb, gson, syncDao)
+                ExampleDatabase2_KtorRoute(exampleDb, gson, tmpAttachmentsDir!!.absolutePath)
             }
         }
 
@@ -83,13 +78,13 @@ class TestDbRoute  {
 
         val requestBuilder = HttpRequestBuilder()
         requestBuilder.body = exampleEntity2
-        requestBuilder.url("http://localhost:8089/ExampleDao2/insertAndReturnId")
+        requestBuilder.url("http://localhost:8089/ExampleDatabase2/ExampleDao2/insertAndReturnId")
         requestBuilder.contentType(ContentType.Application.Json)
 
         exampleEntity2.uid = httpClient.post<Long>(requestBuilder)
 
         val entityFromServer = httpClient.get<ExampleEntity2>(
-                "http://localhost:8089/ExampleDao2/findByUid?uid=${exampleEntity2.uid}")
+                "http://localhost:8089/ExampleDatabase2/ExampleDao2/findByUid?uid=${exampleEntity2.uid}")
         assertEquals(exampleEntity2, entityFromServer, "Entity from server is retrieved OK")
 
         httpClient.close()
@@ -103,14 +98,14 @@ class TestDbRoute  {
         val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
         exampleSyncableEntity.esUid = exampleDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleSyncableDao/findAll") {
+        val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
         }
         val reqId = firstGetListResponse.headers.get("X-reqid")!!.toInt()
         val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
-        httpClient.get<Unit>("http://localhost:8089/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=$reqId")
+        httpClient.get<Unit>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=$reqId")
 
-        val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleSyncableDao/findAll") {
+        val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
         }
 
@@ -132,7 +127,7 @@ class TestDbRoute  {
         val firstGetListResponse = httpClient.get<HttpResponse> {
             url{
                 takeFrom("http://localhost:8089/")
-                path("ExampleSyncableDao", "findAll")
+                path("ExampleDatabase2", "ExampleSyncableDao", "findAll")
                 parameter("x", 1)
             }
             header("X-nid", 1)
@@ -140,7 +135,7 @@ class TestDbRoute  {
 
         val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
 
-        val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleSyncableDao/findAll") {
+        val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
         }
 

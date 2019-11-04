@@ -38,8 +38,14 @@ abstract class AbstractImportLinkTest {
 
         var firstEntry = ContentEntry()
         firstEntry.title = "Ustad Mobile"
-        firstEntry.contentEntryUid = -101
+        firstEntry.sourceUrl = "firstUrl"
         db.contentEntryDao.insert(firstEntry)
+
+        var secondEntry = ContentEntry()
+        secondEntry.title = "Ustad Mobile 2"
+        secondEntry.sourceUrl = "secondUrl"
+        secondEntry.contentEntryUid = -102
+        db.contentEntryDao.insert(secondEntry)
 
 
     }

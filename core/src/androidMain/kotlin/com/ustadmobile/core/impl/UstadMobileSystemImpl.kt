@@ -256,7 +256,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 startIntent.putExtra(ARG_REFERRER, referrer)
             }
             startIntent.flags = flags
-            startIntent.putExtras(argsBundle)
+            if(argsBundle != null)
+                startIntent.putExtras(argsBundle)
 
             ctx.startActivity(startIntent)
         }
