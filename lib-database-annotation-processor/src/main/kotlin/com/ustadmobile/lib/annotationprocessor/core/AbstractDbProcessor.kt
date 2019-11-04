@@ -1380,11 +1380,24 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
         callCodeBlock.add(")\n")
+
+        val resultVarName = if(returnType is ParameterizedTypeName
+                && returnType.rawType == DoorLiveData::class.asClassName()) {
+            callCodeBlock.add("val _liveDataResult = _result.%M()\n",
+                    MemberName("com.ustadmobile.door", "getFirstValue"))
+            "_liveDataResult"
+        }else {
+            "_result"
+        }
+
+        var respondResultType = resolveQueryResultType(returnType!!)
+        respondResultType = respondResultType.copy(nullable = isNullableResultType(respondResultType))
+
         return CodeBlock.builder()
                 .add(getVarsCodeBlock.build())
                 .add(beforeDaoCallCode)
                 .add(callCodeBlock.build())
-                .add(generateRespondCall(returnType!!, "_result"))
+                .add(generateRespondCall(respondResultType, resultVarName))
                 .add(afterDaoCallCode)
                 .build()
     }

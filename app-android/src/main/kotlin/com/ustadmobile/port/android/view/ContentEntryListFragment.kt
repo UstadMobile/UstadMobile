@@ -218,8 +218,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private fun showSnackbarPromptsIfRequired() {
         val currentContext = context
-        if(currentContext != null){
-            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer, currentContext)
+        if(currentContext != null && ::managerAndroidBle.isInitialized
+                && ::rootContainer.isInitialized){
+            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer,
+                    currentContext)
         }
     }
 
@@ -250,7 +252,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
-        if (entryListPresenter == null &&  ::managerAndroidBle.isInitialized) {
+        if (entryListPresenter == null &&  ::managerAndroidBle.isInitialized
+                && ::rootContainer.isInitialized) {
             //create entry adapter here to make sure bleManager is not null
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this,
                     managerAndroidBle, this)
