@@ -932,10 +932,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         return null
     }
 
-    actual override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner {
-        return DeleteJobTaskRunnerAndroid(`object`, args)
-    }
-
 
     /**
      * Start monitoring network changes
