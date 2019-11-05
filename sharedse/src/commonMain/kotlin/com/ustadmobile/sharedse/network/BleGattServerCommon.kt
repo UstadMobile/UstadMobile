@@ -9,6 +9,8 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
+import kotlinx.io.ByteArrayInputStream
+import kotlinx.io.ByteArrayOutputStream
 
 /**
  * This is an abstract class which is used to implement platform specific BleGattServerCommon.
@@ -25,48 +27,36 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_G
  *
  * @author kileha3
  */
-abstract class BleGattServerCommon {
+abstract class BleGattServerCommon() {
 
-    private var networkManager: NetworkManagerBleCommon? = null
+    lateinit var networkManager: NetworkManagerBleCommon
 
-    private var context: Any? = null
+    lateinit var httpSessionFactory: HttpSessionFactory
 
-    constructor(context: Any) {
-        this.context = context
+    lateinit var context: Any
+
+    constructor(aContext: Any, aNetworkManager: NetworkManagerBleCommon, aSessionFactory: HttpSessionFactory): this() {
+        context = aContext
+        networkManager = aNetworkManager
+        httpSessionFactory = aSessionFactory
     }
-
-    /**
-     * Set NetworkManagerBleCommon instance
-     * @param networkManager Instance of NetworkManagerBleCommon
-     */
-    fun setNetworkManager(networkManager: NetworkManagerBleCommon) {
-        this.networkManager = networkManager
-    }
-
-    fun setContext(context: Any) {
-        this.context = context
-    }
-
-    /**
-     * Default constructor used by Mockito when spying this class
-     */
-    protected constructor() {}
 
     /**
      * Handle request from peer device
      * @param requestReceived Message received from the peer device
+     * @param clientDeviceAddr The bluetooth device address the message was received from
      * @return Newly constructed message as a response to the peer device
      *
      * @see BleMessage
      */
-    fun handleRequest(requestReceived: BleMessage): BleMessage? {
+    fun handleRequest(requestReceived: BleMessage, clientDeviceAddr: String): BleMessage? {
         val requestType = requestReceived.requestType
 
         when (requestType) {
             ENTRY_STATUS_REQUEST -> {
                 val entryStatusResponse = ArrayList<Long>()
 
-                val containerDao = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                val containerDao = UmAccountManager.getRepositoryForActiveAccount(context)
                         .containerDao
                 for (containerUid in bleMessageBytesToLong(requestReceived.payload!!)) {
 
@@ -81,14 +71,28 @@ abstract class BleGattServerCommon {
             }
 
             WIFI_GROUP_REQUEST -> {
-                val group = networkManager!!.awaitWifiDirectGroupReady(5000)
+                val group = networkManager.awaitWifiDirectGroupReady(5000)
                 return BleMessage(WIFI_GROUP_CREATION_RESPONSE, 42.toByte(),
                         group.toBytes())
+            }
+
+            BleMessage.MESSAGE_TYPE_HTTP -> {
+                val payload = requestReceived.payload
+                if(payload != null) {
+                    val messageIn = ByteArrayInputStream(payload)
+                    val bufferOut = ByteArrayOutputStream()
+                    val httpSession = httpSessionFactory(messageIn, bufferOut)
+                    httpSession.execute()
+                    bufferOut.flush()
+                    return BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
+                            BleMessage.getNextMessageIdForReceiver(clientDeviceAddr),
+                            bufferOut.toByteArray())
+                }else {
+                    return null
+                }
             }
             else -> return null
         }
     }
-
-    abstract fun handleHttpProxyRequest(proxyRequest: BleMessage): BleMessage?
 
 }

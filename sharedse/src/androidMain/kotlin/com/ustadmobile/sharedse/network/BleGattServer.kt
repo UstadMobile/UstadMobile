@@ -7,7 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
-
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 
 /**
  * This class handle all the GATT server device's Bluetooth Low Energy callback
@@ -41,7 +41,8 @@ class BleGattServer
  * @param networkManager Instance of a NetworkManagerBle for getting
  * BluetoothManager instance.
  */
-(context: Context, networkManager: NetworkManagerBle) : BleGattServerCommon(context) {
+(context: Context, networkManager: NetworkManagerBle, sessionFactory: HttpSessionFactory) :
+        BleGattServerCommon(context, networkManager, sessionFactory) {
 
     /**
      * Get instance of a BluetoothGattServer
@@ -102,7 +103,7 @@ class BleGattServer
 
                     UMLog.l(UMLog.DEBUG, 691,
                             "Request received with default MTU size of $currentMtuSize")
-                    val messageToSend = handleRequest(messageReceived)
+                    val messageToSend = handleRequest(messageReceived, device.address)
 
                     UMLog.l(UMLog.DEBUG, 691,
                             "Prepare response to send back to " + device.address)
@@ -136,10 +137,6 @@ class BleGattServer
 
     init {
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context, gattServerCallback)
-        setNetworkManager(networkManager)
     }
 
-    override fun handleHttpProxyRequest(proxyRequest: BleMessage): BleMessage? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 }

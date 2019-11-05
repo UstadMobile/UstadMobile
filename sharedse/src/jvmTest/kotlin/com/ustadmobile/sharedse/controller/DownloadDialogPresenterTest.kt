@@ -210,7 +210,7 @@ class DownloadDialogPresenterTest {
     }
 
     @Test
-    fun givenDownloadJobCreated_whenHandleClickCalled_shouldSetStatusToQueued() {
+    fun givenDownloadJobAlreadyCreated_whenHandleClickCalled_shouldSetStatusToQueued() {
         runBlocking {
             insertDownloadJobAndJobItems(true, JobStatus.NOT_QUEUED)
             val viewReadyLatch = CountDownLatch(1)
@@ -226,6 +226,8 @@ class DownloadDialogPresenterTest {
                     umAppDatabase, umAppDatabaseRepo, {Int, Any -> Unit})
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
+
+            viewReadyLatch.await(5000, TimeUnit.MILLISECONDS)
 
             presenter.handleClickPositive()
 

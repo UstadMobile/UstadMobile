@@ -9,6 +9,8 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.exception.ZipException
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -260,6 +262,9 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         mountName = mountZip(zipPath, mountName)
         return mountName
     }
+
+    fun newSession(inputStream: InputStream, outputStream: OutputStream): IHTTPSession =
+            HTTPSession(tempFileManagerFactory.create(), inputStream, outputStream)
 
     companion object {
 

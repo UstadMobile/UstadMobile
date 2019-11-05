@@ -176,7 +176,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE advertising service")
                 gattServerAndroid = BleGattServer(mContext,
-                        this@NetworkManagerBle)
+                        this@NetworkManagerBle) {input, output -> httpd.newSession(input, output)}
                 bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
 
                 val service = BluetoothGattService(parcelServiceUuid.uuid,
