@@ -122,17 +122,27 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         }
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>, allMode: Boolean) {
+
         val recyclerAdapter = SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, false, applicationContext)
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                .saleProductParentJoinDaoBoundaryCallbacks.findAllItemsInACategory(factory)
+        var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
+        if(allMode){
+            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
+                    .saleProductDaoBoundaryCallbacks.findAllActiveSNWIProvider(factory)
+
+        }else{
+            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
+                    .saleProductParentJoinDaoBoundaryCallbacks.findAllItemsInACategory(factory)
+
+        }
 
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20)
                 .setBoundaryCallback(boundaryCallback)
                 .build()
+
         //Observe the data:
         data.observe(this,
                 Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
@@ -141,13 +151,21 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         mRecyclerView!!.adapter = recyclerAdapter
     }
 
-    override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleProduct>) {
+    override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleProduct>, allMode: Boolean) {
+
+
+        var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
+        if(allMode){
+            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                    .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
+        }else{
+            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                    .saleProductParentJoinDaoBoundaryCallbacks.findAllCategoriesInACategory(factory)
+
+        }
 
         val recyclerAdapter = SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this, false,
                 true, applicationContext)
-
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
 
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20)

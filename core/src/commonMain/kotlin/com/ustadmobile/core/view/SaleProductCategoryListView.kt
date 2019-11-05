@@ -21,13 +21,13 @@ interface SaleProductCategoryListView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: DataSource.Factory<Int, SaleProduct>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleProduct>, allMode:Boolean)
 
     /**
      * Recycler view for Categories
      * @param listProvider
      */
-    fun setCategoriesListProvider(listProvider: DataSource.Factory<Int, SaleProduct>)
+    fun setCategoriesListProvider(listProvider: DataSource.Factory<Int, SaleProduct>, allMode:Boolean)
 
     fun setMessageOnView(messageCode: Int)
 

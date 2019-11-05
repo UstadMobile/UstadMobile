@@ -130,22 +130,25 @@ class SaleProductCategoryListPresenter(context: Any,
         //Get category and item providers
 
         //Get SaleNameWithImage for all items
+        var allMode : Boolean = false
         if (currentSaleProductCategory!!.saleProductUid != 0L) {
             view.hideEditMenu(false)
             itemProvider = productParentJoinDao.findAllItemsInACategory(
                     currentSaleProductCategory!!.saleProductUid)
             categoryProvider = productParentJoinDao.findAllCategoriesInACategory(
                     currentSaleProductCategory!!.saleProductUid)
+            allMode = false
         } else {
+            allMode = true
             view.hideEditMenu(true)
             itemProvider = productDao.findAllActiveSNWIProvider()
             categoryProvider = productDao.findActiveCategoriesProvider()
         }
 
         if (recent)
-            view.runOnUiThread(Runnable{ view.setListProvider(itemProvider) })
+            view.runOnUiThread(Runnable{ view.setListProvider(itemProvider, allMode) })
         if (category)
-            view.runOnUiThread(Runnable{ view.setCategoriesListProvider(categoryProvider) })
+            view.runOnUiThread(Runnable{ view.setCategoriesListProvider(categoryProvider, allMode) })
 
     }
 
