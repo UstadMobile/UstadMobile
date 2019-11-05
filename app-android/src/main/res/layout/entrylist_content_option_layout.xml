@@ -83,7 +83,7 @@
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
                 android:tint="@color/text_secondary"
-                app:srcCompat="@drawable/ic_import_export_black_24dp"
+                app:srcCompat="@drawable/ic_insert_drive_file_black_24dp"
                 android:id="@+id/import_file"
                 android:layout_centerVertical="true"
                 android:layout_width="@dimen/dimen_20dp"
@@ -108,7 +108,7 @@
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
                 android:tint="@color/text_secondary"
-                app:srcCompat="@drawable/ic_import_export_black_24dp"
+                app:srcCompat="@drawable/ic_insert_link_black_24dp"
                 android:id="@+id/import_link"
                 android:layout_centerVertical="true"
                 android:layout_width="@dimen/dimen_20dp"
