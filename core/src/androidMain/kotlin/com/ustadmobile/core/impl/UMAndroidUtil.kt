@@ -136,15 +136,16 @@ object UMAndroidUtil {
 
     /**
      * Get current device locale
-     * @param context Application context
      * @return current locale
      */
     @JvmStatic
-    fun getCurrentLocale(context: Context): String {
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            context.resources.configuration.locales.get(0)
-        else
-            context.resources.configuration.locale).toString()
+    fun getCurrentLocale(): String {
+        val localeTag = Locale.getDefault().toString()
+        return if(localeTag.indexOf("_") == -1){
+            "$localeTag-${localeTag.toUpperCase()}"
+        }else{
+            localeTag.replace("_","-")
+        }
     }
 
     /**
