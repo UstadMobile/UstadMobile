@@ -52,17 +52,6 @@ class BleGattServer
 
     private val messageAssembler = BleMessageAssembler()
 
-    @get:VisibleForTesting
-            /**
-             * Grant permission a peer device to start reading characteristics values
-             *//* Reject all direct characteristics read from unknown source
-                (one of our characteristics has NO_RESPONSE set).*/
-            /**
-             * Start receiving message packets sent from peer device
-             *///Grant permission to the peer device to write on this characteristics
-    //start receiving packets from the client device
-    //Send back response
-    //Our service doesn't require confirmation, if it does then reject sending packets
     val gattServerCallback: BluetoothGattServerCallback = object : BluetoothGattServerCallback() {
 
         override fun onCharacteristicReadRequest(device: BluetoothDevice, requestId: Int, offset: Int,
@@ -87,6 +76,7 @@ class BleGattServer
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite,
                     responseNeeded, offset, value)
 
+            //Reject all transfer made from unknown source
             if (USTADMOBILE_BLE_SERVICE_UUID == characteristic.uuid.toString()) {
                 val granted = gattServer!!.sendResponse(device, requestId,
                         BluetoothGatt.GATT_SUCCESS, 0, null)
@@ -106,6 +96,11 @@ class BleGattServer
 
                     UMLog.l(UMLog.DEBUG, 691,
                             "Prepare response to send back to " + device.address)
+                    /**
+                      Third part application may try to talk to our service, to avoid that our service by design
+                     * won't require confirmation during packets transfer, if connection requires confirmation
+                     * then do nothing
+                     */
                     val requireConfirmation = characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE == BluetoothGattCharacteristic.PROPERTY_INDICATE
                     if (!requireConfirmation) {
                         val packets = messageToSend!!.getPackets(currentMtuSize)
@@ -125,12 +120,24 @@ class BleGattServer
                         UMLog.l(UMLog.DEBUG, 691,
                                 "Response sent to " + device.address)
 
-                        gattServer!!.cancelConnection(device)
+                        cleanUp(device)
                         UMLog.l(UMLog.DEBUG, 691,
                                 "Response finished, canceled connection with  " + device.address)
+                    }else{
+                        //Packet transfer was made from other than our normal service
+                        cleanUp(device)
                     }
                 }
+            }else{
+                //Connection was made from unknown source, close it
+                cleanUp(device)
             }
+        }
+    }
+
+    fun cleanUp(device: BluetoothDevice){
+        if(gattServer != null){
+            gattServer!!.cancelConnection(device)
         }
     }
 
