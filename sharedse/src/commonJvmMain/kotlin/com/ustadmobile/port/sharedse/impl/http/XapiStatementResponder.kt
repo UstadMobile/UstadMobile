@@ -184,9 +184,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
     companion object {
 
-        private val STATEMENT_LIST_TYPE = object : TypeToken<ArrayList<Statement>>() {
-
-        }.type
+        private val STATEMENT_LIST_TYPE = object : TypeToken<ArrayList<Statement>>() {}.type
 
         const val PARAM_STATEMENT_ID = "statementId"
         private const val PARAM_VOID_STATEMENT_ID = "voidedStatementId"

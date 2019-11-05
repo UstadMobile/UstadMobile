@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
@@ -57,6 +58,8 @@ object ContentEntryUtil {
                 result.mimeType = "video/mp4"
             }
 
+            args[ARG_CONTENT_ENTRY_UID] = result.containerContentEntryUid.toString()
+
             when (result.mimeType) {
                 "application/zip", "application/tincan+zip" -> {
                     args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
@@ -65,13 +68,11 @@ object ContentEntryUtil {
                 "video/mp4", "application/khan-video+zip" -> {
 
                     args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                    args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
                     viewName = VideoPlayerView.VIEW_NAME
                 }
                 "application/webchunk+zip" -> {
 
                     args[WebChunkView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                    args[WebChunkView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
                     viewName = WebChunkView.VIEW_NAME
                 }
                 "application/epub+zip" -> {

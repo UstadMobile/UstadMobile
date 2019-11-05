@@ -299,9 +299,9 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         }
 
         val statementEntity = insertOrUpdateStatementEntity(statementDao, statement, gson,
-                person?.personUid ?: 0,
+                person!!.personUid ?: 0,
                 verbEntity.verbUid,
-                xObjectEntity?.xObjectUid ?: 0,
+                xObjectEntity!!.xObjectUid ?: 0,
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid)

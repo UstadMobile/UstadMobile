@@ -27,7 +27,7 @@ object XapiUtil {
             agentEntity.agentAccountName = if (actor.account != null) actor.account!!.name else null
             agentEntity.agentHomePage = if (actor.account != null) actor.account!!.homePage else null
             agentEntity.agentMbox_sha1sum = actor.mbox_sha1sum
-            agentEntity.agentPersonUid = person?.personUid ?: 0
+            agentEntity.agentPersonUid = person!!.personUid ?: 0
             agentEntity.agentUid = dao.insert(agentEntity)
         }
 
@@ -55,7 +55,7 @@ object XapiUtil {
             val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
             val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-            XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
+            XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant!!.langVariantUid
                     ?: 0, it.value)
         }
         dao.insertList(listToInsert)
@@ -69,7 +69,7 @@ object XapiUtil {
             val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
             val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-            XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
+            XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant!!.langVariantUid
                     ?: 0, it.value)
         }
         if (listToInsert != null) {
@@ -276,7 +276,7 @@ object XapiUtil {
             statementEntity.fullStatement = gson.toJson(statement)
             if (statement.result != null) {
                 statementEntity.resultCompletion = statement.result!!.completion
-                statementEntity.resultDuration = UMTinCanUtil.parse8601Duration(statement.result!!.duration!!)
+                statementEntity.resultDuration = UMTinCanUtil.parse8601Duration(statement.result!!.duration ?:"0")
                 statementEntity.resultResponse = statement.result!!.response
                 statementEntity.resultSuccess = statement.result!!.success.toInt().toByte()
                 if (statement.result!!.score != null) {

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -38,7 +39,8 @@ class UserProfileTest {
             "en"
         }.`when`(impl).getDisplayedLocale(any())
 
-        presenter = UserProfilePresenter(context, mapOf(),view,impl)
+        presenter = UserProfilePresenter(context, mapOf(),view,impl,
+                UmAppDatabase.getInstance(context).personDao)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
                 null,null), context)

@@ -963,7 +963,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
             //Callback received to notify that the page is loaded successfully
             ContentEditorView.ACTION_PAGE_LOADED -> executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "onCreate",
-                    this@ContentEditorActivity, getCurrentLocale(this),
+                    this@ContentEditorActivity, getCurrentLocale(),
                     getDirectionality(this))
 
             //Callback received to notify that the editor is ready for editing

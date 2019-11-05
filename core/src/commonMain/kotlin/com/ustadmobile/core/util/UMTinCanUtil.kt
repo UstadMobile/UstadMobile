@@ -32,6 +32,7 @@ package com.ustadmobile.core.util
 
 import com.soywiz.klock.ISO8601
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.util.UMUtil
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.content
 import kotlinx.serialization.json.json
@@ -247,6 +248,14 @@ object UMTinCanUtil {
             }
         }
         return null
+    }
+
+    fun makeLaunchUrl(url: String, entryUid: Long, context: Any): String{
+        val urlSegments = url.split("/")
+        var page = urlSegments[urlSegments.size - 1]
+        page = page.substring(0,page.lastIndexOf("."))
+        return "$url?actor=${makeActorFromActiveUser(context)}&umId=$entryUid/$page" +
+                "&endpoint=${UMFileUtil.joinPaths(url.substring(0,url.lastIndexOf("container")),"xapi/")}"
     }
 
 }

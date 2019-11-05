@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -25,6 +27,8 @@ class LoginPresenterTest {
 
     private val context = Any()
 
+    private lateinit var personDao: PersonDao
+
     private lateinit var mockWebServer: MockWebServer
 
     @Before
@@ -36,7 +40,8 @@ class LoginPresenterTest {
             }
         }
         impl = mock ()
-        presenter = LoginPresenter(context, mapOf(), view, impl)
+        personDao = UmAppDatabase.getInstance(context).personDao
+        presenter = LoginPresenter(context, mapOf(), view, impl, personDao)
         mockWebServer = MockWebServer()
         mockWebServer.start()
     }
@@ -95,11 +100,11 @@ class LoginPresenterTest {
 
         val presenter = LoginPresenter(context,
                 mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl,
-                        LoginPresenter.ARG_NEXT to "somewhere"), view, impl)
+                        LoginPresenter.ARG_NEXT to "somewhere"), view, impl, personDao)
 
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
 
-        verify<UstadMobileSystemImpl>(impl, timeout(5000 )).go("somewhere",
+        verify(impl, timeout(5000 )).go("somewhere",
                 context)
 
         val activeAccount = UmAccountManager.getActiveAccount(context)
@@ -115,15 +120,15 @@ class LoginPresenterTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(403))
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl, personDao)
         presenter.handleClickLogin(VALID_USER, "wrongpassword", httpUrl)
 
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
                 MessageID.wrong_user_pass_combo, context)
 
-        verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
+        verify(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
         verify(impl, timeout(5000)).getString(MessageID.wrong_user_pass_combo, context)
-        verify<LoginView>(view, timeout(5000)).setPassword("")
+        verify(view, timeout(5000)).setPassword("")
 
         val requestMade = mockWebServer.takeRequest()
         Assert.assertEquals("/Login/login?username=$VALID_USER&password=wrongpassword",
@@ -136,11 +141,11 @@ class LoginPresenterTest {
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl, personDao)
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
                 MessageID.login_network_error, Any())
-        verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
+        verify(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
         verify(impl, timeout(5000)).getString(MessageID.login_network_error, context)
     }
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
@@ -9,6 +9,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -16,13 +17,13 @@ import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
-import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView, val impl: UstadMobileSystemImpl)
+class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+                     val impl: UstadMobileSystemImpl, val personDao: PersonDao)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null
@@ -70,6 +71,11 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     account.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(account, context)
+                    if(personDao.findByUsernameAsync(account.username) == null){
+                        val person = Person(account.username!!, "","")
+                        person.personUid = account.personUid
+                        personDao.insertAsync(person)
+                    }
                     impl.go(mNextDest, context)
                 }else {
                     view.runOnUiThread(Runnable {

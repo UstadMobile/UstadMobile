@@ -63,6 +63,8 @@ interface UstadView {
 
         //Begin common arguments
         const val ARG_CONTAINER_UID = "containerUid"
+
+        const val ARG_CONTENT_ENTRY_UID = "entryid"
     }
 
 }

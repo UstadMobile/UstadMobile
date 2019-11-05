@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UserProfileView
@@ -35,7 +36,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         presenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
+                this, UstadMobileSystemImpl.instance, UmAppDatabase.getInstance(this).personDao)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         logout.setOnClickListener {
