@@ -7,7 +7,7 @@ let UmXapiManager = function() {};
 /**
  * Temp xapi statement
  */
-UmXapiManager.xapiStatement = []
+UmXapiManager.xapiStatement = null
 
 /**
  * Xapi commonnly used verbs
@@ -42,7 +42,7 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
         object: {
             id: objectId,
             objectType: widgetType, 
-            definition: { name: {}, description: {}, type: widgetType}
+            definition: { name: {}, description: {}, type: "http://adlnet.gov/expapi/activities/cmi.interaction"}
         }
     }
 
@@ -62,7 +62,7 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
                 ...xapiStatement.object.definition,
                 interactionType: "choice",
                 correctResponsesPattern: [response],
-                choices: [choices]
+                choices: choices
             }
             break;
         case UmWidgetManager.WIDGET_NAME_FILL_BLANKS:
@@ -72,7 +72,7 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
                 }
             break;
     }
-    UmXapiManager.xapiStatement.push(xapiStatement)
+    UmXapiManager.xapiStatement = xapiStatement
 }
 
 
@@ -80,9 +80,8 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
  * Send statement/status to the endpoint
  */
 UmXapiManager.prototype.send = (callback = null) => {
-    const data = JSON.stringify(UmXapiManager.xapiStatement.length > 0 ? UmXapiManager.xapiStatement: {}),
+    const data = JSON.stringify(UmXapiManager.xapiStatement ? UmXapiManager.xapiStatement: {}),
     path = UmXapiManager.xapiStatement ? "statements/":"activities/state"
-    console.log(data)
     $.post(UmXapiManager.getQueryParms().endpoint + path, data, (response, status) => {
         if(callback != null){
             callback(response, status)
@@ -113,6 +112,7 @@ UmXapiManager.getActor = ()=> {
     if(actorParam.name){
         actor.name = actorParam.name
     }
+
     if(actorParam.account && actorParam.account.name){
         actor.account.name = actorParam.account.name
     }

@@ -142,8 +142,9 @@ UmEditorCore.onCreate  = (locale = "en", dir = "ltr", showToolbar = false, testE
     }
     /**
      * Load placeholders based on locale */
-    const langCode = UmEditorCore.prototype.getLanguageCodeFromLocale(locale);
-    UmEditorCore.prototype.loadPlaceholderByLocale(langCode, testEnv);
+    const langCode = UmEditorCore.getLanguageCodeFromLocale(locale);
+    $(document).find('.container-fluid').attr('um-locale',locale)
+    UmEditorCore.loadPlaceholderByLocale(langCode, testEnv);
     if(saveContentTimerId != null){
         clearInterval(saveContentTimerId);
     }
@@ -157,7 +158,7 @@ UmEditorCore.onCreate  = (locale = "en", dir = "ltr", showToolbar = false, testE
  *                 code will be ar which indicates the language
  * @param testEnv flag to indicate if the current environment is a test or production env.
  * */
-UmEditorCore.prototype.loadPlaceholderByLocale = (langCode, testEnv = false) =>{
+UmEditorCore.loadPlaceholderByLocale = (langCode, testEnv = false) =>{
     if(UmWidgetManager.prototype.isEmpty(UmWidgetManager._placeholder)){
         const localeFileUrl = (testEnv ? "/":"") + localeDir + "locale." + langCode+".json";
         $.ajax({url: localeFileUrl, method: "GET"}).done((data) => {
@@ -254,12 +255,12 @@ UmEditorCore.base64Decode = (content) =>{
 };
 
 /**
- * Get language locale code i.e if ar_EA then the code will be only ar for Arabic
- * @param locale device locale i.e ar_EA
+ * Get language locale code i.e if ar-EA then the code will be only ar for Arabic
+ * @param locale device locale i.e ar-EA
  * @returns active language code currently used.
  * */
-UmEditorCore.prototype.getLanguageCodeFromLocale = (locale) => {
-    let languageCode = locale.split("_");
+UmEditorCore.getLanguageCodeFromLocale = (locale) => {
+    let languageCode = locale.split("-");
     if(languageCode.length > 0){
         languageCode = languageCode[0];
     }

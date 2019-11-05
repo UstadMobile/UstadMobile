@@ -24,7 +24,8 @@
                 content:UmEditorCore.base64Encode(true)}
             ));
             }catch(e){
-                UmEditorCore.onCreate("en", umEditor.attr("dir"), false);
+                const umLocale = $(document).find('.container-fluid').attr('um-locale')
+                UmEditorCore.onCreate(umLocale ? umLocale: "en-US", umEditor.attr("dir"), false);
             }
         }
     </script>

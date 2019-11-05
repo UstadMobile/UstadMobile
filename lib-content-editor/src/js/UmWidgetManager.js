@@ -107,11 +107,11 @@ UmWidgetManager.handleWidgetNode =  (widgetNode , newWidget = false) => {
 };
 
 /**
- * Make xapi statement from question widgets
+ * Make xapi statement from questions widget
  */
-UmWidgetManager.prototype.makeXapiStatement = (widgetNode, choices, responseId, feedback,isCorrect = false, canRetry = false) => {
+UmWidgetManager.makeXapiStatement = (widgetNode, choices, response, feedback, isCorrect = false, canRetry = false) => {
     const xapiManager = new UmXapiManager()
-    xapiManager.makeStatement(widgetNode, choices, responseId, feedback, UmEditorCore.currentLocale, isCorrect, canRetry)
+    xapiManager.makeStatement(widgetNode, choices, response, feedback, UmEditorCore.currentLocale, isCorrect, canRetry)
     xapiManager.send()
 }
 
@@ -386,9 +386,8 @@ UmMultipleChoiceWidget.prototype.onQuestionAnswerChecked = function(event){
             const xapiChoice = {id: $(choiceNode).attr("id") , description: {}}
             xapiChoice.description[UmEditorCore.currentLocale] = $(choiceNode).find(".question-choice-body p").text()
             xapiChoiceList.push(xapiChoice)
-
-            if($(choiceNode).attr("data-um-correct") == 'true'){
-                correctChoiceText = $(choiceNode).text()
+            if($(choiceNode).attr("data-um-correct")==='true'){
+                correctChoiceText = $(choiceNode).find("p:first").text()
             }
             const isClicked = $(choiceNode).attr("id") === $(choiceElement).attr("id");
             if(isClicked){
@@ -412,8 +411,8 @@ UmMultipleChoiceWidget.prototype.onQuestionAnswerChecked = function(event){
     if(isCorrectChoice){
         $(widgetNode).find(".question-retry-btn").removeClass("show-element").addClass("hide-element");
     }
-    UmWidgetManager.prototype.makeXapiStatement(widgetNode, xapiChoiceList, isCorrectChoice, canBeRetried, 
-        correctChoiceText ,$(feedbackText).text())
+    UmWidgetManager.makeXapiStatement(widgetNode, xapiChoiceList, 
+        correctChoiceText ,$(feedbackText).text(), isCorrectChoice, canBeRetried)
 };
 
 /**
@@ -434,13 +433,13 @@ UmFillTheBlanksWidget.prototype.onQuestionAnswerChecked = (event) =>{
     const choiceElement = $(widgetNode).find(".fill-blanks");
     const wrongChoiceText = $(choiceElement).find(".question-choice-feedback-wrong").html();
     const correctChoiceText = $(choiceElement).find(".question-choice-feedback-correct").html();
-    let defaultAnswerText = $(choiceElement).find(".question-choice-body").text().toLowerCase();
+    let correctAnswerText = $(choiceElement).find(".question-choice-body").text().toLowerCase();
     let userAnswerText = $(widgetNode).find(".fill-the-blanks-input").val().toLowerCase();
     const feedbackContainer = $(widgetNode).find(".question-feedback-container");
     userAnswerText = UmWidgetManager.removeSpaces(userAnswerText);
-    defaultAnswerText = UmWidgetManager.removeSpaces(defaultAnswerText);
+    correctAnswerText = UmWidgetManager.removeSpaces(correctAnswerText);
 
-    const isCorrectChoice = defaultAnswerText === userAnswerText;
+    const isCorrectChoice = correctAnswerText === userAnswerText;
     const feedbackText = isCorrectChoice ? correctChoiceText: wrongChoiceText;
     $(feedbackContainer).find(".question-feedback-container-text").html(feedbackText);
     $(feedbackContainer).removeClass("hide-element show-element alert-success alert-danger alert-warning alert-info");
@@ -453,8 +452,8 @@ UmFillTheBlanksWidget.prototype.onQuestionAnswerChecked = (event) =>{
     if(isCorrectChoice){
         $(widgetNode).find(".question-retry-btn").removeClass("show-element").addClass("hide-element");
     }
-    UmWidgetManager.prototype.makeXapiStatement(widgetNode, null, isCorrectChoice,canBeRetried,
-         defaultAnswerText ,$(feedbackText).text())
+    UmWidgetManager.makeXapiStatement(widgetNode, null,
+         correctAnswerText ,$(feedbackText).text(), isCorrectChoice,canBeRetried)
 
 };
 
