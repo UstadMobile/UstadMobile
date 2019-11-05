@@ -138,4 +138,8 @@ class BleGattServer
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context, gattServerCallback)
         setNetworkManager(networkManager)
     }
+
+    override fun handleHttpProxyRequest(proxyRequest: BleMessage): BleMessage? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

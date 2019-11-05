@@ -71,12 +71,16 @@ kotlin {
         }
     }
 
-    jvm("commonJvm") {
-        compilations.main.kotlinOptions {
-            // Setup the Kotlin compiler options for the 'main' compilation:
-            jvmTarget = "$version_kotlin_jvmTarget"
-        }
-    }
+    //Unfortunately there isn't really an elegant way to create a sourceset for one module
+    //The section below can be uncommented for development so that autocomplete works for JVM libraries
+    // see https://youtrack.jetbrains.com/issue/KT-28194
+    // It should be commented out again before running jvmTest.
+//    jvm("commonJvm") {
+//        compilations.main.kotlinOptions {
+//            // Setup the Kotlin compiler options for the 'main' compilation:
+//            jvmTarget = "$version_kotlin_jvmTarget"
+//        }
+//    }
 
     android()
 
@@ -112,6 +116,10 @@ kotlin {
 
         commonJvmMain {
             dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -120,6 +128,10 @@ kotlin {
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-cio:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
             }
         }
 
@@ -129,7 +141,6 @@ kotlin {
          */
         androidMain {
             dependsOn commonJvmMain
-            //kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
 
             dependencies {
                 implementation project(":lib-database-android")
@@ -147,6 +158,9 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
 
                 //Begin SharedSE Android and JVM dependencies
@@ -218,6 +232,7 @@ kotlin {
 
         }
         androidTest {
+            resources.srcDir("src/androidTest/resources")
             dependencies {
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -237,6 +252,10 @@ kotlin {
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-cio:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
 
                 api project(":sharedse")
                 api project(":lib-room-annotations")

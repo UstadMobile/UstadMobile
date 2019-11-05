@@ -6,14 +6,5 @@ import org.junit.Test
 
 class NetworkManagerBleTest {
 
-    @Test
-    fun givenWiFiNetworkExists_whenConnectToWifiCalled_shouldScanThenConnect() {
-        val realNetworkManager = NetworkManagerBle(InstrumentationRegistry.getInstrumentation().targetContext)
-        val networkManagerSpy = spy(realNetworkManager)
-        networkManagerSpy.onCreate()
-
-
-
-    }
 
 }

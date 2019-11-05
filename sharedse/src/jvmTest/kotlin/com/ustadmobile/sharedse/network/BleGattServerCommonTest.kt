@@ -159,6 +159,7 @@ class BleGattServerCommonTest {
                 0, availabilityCounter.toLong())
     }
 
+
     companion object {
 
         internal const val MAX_ENTITIES_NUMBER = 4

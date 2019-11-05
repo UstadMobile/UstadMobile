@@ -89,4 +89,6 @@ abstract class BleGattServerCommon {
         }
     }
 
+    abstract fun handleHttpProxyRequest(proxyRequest: BleMessage): BleMessage?
+
 }
