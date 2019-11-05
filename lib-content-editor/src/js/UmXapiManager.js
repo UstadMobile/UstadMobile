@@ -1,5 +1,5 @@
 /**
- * Class which handles are Xapi implementations
+ * Class which handles all Xapi implementations, it handle creation of statements and post them to the end-point
  */
 
 let UmXapiManager = function() {};
@@ -7,7 +7,7 @@ let UmXapiManager = function() {};
 /**
  * Temp xapi statement
  */
-UmXapiManager.xapiStatement = {}
+UmXapiManager.xapiStatement = []
 
 /**
  * Xapi commonnly used verbs
@@ -28,12 +28,13 @@ UmXapiManager.xapiVerbs = {
  * @param canRetry flag to indicate if a question can be retried
  */
 UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback, locale, isCorrect = false, canRetry = false) => {
-    const params = UmXapiManager.prototype.getQueryParms(),
-    objectId = (params.umId ? params.umId :"") + "/" + $(widgetNode).attr("id")
+    UmXapiManager.xapiStatement = []
+    const params = UmXapiManager.getQueryParms(),
+    objectId = (params.umId ? params.umId :"") + "/" + $(widgetNode).attr("id"),
     widgetType = $(widgetNode).attr("data-um-widget")
-
+    
     let xapiStatement = {
-        actor: UmXapiManager.prototype.getActor(), 
+        actor: UmXapiManager.getActor(), 
         verb: {
             id: canRetry ? UmXapiManager.xapiVerbs.attempted: UmXapiManager.xapiVerbs.answered,
             display:{}
@@ -44,7 +45,13 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
             definition: { name: {}, description: {}, type: widgetType}
         }
     }
-    switch($(widgetNode).attr("data-um-widget")) {
+
+    const question = $(widgetNode).find(".question-body p").text()
+    xapiStatement.verb.display[locale] = feedback
+    xapiStatement.object.definition.name[locale] = question
+    xapiStatement.object.definition.description[locale] = question
+
+    switch(widgetType) {
         case UmWidgetManager.WIDGET_NAME_MULTICHOICE:
             xapiStatement = {...xapiStatement, 
                 result: {
@@ -65,64 +72,77 @@ UmXapiManager.prototype.makeStatement = (widgetNode,choices, response, feedback,
                 }
             break;
     }
-
-    const question = $(widgetNode).find(".question-body p").text()
-    xapiStatement.verb.display[locale] = feedback
-    xapiStatement.object.definition.name[locale] = question
-    xapiStatement.object.definition.description[locale] = question
-    UmXapiManager.xapiStatement = xapiStatement
+    UmXapiManager.xapiStatement.push(xapiStatement)
 }
 
 
 /**
- * Send statement to the endpoint
+ * Send statement/status to the endpoint
  */
-UmXapiManager.prototype.send = () => {
-    const data = UmXapiManager.xapiStatement ? UmXapiManager.xapiStatement: {}
-    $.post(UmXapiManager.prototype.getQueryParms().endpoint, data, (response, status) => {
+UmXapiManager.prototype.send = (callback = null) => {
+    const data = JSON.stringify(UmXapiManager.xapiStatement.length > 0 ? UmXapiManager.xapiStatement: {}),
+    path = UmXapiManager.xapiStatement ? "statements/":"activities/state"
+    console.log(data)
+    $.post(UmXapiManager.getQueryParms().endpoint + path, data, (response, status) => {
+        if(callback != null){
+            callback(response, status)
+        }
+        console.log(status !== 200 ? "Saved successfully": "Failed to save statement")
+
         if(status !== 200){
             console.error(response)
         }
-        console.log(status !== 200 ? "Saved successfully": "Failed to save statement")
     })
 }
 
 
 /**
- * Get actor object from query params
+ * Construct an actor object from params
  */
-UmXapiManager.prototype.getActor = ()=> {
-    const actor = JSON.parse(UmXapiManager.prototype.getQueryParms().actor)
-    let actorMBox = "", actorObjectType = "", actorName = ""
-    if(actor.mbox){
-        actorMBox = actor.mbox
+UmXapiManager.getActor = ()=> {
+    const actorParam = JSON.parse(UmXapiManager.getQueryParms().actor),
+    actor = {name: null, mbox: null, objectType: null, account: {name: null,homePage: null}}
+
+    if(actorParam.mbox){
+        actor.mbox = actorParam.mbox
     }
-    if(actor.objectType){
-        actorObjectType = actor.objectType
+    if(actorParam.objectType){
+        actor.objectType = actorParam.objectType
     }
 
-    if(actor.name){
-        actorName = actor.name
+    if(actorParam.name){
+        actor.name = actorParam.name
     }
-    return {name: actorName, mbox: actorMBox, objectType: actorObjectType}
+    if(actorParam.account && actorParam.account.name){
+        actor.account.name = actorParam.account.name
+    }
+    if(actorParam.account && actorParam.account.homePage){
+        actor.account.homePage = actorParam.account.homePage
+    }
+    return actor
 }
 
 /**
  * Get query params from URL
  */
-UmXapiManager.prototype.getQueryParms = () =>{
-    var locationQuery = window.location.search.substring.length >= 1 ?
-        window.location.search.substring(1) : "";
-    var query = (typeof queryStr !== "undefined") ? queryStr : 
-        locationQuery;
+UmXapiManager.getQueryParms = () =>{
+    var locationQuery = window.location.search.substring.length >= 1 ? window.location.search.substring(1) : "";
+    var query = (typeof queryStr !== "undefined") ? queryStr : locationQuery;
 
-    var retVal = {};
+    var params = {};
     if(window.location.search.length > 2) {
         var vars = query.split("&");
-        for (var i=0;i<vars.length;i++) {
+        for (var i = 0; i < vars.length; i++) {
             var pair = vars[i].split("=");
-            retVal[decodeURIComponent(pair[0].replace("+", "%20"))] = decodeURIComponent(pair[1].replace("+", "%20"))
+            params[UmXapiManager.decodeURIComponent(pair[0])] = UmXapiManager.decodeURIComponent(pair[1])
         }
     }
-    return retVal
+    return params
+}
+
+/**
+ * Decode Url component
+ */
+UmXapiManager.decodeURIComponent = (param)=>{
+    return decodeURIComponent(param.replace("+", "%20"))
 }
