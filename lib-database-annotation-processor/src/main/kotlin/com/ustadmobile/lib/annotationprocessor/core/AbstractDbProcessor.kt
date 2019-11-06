@@ -25,11 +25,11 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.PreparedStatementArrayProxy
 import com.ustadmobile.door.EntityInsertionAdapter
 import com.ustadmobile.door.SyncableDoorDatabase
-import org.apache.commons.text.StringEscapeUtils
 import io.ktor.http.HttpStatusCode
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
 import java.io.IOException
@@ -610,7 +610,13 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * DbProcessorKtorServer for an explanation.
      */
     inner class KtorDaoSpecs(private val packageName: String, private val baseName: String) {
-        val route = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_ROUTE}")
+        val ktorRoute = KtorDaoSpecBuilders(packageName,
+                "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_ROUTE}")
+
+        val nanoHttpdResponder = KtorDaoSpecBuilders(packageName,
+                "$baseName${DbProcessorKtorServer.SUFFIX_NANOHTTPD_URIRESPONDER}").also {
+            it.typeSpec.addSuperinterface(RouterNanoHTTPD.UriResponder::class.asClassName())
+        }
 
         val helperInterface = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}",
                 typeSpec = TypeSpec.interfaceBuilder("$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}"))
@@ -669,7 +675,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     localHelperImplName,
                     packageName)
 
-            return KtorDaoFileSpecs(route.fileSpec.build(),
+            return KtorDaoFileSpecs(ktorRoute.fileSpec.build(),
+                    nanoHttpdResponder.buildFileSpec(),
                     helperInterface.buildFileSpec(),
                     masterHelper.buildFileSpec(),
                     FileSpec.builder(packageName, masterHelperImplName).addType(masterHelperImplSpec).build(),
@@ -680,15 +687,25 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
     }
 
     inner class KtorDaoFileSpecs(val ktorRouteFileSpec: FileSpec,
+                                 val nanoHttpdResponder: FileSpec,
                                 val ktorHelperInterfaceSpec: FileSpec,
                                 val ktorHelperMasterDaoAbstract: FileSpec,
                                 val ktorHelperMasterDaoImpl: FileSpec,
                                 val ktorHelperLocalDaoAbstract: FileSpec,
                                 val ktorHelperLocalDaoImpl: FileSpec) {
 
-        fun writeAllSpecs(writeImpl: Boolean = true, outputSpecArgName: String,
+        fun writeAllSpecs(writeImpl: Boolean = false, writeKtor: Boolean = false,
+                          writeNanoHttpd: Boolean = false,
+                          outputSpecArgName: String,
                           useFilerAsDefault: Boolean) {
-            writeFileSpecToOutputDirs(ktorRouteFileSpec, outputSpecArgName, useFilerAsDefault)
+            if(writeKtor) {
+                writeFileSpecToOutputDirs(ktorRouteFileSpec, outputSpecArgName, useFilerAsDefault)
+            }
+
+            if(writeNanoHttpd) {
+                writeFileSpecToOutputDirs(nanoHttpdResponder, outputSpecArgName, useFilerAsDefault)
+            }
+
             writeFileSpecToOutputDirs(ktorHelperInterfaceSpec, outputSpecArgName, useFilerAsDefault)
             writeFileSpecToOutputDirs(ktorHelperLocalDaoAbstract, outputSpecArgName, useFilerAsDefault)
             writeFileSpecToOutputDirs(ktorHelperMasterDaoAbstract, outputSpecArgName, useFilerAsDefault)
@@ -1283,7 +1300,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      *
      */
     fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, daoTypeEl: TypeElement? = null,
-                                         syncHelperDaoVarName: String = "_syncHelper") : CodeBlock {
+                                         syncHelperDaoVarName: String = "_syncHelper",
+                                         serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR) : CodeBlock {
         val codeBlock = CodeBlock.builder()
         val resultType = resolveQueryResultType(daoMethod.returnType!!)
         val returnType = daoMethod.returnType
@@ -1304,24 +1322,37 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }
 
         if(syncableEntitiesList != null) {
-            codeBlock.add("val __clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
-                    DbProcessorKtorServer.CALL_MEMBER,
-                    MemberName("io.ktor.request","header"),
-                    "X-nid")
-                    .add("val _reqId = %T().nextInt()\n", Random::class)
-                    .add("%M.response.header(%S, _reqId)\n", DbProcessorKtorServer.CALL_MEMBER, "X-reqid")
+            codeBlock.add("val _reqId = %T().nextInt()\n", Random::class)
+            if(serverType == DbProcessorKtorServer.SERVER_TYPE_KTOR) {
+                codeBlock.add("val __clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                            DbProcessorKtorServer.CALL_MEMBER,
+                            MemberName("io.ktor.request","header"),
+                            "X-nid")
+                        .add("%M.response.header(%S, _reqId)\n", DbProcessorKtorServer.CALL_MEMBER, "X-reqid")
+            }else {
+                codeBlock.add("val __clientId = _session.headers.get(%S)?.toInt() ?: 0\n",
+                        "X-nid")
+            }
+
             queryVarsList  += ParameterSpec.builder("clientId", INT).build()
         }
 
 
-        codeBlock.add(generateKtorPassToDaoCodeBlock(FunSpec.builder(daoMethod.name)
+        val modifiedQueryFunSpec = FunSpec.builder(daoMethod.name)
                 .addParameters(queryVarsList)
                 .returns(resultType)
-                .build(), daoVarName = "_ktorHelperDao", preexistingVarNames = listOf("clientId")))
+        modifiedQueryFunSpec.takeIf { KModifier.SUSPEND in daoMethod.modifiers }
+                ?.addModifiers(KModifier.SUSPEND)
+
+        codeBlock.add(generateHttpServerPassToDaoCodeBlock(modifiedQueryFunSpec.build(),
+                daoVarName = "_ktorHelperDao", preexistingVarNames = listOf("clientId"),
+                serverType = serverType, addRespondCall = false))
 
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
                 processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName))
-        codeBlock.add(generateRespondCall(resultType, "_result"))
+        //TODO: pass the clientId header here so it can be set on the HTTP response object
+        codeBlock.add(generateRespondCall(resultType, "_result", serverType,
+                nanoHttpdAlsoCodeBlock = CodeBlock.of("it.addHeader(%S, _reqId)\n", "X-reqid")))
 
         return codeBlock.build()
     }
@@ -1342,11 +1373,13 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * This will skip generation of getting the parameter name from the call (e.g.
      * no val __paramName = request.queryParameters["paramName"] will be generated
      */
-    fun generateKtorPassToDaoCodeBlock(daoMethod: FunSpec, mutlipartHelperVarName: String? = null,
-                                       beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
-                                       afterDaoCallCode: CodeBlock = CodeBlock.of(""),
-                                       daoVarName: String = "_dao",
-                                       preexistingVarNames: List<String> = listOf()): CodeBlock {
+    fun generateHttpServerPassToDaoCodeBlock(daoMethod: FunSpec, mutlipartHelperVarName: String? = null,
+                                             beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                             afterDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                             daoVarName: String = "_dao",
+                                             preexistingVarNames: List<String> = listOf(),
+                                             serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR,
+                                             addRespondCall: Boolean = true): CodeBlock {
         val getVarsCodeBlock = CodeBlock.builder()
         val callCodeBlock = CodeBlock.builder()
 
@@ -1354,6 +1387,14 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         if(returnType != UNIT) {
             callCodeBlock.add("val _result = ")
         }
+
+        val isLiveData = returnType is ParameterizedTypeName
+                && returnType.rawType == DoorLiveData::class.asClassName()
+        val useRunBlocking = serverType == DbProcessorKtorServer.SERVER_TYPE_NANOHTTPD
+                && (KModifier.SUSPEND in daoMethod.modifiers || isLiveData)
+
+        callCodeBlock.takeIf { useRunBlocking }?.beginControlFlow("%M",
+                MemberName("kotlinx.coroutines", "runBlocking"))
 
         callCodeBlock.add("$daoVarName.${daoMethod.name}(")
         var paramOutCount = 0
@@ -1371,7 +1412,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 getVarsCodeBlock.add("val __${param.name} : %T = ",
                         param.type)
                         .add(generateGetParamFromRequestCodeBlock(paramTypeName, param.name,
-                                multipartHelperVarName = mutlipartHelperVarName))
+                                multipartHelperVarName = mutlipartHelperVarName,
+                                serverType = serverType))
                         .add("\n")
             }
 
@@ -1379,16 +1421,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             paramOutCount++
         }
 
-        callCodeBlock.add(")\n")
 
-        val resultVarName = if(returnType is ParameterizedTypeName
-                && returnType.rawType == DoorLiveData::class.asClassName()) {
-            callCodeBlock.add("val _liveDataResult = _result.%M()\n",
+
+        callCodeBlock.add(")")
+        if(isLiveData) {
+            callCodeBlock.add(".%M()",
                     MemberName("com.ustadmobile.door", "getFirstValue"))
-            "_liveDataResult"
-        }else {
-            "_result"
         }
+        callCodeBlock.add("\n")
+
+        callCodeBlock.takeIf { useRunBlocking }?.endControlFlow()
 
         var respondResultType = resolveQueryResultType(returnType!!)
         respondResultType = respondResultType.copy(nullable = isNullableResultType(respondResultType))
@@ -1397,8 +1439,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 .add(getVarsCodeBlock.build())
                 .add(beforeDaoCallCode)
                 .add(callCodeBlock.build())
-                .add(generateRespondCall(respondResultType, resultVarName))
                 .add(afterDaoCallCode)
+                .apply {
+                    takeIf{ addRespondCall }?.add(generateRespondCall(respondResultType,
+                            "_result", serverType))
+                }
                 .build()
     }
 
