@@ -28,8 +28,11 @@ import fi.iki.elonen.router.RouterNanoHTTPD
 import java.util.*
 import javax.lang.model.element.ElementKind
 import com.ustadmobile.door.DoorConstants
+import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_KTOR_NO_CONTENT_RESPOND
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE
+import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.Modifier
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -73,9 +76,9 @@ fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
 
             val parameterizedTypeName = typeName as ParameterizedTypeName
             if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
-                codeBlock.add("?.map { it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}() }")
+                codeBlock.add("·?.map·{·it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}()·}")
             }
-            codeBlock.add(" ?: listOf()\n")
+            codeBlock.add("·?:·listOf()\n")
         }
     }else {
         val getJsonStrCodeBlock = if(multipartHelperVarName != null) {
@@ -186,6 +189,16 @@ fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>,
     return this
 }
 
+fun FunSpec.Builder.addParametersForHttpDb(dbTypeElement: TypeElement, isMasterDefaultVal: Boolean): FunSpec.Builder {
+    addParameter("_db", dbTypeElement.asClassName())
+    addParameter("_gson", Gson::class)
+    addParameter("_attachmentsDir", String::class)
+    addParameter(ParameterSpec.builder("_isMaster", BOOLEAN)
+                    .defaultValue(isMasterDefaultVal.toString())
+                    .build())
+    return this
+}
+
 /**
  * Generate the code required for sending a response back with a KTOR HTTP call.
  *
@@ -274,6 +287,30 @@ internal fun generateGetAttachmentDataCodeBlock(entityTypeEl: TypeElement, attac
 }
 
 /**
+ * Gives a list of all DAOS on the given database. Returns a list of Pairs where the first element
+ * is the TypeElement of the databse and the second is a string representing the correct way to
+ * access this DAO (e.g. .name if it's a property, or .name() if it's a function)
+ */
+internal fun daosOnDatabase(dbTypeElement: TypeElement, processingEnv: ProcessingEnvironment): List<Pair<TypeElement, String>> {
+    return methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
+            .filter{ it.kind == ElementKind.METHOD }
+            .map {it as ExecutableElement }
+            .filter{ processingEnv.typeUtils.asElement(it.returnType) != null}
+            .map {
+                var daoFromDbGetter = ""
+                val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement
+
+                if (it.simpleName.toString().startsWith("get")) {
+                    daoFromDbGetter += it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
+                } else {
+                    daoFromDbGetter += "${it.simpleName}()"
+                }
+
+                Pair(daoTypeEl, daoFromDbGetter)
+            }
+}
+
+/**
  * This annotation processor generates a KTOR Route for each DAO, and a KTOR Route for each DAO
  * with subroutes for each DAO that is part of the database.
  *
@@ -296,6 +333,8 @@ internal fun generateGetAttachmentDataCodeBlock(entityTypeEl: TypeElement, attac
  */
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
+
+
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
 
@@ -306,15 +345,60 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             daoSpecs.writeAllSpecs(writeImpl = true, writeKtor = true,
                     outputSpecArgName = OPTION_KTOR_OUTPUT, useFilerAsDefault = false)
             daoSpecs.writeAllSpecs(writeNanoHttpd = true,
-                    outputSpecArgName = OPTION_NANOHTTPD_OUTPUT, useFilerAsDefault = false)
+                    outputSpecArgName = OPTION_ANDROID_OUTPUT, useFilerAsDefault = false)
         }
 
         roundEnv.getElementsAnnotatedWith(Database::class.java).forEach {
             writeFileSpecToOutputDirs(generateDbRoute(it as TypeElement),
                     AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+            writeFileSpecToOutputDirs(generateNanoHttpdDbMapper(it as TypeElement,
+                    getHelpersFromDb = true), OPTION_ANDROID_OUTPUT, false)
         }
 
         return true
+    }
+
+    fun generateNanoHttpdDbMapper(dbTypeElement: TypeElement, getHelpersFromDb: Boolean = true): FileSpec {
+        val dbTypeClassName = dbTypeElement.asClassName()
+        val dbMapperFileSpec = FileSpec.builder(dbTypeClassName.packageName,
+                "${dbTypeClassName.simpleName}$SUFFIX_NANOHTTPD_ADDURIMAPPING")
+                .addImport("com.ustadmobile.door", "DoorDbType")
+
+        val dbMapperFn = FunSpec.builder("${dbTypeClassName.simpleName}$SUFFIX_NANOHTTPD_ADDURIMAPPING")
+                .addParametersForHttpDb(dbTypeElement, false)
+                .addParameter("_mappingPrefix", String::class)
+                .receiver(RouterNanoHTTPD::class)
+        val codeBlock = CodeBlock.builder()
+
+        val isSyncableDb = isSyncableDb(dbTypeElement, processingEnv)
+
+        if(isSyncableDb) {
+            codeBlock.takeIf { !getHelpersFromDb }?.add("val _syncDao = %T(_db)\n",
+                    ClassName(dbTypeClassName.packageName,
+                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
+            codeBlock.takeIf { getHelpersFromDb }?.add("val _syncDao = _db._syncDao()\n")
+        }
+
+        daosOnDatabase(dbTypeElement, processingEnv).forEach {
+            val daoTypeEl = it.first
+            val daoFromDbGetter = it.second
+            val daoTypeClassName = daoTypeEl.asClassName()
+
+            codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}\", " +
+                    "%T::class.java, _db.$daoFromDbGetter, _db, _gson, _attachmentsDir",
+                    daoTypeEl)
+            if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
+                val ktorHelperBaseName = "${daoTypeClassName.simpleName}$SUFFIX_KTOR_HELPER"
+                codeBlock.takeIf { getHelpersFromDb }?.add(",_syncDao ,if(_isMaster){_db._${ktorHelperBaseName}Master()} else {_db._${ktorHelperBaseName}Local()}")
+            }
+
+            codeBlock.add(")\n")
+        }
+
+        dbMapperFn.addCode(codeBlock.build())
+        dbMapperFileSpec.addFunction(dbMapperFn.build())
+
+        return dbMapperFileSpec.build()
     }
 
     fun generateDbRoute(dbTypeElement: TypeElement): FileSpec {
@@ -326,12 +410,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         val dbRouteFn = FunSpec.builder("${dbTypeElement.simpleName}${SUFFIX_KTOR_ROUTE}")
                 .receiver(Route::class)
-                .addParameter("_db", dbTypeElement.asClassName())
-                .addParameter("_gson", Gson::class)
-                .addParameter("_attachmentsDir", String::class)
-                .addParameter(ParameterSpec.builder("_isMaster", BOOLEAN)
-                        .defaultValue("true")
-                        .build())
+                .addParametersForHttpDb(dbTypeElement, true)
 
         val codeBlock = CodeBlock.builder()
                 .add("val _gson = %T()\n", Gson::class)
@@ -362,20 +441,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     .add(")\n")
         }
 
-        methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
-        .filter{ it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
-            var daoFromDbGetter = ""
-            val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
-            if(daoTypeEl == null) {
-                return@forEach
-            }
+        daosOnDatabase(dbTypeElement, processingEnv).forEach {
+            val daoTypeEl = it.first
+            val daoFromDbGetter = it.second
             val daoTypeClassName = daoTypeEl.asClassName()
-
-            if(it.simpleName.toString().startsWith("get")) {
-                daoFromDbGetter += it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
-            }else {
-                daoFromDbGetter += "${it.simpleName}()"
-            }
 
             codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson, _attachmentsDir", MemberName(daoTypeClassName.packageName,
                     "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE"))
@@ -501,8 +570,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
                 val helperParamList = funSpecBuilt.parameters.toMutableList()
                 if(isDataSourceFactory) {
-                    helperParamList += ParameterSpec.builder("_offset", INT).build()
-                    helperParamList += ParameterSpec.builder("_limit", INT).build()
+                    helperParamList += ParameterSpec.builder(PARAM_NAME_OFFSET, INT).build()
+                    helperParamList += ParameterSpec.builder(PARAM_NAME_LIMIT, INT).build()
                 }
                 helperParamList += ParameterSpec.builder("clientId", INT).build()
 
@@ -563,6 +632,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         const val SUFFIX_KTOR_HELPER_LOCAL = "_KtorHelperLocal"
 
         const val SUFFIX_NANOHTTPD_URIRESPONDER = "_UriResponder"
+
+        const val SUFFIX_NANOHTTPD_ADDURIMAPPING = "_AddUriMapping"
 
         val GET_MEMBER = MemberName("io.ktor.routing", "get")
 

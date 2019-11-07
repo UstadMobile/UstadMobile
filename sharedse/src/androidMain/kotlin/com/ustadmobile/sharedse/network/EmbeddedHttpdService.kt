@@ -4,6 +4,9 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import com.google.gson.Gson
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import java.io.IOException
@@ -34,6 +37,8 @@ class EmbeddedHttpdService : Service() {
         httpd = EmbeddedHTTPD(0, applicationContext)
         httpd.addRoute("$ANDROID_ASSETS_PATH(.)+", AndroidAssetsHandler::class.java,
                 applicationContext)
+        httpd.UmAppDatabase_AddUriMapping(UmAppDatabase.getInstance(this),
+                Gson(), "/test/", false, "/bleproxy/(.*)/UmAppDatabase")
         try {
             httpd.start()
         } catch (e: IOException) {

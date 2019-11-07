@@ -34,7 +34,7 @@ abstract class DownloadJobItemDao {
     }
 
     @Transaction
-    open fun updateDownloadJobItemsProgress(statusList: List<DownloadJobItemStatus>) {
+    open fun updateDownloadJobItemsProgressList(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateDownloadJobItemProgress(status.jobItemUid, status.bytesSoFar,
                     status.totalBytes)
@@ -86,13 +86,6 @@ abstract class DownloadJobItemDao {
         updateDownloadJobItemStatusIm(djiUid, djiStatus, downloadedSoFar, downloadLength,
                 currentSpeed)
     }
-
-    @Query("UPDATE DownloadJobItem SET downloadedSoFar = :downloadedSoFar, " +
-            "currentSpeed = :currentSpeed " +
-            "WHERE djiUid = :djiUid")
-    abstract fun updateDownloadJobItemProgress(djiUid: Long, downloadedSoFar: Long,
-                                               currentSpeed: Long)
-
 
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     abstract fun updateItemStatusInt(djiUid: Int, status: Int)

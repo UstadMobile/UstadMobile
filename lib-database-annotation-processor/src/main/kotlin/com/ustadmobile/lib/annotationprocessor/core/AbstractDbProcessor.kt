@@ -63,6 +63,10 @@ fun isModifyingQueryMethod(methodEl: Element) : Boolean {
 
 val SQL_NUMERIC_TYPES = listOf(BYTE, SHORT, INT, LONG, FLOAT, DOUBLE)
 
+val PARAM_NAME_OFFSET = "offset"
+
+val PARAM_NAME_LIMIT = "limit"
+
 fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
     "0"
 }else if(typeName == BOOLEAN){
@@ -232,7 +236,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
     newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
 
     if(addOffsetAndLimitParam) {
-        newSql += " LIMIT :_limit OFFSET :_offset"
+        newSql += " LIMIT :$PARAM_NAME_LIMIT OFFSET :$PARAM_NAME_OFFSET"
     }
 
     return newSql
@@ -616,6 +620,12 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val nanoHttpdResponder = KtorDaoSpecBuilders(packageName,
                 "$baseName${DbProcessorKtorServer.SUFFIX_NANOHTTPD_URIRESPONDER}").also {
             it.typeSpec.addSuperinterface(RouterNanoHTTPD.UriResponder::class.asClassName())
+                    .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                        .addMember("%S, %S, %S, %S", "UNUSED_PARAMETER",
+                                "REDUNDANT_PROJECTION",
+                                "UNNECESSARY_NOT_NULL_ASSERTION",
+                                "UNUSED_VARIABLE")
+                        .build())
         }
 
         val helperInterface = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}",
@@ -625,11 +635,13 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val masterHelper = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER_MASTER}").also {
             it.typeSpec.addModifiers(KModifier.ABSTRACT)
             it.typeSpec.addSuperinterface(helperInterfaceClassName)
+            it.typeSpec.addAnnotation(Dao::class)
         }
 
         val localHelper = KtorDaoSpecBuilders(packageName, "$baseName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER_LOCAL}").also {
             it.typeSpec.addModifiers(KModifier.ABSTRACT)
             it.typeSpec.addSuperinterface(helperInterfaceClassName)
+            it.typeSpec.addAnnotation(Dao::class)
         }
 
         /**
@@ -1310,8 +1322,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         val queryVarsList = daoMethod.parameters.toMutableList()
         if(isDataSourceFactory){
-            queryVarsList += ParameterSpec.builder("_offset", INT).build()
-            queryVarsList += ParameterSpec.builder("_limit", INT).build()
+            queryVarsList += ParameterSpec.builder(PARAM_NAME_OFFSET, INT).build()
+            queryVarsList += ParameterSpec.builder(PARAM_NAME_LIMIT, INT).build()
         }
 
         val componentEntityType = resolveEntityFromResultType(resultType)

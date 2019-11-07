@@ -267,7 +267,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     }
 
     private fun doCommit(itemsToCommit: List<DownloadJobItemStatus>) {
-        db.downloadJobItemDao.updateDownloadJobItemsProgress(itemsToCommit)
+        db.downloadJobItemDao.updateDownloadJobItemsProgressList(itemsToCommit)
     }
 
     fun close() {

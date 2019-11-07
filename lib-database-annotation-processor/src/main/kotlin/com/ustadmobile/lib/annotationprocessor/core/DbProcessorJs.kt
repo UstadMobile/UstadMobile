@@ -182,8 +182,8 @@ class DbProcessorJs : AbstractDbProcessor(){
 
                 val queryParams = daoFunSpec.parameters.toMutableList()
                 if(isDataSourceFactory) {
-                    queryParams += ParameterSpec.builder("_offset", INT).build()
-                    queryParams += ParameterSpec.builder("_limit", INT).build()
+                    queryParams += ParameterSpec.builder(PARAM_NAME_OFFSET, INT).build()
+                    queryParams += ParameterSpec.builder(PARAM_NAME_LIMIT, INT).build()
                 }
 
                 var codeBlock = generateKtorRequestCodeBlockForMethod(
@@ -203,7 +203,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                     }
 
                     val paramNames = if(isDataSourceFactory) {
-                        "_offset: Int, _limit: Int -> \n"
+                        "offset: Int, limit: Int -> \n"
                     }else {
                         ""
                     }

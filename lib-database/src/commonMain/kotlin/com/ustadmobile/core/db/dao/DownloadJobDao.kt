@@ -90,11 +90,6 @@ abstract class DownloadJobDao {
     @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
     abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int
 
-
-    @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
-    abstract fun update(djUid: Int, djStatus: Int)
-
-
     @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid " +
             "AND djStatus BETWEEN :statusFrom AND :statusTo")
     abstract suspend fun updateAsync(djUid: Int, djStatus: Int, statusFrom: Int, statusTo: Int)

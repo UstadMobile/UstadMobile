@@ -76,7 +76,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
             writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
                     syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
                     overrideSyncDao = true, overrideOpenHelper = true,
-                    addBoundaryCallbackGetters = true),
+                    addBoundaryCallbackGetters = true,
+                    overrideKtorHelpers = true),
                     AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
@@ -104,7 +105,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                   overrideSyncDao: Boolean = false,
                                   overrideOpenHelper: Boolean = false,
                                   addDbVersionProp: Boolean = false,
-                                  addBoundaryCallbackGetters: Boolean = false): FileSpec {
+                                  addBoundaryCallbackGetters: Boolean = false,
+                                  overrideKtorHelpers: Boolean = false): FileSpec {
         val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
         val isDbTypeSyncable = isSyncableDb(dbTypeElement, processingEnv)
@@ -265,7 +267,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val daoClassName = daoTypeEl.asClassName()
             val repoImplClassName = ClassName(pkgNameOfElement(daoTypeEl, processingEnv),
                     "${daoTypeEl.simpleName}_$SUFFIX_REPOSITORY")
-            val syncDaoParam = if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
+            val daoHasSyncableEntities = syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv)
+                    .isNotEmpty()
+            val syncDaoParam = if(daoHasSyncableEntities) {
                 ", _syncDao"
             }else {
                 ""
@@ -294,6 +298,22 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 dbRepoType.addAccessorOverride("${it.simpleName}$SUFFIX_BOUNDARY_CALLBACKS",
                         boundaryCallbackClassName, CodeBlock.of("return $boundaryCallbackVarName\n"))
             }
+
+            if(daoHasSyncableEntities && overrideKtorHelpers) {
+                listOf("Master", "Local").forEach {suffix ->
+                    val ktorHelperClassName = ClassName(daoClassName.packageName,
+                            "${daoClassName.simpleName}${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}$suffix")
+                    dbRepoType.addFunction(FunSpec.builder("_${ktorHelperClassName.simpleName}")
+                            .returns(ktorHelperClassName)
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addCode("throw %T(%S)", IllegalAccessException::class,
+                                    "Cannot access KTOR HTTP Helper from Repository")
+                            .build())
+                }
+            }
+
+
+
         }
 
         dbRepoFileSpec.addType(dbRepoType.build())
@@ -419,8 +439,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
                         codeBlock.add("val _dataSource = ")
                                 .addDelegateFunctionCall("_dao", daoFunSpecBuilt).add("\n")
-                                .add("val _limit = 50\n")
-                        daoFunSpec.addParameter("_limit", INT)
+                                .add("val $PARAM_NAME_LIMIT = 50\n")
+                        daoFunSpec.addParameter(PARAM_NAME_LIMIT, INT)
                         val callbackTypeSpec = TypeSpec.anonymousClassBuilder()
                                 .superclass(BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType))
                                 .addFunction(FunSpec.builder("loadMore")

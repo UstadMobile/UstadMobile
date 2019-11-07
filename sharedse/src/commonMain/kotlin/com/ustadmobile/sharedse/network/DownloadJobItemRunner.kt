@@ -221,7 +221,7 @@ class DownloadJobItemRunner
         runnerStatus.value = JobStatus.RUNNING
         updateItemStatus(JobStatus.RUNNING)
         val downloadJobId = downloadItem.djiDjUid
-        appDb.downloadJobDao.update(downloadJobId, JobStatus.RUNNING)
+        appDb.downloadJobDao.updateStatus(downloadJobId, JobStatus.RUNNING)
 
         statusLiveData = appDb.connectivityStatusDao.statusLive()
         downloadJobItemLiveData = appDb.downloadJobItemDao.getLiveStatus(downloadItem.djiUid)
