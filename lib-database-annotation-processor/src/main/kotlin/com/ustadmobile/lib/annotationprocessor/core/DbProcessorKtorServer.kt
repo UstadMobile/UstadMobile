@@ -383,10 +383,12 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val daoTypeEl = it.first
             val daoFromDbGetter = it.second
             val daoTypeClassName = daoTypeEl.asClassName()
+            val responderUriClassName = ClassName(daoTypeClassName.packageName,
+                    "${daoTypeClassName.simpleName}$SUFFIX_NANOHTTPD_URIRESPONDER")
 
-            codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}\", " +
+            codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}/(.)+\", " +
                     "%T::class.java, _db.$daoFromDbGetter, _db, _gson, _attachmentsDir",
-                    daoTypeEl)
+                    responderUriClassName)
             if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
                 val ktorHelperBaseName = "${daoTypeClassName.simpleName}$SUFFIX_KTOR_HELPER"
                 codeBlock.takeIf { getHelpersFromDb }?.add(",_syncDao ,if(_isMaster){_db._${ktorHelperBaseName}Master()} else {_db._${ktorHelperBaseName}Local()}")
