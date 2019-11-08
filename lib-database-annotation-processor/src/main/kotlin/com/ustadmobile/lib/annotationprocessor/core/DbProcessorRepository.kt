@@ -21,7 +21,7 @@ import com.ustadmobile.door.annotation.SetAttachmentData
 import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
-
+import com.ustadmobile.door.MirrorProvider
 
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
@@ -39,6 +39,8 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
                     .initializer("_dbPath").build())
             .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
                     .initializer("_attachmentsDir").build())
+            .addProperty(PropertySpec.builder("_mirrorProvider", MirrorProvider::class)
+                    .initializer("_mirrorProvider").build())
             .superclass(daoType)
 
     val primaryConstructorFn = FunSpec.constructorBuilder()
@@ -49,6 +51,7 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addParameter("_endpoint", String::class)
             .addParameter("_dbPath", String::class)
             .addParameter("_attachmentsDir", String::class)
+            .addParameter("_mirrorProvider", MirrorProvider::class)
 
     if(addSyncHelperParam) {
         val syncHelperClassName = ClassName(daoType.packageName,
@@ -126,6 +129,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter("_accessToken", String::class)
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
                         .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
+                        .addParameter("_mirrorProvider", MirrorProvider::class)
                         .build())
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
@@ -154,6 +158,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .build(),
                         PropertySpec.builder("_attachmentsDir", String::class)
                                 .initializer("_attachmentsDir")
+                                .build(),
+                        PropertySpec.builder("_mirrorProvider", MirrorProvider::class)
+                                .initializer("_mirrorProvider")
                                 .build()
                 ))
                 .addFunction(FunSpec.builder("clearAllTables")
@@ -244,7 +251,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, _syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, _attachmentsDir) ", repoImplClassName)
+                            .add("%T(_db, _syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, _attachmentsDir, _mirrorProvider) ", repoImplClassName)
                             .endControlFlow().build())
                     .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
@@ -277,7 +284,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, _db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, _attachmentsDir $syncDaoParam) ",
+                            .add("%T(_db, _db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, " +
+                                    "_attachmentsDir, _mirrorProvider $syncDaoParam) ",
                                 repoImplClassName, it.makeAccessorCodeBlock())
                             .endControlFlow()
                             .build())
