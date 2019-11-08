@@ -20,6 +20,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
+import com.ustadmobile.sharedse.network.requestDelete
 import com.ustadmobile.sharedse.network.requestDownloadPreparation
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
@@ -118,7 +119,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun handleDownloadJobStatusChange(downloadJob: DownloadJob?) {
         val downloadStatus = downloadJob?.djStatus ?: -1
         when {
-            downloadStatus >= JobStatus.COMPLETE_MIN -> {
+            downloadStatus >= JobStatus.COMPLETE_MIN && downloadStatus < JobStatus.CANCELED -> {
                 deleteFileOptions = true
                 view.setStackOptionsVisible(false)
                 view.setBottomButtonsVisible(true)
@@ -130,7 +131,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
                         MessageID.download_cancel_label, context))
             }
 
-            downloadStatus >= JobStatus.RUNNING_MIN -> {
+            downloadStatus >= JobStatus.RUNNING_MIN && downloadStatus < JobStatus.COMPLETE_MIN -> {
                 deleteFileOptions = false
                 view.setStackOptionsVisible(true)
                 view.setBottomButtonsVisible(false)
@@ -211,7 +212,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     fun handleClickPositive() {
         GlobalScope.launch {
             if(deleteFileOptions) {
-                networkManagerBle.cancelAndDeleteDownloadJob(currentJobId)
+                requestDelete(contentEntryUid, context)
             }else {
                 if(currentJobId == 0) {
                     createDownloadJobAndRequestPreparation()

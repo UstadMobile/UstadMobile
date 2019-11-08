@@ -40,10 +40,6 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
