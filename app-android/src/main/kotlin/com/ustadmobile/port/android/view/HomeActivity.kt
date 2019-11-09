@@ -106,21 +106,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
-            R.id.action_clear_history -> {
-                GlobalScope.launch {
-                    val database = UmAppDatabase.getInstance(this)
-                    database.networkNodeDao.deleteAllAsync()
-                    database.entryStatusResponseDao.deleteAllAsync()
-                    database.downloadJobItemHistoryDao.deleteAllAsync()
-                    database.downloadJobDao.deleteAllAsync()
-                    database.downloadJobItemDao.deleteAllAsync()
-                    database.contentEntryStatusDao.deleteAllAsync()
-                }
-                networkManagerBle?.clearHistories()
-            }
             R.id.create_new_content -> {
                 val args = HashMap<String,String?>()
                 args.putAll(UMAndroidUtil.bundleToMap(intent.extras))

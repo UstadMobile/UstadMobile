@@ -74,7 +74,16 @@ kotlin {
             }
         }
 
+        commonJvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+            }
+        }
+
         jvmMain {
+            dependsOn commonJvmMain
+
             dependencies {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
@@ -97,6 +106,8 @@ kotlin {
         }
 
         androidMain {
+            dependsOn commonJvmMain
+
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"

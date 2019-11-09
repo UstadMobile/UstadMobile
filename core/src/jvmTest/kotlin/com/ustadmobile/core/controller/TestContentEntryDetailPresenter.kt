@@ -15,13 +15,11 @@ import java.util.Hashtable
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Assert
-import org.mockito.Mockito.spy
 
 class TestContentEntryDetailPresenter {
 
@@ -52,7 +50,7 @@ class TestContentEntryDetailPresenter {
         mockView = Mockito.mock(ContentEntryDetailView::class.java)
         statusProvider = Mockito.mock(DownloadJobItemStatusProvider::class.java)
         umAppDatabase = UmAppDatabase.getInstance(context)
-        umAppRepository = UmAccountManager.getRepositoryForActiveAccount(context)
+        umAppRepository = umAppDatabase //for this test there is no difference
     }
 
 

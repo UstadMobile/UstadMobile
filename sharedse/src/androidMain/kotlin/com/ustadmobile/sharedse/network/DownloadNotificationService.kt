@@ -40,9 +40,10 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
             mNetworkServiceBound = true
             val networkService = (serviceBinder as NetworkManagerBleAndroidService.LocalServiceBinder).service
             networkService.runWhenNetworkManagerReady {
-                networkManagerBle = networkService.networkManagerBle
-
-                val channelNetworkManager = networkManagerBle!!
+                val boundNetworkService = networkService.networkManagerBle!!
+                networkManagerBle = boundNetworkService
+                val umAppDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(
+                        this@DownloadNotificationService)
                 networkManagerBle?.addDownloadChangeListener(this@DownloadNotificationService)
                 val activeDownloadManagers = networkManagerBle?.activeDownloadJobItemManagers!!
                 for (manager in activeDownloadManagers) {
@@ -55,7 +56,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                     for(jobNotifier in downloadJobPreparerChannel) {
                         val downloadJobPreparer = DownloadJobPreparer()
                         activeDownloadJobPreparers.add(downloadJobPreparer)
-                        val jobItemManager = channelNetworkManager.openDownloadJobItemManager(
+                        val jobItemManager = boundNetworkService.openDownloadJobItemManager(
                                 jobNotifier.downloadJobUid)
                         if(jobItemManager != null) {
                             jobItemManager.awaitLoaded()
@@ -84,8 +85,6 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     private val notificationIdRef = AtomicInteger(9)
 
     private lateinit var umAppDatabase: UmAppDatabase
-
-    private lateinit var umAppDatabaseRepo: UmAppDatabase
 
     private lateinit var impl: UstadMobileSystemImpl
 
@@ -300,7 +299,6 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         createChannel()
 
         umAppDatabase = UmAppDatabase.getInstance(this)
-        umAppDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(this)
         //bind to network service
         val networkServiceIntent = Intent(applicationContext,
                 NetworkManagerBleAndroidService::class.java)

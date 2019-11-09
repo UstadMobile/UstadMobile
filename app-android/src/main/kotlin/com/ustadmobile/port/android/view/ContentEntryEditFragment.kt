@@ -141,7 +141,8 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         impl = UstadMobileSystemImpl.instance
 
         presenter = ContentEntryEditPresenter(activity!!,
-                UMAndroidUtil.bundleToMap(arguments), this)
+                UMAndroidUtil.bundleToMap(arguments), this,
+                UmAccountManager.getRepositoryForActiveAccount(this))
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         selectFileBtn!!.setOnClickListener { v ->

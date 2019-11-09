@@ -3,7 +3,7 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.door.MirrorProvider
+import com.ustadmobile.door.MirrorEndpoint
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.db.entities.NetworkNodeWithStatusResponsesAndHistory
@@ -15,10 +15,9 @@ typealias StatusTaskMakerFn = suspend (context: Any, containerUidsToCheck: List<
 
 class LocalAvailabilityManagerImpl(private val context: Any,
                                    private val entryStatusTaskMaker: StatusTaskMakerFn,
-                                   private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : LocalAvailabilityManager, MirrorProvider {
-
-
+                                   private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
+                                   private var endpoint: String)
+    : LocalAvailabilityManager{
 
     private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
 
@@ -102,5 +101,4 @@ class LocalAvailabilityManagerImpl(private val context: Any,
         activeNodes.filter { node -> node.statusResponses[containerUid]?.available ?: false }.
                 sortedBy { it.nodeFailures.size }.firstOrNull()
     }
-
 }

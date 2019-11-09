@@ -28,6 +28,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
@@ -45,17 +46,16 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.Dispatcher
 import java.io.IOException
 import java.net.InetAddress
 import java.util.*
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import com.ustadmobile.core.impl.UmAccountManager
 
 /**
  * This class provides methods to perform android network related communications.
@@ -77,10 +77,13 @@ actual open class NetworkManagerBle
  *
  * @param context Platform specific application context
  */
-actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
-    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO), EmbeddedHTTPD.ResponseListener {
+actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
+                   umAppDatabase: UmAppDatabase)
+    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO,
+        umAppDatabase), EmbeddedHTTPD.ResponseListener {
 
-    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD) : this(context, singleThreadDispatcher) {
+    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD,
+                umAppDatabase: UmAppDatabase) : this(context, singleThreadDispatcher, umAppDatabase) {
         this.httpd = httpd
     }
 
@@ -128,6 +131,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
 
+    override val umAppDatabaseRepo by lazy {
+        UmAccountManager.getRepositoryForActiveAccount(context)
+    }
     /**
      * Receiver to handle bluetooth state changes
      */

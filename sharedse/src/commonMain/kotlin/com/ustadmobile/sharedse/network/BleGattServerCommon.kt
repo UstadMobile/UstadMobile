@@ -1,8 +1,6 @@
 package com.ustadmobile.sharedse.network
 
-//import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
-//import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
@@ -56,12 +54,10 @@ abstract class BleGattServerCommon() {
             ENTRY_STATUS_REQUEST -> {
                 val entryStatusResponse = ArrayList<Long>()
 
-                val containerDao = UmAccountManager.getRepositoryForActiveAccount(context)
-                        .containerDao
+                val containerDao = UmAppDatabase.getInstance(context).containerDao
                 for (containerUid in bleMessageBytesToLong(requestReceived.payload!!)) {
-
                     val foundLocalContainerUid = containerDao.findLocalAvailabilityByUid(containerUid)
-                    entryStatusResponse.add(if (foundLocalContainerUid != null && foundLocalContainerUid != 0L)
+                    entryStatusResponse.add(if (foundLocalContainerUid != 0L)
                         1L
                     else
                         0L)

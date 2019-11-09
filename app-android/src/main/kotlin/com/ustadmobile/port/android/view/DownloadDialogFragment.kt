@@ -20,6 +20,9 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -62,12 +65,11 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             activity = context
-            context.runAfterServiceConnection(Runnable{
-                context.runOnUiThread {
-                    managerBle = context.networkManagerBle!!
-                    checkReady()
-                }
-            })
+            GlobalScope.launch(Dispatchers.Main) {
+                val networkManagerVal = context.networkManagerBle.await()
+                managerBle = networkManagerVal
+                checkReady()
+            }
         }
 
         super.onAttach(context)

@@ -16,5 +16,18 @@ interface DoorDatabaseRepository {
 
     val httpClient: HttpClient
 
+    suspend fun addMirror(mirrorEndpoint: String, initialPriority: Int): Int
 
+    suspend fun removeMirror(mirrorId: Int)
+
+    suspend fun updateMirrorPriorities(newPriorities: Map<Int, Int>)
+
+    var connectivityStatus: Int
+
+    companion object {
+
+        const val STATUS_CONNECTED = 1
+
+        const val STATUS_DISCONNECTED = 2
+    }
 }

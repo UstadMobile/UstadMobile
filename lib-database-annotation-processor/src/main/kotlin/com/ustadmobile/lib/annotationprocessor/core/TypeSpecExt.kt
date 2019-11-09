@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.util.*
 import javax.lang.model.element.ExecutableElement
 
@@ -26,3 +27,40 @@ fun TypeSpec.Builder.addAccessorOverride(methodName: String, returnType: TypeNam
 
 fun TypeSpec.Builder.addAccessorOverride(executableElement: ExecutableElement, codeBlock: CodeBlock)  =
         addAccessorOverride(executableElement.simpleName.toString(), executableElement.returnType.asTypeName(), codeBlock)
+
+/**
+ * Implement the DoorDatabaseRepository methods for add/remove mirror etc. by delegating to a
+ * RepositoryHelper.
+ */
+internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName: String): TypeSpec.Builder {
+    addProperty(PropertySpec.builder("connectivityStatus", INT)
+            .addModifiers(KModifier.OVERRIDE)
+            .mutable(true)
+            .getter(FunSpec.getterBuilder()
+                    .addCode("return $delegatePropName.connectivityStatus\n")
+                    .build())
+            .setter(FunSpec.setterBuilder()
+                    .addParameter("newValue", INT)
+                    .addCode("$delegatePropName.connectivityStatus = newValue\n")
+                    .build())
+            .build())
+    addFunction(FunSpec.builder("addMirror")
+            .returns(INT)
+            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+            .addParameter("mirrorEndpoint", String::class)
+            .addParameter("initialPriority", INT)
+            .addCode("return $delegatePropName.addMirror(mirrorEndpoint, initialPriority)\n")
+            .build())
+    addFunction(FunSpec.builder("removeMirror")
+            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+            .addParameter("mirrorId", INT)
+            .addCode("$delegatePropName.removeMirror(mirrorId)\n")
+            .build())
+    addFunction(FunSpec.builder("updateMirrorPriorities")
+            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+            .addParameter("newPriorities", Map::class.asClassName().parameterizedBy(INT, INT))
+            .addCode("$delegatePropName.updateMirrorPriorities(newPriorities)\n")
+            .build())
+
+    return this
+}

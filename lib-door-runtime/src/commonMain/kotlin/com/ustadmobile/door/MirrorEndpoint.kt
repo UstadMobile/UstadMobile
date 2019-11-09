@@ -1,4 +1,5 @@
 package com.ustadmobile.door
 
-class MirrorEndpoint(val endpointUrl: String, val isPrimary: Boolean,
-                     val priority: Int)
+class MirrorEndpoint(val mirrorId: Int,
+                     val endpointUrl: String,
+                     var priority: Int)

@@ -1,9 +1,15 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.NetworkNode
 import kotlinx.coroutines.CoroutineDispatcher
 
-actual open class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher) : NetworkManagerBleCommon() {
+actual open class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
+                                                       umAppDatabase: UmAppDatabase) : NetworkManagerBleCommon(umAppDatabase) {
     actual override val isWiFiEnabled: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     actual override val isBleCapable: Boolean
@@ -14,6 +20,18 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     actual override val isVersionKitKatOrBelow: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+    override val umAppDatabaseRepo by lazy {
+        val activeAccount = UmAccountManager.getActiveAccount(context)
+        val serverUrl = if(activeAccount!= null) {
+            activeAccount.endpointUrl ?: "http://localhost"
+        }else {
+            UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
+                    "http://localhost", context) ?: "http://localhost"
+        }
+        umAppDatabase.asRepository<UmAppDatabase>(context, serverUrl, "", defaultHttpClient(),
+                null)
+    }
 
     actual override fun canDeviceAdvertise(): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

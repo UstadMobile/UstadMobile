@@ -309,6 +309,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                         .build())
+                .addRepositoryHelperDelegateCalls("_repo")
 
         val syncFnCodeBlock = CodeBlock.builder()
 

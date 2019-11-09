@@ -21,10 +21,6 @@ object AppConfig {
 
     const val KEY_EPUB_TOC_ENABLED = "epubTocEnabled"
 
-    const val KEY_NETWORK_SERVICE_TYPE = "networkServiceType"
-
-    const val KEY_WIFI_P2P_INSTANCE_NAME = "wifiP2pInstanceName"
-
     const val KEY_SHOW_CONTENT_EDITOR_CONTROLS = "editor.show_content_editor_controls"
 
     const val KEY_SHOW_SPASH_SCREEN = "splashscreen.show_splash_screen"

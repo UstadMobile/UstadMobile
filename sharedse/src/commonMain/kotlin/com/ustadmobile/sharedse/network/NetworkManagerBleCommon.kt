@@ -8,13 +8,11 @@ import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sharedMutableMapOf
 import com.ustadmobile.sharedse.util.EntryTaskExecutor
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import io.ktor.client.HttpClient
-import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlin.collections.set
@@ -35,9 +33,10 @@ abstract class NetworkManagerBleCommon(
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
-        internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context),
-        internal var umAppDatabaseRepo: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) :
+        internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context)) :
         DownloadJobItemStatusProvider {
+
+    abstract internal val umAppDatabaseRepo: UmAppDatabase
 
     private val knownNodesLock = Any()
 
@@ -138,7 +137,8 @@ abstract class NetworkManagerBleCommon(
 
 
     val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
-            this::makeEntryStatusTask, singleThreadDispatcher)
+            this::makeEntryStatusTask, singleThreadDispatcher,
+            UmAccountManager.getActiveEndpoint(context) ?: "http://localhost/endpointnotsetyet")
 
     private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
 

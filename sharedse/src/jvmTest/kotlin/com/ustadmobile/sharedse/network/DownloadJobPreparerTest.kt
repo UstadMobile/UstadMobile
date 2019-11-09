@@ -1,12 +1,13 @@
 package com.ustadmobile.sharedse.network
 
-import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.umRestApplication
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -26,9 +27,10 @@ class DownloadJobPreparerTest {
         serverDb.clearAllTables()
         clientDb.clearAllTables()
 
-        mockedNetworkManager = spy { }
+        mockedNetworkManager = spy {
+            on { umAppDatabaseRepo }.thenReturn(clientRepo)
+        }
         mockedNetworkManager.umAppDatabase = clientDb
-        mockedNetworkManager.umAppDatabaseRepo = clientRepo
 
         mockedNetworkManager.onCreate()
     }
@@ -87,7 +89,7 @@ class DownloadJobPreparerTest {
             serverDb = UmAppDatabase.getInstance(Any())
             clientDb = UmAppDatabase.getInstance(Any(), "clientdb")
             clientRepo = clientDb.asRepository(Any(),"http://localhost:8087", "",
-                    defaultHttpClient()) as UmAppDatabase
+                    defaultHttpClient(), null) as UmAppDatabase
             server = embeddedServer(Netty, 8087) {
                 umRestApplication(devMode = false, db = serverDb)
             }

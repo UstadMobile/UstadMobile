@@ -56,7 +56,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                 header("X-nid", repo.clientId)
                 parameter("contentEntryUid", contentEntryUid)
 
-                parameter("_limit", fetchEntitiesLimit)
+                parameter("limit", fetchEntitiesLimit)
 
             }
             val _httpResult =

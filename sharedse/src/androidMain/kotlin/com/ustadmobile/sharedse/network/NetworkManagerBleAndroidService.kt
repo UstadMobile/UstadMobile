@@ -15,6 +15,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.lib.util.RunWhenReadyManager
+import com.ustadmobile.core.impl.UmAccountManager
 
 /**
  * Wrapper class for NetworkManagerBleCommon. A service is required as this encapsulates
@@ -85,7 +86,8 @@ class NetworkManagerBleAndroidService : Service() {
 
     private fun handleHttpdServiceBound(embeddedHTTPD: EmbeddedHTTPD) {
         val createdNetworkManager = NetworkManagerBle(this,
-                newSingleThreadContext("NetworkManager-SingleThread"), embeddedHTTPD)
+                newSingleThreadContext("NetworkManager-SingleThread"), embeddedHTTPD,
+                UmAppDatabase.getInstance(this))
         networkManagerBle = createdNetworkManager
         createdNetworkManager.onCreate()
         runWhenReadyManager.ready = true

@@ -75,7 +75,7 @@ class DownloadDialogPresenterTest {
         umAppDatabase.clearAllTables()
 
         umAppDatabaseRepo = umAppDatabase.asRepository(context,"http://localhost/dummy/", "",
-                defaultHttpClient())
+                defaultHttpClient(), null)
 
         val httpd = EmbeddedHTTPD(0, context)
         httpd.start()

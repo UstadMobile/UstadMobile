@@ -34,7 +34,10 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.activeRange
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -227,13 +230,12 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             this.ustadBaseActivity = context
-            ustadBaseActivity.runAfterServiceConnection(Runnable{
-                ustadBaseActivity.runOnUiThread {
-                    managerAndroidBle = ustadBaseActivity.networkManagerBle!!
-                    checkReady()
-                    showSnackbarPromptsIfRequired()
-                }
-            })
+            GlobalScope.launch(Dispatchers.Main) {
+                val networkManagerVal = ustadBaseActivity.networkManagerBle.await()
+                managerAndroidBle = networkManagerVal
+                checkReady()
+                showSnackbarPromptsIfRequired()
+            }
         }
 
         if (context is ContentEntryListener) {
