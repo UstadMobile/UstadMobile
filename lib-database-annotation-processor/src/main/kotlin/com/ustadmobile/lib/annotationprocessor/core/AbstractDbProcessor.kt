@@ -34,6 +34,7 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
 import java.io.IOException
 import kotlin.reflect.KClass
+import com.ustadmobile.door.RepositoryLoadHelper
 
 //here in a comment because it sometimes gets removed by 'optimization of parameters'
 // import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -1461,27 +1462,30 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
     fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String,
                                                  syncHelperDaoVarName: String = "_syncHelper",
-                                                 addReturnDaoResult: Boolean  = true): CodeBlock {
+                                                 addReturnDaoResult: Boolean  = true,
+                                                 autoRetryEmptyMirrorResult: Boolean = false): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val daoFunReturnType = daoFunSpec.returnType!!
         val resultType = resolveQueryResultType(daoFunReturnType)
         val isLiveDataOrDataSourceFactory = daoFunReturnType is ParameterizedTypeName
                 && daoFunReturnType.rawType in
                 listOf(DoorLiveData::class.asClassName(), DataSource.Factory::class.asClassName())
+        val isLiveData = daoFunReturnType is ParameterizedTypeName
+                && daoFunReturnType.rawType == DoorLiveData::class.asClassName()
+        val isSuspendedFun = KModifier.SUSPEND in daoFunSpec.modifiers
+        codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+                ?.add("val _daoResult = ")?.addDelegateFunctionCall("_dao", daoFunSpec)?.add("\n")
 
-        if (KModifier.SUSPEND !in daoFunSpec.modifiers) {
-            if(isLiveDataOrDataSourceFactory) {
-                codeBlock.beginControlFlow("%T.%M",
-                        GlobalScope::class, MemberName("kotlinx.coroutines", "launch"))
-            }else {
-                codeBlock.beginControlFlow("%M",
-                        MemberName("kotlinx.coroutines", "runBlocking"))
-            }
-        }
+        codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+                ?.beginControlFlow("%T.%M", GlobalScope::class, MemberName("kotlinx.coroutines", "launch"))
 
-
-        codeBlock.beginControlFlow("try")
+        val liveDataLoadHelperArg = if(isLiveData) ",autoRetryOnEmptyLiveData=_daoResult" else ""
+        codeBlock.beginControlFlow("val _loadHelper = %T(_repo,·" +
+                "autoRetryEmptyMirrorResult·=·$autoRetryEmptyMirrorResult·$liveDataLoadHelperArg)",
+                        RepositoryLoadHelper::class)
+                .add("_endpointToTry -> \n")
         codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                httpEndpointVarName = "_endpointToTry",
                 daoName = daoName,
                 dbPathVarName = "_dbPath",
                 methodName = daoFunSpec.name,
@@ -1499,7 +1503,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
                             CLIENT_GET_MEMBER_NAME)
                             .beginControlFlow("url")
-                            .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
+                            .add("%M(_endpointToTry)\n", MemberName("io.ktor.http", "takeFrom"))
                             .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
                                     "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
                             .endControlFlow()
@@ -1574,15 +1578,34 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 resultType = resultType, processingEnv = processingEnv,
                 syncHelperDaoVarName = syncHelperDaoVarName))
 
-        codeBlock.nextControlFlow("catch(e: Exception)")
-                .add("e.printStackTrace()\n")
+        //end the LoadHelper block
+        codeBlock.add("_httpResult\n")
                 .endControlFlow()
-        if(KModifier.SUSPEND !in daoFunSpec.modifiers) {
-            codeBlock.endControlFlow()
-        }
+
+        //End GlobalScope.launch if applicable by triggering the load end ending the control flow
+        codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+                ?.add("_loadHelper.doRequest()\n")
+                ?.endControlFlow()
 
         if(addReturnDaoResult) {
-            codeBlock.add("return ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
+            if(!isLiveDataOrDataSourceFactory ) {
+                codeBlock.add("var _daoResult: %T\n", resultType)
+                        .beginControlFlow("do"
+                        ).apply {
+                            takeIf { !isSuspendedFun }?.beginControlFlow("%M",
+                                MemberName("kotlinx.coroutines", "runBlocking"))
+                        }
+                        .add("_loadHelper.doRequest()\n")
+                        .apply {
+                            takeIf{ !isSuspendedFun }?.endControlFlow()
+                        }
+                        .add("_daoResult = ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
+                        .endControlFlow()
+                        .add("while(_loadHelper.shouldTryAnotherMirror())\n")
+                        .add("return _daoResult\n")
+            }else {
+                codeBlock.add("return _daoResult\n")
+            }
         }
 
 

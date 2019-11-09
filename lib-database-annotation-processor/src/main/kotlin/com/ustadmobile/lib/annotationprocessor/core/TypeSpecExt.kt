@@ -61,6 +61,10 @@ internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName:
             .addParameter("newPriorities", Map::class.asClassName().parameterizedBy(INT, INT))
             .addCode("$delegatePropName.updateMirrorPriorities(newPriorities)\n")
             .build())
+    addFunction(FunSpec.builder("activeMirrors")
+            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+            .addCode("return $delegatePropName.activeMirrors()\n")
+            .build())
 
     return this
 }

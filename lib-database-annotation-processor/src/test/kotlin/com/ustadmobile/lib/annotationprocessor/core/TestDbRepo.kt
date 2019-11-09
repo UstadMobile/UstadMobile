@@ -106,12 +106,11 @@ class TestDbRepo {
 
         val db = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         db.clearAllTables()
-        val dbSyncDao = ExampleDatabase2SyncDao_JdbcKt(db)
+        val dbRepo = db.asRepository<ExampleDatabase2>(Any(), mockServer.url("/").toString(),
+                "", httpClient, null)
 
-        val clientNodeId = 5
-        val repo = ExampleSyncableDao_Repo(db, db.exampleSyncableDao(), httpClient, clientNodeId,
-                mockServer.url("/").toString(), "ExampleDatabase2", "/dummy/attachmentdir",
-                dbSyncDao)
+        val clientNodeId = (dbRepo as DoorDatabaseSyncRepository).clientId
+        val repo = dbRepo.exampleSyncableDao()
         val repoResult = repo.findAll()
 
         val firstRequest = mockServer.takeRequest()

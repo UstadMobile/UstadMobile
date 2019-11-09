@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
 import javax.annotation.processing.RoundEnvironment
@@ -12,13 +13,9 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
-import com.ustadmobile.door.RepositoryHelper
 import kotlinx.coroutines.newSingleThreadContext
 import java.io.File
 import java.util.*
@@ -463,7 +460,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                         .addModifiers(KModifier.PRIVATE)
                                         .addCode(CodeBlock.builder()
                                                 .add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
-                                                        daoTypeElement.simpleName.toString(), addReturnDaoResult = false))
+                                                        daoTypeElement.simpleName.toString(),
+                                                        addReturnDaoResult = false,
+                                                        autoRetryEmptyMirrorResult = true))
                                                 .build())
                                         .build())
                                 .addFunction(FunSpec.builder("onItemAtEndLoaded")
@@ -485,7 +484,11 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 }
 
                 Repository.METHOD_DELEGATE_TO_WEB -> {
-                    codeBlock.add(generateKtorRequestCodeBlockForMethod(
+                    codeBlock.beginControlFlow("val _loaderHelper = %T(_repo)",
+                            RepositoryLoadHelper::class)
+                            .add("_endpointToTry -> \n")
+                        .add(generateKtorRequestCodeBlockForMethod(
+                            httpEndpointVarName = "_endpointToTry",
                             daoName = daoTypeElement.simpleName.toString(),
                             dbPathVarName = "_dbPath",
                             methodName = daoFunSpecBuilt.name,
@@ -494,9 +497,13 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                     MemberName("io.ktor.client.request", "header"),
                                     "X-nid"),
                             params = daoFunSpecBuilt.parameters))
+                        .add("_httpResult\n")
+                        .endControlFlow()
+
                     if(returnTypeResolved != UNIT) {
-                        codeBlock.add("return _httpResult\n")
+                        codeBlock.add("return ")
                     }
+                    codeBlock.add("_loaderHelper.doRequest()\n")
                 }
             }
 

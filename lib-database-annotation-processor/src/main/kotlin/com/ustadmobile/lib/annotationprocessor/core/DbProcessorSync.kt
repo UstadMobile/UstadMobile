@@ -364,6 +364,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             val entitySyncCodeBlock = CodeBlock.builder()
                     .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
                             syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
+                    .add("_loadHelper.doRequest()\n")
 
             val hasAttachments = entityType.getAnnotation(EntityWithAttachment::class.java) != null
 

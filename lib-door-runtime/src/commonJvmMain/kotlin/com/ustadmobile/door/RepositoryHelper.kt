@@ -35,8 +35,8 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = Di
         }
     }
 
-
-
-
+    suspend fun activeMirrors() = withContext(coroutineDispatcher) {
+        mirrors.values.toList()
+    }
 
 }

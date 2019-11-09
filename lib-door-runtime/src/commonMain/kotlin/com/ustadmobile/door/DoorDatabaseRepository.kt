@@ -22,6 +22,8 @@ interface DoorDatabaseRepository {
 
     suspend fun updateMirrorPriorities(newPriorities: Map<Int, Int>)
 
+    suspend fun activeMirrors(): List<MirrorEndpoint>
+
     var connectivityStatus: Int
 
     companion object {
