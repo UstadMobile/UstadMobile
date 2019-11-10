@@ -67,11 +67,14 @@ class BleMessageGattClientCallback
 
     private var packetTransferAttemptsRemaining = 3
 
-    private val MAX_DELAY_TIME  = 80L
+    private val MAX_DELAY_TIME  = 1000L
 
-    private var defaultMtuSizeToUse = MINIMUM_MTU_SIZE
+    private var currentMtu = MINIMUM_MTU_SIZE
 
-    private val mtuCompletableDeferred = CompletableDeferred(MINIMUM_MTU_SIZE)
+    private val mtuCompletableDeferred = CompletableDeferred<Int>()
+
+    private val logPrefix
+        get() = "BleMessageGattClientCallback Request ID# ${messageToSend.messageId}"
 
     init {
         receivedMessage = BleMessage()
@@ -91,8 +94,8 @@ class BleMessageGattClientCallback
      */
     override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
         super.onMtuChanged(gatt, mtu, status)
-        UMLog.l(UMLog.DEBUG, 698, "MTU changed from $defaultMtuSizeToUse to $mtu")
-        defaultMtuSizeToUse = mtu
+        UMLog.l(UMLog.DEBUG, 698, "$logPrefix: MTU changed from $currentMtu to $mtu")
+        currentMtu = mtu
         mtuCompletableDeferred.complete(mtu)
     }
 
@@ -107,24 +110,22 @@ class BleMessageGattClientCallback
 
         if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
             UMLog.l(UMLog.DEBUG, 698,
-                    "Device connected to $remoteDeviceAddress")
+                    "$logPrefix: Device connected to $remoteDeviceAddress")
 
             if (!serviceDiscoveryRef.get()) {
                 UMLog.l(UMLog.DEBUG, 698,
-                        "Discovering services offered by $remoteDeviceAddress")
+                        "$logPrefix: Discovering services offered by $remoteDeviceAddress")
                 serviceDiscoveryRef.set(true)
                 gatt.discoverServices()
             }
-        } else {
-            cleanup(gatt)
+        } else if(status != BluetoothGatt.GATT_SUCCESS && !mClosed.get()){
             UMLog.l(UMLog.DEBUG, 698,
-                    "Connection disconnected " + status + "from "
-                            + remoteDeviceAddress)
-            if (responseListener != null) {
-                responseListener!!.onResponseReceived(remoteDeviceAddress, null,
+                    "$logPrefix: onConnectionChange not successful and connection is not closed "
+                            + status + "from " + remoteDeviceAddress)
+            cleanup(gatt)
+            responseListener?.onResponseReceived(remoteDeviceAddress, null,
                         IOException("BLE onConnectionStateChange not successful." +
                                 "Status = " + status))
-            }
         }
 
     }
@@ -139,15 +140,15 @@ class BleMessageGattClientCallback
         val service = findMatchingService(gatt.services)
         if (service == null) {
             UMLog.l(UMLog.ERROR, 698,
-                    "ERROR Ustadmobile Service not found on " + gatt.device.address)
-            responseListener!!.onResponseReceived(gatt.device.address, null,
+                    "$logPrefix: ERROR Ustadmobile Service not found on " + gatt.device.address)
+            responseListener?.onResponseReceived(gatt.device.address, null,
                     IOException("UstadMobile service not found on device"))
             cleanup(gatt)
             return
         }
 
         UMLog.l(UMLog.DEBUG, 698,
-                "Ustadmobile Service found on " + gatt.device.address)
+                "$logPrefix: Ustadmobile Service found on " + gatt.device.address)
         val characteristics = service.characteristics
 
         val characteristic = characteristics[0]
@@ -155,13 +156,24 @@ class BleMessageGattClientCallback
             characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             gatt.setCharacteristicNotification(characteristic, true)
             GlobalScope.launch(Dispatchers.Main) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    UMLog.l(UMLog.DEBUG, 698,
-                            "Requesting MTU changed from $defaultMtuSizeToUse to $MAXIMUM_MTU_SIZE")
-                    gatt.requestMtu(MAXIMUM_MTU_SIZE)
-                    withTimeoutOrNull(MAX_DELAY_TIME) { mtuCompletableDeferred.await() }
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        UMLog.l(UMLog.DEBUG, 698,
+                                "$logPrefix: Requesting MTU changed from $currentMtu to $MAXIMUM_MTU_SIZE")
+                        gatt.requestMtu(MAXIMUM_MTU_SIZE)
+                        var changedMtu = -1
+                        withTimeoutOrNull(MAX_DELAY_TIME) {
+                            changedMtu = mtuCompletableDeferred.await()
+                        }
+                        UMLog.l(UMLog.DEBUG, 698,
+                                "$logPrefix: Deferrable MTU change: got $changedMtu")
+                    }
+                    onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
+                }catch(e: Exception) {
+                    UMLog.l(UMLog.ERROR, 698,
+                            "$logPrefix: ERROR EXCEPTION on requesting MTU")
                 }
-                onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
+
             }
         }
     }
@@ -175,37 +187,42 @@ class BleMessageGattClientCallback
                                        characteristic: BluetoothGattCharacteristic, status: Int) {
         super.onCharacteristicWrite(gatt, characteristic, status)
 
-        UMLog.l(UMLog.DEBUG, 698, (if(status == BluetoothGatt.GATT_SUCCESS) "Allowed to send packets"
-        else "Not allowed to send packets" ) + " to ${gatt.device.address}")
+        UMLog.l(UMLog.DEBUG, 698, (if(status == BluetoothGatt.GATT_SUCCESS) "$logPrefix: Allowed to send packets"
+        else "$logPrefix: Not allowed to send packets" ) + " to ${gatt.device.address}")
 
-        val packets = messageToSend.getPackets(defaultMtuSizeToUse)
+        val packets = messageToSend.getPackets(currentMtu)
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if (packetIteration < packets.size) {
-                characteristic.value = packets[packetIteration]
+                val packetToSend = packets[packetIteration]
+                UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Transferring packet #${packetIteration + 1}  of size " +
+                        "${packetToSend.size} to ${gatt.device.address} with mtu $currentMtu")
+                characteristic.value = packetToSend
                 gatt.writeCharacteristic(characteristic)
-                UMLog.l(UMLog.DEBUG, 698, "Transferring packet #${packetIteration + 1}  of size " +
-                                "${packets[packetIteration].size} to ${gatt.device.address}")
                 packetIteration++
 
             } else {
                 packetIteration = 0
-                UMLog.l(UMLog.DEBUG, 698,
+                UMLog.l(UMLog.DEBUG, 698,"$logPrefix: Sent packet of " +
                         packets.size.toString() + " packet(s) transferred successfully to " +
                                 "the remote device =" + gatt.device.address)
                 //We now expect the server to send a response
             }
         }else if(packetTransferAttemptsRemaining > 0) {
             packetTransferAttemptsRemaining--
-            UMLog.l(UMLog.DEBUG, 698, "Failed to send packet to ${gatt.device.address}" +
+            UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Failed to send packet to ${gatt.device.address}" +
                     " remain $packetTransferAttemptsRemaining trial, trying now...")
             GlobalScope.launch(Dispatchers.Main) {
-                delay(MAX_DELAY_TIME)
-                onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
+                try {
+                    delay(MAX_DELAY_TIME)
+                    onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
+                }catch(e: Exception) {
+                    UMLog.l(UMLog.ERROR, 698, "$logPrefix: Exception on retry packet write")
+                }
             }
 
         }else {
             UMLog.l(UMLog.DEBUG, 698,
-                    "Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
+                    "$logPrefix: Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
             cleanup(gatt)
         }
     }
@@ -237,9 +254,12 @@ class BleMessageGattClientCallback
                                     characteristic: BluetoothGattCharacteristic) {
         val messageComplete = receivedMessage.onPackageReceived(characteristic.value)
         if (messageComplete) {
-            UMLog.l(UMLog.DEBUG, 698," Message received successfully")
+            UMLog.l(UMLog.DEBUG, 698,"$logPrefix: Message received successfully")
+            //Before we waited for the server to disconnect us. Actually we should disconnect ourselves
+            // as per https://developer.android.com/guide/topics/connectivity/bluetooth-le "Close the client app"
+            cleanup(gatt)
+
             responseListener!!.onResponseReceived(gatt.device.address, receivedMessage, null)
-            //The server should disconnect us shortly.
         }
     }
 
@@ -278,18 +298,18 @@ class BleMessageGattClientCallback
             if (mConnected.get()) {
                 gatt.disconnect()
                 mConnected.set(false)
-                UMLog.l(UMLog.INFO, 698, "GattClientCallback: disconnected")
+                UMLog.l(UMLog.INFO, 698, "$logPrefix: disconnected")
             }
 
             if (!mClosed.get()) {
                 gatt.close()
                 mClosed.set(true)
-                UMLog.l(UMLog.INFO, 698, "GattClientCallback: closed")
+                UMLog.l(UMLog.INFO, 698, "$logPrefix: closed")
             }
         } catch (e: Exception) {
-            UMLog.l(UMLog.ERROR, 698, "GattClientCallback: ERROR disconnecting")
+            UMLog.l(UMLog.ERROR, 698, "$logPrefix: ERROR disconnecting")
         } finally {
-            UMLog.l(UMLog.INFO, 698, "GattClientCallback: closed")
+            UMLog.l(UMLog.INFO, 698, "$logPrefix: cleanup done")
         }
     }
 }

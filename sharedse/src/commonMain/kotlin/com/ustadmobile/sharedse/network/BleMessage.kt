@@ -11,6 +11,7 @@ import kotlinx.io.ByteArrayInputStream
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.ByteBuffer
 import kotlinx.io.IOException
+import kotlin.jvm.Synchronized
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -347,6 +348,7 @@ class BleMessage {
          * @param receiverAddr bluetooth address
          * @return unique message identifier
          */
+        @Synchronized
         fun getNextMessageIdForReceiver(receiverAddr: String): Byte {
             val lastMessageId = messageIds[receiverAddr] ?: (-128).toByte()
             val nextMessageId: Byte

@@ -72,9 +72,15 @@ class BleGattServer
 
             val needResponse = characteristic.properties == BluetoothGattCharacteristic.PROPERTY_WRITE
             if (needResponse) {
+                UMLog.l(UMLog.DEBUG, 691,
+                        "BLEGattServer: onCharacteristicReadRequest : should not need " +
+                                "response; sending failure status to" + device.address)
                 gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0,
                         characteristic.value)
             } else {
+                UMLog.l(UMLog.DEBUG, 691,
+                        "BLEGattServer: onCharacteristicReadRequest sending success status " +
+                                "to" + device.address)
                 gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0,
                         characteristic.value)
 
@@ -92,21 +98,21 @@ class BleGattServer
                 val granted = gattServer!!.sendResponse(device, requestId,
                         BluetoothGatt.GATT_SUCCESS, 0, null)
                 UMLog.l(UMLog.DEBUG, 691,
-                        "Write permission granted for " + device.address + " " + granted)
+                        "BLEGattServer: Write permission granted for " + device.address + " " + granted)
                 val messageReceived = messageAssembler.handleIncomingPacket(
                         device.address, value)
                 UMLog.l(UMLog.DEBUG, 691,
-                        "Received all packets from " + device.address + " "
+                        "BLEGattServer: Received all packets from " + device.address + " "
                                 + (messageReceived != null))
                 if (messageReceived != null) {
                     val currentMtuSize = messageReceived.mtu
 
                     UMLog.l(UMLog.DEBUG, 691,
-                            "Request received with default MTU size of $currentMtuSize")
+                            "BLEGattServer: Request received with default MTU size of $currentMtuSize")
                     val messageToSend = handleRequest(messageReceived, device.address)
 
                     UMLog.l(UMLog.DEBUG, 691,
-                            "Prepare response to send back to " + device.address)
+                            "BLEGattServer: Prepare response to send back to " + device.address)
                     val requireConfirmation = characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE == BluetoothGattCharacteristic.PROPERTY_INDICATE
                     if (!requireConfirmation) {
                         val packets = messageToSend!!.getPackets(currentMtuSize)
@@ -117,26 +123,36 @@ class BleGattServer
                             if (notified) {
                                 packetTracker++
                                 UMLog.l(UMLog.DEBUG, 691,
-                                        "Peer device notified on characteristics change for packet #${packetTracker} size ${packet.size}")
+                                        "BLEGattServer: Peer device notified on characteristics change for packet #${packetTracker} size ${packet.size}")
                             } else {
                                 UMLog.l(UMLog.ERROR, 691,
-                                        "Failed to notify peer device for packet #${packetTracker}")
+                                        "BLEGattServer: Failed to notify peer device for packet #${packetTracker}")
                             }
                         }
                         UMLog.l(UMLog.DEBUG, 691,
-                                "Response sent to " + device.address)
+                                "BLEGattServer: Response sent to " + device.address)
 
                         gattServer!!.cancelConnection(device)
                         UMLog.l(UMLog.DEBUG, 691,
-                                "Response finished, canceled connection with  " + device.address)
+                                "BLEGattServer: Response finished, canceled connection with  " + device.address)
+                    }else {
+                        UMLog.l(UMLog.DEBUG, 691,
+                                "BLEGattServer: ERROR: received item that required confirmation from  " + device.address)
                     }
+                }else {
+                    UMLog.l(UMLog.DEBUG, 691,
+                            "BLEGattServer: received null message from  " + device.address)
                 }
+            }else {
+                UMLog.l(UMLog.DEBUG, 691,
+                        "BLEGattServer: wrong characteristic: ${characteristic.uuid}")
             }
         }
     }
 
     init {
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context, gattServerCallback)
+        UMLog.l(UMLog.DEBUG, 691, "BLEGattServer: Opened")
     }
 
 }

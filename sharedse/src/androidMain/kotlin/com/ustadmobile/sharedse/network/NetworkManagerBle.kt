@@ -118,7 +118,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
     private val wifiLockReference = AtomicReference<WifiManager.WifiLock>()
 
-    private var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager? = null
+    private lateinit var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager
 
     internal lateinit var managerHelper : NetworkManagerBleHelper
 
@@ -551,13 +551,14 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         if (wifiP2pManager == null) {
             wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
         }
+
         wifiP2PCapable.set(wifiP2pManager != null)
         wifiP2pGroupServiceManager = WifiP2PGroupServiceManager(this)
 
 
         if (wifiP2PCapable.get()) {
             wifiP2pChannel = wifiP2pManager!!.initialize(mContext, getMainLooper(), null)
-            mContext.registerReceiver(wifiP2pGroupServiceManager!!.wifiP2pBroadcastReceiver,
+            mContext.registerReceiver(wifiP2pGroupServiceManager.wifiP2pBroadcastReceiver,
                     IntentFilter(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION))
         }
 

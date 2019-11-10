@@ -1477,7 +1477,10 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ?.add("val _daoResult = ")?.addDelegateFunctionCall("_dao", daoFunSpec)?.add("\n")
 
         codeBlock.takeIf { isLiveDataOrDataSourceFactory }
-                ?.beginControlFlow("%T.%M", GlobalScope::class, MemberName("kotlinx.coroutines", "launch"))
+                ?.beginControlFlow("%T.%M(%T.coroutineExceptionHandler)", GlobalScope::class,
+                        MemberName("kotlinx.coroutines", "launch"),
+                        RepositoryLoadHelper::class)
+                ?.beginControlFlow("try")
 
         val liveDataLoadHelperArg = if(isLiveData) ",autoRetryOnEmptyLiveData=_daoResult" else ""
         codeBlock.beginControlFlow("val _loadHelper = %T(_repo,·" +
@@ -1584,10 +1587,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         //End GlobalScope.launch if applicable by triggering the load end ending the control flow
         codeBlock.takeIf { isLiveDataOrDataSourceFactory }
-                ?.beginControlFlow("try")
                 ?.add("_loadHelper.doRequest()\n")
                 ?.nextControlFlow("catch(_e: %T)", Exception::class)
-                ?.add("%M(%S)", MemberName("kotlin.io", "println"), "Caught doRequest exception: \\\$_e")
+                ?.add("%M(%S)\n", MemberName("kotlin.io", "println"), "Caught doRequest exception:")
                 ?.endControlFlow()
                 ?.endControlFlow()
 

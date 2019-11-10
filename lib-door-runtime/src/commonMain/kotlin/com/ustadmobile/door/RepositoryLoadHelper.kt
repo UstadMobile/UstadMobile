@@ -18,7 +18,7 @@ import kotlin.jvm.Volatile
 class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val autoRetryEmptyMirrorResult: Boolean = false,
                               val maxAttempts: Int = 3,
-                              val retryDelay: Int = 100,
+                              val retryDelay: Int = 5000,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
                               val loadFn: suspend(endpoint: String) -> T) {
 
@@ -35,21 +35,23 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     suspend fun doRequest() : T{
         do {
-            attemptCount++
-            val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
-            val mirrorToUse = if(isConnected && !triedMainEndpoint) {
-                null as MirrorEndpoint? //use the main endpoint
-            }else {
-                repository.activeMirrors().firstOrNull { it.mirrorId !in mirrorsTried }
-            }
-
-            val endpointToUse = if(mirrorToUse == null) {
-                repository.endpoint
-            }else {
-                mirrorToUse.endpointUrl
-            }
-
+            var mirrorToUse: MirrorEndpoint? = null
+            var endpointToUse: String? = null
             try {
+                attemptCount++
+                val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
+                mirrorToUse = if(isConnected && !triedMainEndpoint) {
+                    null as MirrorEndpoint? //use the main endpoint
+                }else {
+                    repository.activeMirrors().firstOrNull { it.mirrorId !in mirrorsTried }
+                }
+
+                endpointToUse = if(mirrorToUse == null) {
+                    repository.endpoint
+                }else {
+                    mirrorToUse.endpointUrl
+                }
+
                 var t = loadFn(endpointToUse)
                 val isNullOrEmpty = if(t is List<*>) {
                     t.isEmpty()
@@ -116,6 +118,12 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         }
 
         return nonEmptyVal
+    }
+
+    companion object {
+        val coroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
+            println("Caught $exception")
+        }
     }
 
 

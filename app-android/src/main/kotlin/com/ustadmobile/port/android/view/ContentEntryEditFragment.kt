@@ -149,7 +149,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         selectFileBtn!!.setOnClickListener { v ->
-            presenter!!.handleContentButton()
+            //presenter!!.handleContentButton()
         }
 
 
@@ -191,7 +191,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
             if(which == 0){
                 startBrowseFiles()
             }else if(which == 1){
-                presenter!!.handleUpdateLink()
+                //presenter!!.handleUpdateLink()
             }
         }
         builder.show()

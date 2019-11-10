@@ -1,6 +1,7 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
@@ -52,6 +53,8 @@ abstract class BleGattServerCommon() {
 
         when (requestType) {
             ENTRY_STATUS_REQUEST -> {
+                UMLog.l(UMLog.DEBUG, 691,
+                        "BLEGattServerCommon: entry status request message")
                 val entryStatusResponse = ArrayList<Long>()
 
                 val containerDao = UmAppDatabase.getInstance(context).containerDao
@@ -67,27 +70,45 @@ abstract class BleGattServerCommon() {
             }
 
             WIFI_GROUP_REQUEST -> {
+                UMLog.l(UMLog.DEBUG, 691,
+                        "BLEGattServerCommon: received wifi group request message")
                 val group = networkManager.awaitWifiDirectGroupReady(5000)
                 return BleMessage(WIFI_GROUP_CREATION_RESPONSE, 42.toByte(),
                         group.toBytes())
             }
 
             BleMessage.MESSAGE_TYPE_HTTP -> {
+                UMLog.l(UMLog.DEBUG, 691,
+                        "BLEGattServerCommon: received HTTP proxy message")
                 val payload = requestReceived.payload
                 if(payload != null) {
+                    UMLog.l(UMLog.DEBUG, 691,
+                            "BLEGattServerCommon: Request ID# ${requestReceived.messageId} " +
+                                    "from $clientDeviceAddr : sending message to local HTTP")
                     val messageIn = ByteArrayInputStream(payload)
                     val bufferOut = ByteArrayOutputStream()
                     val httpSession = httpSessionFactory(messageIn, bufferOut)
                     httpSession.execute()
                     bufferOut.flush()
+                    val responseBytes = bufferOut.toByteArray()
+                    UMLog.l(UMLog.DEBUG, 691,
+                            "BLEGattServerCommon: Request ID# ${requestReceived.messageId} " +
+                                    "from $clientDeviceAddr ${httpSession.uri} (${responseBytes.size} bytes)")
                     return BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
                             BleMessage.getNextMessageIdForReceiver(clientDeviceAddr),
-                            bufferOut.toByteArray())
+                            responseBytes)
                 }else {
+                    UMLog.l(UMLog.DEBUG, 691,
+                            "BLEGattServerCommon: Request ID# ${requestReceived.messageId} " +
+                                    "from $clientDeviceAddr: ERROR: proxy http request payload is NULL")
                     return null
                 }
             }
-            else -> return null
+            else -> {
+                UMLog.l(UMLog.ERROR, 691,
+                        "BLEGattServerCommon: Unknown message type")
+                return null
+            }
         }
     }
 

@@ -23,7 +23,7 @@ import com.ustadmobile.core.impl.UMLog
  */
 class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
                    val context: Any,
-                   val numProcessors: Int = 5) {
+                   val numProcessors: Int = 1) {
 
     var serverSocket: ServerSocket? = null
 
@@ -98,18 +98,19 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
                         carbonCopyBufferArr)
                 val destNetworkNode = NetworkNode().also { it.bluetoothMacAddress = destDeviceAddr }
 
-                UMLog.l(UMLog.INFO, 0, "Sending ${carbonCopyBufferArr.size} bytes BLE HTTP Request " +
-                        "to $destDeviceAddr Request ID# $messageId")
+                UMLog.l(UMLog.INFO, 0, "BleProxy: Request ID# $messageId ${httpSession.uri} " +
+                        "SEND ${carbonCopyBufferArr.size} bytes BLE HTTP Request " +
+                        "to $destDeviceAddr")
                 networkManager.sendMessage(context, httpMessage, destNetworkNode,
                         object : BleMessageResponseListener {
                             override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
                                 if(response != null) {
-                                    UMLog.l(UMLog.INFO, 0, "Received response for request ID# " +
+                                    UMLog.l(UMLog.INFO, 0, "BleProxy: Request ID# $messageId : ${httpSession.uri} RECEIVE OK " +
                                             "$messageId ${response.payload?.size} bytes")
                                     deferredResponse.complete(response)
                                 }else {
-                                    UMLog.l(UMLog.INFO, 0, "Response with error for request ID# " +
-                                            "$messageId ")
+                                    UMLog.l(UMLog.ERROR, 0, "BleProxy: Request ID# $messageId : " +
+                                            "${httpSession.uri} RECEIVE FAILED $error")
                                     val exception = if(error != null) {
                                         IOException("Exception receiving response from $sourceDeviceAddress",
                                                 error)
@@ -123,9 +124,18 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
 
                 val response = withTimeoutOrNull(8000) { deferredResponse.await() }
                 val payload = response?.payload
-                if(payload != null) {
+                if(payload != null && payload.size == response.length) {
+                    UMLog.l(UMLog.INFO, 0, "BleProxy: Request ID# $messageId : ${httpSession.uri} Writing  " +
+                            "$messageId ${payload.size} bytes to socket")
                     socketOut.write(payload)
+                }else if(payload != null && response != null && payload.size != response.length) {
+                    UMLog.l(UMLog.ERROR, 0, "BleProxy: Request ID# $messageId : ${httpSession.uri} " +
+                            "ERROR: payload size != expected message length " +
+                            "(expected ${response.length} received ${payload.size}")
+                    throw IOException("BLE ERROR: Message length != payload size")
                 }else {
+                    UMLog.l(UMLog.ERROR, 0, "BleProxy: Request ID# $messageId : ${httpSession.uri}  " +
+                            " ERROR: Timed out or null payload response")
                     throw IOException("BLE response packet timed out or had no payload")
                 }
             }catch(e: Exception) {
@@ -133,6 +143,7 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
                     val errorResponseBytes = e.toString().toUtf8Bytes()
                     val headerBytes = ("HTTP/1.1 502 Bad Gateway\r\n" +
                             "Content-Type: text/plain\r\n" +
+                            "Connection: close\r\n" +
                             "Content-Length: ${errorResponseBytes.size}\n" +
                             "\n").toUtf8Bytes()
                     socketOut?.write(headerBytes)
@@ -154,7 +165,7 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
         active.set(true)
         GlobalScope.launch {
             val clientSocketProducer = produceClientSockets()
-            repeat(5) { launchSocketProcessor(clientSocketProducer)}
+            repeat(numProcessors) { launchSocketProcessor(clientSocketProducer)}
         }
     }
 
