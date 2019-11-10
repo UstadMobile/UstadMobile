@@ -24,6 +24,7 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
             val clientRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
             runBlocking {
                 val syncRepo =(clientRepo as DoorDatabaseSyncRepository)
+                //TODO: UNCOMMENT> ONLY FOR TESTING
                 syncRepo.sync(null)
             }
 

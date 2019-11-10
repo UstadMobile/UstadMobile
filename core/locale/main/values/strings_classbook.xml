@@ -429,10 +429,10 @@
 
     <string name="members">members</string>
     <string name="member">member</string>
-    <string name="add_group">Add group</string>
+    <string name="add_group">Add Group</string>
     <string name="group_name">Group name</string>
     <string name="add_people">Add people</string>
-    <string name="new_group">New group</string>
+    <string name="new_group">New Group</string>
     <string name="last_active">Last active</string>
     <string name="ago">ago</string>
 
@@ -449,7 +449,7 @@
     <string name="scope_location">Location</string>
     <string name="assign_to">Assign to</string>
 
-    <string name="add_edit_location">Add\/Edit location</string>
+    <string name="add_edit_location">Add\/Edit Location</string>
     <string name="sub_locations">sub locations</string>
     <string name="sub_location">sub location</string>
     <string name="add_location">Add location</string>

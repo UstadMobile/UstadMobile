@@ -20,7 +20,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @SetAttachmentData
     open fun setAttachment(entity: PersonPicture, filePath: String) {
-
+        throw Exception(Exception("Shouldn't call the Dao, call the repo instead "))
     }
 
     @GetAttachmentData

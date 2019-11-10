@@ -272,6 +272,17 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
         player!!.start()
     }
 
+    override fun sendMessage(toast: String) {
+
+        runOnUiThread {
+            Toast.makeText(
+                    this,
+                    toast,
+                    Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     fun initiateRecording() {
 
         if (ContextCompat.checkSelfPermission(this,

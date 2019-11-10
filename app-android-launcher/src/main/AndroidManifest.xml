@@ -4,7 +4,8 @@
 
     <application
         android:name="com.ustadmobile.port.android.App"
-        android:allowBackup="true"
+        tools:replace="android:allowBackup"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher_goldozi_new"
         android:roundIcon="@mipmap/ic_launcher_goldozi_new_round"
         android:label="@string/app_name"

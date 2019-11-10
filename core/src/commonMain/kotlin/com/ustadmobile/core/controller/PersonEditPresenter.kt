@@ -2,10 +2,7 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.CustomFieldDao
-import com.ustadmobile.core.db.dao.CustomFieldValueDao
-import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
-import com.ustadmobile.core.db.dao.FeedEntryDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -105,6 +102,7 @@ class PersonEditPresenter
     private var customFieldDao: CustomFieldDao? = null
     private var customFieldValueDao: CustomFieldValueDao? = null
     private var optionDao: CustomFieldValueOptionDao? = null
+    private var personPictureDao : PersonPictureDao
 
     private val customFieldDropDownOptions: HashMap<Long, List<String>>
 
@@ -123,6 +121,7 @@ class PersonEditPresenter
         viewIdToCustomFieldUid = HashMap()
 
         customFieldDropDownOptions = HashMap()
+        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
 
     }
 
@@ -286,7 +285,6 @@ class PersonEditPresenter
      */
     fun updatePersonPic(imageFilePath: String) {
 
-        val personPictureDao = repository.personPictureDao
 
         //Find the person
         GlobalScope.launch {
@@ -330,7 +328,6 @@ class PersonEditPresenter
     }
 
     private fun updatePersonPic(thisPerson: Person) {
-        val personPictureDao = repository.personPictureDao
         GlobalScope.launch {
             val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
             if (personPicture != null) {
@@ -601,7 +598,7 @@ class PersonEditPresenter
      * @param value The new value of the field from the view
      */
     fun handleFieldEdited(fieldCode: Long, value: Any) {
-        //TODO: Check this warning
+
         mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value)
     }
 

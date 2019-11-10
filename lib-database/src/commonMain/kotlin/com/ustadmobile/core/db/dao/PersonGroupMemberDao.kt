@@ -21,10 +21,11 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid")
     abstract fun findAllGroupWherePersonIsInSync(personUid: Long): List<PersonGroupMember>
 
-    @Query("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid " + " AND groupMemberActive = 1")
+    @Query("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid " +
+            " AND CAST(groupMemberActive  AS INTEGER) = 1")
     abstract fun finAllMembersWithGroupId(groupUid: Long): DataSource.Factory<Int, PersonGroupMember>
 
-    @Query("SELECT Person.*, (0) AS clazzUid, " +
+    @Query("SELECT Person.*, Role.*, (0) AS clazzUid, " +
             "   '' AS clazzName, " +
             "  (0) AS attendancePercentage, " +
             "  (0) AS clazzMemberRole,  " +
@@ -33,7 +34,8 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
             "  DESC LIMIT 1) AS personPictureUid, " +
             "  (0) AS enrolled from PersonGroupMember " +
             " LEFT JOIN Person ON PersonGroupMember.groupMemberPersonUid = Person.personUid " +
-            " WHERE groupMemberGroupUid = :groupUid AND groupMemberActive = 1 ")
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
+            " WHERE groupMemberGroupUid = :groupUid AND CAST(groupMemberActive AS INTEGER) = 1")
     abstract fun findAllPersonWithEnrollmentWithGroupUid(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("Select Person.* from PersonGroupMember " +
@@ -45,6 +47,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract suspend fun findMemberByGroupAndPersonAsync(groupUid: Long, personUid: Long)
             : PersonGroupMember?
 
+    //TODO: Update to boolean argument
     @Query("UPDATE PersonGroupMember SET groupMemberActive = 0 " + " WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid")
     abstract suspend fun inactivateMemberFromGroupAsync(personUid: Long, groupUid: Long) : Int
 

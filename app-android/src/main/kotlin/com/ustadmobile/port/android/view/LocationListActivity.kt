@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LocationListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.LocationListView
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount
 import kotlinx.coroutines.Dispatchers
@@ -77,12 +79,18 @@ class LocationListActivity : UstadBaseActivity(), LocationListView {
     }
 
     override fun setListProvider(factory : DataSource.Factory<Int, LocationWithSubLocationCount>) {
+
+        var boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .locationDaoBoundaryCallbacks.findAllLocationsWithCount(factory)
+
         val recyclerAdapter = LocationListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
         //Observe the data:
         val thisP = this

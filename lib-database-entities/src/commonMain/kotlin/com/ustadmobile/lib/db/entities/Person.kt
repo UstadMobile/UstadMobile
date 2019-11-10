@@ -14,7 +14,6 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
 open class Person() {

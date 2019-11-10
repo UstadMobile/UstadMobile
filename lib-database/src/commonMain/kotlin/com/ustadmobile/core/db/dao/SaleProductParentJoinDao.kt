@@ -30,11 +30,11 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     @Query("SELECT CASE WHEN (SELECT COUNT(*) FROM SaleProductParentJoin " +
             " WHERE SaleProductParentJoin.saleProductParentJoinChildUid = :saleProductUid " +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = SaleProduct.saleProductUid " +
-            " AND SaleProductParentJoin.saleProductParentJoinActive = 1) " +
+            " AND CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1 ) " +
             " > 0 THEN 1 ELSE 0 END AS isSelected, " +
             " SaleProduct.* " +
             "FROM SaleProduct WHERE SaleProduct.saleProductCategory = 1 " +
-            " AND SaleProduct.saleProductActive = 1 AND SaleProduct.saleProductUid != :saleProductUid")
+            " AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1 AND SaleProduct.saleProductUid != :saleProductUid")
     abstract fun findAllSelectedCategoriesForSaleProductProvider(
             saleProductUid: Long): DataSource.Factory<Int,SaleProductSelected>
 
@@ -56,15 +56,6 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
             " AND child.saleProductCategory = 1 ")
     abstract fun findAllCategoriesInCollection(): DataSource.Factory<Int, SaleProduct>
-
-//    @Query(QUERY_SELECT_ALL_SALE_PRODUCT2 +
-//            " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
-//            "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
-//            "   WHERE SaleProduct.saleProductName = 'Collection' " +
-//            "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
-//            " AND child.saleProductCategory = 1 ")
-//    abstract fun findAllCategoriesInCollectionWithPP(): DataSource.Factory<Int, SaleProductWithType>
-
 
     @Query("SELECT * FROM SaleProductParentJoin WHERE " +
             " SaleProductParentJoin.saleProductParentJoinParentUid = :parentUid AND " +
@@ -99,7 +90,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     @Query("SELECT Parent.* FROM SaleProductParentJoin " +
             "LEFT JOIN SaleProduct as Parent ON " +
             "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
-            " WHERE SaleProductParentJoinActive = 1  " +
+            " WHERE CAST(SaleProductParentJoinActive  AS INTEGER) = 1 " +
             "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
             "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
             " GROUP BY saleProductParentJoinParentUid")
@@ -109,7 +100,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     @Query("SELECT Parent.* FROM SaleProductParentJoin " +
             "LEFT JOIN SaleProduct as Parent ON " +
             "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
-            " WHERE SaleProductParentJoinActive = 1  " +
+            " WHERE CAST(SaleProductParentJoinActive  AS INTEGER) = 1 " +
             "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
             "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
             " GROUP BY saleProductParentJoinParentUid")
@@ -122,7 +113,8 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "   ON Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
             "   LEFT JOIN SaleProduct as Child " +
             "   ON Child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
-            " WHERE SaleProductParentJoinActive = 1 AND Child.saleProductActive = 1 " +
+            " WHERE CAST(SaleProductParentJoinActive AS INTEGER) = 1 AND " +
+            " CAST(Child.saleProductActive AS INTEGER) = 1 " +
             "   AND Child.saleProductCategory = 1 " +
             " AND SaleProductParentJoinParentUid = :uid ")
     abstract suspend fun findAllChildProductTypesForUidAsync(uid: Long):List<SaleProduct>
@@ -135,7 +127,8 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
                 " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
                 " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
                 " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
-                " WHERE SaleProductParentJoin.saleProductParentJoinActive = 1 AND child.saleProductActive = 1 "
+                " WHERE CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1" +
+                " AND CAST(child.saleProductActive AS INTEGER) = 1 "
 
         const val QUERY_SELECT_ALL_SALE_PRODUCT2 =
                 "SELECT child.* " +
@@ -143,7 +136,8 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
                 " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
                 " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
                 " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
-                " WHERE SaleProductParentJoin.saleProductParentJoinActive = 1 AND child.saleProductActive = 1 "
+                " WHERE CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1" +
+                " AND CAST(child.saleProductActive AS INTEGER) = 1 "
     }
 
 

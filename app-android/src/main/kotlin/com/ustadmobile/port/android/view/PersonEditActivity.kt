@@ -63,6 +63,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * This activity is responsible for showing the edit page for a person. Used for editing a new
@@ -134,6 +135,13 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     }
 
+    private fun handleFieldEdited(fieldUid: Long,  dateLong: Long){
+        val systemTime = AtomicLong(System.currentTimeMillis())
+        val sessionActive = checkTimeoutAndUpdateLastActive(systemTime)
+        if(sessionActive) {
+            mPresenter.handleFieldEdited(fieldUid, dateLong)
+        }
+    }
     /**
      * Clears all fields.
      */
@@ -195,58 +203,61 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 val impl = UstadMobileSystemImpl.instance
                 if (label == impl.getString(MessageID.classes, applicationContext)) {
 
-                    thisLinearLayout!!.addView(divider)
+                    //Goldozi: Not showing clazzes
 
-                    //Add the Header
-                    val header = TextView(this)
-                    header.text = label!!.toUpperCase()
-                    header.textSize = HEADER_TEXT_SIZE.toFloat()
-                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
-                    thisLinearLayout.addView(header)
-
-                    //Add Add new Class button
-                    val addPersonToClazzHL = LinearLayout(this)
-                    addPersonToClazzHL.layoutParams = parentParams
-                    addPersonToClazzHL.orientation = LinearLayout.HORIZONTAL
-
-                    //Add the icon
-                    val addIconResId = getResourceId(ADD_PERSON_ICON,
-                            "drawable", packageName)
-                    //ImageView addIcon = new ImageView(this);
-                    val addIcon = AppCompatImageView(this)
-
-
-                    addIcon.setImageResource(addIconResId)
-                    addIcon.setPadding(DEFAULT_PADDING, 0, DEFAULT_TEXT_PADDING_RIGHT, 0)
-                    addPersonToClazzHL.addView(addIcon)
-
-                    //Add the button
-                    val addPersonButton = Button(this)
-                    addPersonButton.includeFontPadding = false
-                    addPersonButton.minHeight = 0
-                    addPersonButton.text = impl.getString(MessageID.add_person_to_class,
-                            applicationContext)
-                    addPersonButton.background = null
-                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0)
-                    addPersonButton.setOnClickListener { v -> mPresenter.handleClickAddNewClazz() }
-                    addPersonToClazzHL.addView(addPersonButton)
-
-                    mLinearLayout.addView(addPersonToClazzHL)
-
-                    //Add a recycler view of classes
-                    mRecyclerView = RecyclerView(this)
-                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT)
-                    mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
-                    mRecyclerView.setLayoutParams(wrapParams)
-
-
-                    //Add the layout
-                    mLinearLayout.addView(mRecyclerView)
-
-                    //Generate the live data and set it
-                    mPresenter.generateAssignedClazzesLiveData()
+//
+//                    thisLinearLayout!!.addView(divider)
+//
+//                    //Add the Header
+//                    val header = TextView(this)
+//                    header.text = label!!.toUpperCase()
+//                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+//                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+//                    thisLinearLayout.addView(header)
+//
+//                    //Add Add new Class button
+//                    val addPersonToClazzHL = LinearLayout(this)
+//                    addPersonToClazzHL.layoutParams = parentParams
+//                    addPersonToClazzHL.orientation = LinearLayout.HORIZONTAL
+//
+//                    //Add the icon
+//                    val addIconResId = getResourceId(ADD_PERSON_ICON,
+//                            "drawable", packageName)
+//                    //ImageView addIcon = new ImageView(this);
+//                    val addIcon = AppCompatImageView(this)
+//
+//
+//                    addIcon.setImageResource(addIconResId)
+//                    addIcon.setPadding(DEFAULT_PADDING, 0, DEFAULT_TEXT_PADDING_RIGHT, 0)
+//                    addPersonToClazzHL.addView(addIcon)
+//
+//                    //Add the button
+//                    val addPersonButton = Button(this)
+//                    addPersonButton.includeFontPadding = false
+//                    addPersonButton.minHeight = 0
+//                    addPersonButton.text = impl.getString(MessageID.add_person_to_class,
+//                            applicationContext)
+//                    addPersonButton.background = null
+//                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0)
+//                    addPersonButton.setOnClickListener { v -> mPresenter.handleClickAddNewClazz() }
+//                    addPersonToClazzHL.addView(addPersonButton)
+//
+//                    mLinearLayout.addView(addPersonToClazzHL)
+//
+//                    //Add a recycler view of classes
+//                    mRecyclerView = RecyclerView(this)
+//                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+//                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+//                            ViewGroup.LayoutParams.WRAP_CONTENT)
+//                    mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
+//                    mRecyclerView.setLayoutParams(wrapParams)
+//
+//
+//                    //Add the layout
+//                    mLinearLayout.addView(mRecyclerView)
+//
+//                    //Generate the live data and set it
+//                    mPresenter.generateAssignedClazzesLiveData()
                 }else{
 
                     thisLinearLayout!!.addView(divider)
@@ -319,7 +330,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                         fieldEditText.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                                 dateLong, currentLocale))
-                        mPresenter.handleFieldEdited(fieldUid, dateLong)
+                        handleFieldEdited(fieldUid, dateLong)
 
                     }
 

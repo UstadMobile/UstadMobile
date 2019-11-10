@@ -33,7 +33,7 @@ class UserProfilePresenter(context: Any,
             UmAccountManager.getRepositoryForActiveAccount(context)
     private val personDao: PersonDao
     private var loggedInPerson: Person? = null
-    private var personPictureDao: PersonPictureDao? = null
+    private lateinit var personPictureDao: PersonPictureDao
 
     var loggedInPersonUid = 0L
 
@@ -43,7 +43,8 @@ class UserProfilePresenter(context: Any,
 
         //Get provider Dao
         personDao = repository.personDao
-        personPictureDao = repository.personPictureDao
+        personPictureDao =
+                UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
 
     }
 
@@ -65,11 +66,11 @@ class UserProfilePresenter(context: Any,
                         view.updateToolbarTitle(personName)
                     })
 
-                    personPictureDao = repository.personPictureDao
                     val personPicture =
-                            personPictureDao!!.findByPersonUidAsync(loggedInPerson!!.personUid)
+                            personPictureDao.findByPersonUidAsync(loggedInPerson!!.personUid)
                     if (personPicture != null) {
-                        view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture)!!)
+                        val picturePath = personPictureDao.getAttachmentPath(personPicture)
+                        view.updateImageOnView(picturePath!!)
                     }
                 }
             }
@@ -122,8 +123,6 @@ class UserProfilePresenter(context: Any,
     }
 
     fun handleCompressedImage(imageFilePath: String) {
-        val personPictureDao = repository.personPictureDao
-        val personDao = repository.personDao
 
         GlobalScope.launch {
             try {
@@ -140,11 +139,13 @@ class UserProfilePresenter(context: Any,
                 personPictureDao.setAttachment(existingPP, imageFilePath)
 
                 //Update person and generate feeds for person
-                personDao.updateAsync(loggedInPerson!!) //TODO: Check this
+                personDao.updateAsync(loggedInPerson!!)
 
-                view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
+                //Update view with path
+                val picturePath = personPictureDao.getAttachmentPath(existingPP)
+                view.updateImageOnView(picturePath!!)
             }catch(e:Exception){
-                println(e.message)
+                throw e
             }
         }
     }

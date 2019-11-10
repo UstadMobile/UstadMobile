@@ -17,6 +17,7 @@ interface SaleDetailView : UstadView {
      */
     fun finish()
 
+    fun sendMessage(message: String)
 
     /**
      * Sets the given provider to the view's provider adapter.

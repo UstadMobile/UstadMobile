@@ -56,7 +56,7 @@ class SaleProductDetailPresenter(context: Any,
         //Get provider Dao
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
-        pictureDao = repository.saleProductPictureDao
+        pictureDao = UmAccountManager.getRepositoryForActiveAccount(context).saleProductPictureDao
 
         impl = UstadMobileSystemImpl.instance
 

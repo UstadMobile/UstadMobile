@@ -18,18 +18,18 @@ import com.ustadmobile.lib.db.entities.*
 abstract class SaleDao : BaseDao<Sale> {
 
 
-    @Query("SELECT COUNT(*) FROM SALE WHERE salePreOrder = 1 AND saleActive = 1")
+    @Query("SELECT COUNT(*) FROM SALE WHERE salePreOrder = 1 AND CAST(saleActive AS INTEGER) = 1")
     abstract fun removeMe(): DataSource.Factory<Int, Int>
 
 
-    @Query("SELECT COUNT(*) FROM SALE WHERE salePreOrder = 1 AND saleActive = 1")
+    @Query("SELECT COUNT(*) FROM SALE WHERE salePreOrder = 1 AND CAST(saleActive AS INTEGER) = 1")
     abstract fun preOrderSaleCountProvider(): DataSource.Factory<Int, Int>
 
-    //    @Query("select count(*) from sale where salePreOrder = 1 AND saleActive = 1")
+    //    @Query("select count(*) from sale where salePreOrder = 1 AND CAST(saleActive AS INTEGER) = 1")
     @Query(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
             " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
-            " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
+            " FROM Sale sl WHERE CAST(sl.saleActive AS INTEGER) = 1 AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
     abstract fun preOrderSaleCountLive(): Int
     
     //INSERT
@@ -58,12 +58,11 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query("$ALL_SALES_ACTIVE_QUERY AND salePaymentDone = 0")
     abstract fun findAllActivePaymentDueSalesLive(): DoorLiveData<List<Sale>>
 
-    @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
+    @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND CAST(saleActive AS INTEGER) = 1")
     abstract suspend fun findAllSaleWithTitleAsync(saleTitle: String): List<Sale>
 
-    @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
+    @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND CAST(saleActive AS INTEGER) = 1")
     abstract fun findAllSaleWithTitle(saleTitle: String): List<Sale>
-
 
     @Query(ALL_SALE_LIST)
     abstract fun findAllActiveAsSaleListDetailLive(): DoorLiveData<List<SaleListDetail>>
@@ -129,7 +128,6 @@ abstract class SaleDao : BaseDao<Sale> {
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_ASC)
     abstract fun findAllSaleFilterPreOrderSortDateDescProvider(): DataSource.Factory<Int,SaleListDetail>
-
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_ASC)
     abstract fun findAllSaleFilterAllSortNameAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
@@ -214,19 +212,30 @@ abstract class SaleDao : BaseDao<Sale> {
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY)
     abstract fun findAllSaleItemsWithSearchFilter(locationuid: Long,
-                                                  amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
+                                                  amountl: Long, amounth: Long, from: Long,
+                                                  to: Long, title: String)
+            : DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_DATE_ASC)
     abstract fun findAllSaleItemsWithSearchFilterOrderDateAsc(locationuid: Long,
-                                                              amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
+                                                              amountl: Long, amounth: Long,
+                                                              from: Long, to: Long,
+                                                              title: String)
+            : DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_ASC)
     abstract fun findAllSaleItemsWithSearchFilterOrderPriceAsc(locationuid: Long,
-                                                               amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
+                                                               amountl: Long, amounth: Long,
+                                                               from: Long, to: Long,
+                                                               title: String)
+            : DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_DESC)
     abstract fun findAllSaleItemsWithSearchFilterOrderPriceDesc(locationuid: Long,
-                                                                amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
+                                                                amountl: Long, amounth: Long,
+                                                                from: Long, to: Long,
+                                                                title: String)
+            : DataSource.Factory<Int,SaleListDetail>
 
 
     fun findAllSaleFilterAndSearchProvider(locationUid: Long,
@@ -269,14 +278,16 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     //Get overdue sale count
-    @Query("select count(*) from sale where Sale.saleDueDate < :today and Sale.saleDueDate > 0 AND Sale.saleActive = 1")
+    @Query("select count(*) from sale where Sale.saleDueDate < :today " +
+            " and Sale.saleDueDate > 0 AND CAST(Sale.saleActive AS INTEGER) = 1")
     abstract suspend fun getOverDueSaleCountAsync(today: Long): Int
 
 
     @Query(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
             " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
-            " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
+            " FROM Sale sl WHERE CAST(sl.saleActive AS INTEGER) = 1 " +
+            " AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
     abstract fun getPreOrderSaleCountLive(): DoorLiveData<Int>
 
 
@@ -300,11 +311,11 @@ abstract class SaleDao : BaseDao<Sale> {
             "   '' as lastActiveOnApp, " +
             "   '' as leRank, " +
             "   LE.personUid as leUid " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1 " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
-            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
+            " CAST(SALE.saleActive AS INTEGER) = 1 AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
             " GROUP BY leUid " +
-            "  ORDER BY    totalSalesValue DESC")
+            " ORDER BY totalSalesValue DESC")
     abstract suspend fun getTopLEs(): List<ReportTopLEs>
 
     @Query("SELECT    " +
@@ -313,9 +324,10 @@ abstract class SaleDao : BaseDao<Sale> {
             "   '' as lastActiveOnApp, " +
             "   '' as leRank, " +
             "   LE.personUid as leUid " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1 " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND " +
+            " CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
-            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
+            " CAST(SALE.saleActive AS INTEGER) = 1 AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
             " GROUP BY leUid " +
             "  ORDER BY    totalSalesValue DESC")
     abstract fun getTopLEsLive(): DoorLiveData<List<ReportTopLEs>>
@@ -325,11 +337,11 @@ abstract class SaleDao : BaseDao<Sale> {
             "  Sale.saleCreationDate AS saleDate,  " +
             "  SaleProduct.saleProductName as productNames, " +
             "Location.title as locationName " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1  " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive  " +
             " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
             " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
-            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1    " +
+            " CAST(SALE.saleActive AS INTEGER) = 1  AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
             "  ORDER BY    saleDate DESC ")
     abstract suspend fun getSaleLog(): List<ReportSalesLog>
 
@@ -338,11 +350,12 @@ abstract class SaleDao : BaseDao<Sale> {
             "  Sale.saleCreationDate AS saleDate,  " +
             "  SaleProduct.saleProductName as productNames, " +
             "Location.title as locationName " +
-            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid  AND SaleItem.saleItemActive = 1 " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid  AND " +
+            " CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
             " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
             " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
             " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
-            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1    " +
+            " CAST(SALE.saleActive AS INTEGER) = 1  AND CAST(SaleItem.saleItemActive AS INTEGER) = 1   " +
             "  ORDER BY    saleDate DESC ")
     abstract fun getSaleLogLive(): DoorLiveData<List<ReportSalesLog>>
 
@@ -363,6 +376,7 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(MY_WE)
     abstract fun getMyWomenEntrepreneurs(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
+
     fun getMyWomenEntrepreneurs(groupUid:Long, sort:Int):DataSource.Factory<Int, PersonWithSaleInfo>{
 
         return when (sort) {
@@ -373,16 +387,16 @@ abstract class SaleDao : BaseDao<Sale> {
             else -> getMyWomenEntrepreneurs(groupUid)
         }
     }
-    
+
     @Query("SELECT " +
             "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
             "   'Product list goes here' AS topProducts, " +
             "   PersonPicture.personPicturePersonUid as personPictureUid, " +
             "   Members.* " +
             " FROM PersonGroupMember " +
-            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
-            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
-            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active " +
+            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive " +
+            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1" +
             "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
             " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
             "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit  OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
@@ -412,21 +426,21 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val ALL_SALES_QUERY = "SELECT * FROM Sale"
 
-        const val ALL_SALES_ACTIVE_QUERY = "SELECT * FROM Sale WHERE saleActive = 1"
+        const val ALL_SALES_ACTIVE_QUERY = "SELECT * FROM Sale WHERE CAST(saleActive AS INTEGER) = 1 "
 
         const val ALL_SALE_LIST_SELECT =
                 " SELECT sl.*, " +
                 " (SELECT SaleItem.saleItemQuantity " +
                 " FROM Sale stg " +
-                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND SaleItem.saleItemActive = 1 " +
-                " WHERE stg.saleUid = sl.saleUid AND SaleItem.saleItemActive = 1 " +
+                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
+                " WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
                 " ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
                 " )  " +
                 " || 'x ' || " +
                 " (SELECT SaleProduct.saleProductName " +
                 " FROM SaleItem sitg " +
                 " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid " +
-                " WHERE sitg.saleItemSaleUid = sl.saleUid AND sitg.saleItemActive = 1 " +
+                " WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  " +
                 " ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) " +
                 " || " +
                 " (select " +
@@ -444,14 +458,14 @@ abstract class SaleDao : BaseDao<Sale> {
                 " Location.title AS locationName, " +
                 " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
                 "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-                "            Sale.saleUid AND SaleItem.saleItemActive = 1 WHERE Sale.saleUid = sl.saleUid) ,0 " +
+                "            Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 " +
                 " ) AS saleAmount, " +
                 " (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
                 "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-                "            Sale.saleUid AND SaleItem.saleItemActive = 1 WHERE Sale.saleUid = sl.saleUid) ,0 " +
+                "            Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 " +
                 "           ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
                 "               WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
-                "                AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ," +
+                "                AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ," +
                 "           0)" +
                 " ) AS saleAmountDue, " +
                 " 'Afs' AS saleCurrency,  " +
@@ -459,13 +473,13 @@ abstract class SaleDao : BaseDao<Sale> {
                 "    ( " +
                 "    SELECT SaleItem.saleItemDueDate FROM SaleItem LEFT JOIN Sale on Sale.saleUid = " +
                 "       SaleItem.saleItemSaleUid WHERE SaleItem.saleItemSaleUid = sl.saleUid  " +
-                "       AND Sale.saleActive = 1 AND SaleItem.saleItemPreOrder = 1 " +
+                "       AND CAST(Sale.saleActive AS INTEGER) = 1  AND SaleItem.saleItemPreOrder = 1 " +
                 "     ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 " +
                 "    ) ,0) AS earliestDueDate, " +
                 " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount," +
                 " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  " +
                 "   WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
-                "   AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0) " +
+                "   AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,0) " +
                 " AS saleAmountPaid, " +
                 " (select (case  when  " +
                 "   (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
@@ -475,12 +489,12 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val ALL_SALE_LIST_LJ1 =
                 " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid  " +
-                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid AND SaleItem.saleItemActive = 1 "
+                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 "
         const val ALL_SALE_LIST_LJ2 =
                 " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
                 " LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid "
 
-        const val ALL_SALE_LIST_WHERE = " WHERE sl.saleActive = 1 "
+        const val ALL_SALE_LIST_WHERE = " WHERE CAST(sl.saleActive AS INTEGER) = 1 "
         const val ALL_SALE_LIST_WHERE_WE =" AND WE.personUid = :weUid "
 
 
@@ -517,6 +531,7 @@ abstract class SaleDao : BaseDao<Sale> {
 
         //INACTIVATE:
 
+        //TODO: Replace with boolean arguments
         const val INACTIVATE_SALE_QUERY = "UPDATE Sale SET saleActive = 0 WHERE saleUid = :saleUid"
 
 
@@ -557,14 +572,14 @@ abstract class SaleDao : BaseDao<Sale> {
         "   LEFT JOIN SaleProduct AS PP ON SaleProductParentJoin.saleProductParentJoinParentUid = PP.saleProductUid" +
         "   WHERE SaleProductParentJoin.saleProductParentJoinChildUid = SaleItem.saleItemProductUid) as productTypeUid " +
         " FROM SALE " +
-        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND SaleItem.saleItemActive = 1 " +
+        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
         "   LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid " +
         "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
         "   LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
         "   LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid " +
         " WHERE " +
-        "   SALE.saleActive = 1 " +
-        "   AND SaleItem.saleItemActive = 1 " +
+        "   CAST(SALE.saleActive AS INTEGER) = 1  " +
+        "   AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
         "   OR leUid in (:leUids) " +
         "   OR producerUid in (:producerUids) " +
         "   OR locationUid in (:locationUids) " +
@@ -597,9 +612,9 @@ abstract class SaleDao : BaseDao<Sale> {
                         "   PersonPicture.personPicturePersonUid as personPictureUid, "+
                         "   Members.* " +
                         " FROM PersonGroupMember " +
-                        "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active = 1 " +
-                        "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive = 1 " +
-                        "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND Sale.saleActive = 1 " +
+                        "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND CAST(Members.active AS INTEGER) = 1  " +
+                        "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
+                        "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1  " +
                         "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
                         " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
                         "   GROUP BY(Members.personUid) "

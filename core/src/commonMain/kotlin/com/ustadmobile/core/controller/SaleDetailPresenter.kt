@@ -1,13 +1,14 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CD_LE_UID
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_GEN_NAME
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_NAME
@@ -66,7 +67,7 @@ class SaleDetailPresenter(context: Any,
         salePaymentDao = repository.salePaymentDao
         saleDao = repository.saleDao
         locationDao = repository.locationDao
-        saleVoiceNoteDao = UmAppDatabase.getInstance(context).saleVoiceNoteDao
+        saleVoiceNoteDao = UmAccountManager.getRepositoryForActiveAccount(context).saleVoiceNoteDao
         personDao = repository.personDao
 
         positionToLocationUid = HashMap()
@@ -122,14 +123,13 @@ class SaleDetailPresenter(context: Any,
 
                 //startObservingLocations()
 
-                val saleVoiceNote = saleVoiceNoteDao.findByPersonUidAsync(saleUid)
+                val saleVoiceNote = saleVoiceNoteDao.findBySaleUidAsync(saleUid)
                 if(saleVoiceNote != null) {
                     val saleVoiceNotePath = saleVoiceNoteDao.getAttachmentPath(saleVoiceNote!!)
                     if(saleVoiceNotePath != null){
-                        view.updateSaleVoiceNoteOnView(saleVoiceNotePath)
+                        view.runOnUiThread(Runnable { view.updateSaleVoiceNoteOnView(saleVoiceNotePath) })
                     }
                 }
-
             }
 
             getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
@@ -322,42 +322,55 @@ class SaleDetailPresenter(context: Any,
     fun handleClickSave() {
 
         if (updatedSale != null) {
-            updatedSale!!.saleActive = true
-            if (updatedSale!!.saleLocationUid == 0L) {
-                if(positionToLocationUid != null && positionToLocationUid!!.size > 0) {
+            if(updatedSale!!.saleCustomerUid == null || updatedSale!!.saleCustomerUid == 0L){
+                val selectCustomerMessage = UstadMobileSystemImpl.instance.getString(
+                        MessageID.please_select_customer, context)
+                view.sendMessage(selectCustomerMessage)
+            }else{
+                updatedSale!!.saleActive = true
+                if (updatedSale!!.saleLocationUid == 0L) {
+                    if(positionToLocationUid != null && positionToLocationUid!!.size > 0) {
 
-                    if (positionToLocationUid!!.get(0) != null) {
-                        updatedSale!!.saleLocationUid = positionToLocationUid!!.get(0)!!
-                    } else {
-                        updatedSale!!.saleLocationUid = 0
+                        if (positionToLocationUid!!.get(0) != null) {
+                            updatedSale!!.saleLocationUid = positionToLocationUid!!.get(0)!!
+                        } else {
+                            updatedSale!!.saleLocationUid = 0
+                        }
                     }
                 }
-            }
 
-            //Persist voice note
-            if (voiceNoteFileName != null && voiceNoteFileName!!.isNotEmpty()) {
-                val voiceNote = SaleVoiceNote()
-                voiceNote.saleVoiceNoteSaleUid = updatedSale!!.saleUid
+                //Persist voice note
+                if (voiceNoteFileName != null && voiceNoteFileName!!.isNotEmpty()) {
+                    GlobalScope.launch {
+                        try {
+                            var voiceNoteUid : Long = 0L
+
+                            var existingVN = saleVoiceNoteDao.findByPersonUidAsync(updatedSale!!.saleUid)
+                            if(existingVN == null){
+                                existingVN = SaleVoiceNote()
+                                existingVN.saleVoiceNoteSaleUid = updatedSale!!.saleUid
+                                existingVN.saleVoiceNoteTimestamp = DateTime.nowUnixLong()
+                                voiceNoteUid = saleVoiceNoteDao.insertAsync(existingVN)
+                                existingVN.saleVoiceNoteUid = voiceNoteUid
+                            }
+
+                            if(existingVN!=null) {
+                                saleVoiceNoteDao.setAttachment(existingVN, voiceNoteFileName!!)
+                            }
+                        } catch (e: IOException) {
+                            println(e!!.message)
+                        }
+                    }
+                }
+
+                var thisP = this
                 GlobalScope.launch {
-                    try {
+                    val resultLive = saleItemDao.getTitleForSaleUidLive(updatedSale!!.saleUid)
+                    view.runOnUiThread(Runnable {
+                        resultLive.observe(thisP, thisP::handleUpdateSaleName)
+                    })
 
-                        val result = saleVoiceNoteDao.insertAsync(voiceNote)
-
-                        saleVoiceNoteDao.setAttachment(voiceNote, voiceNoteFileName!!)
-
-                    } catch (e: IOException) {
-                        println(e!!.message)
-                    }
                 }
-            }
-
-            var thisP = this
-            GlobalScope.launch {
-                val resultLive = saleItemDao.getTitleForSaleUidLive(updatedSale!!.saleUid)
-                view.runOnUiThread(Runnable {
-                    resultLive.observe(thisP, thisP::handleUpdateSaleName)
-                })
-
             }
         }
     }

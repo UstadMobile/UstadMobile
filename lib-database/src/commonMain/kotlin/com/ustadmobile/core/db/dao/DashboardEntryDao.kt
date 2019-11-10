@@ -20,7 +20,7 @@ abstract class DashboardEntryDao : BaseDao<DashboardEntry> {
     abstract suspend fun updateTitle(uid: Long, title: String):Int
 
     @Query("SELECT * FROM DashboardEntry WHERE " + "dashboardEntryPersonUid = :uid " +
-            " AND dashboardEntryActive = 1 ORDER BY dashboardEntryIndex ASC")
+            " AND CAST(dashboardEntryActive AS INTEGER) = 1 ORDER BY dashboardEntryIndex ASC")
     abstract fun findByPersonAndActiveProvider(uid: Long): DataSource.Factory<Int,DashboardEntry>
 
 
@@ -33,6 +33,7 @@ abstract class DashboardEntryDao : BaseDao<DashboardEntry> {
             "WHERE dashboardEntryUid = :uid")
     abstract suspend fun unpinEntry(uid: Long):Int
 
+    //TODO: Make it use a boolean argument
     @Query("UPDATE DashboardEntry SET dashboardEntryActive = 0 " +
             " WHERE dashboardEntryUid = :uid")
     abstract suspend fun deleteEntry(uid: Long):Int

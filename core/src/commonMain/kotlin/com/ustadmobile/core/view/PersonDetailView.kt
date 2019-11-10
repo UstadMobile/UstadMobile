@@ -82,6 +82,8 @@ interface PersonDetailView : UstadView {
 
     fun addComponent(value: String, label: String)
 
+    fun updateToolbar(name: String)
+
     companion object {
 
         val VIEW_NAME = "PersonDetail"

@@ -111,9 +111,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
 
     var checkLogout:Boolean = true
 
-
-    val TIMEOUT_LOGOUT = 600000L
-
     internal var selectedFileUri: Uri?= null
 
     internal var isOpeningFilePickerOrCamera = false
@@ -349,7 +346,15 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         impl.setAppPref(PREFKEY_LAST_ACTIVE, time.toString(), viewContext)
     }
 
-    private fun checkTimeout() {
+    fun checkTimeoutAndUpdateLastActive(time:AtomicLong):Boolean{
+        if(!checkTimeout()){
+            updateLastActive(time)
+            return true
+        }
+        return false
+    }
+
+    private fun checkTimeout():Boolean {
         val impl = instance
         val lastInputEventTime = LastActive.instance.lastActive
         var lt:Long
@@ -367,6 +372,9 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         if (timeoutExceeded > logoutTimeout)
         {
             handleLogout()
+            return true
+        }else{
+            return false
         }
     }
 
@@ -615,6 +623,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         private const val FILE_SELECTION_REQUEST_CODE = 112
 
         val PREFKEY_LAST_ACTIVE = "prefke.lastactive"
+
+        val TIMEOUT_LOGOUT = 900000L
 
     }
 }

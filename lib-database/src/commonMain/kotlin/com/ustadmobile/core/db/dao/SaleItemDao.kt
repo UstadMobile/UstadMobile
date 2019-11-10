@@ -46,11 +46,11 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
     abstract fun findAllActiveProvider(): DataSource.Factory<Int, SaleItem>
 
     @Query("SELECT count(*) From SaleItem where SaleItem.saleItemSaleUid = :saleUid " +
-            "AND SaleItem.saleItemActive = 1")
+            "AND SaleItem.saleItemActive")
     abstract suspend fun getSaleItemCountFromSale(saleUid: Long): Int
 
     @Query("SELECT count(*) From SaleItem where SaleItem.saleItemSaleUid = :saleUid " +
-            "AND SaleItem.saleItemActive = 1")
+            "AND CAST(SaleItem.saleItemActive AS INTEGER) = 1")
     abstract fun getSaleItemCountFromSaleLive(saleUid: Long): DoorLiveData<Int>
 
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
@@ -95,9 +95,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
     @Query(INACTIVATE_QUERY)
     abstract suspend fun inactivateEntityAsync(uid: Long):Int
 
-
     //UPDATE:
-
     @Update
     abstract suspend fun updateAsync(entity: SaleItem):Int
 
@@ -106,7 +104,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
 
         const val GENERATE_SALE_NAME = " SELECT (SELECT SaleItem.saleItemQuantity " +
                 "  FROM Sale s " +
-                "  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = s.saleUid AND SaleItem.saleItemActive = 1 " +
+                "  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = s.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
                 "  WHERE s.saleUid = :saleUid " +
                 "  ORDER BY s.saleCreationDate ASC LIMIT 1) || 'x ' || " +
                 "  (SELECT SaleProduct.saleProductName " +
@@ -124,7 +122,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
                 "FROM Sale " +
                 "where Sale.saleUid = :saleUid "
 
-        const val ALL_ACTIVE_QUERY = "SELECT * FROM SaleItem WHERE saleItemActive = 1"
+        const val ALL_ACTIVE_QUERY = "SELECT * FROM SaleItem WHERE CAST(saleItemActive AS INTEGER) = 1"
 
         /**
          * long saleItemPictureUid;
@@ -141,7 +139,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
                 " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
                 " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
                 "   SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
-                "WHERE saleItemActive = 1"
+                "WHERE CAST(saleItemActive AS INTEGER) = 1"
 
         const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY =
                 "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
@@ -150,24 +148,23 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
                 " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
                 " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
                 "   SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
-                "WHERE saleItemActive = 1 AND SaleItem.saleItemSaleUid = :saleUid"
+                "WHERE CAST(saleItemActive AS INTEGER) = 1 AND SaleItem.saleItemSaleUid = :saleUid"
 
         //Total amount of every sale per sale uid
 
         const val TOTAL_PAID_BY_SALE_UID = "SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem " +
-                "WHERE saleItemSaleUid = :saleUid AND saleItemActive = 1 " +
+                "WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 " +
                 ""
         const val TOTAL_DISCOUNT_BY_SALE_UID = "SELECT SUM(saleItemDiscount * saleItemQuantity) FROM SaleItem " +
-                "WHERE saleItemSaleUid = :saleUid AND saleItemActive = 1 " +
+                "WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 " +
                 "AND saleItemSold = 1"
 
 
         //LOOK UP
-
         const val FIND_BY_UID_QUERY = "SELECT * FROM SaleItem WHERE saleItemUid = :uid"
 
         //INACTIVATE:
-
+        //TODO: Replace with Boolean argument
         const val INACTIVATE_QUERY = "UPDATE SaleItem SET saleItemActive = 0 WHERE saleItemUid = :uid"
     }
 

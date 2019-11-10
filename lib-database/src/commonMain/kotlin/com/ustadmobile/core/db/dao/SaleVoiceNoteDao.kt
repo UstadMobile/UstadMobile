@@ -19,7 +19,7 @@ abstract class SaleVoiceNoteDao : BaseDao<SaleVoiceNote> {
 
     @SetAttachmentData
     open fun setAttachment(entity: SaleVoiceNote, filePath: String) {
-
+        throw Exception(Exception("Shouldn't call the Dao, call the repo instead "))
     }
 
     @GetAttachmentData
@@ -30,5 +30,10 @@ abstract class SaleVoiceNoteDao : BaseDao<SaleVoiceNote> {
     @Query("SELECT * FROM SaleVoiceNote where  saleVoiceNoteUid = :saleUid ORDER BY "
             + " saleVoiceNoteTimestamp DESC LIMIT 1")
     abstract suspend fun findByPersonUidAsync(saleUid: Long): SaleVoiceNote?
+
+
+    @Query("SELECT * FROM SaleVoiceNote where  saleVoiceNoteSaleUid = :saleUid ORDER BY "
+            + " saleVoiceNoteTimestamp DESC LIMIT 1")
+    abstract suspend fun findBySaleUidAsync(saleUid: Long): SaleVoiceNote?
 
 }

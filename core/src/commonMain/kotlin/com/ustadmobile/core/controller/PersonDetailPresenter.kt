@@ -58,7 +58,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
 
-    private var personPictureDao: PersonPictureDao? = null
+    private var personPictureDao: PersonPictureDao
 
     private var currentPerson: Person? = null
 
@@ -87,7 +87,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         optionDao = repository.customFieldValueOptionDao
         personDao = repository.personDao
         personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        personPictureDao = repository.personPictureDao
+        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
     }
 
     fun addToMap(viewId: Int, fieldId: Long) {
@@ -228,8 +228,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      * @param imageFile The image file object
      */
     fun handleCompressedImage(imageFilePath: String) {
-        val personPictureDao = repository.personPictureDao
-        val personDao = repository.personDao
 
         GlobalScope.launch {
             var personPictureUid : Long = 0L
@@ -291,6 +289,24 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         view.clearAllFields()
 
         currentPerson = person
+
+        var personName = ""
+        var personFirstNames = ""
+        var personLastName = ""
+
+        if(currentPerson != null ){
+            if(currentPerson!!.firstNames!=null){
+                personFirstNames = currentPerson!!.firstNames!! + " "
+            }
+            if(currentPerson!!.lastName != null){
+                personLastName = currentPerson!!.lastName!!
+            }
+        }
+        personName = personFirstNames + personLastName
+
+        view.runOnUiThread(Runnable {
+            view.updateToolbar(personName)
+        })
 
         GlobalScope.launch {
             val personPicture = personPictureDao!!.findByPersonUidAsync(currentPerson!!.personUid)

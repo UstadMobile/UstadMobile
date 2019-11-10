@@ -70,6 +70,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     private var fab: FloatingTextButton? = null
     internal var updateImageButton: Button? = null
     private var imagePathFromCamera: String? = null
+    private var toolbar: Toolbar? = null
 
     private var mOptionsMenu: Menu? = null
 
@@ -78,6 +79,9 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
 
     internal var customFieldsLL: LinearLayout? = null
 
+    override fun updateToolbar(name: String) {
+        toolbar!!.title = name
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val i = item.itemId
@@ -110,7 +114,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         setContentView(R.layout.activity_person_detail)
 
         //Toolbar
-        val toolbar = findViewById<Toolbar>(R.id.activity_person_detail_toolbar)
+        toolbar = findViewById<Toolbar>(R.id.activity_person_detail_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -193,7 +197,8 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     }
 
     override fun showEnrollInClass(show: Boolean) {
-        runOnUiThread { enrollInClassLL!!.visibility = if (show) View.VISIBLE else View.GONE }
+        //Goldozi: Not showing enroll in clazz
+        //runOnUiThread { enrollInClassLL!!.visibility = if (show) View.VISIBLE else View.GONE }
 
     }
 
@@ -248,7 +253,6 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    //TODO: Check this KMP. Changed File to file path
                     mPresenter!!.handleCompressedImage(imageFile.absolutePath)
                 }
             }
@@ -318,9 +322,6 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             label = impl.getString(field.messageLabel, this)
         }
 
-        /*Possible workaround is search by the MessaeID.thisBit
-
-         */
 
         when (field.fieldType) {
             FIELD_TYPE_HEADER -> {
@@ -340,20 +341,27 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 header.text = label!!.toUpperCase()
                 header.textSize = 12f
                 header.setPadding(16, 0, 0, 2)
-                mLinearLayout!!.addView(header)
+
+                //Goldozi: Not showing header for classes
+                if (field.messageLabel != MessageID.classes) {
+                    mLinearLayout!!.addView(header)
+                }
 
                 if (field.messageLabel == MessageID.classes) {
-                    //Add a recyclerview of classes
-                    mRecyclerView = RecyclerView(this)
 
-                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-                    mRecyclerView!!.setLayoutManager(mRecyclerLayoutManager)
+                    //Goldozi: No clazzes feature
 
-                    //Add the layout
-                    mLinearLayout!!.addView(mRecyclerView)
-
-                    //Generate the live data and set it
-                    mPresenter!!.generateAssignedClazzesLiveData()
+//                    //Add a recyclerview of classes
+//                    mRecyclerView = RecyclerView(this)
+//
+//                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+//                    mRecyclerView!!.setLayoutManager(mRecyclerLayoutManager)
+//
+//                    //Add the layout
+//                    mLinearLayout!!.addView(mRecyclerView)
+//
+//                    //Generate the live data and set it
+//                    mPresenter!!.generateAssignedClazzesLiveData()
                 }
             }
             FIELD_TYPE_TEXT, FIELD_TYPE_FIELD -> {

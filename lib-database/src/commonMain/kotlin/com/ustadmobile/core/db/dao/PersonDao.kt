@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -106,9 +107,6 @@ abstract class  PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-    /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-      protected abstract fun incrementPrimaryKey()*/
-
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
         var accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
@@ -124,7 +122,8 @@ abstract class  PersonDao : BaseDao<Person> {
         return isValidToken(token, personUid)
     }
 
-    @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token and accessTokenPersonUid = :personUid)")
+    @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token " +
+            " and accessTokenPersonUid = :personUid)")
     abstract fun isValidToken(token: String, personUid: Long): Boolean
 
     @Insert
@@ -140,14 +139,14 @@ abstract class  PersonDao : BaseDao<Person> {
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
     @JsName("getAllPersons")
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name " +
+            " FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
     abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
 
-
     @JsName("getAllPersonsInList")
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE Person.personUid IN (:uidList)")
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name " +
+            " FROM Person WHERE Person.personUid IN (:uidList)")
     abstract suspend fun getAllPersonsInList(uidList: List<Long>): List<PersonNameAndUid>
-
 
     /**
      * Checks if a user has the given permission over a given person in the database
@@ -163,7 +162,6 @@ abstract class  PersonDao : BaseDao<Person> {
 
     @Query("SELECT 1 FROM Person WHERE Person.personUid = :personUid AND (" +
             ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
-
     abstract fun personHasPermissionLive(accountPersonUid: Long, personUid: Long, permission: Long)
             : DoorLiveData<Boolean>
 
@@ -186,23 +184,23 @@ abstract class  PersonDao : BaseDao<Person> {
     abstract suspend fun findByUidAsync(uid: Long) : Person?
 
 
-    @Query("SELECT * FROM Person WHERE active =1 " +
+    @Query("SELECT * FROM Person WHERE CAST(active AS INTEGER) =1 " +
             "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
             Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " )
     abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
 
-    @Query("SELECT * FROM Person WHERE active=1 " +
+    @Query("SELECT * FROM Person WHERE CAST(active AS INTEGER)=1 " +
             "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
              Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " +
             "ORDER BY firstNames ASC")
     abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person>
 
     //TODO: Query is wrong, used while testing. Please fix this. (Varuna)
-    @Query("SELECT * FROM PERSON WHERE active = 1 AND Person.personRoleUid != :leUid " +
+    @Query("SELECT * FROM PERSON WHERE CAST(active AS INTEGER) = 1 AND Person.personRoleUid != :leUid " +
             " AND Person.personRoleUid = :roleUid  ORDER BY firstNames ASC")
     abstract fun findAllPeopleByLEAndRoleUid(leUid: Long, roleUid: Long): DataSource.Factory<Int, Person>
 
-    @Query("SELECT * FROM Person WHERE active=1 " +
+    @Query("SELECT * FROM Person WHERE CAST(active AS INTEGER)=1 " +
             "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
             Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " +
             "ORDER BY firstNames DESC")
@@ -211,7 +209,7 @@ abstract class  PersonDao : BaseDao<Person> {
     @Update
     abstract fun updateAsync(entity: Person):Int
 
-    @Query("Select * From Person WHERE active = 1")
+    @Query("Select * From Person WHERE CAST(active AS INTEGER) = 1")
     abstract fun findAllPeople(): List<Person>
 
     @Query("Select * From Person")
@@ -226,7 +224,7 @@ abstract class  PersonDao : BaseDao<Person> {
     abstract fun findAllAdminsAsList(): List<Person>
 
 
-    @Query("SELECT Person.* , (0) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (0) AS clazzUid, " +
             " (0) AS attendancePercentage, " +
             " '' AS clazzName, " +
             " (0) AS clazzMemberRole, " +
@@ -239,7 +237,9 @@ abstract class  PersonDao : BaseDao<Person> {
             "   THEN 1 " +
             "   ELSE 0 " +
             " END AS enrolled " +
-            "  FROM Person WHERE Person.active = 1 ORDER BY Person.firstNames ASC")
+            "  FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
+            "WHERE CAST(Person.active AS INTEGER) = 1 ORDER BY Person.firstNames ASC")
     abstract fun findAllPeopleWithEnrollmentInGroup(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Insert
@@ -249,20 +249,24 @@ abstract class  PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
 
+    @QueryLiveTables(["Person", "PersonPicture", "Role"])
     @Query(QUERY_FIND_ALL)
     abstract fun findAllPeopleWithEnrollment(): DataSource.Factory<Int, PersonWithEnrollment>
 
+    @QueryLiveTables(["Person", "PersonPicture", "Role"])
     @Query(QUERY_FIND_ALL + QUERY_SEARCH_BIT)
     abstract fun findAllPeopleWithEnrollmentBySearch(searchQuery: String):
             DataSource.Factory<Int, PersonWithEnrollment>
 
+    @QueryLiveTables(["Person", "PersonPicture", "Role"])
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
     abstract fun findAllPeopleWithEnrollmentSortNameDesc(): DataSource.Factory<Int, PersonWithEnrollment>
 
+    @QueryLiveTables(["Person", "PersonPicture", "Role"])
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
     abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query("SELECT * FROM Person where active = 1")
+    @Query("SELECT * FROM Person where CAST(active AS INTEGER) = 1")
     abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
 
     /**
@@ -350,7 +354,6 @@ abstract class  PersonDao : BaseDao<Person> {
         return result
     }
 
-
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
@@ -376,16 +379,20 @@ abstract class  PersonDao : BaseDao<Person> {
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
-        const val QUERY_FIND_ALL = "SELECT Person.* , (0) AS clazzUid, " +
-                " '' AS clazzName, " +
-                " (0) AS attendancePercentage, " +
-                " (0) AS clazzMemberRole, " +
-                " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
-                " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
-                " DESC LIMIT 1) AS personPictureUid, " +
-                " (0) AS enrolled FROM Person WHERE Person.active = 1 " +
-                " AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '" +
-                Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) "
+        const val QUERY_FIND_ALL = "SELECT Person.* , Role.*, (0) AS clazzUid, " +
+                "   '' AS clazzName, " +
+                "   (0) AS attendancePercentage, " +
+                "   (0) AS clazzMemberRole, " +
+                "   (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+                "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
+                "   DESC LIMIT 1) AS personPictureUid, " +
+                "   (0) AS enrolled " +
+                " FROM Person " +
+                " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
+                " WHERE CAST(Person.active AS INTEGER) = 1 " +
+                " AND Person.personRoleUid != " +
+                "   (SELECT rol.roleUid FROM ROLE AS rol " +
+                "   WHERE rol.roleName = '" + Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) "
 
         const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
             ":searchQuery "

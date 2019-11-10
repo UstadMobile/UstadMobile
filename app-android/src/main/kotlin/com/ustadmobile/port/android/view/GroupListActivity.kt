@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.GroupListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.GroupListView
 import com.ustadmobile.lib.db.entities.GroupWithMemberCount
 import kotlinx.coroutines.Dispatchers
@@ -78,12 +79,19 @@ class GroupListActivity : UstadBaseActivity(), GroupListView {
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, GroupWithMemberCount>) {
+
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .personGroupDaoBoundaryCallbacks.findAllActiveGroupsWithoutIndividualGroup(factory)
+
         val recyclerAdapter = GroupListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
         // get the provider, set , observe, etc.
 
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
+
         //Observe the data:
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {

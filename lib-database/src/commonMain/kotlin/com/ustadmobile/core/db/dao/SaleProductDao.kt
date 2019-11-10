@@ -123,17 +123,19 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
     companion object {
 
         const val ALL_ACTIVE_QUERY = "SELECT SaleProduct.* FROM SaleProduct " +
-                " WHERE saleProductActive = 1 "
+                " WHERE CAST(saleProductActive AS INTEGER) = 1 "
 
-        const val AND_IS_CATEGORY = " AND SaleProduct.saleProductCategory = 1 "
+        const val AND_IS_CATEGORY = " AND CAST(SaleProduct.saleProductCategory AS INTEGER) = 1 "
 
-        const val AND_IS_NOT_CATEGORY = " AND SaleProduct.saleProductCategory = 0 "
+        const val AND_IS_NOT_CATEGORY = " AND CAST(SaleProduct.saleProductCategory AS INTEGER) = 0 "
 
         const val AND_NOT_IN_CATEGORY =
-                " AND SaleProduct.saleProductUid NOT IN (Select SaleProduct.saleProductUid FROM SaleProductParentJoin " +
-                " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
-                " WHERE SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-                " AND SaleProductParentJoin.saleProductParentJoinActive = 1 AND SaleProduct.saleProductActive = 1) " +
+                " AND SaleProduct.saleProductUid " +
+                " NOT IN (Select SaleProduct.saleProductUid FROM SaleProductParentJoin " +
+                "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+                "   WHERE SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
+                "   AND CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1" +
+                "   AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1) " +
                 " AND SaleProduct.saleProductUid != :saleProductCategoryUid "
 
         const val ALL_ACTIVE_CATEGORY_QUERY = ALL_ACTIVE_QUERY + AND_IS_CATEGORY
@@ -153,10 +155,10 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
         const val FIND_BY_UID_QUERY = "SELECT * FROM SaleProduct WHERE saleProductUid = :uid"
 
-        const val FIND_BY_NAME_QUERY = "SELECT * FROM SaleProduct WHERE saleProductName = :name AND saleProductActive = 1"
+        const val FIND_BY_NAME_QUERY = "SELECT * FROM SaleProduct WHERE saleProductName = :name AND CAST(saleProductActive AS INTEGER) = 1"
 
         //INACTIVATE:
-
+        //TODO: Replace with Boolean argument
         const val INACTIVATE_QUERY = "UPDATE SaleProduct SET saleProductActive = 0 WHERE saleProductUid = :uid"
     }
 

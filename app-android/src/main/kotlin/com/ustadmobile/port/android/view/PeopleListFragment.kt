@@ -126,7 +126,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         //personDao.findAllPeopleWithEnrollmentBySearch
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
                 .personDaoBoundaryCallbacks
-                .findAllPeopleWithEnrollmentSortNameDesc(factory)
+                .findAllPeopleWithEnrollment(factory)
 
         //A warning is expected
         val data = LivePagedListBuilder(factory, 20)

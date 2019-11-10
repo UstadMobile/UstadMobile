@@ -3,12 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.*
-
+import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = 75)
 @Entity
+@Serializable
 @EntityWithAttachment
-class SaleVoiceNote {
+open class SaleVoiceNote() {
 
     @PrimaryKey(autoGenerate = true)
     var saleVoiceNoteUid: Long = 0

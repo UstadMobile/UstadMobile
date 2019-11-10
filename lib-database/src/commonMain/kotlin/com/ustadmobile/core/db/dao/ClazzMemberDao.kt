@@ -202,53 +202,51 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "AND Person.active = 1 ")
     abstract fun findAllPeopleNotInClassUid(clazzUid: Long): DataSource.Factory<Int, Person>
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT clazzMemberAttendancePercentage FROM ClazzMember " +
-            "WHERE clazzMemberPersonUid = Person.personUid " +
-            " AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
+            "   WHERE clazzMemberPersonUid = Person.personUid " +
+            "   AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
             " (SELECT clazzMemberRole FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
+            "   AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
             " (SELECT clazzMemberActive FROM ClazzMember " +
-            "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            " AND clazzMemberPersonUid = Person.personUid AND ClazzMember.clazzMemberRole = "
-            + ClazzMember.ROLE_STUDENT + " ) AS enrolled FROM Person WHERE Person.active = 1 " +
+            "   WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            "   AND clazzMemberPersonUid = Person.personUid AND ClazzMember.clazzMemberRole = "
+            +   ClazzMember.ROLE_STUDENT + " ) AS enrolled " +
+            " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
+            " WHERE Person.active = 1 " +
             " ORDER BY Person.firstNames ASC")
     abstract fun findAllStudentsWithEnrollmentForClassUid(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
             " (SELECT clazzMemberAttendancePercentage FROM ClazzMember " +
-            "WHERE clazzMemberPersonUid = Person.personUid AND " +
-            " clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
+            "   WHERE clazzMemberPersonUid = Person.personUid AND " +
+            "   clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
             " (SELECT clazzMemberRole FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = " +
-            ":clazzUid " +
-            " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
+            "   :clazzUid AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
             " (SELECT clazzMemberActive FROM ClazzMember " +
-            "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            " AND clazzMemberPersonUid = Person.personUid) AS enrolled" +
-
-//            ",  (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberPersonUid = Person.personUid " +
-//            "   AND ClazzMember.clazzMemberRole = 1) as isClazzStudent " +
-
+            "   WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            "   AND clazzMemberPersonUid = Person.personUid) AS enrolled" +
             " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
             " WHERE Person.active = 1 " +
             "  AND (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberPersonUid = " +
             "       Person.personUid AND ClazzMember.clazzMemberRole = 1) = 0 " +
-//            " AND isClazzStudent = 0 " +
             "ORDER BY Person.firstNames ASC")
     abstract fun findAllEligibleTeachersWithEnrollmentForClassUid(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("SELECT " +
 
-            "  Person.* , " +
+            "  Person.* , Role.*, " +
 
             "  (:clazzUid) AS clazzUid,  " +
 
@@ -268,6 +266,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "     :clazzUid AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
 
             "FROM Person " +
+
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
 
             "LEFT JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = :clazzUid AND " +
             "   ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -289,7 +289,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             : DataSource.Factory<Int, PersonWithEnrollment>
 
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -304,6 +304,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             ":clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
             " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -313,7 +314,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
 
     //REPORT Query: At Risk Student Report
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*,  (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -331,6 +332,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
 
             " FROM Person " +
+
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
 
             " WHERE personUid IN ( " +
             "   SELECT Person.personUid FROM ClazzMember " +
@@ -342,8 +345,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " AND attendancePercentage < :riskThreshold " +
             " AND Person.active = 1 ORDER BY attendancePercentage DESC")
     abstract suspend fun findAllStudentsAtRiskForClazzUidAsync(clazzUid: Long,
-                                                               riskThreshold:Float)
-            :List<PersonWithEnrollment>
+                                               riskThreshold:Float):List<PersonWithEnrollment>
 
     @Query(AT_RISK_STUDENT_REPORT_QUERY)
     abstract fun findAllStudentsAtRiskForClazzList(clazzes: List<Long>,
@@ -354,7 +356,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             clazzes: List<Long>,riskThreshold: Float) : List<PersonWithEnrollment>
 
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -369,6 +371,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             ":clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
             " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -376,7 +379,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, Person.firstNames ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -391,6 +394,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             ":clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
             " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -398,7 +402,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, attendancePercentage ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -413,6 +417,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             ":clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
             " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -421,7 +426,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceDesc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
-    @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
+    @Query("SELECT Person.* , Role.*, (:clazzUid) AS clazzUid, " +
             " '' AS clazzName, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -435,6 +440,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " (SELECT clazzMemberRole FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
             " FROM Person " +
+            " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
@@ -503,35 +509,28 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
         //Report Query: At risk student report with with Provider (for live data)
         const val AT_RISK_STUDENT_REPORT_QUERY = "SELECT " +
-                "   Person.* , " +
-                "" +
-                "   (Clazz.clazzUid) AS clazzUid, " +
-                "   (Clazz.clazzName) AS clazzName, " +
-                "" +
-                "   (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
+                " Person.* , Role.*, " +
+                " (Clazz.clazzUid) AS clazzUid, " +
+                " (Clazz.clazzName) AS clazzName, " +
+                " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
                 "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
                 "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
-                "" +
-                "   (SELECT clazzMemberAttendancePercentage FROM ClazzMember " +
+                " (SELECT clazzMemberAttendancePercentage FROM ClazzMember " +
                 "   WHERE clazzMemberPersonUid = Person.personUid " +
                 "   AND clazzMemberClazzUid = Clazz.clazzUid) AS attendancePercentage, " +
-                "" +
-                "   (SELECT clazzMemberActive FROM ClazzMember " +
+                " (SELECT clazzMemberActive FROM ClazzMember " +
                 "   WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "   AND clazzMemberPersonUid = Person.personUid) AS enrolled, " +
-                "" +
-                "   (SELECT clazzMemberRole FROM ClazzMember WHERE ClazzMember" +
-                ".clazzMemberClazzUid = Clazz.clazzUid " +
+                " (SELECT clazzMemberRole FROM ClazzMember WHERE ClazzMember" +
+                "   .clazzMemberClazzUid = Clazz.clazzUid " +
                 "   AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
-                "" +
                 " FROM ClazzMember " +
                 "  LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+                "  LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
                 "  LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
-                "" +
                 " WHERE ClazzMember.clazzMemberClazzUid IN (:clazzes)" +
                 "   AND ClazzMember.clazzMemberRole =  " + ClazzMember.ROLE_STUDENT + " " +
                 "   AND ClazzMember.clazzMemberActive = 1 " +
-                "   " +
                 "   AND attendancePercentage < :riskThreshold " +
                 "   AND Person.active = 1 ORDER BY clazzUid, attendancePercentage DESC"
     }

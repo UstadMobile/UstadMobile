@@ -15,11 +15,11 @@ import com.ustadmobile.lib.db.entities.DashboardTag
 @Dao
 abstract class DashboardTagDao : BaseDao<DashboardTag> {
 
-    @Query("SELECT * FROM DashboardTag WHERE " + " dashboardTagActive = 1")
+    @Query("SELECT * FROM DashboardTag WHERE CAST(dashboardTagActive AS INTEGER) = 1 ")
     abstract fun findAllActiveProvider(): DataSource.Factory<Int, DashboardTag>
 
 
-    @Query("SELECT * FROM DashboardTag WHERE " + " dashboardTagActive = 1")
+    @Query("SELECT * FROM DashboardTag WHERE CAST(dashboardTagActive AS INTEGER) = 1 ")
     abstract fun findAllActiveLive(): DoorLiveData<List<DashboardTag>>
 
 

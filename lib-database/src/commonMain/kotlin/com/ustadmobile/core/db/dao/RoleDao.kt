@@ -22,15 +22,17 @@ abstract class RoleDao : BaseDao<Role> {
     @Query("SELECT * FROM Role WHERE roleName = :roleName")
     abstract fun findByNameSync(roleName: String): Role?
 
-    @Query("SELECT * FROM Role WHERE roleActive = 1")
+    @Query("SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1")
     abstract fun findAllActiveRoles(): DataSource.Factory<Int, Role>
 
-    @Query("SELECT * FROM Role WHERE roleActive = 1")
+    @Query("SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1")
     abstract fun findAllActiveRolesLive(): DoorLiveData<List<Role>>
 
+    //TODO : Replace with boolean argument
     @Query("UPDATE Role SET roleActive = 0 WHERE roleUid = :uid")
     abstract fun inactiveRole(uid: Long)
 
+    //TODO: Replace with boolean argument
     @Query("UPDATE Role SET roleActive = 0 WHERE roleUid = :uid")
     abstract suspend fun inactiveRoleAsync(uid: Long) :Int
 

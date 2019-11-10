@@ -24,20 +24,13 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
 
     @SetAttachmentData
     open fun setAttachment(entity: SaleProductPicture, filePath: String) {
-
+        throw Exception(Exception("Shouldn't call the Dao, call the repo instead "))
     }
 
     @GetAttachmentData
     open fun getAttachmentPath(entity: SaleProductPicture): String? {
         return ""
     }
-
-//    @Query("SELECT * FROM SaleProductPicture where " +
-//            " saleProductPictureSaleProductUid = :saleProductUid " +
-//            " ORDER BY saleProductPictureTimestamp DESC LIMIT 1")
-//    abstract suspend fun findBySaleProductUidAsync(saleProductUid: Long)
-//            :SaleProductPicture?
-
 
     @Query(""" SELECT * FROM SaleProductPicture WHERE saleProductPictureSaleProductUid = :saleProductUid AND saleProductPictureIndex = 0""")
     abstract suspend fun findBySaleProductUidAsync2(saleProductUid: Long): SaleProductPicture?
