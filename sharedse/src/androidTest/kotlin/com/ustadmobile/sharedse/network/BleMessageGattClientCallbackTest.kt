@@ -1,7 +1,7 @@
 package com.ustadmobile.sharedse.network
 
 import android.bluetooth.*
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MAXIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
@@ -103,7 +103,7 @@ class BleMessageGattClientCallbackTest {
 
     @Test
     fun givenOnCharacteristicWrite_whenGrantedPermissionToWrite_thenShouldStartSendingPackets() {
-        val packets = messageToSend!!.getPackets(DEFAULT_MTU_SIZE)
+        val packets = messageToSend!!.getPackets(MINIMUM_MTU_SIZE)
 
         for (i in packets.indices) {
             gattClientCallback!!.onCharacteristicWrite(mockedGattClient!!, mockedCharacteristic!!,
@@ -118,5 +118,17 @@ class BleMessageGattClientCallbackTest {
             // that the process will repeat.
             verify<BluetoothGatt>(mockedGattClient, times(i + 1)).writeCharacteristic(mockedCharacteristic)
         }
+    }
+
+    @Test
+    fun givenOnCharacteristicsWrite_whenPermissionToWriteIsDenied_thenShouldRetryAndDisconnect(){
+        val packets = messageToSend!!.getPackets(MINIMUM_MTU_SIZE)
+
+        for (i in packets.indices) {
+            gattClientCallback!!.onCharacteristicWrite(mockedGattClient!!, mockedCharacteristic!!,
+                    BluetoothGatt.GATT_FAILURE)
+        }
+        //Verify that after many trials, device disconnected from the service
+        verify<BluetoothGatt>(mockedGattClient, times(1)).disconnect()
     }
 }

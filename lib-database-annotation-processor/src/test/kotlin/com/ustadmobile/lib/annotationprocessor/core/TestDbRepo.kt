@@ -27,6 +27,8 @@ import org.junit.After
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import kotlinx.coroutines.runBlocking
+import java.io.File
+import java.nio.file.Files
 import kotlin.test.assertEquals
 
 
@@ -40,6 +42,8 @@ class TestDbRepo {
 
     lateinit var httpClient: HttpClient
 
+    var tmpAttachmentsDir: File? = null
+
     fun createSyncableDaoServer(db: ExampleDatabase2) = embeddedServer(Netty, 8089) {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, GsonConverter())
@@ -48,8 +52,9 @@ class TestDbRepo {
 
         val syncDao = ExampleDatabase2SyncDao_JdbcKt(db)
         val gson = Gson()
+        tmpAttachmentsDir = Files.createTempDirectory("testdbrepoattachments").toFile()
         install(Routing) {
-            ExampleDatabase2_KtorRoute(db, gson)
+            ExampleDatabase2_KtorRoute(db, gson, tmpAttachmentsDir!!.absolutePath)
         }
     }
 
@@ -81,6 +86,8 @@ class TestDbRepo {
     fun tearDown() {
         server?.stop(0, 10, TimeUnit.SECONDS)
         httpClient.close()
+        tmpAttachmentsDir?.deleteRecursively()
+        tmpAttachmentsDir = null
     }
 
     @Test
@@ -102,8 +109,9 @@ class TestDbRepo {
         val dbSyncDao = ExampleDatabase2SyncDao_JdbcKt(db)
 
         val clientNodeId = 5
-        val repo = ExampleSyncableDao_Repo(db.exampleSyncableDao(), httpClient, clientNodeId,
-                mockServer.url("/").toString(), "ExampleDatabase2", dbSyncDao)
+        val repo = ExampleSyncableDao_Repo(db, db.exampleSyncableDao(), httpClient, clientNodeId,
+                mockServer.url("/").toString(), "ExampleDatabase2", "/dummy/attachmentdir",
+                dbSyncDao)
         val repoResult = repo.findAll()
 
         val firstRequest = mockServer.takeRequest()
@@ -127,8 +135,8 @@ class TestDbRepo {
         val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
         exampleSyncableEntity.esUid = serverDb!!.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val clientRepo = clientDb!!.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
-                httpClient) as ExampleDatabase2
+        val clientRepo = clientDb!!.asRepository<ExampleDatabase2>(Any(),
+                "http://localhost:8089/", "token", httpClient) as ExampleDatabase2
 
         val entityFromServer = clientRepo.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
         Assert.assertNotNull("Entity came back from server using repository", entityFromServer)
@@ -145,8 +153,8 @@ class TestDbRepo {
         val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
         exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
-                httpClient) as ExampleDatabase2
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
+                "token", httpClient) as ExampleDatabase2
         val entityFromServerBeforeChange = clientRepo.exampleSyncableDao()
                 .findByUid(exampleSyncableEntity.esUid)
 
@@ -176,8 +184,8 @@ class TestDbRepo {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
-            val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
-                    httpClient) as ExampleDatabase2
+            val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
+                    "token", httpClient) as ExampleDatabase2
 
             (clientRepo as DoorDatabaseSyncRepository).sync(null)
 
@@ -191,8 +199,8 @@ class TestDbRepo {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
-                httpClient) as ExampleDatabase2
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
+                "token", httpClient) as ExampleDatabase2
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
@@ -209,8 +217,8 @@ class TestDbRepo {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
-                httpClient) as ExampleDatabase2
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
+                "token", httpClient) as ExampleDatabase2
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
@@ -220,8 +228,8 @@ class TestDbRepo {
             val entityOnServerAfterSync = serverDb.exampleSyncableDao()
                     .findByUid(exampleSyncableEntity.esUid)
 
-            val serverRepo= serverDb.asRepository<ExampleDatabase2>("http://localhost/dummy", "token",
-                    httpClient) as ExampleDatabase2
+            val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
+                    "token", httpClient) as ExampleDatabase2
             serverRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 52)
 
             (clientRepo as DoorDatabaseSyncRepository).sync(null)
@@ -238,9 +246,10 @@ class TestDbRepo {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),
+                "http://localhost:8089/", "token",
                 httpClient) as ExampleDatabase2
-        val serverRepo= serverDb.asRepository<ExampleDatabase2>("http://localhost/dummy", "token",
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy", "token",
                 httpClient) as ExampleDatabase2
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
@@ -267,9 +276,9 @@ class TestDbRepo {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>("http://localhost:8089/", "token",
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/", "token",
                 httpClient) as ExampleDatabase2
-        val serverRepo= serverDb.asRepository<ExampleDatabase2>("http://localhost/dummy", "token",
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy", "token",
                 httpClient) as ExampleDatabase2
         val e1 = ExampleSyncableEntity(esNumber = 42)
         var e2 = ExampleSyncableEntity(esNumber = 43)

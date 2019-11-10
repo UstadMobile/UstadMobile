@@ -103,20 +103,6 @@ object UmAndroidTestUtil {
         return supported
     }
 
-    @Throws(IOException::class)
-    fun readFromTestResources(pathToFile: String, nameOfFile: String): File {
-        val inputStream = VideoPlayerTest::class.java.getResourceAsStream(pathToFile)
-        val path = Environment.getExternalStorageDirectory()
-        val targetFile = File(path, nameOfFile)
-        val outStream = FileOutputStream(targetFile)
-        UMIOUtils.readFully(inputStream, outStream)
-        inputStream?.close()
-        outStream.flush()
-        outStream.close()
-
-        return targetFile
-    }
-
     fun readAllFilesInDirectory(sourceDirPath: File, directory: File, filemap: HashMap<File, String>) {
         try {
             for (fileEntry in directory.listFiles()) {

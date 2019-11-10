@@ -115,7 +115,7 @@ object UmFileUtilSe {
 
     @Throws(IOException::class)
     fun extractResourceToFile(resourcePath: String, destFile: File) {
-        FileOutputStream(destFile).use { fout -> UmFileUtilSe::class.java.getResourceAsStream(resourcePath).use { resIn -> UMIOUtils.readFully(resIn, fout) } }
+        FileOutputStream(destFile).use { fout -> UmFileUtilSe::class.java.getResourceAsStream(resourcePath)!!.use { resIn -> UMIOUtils.readFully(resIn, fout) } }
     }
 
     /**
