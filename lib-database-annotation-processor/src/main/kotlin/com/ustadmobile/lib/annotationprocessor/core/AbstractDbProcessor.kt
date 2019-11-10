@@ -1473,7 +1473,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val isLiveData = daoFunReturnType is ParameterizedTypeName
                 && daoFunReturnType.rawType == DoorLiveData::class.asClassName()
         val isSuspendedFun = KModifier.SUSPEND in daoFunSpec.modifiers
-        codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+        codeBlock.takeIf { isLiveDataOrDataSourceFactory && addReturnDaoResult }
                 ?.add("val _daoResult = ")?.addDelegateFunctionCall("_dao", daoFunSpec)?.add("\n")
 
         codeBlock.takeIf { isLiveDataOrDataSourceFactory }
@@ -1584,7 +1584,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         //End GlobalScope.launch if applicable by triggering the load end ending the control flow
         codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+                ?.beginControlFlow("try")
                 ?.add("_loadHelper.doRequest()\n")
+                ?.nextControlFlow("catch(_e: %T)", Exception::class)
+                ?.add("%M(%S)", MemberName("kotlin.io", "println"), "Caught doRequest exception: \\\$_e")
+                ?.endControlFlow()
                 ?.endControlFlow()
 
         if(addReturnDaoResult) {
@@ -1595,7 +1599,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             takeIf { !isSuspendedFun }?.beginControlFlow("%M",
                                 MemberName("kotlinx.coroutines", "runBlocking"))
                         }
+                        .beginControlFlow("try")
                         .add("_loadHelper.doRequest()\n")
+                        .nextControlFlow("catch(_e: %T)", Exception::class)
+                        .add("%M(%S)", MemberName("kotlin.io", "println"), "Caught doRequest exception: \\\$_e")
+                        .endControlFlow()
                         .apply {
                             takeIf{ !isSuspendedFun }?.endControlFlow()
                         }

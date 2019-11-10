@@ -13,10 +13,13 @@ import kotlinx.coroutines.*
 
 typealias StatusTaskMakerFn = suspend (context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode) -> BleEntryStatusTask?
 
+typealias OnNodeStatusChangeFn = suspend (bluetoothAddr: String) -> Unit
+
 class LocalAvailabilityManagerImpl(private val context: Any,
                                    private val entryStatusTaskMaker: StatusTaskMakerFn,
                                    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
-                                   private var endpoint: String)
+                                   private val onNewNodeDiscovered: OnNodeStatusChangeFn = { },
+                                   private val onNodeLost: OnNodeStatusChangeFn = { })
     : LocalAvailabilityManager{
 
     private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
@@ -37,6 +40,7 @@ class LocalAvailabilityManagerImpl(private val context: Any,
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
+                onNewNodeDiscovered(bluetoothAddr)
             }
         }
     }

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
@@ -62,8 +63,6 @@ abstract class NetworkManagerBleCommon(
 
     private lateinit var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>
 
-    private val entryStatusResponses = mutableMapOf<Long, MutableList<EntryStatusResponse>>()
-
     private val locallyAvailableContainerUids = mutableSetOf<Long>()
 
     protected val connectivityStatusRef = atomic(null as ConnectivityStatus?)
@@ -73,8 +72,6 @@ abstract class NetworkManagerBleCommon(
     private val knownPeerNodes = mutableMapOf<String, Long>()
 
     private var jobItemManagerList: DownloadJobItemManagerList? = null
-
-    private val entryStatusTaskExecutor = EntryTaskExecutor(5)
 
     private lateinit var nextDownloadItemsLiveData: DoorLiveData<List<DownloadJobItem>>
 
@@ -138,9 +135,14 @@ abstract class NetworkManagerBleCommon(
 
     val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
             this::makeEntryStatusTask, singleThreadDispatcher,
-            UmAccountManager.getActiveEndpoint(context) ?: "http://localhost/endpointnotsetyet")
+            this::onNewBleNodeDiscovered, this::onBleNodeLost)
 
     private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
+
+    private val bleMirrorIdMap = mutableMapOf<String, Int>()
+
+    protected var bleProxyPort: Int = 9100
+
 
     /**
      * Only for testing - allows the unit test to set this without running the main onCreate method
@@ -171,6 +173,18 @@ abstract class NetworkManagerBleCommon(
         nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
 
         GlobalScope.launch { downloadJobItemWorkQueue.start() }
+    }
+
+    protected suspend fun onNewBleNodeDiscovered(bluetoothAddress: String) {
+        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
+        val mirrorId = dbRepo.addMirror("http://127.0.0.1:$bleProxyPort/rest/$bluetoothAddress/",
+                100)
+        bleMirrorIdMap[bluetoothAddress] = mirrorId
+    }
+
+    protected suspend fun onBleNodeLost(bluetoothAddress: String) {
+        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
+        dbRepo.removeMirror(bleMirrorIdMap[bluetoothAddress] ?: 0)
     }
 
     protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
@@ -305,12 +319,6 @@ abstract class NetworkManagerBleCommon(
         makeDeleteJobTask(context, taskArgs).run()
     }
 
-    //testing purpose only
-    fun clearHistories() {
-        locallyAvailableContainerUids.clear()
-        knownPeerNodes.clear()
-    }
-
     /**
      * Used for unit testing purposes only.
      *
@@ -372,15 +380,6 @@ abstract class NetworkManagerBleCommon(
         return knownBadNodeTrackList[bluetoothAddress]
     }
 
-    fun isEntryLocallyAvailable(containerUid: Long): Boolean {
-        return locallyAvailableContainerUids.contains(containerUid)
-    }
-
-    fun getLocallyAvailableContainerUids(): Set<Long> {
-        return locallyAvailableContainerUids
-    }
-
-
     /**
      * Clean up the network manager for shutdown
      */
@@ -389,8 +388,6 @@ abstract class NetworkManagerBleCommon(
         val downloadQueueMonitorRequest = downloadQueueLocalAvailabilityObserver.currentRequest
         if(downloadQueueMonitorRequest != null)
             localAvailabilityManager.removeMonitoringRequest(downloadQueueMonitorRequest)
-
-        entryStatusTaskExecutor.stop()
     }
 
     /**

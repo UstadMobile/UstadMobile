@@ -12,6 +12,7 @@ import java.io.*
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
+import com.ustadmobile.core.impl.UMLog
 
 /**
  * Ble Http Proxy will listen on a TCP Port and send an HTTP request as a BleMessage. When the
@@ -51,7 +52,7 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
         }
     }
 
-    class HttpdBase: NanoHTTPD(8094) {
+    class HttpdBase: NanoHTTPD(0) {
 
         fun newSession(inputStream: InputStream, outputStream: OutputStream): IHTTPSession {
             return HTTPSession(tempFileManagerFactory.create(), inputStream, outputStream)
@@ -90,17 +91,25 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
                 val destDeviceAddr = httpSession.uri.substring(prefixEndIndex,
                         httpSession.uri.indexOf('/', prefixEndIndex))
 
+                val carbonCopyBufferArr = carbonCopyBuffer.toByteArray()
+                val messageId = BleMessage.getNextMessageIdForReceiver(destDeviceAddr)
                 val httpMessage = BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
-                        BleMessage.getNextMessageIdForReceiver(destDeviceAddr),
-                        carbonCopyBuffer.toByteArray())
+                        messageId,
+                        carbonCopyBufferArr)
                 val destNetworkNode = NetworkNode().also { it.bluetoothMacAddress = destDeviceAddr }
 
+                UMLog.l(UMLog.INFO, 0, "Sending ${carbonCopyBufferArr.size} bytes BLE HTTP Request " +
+                        "to $destDeviceAddr Request ID# $messageId")
                 networkManager.sendMessage(context, httpMessage, destNetworkNode,
                         object : BleMessageResponseListener {
                             override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
                                 if(response != null) {
+                                    UMLog.l(UMLog.INFO, 0, "Received response for request ID# " +
+                                            "$messageId ${response.payload?.size} bytes")
                                     deferredResponse.complete(response)
                                 }else {
+                                    UMLog.l(UMLog.INFO, 0, "Response with error for request ID# " +
+                                            "$messageId ")
                                     val exception = if(error != null) {
                                         IOException("Exception receiving response from $sourceDeviceAddress",
                                                 error)
@@ -112,12 +121,12 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
                             }
                         })
 
-                val response = deferredResponse.await()
-                val payload = response.payload
+                val response = withTimeoutOrNull(8000) { deferredResponse.await() }
+                val payload = response?.payload
                 if(payload != null) {
                     socketOut.write(payload)
                 }else {
-                    throw IOException("BLE response packet had no payload")
+                    throw IOException("BLE response packet timed out or had no payload")
                 }
             }catch(e: Exception) {
                 try {
@@ -155,7 +164,7 @@ class BleHttpProxy(val networkManager: NetworkManagerBleCommon,
     }
 
     companion object {
-        const val PREFIX = "bleproxy"
+        const val PREFIX = "rest"
     }
 
 

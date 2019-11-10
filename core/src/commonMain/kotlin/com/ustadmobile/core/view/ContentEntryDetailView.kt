@@ -6,9 +6,6 @@ import kotlin.js.JsName
 
 interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier, UstadViewWithProgress {
 
-    val allKnowAvailabilityStatus: Set<Long>
-
-
     @JsName("setContentEntry")
     fun setContentEntry(contentEntry: ContentEntry)
 

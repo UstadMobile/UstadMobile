@@ -56,6 +56,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.sharedse.network.BleHttpProxy
+import com.ustadmobile.door.DoorDatabaseRepository
 
 /**
  * This class provides methods to perform android network related communications.
@@ -130,6 +132,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     private val numActiveRequests = AtomicInteger()
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
+
+    private val bleProxy = BleHttpProxy(this, context)
 
     override val umAppDatabaseRepo by lazy {
         UmAccountManager.getRepositoryForActiveAccount(context)
@@ -448,6 +452,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
+        (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_DISCONNECTED
 
         GlobalScope.launch {
             addLogs("changed to ${ConnectivityStatus.STATE_DISCONNECTED}, updating DB")
@@ -484,11 +489,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         val status = ConnectivityStatus(state, true, ssid)
         addLogs("changed to $state")
         connectivityStatusRef.value = status
+        (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
 
         //get network SSID
         if (ssid != null /*&& ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)*/) {
             if(ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
                 status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
+                //TODO: set repo status
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -587,6 +594,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         }
 
         updateEnableServicesPromptsRequired()
+        bleProxy.start(bleProxyPort)
 
         super.onCreate()
     }
@@ -974,6 +982,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         scanningServiceManager.setEnabled(false)
         advertisingServiceManager.setEnabled(false)
         wifiP2pGroupServiceManager!!.setEnabled(false)
+        bleProxy.stop()
 
         if (isBleCapable) {
             mContext.unregisterReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver)

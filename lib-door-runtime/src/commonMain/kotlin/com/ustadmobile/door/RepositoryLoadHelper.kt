@@ -35,6 +35,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     suspend fun doRequest() : T{
         do {
+            attemptCount++
             val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
             val mirrorToUse = if(isConnected && !triedMainEndpoint) {
                 null as MirrorEndpoint? //use the main endpoint
@@ -78,7 +79,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 delay(retryDelay.toLong())
             }catch(e: Exception) {
                 //something went wrong with the load
-                println("RepositoryLoadHelper: Exception: $e")
+                println("RepositoryLoadHelper: Exception attempting to load from $endpointToUse: $e")
             }
 
             if(mirrorToUse == null) {
@@ -86,7 +87,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }else {
                 mirrorsTried.add(mirrorToUse.mirrorId)
             }
-        }while(coroutineContext.isActive && attemptCount++ < maxAttempts)
+        }while(coroutineContext.isActive && attemptCount <= maxAttempts)
 
         throw IOException("loadHelper retry count exceeded")
     }

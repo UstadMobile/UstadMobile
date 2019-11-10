@@ -77,10 +77,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     private var showControls : Boolean = false
 
 
-    override val allKnowAvailabilityStatus: Set<Long>
-        get() = managerAndroidBle.getLocallyAvailableContainerUids()
-
-
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle.isVersionKitKatOrBelow) {
