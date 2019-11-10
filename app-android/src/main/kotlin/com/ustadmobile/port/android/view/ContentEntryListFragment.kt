@@ -219,8 +219,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         val currentContext = context
         if(currentContext != null && ::managerAndroidBle.isInitialized
                 && ::rootContainer.isInitialized){
-            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer,
-                    currentContext)
+
+            //Varuna: Temp disabling since were not using this and it crashes here
+//            managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(rootContainer,
+//                    currentContext)
         }
     }
 

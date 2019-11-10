@@ -17,14 +17,12 @@ import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductCategoryListPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SaleProductCategoryListView
 import com.ustadmobile.lib.db.entities.SaleProduct
 import java.security.AccessController.getContext
-import java.util.Objects
 
 class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategoryListView {
 

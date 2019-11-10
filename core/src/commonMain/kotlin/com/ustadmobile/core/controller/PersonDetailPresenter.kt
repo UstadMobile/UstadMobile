@@ -242,6 +242,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             }
 
             personPictureDao.setAttachment(existingPP, imageFilePath)
+            existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+            personPictureDao.update(existingPP)
 
 
             //Update person and generate feeds for person

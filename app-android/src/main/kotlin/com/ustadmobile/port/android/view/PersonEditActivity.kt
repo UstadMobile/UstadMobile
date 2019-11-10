@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
 import com.soywiz.klock.DateTime
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonEditPresenter
@@ -568,7 +569,14 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         runOnUiThread {
             val profileImage = Uri.fromFile(File(imagePath))
 
-            Picasso.get().load(profileImage).into(personEditImage)
+
+            Picasso.get().invalidate(profileImage)
+            Picasso
+                    .get()
+                    .load(profileImage)
+                    .networkPolicy(NetworkPolicy.NO_CACHE, NetworkPolicy.NO_STORE)
+                    .into(personEditImage)
+
         }
 
 

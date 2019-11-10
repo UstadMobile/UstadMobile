@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.ClazzMember
@@ -72,7 +73,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     private var addCMCLT: Int = 0
     private var addCMCLS: Int = 0
 
-    private var personPictureDao: PersonPictureDao?=null
+    private var personPictureDaoRepo: PersonPictureDao?=null
 
     @SuppressLint("UseSparseArrays")
     private val checkBoxHM = HashMap<Long, Boolean>()
@@ -285,20 +286,32 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
         //PICTURE : Add picture to person
 
+        var imgPath = ""
+
         holder.imageLoadJob?.cancel()
 
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            personPictureDao = UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+            personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+            val personPictureDao = UmAppDatabase.getInstance(theContext).personPictureDao
 
-            val personPictureEntity = personPictureDao!!.findByPersonUidAsync(personUid)
-
-            val imgPath = personPictureDao!!.getAttachmentPath(personPictureEntity!!)
+            val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
+            imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureLocal!!)!!
 
             if (!imgPath!!.isEmpty())
                 setPictureOnView(imgPath, personPicture!!)
             else
                 personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+
+            val personPictureEntity = personPictureDaoRepo!!.findByPersonUidAsync(personUid)
+            imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureEntity!!)!!
+
+            if(personPictureLocal != personPictureEntity) {
+                if (!imgPath!!.isEmpty())
+                    setPictureOnView(imgPath, personPicture!!)
+                else
+                    personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+            }
         }
 
 
@@ -505,7 +518,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .resize(0, dpToPxImagePerson())
                 .noFade()
                 .into(theImage)
     }

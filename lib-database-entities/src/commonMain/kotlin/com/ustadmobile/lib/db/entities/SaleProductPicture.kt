@@ -37,4 +37,38 @@ open class SaleProductPicture() {
 
     //Index for which picture. Default to zero
     var saleProductPictureIndex : Int = 0
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as SaleProductPicture
+
+        if (saleProductPictureUid != other.saleProductPictureUid) return false
+        if (saleProductPictureSaleProductUid != other.saleProductPictureSaleProductUid) return false
+        if (saleProductPictureFileSize != other.saleProductPictureFileSize) return false
+        if (saleProductPictureTimestamp != other.saleProductPictureTimestamp) return false
+        if (saleProductPictureMime != other.saleProductPictureMime) return false
+        if (saleProductPictureMCSN != other.saleProductPictureMCSN) return false
+        if (saleProductPictureLCSN != other.saleProductPictureLCSN) return false
+        if (saleProductPictureLCB != other.saleProductPictureLCB) return false
+        if (saleProductPictureIndex != other.saleProductPictureIndex) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = saleProductPictureUid.hashCode()
+        result = 31 * result + saleProductPictureSaleProductUid.hashCode()
+        result = 31 * result + saleProductPictureFileSize
+        result = 31 * result + saleProductPictureTimestamp.hashCode()
+        result = 31 * result + (saleProductPictureMime?.hashCode() ?: 0)
+        result = 31 * result + saleProductPictureMCSN.hashCode()
+        result = 31 * result + saleProductPictureLCSN.hashCode()
+        result = 31 * result + saleProductPictureLCB
+        result = 31 * result + saleProductPictureIndex
+        return result
+    }
+
+
 }

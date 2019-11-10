@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AddSaleProductToSaleCategoryPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -35,7 +36,7 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         internal var theContext: Context)
     : PagedListAdapter<SaleProduct, SelectSaleProductToSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
 
-    private var productPictureDao : SaleProductPictureDao? = null
+    private var productPictureDaoRepo : SaleProductPictureDao? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -53,7 +54,7 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .resize(0, dpToPxImagePerson())
                 .noFade()
                 .into(theImage)
     }
@@ -74,15 +75,29 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
 
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+            productPictureDaoRepo  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+            val productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
 
-            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
 
             if (!imagePath.isEmpty())
                 setPictureOnView(imagePath, imageView)
             else
                 imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+
+
+            val saleProductPicture = productPictureDaoRepo!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            if(saleProductPictureLocal != saleProductPicture) {
+
+                if (!imagePath.isEmpty())
+                    setPictureOnView(imagePath, imageView)
+                else
+                    imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+            }
         }
 
 
@@ -98,7 +113,7 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
 
     companion object {
 
-        private val IMAGE_WITH = 26
+        private val IMAGE_WITH = 100
 
         private fun dpToPxImagePerson(): Int {
             return (IMAGE_WITH * Resources.getSystem().displayMetrics.density).toInt()

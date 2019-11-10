@@ -19,6 +19,7 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -61,7 +62,9 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
                 currentPerson = result
                 usernameSet = currentPerson!!.username
                 if (usernameSet != null) {
-                    view.updateUsername(usernameSet!!)
+                    view.runOnUiThread(Runnable {
+                        view.updateUsername(usernameSet!!)
+                    })
                 }
 
                 val result2 = personAuthDao.findByUidAsync(currentPersonUid)

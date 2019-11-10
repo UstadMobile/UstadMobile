@@ -8,6 +8,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonWithSaleInfoListView.Companion.ARG_LE_UID
 import com.ustadmobile.lib.db.entities.Person
@@ -33,7 +34,7 @@ class UserProfilePresenter(context: Any,
             UmAccountManager.getRepositoryForActiveAccount(context)
     private val personDao: PersonDao
     private var loggedInPerson: Person? = null
-    private lateinit var personPictureDao: PersonPictureDao
+    private var personPictureDao: PersonPictureDao
 
     var loggedInPersonUid = 0L
 
@@ -70,7 +71,7 @@ class UserProfilePresenter(context: Any,
                             personPictureDao.findByPersonUidAsync(loggedInPerson!!.personUid)
                     if (personPicture != null) {
                         val picturePath = personPictureDao.getAttachmentPath(personPicture)
-                        view.updateImageOnView(picturePath!!)
+                        view.updateImageOnView(picturePath!!, true)
                     }
                 }
             }
@@ -137,13 +138,15 @@ class UserProfilePresenter(context: Any,
                 }
 
                 personPictureDao.setAttachment(existingPP, imageFilePath)
+                existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+                personPictureDao.update(existingPP)
 
                 //Update person and generate feeds for person
                 personDao.updateAsync(loggedInPerson!!)
 
                 //Update view with path
                 val picturePath = personPictureDao.getAttachmentPath(existingPP)
-                view.updateImageOnView(picturePath!!)
+                view.updateImageOnView(picturePath!!, true)
             }catch(e:Exception){
                 throw e
             }

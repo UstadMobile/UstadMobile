@@ -109,11 +109,11 @@ class PersonEditPresenter
     init {
 
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
-            personUid = (arguments!!.get(ARG_PERSON_UID)!!.toString()).toLong()
+            personUid = (arguments.get(ARG_PERSON_UID)!!.toString()).toLong()
         }
 
-        if (arguments!!.containsKey(ARG_NEW_PERSON)) {
-            newPersonString = arguments!!.get(ARG_NEW_PERSON)!!.toString()
+        if (arguments.containsKey(ARG_NEW_PERSON)) {
+            newPersonString = arguments.get(ARG_NEW_PERSON)!!.toString()
         }
 
         customFieldsToUpdate = ArrayList()
@@ -139,9 +139,10 @@ class PersonEditPresenter
         GlobalScope.launch {
             //1. Get all custom fields
             val result = customFieldDao!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
-            for (c in result!!) {
+            for (c in result) {
                 //Get value as well
-                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(c.customFieldUid, personUid)
+                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(
+                        c.customFieldUid, personUid)
                 var valueString: String? = ""
                 var valueSelection = 0
 
@@ -189,9 +190,7 @@ class PersonEditPresenter
                         //view.addCustomFieldText(c, finalValueString);
 
                     })
-
                 }
-
             }
         }
     }
@@ -227,29 +226,6 @@ class PersonEditPresenter
             GlobalScope.launch(Dispatchers.Main){
                 resultLive.observe(thisP, thisP::handleFieldsLive)
             }
-//            val cleanedResult = ArrayList<PersonDetailPresenterField>()
-//            //Remove old custom fields
-//            val fieldsIterator = result.iterator()
-//            while (fieldsIterator.hasNext()) {
-//                val field = fieldsIterator.next()
-//                val fieldIndex = field.fieldIndex
-//                if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-//                    //TODOne: Remove from iterator in Kotlin
-//                    //fieldsIterator.remove()
-//                }else{
-//                    cleanedResult.add(field)
-//                }
-//            }
-//
-//            headersAndFields = cleanedResult
-//
-//            //Get person live data and observe
-//            personLiveData = personDao.findByUidLive(personUid)
-//            //Observe the live data
-//            view.runOnUiThread(Runnable {
-//                personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
-//            })
-
         }
     }
 
@@ -302,6 +278,8 @@ class PersonEditPresenter
             }
 
             personPictureDao.setAttachment(existingPP, imageFilePath)
+            existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+            personPictureDao.update(existingPP)
 
             //Update personWithpic
             personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)

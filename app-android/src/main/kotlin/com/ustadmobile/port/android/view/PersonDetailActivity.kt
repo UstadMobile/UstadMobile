@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonDetailPresenter
@@ -297,11 +298,14 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             val profileImage = Uri.fromFile(output)
 
             runOnUiThread {
+
+                Picasso.get().invalidate(profileImage)
                 Picasso
                         .get()
                         .load(profileImage)
                         .fit()
                         .centerCrop()
+                        .networkPolicy(NetworkPolicy.NO_CACHE, NetworkPolicy.NO_STORE)
                         .into(personEditImage)
 
                 //Click on image - open dialog to show bigger picture

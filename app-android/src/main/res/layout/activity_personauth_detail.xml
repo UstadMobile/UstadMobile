@@ -61,7 +61,7 @@
         android:autofillHints="@string/username"
         android:ems="10"
         android:hint="@string/username"
-        android:inputType="text|textPersonName|textCapSentences"
+        android:inputType="text"
         android:textColor="@color/text_primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

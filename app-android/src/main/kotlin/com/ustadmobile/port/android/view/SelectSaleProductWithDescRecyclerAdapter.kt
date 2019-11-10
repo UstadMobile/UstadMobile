@@ -36,7 +36,7 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
         internal var theContext: Context)
     : PagedListAdapter<SaleProduct, SelectSaleProductWithDescRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
 
-    private var productPictureDao : SaleProductPictureDao? = null
+    private var productPictureDaoRepo : SaleProductPictureDao? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -54,7 +54,7 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .resize(0, dpToPxImagePerson())
                 .noFade()
                 .into(theImage)
     }
@@ -73,28 +73,30 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
 
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+            productPictureDaoRepo  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+            val productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
 
-            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
 
             if (!imagePath.isEmpty())
                 setPictureOnView(imagePath, imageView)
             else
                 imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+
+
+            val saleProductPicture = productPictureDaoRepo!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            if(saleProductPictureLocal != saleProductPicture) {
+
+                if (!imagePath.isEmpty())
+                    setPictureOnView(imagePath, imageView)
+                else
+                    imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+            }
         }
-
-
-//        val pictureUid = entity!!.pictureUid
-//        if (pictureUid != 0L) {
-////            imagePath = UmAppDatabase.Companion.getInstance(theContext).saleProductPictureDao
-////                            .getAttachmentPath(entity);
-//        }
-//
-//        if (imagePath != null && !imagePath.isEmpty())
-//            setPictureOnView(imagePath, imageView)
-//        else
-//            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
 
         name.text = entity!!.saleProductName
         desc.text = entity!!.saleProductDesc
@@ -107,7 +109,7 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
 
     companion object {
 
-        private val IMAGE_WITH = 26
+        private val IMAGE_WITH = 100
 
         private fun dpToPxImagePerson(): Int {
             return (IMAGE_WITH * Resources.getSystem().displayMetrics.density).toInt()

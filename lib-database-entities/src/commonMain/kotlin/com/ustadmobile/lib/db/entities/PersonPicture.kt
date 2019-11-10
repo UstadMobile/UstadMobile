@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
 @EntityWithAttachment
-class PersonPicture() {
+open class PersonPicture() {
 
     @PrimaryKey(autoGenerate = true)
     var personPictureUid: Long = 0
@@ -36,4 +36,36 @@ class PersonPicture() {
 
         const val TABLE_ID = 50
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as PersonPicture
+
+        if (personPictureUid != other.personPictureUid) return false
+        if (personPicturePersonUid != other.personPicturePersonUid) return false
+        if (personPictureMasterCsn != other.personPictureMasterCsn) return false
+        if (personPictureLocalCsn != other.personPictureLocalCsn) return false
+        if (personPictureLastChangedBy != other.personPictureLastChangedBy) return false
+        if (fileSize != other.fileSize) return false
+        if (picTimestamp != other.picTimestamp) return false
+        if (mimeType != other.mimeType) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = personPictureUid.hashCode()
+        result = 31 * result + personPicturePersonUid.hashCode()
+        result = 31 * result + personPictureMasterCsn.hashCode()
+        result = 31 * result + personPictureLocalCsn.hashCode()
+        result = 31 * result + personPictureLastChangedBy
+        result = 31 * result + fileSize
+        result = 31 * result + picTimestamp.hashCode()
+        result = 31 * result + (mimeType?.hashCode() ?: 0)
+        return result
+    }
+
+
 }

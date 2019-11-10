@@ -21,6 +21,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
@@ -142,7 +143,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     }
 
 
-    override fun updateImageOnView(imagePath: String) {
+    override fun updateImageOnView(imagePath: String, skipCached: Boolean) {
         imagePathFromCamera = imagePath
         val output = File(imagePath)
 
@@ -152,13 +153,29 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
             val profileImage = Uri.fromFile(output)
 
             runOnUiThread {
-                Picasso
-                        .get()
-                        .load(profileImage)
-                        .transform(CircleTransform())
-                        .resize(iconDimen, iconDimen)
-                        .centerCrop()
-                        .into(personEditImage)
+
+                if(skipCached){
+                    Picasso.get().invalidate(profileImage)
+
+                    Picasso
+                            .get()
+                            .load(profileImage)
+                            .transform(CircleTransform())
+                            .resize(iconDimen, iconDimen)
+                            .centerCrop()
+                            .networkPolicy(NetworkPolicy.NO_CACHE, NetworkPolicy.NO_STORE)
+                            .into(personEditImage)
+
+                }else{
+                    Picasso
+                            .get()
+                            .load(profileImage)
+                            .transform(CircleTransform())
+                            .resize(iconDimen, iconDimen)
+                            .centerCrop()
+                            .into(personEditImage)
+                }
+
 
                 //Click on image - open dialog to show bigger picture
                 personEditImage.setOnClickListener { view ->

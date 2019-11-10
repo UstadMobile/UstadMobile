@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectSaleProductPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -36,7 +37,7 @@ class SelectSaleProductRecyclerAdapter
     private var listCategory: Boolean = false
     private var isCatalog: Boolean = false
 
-    private var productPictureDao : SaleProductPictureDao ? = null
+    private var productPictureDaoRepo : SaleProductPictureDao ? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -51,6 +52,7 @@ class SelectSaleProductRecyclerAdapter
 
         val imageUri = Uri.fromFile(File(imagePath))
 
+        //Picasso.get().invalidate(imageUri)
         Picasso
                 .get()
                 .load(imageUri)
@@ -72,15 +74,29 @@ class SelectSaleProductRecyclerAdapter
 
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+            productPictureDaoRepo  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+            val productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
 
-            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
 
             if (!imagePath.isEmpty())
                 setPictureOnView(imagePath, imageView)
             else
                 imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+
+
+            val saleProductPicture = productPictureDaoRepo!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
+            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPicture!!)!!;
+
+            if(saleProductPictureLocal != saleProductPicture) {
+
+                if (!imagePath.isEmpty())
+                    setPictureOnView(imagePath, imageView)
+                else
+                    imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+            }
         }
 
 
