@@ -210,3 +210,6 @@ app-android/src/main/assets/cache
 build/
 build/
 .vscode/
+
+#attachments
+attachments/
