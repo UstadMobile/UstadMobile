@@ -22,7 +22,7 @@ abstract class ExampleAttachmentDao {
     }
 
     @GetAttachmentData
-    open fun getAttachmentDataFileName(entity: ExampleAttachmentEntity): String {
+    open fun getAttachmentDataFileName(entity: ExampleAttachmentEntity): String? {
         return ""
     }
 

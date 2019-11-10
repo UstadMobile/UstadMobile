@@ -283,6 +283,9 @@
     <string name="content_entry_label_update">Update document</string>
     <string name="content_entry_label_select_file">Select file</string>
     <string name="content_entry_label_update_file">Update file</string>
+    <string name="content_entry_label_update_content">Update Content</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
     <string name="content_entry_label_licence">License</string>
     <string name="content_import_success_message">You have successfully imported a file</string>
     <string name="content_import_failure_message">Selected file is not supported, try another file</string>
