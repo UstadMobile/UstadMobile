@@ -95,6 +95,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
 
                 container = containerDao.findByUidAsync(containerUid)!!
                 val result = containerEntryDao.findByContainerAsync(containerUid)
+
                 containerManager = ContainerManager(container, db, repo)
                 var defaultLangName = ""
                 for (entry in result) {
@@ -115,9 +116,11 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                             else "English"
                             srtMap[defaultLangName] = fileInContainer
                         } else {
-                            val name = fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
-                            srtMap[name] = fileInContainer
-                            srtLangList.add(name)
+                            if (fileInContainer.contains("-") && fileInContainer.contains(".")) {
+                                val name = fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
+                                srtMap[name] = fileInContainer
+                                srtLangList.add(name)
+                            }
                         }
                     }
                 }
