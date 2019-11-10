@@ -184,7 +184,7 @@ actual class ContainerManager actual constructor(container: Container,
     }
 
     companion object {
-        val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4")
+        val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4", ".avi", ".mov", ".wmv",".flv", ".mkv", ".m4v")
     }
 
 }

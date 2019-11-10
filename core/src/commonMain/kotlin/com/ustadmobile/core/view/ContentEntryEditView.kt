@@ -39,6 +39,10 @@ interface ContentEntryEditView : UstadView {
 
     fun dismissDialog()
 
+    fun startBrowseFiles()
+
+    fun showUpdateContentDialog(title: String, options: List<String>)
+
     companion object{
 
         const val CONTENT_ENTRY_LEAF = "content_entry_leaf"
