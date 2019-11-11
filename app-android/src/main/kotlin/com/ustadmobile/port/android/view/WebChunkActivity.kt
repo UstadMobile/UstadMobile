@@ -10,7 +10,7 @@ import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.util.ContentEntryUtilCommon
+import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
@@ -90,7 +90,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
         showErrorNotification(message, {
-            var appPackageName = ContentEntryUtilCommon.mimeTypeToPlayStoreIdMap[mimeType]
+            var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }
