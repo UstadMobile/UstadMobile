@@ -21,9 +21,9 @@
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
 
-    <li><a (click)="navigateTo(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
-    <li *ngIf="showReports"> <a (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
-    <li > <a (click)="openProfile()"> <span i18n="@@profile">Profile</span></a></li>
+    <li><a (click)="handleSideMenuSelected(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
+    <li *ngIf="showReports"> <a (click)="handleSideMenuSelected(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
+    <li > <a (click)="handleClickPersonIcon()"> <span i18n="@@profile">Profile</span></a></li>
     <li > <a (click)="bottomSheetModal.openModal()"> <span i18n="@@language">Language</span></a></li>
   </mz-dropdown> 
 
@@ -31,7 +31,7 @@
   <mz-modal #bottomSheetModal [fixedFooter]="false" [bottomSheet]="false" [options]="modalOptions">
     <mz-modal-content class="black">
       <div class="collection margin-modal">
-        <a (click)="onLanguageSelected(language, bottomSheetModal)" class="collection-item" *ngFor="let language of supportedLanguages">{{language}}</a>
+        <a (click)="handleLanguageSelected(language, bottomSheetModal)" class="collection-item" *ngFor="let language of supportedLanguages">{{language}}</a>
       </div>
     </mz-modal-content>
   </mz-modal>
@@ -41,7 +41,7 @@
 
     <mz-sidenav-header>
       <div class="user-view" style="background: url('assets/images/top_header_bg.jpg')">
-        <i class="material-icons white-text {{class_open_profile}} open-profile" (click)="openProfile()">open_in_new</i>
+        <i class="material-icons white-text {{class_open_profile}} open-profile" (click)="handleClickPersonIcon()">open_in_new</i>
         <img class="circle avatar" [src]="userProfile">
         <div class="white-text name">{{userName}}</div>
         <div class="white-text email">{{userEmail}}</div>
@@ -49,14 +49,14 @@
     </mz-sidenav-header>
 
     <mz-sidenav-link [active]="activeState[0]">
-      <a class="collapsible-header" id="libs" (click)="navigateTo(routes.entryList)"><span
+      <a class="collapsible-header" id="libs" (click)="handleSideMenuSelected(routes.entryList)"><span
           i18n="@@libraries">Libraries</span>
         <i class="material-icons {{class_icon_position}}">library_books</i>
       </a>
     </mz-sidenav-link>
 
     <mz-sidenav-link *ngIf="showReports" [active]="activeState[1]">
-      <a class="collapsible-header" (click)="navigateTo(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
+      <a class="collapsible-header" (click)="handleSideMenuSelected(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
         <i class="material-icons {{class_icon_position}}">pie_chart</i>
       </a>
     </mz-sidenav-link>

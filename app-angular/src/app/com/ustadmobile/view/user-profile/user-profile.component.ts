@@ -86,7 +86,7 @@ export class UserProfileComponent extends UmBaseComponent implements OnDestroy,
 
   showLanguageOptions(){}
 
-  logoutUser(){
+  handleUserLogout(){
     this.presenter.handleUserLogout()
   }
 

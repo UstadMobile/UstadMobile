@@ -40,9 +40,7 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
 
   ngOnInit() {
     super.ngOnInit()
-    $(document).ready(function() {
-      //$('iframe').contents().find('img').addClass("responsive-img")
-    });
+    $(document).ready(function() {});
   }
 
 
@@ -69,7 +67,6 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
         super.openOnNewtab(url) 
       })
     }
-    
   }
 
   private loadPage(index){

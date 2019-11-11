@@ -61,13 +61,13 @@ export class RegisterComponent extends UmBaseComponent implements OnDestroy,
     super.ngOnInit();
   }
 
-  startRegistration() {
+  handleClickRegister() {
     this.formValidated = false;
     const formValues = this.umFormRegister.value;
     const person = new entity.com.ustadmobile.lib.db.entities.Person(formValues.username,
       formValues.first_name, formValues.last_name);
     person.emailAddr = formValues.email;
-    this.presenter.handleClickRegister("person", formValues.password, this.serverUrl);
+    this.presenter.handleClickRegister(person, formValues.password, this.serverUrl);
   }
   setErrorMessageView(errorMessage: string) {
     this.showError(errorMessage);

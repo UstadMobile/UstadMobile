@@ -276,7 +276,7 @@ core.com.ustadmobile.core.view.XapiReportOptionsView {
 
   updateDidListSelected() {}
 
-  handleDoneSelected() {
+  handleViewReportPreview() {
     const didList = []
     const whoList = []
 

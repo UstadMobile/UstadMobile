@@ -136,7 +136,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
    })  
   }
 
-  openEntry(entry) {
+  handleContentEntryClicked(entry) {
     UmAngularUtil.fireTitleUpdate(entry.title)
     this.presenter.handleContentEntryClicked(entry);
   }

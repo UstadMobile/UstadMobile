@@ -35,7 +35,7 @@
       (scrolled)="onScrollDown()" [fromRoot]="false" *ngIf="entryList"
       class="collection default-padding-top {{class_entry_collection}}">
       <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entryList"
-        (click)="openEntry(entry)">
+        (click)="handleContentEntryClicked(entry)">
         <div class="row">
           <div class="col s4 l2 {{class_entry_thumbnail}}">
             <img src="{{entry.thumbnailUrl}}" alt="" class="responsive-img entry-image">

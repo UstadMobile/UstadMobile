@@ -56,7 +56,7 @@ export class LoginComponent extends UmBaseComponent implements OnDestroy, core.c
     this.presenter.onCreate(null);
   }
 
-  startLogin() {
+  handleClickLogin() {
     this.formValidated = false;
     this.presenter.handleClickLogin(this.umFormLogin.value.username,
       this.umFormLogin.value.password, this.serverUrl);

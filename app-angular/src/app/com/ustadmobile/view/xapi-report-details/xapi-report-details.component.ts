@@ -106,6 +106,4 @@ core.com.ustadmobile.core.view.XapiReportDetailView {
       this.navigationSubscription.unsubscribe();
     }
   }
-
-
 }

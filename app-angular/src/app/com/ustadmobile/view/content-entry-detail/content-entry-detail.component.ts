@@ -49,11 +49,11 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
       super.ngOnInit();
     }
 
-    openEntry() {
+    handleDownloadButtonClick() {
       this.presenter.handleDownloadButtonClick();
     }
 
-    openTranslation(translation) {
+    handleClickTranslatedEntry(translation) {
       this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
     }
 

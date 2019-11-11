@@ -2,7 +2,7 @@
 default-content-padding-right default-content-padding-left">
 
   <div class="col s12 l6 m6 push-l3 push-m3 push-s0 z-depth-1 white login-box default-padding-top">
-    <form (ngSubmit)="startLogin()" [formGroup]="umFormLogin">
+    <form (ngSubmit)="handleClickLogin()" [formGroup]="umFormLogin">
       <div class="row default-padding-top default-content-padding-bottom">
         <div class="input-field col s12">
           <mz-input-container>

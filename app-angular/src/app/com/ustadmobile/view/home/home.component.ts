@@ -88,12 +88,12 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     super.ngOnInit()
     this.umFormLanguage.valueChanges.subscribe((form: any) => {
       if (form.language !== "") {
-        this.onLanguageSelected(form.language)
+        this.handleLanguageSelected(form.language)
       }
     });
   }
 
-  onLanguageSelected(language, bottomSheetModal = null){
+  handleLanguageSelected(language, bottomSheetModal = null){
     this.zone.run(()=>{
       this.presenter.handleLanguageSelected(this.supportedLanguages.indexOf(language))
     })
@@ -110,7 +110,7 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     this.presenter.handleShowLanguageOptions()
   }
 
-  openProfile(){
+  handleClickPersonIcon(){
     this.presenter.handleClickPersonIcon()
   }
 
@@ -137,7 +137,7 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     }
   }
 
-  navigateTo(route) {
+  handleSideMenuSelected(route) {
     const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context)
     const isDashboard = route == "ReportDashboard"
     const routeTo =  isDashboard && !activeAcount ? this.routes.login : route 
