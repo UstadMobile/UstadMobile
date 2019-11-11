@@ -259,7 +259,7 @@ class BleMessageGattClientCallback
             // as per https://developer.android.com/guide/topics/connectivity/bluetooth-le "Close the client app"
             cleanup(gatt)
 
-            responseListener!!.onResponseReceived(gatt.device.address, receivedMessage, null)
+            responseListener?.onResponseReceived(gatt.device.address, receivedMessage, null)
         }
     }
 

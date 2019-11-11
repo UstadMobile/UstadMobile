@@ -47,7 +47,7 @@ class LocalAvailabilityManagerImplTest  {
 
             val coroutineContext = newSingleThreadContext("LocalAvailabilityTest")
             val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
-                    coroutineDispatcher = coroutineContext, endpoint = "http://localhost:8087/")
+                    coroutineDispatcher = coroutineContext)
             val monitorRequest = AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1), {
                 if(it[TEST_ENTRY_UID1] ?: false)
                     countdownLatch.countDown()
@@ -89,8 +89,7 @@ class LocalAvailabilityManagerImplTest  {
                 task
             }
 
-            val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
-                    endpoint = "http://localhost:8087/")
+            val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
             managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
             managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
 
@@ -136,8 +135,7 @@ class LocalAvailabilityManagerImplTest  {
                     task
                 }
 
-                val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
-                        endpoint = "http://localhost:8087/")
+                val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
                 managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
                 managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
                 managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))

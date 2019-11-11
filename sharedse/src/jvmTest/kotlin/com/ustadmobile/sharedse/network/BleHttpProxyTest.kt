@@ -88,9 +88,11 @@ class BleHttpProxyTest {
         nearbyDevices = listOf(MockBleDevice(TEST_NEARBY_MAC1, true, false))
 
         runBlocking {
-            val response = httpClient.get<String>("http://localhost:8090/${BleHttpProxy.PREFIX}/$TEST_NEARBY_MAC1/ContentEntryList")
-            Assert.assertEquals("Response is as expected", "OK",
-                    response)
+            repeat(10) {
+                val response = httpClient.get<String>("http://localhost:8090/${BleHttpProxy.PREFIX}/$TEST_NEARBY_MAC1/ContentEntryList")
+                Assert.assertEquals("Response is as expected", "OK",
+                        response)
+            }
         }
     }
 
