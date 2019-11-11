@@ -11,6 +11,8 @@ export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnIni
 
   barge_img =""
 
+  avatar_image = ""
+
   public modalOptions: Materialize.ModalOptions = {
     dismissible: false,
     opacity: .5, 
@@ -26,6 +28,7 @@ export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnIni
 
   ngOnInit() {
     this.barge_img = window.location.origin + "/assets/images/get_from_playtore.jpg";
+    this.avatar_image = window.location.origin + "/assets/images/downloading_data.png";
   }
 
   openPayStore(){
