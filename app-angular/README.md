@@ -2,32 +2,40 @@
 # app-angular  
 This modules contains angular web application, based on kotlin multi-platform idea it uses packages delivered from kotlin based modules packaged as NPM packages.  
   
-## Prerequisites  
+## Prerequisites 
+ 
 After acquiring a copy of this app, the first thing to do is to install [Node v8](https://nodejs.org/en/download/)  or above (Everything depends on it). After Node installation, install angular CLI.   
 Finally,change working directory to app-angular and install all dependencies used in the project since node_modules directory is git ignored.   
   
 * Installing Angular CLI  
+
 ```  
 npm install -g @angular/cli  
 ```  
-* Resolving EACCES Permission errors  
+* Resolving EACCES Permission errors
+
 If using Linux or MacOS, you need to change your npm global directory as per [Resolving EACCES permissions errors when installing packages globally](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally)   
 otherwise you will have file permission errors on build.  
 
 * Install protractor globally
+
 ```  
  npm install protractor -g  
 ``` 
   
 This will install protractor and webdriver-manager, then run 
+
  ``` 
 webdriver-manager update 
 ``` 
+
 For more information checkout [here](http://www.protractortest.org/#/tutorial)
+
 ## Development   
 While you are still in app-angular , you can now build this module. It will create modules dependencies from core source ready to be installed.  
   
 * Building and installing  
+
 ```  
 ./gradlew app-angular:build  
 ```  
@@ -41,15 +49,17 @@ import entity from 'UstadMobile-lib-database-entities';
 i.e  
 const contentEntry = new entity.com.ustadmobile.lib.db.entities.ContentEntry();  
 ```  
+
 * Run app locally
 
-Run with default locale
+**Run with default locale**
 
 ```
 ng serve  or  npm run start
 ```
 
-Running app locally for a specific locale
+**Running app locally for a specific locale**
+
 
 ```  
 npm run start:<locale code> 
@@ -59,17 +69,19 @@ npm run start:<locale code>
 
 This will create an app, to run it use http://localhost:4200/ 
 
-NOTE:
+**NOTE:**
 
 Make sure you build and run development server before executing above command, to run the server in development mode use:-
 
 ```  
 ./gradlew app-ktor-server:appRunDevMode
-``` 
+```
+
 
 ### Codding pattern
 #### Adding new component
 To add new component, just run the following angular CLI commands:-
+
 ```  
 ng generate component <path to views dir> <component name>
 i.e ng g c com/ustadmobile/view/new-component-name
@@ -162,7 +174,8 @@ i.e
 ## Deployment  
 To create production app, you need to generate JS bundles from angular source. To achieve that run the following command on your terminal.  
 
-Deploy for specific locale
+**Deploy for specific locale**
+
 ```  
 npm run build:<locale code> 
 //i.d npm run build:en
@@ -172,7 +185,7 @@ or
 ./gradlew app-angular:buildProd -Plocale=en
 ```
 
-Deploy for all locales
+**Deploy for all locales**
 
 ```  
 npm run build-prod 
