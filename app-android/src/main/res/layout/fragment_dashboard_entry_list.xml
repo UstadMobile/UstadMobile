@@ -56,17 +56,18 @@
         android:id="@+id/fragment_dashboard_entry_list_fab_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:visibility="visible"
-        app:menu_icon="@drawable/ic_add_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:menu_colorNormal="@color/fab"
         app:menu_colorPressed="@color/fab_pressed"
         app:menu_colorRipple="@color/fab_ripple"
+        app:menu_icon="@drawable/ic_add_black_24dp"
         fab:fab_colorNormal="@color/fab"
         fab:fab_colorPressed="@color/fab_pressed"
-        fab:fab_colorRipple="@color/fab_ripple"
-        >
+        fab:fab_colorRipple="@color/fab_ripple">
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fragment_dashboard_entry_list_fab_menu_sales_performance"
@@ -93,6 +94,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:src="@drawable/ic_assignment_ind_black_24dp"
+            android:visibility="invisible"
             app:fab_label="@string/sales_log"
             app:fab_size="mini"
             app:menu_colorNormal="@color/fab"
@@ -100,8 +102,7 @@
             app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
-            fab:fab_colorRipple="@color/fab_ripple"
-            android:visibility="invisible"/>
+            fab:fab_colorRipple="@color/fab_ripple" />
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fragment_dashboard_entry_list_fab_menu_top_les"
@@ -111,6 +112,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:src="@drawable/ic_content_paste_black_24dp"
+            android:visibility="invisible"
             app:fab_label="@string/top_les"
             app:fab_size="mini"
             app:menu_colorNormal="@color/fab"
@@ -118,8 +120,7 @@
             app:menu_colorRipple="@color/fab_ripple"
             fab:fab_colorNormal="@color/fab"
             fab:fab_colorPressed="@color/fab_pressed"
-            fab:fab_colorRipple="@color/fab_ripple"
-            android:visibility="invisible"/>
+            fab:fab_colorRipple="@color/fab_ripple" />
     </com.github.clans.fab.FloatingActionMenu>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

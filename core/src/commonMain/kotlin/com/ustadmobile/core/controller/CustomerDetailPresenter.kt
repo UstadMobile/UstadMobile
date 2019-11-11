@@ -40,6 +40,8 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
     private var locationName : String = ""
     private var phoneNumber : String = ""
 
+    var editMode: Boolean = false
+
     private var positionToLocationUid: MutableMap<Int, Long>? = null
 
 
@@ -125,23 +127,17 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
         view.updatePhoneNumber("")
         view.updateCustomerName("")
 
-        //Old way:
-
-//        if (customerUid != 0L) {
-//            selectedCustomer(customerUid)
-//        }else{
-//            createNewCustomer()
-//        }
-
         //New way:
         initFromCustomer()
 
     }
 
-    fun initFromCustomer(){
+    private fun initFromCustomer(){
         val thisP = this
         GlobalScope.launch {
+
             if (customerUid == 0L) {
+                editMode = true
                 currentPerson = Person()
                 val customerRole = roleDao.findByName(Role.ROLE_NAME_CUSTOMER)
 
@@ -150,7 +146,6 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
                     currentPerson!!.personRoleUid = customerRole.roleUid
                 }
 
-
                 currentPerson!!.personUid = personDao.createPersonAsync(currentPerson!!)
                 customerUid = currentPerson!!.personUid
 
@@ -158,6 +153,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
                     view.updatePAB(true)
                 })
             }else{
+                editMode = false
                 view.runOnUiThread(Runnable {
                     view.updatePAB(false)
                 })
@@ -174,6 +170,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
     }
 
     private fun updateCustomerOnView(person:Person?){
+        editMode = false
         currentPerson = person!!
         var firstNames = ""
         var lastName = ""
@@ -202,6 +199,8 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
         }else{
             view.updatePhoneNumber("")
         }
+
+        editMode = true
 
     }
 

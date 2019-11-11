@@ -28,7 +28,6 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
 
     private var toolbar: Toolbar? = null
     private var mPresenter: SalePaymentDetailPresenter? = null
-    private val mRecyclerView: RecyclerView? = null
 
     private var amountNP: NumberPicker? = null
     private var paymentDateET: EditText? = null
@@ -70,6 +69,12 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun updateMaxPaymentValue(value: Long){
+        val intVal = value.toInt()
+        if(intVal != null) {
+            amountNP!!.maxValue = value.toInt()
+        }
+    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,8 +94,8 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
         amountNP!!.value = 1
 
         val np = amountNP
-        np!!.maxValue = 9999999 // max value 1000
-        np.minValue = 0   // min value 0
+        np!!.maxValue = 0 // max value 1000
+        np.minValue = 1   // min value 0
         np.value = 1
         np.wrapSelectorWheel = false
         val m_oldFocus = np.descendantFocusability
@@ -99,22 +104,6 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
             np.descendantFocusability = m_oldFocus
             false
         }
-
-        //        np.setOnValueChangedListener((numberPicker, oldVal, newVal) -> {
-        //            int stepSize = 10;
-        //            if(newVal%stepSize !=0){
-        //                if(newVal < oldVal){
-        //                    numberPicker.setValue((newVal/stepSize) *stepSize);
-        //                }else{
-        //                    numberPicker.setValue(((newVal/stepSize) *stepSize ) +stepSize );
-        //                }
-        //
-        //            }else{
-        //                numberPicker.setValue(newVal);
-        //            }
-        //
-        //        });
-
 
         paymentDateET = findViewById(R.id.activity_sale_payment_detail_payment_date_et)
 
@@ -159,7 +148,6 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
                     val newVal = Integer.valueOf(s.toString())
                     mPresenter!!.handleAmountUpdated(newVal.toLong())
                 }
-
             }
         })
 
@@ -173,6 +161,7 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
     }
 
     override fun updateDefaultValue(value: Long) {
+        updateMaxPaymentValue(value)
         amountNP!!.value = value.toInt()
     }
 }

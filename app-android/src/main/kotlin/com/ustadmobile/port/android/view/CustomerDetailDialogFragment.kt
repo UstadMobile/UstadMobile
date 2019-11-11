@@ -10,10 +10,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
@@ -25,8 +22,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.CustomerDetailView
 import com.ustadmobile.core.view.DismissableDialog
 
-class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
-        SelectPersonDialogFragment.PersonSelectedDialogListener, DismissableDialog {
+class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView, DismissableDialog {
     override val viewContext: Any
         get() = context!!
 
@@ -82,12 +78,6 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onSelectPersonListener(personUid: Long) {
-        customerUid = personUid
-        mPresenter!!.updateCustomerUid(customerUid!!)
-    }
-
-
     fun getTintedDrawable(drawable: Drawable?, color: Int): Drawable {
         var drawable = drawable
         drawable = DrawableCompat.wrap(drawable!!)
@@ -97,7 +87,7 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
     }
 
     override fun updatePAB(save: Boolean){
-        if(save){
+        if(save && mPresenter!!.editMode){
             pabMenuItem!!.setTitle(R.string.save)
         }else{
             pabMenuItem!!.setTitle(R.string.select)
@@ -109,8 +99,8 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         val adapter = ArrayAdapter(activity!!,
                 R.layout.item_simple_spinner, locationPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        locationSpinner!!.adapter = adapter
-        locationSpinner!!.setSelection(selectedPosition)
+        locationSpinner.adapter = adapter
+        locationSpinner.setSelection(selectedPosition)
 
     }
 
@@ -147,22 +137,19 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
         toolbar.setOnMenuItemClickListener { item ->
             val i = item.itemId
             if (i == R.id.menu_save) {
-                mPresenter!!.doneSelecting(locationName!!.text.toString(), phoneNumber!!.text.toString(),
-                        customerName!!.text.toString())
+                if(customerName!!.text.toString().equals("")){
+                    sendMessage(activity!!.getText(R.string.please_enter_a_name).toString())
+                }else {
+                    mPresenter!!.doneSelecting(locationName!!.text.toString(), phoneNumber!!.text.toString(),
+                            customerName!!.text.toString())
+                }
             }
             false
         }
 
-
         customerName = rootView.findViewById(R.id.activity_customer_detail_name)
         locationName = rootView.findViewById(R.id.activity_customer_detail_location)
         phoneNumber = rootView.findViewById(R.id.activity_customer_detail_phone)
-
-
-        //Call the Presenter
-        mPresenter = CustomerDetailPresenter(context!!,
-                UMAndroidUtil.bundleToMap(arguments), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         locationName!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int,
@@ -206,6 +193,11 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
             }
         })
 
+        //Call the Presenter
+        mPresenter = CustomerDetailPresenter(context!!,
+                UMAndroidUtil.bundleToMap(arguments), this)
+        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
         //Location spinner
         locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
@@ -221,17 +213,6 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
             newCustomer = true
         }
 
-        if(!newCustomer) {
-            customerName!!.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-
-                if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                    mPresenter!!.selectCustomer();
-                }
-                true
-
-            })
-        }
-
         //Dialog stuff:
         //Set any view components and its listener (post presenter work)
         dialog = AlertDialog.Builder(context!!,
@@ -240,6 +221,15 @@ class CustomerDetailDialogFragment : UstadDialogFragment(), CustomerDetailView,
                 .setTitle("")
                 .create()
         return dialog
+    }
+
+    private fun sendMessage(toast: String) {
+
+        Toast.makeText(
+            context,
+            toast,
+            Toast.LENGTH_SHORT
+        ).show()
 
     }
 

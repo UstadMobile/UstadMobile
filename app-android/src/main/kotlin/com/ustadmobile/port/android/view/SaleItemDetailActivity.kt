@@ -138,7 +138,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         pppNP = findViewById(R.id.activity_sale_payment_detail_amount_np)
         pppNPET = pppNP!!.findViewById(Resources.getSystem().getIdentifier("numberpicker_input",
                 "id", "android"))
-        pppNPET!!.isFocusable = false
+        pppNPET!!.isFocusable = true
 
         preOrderHline = findViewById(R.id.activity_sale_item_detail_preorder_hline)
         orderDueDateTV = findViewById(R.id.activity_sale_item_detail_preorder_due_date_tv)

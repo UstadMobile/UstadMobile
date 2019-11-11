@@ -58,11 +58,6 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
 
     internal lateinit var toolbar: Toolbar
 
-    //Main Activity should implement this ?
-    interface PersonSelectedDialogListener {
-        fun onSelectPersonListener(personUid : Long)
-    }
-
     fun getTintedDrawable(drawable: Drawable?, color: Int): Drawable {
         var drawable = drawable
         drawable = DrawableCompat.wrap(drawable!!)

@@ -198,5 +198,6 @@
 
     <string name="please_select_sale_as_pre_order_or_sale">Please select item as Sold or Pre-order</string>
     <string name="please_select_customer">Please select a customer to save the sale</string>
+    <string name="please_enter_a_name">Please enter in a name</string>
 
 </resources>

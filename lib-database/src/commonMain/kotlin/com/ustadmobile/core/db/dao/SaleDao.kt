@@ -99,13 +99,13 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(ALL_SALE_LIST + SORT_NAME_DEC)
     abstract fun findAllSaleFilterAllSortNameDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_DESC)
+    @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_ASC)
     abstract fun findAllSaleFilterAllSortTotalAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_ASC)
+    @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_DESC)
     abstract fun findAllSaleFilterAllSortTotalDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST + SORT_ORDER_DATE_DESC)
+    @Query(ALL_SALE_LIST + SORT_ORDER_DATE_DESC  )
     abstract fun findAllSaleFilterAllSortDateAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_ORDER_DATE_ASC)
@@ -135,16 +135,16 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_DEC)
     abstract fun findAllSaleFilterAllSortNameDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_DESC)
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_ASC)
     abstract fun findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_ASC)
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_DESC)
     abstract fun findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_DESC)
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_ASC )
     abstract fun findAllSaleFilterAllSortDateAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
-    @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_ASC)
+    @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_DESC)
     abstract fun findAllSaleFilterAllSortDateDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
 
@@ -507,8 +507,8 @@ abstract class SaleDao : BaseDao<Sale> {
         const val FILTER_PAYMENT_DUE = " AND saleAmountPaid < saleAmount "
 
 
-        const val SORT_NAME_ASC = " ORDER BY sl.saleTitle ASC "
-        const val SORT_NAME_DEC = " ORDER BY sl.saleTitle DESC "
+        const val SORT_NAME_ASC = " ORDER BY saleProductNames ASC "
+        const val SORT_NAME_DEC = " ORDER BY saleProductNames DESC "
         const val SORT_TOTAL_AMOUNT_DESC = " ORDER BY saleAmount DESC "
         const val SORT_TOTAL_AMOUNT_ASC = " ORDER BY saleAmount ASC "
         const val SORT_ORDER_DATE_DESC = " ORDER BY sl.saleCreationDate DESC "
