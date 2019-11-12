@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.AccessToken
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.encryptPassword
@@ -27,6 +28,9 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
     @Query("SELECT * FROM PersonAuth WHERE personAuthUid = :uid")
     abstract fun findByUid(uid: Long) : PersonAuth?
+
+    @Query("SELECT * FROM Person WHERE username = :username")
+    abstract fun findPersonByUsername(username: String): Person?
 
     @Update
     abstract suspend fun updateAsync(entity: PersonAuth):Int
@@ -86,93 +90,45 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
     protected suspend fun onSuccessCreateAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
-                getSystemTimeInMillis() + SESSION_LENGTH)
+                getSystemTimeInMillis() + SESSION_LENGTH, getSystemTimeInMillis().toString())
+
         insertAccessToken(accessToken)
         return (UmAccount(personUid, username, accessToken.token, null))
     }
 
-    @UmRestAccessible
-    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    suspend fun authenticate(username: String, loggedInPersonUid: Long, oldPassword: String) :
+
+    suspend fun authenticate(username: String, password: String) :
             UmAccount? {
-        //Authenticate with current password first.
-        val personAuthResult = findByUid(loggedInPersonUid)
-        if (personAuthResult == null) {
+
+        val person = findPersonByUsername(username)
+        if(person == null){
+            return null
+        }
+
+        val loggedInPersonUid = person.personUid
+
+        val personAuth = findByUid(loggedInPersonUid)
+        if (personAuth == null) {
             return null
         } else {
-            val passwordHash = personAuthResult.passwordHash
+            val passwordHash = personAuth.passwordHash
 
             if (passwordHash!!.startsWith(PLAIN_PASS_PREFIX) &&
-                    passwordHash.substring(2) == oldPassword) {
-                println("ok1")
+                    passwordHash.substring(2) == password) {
                 return onSuccessCreateAccessToken(loggedInPersonUid, username)
 
             } else if (passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) &&
-                    authenticateThisEncryptedPassword(oldPassword,
+                    authenticateThisEncryptedPassword(password,
                             passwordHash.substring(2))) {
-                println("ok2")
                 return onSuccessCreateAccessToken(loggedInPersonUid, username)
-            } else if (authenticateThisEncryptedPassword(oldPassword,
+            } else if (authenticateThisEncryptedPassword(password,
                             passwordHash)) {
-                println("ok3")
                 return onSuccessCreateAccessToken(loggedInPersonUid, username)
             } else {
-                println("nope1")
                 return null
             }
         }
     }
-
-    //TODO: Undo when ready
-//    @UmRestAccessible
-//    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-//    fun selfResetPassword(username: String, oldPassword: String, newPassword: String,
-//                          @UmRestAuthorizedUidParam loggedInPersonUid: Long,
-//                          resetCallback: UmCallback<Int>) {
-//
-//        //Generate password Hash
-//        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptThisPassword(newPassword)
-//
-//        authenticate(username, loggedInPersonUid, oldPassword, object : UmCallback<UmAccount> {
-//            override fun onSuccess(result: UmAccount?) {
-//                if (result == null) {
-//                    resetCallback.onFailure(Exception())
-//                } else {
-//                    //Create new person auth entry if it doesnt exist
-//                    val existingPersonAuth = findByUid(loggedInPersonUid)
-//                    if (existingPersonAuth == null) {
-//                        val personAuth = PersonAuth(loggedInPersonUid, passwordHash)
-//                        insert(personAuth)
-//                    }
-//
-//                    //Update password for Person
-//                    updatePasswordForPersonUid(loggedInPersonUid, passwordHash,
-//                            object : UmCallback<Int> {
-//                                override fun onSuccess(result: Int?) {
-//                                    if (result!! > 0) {
-//                                        println("Update password success")
-//                                        resetCallback.onSuccess(1)
-//                                    } else {
-//                                        resetCallback.onFailure(Exception())
-//                                    }
-//                                }
-//
-//                                override fun onFailure(exception: Throwable?) {
-//                                    println("Update password fail")
-//                                    resetCallback.onFailure(Exception())
-//                                }
-//                            })
-//                }
-//
-//
-//            }
-//
-//            override fun onFailure(exception: Throwable?) {
-//                resetCallback.onFailure(Exception())
-//            }
-//        })
-//
-//    }
 
     companion object {
 

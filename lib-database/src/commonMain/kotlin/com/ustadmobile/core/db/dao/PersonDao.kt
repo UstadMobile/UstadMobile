@@ -108,11 +108,8 @@ abstract class  PersonDao : BaseDao<Person> {
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
-        var accessToken = AccessToken(personUid,
-                getSystemTimeInMillis() + SESSION_LENGTH)
 
-        //TODO: KMP Disable when Access Token TODO is fixed.
-        accessToken = AccessToken(personUid, getSystemTimeInMillis() +
+        val accessToken = AccessToken(personUid, getSystemTimeInMillis() +
                 SESSION_LENGTH, getSystemTimeInMillis().toString())
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)

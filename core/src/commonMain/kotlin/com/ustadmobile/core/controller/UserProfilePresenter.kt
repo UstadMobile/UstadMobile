@@ -62,7 +62,16 @@ class UserProfilePresenter(context: Any,
 
                 if (loggedInPerson != null) {
 
-                    val personName = result!!.firstNames + " " + result.lastName
+                    var firstNames = ""
+                    var lastName = ""
+                    if(result!!.firstNames!=null){
+                        firstNames = result!!.firstNames!!
+                    }
+                    if(result!!.lastName != null){
+                        lastName = result!!.lastName!!
+                    }
+
+                    val personName = firstNames + " " + lastName
                     view.runOnUiThread(Runnable {
                         view.updateToolbarTitle(personName)
                     })

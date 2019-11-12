@@ -16,15 +16,12 @@ class AccessToken() {
     var expires: Long = 0
 
     constructor(personUid: Long, expires: Long) : this() {
-        token = ""
+        this.token = ""
         this.accessTokenPersonUid = personUid
         this.expires = expires
     }
 
     constructor(personUid: Long, expires: Long, fToken:String) : this() {
-        //TODO"Fix UUID to use expect / actual"
-        //token = UUID.randomUUID().toString()
-        token = ""
         this.accessTokenPersonUid = personUid
         this.expires = expires
         this.token = fToken
