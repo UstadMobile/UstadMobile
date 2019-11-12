@@ -47,7 +47,7 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
 
-        versionName "6.3.12.7"
+        versionName "6.3.12.8"
 
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
