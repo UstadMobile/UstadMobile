@@ -24,9 +24,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import java.io.File
 import java.util.*
 
@@ -66,6 +73,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     private var addCMCLT: Int = 0
     private var addCMCLS: Int = 0
 
+    private var personPictureDaoRepo: PersonPictureDao?=null
+
     @SuppressLint("UseSparseArrays")
     private val checkBoxHM = HashMap<Long, Boolean>()
 
@@ -83,7 +92,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                     theFragment!!.activity!!.packageName)
         }
 
-    class ClazzLogDetailViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class ClazzLogDetailViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
 
     internal constructor(
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
@@ -155,11 +164,11 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         this.showAddTeacher = showAddTeacher
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzLogDetailViewHolder {
 
         val clazzLogDetailListItem = LayoutInflater.from(theContext).inflate(
                 R.layout.item_studentlistenroll_student, parent, false)
-        return PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder(
+        return ClazzLogDetailViewHolder(
                 clazzLogDetailListItem)
     }
 
@@ -225,7 +234,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param position  The position in the recycler view.
      */
     override fun onBindViewHolder(
-            holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder,
+            holder: ClazzLogDetailViewHolder,
             position: Int) {
 
         //Get person with enrollment and other info
@@ -276,18 +285,35 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         }
 
         //PICTURE : Add picture to person
-        var imagePath: String? = ""
-        val personPictureUid = personWithEnrollment.personPictureUid
-        if (personPictureUid != 0L) {
-            //TODO: KMP Attachments
-//            imagePath = UmAppDatabase.getInstance(theContext).personPictureDao
-//                    .getAttachmentPath(personPictureUid)
+
+        var imgPath = ""
+
+        holder.imageLoadJob?.cancel()
+
+        holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
+
+            personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+            val personPictureDao = UmAppDatabase.getInstance(theContext).personPictureDao
+
+            val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
+            imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureLocal!!)!!
+
+            if (!imgPath!!.isEmpty())
+                setPictureOnView(imgPath, personPicture!!)
+            else
+                personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+
+            val personPictureEntity = personPictureDaoRepo!!.findByPersonUidAsync(personUid)
+            imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureEntity!!)!!
+
+            if(personPictureLocal != personPictureEntity) {
+                if (!imgPath!!.isEmpty())
+                    setPictureOnView(imgPath, personPicture!!)
+                else
+                    personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+            }
         }
 
-        if (imagePath != null && !imagePath.isEmpty())
-            setPictureOnView(imagePath, personPicture)
-        else
-            personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
 
         //ENROLLMENT
         if (showEnrollment) {
@@ -492,7 +518,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .resize(0, dpToPxImagePerson())
                 .noFade()
                 .into(theImage)
     }
@@ -504,7 +530,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param holder    The holder that has the itemView
      */
     private fun removeAllAddClazzMemberView(cl: ConstraintLayout,
-                                            holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder) {
+                                            holder: ClazzLogDetailViewHolder) {
 
         //Get Clazz Member layout for student and teacher
         val addCMCLViewS = holder.itemView.findViewById<View>(addCMCLS)
@@ -531,7 +557,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param holder    The holder that has the itemView
      */
     private fun removeAddTeacherAddView(cl: ConstraintLayout,
-                                        holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder) {
+                                        holder: ClazzLogDetailViewHolder) {
 
         //Get Clazz Member layout for student and teacher
         val addCMCLViewT = holder.itemView.findViewById<View>(addCMCLT)
@@ -551,7 +577,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param holder    The holder that has the itemView
      */
     private fun removeAddStudentView(cl: ConstraintLayout,
-                                     holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder) {
+                                     holder: ClazzLogDetailViewHolder) {
 
         //Get Clazz Member layout for student and teacher
         val addCMCLViewS = holder.itemView.findViewById<View>(addCMCLS)
@@ -567,7 +593,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     }
 
     private fun removeHeading(cl: ConstraintLayout, headingId: Int,
-                              holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder) {
+                              holder: ClazzLogDetailViewHolder) {
         val removeMe = holder.itemView.findViewById<View>(headingId)
 
         if (removeMe != null)
@@ -583,7 +609,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param heading  The heading
      */
     private fun addHeading(mainCL: ConstraintLayout, heading: String,
-                           holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder) {
+                           holder: ClazzLogDetailViewHolder) {
 
 
         removeHeading(mainCL, headingCLId, holder)
@@ -656,7 +682,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param role  The role (Teacher or Student) as per ClazzMember.ROLE_*
      */
     private fun addHeadingAndNew(cl: ConstraintLayout, role: Int, showAdd: Boolean,
-                                 holder: PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder) {
+                                 holder: ClazzLogDetailViewHolder) {
 
         //Testing if improves:
         if (role == ClazzMember.ROLE_TEACHER) {

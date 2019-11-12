@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
 import com.soywiz.klock.DateTime
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonEditPresenter
@@ -63,6 +64,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * This activity is responsible for showing the edit page for a person. Used for editing a new
@@ -134,6 +136,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     }
 
+    private fun handleFieldEdited(fieldUid: Long,  dateLong: Long){
+        mPresenter.handleFieldEdited(fieldUid, dateLong)
+    }
     /**
      * Clears all fields.
      */
@@ -190,18 +195,19 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                         DEFAULT_DIVIDER_HEIGHT)
                 divider.layoutParams = dividerLayout
                 divider.setBackgroundColor(Color.parseColor(COLOR_GREY))
-                thisLinearLayout!!.addView(divider)
-
-                //Add the Header
-                val header = TextView(this)
-                header.text = label!!.toUpperCase()
-                header.textSize = HEADER_TEXT_SIZE.toFloat()
-                header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
-                thisLinearLayout.addView(header)
 
                 //Add for classes
                 val impl = UstadMobileSystemImpl.instance
                 if (label == impl.getString(MessageID.classes, applicationContext)) {
+
+                    thisLinearLayout!!.addView(divider)
+
+                    //Add the Header
+                    val header = TextView(this)
+                    header.text = label!!.toUpperCase()
+                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    thisLinearLayout.addView(header)
 
                     //Add Add new Class button
                     val addPersonToClazzHL = LinearLayout(this)
@@ -246,6 +252,16 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                     //Generate the live data and set it
                     mPresenter.generateAssignedClazzesLiveData()
+                }else{
+
+                    thisLinearLayout!!.addView(divider)
+
+                    //Add the Header
+                    val header = TextView(this)
+                    header.text = label!!.toUpperCase()
+                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    thisLinearLayout.addView(header)
                 }
             }
 
@@ -308,7 +324,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                         fieldEditText.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                                 dateLong, currentLocale))
-                        mPresenter.handleFieldEdited(fieldUid, dateLong)
+                        handleFieldEdited(fieldUid, dateLong)
 
                     }
 
@@ -484,28 +500,28 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
      * Starts the camera intent.
      */
     private fun startCameraIntent() {
-        //TODO: Re-enable when doing KMP attachments.
-//        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
-//        val dir = filesDir
-//        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
-//        imagePathFromCamera = output.absolutePath
-//
-//        val cameraImage = FileProvider.getUriForFile(this,
-//                "$packageName.fileprovider", output)
-//        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
-//
-//
-//        val resInfoList = packageManager.queryIntentActivities(cameraIntent,
-//                PackageManager.MATCH_DEFAULT_ONLY)
-//        for (resolveInfo in resInfoList) {
-//            val packageName = resolveInfo.activityInfo.packageName
-//            grantUriPermission(packageName, cameraImage,
-//                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//        }
-//
-//
-//        //cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION |Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
+        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+        val dir = filesDir
+        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
+        imagePathFromCamera = output.absolutePath
+
+        val cameraImage = FileProvider.getUriForFile(this,
+                "$packageName.provider", output)
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
+
+
+        val resInfoList = packageManager.queryIntentActivities(cameraIntent,
+                PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            grantUriPermission(packageName, cameraImage,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+
+        //cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION |Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
+
 
     }
 
@@ -526,18 +542,18 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     fun compressImage() {
         val imageFile = File(imagePathFromCamera)
 
-            val c = Compressor(this)
-                    .setMaxWidth(IMAGE_MAX_WIDTH)
-                    .setMaxHeight(IMAGE_MAX_HEIGHT)
-                    .setQuality(IMAGE_QUALITY)
-                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                    .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
+        val c = Compressor(this)
+                .setMaxWidth(IMAGE_MAX_WIDTH)
+                .setMaxHeight(IMAGE_MAX_HEIGHT)
+                .setQuality(IMAGE_QUALITY)
+                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
 
-            val compressedImageFile = c.compressToFile(imageFile)
-            if (!imageFile.delete()) {
-                print("Could not delete " + imagePathFromCamera!!)
-            }
-            imagePathFromCamera = compressedImageFile.absolutePath
+        val compressedImageFile = c.compressToFile(imageFile)
+        if (!imageFile.delete()) {
+            print("Could not delete " + imagePathFromCamera!!)
+        }
+        imagePathFromCamera = compressedImageFile.absolutePath
 
 
     }
@@ -546,7 +562,14 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         runOnUiThread {
             val profileImage = Uri.fromFile(File(imagePath))
 
-            Picasso.get().load(profileImage).into(personEditImage)
+
+            Picasso.get().invalidate(profileImage)
+            Picasso
+                    .get()
+                    .load(profileImage)
+                    .networkPolicy(NetworkPolicy.NO_CACHE, NetworkPolicy.NO_STORE)
+                    .into(personEditImage)
+
         }
 
 
@@ -684,7 +707,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
         // Diff callback.
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object
-                : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+            : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
             override fun areItemsTheSame(oldItem: ClazzWithNumStudents,
                                          newItem: ClazzWithNumStudents): Boolean {
                 return oldItem.clazzUid == newItem.clazzUid

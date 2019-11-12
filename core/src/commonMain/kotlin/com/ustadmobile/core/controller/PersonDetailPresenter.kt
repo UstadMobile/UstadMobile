@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -57,7 +58,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
 
-    private var personPictureDao: PersonPictureDao? = null
+    private var personPictureDao: PersonPictureDao
 
     private var currentPerson: Person? = null
 
@@ -86,7 +87,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         optionDao = repository.customFieldValueOptionDao
         personDao = repository.personDao
         personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        personPictureDao = repository.personPictureDao
+        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
     }
 
     fun addToMap(viewId: Int, fieldId: Long) {
@@ -227,24 +228,29 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      * @param imageFile The image file object
      */
     fun handleCompressedImage(imageFilePath: String) {
-        val personPictureDao = repository.personPictureDao
-        val personPicture = PersonPicture()
-        personPicture.personPicturePersonUid = personUid
-        personPicture.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-
-        val personDao = repository.personDao
 
         GlobalScope.launch {
-            val personPictureUid = personPictureDao.insertAsync(personPicture)
-            //TODO: KMP attachment
-            //personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile)
+            var personPictureUid : Long = 0L
+            var existingPP: PersonPicture ? = null
+            existingPP = personPictureDao.findByPersonUidAsync(personUid)
+            if(existingPP == null){
+                existingPP = PersonPicture()
+                existingPP.personPicturePersonUid = personUid
+                existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+                personPictureUid = personPictureDao.insertAsync(existingPP)
+                existingPP.personPictureUid = personPictureUid
+            }
+
+            personPictureDao.setAttachment(existingPP, imageFilePath)
+            existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+            personPictureDao.update(existingPP)
+
 
             //Update person and generate feeds for person
             val result = personDao.updateAsync(currentPerson!!)
             PersonEditPresenter.generateFeedsForPersonUpdate(repository, currentPerson!!)
 
-            //TODO: KMP attachment
-            //view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid))
+            view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
         }
     }
 
@@ -286,12 +292,28 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
         currentPerson = person
 
+        var personName = ""
+        var personFirstNames = ""
+        var personLastName = ""
+
+        if(currentPerson != null ){
+            if(currentPerson!!.firstNames!=null){
+                personFirstNames = currentPerson!!.firstNames!! + " "
+            }
+            if(currentPerson!!.lastName != null){
+                personLastName = currentPerson!!.lastName!!
+            }
+        }
+        personName = personFirstNames + personLastName
+
+        view.runOnUiThread(Runnable {
+            view.updateToolbar(personName)
+        })
+
         GlobalScope.launch {
-            //TODO: Make it Live
             val personPicture = personPictureDao!!.findByPersonUidAsync(currentPerson!!.personUid)
             if (personPicture != null) {
-                //TODO: KMP
-                //view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture.personPictureUid))
+                view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture)!!)
             }
         }
 
@@ -439,8 +461,12 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
-                thisValue = UMCalendarUtil.getPrettyDateFromLong(
-                        person.dateOfBirth, currentLocale)
+                if(person.dateOfBirth > 0) {
+                    thisValue = UMCalendarUtil.getPrettyDateFromLong(
+                            person.dateOfBirth, currentLocale)
+                }else{
+                    thisValue = ""
+                }
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         labelMessageId, field.fieldIcon), thisValue)
             } else {//this is actually a custom field

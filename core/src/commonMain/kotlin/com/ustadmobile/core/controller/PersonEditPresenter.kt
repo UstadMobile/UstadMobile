@@ -2,10 +2,7 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.CustomFieldDao
-import com.ustadmobile.core.db.dao.CustomFieldValueDao
-import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
-import com.ustadmobile.core.db.dao.FeedEntryDao
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -67,7 +64,7 @@ class PersonEditPresenter
  * @param view  The view that called this presenter (PersonEditView->PersonEditActivity)
  */
 (context: Any, arguments: Map<String, String>?, view: PersonEditView,
-        val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
+ val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     :UstadBaseController<PersonEditView>(context, arguments!!, view) {
 
 
@@ -105,17 +102,18 @@ class PersonEditPresenter
     private var customFieldDao: CustomFieldDao? = null
     private var customFieldValueDao: CustomFieldValueDao? = null
     private var optionDao: CustomFieldValueOptionDao? = null
+    private var personPictureDao : PersonPictureDao
 
     private val customFieldDropDownOptions: HashMap<Long, List<String>>
 
     init {
 
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
-            personUid = (arguments!!.get(ARG_PERSON_UID)!!.toString()).toLong()
+            personUid = (arguments.get(ARG_PERSON_UID)!!.toString()).toLong()
         }
 
-        if (arguments!!.containsKey(ARG_NEW_PERSON)) {
-            newPersonString = arguments!!.get(ARG_NEW_PERSON)!!.toString()
+        if (arguments.containsKey(ARG_NEW_PERSON)) {
+            newPersonString = arguments.get(ARG_NEW_PERSON)!!.toString()
         }
 
         customFieldsToUpdate = ArrayList()
@@ -123,6 +121,7 @@ class PersonEditPresenter
         viewIdToCustomFieldUid = HashMap()
 
         customFieldDropDownOptions = HashMap()
+        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
 
     }
 
@@ -140,9 +139,10 @@ class PersonEditPresenter
         GlobalScope.launch {
             //1. Get all custom fields
             val result = customFieldDao!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
-            for (c in result!!) {
+            for (c in result) {
                 //Get value as well
-                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(c.customFieldUid, personUid)
+                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(
+                        c.customFieldUid, personUid)
                 var valueString: String? = ""
                 var valueSelection = 0
 
@@ -190,9 +190,7 @@ class PersonEditPresenter
                         //view.addCustomFieldText(c, finalValueString);
 
                     })
-
                 }
-
             }
         }
     }
@@ -228,29 +226,6 @@ class PersonEditPresenter
             GlobalScope.launch(Dispatchers.Main){
                 resultLive.observe(thisP, thisP::handleFieldsLive)
             }
-//            val cleanedResult = ArrayList<PersonDetailPresenterField>()
-//            //Remove old custom fields
-//            val fieldsIterator = result.iterator()
-//            while (fieldsIterator.hasNext()) {
-//                val field = fieldsIterator.next()
-//                val fieldIndex = field.fieldIndex
-//                if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-//                    //TODOne: Remove from iterator in Kotlin
-//                    //fieldsIterator.remove()
-//                }else{
-//                    cleanedResult.add(field)
-//                }
-//            }
-//
-//            headersAndFields = cleanedResult
-//
-//            //Get person live data and observe
-//            personLiveData = personDao.findByUidLive(personUid)
-//            //Observe the live data
-//            view.runOnUiThread(Runnable {
-//                personLiveData!!.observe(thisP, thisP::handlePersonValueChanged)
-//            })
-
         }
     }
 
@@ -282,23 +257,32 @@ class PersonEditPresenter
     /**
      * Updates the pic of the person after taken to the Person object directly
      *
-     * @param picPath    The whole path of the picture.
+     * @param imageFilePath    The whole path of the picture.
      */
-    fun updatePersonPic(picPath: String) {
+    fun updatePersonPic(imageFilePath: String) {
+
+
         //Find the person
         GlobalScope.launch {
-            val personWithPic = personDao.findByUidAsync(personUid)
+            val thisPerson = personDao.findByUidAsync(personUid)
 
-            val personPictureDao = repository.personPictureDao
-            val personPicture = personPictureDao.findByPersonUidAsync(personWithPic!!.personUid)
-
-            if (personPicture != null) {
-                //TODO: KMP attachment :
-                //personPictureDao.setAttachmentFromTmpFile(personPicture.personPictureUid, picPath)
+            var personPictureUid : Long = 0L
+            var existingPP: PersonPicture ? = null
+            existingPP = personPictureDao.findByPersonUidAsync(personUid)
+            if(existingPP == null){
+                existingPP = PersonPicture()
+                existingPP.personPicturePersonUid = personUid
+                existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+                personPictureUid = personPictureDao.insertAsync(existingPP)
+                existingPP.personPictureUid = personPictureUid
             }
 
+            personPictureDao.setAttachment(existingPP, imageFilePath)
+            existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+            personPictureDao.update(existingPP)
+
             //Update personWithpic
-            personDao.updatePersonAsync(personWithPic, loggedInPersonUid!!)
+            personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)
             generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
 
         }
@@ -322,12 +306,10 @@ class PersonEditPresenter
     }
 
     private fun updatePersonPic(thisPerson: Person) {
-        val personPictureDao = repository.personPictureDao
         GlobalScope.launch {
             val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
             if (personPicture != null) {
-                //TODO: KMP Atachment
-                //view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture.personPictureUid))
+                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture)!!)
             }
         }
 
@@ -467,8 +449,12 @@ class PersonEditPresenter
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
             } else if (field.fieldUid == PERSON_FIELD_UID_BIRTHDAY.toLong()) {
-                thisValue = UMCalendarUtil.getPrettyDateFromLong(
-                        thisPerson.dateOfBirth, currnetLocale)
+                if(thisPerson.dateOfBirth > 0L) {
+                    thisValue = UMCalendarUtil.getPrettyDateFromLong(
+                            thisPerson.dateOfBirth, currnetLocale)
+                }else{
+                    thisValue = ""
+                }
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
@@ -590,7 +576,7 @@ class PersonEditPresenter
      * @param value The new value of the field from the view
      */
     fun handleFieldEdited(fieldCode: Long, value: Any) {
-        //TODO: Check this warning
+
         mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value)
     }
 

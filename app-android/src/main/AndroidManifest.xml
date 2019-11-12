@@ -292,6 +292,10 @@
         <activity android:name="com.ustadmobile.port.android.view.RecordDropoutDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
+        <activity android:name="com.ustadmobile.port.android.view.ChangePasswordActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/change_password"
+            android:theme="@style/Theme.UstadTheme"/>
 
 
     </application>

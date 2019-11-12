@@ -546,6 +546,14 @@
     <string name="end_date">End date</string>
 
 
-
+    <string name="select_image_from_camera_or_gallery">Select image from Camera or Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="unable_open_image">Unable to open that image</string>
+    <string name="current_password_not_correct">The current password is incorrect</string>
+    <string name="save">Save</string>
+    <string name="change_password">Change Password</string>
+    <string name="current_password">Current password</string>
+    <string name="confirm_new_password">Confirm new password</string>
 
 </resources>

@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller
 
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
@@ -11,7 +13,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.LoginView.Companion.ARG_STARTSYNCING
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 class BasePointPresenter
 /**
@@ -31,6 +35,12 @@ class BasePointPresenter
 
     private var showDownloadAll = false
 
+    private var personPictureDao: PersonPictureDao? = null
+
+    private var loggedInPersonUid: Long = 0L
+
+    private var personDao: PersonDao
+
     /**
      * Gets sync started flag
      * @return  true if syncStarted set to true, else false
@@ -45,15 +55,17 @@ class BasePointPresenter
                 isSyncStarted = true
             }
         }
+        repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        personDao = repository.personDao
+        personPictureDao = repository.personPictureDao
     }
 
     /**
      * Gets logged in person and observes it.
      */
     fun getLoggedInPerson() {
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
-        val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
+        val personLive = personDao.findByUidLive(loggedInPersonUid)
         personLive.observe(this, this::handlePersonValueChanged)
     }
 
@@ -72,6 +84,20 @@ class BasePointPresenter
             } else {
                 view.showBulkUploadForAdmin(false)
                 view.showSettings(false)
+            }
+
+            GlobalScope.launch {
+                val personPicture = personPictureDao!!.findByPersonUidAsync(loggedInPerson!!.personUid)
+                if (personPicture != null) {
+                    view.runOnUiThread(Runnable {
+                        val imagePath = personPictureDao!!.getAttachmentPath(personPicture)
+                        if(!imagePath!!.isEmpty()){
+                            view.loadProfileImage(imagePath)
+                        }else{
+                            view.loadProfileIcon("")
+                        }
+                    })
+                }
             }
         }
     }
@@ -141,6 +167,20 @@ class BasePointPresenter
         super.onCreate(savedState)
 
         account = UmAccountManager.getActiveAccount(context)
+
+        var isAdmin: Boolean = false
+        GlobalScope.launch {
+            if (loggedInPersonUid != 0L) {
+                val loggedInPerson = personDao.findByUid(loggedInPersonUid)
+                if (loggedInPerson != null) {
+                    isAdmin = loggedInPerson.admin
+                } else {
+                    isAdmin = false
+                }
+            }else{
+                isAdmin = false
+            }
+        }
 
         view.runOnUiThread(Runnable {
             view.loadProfileIcon(if(account == null) "" else "")

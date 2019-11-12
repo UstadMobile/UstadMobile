@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputLayout
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonDetailPresenter
@@ -70,6 +71,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     private var fab: FloatingTextButton? = null
     internal var updateImageButton: Button? = null
     private var imagePathFromCamera: String? = null
+    private var toolbar: Toolbar? = null
 
     private var mOptionsMenu: Menu? = null
 
@@ -78,6 +80,9 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
 
     internal var customFieldsLL: LinearLayout? = null
 
+    override fun updateToolbar(name: String) {
+        toolbar!!.title = name
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val i = item.itemId
@@ -86,8 +91,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             return true
 
         } else if (i == R.id.update_username_password) {
-            //TODO: KMP Server stuff
-            //mPresenter!!.goToUpdateUsernamePassword()
+            mPresenter!!.goToUpdateUsernamePassword()
 
         }
         return super.onOptionsItemSelected(item)
@@ -111,7 +115,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         setContentView(R.layout.activity_person_detail)
 
         //Toolbar
-        val toolbar = findViewById<Toolbar>(R.id.activity_person_detail_toolbar)
+        toolbar = findViewById<Toolbar>(R.id.activity_person_detail_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -218,24 +222,25 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
      * Starts the camera intent.
      */
     private fun startCameraIntent() {
-        //TODO: Re enable when doing KMP attachments
-//        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
-//        val dir = filesDir
-//        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
-//        imagePathFromCamera = output.absolutePath
-//
-//        val cameraImage = FileProvider.getUriForFile(this,
-//                "$packageName.fileprovider", output)
-//        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
-//
-//        val resInfoList = packageManager.queryIntentActivities(cameraIntent,
-//                PackageManager.MATCH_DEFAULT_ONLY)
-//        for (resolveInfo in resInfoList) {
-//            val packageName = resolveInfo.activityInfo.packageName
-//            grantUriPermission(packageName, cameraImage,
-//                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//        }
-//        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
+
+        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+        val dir = filesDir
+        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
+        imagePathFromCamera = output.absolutePath
+
+        val cameraImage = FileProvider.getUriForFile(applicationContext,
+                "$packageName.provider", output)
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
+
+        val resInfoList = packageManager.queryIntentActivities(cameraIntent,
+                PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            grantUriPermission(packageName, cameraImage,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -248,7 +253,6 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    //TODO: Check this KMP. Changed File to file path
                     mPresenter!!.handleCompressedImage(imageFile.absolutePath)
                 }
             }
@@ -262,18 +266,18 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     fun compressImage() {
         val imageFile = File(imagePathFromCamera)
 
-            val c = Compressor(this)
-                    .setMaxWidth(IMAGE_MAX_WIDTH)
-                    .setMaxHeight(IMAGE_MAX_HEIGHT)
-                    .setQuality(IMAGE_QUALITY)
-                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                    .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
+        val c = Compressor(this)
+                .setMaxWidth(IMAGE_MAX_WIDTH)
+                .setMaxHeight(IMAGE_MAX_HEIGHT)
+                .setQuality(IMAGE_QUALITY)
+                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
 
-            val compressedImageFile = c.compressToFile(imageFile)
-            if (!imageFile.delete()) {
-                print("Could not delete " + imagePathFromCamera!!)
-            }
-            imagePathFromCamera = compressedImageFile.absolutePath
+        val compressedImageFile = c.compressToFile(imageFile)
+        if (!imageFile.delete()) {
+            print("Could not delete " + imagePathFromCamera!!)
+        }
+        imagePathFromCamera = compressedImageFile.absolutePath
 
 
 
@@ -293,11 +297,14 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             val profileImage = Uri.fromFile(output)
 
             runOnUiThread {
+
+                Picasso.get().invalidate(profileImage)
                 Picasso
                         .get()
                         .load(profileImage)
                         .fit()
                         .centerCrop()
+                        .networkPolicy(NetworkPolicy.NO_CACHE, NetworkPolicy.NO_STORE)
                         .into(personEditImage)
 
                 //Click on image - open dialog to show bigger picture
@@ -318,6 +325,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             label = impl.getString(field.messageLabel, this)
         }
 
+
         when (field.fieldType) {
             FIELD_TYPE_HEADER -> {
 
@@ -336,9 +344,13 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 header.text = label!!.toUpperCase()
                 header.textSize = 12f
                 header.setPadding(16, 0, 0, 2)
+
                 mLinearLayout!!.addView(header)
 
+
                 if (field.messageLabel == MessageID.classes) {
+
+
                     //Add a recyclerview of classes
                     mRecyclerView = RecyclerView(this)
 

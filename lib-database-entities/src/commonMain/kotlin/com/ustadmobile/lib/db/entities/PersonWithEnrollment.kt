@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,4 +17,7 @@ class PersonWithEnrollment : Person() {
     var clazzName: String? = null
 
     var personPictureUid: Long = 0
+
+//    @Embedded
+//    var personRole: Role? = null
 }

@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -29,6 +31,7 @@ import androidx.work.WorkManager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.google.android.material.appbar.AppBarLayout
+import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.BasePointPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
@@ -191,6 +194,25 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
     override fun loadProfileIcon(profileUrl: String) {
         UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp, profileImage)
+    }
+
+    override fun loadProfileImage(imagePath: String) {
+        val output = File(imagePath)
+
+        if (output.exists()) {
+            val imageUri = Uri.fromFile(output)
+
+            runOnUiThread {
+                Picasso
+                        .get()
+                        .load(imageUri)
+                        .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                        .centerCrop()
+                        .into(profileImage)
+
+            }
+
+        }
     }
 
     override fun showDownloadAllButton(show: Boolean) {
@@ -665,6 +687,12 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         var VIEW_POSITION_POSITION_REPORTS = -1
         var VIEW_POSITION_POSITION_CONTENT = -1
 
+        private val IMAGE_PERSON_THUMBNAIL_WIDTH = 26
+
+
+        private fun dpToPxImagePerson(): Int {
+            return (IMAGE_PERSON_THUMBNAIL_WIDTH * Resources.getSystem().displayMetrics.density).toInt()
+        }
     }
 
 

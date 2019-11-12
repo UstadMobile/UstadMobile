@@ -2,11 +2,23 @@ package com.ustadmobile.core.view
 
 interface UserProfileView : UstadView {
 
+    fun finish()
+
+    fun updateToolbarTitle(personName: String)
+
     fun setUsername(username: String)
 
     fun setCurrentLanguage(language: String?)
 
     fun setLanguageOption(languages: MutableList<String>)
+
+    fun updateImageOnView(imagePath: String, skipCached: Boolean)
+
+    fun addImageFromCamera()
+
+    fun addImageFromGallery()
+
+    fun sendMessage(messageId: Int)
 
     fun restartUI()
 

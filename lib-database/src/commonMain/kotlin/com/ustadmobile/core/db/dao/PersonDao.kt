@@ -35,23 +35,6 @@ abstract class PersonDao : BaseDao<Person> {
         var personUid: Long = 0
     }
 
-    //TODO: KMP Undo when Server bits ready
-    @UmRestAccessible
-    //@UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    suspend fun loginAsync(username: String, password: String): UmAccount? {
-
-        val person = findUidAndPasswordHashAsync(username)
-        return if (person == null) {
-            null
-        } else if (person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) && person.passwordHash.substring(2) != password) {
-            null
-        } else if (person.passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) && !authenticateEncryptedPassword(password,
-                        person.passwordHash.substring(2))) {
-            null
-        } else {
-            onSuccessCreateAccessTokenAsync(person.personUid, username)
-        }
-    }
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {
@@ -106,15 +89,9 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-    /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-      protected abstract fun incrementPrimaryKey()*/
-
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
-        var accessToken = AccessToken(personUid,
-                getSystemTimeInMillis() + SESSION_LENGTH)
 
-        //TODO: KMP Disable when Access Token TODO is fixed.
-        accessToken = AccessToken(personUid, getSystemTimeInMillis() +
+        val accessToken = AccessToken(personUid, getSystemTimeInMillis() +
                 SESSION_LENGTH, getSystemTimeInMillis().toString())
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)
@@ -124,7 +101,8 @@ abstract class PersonDao : BaseDao<Person> {
         return isValidToken(token, personUid)
     }
 
-    @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token and accessTokenPersonUid = :personUid)")
+    @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token " +
+            " and accessTokenPersonUid = :personUid)")
     abstract fun isValidToken(token: String, personUid: Long): Boolean
 
     @Insert
@@ -140,12 +118,14 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
     @JsName("getAllPersons")
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name " +
+            " FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
     abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
 
 
     @JsName("getAllPersonsInList")
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE Person.personUid IN (:uidList)")
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name " +
+            " FROM Person WHERE Person.personUid IN (:uidList)")
     abstract suspend fun getAllPersonsInList(uidList: List<Long>): List<PersonNameAndUid>
 
 
@@ -338,7 +318,6 @@ abstract class PersonDao : BaseDao<Person> {
     }
 
 
-
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
@@ -352,12 +331,15 @@ abstract class PersonDao : BaseDao<Person> {
                 " AND EntityRole.erEntityUid = Person.personUid) " +
                 "OR " +
                 "(EntityRole.ertableId = " + Clazz.TABLE_ID +
-                " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
+                " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
+                " ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
                 "OR" +
                 "(EntityRole.ertableId = " + Location.TABLE_ID +
                 " AND EntityRole.erEntityUid IN " +
-                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
-                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin WHERE personLocationPersonUid = Person.personUid)))" +
+                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
+                " WHERE locationAncestorChildLocationUid " +
+                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
+                " WHERE personLocationPersonUid = Person.personUid)))" +
                 ") AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
