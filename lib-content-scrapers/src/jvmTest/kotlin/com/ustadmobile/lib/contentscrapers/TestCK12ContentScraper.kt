@@ -327,26 +327,6 @@ class TestCK12ContentScraper {
 
     }*/
 
-    @Test
-    fun testPracticeCotnente(){
-        CK12ContentScraper(URL("https://www.ck12.org/c/arithmetic/divide-whole-numbers/plix/Whole-Number-Division-Pancakes-537110d0da2cfe4f6fb8096a?referrer=concept_details"),
-                File("/media/samih/LENOVO/content/testck12/"), File("/media/samih/LENOVO/content/testcontainer/"), ContentEntry(), "video", 0)
-                .scrapePlixContent(File("/media/samih/LENOVO/content/testck12/plix4/"))
-    }
-
-    @Test
-    fun testLog(){
-
-        FileUtils.copyURLToFile(
-                URL("https://www.ck12.org/assessment/api/start/tests/575f58d19616aa3711c019ca?instanceBundle=true&evalData=true&includePLIX=true&preview=true&collectionHandle=arithmetic&_=1573550083336"),
-                File("/media/samih/LENOVO/content/testck12/plix5"))
-
-        /*ContentScraperUtil.downloadFileFromLogIndex(
-                URL("https://www.ck12.org/assessment/api/start/tests/575f58d19616aa3711c019ca?instanceBundle=true&evalData=true&includePLIX=true&preview=true&collectionHandle=arithmetic&_=1573550083336"),
-                File("/media/samih/LENOVO/content/testck12/plix5"),
-                )*/
-    }
-
     companion object {
 
         private val COMPONENT_API_PREFIX = "/c/"
