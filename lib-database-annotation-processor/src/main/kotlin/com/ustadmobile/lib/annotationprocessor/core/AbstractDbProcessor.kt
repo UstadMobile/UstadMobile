@@ -1463,6 +1463,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
     fun generateRepositoryGetSyncableEntitiesFun(daoFunSpec: FunSpec, daoName: String,
                                                  syncHelperDaoVarName: String = "_syncHelper",
                                                  addReturnDaoResult: Boolean  = true,
+                                                 generateGlobalScopeLaunchBlockForLiveDataTypes: Boolean = true,
                                                  autoRetryEmptyMirrorResult: Boolean = false): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val daoFunReturnType = daoFunSpec.returnType!!
@@ -1476,7 +1477,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.takeIf { isLiveDataOrDataSourceFactory && addReturnDaoResult }
                 ?.add("val _daoResult = ")?.addDelegateFunctionCall("_dao", daoFunSpec)?.add("\n")
 
-        codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+        codeBlock.takeIf { isLiveDataOrDataSourceFactory && generateGlobalScopeLaunchBlockForLiveDataTypes}
                 ?.beginControlFlow("%T.%M(%T.coroutineExceptionHandler)", GlobalScope::class,
                         MemberName("kotlinx.coroutines", "launch"),
                         RepositoryLoadHelper::class)
@@ -1586,7 +1587,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 .endControlFlow()
 
         //End GlobalScope.launch if applicable by triggering the load end ending the control flow
-        codeBlock.takeIf { isLiveDataOrDataSourceFactory }
+        codeBlock.takeIf { isLiveDataOrDataSourceFactory && generateGlobalScopeLaunchBlockForLiveDataTypes }
                 ?.add("_loadHelper.doRequest()\n")
                 ?.nextControlFlow("catch(_e: %T)", Exception::class)
                 ?.add("%M(%S)\n", MemberName("kotlin.io", "println"), "Caught doRequest exception:")

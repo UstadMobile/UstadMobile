@@ -69,24 +69,6 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                         val returnTypeEl = processingEnv.typeUtils.asElement(execEl.returnType)
 
                         if(returnTypeEl != null && returnTypeEl is TypeElement
-                                && returnTypeEl.hasDataSourceFactory(daoMethodSyncableDataSourceFactoryFilter) ) {
-                            val returnTypeClass = returnTypeEl.asClassName()
-                            val boundaryCallbackQualifiedName = "${returnTypeClass.packageName}.${returnTypeClass.simpleName}${DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS}"
-                            if(it.simpleName.toString().startsWith("get")) {
-                                var varName = it.simpleName.toString()
-                                varName = varName.substring(3, 4).toLowerCase(Locale.ROOT) + varName.substring(4) + DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS
-                                lineOut += "open val ${varName}: $boundaryCallbackQualifiedName \n" +
-                                        "get() = " +
-                                        "throw IllegalAccessException(\"You must access boundary callbacks using the repository, not the database itself\")\n"
-                            }else {
-                                lineOut += "open fun ${it.simpleName}${DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS}(): " +
-                                        "$boundaryCallbackQualifiedName = " +
-                                        "throw IllegalAccessException(\"You must access boundary callbacks using the repository, not the database itself\")\n"
-                            }
-
-                        }
-
-                        if(returnTypeEl != null && returnTypeEl is TypeElement
                                 && syncableEntitiesOnDao(returnTypeEl.asClassName(), processingEnv).isNotEmpty()) {
 
                             listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL).forEach {suffix ->

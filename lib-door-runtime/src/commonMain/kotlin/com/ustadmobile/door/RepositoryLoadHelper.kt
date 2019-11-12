@@ -22,6 +22,50 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
                               val loadFn: suspend(endpoint: String) -> T) {
 
+    var liveDataWrapper: LiveDataWrapper<*>? = null
+
+    /**
+     * This wrapper exists to monitor when LiveData is actively observed. The repository will wrap
+     * the return type so that we can watch if the data is being observed.
+     */
+    inner class LiveDataWrapper<L>(private val src: DoorLiveData<L>,
+                                   internal var onActiveCb: (()-> Unit)? = null) : DoorLiveData<L>() {
+
+        val dummyObserverMap = mutableMapOf<DoorObserver<in L>, DoorObserver<in L>>()
+
+        inner class DummyObserver<L>: DoorObserver<L> {
+            override fun onChanged(t: L) {
+                //do nothing
+            }
+        }
+
+        override fun observe(lifecycleOwner: DoorLifecycleOwner, observer: DoorObserver<in L>) {
+            src.observe(lifecycleOwner, observer)
+            val dummyObserver = DummyObserver<L>()
+            dummyObserverMap[observer] = dummyObserver
+            super.observe(lifecycleOwner, dummyObserver)
+        }
+
+        override fun observeForever(observer: DoorObserver<in L>) {
+            src.observeForever(observer)
+            val dummyObserver = DummyObserver<L>()
+            dummyObserverMap[observer] = dummyObserver
+            super.observeForever(dummyObserver)
+        }
+
+        override fun removeObserver(observer: DoorObserver<in L>) {
+            src.removeObserver(observer)
+            dummyObserverMap.remove(observer)
+        }
+    }
+
+    fun <L> wrapLiveData(src: DoorLiveData<L>): DoorLiveData<L> {
+        liveDataWrapper?.onActiveCb = null
+        val newWrapper = LiveDataWrapper<L>(src)
+        liveDataWrapper = newWrapper
+        return newWrapper
+    }
+
     @Volatile
     var completed = false
 
@@ -125,7 +169,5 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             println("Caught $exception")
         }
     }
-
-
 
 }

@@ -51,7 +51,6 @@ data class BleHttpRequest(var method: String, var reqUri: String, var reqHeaders
     override fun getHeaders(): MutableMap<String, String> = reqHeaders.toMutableMap()
 
     override fun getParameters(): MutableMap<String, MutableList<String>> =  reqParameters
-    }
 
     override fun parseBody(files: MutableMap<String, String>) {
         val postBodyVal = postBody

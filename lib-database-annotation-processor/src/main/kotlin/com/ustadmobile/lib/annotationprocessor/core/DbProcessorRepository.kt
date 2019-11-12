@@ -40,6 +40,9 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
                     .initializer("_attachmentsDir").build())
             .superclass(daoType)
+            .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                    .addMember("%S", "REDUNDANT_PROJECTION")
+                    .build())
 
     val primaryConstructorFn = FunSpec.constructorBuilder()
             .addParameter("_db", DoorDatabase::class)
@@ -89,14 +92,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
-            writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl).first, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-            val (androidRepoFileSpec, androidBoundaryCallbackFileSpec) =
-                    generateDaoRepositoryClass(daoTypeEl, pagingBoundaryCallbackEnabled = true)
+            writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),
+                    AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+            val androidRepoFileSpec = generateDaoRepositoryClass(daoTypeEl,
+                    pagingBoundaryCallbackEnabled = true)
             writeFileSpecToOutputDirs(androidRepoFileSpec,
                     AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
-            if(androidBoundaryCallbackFileSpec != null)
-                writeFileSpecToOutputDirs(androidBoundaryCallbackFileSpec,
-                        AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
         return true
@@ -297,21 +298,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .build())
             dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
 
-            if(addBoundaryCallbackGetters
-                    && daoTypeEl.hasDataSourceFactory(daoMethodSyncableDataSourceFactoryFilter)) {
-                val boundaryCallbackClassName = ClassName(daoClassName.packageName,
-                        "${daoClassName.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
-                val boundaryCallbackVarName = "_${daoTypeEl.simpleName}$SUFFIX_BOUNDARY_CALLBACKS"
-                dbRepoType.addProperty(PropertySpec.builder(boundaryCallbackVarName,
-                        boundaryCallbackClassName)
-                        .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                                .add("%T(_${daoTypeEl.simpleName}::getBoundaryCallback)", boundaryCallbackClassName)
-                                .endControlFlow().build())
-                        .build())
-                dbRepoType.addAccessorOverride("${it.simpleName}$SUFFIX_BOUNDARY_CALLBACKS",
-                        boundaryCallbackClassName, CodeBlock.of("return $boundaryCallbackVarName\n"))
-            }
-
             if(daoHasSyncableEntities && overrideKtorHelpers) {
                 listOf("Master", "Local").forEach {suffix ->
                     val ktorHelperClassName = ClassName(daoClassName.packageName,
@@ -337,12 +323,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
 
     fun generateDaoRepositoryClass(daoTypeElement: TypeElement,
-                                   pagingBoundaryCallbackEnabled: Boolean = false): Pair<FileSpec, FileSpec?> {
+                                   pagingBoundaryCallbackEnabled: Boolean = false): FileSpec{
         val repoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
         repoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
-        var boundaryCallbackFile = null as FileSpec.Builder?
-        var boundaryCallbackClassSpec = null as TypeSpec.Builder?
 
         val syncableEntitiesOnDao = syncableEntitiesOnDao(daoTypeElement.asClassName(),
                 processingEnv)
@@ -405,6 +389,21 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             .initializer("%T()", WeakHashMap::class)
                             .build()
                     repoClassSpec.addProperty(pagingBoundarySourceToKeyMap!!)
+                    val typeVarName = TypeVariableName("T")
+                    val boundaryCallbackTypeName = BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(typeVarName).copy(nullable = true)
+                    repoClassSpec.addSuperinterface(ClassName("com.ustadmobile.door",
+                            "DoorBoundaryCallbackProvider"))
+                            .addFunction(FunSpec.builder("getBoundaryCallback")
+                                    .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                                            .addMember("%S", "UNCHECKED_CAST")
+                                            .build())
+                                .addTypeVariable(typeVarName)
+                                .addParameter("dataSource", DataSource.Factory::class.asClassName().parameterizedBy(INT, typeVarName))
+                                .addModifiers(KModifier.OVERRIDE)
+                                .returns(boundaryCallbackTypeName)
+                                .addCode("return $DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME[dataSource] as %T\n",
+                                        boundaryCallbackTypeName)
+                                .build())
                 }
 
                 generateBoundaryCallback = true
@@ -421,62 +420,20 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 }
                 Repository.METHOD_DELEGATE_TO_DAO -> {
                     if(generateBoundaryCallback) {
-                        if(boundaryCallbackFile == null) {
-                            boundaryCallbackFile = FileSpec.builder(daoTypeElement.asClassName().packageName,
-                                    "${daoTypeElement.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
-                            val funSpecType = LambdaTypeName.get(
-                                    parameters = listOf(ParameterSpec.builder("dataSourceFactory",
-                                            DataSource.Factory::class.asClassName().parameterizedBy(INT, STAR)).build()),
-                                    returnType = BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(STAR).copy(nullable = true)) as LambdaTypeName
-
-                            boundaryCallbackClassSpec = TypeSpec.classBuilder("${daoTypeElement.simpleName}$SUFFIX_BOUNDARY_CALLBACKS")
-                                    .primaryConstructor(FunSpec.constructorBuilder()
-                                            .addParameter(ParameterSpec.builder("_boundaryGetter", funSpecType).build())
-                                            .build())
-                                    .addProperty(PropertySpec.builder("_boundaryGetter", funSpecType)
-                                            .initializer("_boundaryGetter").build())
-                            repoClassSpec.addFunction(FunSpec.builder("getBoundaryCallback")
-                                .addParameter("_dataSource", DataSource.Factory::class.asClassName().parameterizedBy(INT, STAR))
-                                .returns(BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(STAR).copy(nullable = true))
-                                    .addCode("return $DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME[_dataSource]\n")
-                                .build())
-                        }
-
-                        val daoFunSpecBuilt = daoFunSpec.build()
-                        val boundaryCallbackRetType = BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType)
-                        boundaryCallbackClassSpec!!.addFunction(FunSpec.builder(daoFunSpecBuilt.name)
-                                .addParameter("_dataSource", DataSource.Factory::class.asClassName().parameterizedBy(INT, entityType))
-                                .returns(boundaryCallbackRetType)
-                                .addCode("return _boundaryGetter(_dataSource) as %T\n", boundaryCallbackRetType)
-                                .build())
-
+                        daoFunSpec.addParameter(PARAM_NAME_LIMIT, INT)
                         codeBlock.add("val _dataSource = ")
                                 .addDelegateFunctionCall("_dao", daoFunSpecBuilt).add("\n")
                                 .add("val $PARAM_NAME_LIMIT = 50\n")
-                        daoFunSpec.addParameter(PARAM_NAME_LIMIT, INT)
-                        val callbackTypeSpec = TypeSpec.anonymousClassBuilder()
-                                .superclass(BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType))
-                                .addFunction(FunSpec.builder("loadMore")
-                                        .addModifiers(KModifier.PRIVATE)
-                                        .addCode(CodeBlock.builder()
-                                                .add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
-                                                        daoTypeElement.simpleName.toString(),
-                                                        addReturnDaoResult = false,
-                                                        autoRetryEmptyMirrorResult = true))
-                                                .build())
-                                        .build())
-                                .addFunction(FunSpec.builder("onItemAtEndLoaded")
-                                        .addParameter("itemAtEnd", entityType)
-                                        .addModifiers(KModifier.OVERRIDE)
-                                        .addCode("loadMore()\n")
-                                        .build())
-                                .addFunction(FunSpec.builder("onZeroItemsLoaded")
-                                        .addModifiers(KModifier.OVERRIDE)
-                                        .addCode("loadMore()\n")
+                                .add(CodeBlock.builder()
+                                        .add(generateRepositoryGetSyncableEntitiesFun(daoFunSpec.build(),
+                                                daoTypeElement.simpleName.toString(),
+                                                generateGlobalScopeLaunchBlockForLiveDataTypes = false,
+                                                addReturnDaoResult = false,
+                                                autoRetryEmptyMirrorResult = true))
                                         .build())
 
-                        codeBlock.add("$DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME[_dataSource] = %L\n",
-                                        callbackTypeSpec.build())
+                        codeBlock.add("$DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME[_dataSource] = %T(_loadHelper)\n",
+                                BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType))
                                 .add("return _dataSource\n")
                     }else {
                         codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
@@ -549,10 +506,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
             repoClassSpec.addFunction(overridingFunSpec.build())
         }
 
-        boundaryCallbackFile?.addType(boundaryCallbackClassSpec!!.build())
         repoImplFile.addType(repoClassSpec.build())
-
-        return Pair(repoImplFile.build(), boundaryCallbackFile?.build())
+        return repoImplFile.build()
     }
 
     /**
@@ -615,12 +570,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
          */
         const val DB_NAME_VAR = "_DB_NAME"
 
-        const val SUFFIX_BOUNDARY_CALLBACKS = "BoundaryCallbacks"
-
         const val DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME = "_dataSourceFactoryToBoundaryCallbackMap"
 
-        val BOUNDARY_CALLBACK_CLASSNAME = ClassName("androidx.paging", "PagedList")
-                .nestedClass("BoundaryCallback")
+        val BOUNDARY_CALLBACK_CLASSNAME = ClassName("com.ustadmobile.door", "" +
+                "RepositoryBoundaryCallback")
 
         val BOUNDARY_CALLBACK_MAP_CLASSNAME = WeakHashMap::class.asClassName().parameterizedBy(
                 DataSource.Factory::class.asClassName().parameterizedBy(INT, STAR),
