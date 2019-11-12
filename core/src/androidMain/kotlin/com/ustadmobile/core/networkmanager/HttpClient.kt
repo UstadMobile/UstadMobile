@@ -7,6 +7,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import okhttp3.Dispatcher
+import java.util.concurrent.TimeUnit
 
 private val httpClient = if(Build.VERSION.SDK_INT < 21) {
     HttpClient(CIO) {
@@ -25,6 +26,8 @@ private val httpClient = if(Build.VERSION.SDK_INT < 21) {
         engine {
             this.config {
                 dispatcher(dispatcher)
+                connectTimeout(45, TimeUnit.SECONDS)
+                readTimeout(45, TimeUnit.SECONDS)
             }
         }
 

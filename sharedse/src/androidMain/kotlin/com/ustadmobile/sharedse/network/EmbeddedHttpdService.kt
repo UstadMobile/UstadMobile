@@ -38,7 +38,7 @@ class EmbeddedHttpdService : Service() {
         httpd.addRoute("$ANDROID_ASSETS_PATH(.)+", AndroidAssetsHandler::class.java,
                 applicationContext)
         httpd.UmAppDatabase_AddUriMapping(UmAppDatabase.getInstance(this),
-                Gson(), "/test/", false, "/rest/(.)+/UmAppDatabase")
+                Gson(), "/test/", false, "/rest/UmAppDatabase")
         try {
             httpd.start()
             UMLog.l(UMLog.INFO, 0, "Started embedded HTTP server on port: ${httpd.listeningPort}")

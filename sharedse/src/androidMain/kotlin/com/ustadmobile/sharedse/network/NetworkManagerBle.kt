@@ -56,8 +56,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.sharedse.network.BleHttpProxy
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
 
 /**
  * This class provides methods to perform android network related communications.
@@ -133,11 +133,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
 
-    private val bleProxy = BleHttpProxy(this, context)
-
     override val umAppDatabaseRepo by lazy {
         UmAccountManager.getRepositoryForActiveAccount(context)
     }
+
+    override val localHttpPort: Int
+        get() = httpd.listeningPort
+
     /**
      * Receiver to handle bluetooth state changes
      */
@@ -595,7 +597,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         }
 
         updateEnableServicesPromptsRequired()
-        bleProxy.start(bleProxyPort)
+        httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
 
         super.onCreate()
     }
@@ -983,7 +985,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         scanningServiceManager.setEnabled(false)
         advertisingServiceManager.setEnabled(false)
         wifiP2pGroupServiceManager!!.setEnabled(false)
-        bleProxy.stop()
 
         if (isBleCapable) {
             mContext.unregisterReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver)

@@ -6,8 +6,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.port.sharedse.impl.http.BleHttpRequest
+import com.ustadmobile.port.sharedse.impl.http.BleHttpResponse
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import com.ustadmobile.port.sharedse.impl.http.asBleHttpResponse
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.toUtf8Bytes
 
 /**
  * This class handle all the GATT server device's Bluetooth Low Energy callback
@@ -52,6 +58,8 @@ class BleGattServer
     var gattServer: BluetoothGattServer? = null
 
     private val messageAssembler = BleMessageAssembler()
+
+    val networkManagerAndroid = networkManager
 
     @get:VisibleForTesting
             /**
@@ -115,7 +123,7 @@ class BleGattServer
                             "BLEGattServer: Prepare response to send back to " + device.address)
                     val requireConfirmation = characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE == BluetoothGattCharacteristic.PROPERTY_INDICATE
                     if (!requireConfirmation) {
-                        val packets = messageToSend!!.getPackets(currentMtuSize)
+                        val packets = messageToSend!!.getPackets(currentMtuSize - ATT_HEADER_SIZE)
                         var packetTracker = 0
                         for (packet in packets) {
                             characteristic.value = packet
@@ -155,4 +163,35 @@ class BleGattServer
         UMLog.l(UMLog.DEBUG, 691, "BLEGattServer: Opened")
     }
 
+    override fun handleHttpRequest(bleMessageReceived: BleMessage, clientDeviceAddr: String): BleMessage {
+        val bleRequest = Json.parse(BleHttpRequest.serializer(), String(bleMessageReceived.payload!!))
+        UMLog.l(UMLog.DEBUG, 691,
+                "BLEGattServer: Request ID# ${bleMessageReceived.messageId} " +
+                        "Received bleRequest ${bleRequest.reqUri} ")
+        val response = networkManagerAndroid.httpd.serve(bleRequest)
+                ?: NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, "text/plain", "not found")
+        val bleResponse = response.asBleHttpResponse()
+
+        val bleResponseStr = Json.stringify(BleHttpResponse.serializer(), bleResponse)
+        val payload = bleResponseStr.toUtf8Bytes()
+        UMLog.l(UMLog.DEBUG, 691,
+                "BLEGattServer: Sending response ID# ${bleMessageReceived.messageId} ${bleRequest.reqUri} " +
+                        "(${bleResponse.statusCode}) \n==Content Body: Message payload.size = ${payload.size} bytes==${bleResponse.body}\n\n")
+
+        return BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
+                BleMessage.getNextMessageIdForReceiver(clientDeviceAddr),
+                payload)
+    }
+
+    companion object {
+
+        /**
+         * Each BLE characteristic notification etc. packet has a 1 byte Op-Code and a 2 byte
+         * Attribute Handle. When we send a characteristic the maximum amount of data we can send
+         * is the MTU minus this overhead (e.g. MTU - 3). See "ATT MTU" here:
+         *  https://punchthrough.com/maximizing-ble-throughput-part-2-use-larger-att-mtu-2/
+         */
+        const val ATT_HEADER_SIZE = 3
+
+    }
 }

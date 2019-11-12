@@ -141,7 +141,7 @@ abstract class NetworkManagerBleCommon(
 
     private val bleMirrorIdMap = mutableMapOf<String, Int>()
 
-    protected var bleProxyPort: Int = 9100
+    abstract val localHttpPort: Int
 
 
     /**
@@ -177,7 +177,7 @@ abstract class NetworkManagerBleCommon(
 
     protected suspend fun onNewBleNodeDiscovered(bluetoothAddress: String) {
         val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
-        val mirrorId = dbRepo.addMirror("http://127.0.0.1:$bleProxyPort/rest/$bluetoothAddress/",
+        val mirrorId = dbRepo.addMirror("http://127.0.0.1:${localHttpPort}/bleproxy/$bluetoothAddress/rest/",
                 100)
         bleMirrorIdMap[bluetoothAddress] = mirrorId
     }

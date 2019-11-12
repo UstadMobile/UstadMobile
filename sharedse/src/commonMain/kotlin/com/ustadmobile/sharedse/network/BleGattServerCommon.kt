@@ -80,29 +80,7 @@ abstract class BleGattServerCommon() {
             BleMessage.MESSAGE_TYPE_HTTP -> {
                 UMLog.l(UMLog.DEBUG, 691,
                         "BLEGattServerCommon: received HTTP proxy message")
-                val payload = requestReceived.payload
-                if(payload != null) {
-                    UMLog.l(UMLog.DEBUG, 691,
-                            "BLEGattServerCommon: Request ID# ${requestReceived.messageId} " +
-                                    "from $clientDeviceAddr : sending message to local HTTP")
-                    val messageIn = ByteArrayInputStream(payload)
-                    val bufferOut = ByteArrayOutputStream()
-                    val httpSession = httpSessionFactory(messageIn, bufferOut)
-                    httpSession.execute()
-                    bufferOut.flush()
-                    val responseBytes = bufferOut.toByteArray()
-                    UMLog.l(UMLog.DEBUG, 691,
-                            "BLEGattServerCommon: Request ID# ${requestReceived.messageId} " +
-                                    "from $clientDeviceAddr ${httpSession.uri} (${responseBytes.size} bytes)")
-                    return BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
-                            BleMessage.getNextMessageIdForReceiver(clientDeviceAddr),
-                            responseBytes)
-                }else {
-                    UMLog.l(UMLog.DEBUG, 691,
-                            "BLEGattServerCommon: Request ID# ${requestReceived.messageId} " +
-                                    "from $clientDeviceAddr: ERROR: proxy http request payload is NULL")
-                    return null
-                }
+                return handleHttpRequest(requestReceived, clientDeviceAddr)
             }
             else -> {
                 UMLog.l(UMLog.ERROR, 691,
@@ -111,5 +89,7 @@ abstract class BleGattServerCommon() {
             }
         }
     }
+
+    abstract fun handleHttpRequest(bleMessageReceived: BleMessage, clientDeviceAddr: String): BleMessage
 
 }

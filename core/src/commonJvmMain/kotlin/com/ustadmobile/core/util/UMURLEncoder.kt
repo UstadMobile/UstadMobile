@@ -8,7 +8,7 @@ actual class UMURLEncoder {
          * Encode url string
          */
         @JvmStatic
-        actual fun encodeUTF8(text: String?): String {
+        actual fun encodeUTF8(text: String): String {
             return java.net.URLEncoder.encode(text, "UTF-8")
         }
 
@@ -16,7 +16,7 @@ actual class UMURLEncoder {
          * Decode url string
          */
         @JvmStatic
-        actual fun decodeUTF8(text: String?): String {
+        actual fun decodeUTF8(text: String): String {
             return java.net.URLDecoder.decode(text, "UTF-8")
         }
 

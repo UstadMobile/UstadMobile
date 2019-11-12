@@ -21,6 +21,9 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
     actual override val isVersionKitKatOrBelow: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
+    override val localHttpPort: Int
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
     override val umAppDatabaseRepo by lazy {
         val activeAccount = UmAccountManager.getActiveAccount(context)
         val serverUrl = if(activeAccount!= null) {
