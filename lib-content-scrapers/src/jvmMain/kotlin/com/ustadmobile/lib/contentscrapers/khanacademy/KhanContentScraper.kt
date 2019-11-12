@@ -376,7 +376,7 @@ class KhanContentScraper : Runnable {
 
                     val url = URL(urlString!!)
                     val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url)
-                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log)
+                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log, null)
 
                     if (urlString == scrapUrl) {
 
@@ -634,7 +634,7 @@ class KhanContentScraper : Runnable {
                 try {
                     val url = URL(urlString!!)
                     val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(khanDirectory, url)
-                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log)
+                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log, null)
 
 
                     if (urlString == scrapUrl) {

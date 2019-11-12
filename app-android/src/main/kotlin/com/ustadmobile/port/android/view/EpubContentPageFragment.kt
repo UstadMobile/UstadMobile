@@ -118,7 +118,7 @@ class EpubContentPageFragment : Fragment() {
     companion object {
 
         /**
-         * Argument with the entire, absolute url for this page
+         * Argument with the entire, absolute startingUrl for this page
          */
         const val ARG_PAGE_URL = "pg_url"
 

@@ -50,7 +50,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
         webClient = WebChunkWebViewClient(container, mPresenter!!, this)
         runOnUiThread {
             mWebView!!.webViewClient = webClient
-            callback.onSuccess(webClient!!.url)
+            callback.onSuccess(webClient!!.startingUrl)
         }
     }
 

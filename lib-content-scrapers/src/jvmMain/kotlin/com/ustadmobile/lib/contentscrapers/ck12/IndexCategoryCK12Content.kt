@@ -1,10 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.ck12
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
+import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -14,10 +12,18 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_TINCAN
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.gdl.GdlContentIndexer
+import com.ustadmobile.lib.contentscrapers.gdl.GdlContentScraper
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeRun
+import com.ustadmobile.lib.rest.waitForNewFiles
+import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
@@ -25,6 +31,7 @@ import org.jsoup.nodes.Element
 import org.openqa.selenium.By
 import org.openqa.selenium.NoSuchElementException
 import org.openqa.selenium.TimeoutException
+import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.io.File
@@ -71,103 +78,102 @@ import java.util.*
  * Once all information is found, use the groupType to identify the scraper to use.
  */
 class IndexCategoryCK12Content @Throws(IOException::class)
-constructor(urlString: String, private val destinationDirectory: File, private val containerDir: File) {
-    private val contentEntryDao: ContentEntryDao
-    private val contentParentChildJoinDao: ContentEntryParentChildJoinDao
-    private val languageDao: LanguageDao
-    private val containerDao: ContainerDao
-    private val db: UmAppDatabase
-    private val repository: UmAppDatabase
-    private var englishLang: Language? = null
-    private val ck12ParentEntry: ContentEntry
-    internal var url: URL
+constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
+            val contentType: String, val scrapeQueueItemUid: Int, val runId: Int) : Runnable {
 
 
-    init {
-
+    override fun run() {
+        System.gc()
+        queueDao.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis())
+        var successful = false
         try {
-            url = URL(urlString)
-        } catch (e: MalformedURLException) {
-            UMLogUtil.logError("Index Malformed url$urlString")
-            throw IllegalArgumentException("Malformed url$urlString", e)
+            when (contentType) {
+                ScraperConstants.CK12ContentType.ROOT.type -> {
+                    browseRootContent(queueUrl, destLocation, parentEntry)
+                    successful = true
+                }
+                ScraperConstants.CK12ContentType.SUBJECTS.type -> {
+                    browseSubjects(queueUrl, destLocation, parentEntry)
+                    successful = true
+                }
+                ScraperConstants.CK12ContentType.GRADES.type -> {
+                    browseGradeTopics(queueUrl, destLocation, parentEntry)
+                    successful = true
+                }
+                ScraperConstants.CK12ContentType.CONTENT.type -> {
+                    browseContent(queueUrl, destLocation, parentEntry)
+                    successful = true
+                }
+            }
+
+        } catch (e: Exception) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            UMLogUtil.logError("Error creating topics for url $queueUrl")
         }
 
-        destinationDirectory.mkdirs()
-        containerDir.mkdirs()
-
-
-        db = UmAppDatabase.getInstance(Any())
-        repository = db //db.getRepository("https://localhost", "")
-        contentEntryDao = repository.contentEntryDao
-        contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
-        containerDao = repository.containerDao
-        languageDao = repository.languageDao
-
-        LanguageList().addAllLanguages()
-
-        ContentScraperUtil.setChromeDriverLocation()
-
-        englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE)
-        if (englishLang == null) {
-            englishLang = Language()
-            englishLang!!.name = "English"
-            englishLang!!.iso_639_1_standard = ScraperConstants.ENGLISH_LANG_CODE
-            englishLang!!.iso_639_2_standard = "eng"
-            englishLang!!.iso_639_3_standard = "eng"
-            englishLang!!.langUid = languageDao.insert(englishLang!!)
-        }
-
-        val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
-                ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY,
-                englishLang!!.langUid, null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao)
-
-
-        ck12ParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.ck12.org/", "CK-12 Foundation",
-                "https://www.ck12.org/", CK_12, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
-                "100% Free, Personalized Learning for Every Student", false, EMPTY_STRING,
-                "https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png",
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao)
-
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2)
-
+        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
-    /**
-     * Given a ck12 url, find the content and download it all
-     *
-     * @throws IOException
-     */
-    @Throws(IOException::class)
-    fun findContent() {
+    fun browseRootContent(queueUrl: URL, destLocation: File, parentEntry: ContentEntry) {
 
-        val document = Jsoup.connect(url.toString()).get()
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
+        try {
+            driver.get(queueUrl.toString())
+            val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+            ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("div#browse-grid-wrapper a.dxtrack-user-action")))
+        } catch (e: TimeoutException) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+        }
 
-        val subjectList = document.select("a.subject-link")
+        var document  = Jsoup.parse(driver.pageSource)
+        driver.close()
 
-        // each subject appears twice on ck12 for different layouts
-        val uniqueSubjects = HashSet<String>()
-        var count = 0
-        for (subject in subjectList) {
+        var categoryList = document.select("div[role]")
+        UMLogUtil.logInfo("size of category List = ${categoryList.size}")
 
-            val hrefLink = subject.attr("href")
-            val isAdded = uniqueSubjects.add(hrefLink)
+        var categoryCounter = 0
+        for (category in categoryList) {
 
-            if (isAdded) {
+            val categoryTitle = category.text()
 
-                val subjectUrl = URL(url, hrefLink)
-                val title = subject.attr("title")
+            UMLogUtil.logInfo("category title = $categoryTitle")
+
+            val categoryFolder = File(destLocation, categoryTitle)
+            categoryFolder.mkdirs()
+
+            val subjectList = document.select("div[data-header=\"$categoryTitle\"] li a")
+
+            UMLogUtil.logInfo("subject size from category $categoryTitle is = ${subjectList.size}")
+
+            val categoryEntry = ContentScraperUtil.createOrUpdateContentEntry(categoryTitle, categoryTitle, "ck12://$categoryTitle", CK_12,
+                    LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
+                    EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, categoryEntry, categoryCounter++)
+
+            var subjectCounter = 0
+            for(subject in subjectList){
+
+                var hrefLink = subject.attr("href")
+                var title = subject.text()
+
+                UMLogUtil.logInfo("subject title = $title")
+
+                val subjectFolder = File(categoryFolder, title)
+                subjectFolder.mkdirs()
+
+                val subjectUrl = URL(queueUrl, hrefLink)
 
                 val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subjectUrl.toString(), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
                         EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, ck12ParentEntry, subjectEntry, count++)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, categoryEntry, subjectEntry, subjectCounter++)
 
-                val subjectFolder = File(destinationDirectory, title)
-                subjectFolder.mkdirs()
-
-                browseSubjects(subjectUrl, subjectFolder, subjectEntry)
+                ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, subjectFolder, ScraperConstants.CK12ContentType.SUBJECTS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
             }
 
@@ -175,10 +181,11 @@ constructor(urlString: String, private val destinationDirectory: File, private v
 
     }
 
+
     @Throws(IOException::class)
     private fun browseSubjects(url: URL, destinationDirectory: File, parent: ContentEntry) {
 
-        val driver = ContentScraperUtil.setupChrome(true)
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
         try {
             driver.get(url.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
@@ -192,6 +199,7 @@ constructor(urlString: String, private val destinationDirectory: File, private v
 
         val subCategory = HashSet<String>()
         val gradesList = doc.select("li.js-grade a")
+        UMLogUtil.logInfo("size of grades List = ${gradesList.size}")
         var count = 0
         for (grade in gradesList) {
 
@@ -203,6 +211,8 @@ constructor(urlString: String, private val destinationDirectory: File, private v
                 val title = grade.text()
                 val subCategoryUrl = URL(url, hrefLink)
 
+                UMLogUtil.logInfo("grade title = $title")
+
                 val gradeFolder = File(destinationDirectory, title)
                 gradeFolder.mkdirs()
 
@@ -212,7 +222,7 @@ constructor(urlString: String, private val destinationDirectory: File, private v
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, gradeEntry, count++)
 
-                browseGradeTopics(subCategoryUrl, gradeFolder, gradeEntry)
+                ContentScraperUtil.createQueueItem(queueDao, subCategoryUrl, gradeEntry, gradeFolder, ScraperConstants.CK12ContentType.GRADES.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
             }
         }
 
@@ -268,7 +278,8 @@ constructor(urlString: String, private val destinationDirectory: File, private v
                 val topicDestination = File(destinationDirectory, title)
                 topicDestination.mkdirs()
 
-                browseContent(contentUrl, topicDestination, lastTopicEntry)
+                ContentScraperUtil.createQueueItem(queueDao, contentUrl, lastTopicEntry, topicDestination, ScraperConstants.CK12ContentType.CONTENT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
+
 
             } else if (secondCategory.attr("class").contains("parent")) {
 
@@ -296,7 +307,7 @@ constructor(urlString: String, private val destinationDirectory: File, private v
     @Throws(IOException::class)
     private fun browseGradeTopics(subCategoryUrl: URL, destination: File, parent: ContentEntry) {
 
-        val driver = ContentScraperUtil.setupChrome(true)
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
         try {
             driver.get(subCategoryUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
@@ -311,6 +322,7 @@ constructor(urlString: String, private val destinationDirectory: File, private v
         var count = 0
         val headerList = doc.select("div.topic-details-container")
         for (header in headerList) {
+
 
             val headingTitle = header.select("div.topic-header span").attr("title")
 
@@ -359,7 +371,7 @@ constructor(urlString: String, private val destinationDirectory: File, private v
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subTopicEntry, subTopicCount++)
 
-                    browseContent(contentUrl, topicDestination, subTopicEntry)
+                    ContentScraperUtil.createQueueItem(queueDao, contentUrl, subTopicEntry, topicDestination, ScraperConstants.CK12ContentType.CONTENT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
                 }
 
@@ -372,7 +384,7 @@ constructor(urlString: String, private val destinationDirectory: File, private v
     @Throws(IOException::class)
     private fun browseContent(contentUrl: URL, topicDestination: File, parent: ContentEntry) {
 
-        val driver = ContentScraperUtil.setupChrome(true)
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
         try {
             driver.get(contentUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
@@ -389,62 +401,43 @@ constructor(urlString: String, private val destinationDirectory: File, private v
         var courseCount = 0
         for (course in courseList) {
 
-            val groupType = course.findElement(
-                    By.cssSelector("div[class*=js-components-newspaper-Card-Card__groupType] span"))
-                    .text
-
-            val imageLink = course.findElement(
-                    By.cssSelector("a[class*=js-components-newspaper-Card-Card__link]"))
-                    .getAttribute("href")
-
-
-            val link = course.findElement(
-                    By.cssSelector("h2[class*=js-components-newspaper-Card-Card__title] a"))
-
-            val hrefLink = link.getAttribute("href")
-            val title = link.getAttribute("title")
-
-
-            val summary = course.findElement(
-                    By.cssSelector("div[class*=js-components-newspaper-Card-Card__summary]"))
-                    .text
-
-            val url = URL(contentUrl, hrefLink)
-
-            val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.path, title, url.toString().substring(0, url.toString().indexOf("?")), CK_12,
-                    LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, summary, true,
-                    EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
-
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++)
-
-            val scraper = CK12ContentScraper(url.toString(), topicDestination)
             try {
-                var mimeType = MIMETYPE_TINCAN
-                when (groupType.toLowerCase()) {
 
-                    "video" -> scraper.scrapeVideoContent()
-                    "plix" -> {
-                        scraper.scrapePlixContent()
-                        mimeType = MIMETYPE_WEB_CHUNK
-                    }
-                    "practice" -> scraper.scrapePracticeContent()
-                    "read", "activities", "study aids", "lesson plans", "real world" -> scraper.scrapeReadContent()
-                    else -> UMLogUtil.logError("found a group type not supported $groupType for url $url")
-                }
+                val groupType = course.findElement(
+                        By.cssSelector("div[class*=js-components-newspaper-Card-Card__groupType] span"))
+                        .text
+
+                val imageLink = course.findElement(
+                        By.cssSelector("a[class*=js-components-newspaper-Card-Card__link]"))
+                        .getAttribute("href")
 
 
-                val content = File(topicDestination, FilenameUtils.getBaseName(url.path))
-                if (scraper.isContentUpdated) {
-                    ContentScraperUtil.insertContainer(containerDao, topicEntry, true,
-                            mimeType, content.lastModified(), content, db, repository,
-                            containerDir)
-                }
+                val link = course.findElement(
+                        By.cssSelector("h2[class*=js-components-newspaper-Card-Card__title] a"))
 
-            } catch (e: Exception) {
-                UMLogUtil.logError("Unable to scrape content from $groupType at url $url")
+                val hrefLink = link.getAttribute("href")
+                val title = link.getAttribute("title")
+
+
+                val summary = course.findElement(
+                        By.cssSelector("div[class*=js-components-newspaper-Card-Card__summary]"))
+                        .text
+
+                val url = URL(contentUrl, hrefLink)
+
+                val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.path, title, url.toString().substring(0, url.toString().indexOf("?")), CK_12,
+                        LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, summary, true,
+                        EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++)
+
+                ContentScraperUtil.createQueueItem(queueDao, url, topicEntry, topicDestination,
+                        groupType.toLowerCase(), runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+
+            }catch (e: Exception){
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-                val modifiedFile = File(topicDestination, FilenameUtils.getBaseName(url.path) + LAST_MODIFIED_TXT)
-                ContentScraperUtil.deleteFile(modifiedFile)
+                UMLogUtil.logError("error getting content from page $contentUrl with hrefLink ${course.findElement(
+                        By.cssSelector("h2[class*=js-components-newspaper-Card-Card__title] a")).getAttribute("href")}")
             }
 
         }
@@ -457,24 +450,147 @@ constructor(urlString: String, private val destinationDirectory: File, private v
 
         private val CK_12 = "CK12"
 
+        val ROOT_URL = "https://www.ck12.org/browse/"
+
+        private lateinit var queueDao: ScrapeQueueItemDao
+        private lateinit var contentEntryDao: ContentEntryDao
+        private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
+        private lateinit var languageDao: LanguageDao
+        private lateinit var containerDao: ContainerDao
+        private lateinit var db: UmAppDatabase
+        private lateinit var repository: UmAppDatabase
+        private var englishLang: Language? = null
+        private lateinit var ck12ParentEntry: ContentEntry
+        internal lateinit var url: URL
+
+
+        fun scrapeFromRoot(destination: File, container: File, runId: Int) {
+            startScrape(ROOT_URL, destination, container, runId)
+        }
+
+        fun startScrape(urlString: String, destination: File, container: File, runId: Int) {
+            try {
+                url = URL(urlString)
+            } catch (e: MalformedURLException) {
+                UMLogUtil.logError("Index Malformed url$urlString")
+                throw IllegalArgumentException("Malformed url$urlString", e)
+            }
+
+            destination.mkdirs()
+            container.mkdirs()
+
+
+            db = UmAppDatabase.getInstance(Any())
+            repository = db //db.getRepository("https://localhost", "")
+            contentEntryDao = repository.contentEntryDao
+            contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
+            containerDao = repository.containerDao
+            languageDao = repository.languageDao
+            queueDao = db.scrapeQueueItemDao
+
+            LanguageList().addAllLanguages()
+
+            ContentScraperUtil.setChromeDriverLocation()
+
+            englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE)
+            if (englishLang == null) {
+                englishLang = Language()
+                englishLang!!.name = "English"
+                englishLang!!.iso_639_1_standard = ScraperConstants.ENGLISH_LANG_CODE
+                englishLang!!.iso_639_2_standard = "eng"
+                englishLang!!.iso_639_3_standard = "eng"
+                englishLang!!.langUid = languageDao.insert(englishLang!!)
+            }
+
+            val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
+                    ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY,
+                    englishLang!!.langUid, null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+
+
+            ck12ParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.ck12.org/", "CK-12 Foundation",
+                    "https://www.ck12.org/", CK_12, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
+                    "100% Free, Personalized Learning for Every Student", false, EMPTY_STRING,
+                    "https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png",
+                    EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2)
+
+            ContentScraperUtil.createQueueItem(queueDao, url, ck12ParentEntry, destination, ScraperConstants.GDLContentType.ROOT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
+
+            val indexProcessor = 4
+            val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid },
+                    indexProcessor) {
+                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
+                val queueUrl: URL
+
+                try {
+                    queueUrl = URL(it.scrapeUrl!!)
+                    IndexCategoryCK12Content(queueUrl, parent!!, File(it.destDir!!),
+                            it.contentType!!, it.sqiUid, runId).run()
+                } catch (ignored: Exception) {
+                    //Must never happen
+                    throw RuntimeException("SEVERE: invalid URL to index: should not be in queue:" + it.scrapeUrl!!)
+                }
+            }
+
+            GlobalScope.launch {
+                indexWorkQueue.start()
+            }
+
+            val scrapePrecessor = 1
+            var scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
+                    { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
+
+                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
+                val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
+
+                val scrapeUrl: URL
+                try {
+                    scrapeUrl = URL(it.scrapeUrl!!)
+                    CK12ContentScraper(scrapeUrl, File(it.destDir!!),
+                            container, parent!!,
+                            it.contentType!!, it.sqiUid).run()
+                } catch (ignored: Exception) {
+                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!)
+                }
+            }
+            GlobalScope.launch {
+                scrapeWorkQueue.start()
+            }
+
+            ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
+            UMLogUtil.logInfo("Finished Indexer")
+        }
+
+
         @JvmStatic
         fun main(args: Array<String>) {
-            if (args.size < 3) {
-                System.err.println("Usage: <ck12 url> <file destination><folder container><optional log{trace, debug, info, warn, error, fatal}>")
+            if (args.size < 2) {
+                System.err.println("Usage: <file destination><folder container><optional log{trace, debug, info, warn, error, fatal}>")
                 System.exit(1)
             }
 
-            UMLogUtil.setLevel(if (args.size == 4) args[3] else "")
-
+            UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
             UMLogUtil.logInfo(args[0])
             UMLogUtil.logInfo(args[1])
+            ContentScraperUtil.checkIfPathsToDriversExist()
             try {
-                IndexCategoryCK12Content(args[0], File(args[1]), File(args[2])).findContent()
+                val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
+
+                var runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_CK12)
+                if (runId == 0) {
+                    runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_CK12,
+                            ScrapeQueueItemDao.STATUS_PENDING)).toInt()
+                }
+
+                scrapeFromRoot(File(args[0]), File(args[1]), runId)
             } catch (e: Exception) {
                 UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logFatal("Exception running findContent CK12 Index Scraper")
             }
-
         }
     }
 

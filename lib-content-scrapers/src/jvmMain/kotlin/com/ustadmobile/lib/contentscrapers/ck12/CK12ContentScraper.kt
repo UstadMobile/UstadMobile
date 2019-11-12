@@ -1,8 +1,16 @@
 package com.ustadmobile.lib.contentscrapers.ck12
 
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.lib.contentscrapers.*
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_ACTIVITIES
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_LESSONS
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_PRACTICE
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_READ
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_READ_WORLD
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_STUDY_AIDS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_INPUT_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_INPUT_LINK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_OUTPUT_FILE
@@ -29,6 +37,9 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_EVENTS_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_EVENTS_LINK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_JAX_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_JAX_LINK
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_MP4
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_TINCAN
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MTABLE_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MTABLE_LINK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_AMS_MATH_FILE
@@ -47,6 +58,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse
 import com.ustadmobile.lib.contentscrapers.ck12.practice.*
+import com.ustadmobile.lib.db.entities.ContentEntry
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
@@ -56,7 +68,6 @@ import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
-import org.openqa.selenium.logging.LogType
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.io.File
@@ -130,8 +141,8 @@ import javax.xml.transform.TransformerException
  *
  */
 class CK12ContentScraper @Throws(MalformedURLException::class)
-constructor(private val urlString: String, private val destinationDirectory: File) {
-    private val scrapUrl: URL
+constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, var parentEntry: ContentEntry, var contentType: String, var sqiUid: Int) : Runnable {
+
     private lateinit var assetDirectory: File
 
     val css = "<style> .read-more-container { display: none; } #plixIFrameContainer { float: left !important; margin-top: 15px; } #plixLeftWrapper { float: left !important; width: 49%; min-width: 200px; padding-left: 15px !important; padding-right: 15px !important; margin-right: 15px; } @media (max-width: 1070px) { #plixLeftWrapper { width: 98% !important; } } .plixQestionPlayer, .plixLeftMiddlequestionContainer { margin-bottom: 5px !important; } .leftTopFixedBar { padding-top: 20px !important; } #next-container { margin-top: 0 !important; } .overflow-container { background: transparent !important; width: 0px !important; } .overflow-indicator { left: 50% !important; padding: 12px !important; } .plixWrapper { width: 95% !important; max-width: inherit !important; } body.plix-modal { overflow: auto !important; padding: 0; width: 95% !important; height: inherit !important; } .show-description, .show-challenge { position: static !important; padding-top: 0 !important; } #hintModal { width: 90% !important; margin-left: -45% !important; } @media only screen and (max-device-width: 605px), only screen and (max-device-height: 605px) { #landscapeView { display: block !important; } } </style>"
@@ -154,30 +165,88 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         private set
 
 
-    init {
-        scrapUrl = URL(urlString)
+    override fun run() {
+        val db = UmAppDatabase.getInstance(Any())
+        val repository = db// db.getRepository("https://localhost", "")
+        val containerDao = repository.containerDao
+        val queueDao = db.scrapeQueueItemDao
+
+
+        val startTime = System.currentTimeMillis()
+        UMLogUtil.logInfo("Started scraper url $scrapeUrl at start time: $startTime with squUid $sqiUid")
+        queueDao.setTimeStarted(sqiUid, startTime)
+        var successful = false
+        try {
+            var content = File(destLocation, destLocation.name)
+            var mimeType = MIMETYPE_TINCAN
+            when (contentType) {
+                ScraperConstants.CK12_VIDEO -> {
+                    content = File(destLocation, destLocation.name + ".mp4")
+                    scrapeVideoContent(content)
+                    mimeType = MIMETYPE_MP4
+                    successful = true
+                }
+                ScraperConstants.CK12_PLIX -> {
+                    scrapePlixContent(content)
+                    mimeType = MIMETYPE_WEB_CHUNK
+                    successful = true
+                }
+                CK12_READ, CK12_ACTIVITIES, CK12_LESSONS, CK12_READ_WORLD, CK12_STUDY_AIDS -> {
+                    scrapeReadContent(content)
+                    successful = true
+                }
+                CK12_PRACTICE -> {
+                    scrapePracticeContent(content)
+                    successful = true
+                }
+                else -> {
+                    UMLogUtil.logError("unsupported kind = $contentType at url = $scrapeUrl")
+                    queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+                    queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
+                    val modifiedFile = File(destLocation, destLocation.name + LAST_MODIFIED_TXT)
+                    FileUtils.deleteQuietly(modifiedFile)
+                    throw IllegalArgumentException("unsupported kind = $contentType at url = $scrapeUrl")
+                }
+            }
+
+            if (isContentUpdated) {
+                ContentScraperUtil.insertContainer(containerDao, parentEntry, true,
+                        mimeType, content.lastModified(), content, db, repository,
+                        containerDir)
+
+            }
+
+        } catch (e: Exception) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            UMLogUtil.logError("Unable to scrape content from url $scrapeUrl")
+            ContentScraperUtil.deleteETagOrModified(destLocation, destLocation.name)
+        }
+
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
+        val duration = System.currentTimeMillis() - startTime
+        UMLogUtil.logInfo("Ended scrape for url $scrapeUrl in duration: $duration squUid  $sqiUid")
     }
 
+
     @Throws(IOException::class)
-    fun scrapePlixContent() {
+    fun scrapePlixContent(content: File) {
+
+        var urlString = scrapeUrl.toString()
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
         val plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.lastIndexOf("?"))
-        val plixName = FilenameUtils.getBaseName(scrapUrl.path)
 
-        val plixDirectory = File(destinationDirectory, plixName)
-        plixDirectory.mkdirs()
+        content.mkdirs()
 
-        assetDirectory = File(plixDirectory, "asset")
-        assetDirectory!!.mkdirs()
 
         val plixUrl = generatePlixLink(plixId)
 
         val response = gson.fromJson(
                 IOUtils.toString(URL(plixUrl), UTF_ENCODING), PlixResponse::class.java)
 
-        val fileLastModified = File(destinationDirectory, plixName + LAST_MODIFIED_TXT)
+        val fileLastModified = File(destLocation, content.name + LAST_MODIFIED_TXT)
         isContentUpdated = ContentScraperUtil.isFileContentsUpdated(fileLastModified, ContentScraperUtil.parseServerDate(response.response!!.question!!.updated!!).toString())
 
         if (!isContentUpdated) {
@@ -188,7 +257,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
         val driver = ContentScraperUtil.setupLogIndexChromeDriver()
 
-        driver.get(urlString)
+        driver.get(scrapeUrl.toString())
         val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
         try {
@@ -197,7 +266,8 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
         }
 
-        val les = driver.manage().logs().get(LogType.PERFORMANCE)
+        val les = ContentScraperUtil.waitForNewFiles(driver)
+        val cookieList = driver.manage().cookies
         driver.close()
         driver.quit()
 
@@ -213,23 +283,29 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
                 try {
 
                     val url = URL(urlString!!)
-                    val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(plixDirectory, url)
-                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log)
+                    val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(content, url)
+                    var cookies = ContentScraperUtil.returnListOfCookies(urlString, cookieList)
+                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log, cookies)
 
                     if (file.name.contains("plix.js")) {
                         var plixJs = FileUtils.readFileToString(file, UTF_ENCODING)
-                        val startIndex = plixJs.indexOf("\"trialscount.plix.\"")
-                        val lastIndex = plixJs.lastIndexOf("():")
-                        plixJs = StringBuilder(plixJs).insert(lastIndex + 3, "*/").insert(startIndex, "/*").toString()
-                        FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING)
+
+                        if(plixJs.contains("\"trialscount.plix.\"")){
+                            val startIndex = plixJs.indexOf("\"trialscount.plix.\"")
+                            val lastIndex = plixJs.lastIndexOf("():")
+                            plixJs = StringBuilder(plixJs).insert(lastIndex + 3, "*/").insert(startIndex, "/*").toString()
+                            FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING)
+                        }
                     }
 
                     if (file.name.contains("plix.css")) {
                         var plixJs = FileUtils.readFileToString(file, UTF_ENCODING)
-                        val startIndex = plixJs.indexOf("@media only screen and (max-device-width:")
-                        val endIndex = plixJs.indexOf(".plix{")
-                        plixJs = StringBuilder(plixJs).insert(endIndex, "*/").insert(startIndex, "/*").toString()
-                        FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING)
+                        if(plixJs.contains("@media only screen and (max-device-width:")){
+                            val startIndex = plixJs.indexOf("@media only screen and (max-device-width:")
+                            val endIndex = plixJs.indexOf(".plix{")
+                            plixJs = StringBuilder(plixJs).insert(endIndex, "*/").insert(startIndex, "/*").toString()
+                            FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING)
+                        }
                     }
 
                     if (file.name.contains("plix.html")) {
@@ -278,76 +354,61 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
             }
         }
 
-        FileUtils.writeStringToFile(File(plixDirectory, "index.json"), gson.toJson(indexList), UTF_ENCODING)
+
+        val logIndex = LogIndex()
+        logIndex.title = ScraperConstants.CK12
+        logIndex.entries = indexList
+
+        FileUtils.writeStringToFile(File(content, "index.json"), gson.toJson(logIndex), UTF_ENCODING)
 
     }
 
     @Throws(IOException::class)
-    fun scrapeVideoContent() {
+    fun scrapeVideoContent(destination: File) {
 
-        val fullSite = Jsoup.connect(urlString).get()
+        val fullSite = Jsoup.connect(scrapeUrl.toString()).get()
 
-        val videoContentName = FilenameUtils.getBaseName(scrapUrl.path)
-        val videoHtmlLocation = File(destinationDirectory, videoContentName)
-        videoHtmlLocation.mkdirs()
-
-        assetDirectory = File(videoHtmlLocation, "asset")
-        assetDirectory!!.mkdirs()
-
-        val modifiedFile = File(destinationDirectory, videoContentName + LAST_MODIFIED_TXT)
+        val modifiedFile = File(destLocation, destination.name + LAST_MODIFIED_TXT)
         isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, isPageUpdated(fullSite).toString())
 
         if (!isContentUpdated) {
             return
         }
 
-
         var videoContent = getMainContent(fullSite, "div.modality_content[data-loadurl]", "data-loadurl")
         // sometimes video stored in iframe
         if (videoContent == null) {
             videoContent = getMainContent(fullSite, "iframe[src]", "src")
             if (videoContent == null) {
-                UMLogUtil.logError("Unsupported video content$urlString")
-                throw IOException("Did not find video content$urlString")
+                UMLogUtil.logError("Unsupported video content$scrapeUrl")
+                throw IOException("Did not find video content$scrapeUrl")
             }
         }
 
         val videoElement = getIframefromHtml(videoContent)
 
-        val imageThumbnail = fullSite.select("meta[property=og:image]").attr("content")
+        var urlString = Jsoup.parse(videoElement.outerHtml()).select("[src]").attr("src")
 
-        if (imageThumbnail != null && !imageThumbnail.isEmpty()) {
-            try {
-                val thumbnail = File(assetDirectory, "$videoContentName-video-thumbnail.jpg")
-                if (!ContentScraperUtil.fileHasContent(thumbnail)) {
-                    FileUtils.copyURLToFile(URL(scrapUrl, imageThumbnail), thumbnail)
-                }
-
-            } catch (ignored: IOException) {
+        if (urlString.startsWith("//")) {
+            urlString = Jsoup.connect("https:$urlString").get().selectFirst("video source").attr("src")
+        } else if (urlString.startsWith("/flx")) {
+            var html = Jsoup.connect("https://www.ck12.org$urlString").followRedirects(true).get()
+            var urlSrc = Jsoup.parse(getIframefromHtml(html).outerHtml()).selectFirst("[src]").attr("src")
+            if (urlSrc.contains(".mp4")) {
+                urlString = urlSrc
+            } else if (urlSrc.startsWith("//")) {
+                urlString = Jsoup.connect("https:$urlSrc").get().selectFirst("video source").attr("src")
+            }else{
+                UMLogUtil.logError("found flx video - might be youtube at $urlSrc")
+                isContentUpdated = false
+                return
             }
-
         }
 
-        val videoSource = ContentScraperUtil.downloadAllResources(videoElement.outerHtml(), assetDirectory, scrapUrl)
+        UMLogUtil.logError("final urlString =  $urlString")
 
-        val videoTitleHtml = getTitleHtml(fullSite)
+        FileUtils.copyURLToFile(URL(urlString), destination)
 
-        val detailHtml = removeAllHref(getDetailSectionHtml(fullSite))
-
-        val indexHtml = videoTitleHtml + videoSource + detailHtml
-
-        FileUtils.writeStringToFile(File(videoHtmlLocation, "index.html"), indexHtml, UTF_ENCODING)
-
-        try {
-            ContentScraperUtil.generateTinCanXMLFile(videoHtmlLocation, videoContentName, "en", "index.html",
-                    ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.path, "", "")
-        } catch (e: TransformerException) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Video Tin can file unable to create for url$urlString")
-        } catch (e: ParserConfigurationException) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Video Tin can file unable to create for url$urlString")
-        }
 
     }
 
@@ -377,7 +438,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         for (element in elements) {
             if (!element.attr(search).contains("googletag")) {
                 val path = element.attr(search)
-                val contentUrl = URL(scrapUrl, path)
+                val contentUrl = URL(scrapeUrl, path)
                 return Jsoup.connect(contentUrl.toString())
                         .followRedirects(true).get()
             }
@@ -391,7 +452,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         val elements = site.select("section.vocabulary_content[data-loadurl]")
         for (element in elements) {
             val path = element.attr("data-loadurl")
-            val contentUrl = URL(scrapUrl, path)
+            val contentUrl = URL(scrapeUrl, path)
             return Jsoup.connect(contentUrl.toString())
                     .followRedirects(true).get().html()
         }
@@ -405,18 +466,17 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
 
     @Throws(IOException::class)
-    fun scrapeReadContent() {
+    fun scrapeReadContent(destination: File) {
 
-        val html = Jsoup.connect(urlString).get()
+        val html = Jsoup.connect(scrapeUrl.toString()).get()
 
-        val readContentName = FilenameUtils.getBaseName(scrapUrl.path)
-        val readHtmlLocation = File(destinationDirectory, readContentName)
-        readHtmlLocation.mkdirs()
+        val readContentName = FilenameUtils.getBaseName(scrapeUrl.path)
+        destination.mkdirs()
 
-        assetDirectory = File(readHtmlLocation, "asset")
-        assetDirectory!!.mkdirs()
+        assetDirectory = File(destination, "asset")
+        assetDirectory.mkdirs()
 
-        val modifiedFile = File(destinationDirectory, readContentName + LAST_MODIFIED_TXT)
+        val modifiedFile = File(destLocation, destination.name + LAST_MODIFIED_TXT)
         isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, isPageUpdated(html).toString())
 
         if (!isContentUpdated) {
@@ -428,12 +488,12 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         val content = getMainContent(html, "div.modality_content[data-loadurl]", "data-loadurl")
 
         if (content == null) {
-            UMLogUtil.logError("Unsupported read content$urlString")
-            throw IllegalArgumentException("Did not find read content$urlString")
+            UMLogUtil.logError("Unsupported read destination$scrapeUrl")
+            throw IllegalArgumentException("Did not find read destination$scrapeUrl")
         }
         var readHtml = content.html()
 
-        readHtml = removeAllHref(ContentScraperUtil.downloadAllResources(readHtml, assetDirectory, scrapUrl))
+        readHtml = removeAllHref(ContentScraperUtil.downloadAllResources(readHtml, assetDirectory, scrapeUrl))
 
         val vocabHtml = removeAllHref(getVocabHtml(html))
 
@@ -441,9 +501,9 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
         if (readHtml.contains("x-ck12-mathEditor")) {
             readHtml = appendMathJax() + readHtml
-            detailHtml = detailHtml + appendMathJaxScript()
+            detailHtml += appendMathJaxScript()
 
-            val mathJaxDir = File(readHtmlLocation, "mathjax")
+            val mathJaxDir = File(destination, "mathjax")
             mathJaxDir.mkdirs()
 
             FileUtils.copyToFile(javaClass.getResourceAsStream(MATH_JAX_LINK), File(mathJaxDir, MATH_JAX_FILE))
@@ -467,17 +527,17 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
         readHtml = readTitle + readHtml + vocabHtml + detailHtml
 
-        FileUtils.writeStringToFile(File(readHtmlLocation, "index.html"), readHtml, UTF_ENCODING)
+        FileUtils.writeStringToFile(File(destination, "index.html"), readHtml, UTF_ENCODING)
 
         try {
-            ContentScraperUtil.generateTinCanXMLFile(readHtmlLocation, readContentName, "en", "index.html",
-                    ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapUrl.path, "", "")
+            ContentScraperUtil.generateTinCanXMLFile(destination, readContentName, "en", "index.html",
+                    ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapeUrl.path, "", "")
         } catch (e: TransformerException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Read Tin can file unable to create for url$urlString")
+            UMLogUtil.logError("Read Tin can file unable to create for url$scrapeUrl")
         } catch (e: ParserConfigurationException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Read Tin can file unable to create for url$urlString")
+            UMLogUtil.logError("Read Tin can file unable to create for url$scrapeUrl")
         }
 
     }
@@ -576,18 +636,17 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
 
     @Throws(IOException::class)
-    fun scrapePracticeContent() {
+    fun scrapePracticeContent(destination: File) {
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
-        val practiceUrl = FilenameUtils.getBaseName(scrapUrl.path)
+        val practiceUrl = FilenameUtils.getBaseName(scrapeUrl.path)
 
         val testIdLink = generatePracticeLink(practiceUrl)
 
-        val practiceDirectory = File(destinationDirectory, practiceUrl)
-        practiceDirectory.mkdirs()
+        destination.mkdirs()
 
-        val practiceAssetDirectory = File(practiceDirectory, "asset")
+        val practiceAssetDirectory = File(destination, "asset")
         practiceAssetDirectory.mkdirs()
 
         val response = gson.fromJson(
@@ -600,7 +659,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         val practiceName = response.response!!.test!!.title
         val updated = response.response!!.test!!.updated
 
-        val modifiedFile = File(destinationDirectory, practiceUrl + LAST_MODIFIED_TXT)
+        val modifiedFile = File(destLocation, destination.name + LAST_MODIFIED_TXT)
         isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, ContentScraperUtil.parseServerDate(updated!!).toString())
 
         if (!isContentUpdated) {
@@ -637,24 +696,25 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
             val questionId = questionResponse.response!!.questionID
 
-            val questionAsset = File(practiceDirectory, questionId!!)
+            val questionAsset = File(destination, questionId!!)
             questionAsset.mkdirs()
 
             questionResponse.response!!.stem!!.displayText = ContentScraperUtil.downloadAllResources(
-                    questionResponse.response!!.stem!!.displayText?: "", questionAsset, scrapUrl)
+                    questionResponse.response!!.stem!!.displayText ?: "", questionAsset, scrapeUrl)
 
             val hintsList = questionResponse.response!!.hints
             for (j in hintsList!!.indices) {
-                hintsList[j] = ContentScraperUtil.downloadAllResources(hintsList[j], practiceAssetDirectory, scrapUrl)
+                hintsList[j] = ContentScraperUtil.downloadAllResources(hintsList[j], practiceAssetDirectory, scrapeUrl)
             }
             questionResponse.response!!.hints = hintsList
 
-            val answerResponse = extractAnswerFromEncryption(questionResponse.response!!.data?: "")
+            val answerResponse = extractAnswerFromEncryption(questionResponse.response!!.data ?: "")
 
             val answer = gson.fromJson(answerResponse, AnswerResponse::class.java)
-            answer.instance!!.solution = ContentScraperUtil.downloadAllResources(answer.instance!!.solution?: "", questionAsset, scrapUrl)
+            answer.instance?.solution = ContentScraperUtil.downloadAllResources(answer.instance?.solution
+                    ?: "", questionAsset, scrapeUrl)
 
-            answer.instance!!.answer = downloadAllResourcesFromAnswer(answer.instance!!.answer!!, questionAsset, scrapUrl)
+            answer.instance?.answer = downloadAllResourcesFromAnswer(answer.instance!!.answer!!, questionAsset, scrapeUrl)
 
             if (ScraperConstants.QUESTION_TYPE.MULTI_CHOICE.type.equals(questionResponse.response!!.questionType!!, ignoreCase = true)) {
 
@@ -664,12 +724,16 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
                     val question = questionOrderList[order]
 
-                    question.displayText = ContentScraperUtil.downloadAllResources(question.displayText?: "", questionAsset, scrapUrl)
-                    question.optionKey = ContentScraperUtil.downloadAllResources(question.optionKey?: "", questionAsset, scrapUrl)
+                    question.displayText = ContentScraperUtil.downloadAllResources(question.displayText
+                            ?: "", questionAsset, scrapeUrl)
+                    question.optionKey = ContentScraperUtil.downloadAllResources(question.optionKey
+                            ?: "", questionAsset, scrapeUrl)
 
                     val answerObject = answerObjectsList!![order]
-                    answerObject.displayText = ContentScraperUtil.downloadAllResources(answerObject.displayText?: "", questionAsset, scrapUrl)
-                    answerObject.optionKey = ContentScraperUtil.downloadAllResources(answerObject.optionKey?: "", questionAsset, scrapUrl)
+                    answerObject.displayText = ContentScraperUtil.downloadAllResources(answerObject.displayText
+                            ?: "", questionAsset, scrapeUrl)
+                    answerObject.optionKey = ContentScraperUtil.downloadAllResources(answerObject.optionKey
+                            ?: "", questionAsset, scrapeUrl)
 
                 }
             }
@@ -682,24 +746,24 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         }
 
         try {
-            ContentScraperUtil.generateTinCanXMLFile(practiceDirectory, practiceUrl, "en", "index.html",
-                    ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapUrl.path, "", "")
+            ContentScraperUtil.generateTinCanXMLFile(destination, practiceUrl, "en", "index.html",
+                    ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapeUrl.path, "", "")
         } catch (e: TransformerException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Practice Tin can file unable to create for url$urlString")
+            UMLogUtil.logError("Practice Tin can file unable to create for url$scrapeUrl")
         } catch (e: ParserConfigurationException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Practice Tin can file unable to create for url$urlString")
+            UMLogUtil.logError("Practice Tin can file unable to create for url$scrapeUrl")
         }
 
-        ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON)
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.JS_TAG), File(practiceDirectory, JQUERY_JS))
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), File(practiceDirectory, MATERIAL_CSS))
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), File(practiceDirectory, ScraperConstants.MATERIAL_JS))
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.CK12_INDEX_HTML_TAG), File(practiceDirectory, INDEX_HTML))
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.TIMER_PATH), File(practiceDirectory, TIMER_NAME))
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.TROPHY_PATH), File(practiceDirectory, TROPHY_NAME))
-        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.CHECK_PATH), File(practiceDirectory, CHECK_NAME))
+        ContentScraperUtil.saveListAsJson(destination, questionList, ScraperConstants.QUESTIONS_JSON)
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.JS_TAG), File(destination, JQUERY_JS))
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.MATERIAL_CSS_LINK), File(destination, MATERIAL_CSS))
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK), File(destination, ScraperConstants.MATERIAL_JS))
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.CK12_INDEX_HTML_TAG), File(destination, INDEX_HTML))
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.TIMER_PATH), File(destination, TIMER_NAME))
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.TROPHY_PATH), File(destination, TROPHY_NAME))
+        FileUtils.copyToFile(javaClass.getResourceAsStream(ScraperConstants.CHECK_PATH), File(destination, CHECK_NAME))
 
     }
 
@@ -761,38 +825,6 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
         val RESPONSE_RECEIVED = "Network.responseReceived"
 
-        @JvmStatic
-        fun main(args: Array<String>) {
-            if (args.size < 3) {
-                System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO or plix><optional log{trace, debug, info, warn, error, fatal}>")
-                System.exit(1)
-            }
-            UMLogUtil.setLevel(if (args.size == 4) args[3] else "")
-
-
-            UMLogUtil.logInfo(args[0])
-            UMLogUtil.logInfo(args[1])
-            UMLogUtil.logInfo(args[2])
-
-
-            try {
-                val scraper = CK12ContentScraper(args[0], File(args[1]))
-                val type = args[2]
-                when (type.toLowerCase()) {
-
-                    "video" -> scraper.scrapeVideoContent()
-                    "plix" -> scraper.scrapePlixContent()
-                    "practice" -> scraper.scrapePracticeContent()
-                    "read", "activities", "study aids", "lesson plans", "real world" -> scraper.scrapeReadContent()
-                    else -> UMLogUtil.logError("found a group type not supported $type")
-                }
-
-            } catch (e: IOException) {
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-                UMLogUtil.logError("Exception running scrapeContent ck12")
-            }
-
-        }
     }
 
 

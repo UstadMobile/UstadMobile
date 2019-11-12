@@ -1,7 +1,10 @@
 package com.ustadmobile.lib.contentscrapers.ck12.practice
 
-import java.io.File
-import java.io.FileReader
+import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import org.apache.commons.io.IOUtils
+import org.apache.commons.lang.exception.ExceptionUtils
+import java.io.*
+import java.nio.charset.StandardCharsets.UTF_8
 
 import javax.script.Invocable
 import javax.script.ScriptEngine
@@ -12,21 +15,36 @@ class ScriptEngineReader {
     private var result = ""
 
     fun getResult(code: String): String {
+        var cryptoInput: InputStream? = null
+        var utilsInput: InputStream? = null
+
+        var cryptoReader: InputStreamReader? = null
+        var utilsReader: InputStreamReader? = null
+
 
         try {
+            cryptoInput = javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/ck12/crypto-js.js")
+            cryptoReader = InputStreamReader(cryptoInput!!, UTF_8)
 
-            val cryptoReader = FileReader(File(javaClass.getResource("/com/ustadmobile/lib/contentscrapers/ck12/crypto-js.js").toURI()))
-            val utils = FileReader(File(javaClass.getResource("/com/ustadmobile/lib/contentscrapers/ck12/utils.js").toURI()))
+            utilsInput = javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/ck12/utils.js")
+            utilsReader = InputStreamReader(utilsInput!!, UTF_8)
 
             val engine = ScriptEngineManager().getEngineByExtension("js")
-            engine.eval(utils)
+            engine.eval(utilsReader)
             engine.eval(cryptoReader)
 
             val inv = engine as Invocable
             result = inv.invokeFunction("getResult", code) as String
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            UMLogUtil.logError("Failed to read answer from encryption for")
+        }finally {
+            utilsReader?.close()
+            utilsInput?.close()
+
+            cryptoReader?.close()
+            cryptoInput?.close()
         }
 
         return result

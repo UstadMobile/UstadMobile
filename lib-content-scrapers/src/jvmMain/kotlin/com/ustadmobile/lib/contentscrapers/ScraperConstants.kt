@@ -195,6 +195,14 @@ object ScraperConstants {
     const val WEBM_EXT = ".webm"
     const val OPUS_EXT = ".opus"
 
+    const val CK12_VIDEO = "video"
+    const val CK12_PLIX = "plix"
+    const val CK12_PRACTICE = "practice"
+    const val CK12_READ = "read"
+    const val CK12_ACTIVITIES = "activities"
+    const val CK12_STUDY_AIDS = "study aids"
+    const val CK12_LESSONS = "lesson plans"
+    const val CK12_READ_WORLD = "real world"
 
 
     val IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg")
@@ -215,6 +223,7 @@ object ScraperConstants {
     const val FORWARD_SLASH = "/"
     const val KHAN = "Khan Academy"
     const val GDL = "Global Digital Library"
+    const val CK12 = "CK12"
 
     const val TIME_OUT_SELENIUM = 500
 
@@ -273,7 +282,10 @@ object ScraperConstants {
 
 
     enum class CK12ContentType private constructor(val type: String) {
-        SUBJECTS("Subjects")
+        ROOT("ROOT"),
+        SUBJECTS("Subjects"),
+        GRADES("GRADES"),
+        CONTENT("CONTENT")
     }
 
 

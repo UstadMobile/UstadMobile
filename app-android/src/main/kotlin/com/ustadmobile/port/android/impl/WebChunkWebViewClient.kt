@@ -16,10 +16,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
-import fi.iki.elonen.NanoHTTPD
 import java.io.ByteArrayInputStream
-import java.io.IOException
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -33,7 +30,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
     private lateinit var presenter: WebChunkPresenter
     private val indexMap = HashMap<String, IndexLog.IndexEntry>()
     private val linkPatterns = HashMap<Pattern, String>()
-    var url: String? = null
+    lateinit var startingUrl: String
 
     init {
         try {
@@ -48,7 +45,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index!!)), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
-            url = firstUrlToOpen.url
+            startingUrl = firstUrlToOpen.url!!
 
 
             for (log in indexList) {
@@ -81,7 +78,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         val sourceUrl = checkWithPattern(requestUrl.toString())
         if (sourceUrl != null) {
             presenter.handleUrlLinkToContentEntry(sourceUrl)
-            Handler(Looper.getMainLooper()).post { view.loadUrl(url) }
+            Handler(Looper.getMainLooper()).post { view.loadUrl(startingUrl) }
             return WebResourceResponse("text/html", "utf-8", null)
         }
 
@@ -118,7 +115,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                     break
                 }
                 if (key.contains("/api/internal/user/task/practice/") && requestUrl.toString().contains("/api/internal/user/task/practice/")) {
-                    view.post { view.loadUrl(url) }
+                    view.post { view.loadUrl(startingUrl) }
                     return super.shouldInterceptRequest(view, request)
                 }
                 if (key.contains("/assessment_item") && requestUrl.toString().contains("/assessment_item")) {
@@ -150,7 +147,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
 
         if (log == null) {
-            System.err.println("did not find match for url in indexMap " + request.url.toString())
+            System.err.println("did not find match for startingUrl in indexMap " + request.url.toString())
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
@@ -202,7 +199,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                         "OK", mutMap, data)
             }
         } catch (e: Exception) {
-            System.err.println("did not find entry in zip for url " + log.url!!)
+            System.err.println("did not find entry in zip for startingUrl " + log.url!!)
             e.printStackTrace()
         }
 

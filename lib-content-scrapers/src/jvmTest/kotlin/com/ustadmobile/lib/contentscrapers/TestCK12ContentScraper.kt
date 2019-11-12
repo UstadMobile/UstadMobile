@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.nhaarman.mockitokotlin2.spy
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader
 
@@ -23,12 +25,17 @@ import okio.Buffer
 import okio.Okio
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.H5PImportData
 import com.ustadmobile.lib.rest.findSystemCommand
+import org.apache.commons.io.FileUtils
 import org.junit.Before
 import org.mockito.Mockito.doReturn
+import java.net.URL
 
 class TestCK12ContentScraper {
+    private lateinit var db: UmAppDatabase
     private val PRACTICE_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-practice.txt"
     private val TEST_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-test.txt"
     private val QUESTION_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-question-1.txt"
@@ -59,6 +66,7 @@ class TestCK12ContentScraper {
     @Before
     fun setup(){
         ContentScraperUtil.checkIfPathsToDriversExist()
+        db = UmAppDatabase.getInstance(Any())
     }
 
 
@@ -139,7 +147,7 @@ class TestCK12ContentScraper {
     }
 
 
-    @Test
+  /*  @Test
     @Throws(IOException::class)
     fun givenServerOnline_whenVideoContentScraped_thenShouldConvertAndDownload() {
 
@@ -317,7 +325,26 @@ class TestCK12ContentScraper {
         val indexJson = File(plixFolder, "index.json")
         Assert.assertEquals("index json for all urls and thier path exists", true, ContentScraperUtil.fileHasContent(indexJson))
 
+    }*/
 
+    @Test
+    fun testPracticeCotnente(){
+        CK12ContentScraper(URL("https://www.ck12.org/c/arithmetic/divide-whole-numbers/plix/Whole-Number-Division-Pancakes-537110d0da2cfe4f6fb8096a?referrer=concept_details"),
+                File("/media/samih/LENOVO/content/testck12/"), File("/media/samih/LENOVO/content/testcontainer/"), ContentEntry(), "video", 0)
+                .scrapePlixContent(File("/media/samih/LENOVO/content/testck12/plix4/"))
+    }
+
+    @Test
+    fun testLog(){
+
+        FileUtils.copyURLToFile(
+                URL("https://www.ck12.org/assessment/api/start/tests/575f58d19616aa3711c019ca?instanceBundle=true&evalData=true&includePLIX=true&preview=true&collectionHandle=arithmetic&_=1573550083336"),
+                File("/media/samih/LENOVO/content/testck12/plix5"))
+
+        /*ContentScraperUtil.downloadFileFromLogIndex(
+                URL("https://www.ck12.org/assessment/api/start/tests/575f58d19616aa3711c019ca?instanceBundle=true&evalData=true&includePLIX=true&preview=true&collectionHandle=arithmetic&_=1573550083336"),
+                File("/media/samih/LENOVO/content/testck12/plix5"),
+                )*/
     }
 
     companion object {

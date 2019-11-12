@@ -38,13 +38,11 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.Platform
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.logging.LogEntry
 import org.openqa.selenium.logging.LogType
 import org.openqa.selenium.logging.LoggingPreferences
-import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.remote.DesiredCapabilities
 import org.openqa.selenium.support.ui.ExpectedCondition
 import org.openqa.selenium.support.ui.ExpectedConditions
@@ -80,7 +78,6 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.ANDROID_USER_AGENT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_SPACE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.FORWARD_SLASH
@@ -98,6 +95,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
 import kotlinx.coroutines.runBlocking
+import org.openqa.selenium.Cookie
 import java.time.temporal.TemporalQuery
 import kotlin.system.exitProcess
 
@@ -221,7 +219,7 @@ object ContentScraperUtil {
 
                 content.attr("src", destinationDir.name + "/" + destinationFile.name)
 
-                if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName) && fileHasContent(destinationFile)) {
+                if (!isFileModified(conn, destinationDir, fileName) && fileHasContent(destinationFile)) {
                     continue
                 }
                 FileUtils.copyURLToFile(contentUrl, contentFile)
@@ -477,7 +475,7 @@ object ContentScraperUtil {
      * Set the system property of the driver in your machine
      */
     fun setChromeDriverLocation() {
-        System.setProperty("webdriver.chrome.driver", System.getProperty(CHROME_PATH_KEY))
+        System.setProperty("chromedriver", System.getProperty(CHROME_PATH_KEY))
     }
 
 
@@ -821,7 +819,7 @@ object ContentScraperUtil {
             val nameOfLang = LanguageCode.getByCode(langThreeCode)
             if (nameOfLang != null) {
                 language.name = nameOfLang.getName()
-            }else{
+            } else {
                 language.name = LanguageAlpha3Code.getByCode(langThreeCode).getName()
             }
             language.langUid = langDao.insert(language)
@@ -832,9 +830,9 @@ object ContentScraperUtil {
             val nameOfLang = LanguageCode.getByCode(langThreeCode)
             if (nameOfLang != null) {
                 changedLang.name = nameOfLang.getName()
-            }else{
+            } else {
                 var code = LanguageAlpha3Code.getByCode(langThreeCode)
-                if(code != null){
+                if (code != null) {
                     language.name = LanguageAlpha3Code.getByCode(langThreeCode).getName()
                 }
             }
@@ -852,7 +850,6 @@ object ContentScraperUtil {
         }
         return language
     }
-
 
 
     @Throws(IOException::class)
@@ -1104,19 +1101,24 @@ object ContentScraperUtil {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun downloadFileFromLogIndex(url: URL, destination: File, log: LogResponse?): File {
+    fun downloadFileFromLogIndex(url: URL, destination: File, log: LogResponse?, cookies: String?): File {
 
-        val fileName = ContentScraperUtil.getFileNameFromUrl(url)
+        val fileName = getFileNameFromUrl(url)
         val file = File(destination, fileName)
-        if (log != null && log.message!!.params!!.response!!.requestHeaders != null) {
+        if (log != null && log.message!!.params!!.response!!.requestHeaders != null || cookies != null) {
             var conn: HttpURLConnection? = null
             try {
                 conn = url.openConnection() as HttpURLConnection
-                for ((key, value) in log.message!!.params!!.response!!.requestHeaders!!) {
-                    if (key.equals("Accept-Encoding", ignoreCase = true)) {
-                        continue
+                if (log!!.message!!.params!!.response!!.requestHeaders != null) {
+                    for ((key, value) in log.message!!.params!!.response!!.requestHeaders!!) {
+                        if (key.equals("Accept-Encoding", ignoreCase = true)) {
+                            continue
+                        }
+                        conn.addRequestProperty(key.replace(":".toRegex(), EMPTY_STRING), value)
                     }
-                    conn.addRequestProperty(key.replace(":".toRegex(), EMPTY_STRING), value)
+                }
+                if (cookies != null) {
+                    conn.addRequestProperty("cookie", cookies)
                 }
                 FileUtils.copyInputStreamToFile(conn.inputStream, file)
             } catch (e: IOException) {
@@ -1172,15 +1174,10 @@ object ContentScraperUtil {
     fun setupLogIndexChromeDriver(): ChromeDriver {
         val d = DesiredCapabilities.chrome()
         d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731")
-        d.platform = Platform.ANDROID
-
-        val options = ChromeOptions()
-        options.addArguments(ANDROID_USER_AGENT)
 
         val logPrefs = LoggingPreferences()
         logPrefs.enable(LogType.PERFORMANCE, Level.ALL)
-        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs)
-        d.setCapability(ChromeOptions.CAPABILITY, options)
+        d.setCapability("goog:loggingPrefs", logPrefs)
 
         return ChromeDriver(d)
     }
@@ -1368,6 +1365,10 @@ object ContentScraperUtil {
         if (lang == null) {
             newLang.langUid = langDao.insert(newLang)
         }
+    }
+
+    fun returnListOfCookies(url: String, cookieList: Set<Cookie>): String {
+        return cookieList.filter { it.domain in url }.joinToString(separator = "; ") { cookie -> "${cookie.name}=${cookie.value}" }
     }
 
 
