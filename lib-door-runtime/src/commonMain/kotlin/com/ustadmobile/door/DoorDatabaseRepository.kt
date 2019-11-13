@@ -24,6 +24,18 @@ interface DoorDatabaseRepository {
 
     suspend fun activeMirrors(): List<MirrorEndpoint>
 
+    /**
+     * Adds a weak reference to the given connectivity listener - useful for RepositoryLoadHelper
+     * so it can automatically retry requests when connectivity is restored or when a mirror
+     * becomes available.
+     */
+    fun addWeakConnectivityListener(listener: RepositoryConnectivityListener)
+
+    /**
+     *
+     */
+    fun removeWeakConnectivityListener(listener: RepositoryConnectivityListener)
+
     var connectivityStatus: Int
 
     companion object {

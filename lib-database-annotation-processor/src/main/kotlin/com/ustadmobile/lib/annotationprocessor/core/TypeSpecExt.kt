@@ -4,6 +4,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.util.*
 import javax.lang.model.element.ExecutableElement
+import com.ustadmobile.door.RepositoryConnectivityListener
 
 /**
  * Add a method or property that overrides the given accessor. The ExecutableElement could be a
@@ -65,6 +66,18 @@ internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName:
             .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
             .addCode("return $delegatePropName.activeMirrors()\n")
             .build())
+    addFunction(FunSpec.builder("addWeakConnectivityListener")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("listener", RepositoryConnectivityListener::class)
+            .addCode("$delegatePropName.addWeakConnectivityListener(listener)\n")
+            .build())
+    addFunction(FunSpec.builder("removeWeakConnectivityListener")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("listener", RepositoryConnectivityListener::class)
+            .addCode("$delegatePropName.removeWeakConnectivityListener(listener)\n")
+            .build())
+
+
 
     return this
 }

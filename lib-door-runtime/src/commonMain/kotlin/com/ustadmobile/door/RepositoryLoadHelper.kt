@@ -1,6 +1,9 @@
 package com.ustadmobile.door
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
@@ -20,9 +23,15 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val maxAttempts: Int = 3,
                               val retryDelay: Int = 5000,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
-                              val loadFn: suspend(endpoint: String) -> T) {
+                              val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
     var liveDataWrapper: LiveDataWrapper<*>? = null
+
+    val requestLock = Mutex()
+
+    init {
+        repository.addWeakConnectivityListener(this)
+    }
 
     /**
      * This wrapper exists to monitor when LiveData is actively observed. The repository will wrap
@@ -31,31 +40,64 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     inner class LiveDataWrapper<L>(private val src: DoorLiveData<L>,
                                    internal var onActiveCb: (()-> Unit)? = null) : DoorLiveData<L>() {
 
-        val dummyObserverMap = mutableMapOf<DoorObserver<in L>, DoorObserver<in L>>()
+        val observerHelpersMap
+                = mutableMapOf<DoorObserver<in L>, RepositoryLoadHelperLifecycleHelper>()
 
-        inner class DummyObserver<L>: DoorObserver<L> {
-            override fun onChanged(t: L) {
-                //do nothing
+        val activeObservers = mutableListOf<DoorObserver<in L>>()
+
+        val active = atomic(false)
+
+        override fun observe(lifecycleOwner: DoorLifecycleOwner, observer: DoorObserver<in L>) {
+            val lifecycleHelper = RepositoryLoadHelperLifecycleHelper(
+                    this@RepositoryLoadHelper, lifecycleOwner)
+            observerHelpersMap[observer] = lifecycleHelper
+            lifecycleHelper.onActive = { addActiveObserver(observer) }
+            lifecycleHelper.onInactive = { removeActiveObserver(observer) }
+            lifecycleHelper.addObserver()
+
+            src.observe(lifecycleOwner, observer)
+        }
+
+        private fun addActiveObserver(observer: DoorObserver<in L>) {
+            activeObservers.add(observer)
+            val numObservers = activeObservers.size
+            if(numObservers == 1) {
+                active.value = activeObservers.isNotEmpty()
+                if(!completed.value) {
+                    //try again if needed
+                    attemptCount = 0
+                    GlobalScope.launch {
+                        try {
+                            doRequest()
+                        } catch(e: IOException) {
+
+                        }
+                    }
+                }
             }
         }
 
-        override fun observe(lifecycleOwner: DoorLifecycleOwner, observer: DoorObserver<in L>) {
-            src.observe(lifecycleOwner, observer)
-            val dummyObserver = DummyObserver<L>()
-            dummyObserverMap[observer] = dummyObserver
-            super.observe(lifecycleOwner, dummyObserver)
+        private fun removeActiveObserver(observer: DoorObserver<in L>) {
+            activeObservers.remove(observer)
+            active.value = activeObservers.isNotEmpty()
         }
 
         override fun observeForever(observer: DoorObserver<in L>) {
             src.observeForever(observer)
-            val dummyObserver = DummyObserver<L>()
-            dummyObserverMap[observer] = dummyObserver
-            super.observeForever(dummyObserver)
+            addActiveObserver(observer)
         }
 
         override fun removeObserver(observer: DoorObserver<in L>) {
             src.removeObserver(observer)
-            dummyObserverMap.remove(observer)
+            val observerHelper = observerHelpersMap[observer]
+            if(observerHelper != null) {
+                observerHelper.removeObserver()
+                observerHelpersMap.remove(observer)
+            }
+
+            if(observer in activeObservers) {
+                removeActiveObserver(observer)
+            }
         }
     }
 
@@ -66,8 +108,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         return newWrapper
     }
 
-    @Volatile
-    var completed = false
+    val completed = atomic(false)
 
     @Volatile
     var triedMainEndpoint = false
@@ -77,69 +118,102 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     @Volatile
     var attemptCount = 0
 
+    override fun onConnectivityStatusChanged(newStatus: Int) {
+        if(!completed.value && newStatus == DoorDatabaseRepository.STATUS_CONNECTED
+                && liveDataWrapper?.active?.value ?: true)
+            attemptCount = 0
+            GlobalScope.launch {
+                try {
+                    doRequest()
+                } catch(e: IOException) {
+
+                }
+            }
+    }
+
+    override fun onNewMirrorAvailable(mirror: MirrorEndpoint) {
+        if(!completed.value && liveDataWrapper?.active?.value ?: true) {
+            GlobalScope.launch {
+                try {
+                    doRequest()
+                } catch(e: IOException) {
+
+                }
+            }
+        }
+    }
+
     suspend fun doRequest() : T{
-        do {
-            var mirrorToUse: MirrorEndpoint? = null
-            var endpointToUse: String? = null
-            try {
-                attemptCount++
-                val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
-                mirrorToUse = if(isConnected && !triedMainEndpoint) {
-                    null as MirrorEndpoint? //use the main endpoint
-                }else {
-                    repository.activeMirrors().firstOrNull { it.mirrorId !in mirrorsTried }
-                }
-
-                endpointToUse = if(mirrorToUse == null) {
-                    repository.endpoint
-                }else {
-                    mirrorToUse.endpointUrl
-                }
-
-                var t = loadFn(endpointToUse)
-                val isNullOrEmpty = if(t is List<*>) {
-                    t.isEmpty()
-                }else {
-                    t == null
-                }
-
-                //if it came from the main endpoint, or we got some actual data, then it looks good
-                var isMainEndpointOrNotNullOrEmpty = mirrorToUse == null || !isNullOrEmpty
-                if(isMainEndpointOrNotNullOrEmpty) {
-                    completed = true
-                }
-
-                if(!completed && autoRetryOnEmptyLiveData != null) {
-                    val liveDataVal = waitForNonEmptyLiveData()
-                    if(liveDataVal != null) {
-                        t = liveDataVal
-                        isMainEndpointOrNotNullOrEmpty = true
-                        completed = true
+        requestLock.withLock {
+            while(!completed.value && coroutineContext.isActive && attemptCount <= maxAttempts) {
+                var mirrorToUse: MirrorEndpoint? = null
+                var endpointToUse: String? = null
+                try {
+                    attemptCount++
+                    val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
+                    mirrorToUse = if(isConnected && !triedMainEndpoint) {
+                        null as MirrorEndpoint? //use the main endpoint
+                    }else {
+                        repository.activeMirrors().firstOrNull { it.mirrorId !in mirrorsTried }
                     }
+
+                    if(!isConnected && mirrorToUse == null) {
+                        //it's hopeless - there is no mirror and we have no connection - give up
+                        throw IOException("LoadHelper: Repository status indicates no connectivity and there are no active mirrors")
+                    }
+
+                    endpointToUse = if(mirrorToUse == null) {
+                        repository.endpoint
+                    }else {
+                        mirrorToUse.endpointUrl
+                    }
+
+                    var t = loadFn(endpointToUse)
+                    val isNullOrEmpty = if(t is List<*>) {
+                        t.isEmpty()
+                    }else {
+                        t == null
+                    }
+
+                    //if it came from the main endpoint, or we got some actual data, then it looks good
+                    var isMainEndpointOrNotNullOrEmpty = mirrorToUse == null || !isNullOrEmpty
+                    if(isMainEndpointOrNotNullOrEmpty) {
+                        completed.value = true
+                    }
+
+                    if(!completed.value && autoRetryOnEmptyLiveData != null) {
+                        val liveDataVal = waitForNonEmptyLiveData()
+                        if(liveDataVal != null) {
+                            t = liveDataVal
+                            isMainEndpointOrNotNullOrEmpty = true
+                            completed.value = true
+                        }
+                    }
+
+                    if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult) {
+                        return t
+                    }
+
+                    delay(retryDelay.toLong())
+                }catch(e: Exception) {
+                    //something went wrong with the load
+                    println("RepositoryLoadHelper: Exception attempting to load from $endpointToUse: $e")
                 }
 
-                if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult) {
-                    return t
+                if(mirrorToUse == null) {
+                    triedMainEndpoint = true
+                }else {
+                    mirrorsTried.add(mirrorToUse.mirrorId)
                 }
-
-                delay(retryDelay.toLong())
-            }catch(e: Exception) {
-                //something went wrong with the load
-                println("RepositoryLoadHelper: Exception attempting to load from $endpointToUse: $e")
             }
 
-            if(mirrorToUse == null) {
-                triedMainEndpoint = true
-            }else {
-                mirrorsTried.add(mirrorToUse.mirrorId)
-            }
-        }while(coroutineContext.isActive && attemptCount <= maxAttempts)
-
-        throw IOException("loadHelper retry count exceeded")
+            throw IOException("loadHelper retry count exceeded")
+        }
     }
 
     fun shouldTryAnotherMirror() : Boolean {
-        return !completed && attemptCount < maxAttempts
+        val isCompleted = completed.value
+        return !isCompleted && attemptCount < maxAttempts
     }
 
     suspend fun waitForNonEmptyLiveData() : T?{
