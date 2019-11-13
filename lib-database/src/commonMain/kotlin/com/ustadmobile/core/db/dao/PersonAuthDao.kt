@@ -63,7 +63,6 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
                 return -1
             }
         }
-
     }
 
     open suspend fun changePassword(personUid: Long, passwordHash: String):Int {

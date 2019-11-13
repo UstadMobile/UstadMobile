@@ -22,7 +22,7 @@ import org.acra.util.ToastSender
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-class LoginActivity : UstadBaseActivity(), LoginView {
+class updateLastActiveLoginActivity : UstadBaseActivity(), LoginView {
     override fun showToolbar(show: Boolean) {
         val appBar = findViewById<AppBarLayout>(R.id.appbar)
         if(show){

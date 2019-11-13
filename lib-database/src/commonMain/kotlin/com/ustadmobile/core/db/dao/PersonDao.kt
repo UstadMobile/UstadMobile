@@ -36,23 +36,6 @@ abstract class  PersonDao : BaseDao<Person> {
         var personUid: Long = 0
     }
 
-    //TODO: KMP Undo when Server bits ready
-    @UmRestAccessible
-    //@UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    suspend fun loginAsync(username: String, password: String): UmAccount? {
-
-        val person = findUidAndPasswordHashAsync(username)
-        return if (person == null) {
-            null
-        } else if (person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) && person.passwordHash.substring(2) != password) {
-            null
-        } else if (person.passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) && !authenticateEncryptedPassword(password,
-                        person.passwordHash.substring(2))) {
-            null
-        } else {
-            onSuccessCreateAccessTokenAsync(person.personUid, username)
-        }
-    }
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {

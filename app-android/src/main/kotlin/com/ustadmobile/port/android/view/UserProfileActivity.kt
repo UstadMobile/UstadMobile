@@ -289,7 +289,6 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val galleryFile = File(imagePathFromCamera)
-                    //TODO: KMP File stuff
                     mPresenter!!.handleCompressedImage(galleryFile.canonicalPath)
                 }
             }

@@ -59,8 +59,6 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER,
                 "false", context)!!.toBoolean()
 
-//        val loginRequired = impl.getAppPref(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-//                "false", context)!!.toBoolean()
         view.showToolbar(false)
 
         view.setRegistrationLinkVisible(showRegisterLink)
@@ -120,11 +118,8 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
     @JsName("handleClickLogin")
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
-        view.setErrorMessage("")
         val usernameTrim = username.trim()
-
-
-
+        view.setErrorMessage("")
         GlobalScope.launch {
             try {
                 val loginResponse = defaultHttpClient().get<HttpResponse>() {
