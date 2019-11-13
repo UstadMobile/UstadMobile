@@ -387,6 +387,8 @@
     <string name="more_information">More information</string>
     <string name="less_information">Less information</string>
 
+    <string name="login_no_network_no_person">Person not found locally. Please get online for first login.</string>
+    <string name="login_no_network_auth_fail">Person authentication failed offline.</string>
 
 
 </resources>

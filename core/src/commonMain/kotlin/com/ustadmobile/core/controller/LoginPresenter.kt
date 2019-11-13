@@ -1,13 +1,17 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
+import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -25,6 +29,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null
+    private var personAuthdao: PersonAuthDao
 
     init {
         mNextDest = if (arguments.containsKey(ARG_NEXT)) {
@@ -33,6 +38,8 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
             impl.getAppConfigString(
                     AppConfig.KEY_FIRST_DEST, "BasePoint", context)
         }
+
+        personAuthdao = UmAppDatabase.getInstance(context!!).personAuthDao
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -47,12 +54,45 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
             view.setMessage(arguments.get(ARG_MESSAGE)!!)
         }
 
-        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER, "false", context)!!.toBoolean()
+        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER,
+                "false", context)!!.toBoolean()
 
         view.setRegistrationLinkVisible(showRegisterLink)
 
         val version = impl.getVersion(context)
         view.updateVersionOnLogin(version)
+    }
+
+    private fun checkLocalLogin(username:String, password:String, serverUrl: String){
+
+        GlobalScope.launch {
+            val time = UMCalendarUtil.getDateInMilliPlusDays(0)
+            val person = personAuthdao.findPersonByUsername(username)
+            val account = personAuthdao.authenticate(username, password)
+            when {
+                person == null -> view.runOnUiThread(Runnable {
+                    view.setErrorMessage(impl.getString(
+                            MessageID.login_no_network_no_person, context))
+                    view.setInProgress(false)
+                })
+                account != null -> {
+                    account.endpointUrl = serverUrl
+                    view.runOnUiThread(Runnable { view.setInProgress(false) })
+                    UmAccountManager.setActiveAccount(account, context)
+                    view.runOnUiThread(Runnable {
+                        view.forceSync()
+                        view.setFinishAfficinityOnView()
+                    })
+
+                    impl.go(mNextDest, context)
+                }
+                else -> view.runOnUiThread(Runnable {
+                    view.setErrorMessage(impl.getString(
+                            MessageID.login_no_network_auth_fail, context))
+                    view.setInProgress(false)
+                })
+            }
+        }
     }
 
     @JsName("handleClickLogin")
@@ -74,8 +114,29 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                 if(loginResponse.status == HttpStatusCode.OK) {
                     val account = loginResponse.receive<UmAccount>()
                     account.endpointUrl = serverUrl
-                    view.runOnUiThread(Runnable { view.setInProgress(false) })
+
+                    val passwordHash = PersonAuthDao.Companion.encryptThisPassword(password)
+                    val person = personAuthdao.findPersonByUsername(username)
+                    if(person!=null){
+                        //Persist local PersonAuth
+                        var personAuth = personAuthdao.findByUid(person.personUid)
+                        if(personAuth== null){
+                            personAuth = PersonAuth(person.personUid, passwordHash)
+                            personAuthdao.insert(personAuth)
+                        }
+                        personAuth.passwordHash = passwordHash
+
+                        personAuthdao.update(personAuth)
+
+                    }
+
                     UmAccountManager.setActiveAccount(account, context)
+                    view.runOnUiThread(Runnable {
+                        view.setInProgress(false)
+                        view.forceSync()
+                        view.setFinishAfficinityOnView()
+                    })
+
                     impl.go(mNextDest, context)
                 }else {
                     view.runOnUiThread(Runnable {
@@ -86,11 +147,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     })
                 }
             } catch (e: Exception) {
-                view.runOnUiThread(Runnable {
-                    view.setErrorMessage(impl.getString(
-                            MessageID.login_network_error, context))
-                    view.setInProgress(false)
-                })
+                checkLocalLogin(username, password, serverUrl)
             }
         }
     }
