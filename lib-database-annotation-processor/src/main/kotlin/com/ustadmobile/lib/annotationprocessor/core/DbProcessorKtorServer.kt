@@ -31,6 +31,7 @@ import com.ustadmobile.door.DoorConstants
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_KTOR_NO_CONTENT_RESPOND
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.NANOHTTPD_URIRESOURCE_FUNPARAMS
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 
@@ -129,16 +130,11 @@ fun CodeBlock.Builder.addKtorResponse(varName: String, addNonNullOperator: Boole
 fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>, nanoHttpdPostFns: List<String>,
                                                   initParamsList: List<ParameterSpec>): TypeSpec.Builder {
 
-    val nanoHttpdResponderParams = listOf(
-            ParameterSpec.builder("_uriResource", RouterNanoHTTPD.UriResource::class).build(),
-            ParameterSpec.builder("_uriParams", Map::class.parameterizedBy(String::class, String::class)).build(),
-            ParameterSpec.builder("_session", NanoHTTPD.IHTTPSession::class).build())
-
     listOf(nanoHttpdGetFns to "get", nanoHttpdPostFns to "post").forEach {fnType ->
         val uriResponderFnSpec = FunSpec.builder(fnType.second)
                 .returns(NanoHTTPD.Response::class)
                 .addModifiers(KModifier.OVERRIDE)
-                .addParameters(nanoHttpdResponderParams)
+                .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
 
         val fnCodeBlock = CodeBlock.builder()
                 .add("val _fnName = _session.uri.%M('/')\n", MemberName("kotlin.text", "substringAfterLast"))
@@ -155,7 +151,7 @@ fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>,
             fnCodeBlock.beginControlFlow("return when(_fnName)")
 
             fnType.first.forEach {fnName ->
-                fnCodeBlock.add("%S -> ${fnName}(_uriResource, _uriParams, _session, ${initParamsList.map{it.name}.joinToString()})\n",
+                fnCodeBlock.add("%S -> ${fnName}(_uriResource, _urlParams, _session, ${initParamsList.map{it.name}.joinToString()})\n",
                         fnName)
             }
             fnCodeBlock.add("else -> ").add(notFoundCodeBlock).add("\n")
@@ -172,7 +168,7 @@ fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>,
             NanoHTTPD.Response::class, DoorConstants::class, "")
     listOf("put", "delete").forEach {fnName ->
         this.addFunction(FunSpec.builder(fnName)
-                .addParameters(nanoHttpdResponderParams)
+                .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
                 .addModifiers(KModifier.OVERRIDE)
                 .returns(NanoHTTPD.Response::class)
                 .addCode(returnMethodNotSupportedException)
@@ -180,7 +176,7 @@ fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>,
     }
     this.addFunction(FunSpec.builder("other")
             .addParameter("methodName", String::class)
-            .addParameters(nanoHttpdResponderParams)
+            .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
             .addModifiers(KModifier.OVERRIDE)
             .returns(NanoHTTPD.Response::class)
             .addCode(returnMethodNotSupportedException)
@@ -255,20 +251,39 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
     return codeBlock.build()
 }
 
-internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper") =
+internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper",
+                                                    serverType: Int = SERVER_TYPE_KTOR) =
     CodeBlock.builder()
-            .beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_update${trackerClassName.simpleName}Received")
-            .add("val _clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
-                    DbProcessorKtorServer.CALL_MEMBER,
-                    MemberName("io.ktor.request","header"),
-                    "X-nid")
-            .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId"))
+            .addGetClientIdHeader("_clientId", serverType)
+            .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId",
+                    serverType = serverType))
             //TODO: Add the clientId to this query (to prevent other clients interfering)
             .add("$syncHelperVarName._update${trackerClassName.simpleName}Received(true, _requestId)\n")
-            .add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER,
-                    HttpStatusCode::class)
+            .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND) }
+            .apply { takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE) }
+            .build()
+
+internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper")=
+    CodeBlock.builder().beginControlFlow("%M(%S)",
+                DbProcessorKtorServer.GET_MEMBER, "_update${trackerClassName.simpleName}Received")
+            .add(generateUpdateTrackerReceivedCodeBlock(trackerClassName, syncHelperVarName,
+                    serverType = SERVER_TYPE_KTOR))
             .endControlFlow()
             .build()
+
+/**
+ * Generates a function for NanoHTTPD to implement the update syncable tracker received. This function
+ * will have the NanoHTTPD standard parameters (uriresource, urlparams, and session) but will not
+ * have parameters for parameters that are retrieved from the uriResource itself (e.g. the db,
+ * dao, synchelper etc).
+ */
+internal fun generateUpdateTrackerReceivedNanoHttpdFun(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper") =
+    FunSpec.builder("_update${trackerClassName.simpleName}Received")
+            .addCode(generateUpdateTrackerReceivedCodeBlock(trackerClassName, syncHelperVarName,
+                        serverType = SERVER_TYPE_NANOHTTPD))
+            .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
+            .returns(NanoHTTPD.Response::class)
+
 
 internal fun generateGetAttachmentDataCodeBlock(entityTypeEl: TypeElement, attachmentsDirVarName: String = "_attachmentsDir"): CodeBlock {
     val entityPkField = entityTypeEl.enclosedElements
@@ -600,7 +615,13 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).forEach {
             val syncableEntityinfo = SyncableEntityInfo(it, processingEnv)
-            ktorCodeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityinfo.tracker))
+            ktorCodeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityinfo.tracker))
+            specs.nanoHttpdResponder.typeSpec.addFunction(generateUpdateTrackerReceivedNanoHttpdFun(
+                    syncableEntityinfo.tracker)
+                    .addParameters(daoParams)
+                    .build()
+                    .also { nanoHttpdGetFns.add(it.name) }
+            )
         }
 
         queryResultTypesWithAnnotationOnDao(daoTypeElement.asClassName(), EntityWithAttachment::class.java,
@@ -657,6 +678,12 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         internal val CODEBLOCK_KTOR_NO_CONTENT_RESPOND = CodeBlock.of("%M.%M(%T.NoContent, %S)\n",
                 CALL_MEMBER, RESPOND_MEMBER, HttpStatusCode::class, "")
+
+        internal val NANOHTTPD_URIRESOURCE_FUNPARAMS = listOf<ParameterSpec>(
+                ParameterSpec.builder("_uriResource", RouterNanoHTTPD.UriResource::class).build(),
+                ParameterSpec.builder("_urlParams",
+                        Map::class.parameterizedBy(String::class, String::class)).build(),
+                ParameterSpec.builder("_session", NanoHTTPD.IHTTPSession::class).build())
 
     }
 }

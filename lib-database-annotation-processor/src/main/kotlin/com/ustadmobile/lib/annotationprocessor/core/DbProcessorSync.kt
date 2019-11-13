@@ -263,7 +263,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                 codeBlock.add(generateGetAttachmentDataCodeBlock(entityType))
             }
 
-            codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityInfo.tracker,
+            codeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityInfo.tracker,
                     syncHelperVarName = "_dao"))
 
         }

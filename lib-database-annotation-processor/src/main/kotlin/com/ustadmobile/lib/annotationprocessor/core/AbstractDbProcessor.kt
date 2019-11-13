@@ -1336,17 +1336,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         if(syncableEntitiesList != null) {
             codeBlock.add("val _reqId = %T().nextInt()\n", Random::class)
-            if(serverType == DbProcessorKtorServer.SERVER_TYPE_KTOR) {
-                codeBlock.add("val __clientId = %M.request.%M(%S)?.toInt() ?: 0\n",
-                            DbProcessorKtorServer.CALL_MEMBER,
-                            MemberName("io.ktor.request","header"),
-                            "X-nid")
-                        .add("%M.response.header(%S, _reqId)\n", DbProcessorKtorServer.CALL_MEMBER, "X-reqid")
-            }else {
-                codeBlock.add("val __clientId = _session.headers.get(%S)?.toInt() ?: 0\n",
-                        "X-nid")
-            }
-
+                    .addGetClientIdHeader("__clientId", serverType)
             queryVarsList  += ParameterSpec.builder("clientId", INT).build()
         }
 
