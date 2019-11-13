@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ClassBook Nigeria</string>
+    <string name="app_name">ClassBook</string>
     <string name='downloaded' value='81'>Downloaded</string>
     <string name='dir'>ltr</string>
     <string name='login'>Login</string>
