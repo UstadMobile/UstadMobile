@@ -141,7 +141,7 @@ class LoginPresenterTest {
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
                 MessageID.login_network_error, Any())
         verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
-        verify(impl, timeout(5000)).getString(MessageID.login_network_error, context)
+        verify(impl, timeout(5000)).getString(MessageID.login_no_network_no_person, context)
     }
 
 

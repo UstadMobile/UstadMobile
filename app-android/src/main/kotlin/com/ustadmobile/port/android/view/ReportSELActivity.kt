@@ -232,7 +232,7 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
 
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(csvReportFilePath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"
@@ -249,7 +249,7 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
 
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(xlsxReportPath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"

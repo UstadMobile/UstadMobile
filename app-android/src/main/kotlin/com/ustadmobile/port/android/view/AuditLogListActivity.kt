@@ -154,7 +154,7 @@ class AuditLogListActivity : UstadBaseActivity(), AuditLogListView, PopupMenu.On
 
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(csvReportFilePath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"
