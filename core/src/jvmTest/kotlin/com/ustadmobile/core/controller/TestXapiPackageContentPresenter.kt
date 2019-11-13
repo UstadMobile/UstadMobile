@@ -94,6 +94,7 @@ class TestXapiPackageContentPresenter {
     fun tearDown() {
         xapiTmpFile.delete()
         UmFileUtilSe.deleteRecursively(containerDirTmp!!)
+
     }
 
     @Test

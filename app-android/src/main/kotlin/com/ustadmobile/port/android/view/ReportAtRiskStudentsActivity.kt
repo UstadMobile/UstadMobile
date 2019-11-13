@@ -103,7 +103,7 @@ class ReportAtRiskStudentsActivity : UstadBaseActivity(), ReportAtRiskStudentsVi
     override fun generateXLSXReport(xlsxReportPath: String) {
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(xlsxReportPath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"
@@ -170,7 +170,7 @@ class ReportAtRiskStudentsActivity : UstadBaseActivity(), ReportAtRiskStudentsVi
 
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(csvReportFilePath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"
