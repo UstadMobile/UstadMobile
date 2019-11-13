@@ -98,7 +98,6 @@ class BasePointPresenter
                     })
                 }
             }
-
         }
     }
 

@@ -64,7 +64,7 @@ class PersonEditPresenter
  * @param view  The view that called this presenter (PersonEditView->PersonEditActivity)
  */
 (context: Any, arguments: Map<String, String>?, view: PersonEditView,
-        val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
+ val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     :UstadBaseController<PersonEditView>(context, arguments!!, view) {
 
 

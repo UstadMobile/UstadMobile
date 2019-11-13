@@ -5,7 +5,6 @@ package com.ustadmobile.core.view
  */
 interface UserProfileView : UstadView {
 
-    //Any argument keys:
 
     /**
      * Method to finish the screen / view.

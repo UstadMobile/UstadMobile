@@ -549,18 +549,18 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     fun compressImage() {
         val imageFile = File(imagePathFromCamera)
 
-            val c = Compressor(this)
-                    .setMaxWidth(IMAGE_MAX_WIDTH)
-                    .setMaxHeight(IMAGE_MAX_HEIGHT)
-                    .setQuality(IMAGE_QUALITY)
-                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                    .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
+        val c = Compressor(this)
+                .setMaxWidth(IMAGE_MAX_WIDTH)
+                .setMaxHeight(IMAGE_MAX_HEIGHT)
+                .setQuality(IMAGE_QUALITY)
+                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
 
-            val compressedImageFile = c.compressToFile(imageFile)
-            if (!imageFile.delete()) {
-                print("Could not delete " + imagePathFromCamera!!)
-            }
-            imagePathFromCamera = compressedImageFile.absolutePath
+        val compressedImageFile = c.compressToFile(imageFile)
+        if (!imageFile.delete()) {
+            print("Could not delete " + imagePathFromCamera!!)
+        }
+        imagePathFromCamera = compressedImageFile.absolutePath
 
 
     }
@@ -714,7 +714,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
         // Diff callback.
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object
-                : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+            : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
             override fun areItemsTheSame(oldItem: ClazzWithNumStudents,
                                          newItem: ClazzWithNumStudents): Boolean {
                 return oldItem.clazzUid == newItem.clazzUid

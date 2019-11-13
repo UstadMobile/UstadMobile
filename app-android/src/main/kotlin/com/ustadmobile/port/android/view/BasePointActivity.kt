@@ -219,7 +219,6 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp, profileImage)
     }
 
-
     override fun loadProfileImage(imagePath: String) {
         val output = File(imagePath)
 
@@ -759,7 +758,6 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         private fun dpToPxImagePerson(): Int {
             return (IMAGE_PERSON_THUMBNAIL_WIDTH * Resources.getSystem().displayMetrics.density).toInt()
         }
-
     }
 
 

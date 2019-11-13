@@ -153,17 +153,17 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         when (order) {
 
             SORT_ORDER_NAME_DESC -> clazzListProvider = repository.clazzDao
-                    .findAllActiveClazzesSortByNameDesc(searchQuery)
+                    .findAllActiveClazzesSortByNameDesc(searchQuery, loggedInPersonUid!!)
             SORT_ORDER_ATTENDANCE_ASC -> clazzListProvider = repository.clazzDao
-                    .findAllActiveClazzesSortByAttendanceAsc(searchQuery)
+                    .findAllActiveClazzesSortByAttendanceAsc(searchQuery, loggedInPersonUid!!)
             SORT_ORDER_ATTENDANCE_DESC -> clazzListProvider = repository.clazzDao
-                    .findAllActiveClazzesSortByAttendanceDesc(searchQuery)
+                    .findAllActiveClazzesSortByAttendanceDesc(searchQuery, loggedInPersonUid!!)
             SORT_ORDER_TEACHER_ASC -> clazzListProvider = repository.clazzDao
-                    .findAllActiveClazzesSortByTeacherAsc(searchQuery)
+                    .findAllActiveClazzesSortByTeacherAsc(searchQuery, loggedInPersonUid!!)
             else ->
                 //SORT_ORDER_NAME_ASC
                 clazzListProvider = repository.clazzDao
-                        .findAllActiveClazzesSortByNameAsc(searchQuery)
+                        .findAllActiveClazzesSortByNameAsc(searchQuery, loggedInPersonUid!!)
         }
 
         updateProviderToView()

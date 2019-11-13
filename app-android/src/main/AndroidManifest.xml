@@ -389,7 +389,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
 
-
     </application>
 
 </manifest>

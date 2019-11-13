@@ -75,16 +75,16 @@ class ClazzDetailEnrollStudentActivity : UstadBaseActivity(), ClazzDetailEnrollS
 
         //Get the clazz Uid from the arguments
         if (intent.hasExtra(ARG_CLAZZ_UID)) {
-            currentClazzUid = intent.extras!!.get(ARG_CLAZZ_UID).toString().toLong()
+            currentClazzUid = intent!!.extras!!.get(ARG_CLAZZ_UID)!!.toString().toLong()
         }
 
         if (intent.hasExtra(ARG_NEW_PERSON_TYPE)) {
-            currentRole = intent.extras!!.get(ARG_NEW_PERSON_TYPE).toString().toInt()
+            currentRole = intent!!.extras!!.get(ARG_NEW_PERSON_TYPE)!!.toString().toInt()
         }
 
         //PersonGroup enrollment
         if (intent.hasExtra(GROUP_UID)) {
-            groupUid = intent.extras!!.get(GROUP_UID).toString().toLong()
+            groupUid = intent!!.extras!!.get(GROUP_UID)!!.toString().toLong()
             if (groupUid != 0L) {
                 groupEnrollment = true
             }

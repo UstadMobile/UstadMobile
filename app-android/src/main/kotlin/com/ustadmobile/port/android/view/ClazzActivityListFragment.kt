@@ -157,7 +157,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
     override fun setClazzActivityChangesDropdownPresets(presets: Array<String?>) {
         this.changesPresets = presets
-        val adapter = ArrayAdapter(Objects.requireNonNull(context!!),
+        val adapter = ArrayAdapter(context!!,
                 android.R.layout.simple_spinner_item, changesPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         activityChangesSpinner.adapter = adapter

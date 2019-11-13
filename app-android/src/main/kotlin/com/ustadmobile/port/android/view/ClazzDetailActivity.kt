@@ -89,7 +89,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
         //Setting layout:
         setContentView(R.layout.activity_clazz_detail)
 
-        if (Objects.requireNonNull(intent.extras)!!.get(ARG_CLAZZ_UID) is String) {
+        if (intent!!.extras!!.get(ARG_CLAZZ_UID) is String) {
             currentClazzUid = intent.getStringExtra(ARG_CLAZZ_UID).toString().toLong()
         } else {
             currentClazzUid = intent.getLongExtra(ARG_CLAZZ_UID, 0L)

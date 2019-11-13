@@ -153,7 +153,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
     override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
-        val adapter = ArrayAdapter(Objects.requireNonNull(context!!),
+        val adapter = ArrayAdapter(context!!,
                 R.layout.spinner_item, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter

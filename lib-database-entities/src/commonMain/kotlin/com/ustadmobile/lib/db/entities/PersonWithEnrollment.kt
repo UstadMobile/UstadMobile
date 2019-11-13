@@ -20,4 +20,5 @@ class PersonWithEnrollment : Person() {
 
     @Embedded
     var personRole: Role? = null
+
 }

@@ -31,8 +31,8 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private var mNextDest: String? = null
-
     private var personAuthdao: PersonAuthDao
+
     init {
         mNextDest = if (arguments.containsKey(ARG_NEXT)) {
             arguments[ARG_NEXT]
@@ -82,6 +82,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         }
     }
 
+
     private fun checkLocalLogin(username:String, password:String, serverUrl: String){
 
         GlobalScope.launch {
@@ -100,7 +101,6 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     UmAccountManager.setActiveAccount(account, context)
                     view.runOnUiThread(Runnable {
                         view.forceSync()
-                        view.updateLastActive()
                         view.setFinishAfficinityOnView()
                     })
 

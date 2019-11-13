@@ -347,12 +347,15 @@ abstract class  PersonDao : BaseDao<Person> {
                 " AND EntityRole.erEntityUid = Person.personUid) " +
                 "OR " +
                 "(EntityRole.ertableId = " + Clazz.TABLE_ID +
-                " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
+                " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
+                " ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
                 "OR" +
                 "(EntityRole.ertableId = " + Location.TABLE_ID +
                 " AND EntityRole.erEntityUid IN " +
-                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
-                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin WHERE personLocationPersonUid = Person.personUid)))" +
+                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
+                " WHERE locationAncestorChildLocationUid " +
+                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
+                " WHERE personLocationPersonUid = Person.personUid)))" +
                 ") AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"

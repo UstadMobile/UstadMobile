@@ -205,7 +205,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             CustomFieldListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}CustomFieldListActivity"),
             CustomFieldDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}CustomFieldDetailActivity"),
             AddCustomFieldOptionDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AddCustomFieldOptionDialogFragment"),
-            RecordDropoutDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RecordDropoutDialogFragment")
+            RecordDropoutDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RecordDropoutDialogFragment"),
+
+            ChangePasswordView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ChangePasswordActivity")
 
     )
 

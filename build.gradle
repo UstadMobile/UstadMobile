@@ -61,12 +61,12 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.2.13.14"
+version = "0.2.13.15"
 
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 177
+    ustadVersionCode = 178
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"

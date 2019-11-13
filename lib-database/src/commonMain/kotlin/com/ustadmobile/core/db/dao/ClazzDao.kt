@@ -92,25 +92,22 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("UPDATE Clazz SET isClazzActive = 0 WHERE clazzUid = :clazzUid")
     abstract suspend fun inactivateClazz(clazzUid: Long) : Int
 
-    @Query(CLAZZ_WHERE +
-            " FROM Clazz WHERE :personUid in " +
-            " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
-            "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberActive = 1)")
+    @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER )
     abstract fun findAllClazzesByPersonUid(personUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query(CLAZZ_WHERE +
+    @Query(CLAZZ_SELECT +
             " FROM Clazz " +
             " WHERE " + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT +
             ENTITY_LEVEL_PERMISSION_CONDITION2)
     abstract fun findAllClazzesByPermission(accountPersonUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query("$CLAZZ_WHERE FROM Clazz ")
+    @Query("$CLAZZ_SELECT FROM Clazz ")
     abstract fun findAllClazzes(): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query("$CLAZZ_WHERE FROM Clazz WHERE clazzLocationUid in (:locations)")
+    @Query("$CLAZZ_SELECT FROM Clazz WHERE clazzLocationUid in (:locations)")
     abstract fun findAllClazzesInLocationList(locations: List<Long>): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query("$CLAZZ_WHERE FROM Clazz WHERE clazzLocationUid in (:locations)")
+    @Query("$CLAZZ_SELECT FROM Clazz WHERE clazzLocationUid in (:locations)")
     abstract suspend fun findAllClazzesInLocationListAsync(locations: List<Long>) :
             List<ClazzWithNumStudents>
 
@@ -145,46 +142,46 @@ abstract class ClazzDao : BaseDao<Clazz> {
         }
     }
 
-    @Query("$CLAZZ_WHERE FROM Clazz WHERE Clazz.isClazzActive = 1 ")
+    @Query("$CLAZZ_SELECT FROM Clazz WHERE Clazz.isClazzActive = 1 ")
     abstract fun findAllActiveClazzes(): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.isClazzActive = 1 " +
+    @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
+            " AND Clazz.isClazzActive = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.clazzName ASC")
     abstract fun findAllActiveClazzesSortByNameAsc(
-            searchQuery: String): DataSource.Factory<Int, ClazzWithNumStudents>
+            searchQuery: String, personUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.isClazzActive = 1 " +
+    @Query(CLAZZ_SELECT +  CLAZZ_WHERE_CLAZZMEMBER +
+            " AND Clazz.isClazzActive = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.clazzName DESC")
     abstract fun findAllActiveClazzesSortByNameDesc(
-            searchQuery: String
+            searchQuery: String, personUid: Long
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.isClazzActive = 1 " +
+    @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
+            " AND Clazz.isClazzActive = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.attendanceAverage ASC ")
     abstract fun findAllActiveClazzesSortByAttendanceAsc(
-            searchQuery: String
+            searchQuery: String, personUid: Long
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.isClazzActive = 1 " +
+    @Query(CLAZZ_SELECT +  CLAZZ_WHERE_CLAZZMEMBER +
+            " AND Clazz.isClazzActive = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.attendanceAverage DESC ")
     abstract fun findAllActiveClazzesSortByAttendanceDesc(
-            searchQuery: String
+            searchQuery: String, personUid: Long
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query(CLAZZ_WHERE +
-            " FROM Clazz WHERE Clazz.isClazzActive = 1 " +
+    @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
+            " AND Clazz.isClazzActive = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY teacherNames ASC ")
     abstract fun findAllActiveClazzesSortByTeacherAsc(
-            searchQuery: String
+            searchQuery: String, personUid: Long
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and isClazzActive = 1")
@@ -203,7 +200,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             "FROM Clazz WHERE Clazz.isClazzActive = 1 ORDER BY Clazz.clazzName ASC")
     abstract fun findAllClazzesWithEnrollmentByPersonUid(personUid: Long): DataSource.Factory<Int, ClazzWithEnrollment>
 
-    @Query(CLAZZ_WHERE +
+    @Query(CLAZZ_SELECT +
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
             " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
@@ -337,25 +334,36 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
         const val TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)"
 
-        private const val CLAZZ_WHERE = " SELECT Clazz.*, " +
+        private const val CLAZZ_SELECT = " SELECT Clazz.*, " +
                 "(SELECT ClazzLog.logDate FROM ClazzLog " +
                 "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.clazzLogDone = 1 " +
                 "ORDER BY ClazzLog.logDate DESC LIMIT 1) AS lastRecorded, " +
                 "(SELECT COUNT(*) " +
-                " FROM ClazzMember WHERE " +
-                " ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
-                " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
-                " AND ClazzMember.clazzMemberActive = 1) AS numStudents, " +
+                "   FROM ClazzMember WHERE " +
+                "   ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+                "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
+                "   AND ClazzMember.clazzMemberActive = 1) AS numStudents, " +
                 " (SELECT COUNT(*) FROM ClazzMember " +
-                " WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
-                " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
-                " AND ClazzMember.clazzMemberActive = 1 ) AS numTeachers, " +
+                "   WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+                "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
+                "   AND ClazzMember.clazzMemberActive = 1 ) AS numTeachers, " +
                 " (SELECT GROUP_CONCAT(Person.firstNames || ' ' ||  Person.lastName ) as teacherName " +
-                " FROM Person where Person.personUid in (SELECT ClazzMember.clazzMemberPersonUid " +
-                " FROM ClazzMember WHERE ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
-                " AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
-                " AND ClazzMember.clazzMemberActive = 1) " +
+                "   FROM Person where Person.personUid in (SELECT ClazzMember.clazzMemberPersonUid " +
+                "   FROM ClazzMember WHERE ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
+                "   AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
+                "   AND ClazzMember.clazzMemberActive = 1) " +
                 " ) AS teacherNames "
+
+        private const val CLAZZ_WHERE_CLAZZMEMBER =
+                " FROM Clazz " +
+                " LEFT JOIN Person ON Person.personUid = :personUid " +
+                " WHERE Person.admin OR :personUid in " +
+                " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
+                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
+                " ClazzMember.clazzMemberActive = 1 ) "
+
+
+
 
         private const val SELECT_CLAZZ_WHERE_PERMISSION = " SELECT " +
                 "   Clazz.*, " +
