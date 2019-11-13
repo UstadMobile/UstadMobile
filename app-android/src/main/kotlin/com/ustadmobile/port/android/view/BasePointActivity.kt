@@ -268,7 +268,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
     override fun shareAppSetupFile(filePath: String) {
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(filePath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"

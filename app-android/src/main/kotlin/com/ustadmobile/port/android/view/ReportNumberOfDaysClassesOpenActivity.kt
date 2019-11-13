@@ -198,7 +198,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
 
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(csvReportFilePath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"
@@ -213,7 +213,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
     override fun generateXLSXReport(xlsxReportPath: String) {
         val applicationId = packageName
         val sharedUri = FileProvider.getUriForFile(this,
-                "$applicationId.fileprovider",
+                "$applicationId.provider",
                 File(xlsxReportPath))
         val shareIntent = Intent(Intent.ACTION_SEND)
         shareIntent.type = "*/*"
