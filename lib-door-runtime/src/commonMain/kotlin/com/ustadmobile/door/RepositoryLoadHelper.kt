@@ -7,6 +7,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
+import com.github.aakira.napier.Napier
 
 //Empty / null retry:
 // On DataSourceFactory / boundary callback: alwasy - because it was called by onZeroItemsLoaded
@@ -68,9 +69,12 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     attemptCount = 0
                     GlobalScope.launch {
                         try {
+                            Napier.d("RepositoryLoadHelper: addActiveObserver: did not complete " +
+                                            "and data is being observed. Trying again.")
                             doRequest()
                         } catch(e: IOException) {
-
+                            Napier.e("RepositoryLoadHelper: addActiveObserver: ERROR " +
+                                    "did not complete and data is being observed: ", e)
                         }
                     }
                 }
@@ -120,24 +124,32 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     override fun onConnectivityStatusChanged(newStatus: Int) {
         if(!completed.value && newStatus == DoorDatabaseRepository.STATUS_CONNECTED
-                && liveDataWrapper?.active?.value ?: true)
+                && liveDataWrapper?.active?.value ?: false) {
             attemptCount = 0
             GlobalScope.launch {
                 try {
+                    Napier.d("RepositoryLoadHelper: onConnectivityStatusChanged: did not complete " +
+                                    "and data is being observed. Trying again.")
                     doRequest()
-                } catch(e: IOException) {
-
+                } catch (e: IOException) {
+                    Napier.e("RepositoryLoadHelper: onConnectivityStatusChanged: ERROR " +
+                                    "did not complete and data is being observed: ", e)
                 }
             }
+        }
     }
 
     override fun onNewMirrorAvailable(mirror: MirrorEndpoint) {
         if(!completed.value && liveDataWrapper?.active?.value ?: true) {
+            attemptCount = 0
             GlobalScope.launch {
                 try {
+                    Napier.d("RepositoryLoadHelper: onNewMirrorAvailable: Mirror # ${mirror.mirrorId} " +
+                                    "did not complete and data is being observed. Trying again.")
                     doRequest()
                 } catch(e: IOException) {
-
+                    Napier.e("RepositoryLoadHelper: onNewMirrorAvailable: ERROR " +
+                                    "did not complete and data is being observed: ", e)
                 }
             }
         }
@@ -154,7 +166,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     mirrorToUse = if(isConnected && !triedMainEndpoint) {
                         null as MirrorEndpoint? //use the main endpoint
                     }else {
-                        repository.activeMirrors().firstOrNull { it.mirrorId !in mirrorsTried }
+                        repository.activeMirrors().firstOrNull() /*firstOrNull { it.mirrorId !in mirrorsTried }*/
                     }
 
                     if(!isConnected && mirrorToUse == null) {
@@ -197,7 +209,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     delay(retryDelay.toLong())
                 }catch(e: Exception) {
                     //something went wrong with the load
-                    println("RepositoryLoadHelper: Exception attempting to load from $endpointToUse: $e")
+                    Napier.e("RepositoryLoadHelper: Exception attempting to load from $endpointToUse",
+                            e)
                 }
 
                 if(mirrorToUse == null) {

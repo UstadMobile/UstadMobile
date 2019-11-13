@@ -4,7 +4,9 @@ interface HomeView : UstadView {
 
     fun showDownloadAllButton(show:Boolean)
 
-    fun loadProfileIcon(profileUrl: String);
+    fun loadProfileIcon(profileUrl: String)
+
+    fun showShareAppDialog()
 
     companion object {
 

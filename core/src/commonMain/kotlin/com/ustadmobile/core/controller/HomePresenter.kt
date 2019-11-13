@@ -52,6 +52,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         else LoginView.VIEW_NAME , args, context)
     }
 
+    fun handleClickShareApp() {
+        view.showShareAppDialog()
+    }
+
 
     companion object {
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L

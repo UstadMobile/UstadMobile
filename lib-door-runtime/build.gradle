@@ -56,6 +56,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "com.github.aakira:napier:$version_napier"
                 compileOnly project(":lib-room-annotations")
             }
         }
@@ -91,6 +92,7 @@ kotlin {
                 implementation project(":lib-room-annotations")
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-server-core:$version_ktor"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
 
@@ -102,6 +104,7 @@ kotlin {
                 implementation project(":lib-room-annotations")
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
 
@@ -116,6 +119,7 @@ kotlin {
                 implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "com.github.aakira:napier-android:$version_napier"
             }
         }
         androidTest{
