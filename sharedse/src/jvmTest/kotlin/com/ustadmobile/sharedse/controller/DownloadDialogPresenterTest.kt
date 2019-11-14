@@ -75,6 +75,7 @@ class DownloadDialogPresenterTest {
 
         val httpd = EmbeddedHTTPD(0, context)
         httpd.start()
+        mockedNetworkManager = spy { }
         mockedNetworkManager.onCreate()
 
         contentEntrySet = insertTestContentEntries(umAppDatabase, System.currentTimeMillis())
