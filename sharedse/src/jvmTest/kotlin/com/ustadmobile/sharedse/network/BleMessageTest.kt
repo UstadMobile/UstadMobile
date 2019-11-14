@@ -35,8 +35,6 @@ class BleMessageTest {
         assertTrue("Payload depacketized is the same", Arrays.equals(payload,
                 receivedMessage.payload))
         assertEquals("Same message id", sentMessage.messageId.toLong(), receivedMessage.messageId.toLong())
-        Assert.assertEquals("Size is equal and correct", payload.size,
-                receivedMessage.length)
     }
 
     @Test
@@ -50,8 +48,6 @@ class BleMessageTest {
                 sentMessage.length)
         Assert.assertArrayEquals("message is the same after beign received", payload,
                 receivedMessage.payload)
-        Assert.assertEquals("Received message length is equal and correct", payload.size,
-                receivedMessage.length)
     }
 
     @Test
