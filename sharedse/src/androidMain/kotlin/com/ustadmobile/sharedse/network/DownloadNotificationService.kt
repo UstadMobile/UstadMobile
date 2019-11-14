@@ -26,9 +26,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import com.ustadmobile.core.impl.UMLog
+import kotlinx.coroutines.async
 
 /**
  * This services monitors the download job statuses and act accordingly
@@ -52,12 +52,12 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 }
 
                 GlobalScope.launch {
-                    for(jobNotifier in downloadJobPreparerChannel) {
+                    for (jobNotifier in downloadJobPreparerChannel) {
                         val downloadJobPreparer = DownloadJobPreparer()
                         activeDownloadJobPreparers.add(downloadJobPreparer)
                         val jobItemManager = channelNetworkManager.openDownloadJobItemManager(
                                 jobNotifier.downloadJobUid)
-                        if(jobItemManager != null) {
+                        if (jobItemManager != null) {
                             jobItemManager.awaitLoaded()
                             downloadJobPreparer.prepare(jobItemManager, umAppDatabase, umAppDatabaseRepo)
                         }
@@ -99,10 +99,12 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val activeDownloadJobNotifications: MutableList<DownloadJobNotificationHolder> = copyOnWriteListOf()
 
+    private val activeDeleteJobNotifications: MutableList<DeleteNotificationHolder> = copyOnWriteListOf()
+
     private val activeDownloadJobPreparers: MutableList<DownloadJobPreparer> = copyOnWriteListOf()
 
     open inner class NotificationHolder2(var contentTitle: String, var contentText: String,
-                                         val notificationId : Int = notificationIdRef.incrementAndGet()) {
+                                         val notificationId: Int = notificationIdRef.incrementAndGet()) {
 
         val builder: NotificationCompat.Builder
 
@@ -129,7 +131,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                     .setContentIntent(mNotificationPendingIntent)
                     .setDefaults(Notification.DEFAULT_SOUND)
 
-            if(canCreateGroupedNotification()) {
+            if (canCreateGroupedNotification()) {
                 builder.setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                         .setGroup(NOTIFICATION_GROUP_KEY)
             }
@@ -167,7 +169,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
          * @return constructed action button
          */
         internal fun createAction(downloadJobId: Int, actionTag: String,
-                                 actionLabel: String): NotificationCompat.Action {
+                                  actionLabel: String): NotificationCompat.Action {
             val actionIntent = Intent(this@DownloadNotificationService,
                     DownloadNotificationService::class.java)
             actionIntent.putExtra(EXTRA_DOWNLOADJOBUID, downloadJobId)
@@ -178,7 +180,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         }
     }
 
-    inner class DownloadJobNotificationHolder(val downloadJobUid: Int, notifyAfterInit: Boolean = true): NotificationHolder2(
+    inner class DownloadJobNotificationHolder(val downloadJobUid: Int, notifyAfterInit: Boolean = true) : NotificationHolder2(
             impl.getString(MessageID.loading, applicationContext),
             impl.getString(MessageID.waiting, applicationContext)) {
 
@@ -187,41 +189,35 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
         init {
             builder.setProgress(MAX_PROGRESS_VALUE, 0, false)
-                .addAction(createAction(downloadJobUid,
-                        ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
-                        applicationContext)))
-                .addAction(createAction(downloadJobUid,
-                        ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
-                        applicationContext)))
-                .setContentTitle(contentTitle)
-                .setContentText(contentText)
+                    .addAction(createAction(downloadJobUid,
+                            ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
+                            applicationContext)))
+                    .addAction(createAction(downloadJobUid,
+                            ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
+                            applicationContext)))
+                    .setContentTitle(contentTitle)
+                    .setContentText(contentText)
 
             GlobalScope.launch {
-                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid) ?: ""
+                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
+                        ?: ""
                 builder.setContentTitle(downloadJobTitleInDb)
                 contentTitle = downloadJobTitleInDb
-                if(notifyAfterInit)
+                if (notifyAfterInit)
                     doNotify()
 
             }
         }
 
         internal fun updateFromStatus(status: DownloadJobItemStatus?, doNotifyAfter: Boolean = true) {
-            if(status == null)
+            if (status == null)
                 return
 
-            if(status.status >= JobStatus.COMPLETE_MIN) {
+            if (status.status >= JobStatus.COMPLETE_MIN) {
                 activeDownloadJobNotifications.remove(this)
                 mNotificationManager.cancel(notificationId)
-                GlobalScope.launch {
-                    delay(2000)
-                    if(isEmpty()) {
-                        Handler(Looper.getMainLooper()).post {
-                            stopForegroundService()
-                        }
-                    }
-                }
-            }else {
+                checkIfCompleteAfterDelay()
+            } else {
                 bytesSoFar = status.bytesSoFar
                 totalBytes = status.totalBytes
 
@@ -233,7 +229,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                         UMFileUtil.formatFileSize(totalBytes))
                 builder.setContentText(contentText)
 
-                if(doNotifyAfter) {
+                if (doNotifyAfter) {
                     UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: Updating DownloadJob ($downloadJobUid) notification")
                     doNotify()
                 }
@@ -241,8 +237,23 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         }
     }
 
+    inner class DeleteNotificationHolder(val contentEntryUid: Long) : NotificationHolder2(impl.getString(MessageID.deleting, applicationContext), impl.getString(MessageID.deleting, applicationContext)) {
+        init {
+            builder.setContentTitle(contentTitle)
+                    .setContentText(contentText)
 
-    inner class DownloadJobPreparerNotificationHolder(val downloadJobUid: Int): NotificationHolder2("Preparing", "Downloading Preparing") {
+            GlobalScope.launch {
+                val contentEntryTitle = umAppDatabase.contentEntryDao.findByUidAsync(contentEntryUid)!!.title
+                        ?: ""
+                builder.setContentTitle(contentEntryTitle)
+                contentTitle = contentEntryTitle
+                doNotify()
+
+            }
+        }
+    }
+
+    inner class DownloadJobPreparerNotificationHolder(val downloadJobUid: Int) : NotificationHolder2("Preparing", "Downloading Preparing") {
         init {
             builder.setContentTitle(contentTitle)
                     .setContentText(contentText)
@@ -250,22 +261,22 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     }
 
 
-    inner class SummaryNotificationHolder(): NotificationHolder2(
+    inner class SummaryNotificationHolder() : NotificationHolder2(
             impl.getString(MessageID.downloading, applicationContext),
             impl.getString(MessageID.downloading, applicationContext)) {
         init {
             val inboxStyle = NotificationCompat.InboxStyle()
-                .setBigContentTitle(contentTitle)
-                .setSummaryText(contentText)
+                    .setBigContentTitle(contentTitle)
+                    .setSummaryText(contentText)
             builder.setGroupSummary(true)
                     .setStyle(inboxStyle)
         }
 
         fun updateSummary() {
-            val totalBytes = activeDownloadJobNotifications.fold(0L, {count, jobNotification ->
+            val totalBytes = activeDownloadJobNotifications.fold(0L, { count, jobNotification ->
                 count + jobNotification.totalBytes
             })
-            val bytesSoFar = activeDownloadJobNotifications.fold(0L, {count, jobNotification ->
+            val bytesSoFar = activeDownloadJobNotifications.fold(0L, { count, jobNotification ->
                 count + jobNotification.bytesSoFar
             })
 
@@ -294,6 +305,17 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     }
 
+    fun checkIfCompleteAfterDelay(){
+        GlobalScope.launch {
+            delay(2000)
+            if (isEmpty()) {
+                Handler(Looper.getMainLooper()).post {
+                    stopForegroundService()
+                }
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         mNotificationManager = NotificationManagerCompat.from(this)
@@ -319,28 +341,28 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         val intentAction = intent?.action
         val intentExtras = intent?.extras
 
-        if(intentAction == null)
+        if (intentAction == null)
             return START_STICKY
 
         var foregroundNotificationHolder = null as NotificationHolder2?
 
-        if(intentAction in listOf(ACTION_DOWNLOADJOBITEM_STARTED, ACTION_PREPARE_DOWNLOAD) && !foregroundActive) {
-            if(canCreateGroupedNotification()) {
+        if (intentAction in listOf(ACTION_DOWNLOADJOBITEM_STARTED, ACTION_PREPARE_DOWNLOAD) && !foregroundActive) {
+            if (canCreateGroupedNotification()) {
                 summaryNotificationHolder = SummaryNotificationHolder()
                 foregroundNotificationHolder = summaryNotificationHolder
             }
         }
 
-        when(intentAction) {
+        when (intentAction) {
             ACTION_PREPARE_DOWNLOAD -> {
                 val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: 0
                 val downloadJobPreparationHolder = DownloadJobPreparerNotificationHolder(downloadJobUid)
                 downloadJobPreparerChannel.offer(downloadJobPreparationHolder)
 
-                if(!foregroundActive && foregroundNotificationHolder == null) {
+                if (!foregroundActive && foregroundNotificationHolder == null) {
                     UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: offered preparer notification as foreground holder")
                     foregroundNotificationHolder = downloadJobPreparationHolder
-                }else {
+                } else {
                     UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: preparer to doNotify")
                     downloadJobPreparationHolder.doNotify()
                 }
@@ -350,21 +372,44 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
                 var downloadJobNotificationHolder = activeDownloadJobNotifications
                         .firstOrNull { it.downloadJobUid == downloadJobUid }
-                if(downloadJobNotificationHolder == null) {
+                if (downloadJobNotificationHolder == null) {
                     downloadJobNotificationHolder = DownloadJobNotificationHolder(downloadJobUid)
                     activeDownloadJobNotifications.add(downloadJobNotificationHolder)
                 }
 
-                if(!foregroundActive && foregroundNotificationHolder == null) {
+                if (!foregroundActive && foregroundNotificationHolder == null) {
                     foregroundNotificationHolder = downloadJobNotificationHolder
-                }else {
+                } else {
                     UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: Starting notification for new download: $downloadJobUid")
                     downloadJobNotificationHolder.doNotify()
                 }
             }
+            ACTION_DELETE_DOWNLOAD -> {
+
+                val contentEntryUid = intentExtras?.getLong(EXTRA_CONTENT_ENTRY_UID) ?: -1
+                var deleteNotificationHolder = DeleteNotificationHolder(contentEntryUid)
+                activeDeleteJobNotifications.add(deleteNotificationHolder)
+
+                if (!foregroundActive && foregroundNotificationHolder == null) {
+                    foregroundNotificationHolder = deleteNotificationHolder
+                } else {
+                    deleteNotificationHolder.doNotify()
+                }
+
+                GlobalScope.async {
+                    deleteDownloadJob(umAppDatabase, contentEntryUid) {
+                        deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
+                        deleteNotificationHolder.doNotify()
+                    }
+                    activeDeleteJobNotifications.remove(deleteNotificationHolder)
+                    mNotificationManager.cancel(deleteNotificationHolder.notificationId)
+                    checkIfCompleteAfterDelay()
+                }
+
+            }
         }
 
-        if(!foregroundActive && foregroundNotificationHolder != null) {
+        if (!foregroundActive && foregroundNotificationHolder != null) {
             UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: startForeground using $foregroundNotificationHolder")
             startForeground(foregroundNotificationHolder.notificationId,
                     foregroundNotificationHolder.build())
@@ -374,7 +419,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         return START_STICKY
     }
 
-    private fun isEmpty() : Boolean = activeDownloadJobNotifications.isEmpty() && downloadJobPreparerChannel.isEmpty
+    private fun isEmpty(): Boolean = activeDownloadJobNotifications.isEmpty() && downloadJobPreparerChannel.isEmpty && activeDeleteJobNotifications.isEmpty()
 
     @Synchronized
     override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
@@ -422,7 +467,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         if (mNetworkServiceBound)
             unbindService(mNetworkServiceConnection)
 
-        if(!downloadJobPreparerChannel.isClosedForSend) {
+        if (!downloadJobPreparerChannel.isClosedForSend) {
             downloadJobPreparerChannel.close()
         }
     }
@@ -437,6 +482,8 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
         const val ACTION_CANCEL_DOWNLOAD = "ACTION_CANCEL_DOWNLOAD"
 
+        const val ACTION_DELETE_DOWNLOAD = "ACTION_DELETE_DOWNLOAD"
+
         const val ACTION_PREPARE_DOWNLOAD = "ACTION_PREPARE_DOWNLOAD"
 
         const val ACTION_DOWNLOADJOBITEM_STARTED = "ACTION_DOWNLOADJOBITEM_STARTED"
@@ -444,6 +491,8 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         const val EXTRA_DOWNLOADJOBUID = "EXTRA_DOWNLOADJOBUID"
 
         const val EXTRA_DOWNLOADJOBITEMUID = "EXTRA_DOWNLOADJOBITEMUID"
+
+        const val EXTRA_CONTENT_ENTRY_UID = "EXTRA_CONTENT_ENTRY_UID"
 
         const val NOTIFICATION_CHANNEL_ID = "UM_NOTIFICATION_CHANNEL_ID"
 

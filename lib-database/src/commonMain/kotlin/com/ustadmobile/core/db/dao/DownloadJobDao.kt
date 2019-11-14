@@ -87,7 +87,9 @@ abstract class DownloadJobDao {
     @Query("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int
 
-    @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
+    @Query("""SELECT djiDjUid FROM DownloadJobItem 
+        WHERE djiContentEntryUid = :contentEntryUid AND djiStatus < ${JobStatus.CANCELED} 
+        ORDER BY timeStarted DESC LIMIT 1""")
     abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int
 
 
@@ -161,5 +163,11 @@ abstract class DownloadJobDao {
             "(SELECT downloadLength FROM DownloadJobItem WHERE djiDjUid = :downloadJobId AND " +
             " djiContentEntryUid = (SELECT djRootContentEntryUid FROM DownloadJob WHERE djUid = :downloadJobId)) AS totalSize" )
     abstract suspend fun getDownloadSizeInfo(downloadJobId: Int): DownloadJobSizeInfo?
+
+    @Query("DELETE FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
+    abstract fun deleteByContentEntryUid(rootContentEntryUid: Long)
+
+    @Query("UPDATE DownloadJob SET djStatus = :status WHERE djUid = :djiDjUid")
+    abstract fun changeStatus(status: Int, djiDjUid: Int)
 
 }

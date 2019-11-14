@@ -206,6 +206,7 @@ abstract class DownloadJobItemDao {
      */
     fun forAllChildDownloadJobItemsRecursive(parentDownloadJobUid: Int, block: (batch: List<DownloadJobItem>) -> Unit) {
         var lastParentUids = listOf(parentDownloadJobUid)
+        block.invoke(listOf(findByUid(parentDownloadJobUid)?: throw IllegalArgumentException("Please provide the parent content Entry")))
         do {
             val childItems = findByParentDownloadJobUids(lastParentUids)
             block.invoke(childItems)
