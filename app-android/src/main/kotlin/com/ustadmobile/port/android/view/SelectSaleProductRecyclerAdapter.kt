@@ -22,6 +22,7 @@ import com.ustadmobile.core.controller.SelectSaleProductPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.*
 
@@ -36,6 +37,8 @@ class SelectSaleProductRecyclerAdapter
 
     private var listCategory: Boolean = false
     private var isCatalog: Boolean = false
+
+    private var impl = UstadMobileSystemImpl.instance
 
     private var productPictureDaoRepo : SaleProductPictureDao ? = null
 
@@ -52,7 +55,6 @@ class SelectSaleProductRecyclerAdapter
 
         val imageUri = Uri.fromFile(File(imagePath))
 
-        //Picasso.get().invalidate(imageUri)
         Picasso
                 .get()
                 .load(imageUri)
@@ -98,9 +100,22 @@ class SelectSaleProductRecyclerAdapter
                     imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
             }
         }
+        val currentLocale = impl.getLocale(theContext)
 
+        var saleProductNameLocale: String?=null
 
-        name.text = entity!!.saleProductName
+        if(currentLocale.equals("fa")){
+            saleProductNameLocale = entity!!.saleProductNameDari
+        }else if(currentLocale.equals("ps")){
+            saleProductNameLocale = entity!!.saleProductNamePashto
+        }else{
+            saleProductNameLocale = entity!!.saleProductName
+        }
+        if(saleProductNameLocale == null && entity!!.saleProductName != null) {
+            saleProductNameLocale = entity!!.saleProductName
+
+        }
+        name.text = saleProductNameLocale
 
         if (isCatalog) {
             dots.visibility = View.VISIBLE
@@ -112,7 +127,8 @@ class SelectSaleProductRecyclerAdapter
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickProductMulti(entity.saleProductUid, listCategory, true)
+                            mPresenter.handleClickProductMulti(entity.saleProductUid, listCategory,
+                                    true)
                             true
                         } else if (i == R.id.delete) {
                             mPresenter.handleDelteSaleProduct(entity.saleProductUid, listCategory)

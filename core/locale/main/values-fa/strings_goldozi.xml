@@ -97,7 +97,7 @@
     <string name="item_added_to_catalog">بخش در کتلاگ علاوه گردید</string>
     <string name="category_added_to_catalog">کتلاگ در کتلاگ علاوه گردید</string>
     <string name="undo">فسخ عملکرد</string>
-    <string name="item">بخش</string>
+    <string name="item">جنس</string>
     <string name="subcategory">کتگوری فرعی</string>
     <string name="sign_in">وارد شدن</string>
     <string name="confirm_fingerprint">برای ادامه، نشان انگشت را تایید کنید</string>

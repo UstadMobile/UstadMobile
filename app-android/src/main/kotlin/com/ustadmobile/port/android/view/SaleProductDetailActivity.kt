@@ -290,8 +290,26 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                 updateCategoryTitle(getText(R.string.categories).toString())
             }
 
-            if (!saleProduct.saleProductName!!.isEmpty())
-                updateToolbarTitle(saleProduct.saleProductName!!)
+            val impl = UstadMobileSystemImpl.instance
+            var saleProductNameLocale: String ? = null
+
+            val currentLocale = impl.getLocale(this)
+
+            if(currentLocale.equals("fa")){
+                saleProductNameLocale = saleProduct.saleProductNameDari
+            }else if(currentLocale.equals("ps")){
+                saleProductNameLocale = saleProduct.saleProductNamePashto
+            }else{
+                saleProductNameLocale = saleProduct.saleProductName
+            }
+            if(saleProductNameLocale == null && saleProduct.saleProductName != null) {
+                saleProductNameLocale = saleProduct.saleProductName
+
+            }
+
+            updateToolbarTitle(saleProductNameLocale!!)
+
+
 
         }
     }

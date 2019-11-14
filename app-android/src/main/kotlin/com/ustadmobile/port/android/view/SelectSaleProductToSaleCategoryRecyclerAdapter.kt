@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.AddSaleProductToSaleCategoryPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -37,6 +38,7 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
     : PagedListAdapter<SaleProduct, SelectSaleProductToSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
 
     private var productPictureDaoRepo : SaleProductPictureDao? = null
+    private var impl = UstadMobileSystemImpl.instance
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
@@ -101,9 +103,31 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         }
 
 
+        var saleProductNameLocale = entity!!.saleProductName
+        var saleProductDescLocale = entity!!.saleProductName
+        val currentLocale = impl.getLocale(theContext)
 
-        name.text = entity!!.saleProductName
-        desc.text = entity!!.saleProductDesc
+        if(currentLocale.equals("fa")){
+            saleProductNameLocale = entity.saleProductNameDari
+        }else if(currentLocale.equals("ps")){
+            saleProductNameLocale = entity.saleProductNamePashto
+            saleProductDescLocale = entity.saleProductDescPashto
+        }else{
+            saleProductNameLocale = entity.saleProductName
+            saleProductDescLocale = entity.saleProductDesc
+        }
+        if(saleProductNameLocale.equals("")){
+            saleProductNameLocale = entity.saleProductName
+        }
+        if(saleProductDescLocale.equals("")){
+            saleProductDescLocale = entity.saleProductDesc
+        }
+        if(saleProductNameLocale == null ){
+            saleProductNameLocale = ""
+            saleProductDescLocale = ""
+        }
+        name.text = saleProductNameLocale
+        desc.text = saleProductDescLocale
 
         holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity!!.saleProductUid) }
 

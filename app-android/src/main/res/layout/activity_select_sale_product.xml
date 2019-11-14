@@ -135,7 +135,7 @@
                 android:layout_marginEnd="8dp"
                 android:background="?android:attr/selectableItemBackground"
                 android:text="@string/more_caps"
-                android:textColor="@color/primary"
+                android:textColor="@color/primaryTextColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -144,10 +144,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="?android:attr/selectableItemBackground"
                 android:layout_marginEnd="8dp"
+                android:background="?android:attr/selectableItemBackground"
                 android:text="@string/more_caps"
-                android:textColor="@color/primary"
+                android:textColor="@color/primaryTextColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_recent_rv" />
 
@@ -157,9 +157,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:text="@string/more_caps"
                 android:background="?android:attr/selectableItemBackground"
-                android:textColor="@color/primary"
+                android:text="@string/more_caps"
+                android:textColor="@color/primaryTextColor"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_category_rv" />

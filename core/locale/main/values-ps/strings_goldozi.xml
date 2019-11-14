@@ -97,7 +97,7 @@
     <string name="item_added_to_catalog">توکی په کټلاګ کې اضافه شو</string>
     <string name="category_added_to_catalog">کټلاګ په کټلاګ کې اضافه شو</string>
     <string name="undo">ناکړ</string>
-    <string name="item">توک</string>
+    <string name="item">توکي</string>
     <string name="subcategory">فرعی کټګوری</string>
     <string name="sign_in">ننوتل</string>
     <string name="confirm_fingerprint">د ادامه ورکولو لپاره د ګوتې نښه تائیدول</string>
