@@ -130,6 +130,13 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
             }
         }
+
+        jvmTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+            }
+        }
     }
 }
 

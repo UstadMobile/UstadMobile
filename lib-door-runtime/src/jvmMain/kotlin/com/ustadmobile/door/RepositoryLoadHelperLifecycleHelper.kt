@@ -1,7 +1,7 @@
 package com.ustadmobile.door
 
 
-actual class RepositoryLoadHelperLifecycleHelper actual constructor(loadHelper: RepositoryLoadHelper<*>, lifecycleOwner: DoorLifecycleOwner) {
+actual class RepositoryLoadHelperLifecycleHelper actual constructor(lifecycleOwner: DoorLifecycleOwner) {
     actual var onActive: (() -> Unit)? = null
 
     actual var onInactive: (() -> Unit)? = null

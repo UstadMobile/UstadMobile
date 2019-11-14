@@ -9,23 +9,27 @@ package com.ustadmobile.door
  * The RepositoryLoadHelper must call addObserver to start observing the lifecycleOwner and
  * removeObserver to stop observing the given lifecycleOwner.
  */
-expect class RepositoryLoadHelperLifecycleHelper(lifecycleOwner: DoorLifecycleOwner) {
-
+actual class RepositoryLoadHelperLifecycleHelper actual constructor(lifecycleOwner: DoorLifecycleOwner) {
     /**
      * Function to run when the given lifecycleOwner becomes active
      */
-    var onActive: (() -> Unit)?
-
+    actual var onActive: (() -> Unit)?
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        set(value) {}
     /**
      * Function to run when the given lifecycleOwner becomes inActive
      */
-    var onInactive: (() -> Unit)?
+    actual var onInactive: (() -> Unit)?
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        set(value) {}
 
     /**
      * Function to call to start actively observing the lifecycleOwner
      */
-    fun addObserver()
+    actual fun addObserver() {
+    }
 
-    fun removeObserver()
+    actual fun removeObserver() {
+    }
 
 }

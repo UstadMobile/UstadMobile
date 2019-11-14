@@ -4,8 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 
-actual class RepositoryLoadHelperLifecycleHelper actual constructor(loadHelper: RepositoryLoadHelper<*>,
-                                                                    lifecycleOwner: DoorLifecycleOwner) : LifecycleObserver {
+actual class RepositoryLoadHelperLifecycleHelper actual constructor(lifecycleOwner: DoorLifecycleOwner) : LifecycleObserver {
 
     val actLifecycleOwner = lifecycleOwner
 

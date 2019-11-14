@@ -24,11 +24,15 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val maxAttempts: Int = 3,
                               val retryDelay: Int = 5000,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
+                              val lifecycleHelperFactory: (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper =
+                                      {RepositoryLoadHelperLifecycleHelper(it)},
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
     var liveDataWrapper: LiveDataWrapper<*>? = null
 
     val requestLock = Mutex()
+
+    val loadedVal = CompletableDeferred<T>()
 
     init {
         repository.addWeakConnectivityListener(this)
@@ -39,7 +43,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
      * the return type so that we can watch if the data is being observed.
      */
     inner class LiveDataWrapper<L>(private val src: DoorLiveData<L>,
-                                   internal var onActiveCb: (()-> Unit)? = null) : DoorLiveData<L>() {
+                                   internal var onActiveCb: (suspend ()-> Unit)? = null) : DoorLiveData<L>() {
 
         val observerHelpersMap
                 = mutableMapOf<DoorObserver<in L>, RepositoryLoadHelperLifecycleHelper>()
@@ -49,8 +53,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         val active = atomic(false)
 
         override fun observe(lifecycleOwner: DoorLifecycleOwner, observer: DoorObserver<in L>) {
-            val lifecycleHelper = RepositoryLoadHelperLifecycleHelper(
-                    this@RepositoryLoadHelper, lifecycleOwner)
+            val lifecycleHelper = lifecycleHelperFactory(lifecycleOwner)
             observerHelpersMap[observer] = lifecycleHelper
             lifecycleHelper.onActive = { addActiveObserver(observer) }
             lifecycleHelper.onInactive = { removeActiveObserver(observer) }
@@ -59,7 +62,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             src.observe(lifecycleOwner, observer)
         }
 
-        private fun addActiveObserver(observer: DoorObserver<in L>) {
+        internal fun addActiveObserver(observer: DoorObserver<in L>) {
             activeObservers.add(observer)
             val numObservers = activeObservers.size
             if(numObservers == 1) {
@@ -71,7 +74,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         try {
                             Napier.d("RepositoryLoadHelper: addActiveObserver: did not complete " +
                                             "and data is being observed. Trying again.")
-                            doRequest()
+                            onActiveCb?.invoke()
                         } catch(e: IOException) {
                             Napier.e("RepositoryLoadHelper: addActiveObserver: ERROR " +
                                     "did not complete and data is being observed: ", e)
@@ -81,7 +84,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }
         }
 
-        private fun removeActiveObserver(observer: DoorObserver<in L>) {
+        internal fun removeActiveObserver(observer: DoorObserver<in L>) {
             activeObservers.remove(observer)
             active.value = activeObservers.isNotEmpty()
         }
@@ -107,7 +110,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     fun <L> wrapLiveData(src: DoorLiveData<L>): DoorLiveData<L> {
         liveDataWrapper?.onActiveCb = null
-        val newWrapper = LiveDataWrapper<L>(src)
+        val newWrapper = LiveDataWrapper<L>(src) { doRequest(resetAttemptCount = true) }
         liveDataWrapper = newWrapper
         return newWrapper
     }
@@ -125,12 +128,11 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     override fun onConnectivityStatusChanged(newStatus: Int) {
         if(!completed.value && newStatus == DoorDatabaseRepository.STATUS_CONNECTED
                 && liveDataWrapper?.active?.value ?: false) {
-            attemptCount = 0
             GlobalScope.launch {
                 try {
                     Napier.d("RepositoryLoadHelper: onConnectivityStatusChanged: did not complete " +
                                     "and data is being observed. Trying again.")
-                    doRequest()
+                    doRequest(resetAttemptCount = true)
                 } catch (e: IOException) {
                     Napier.e("RepositoryLoadHelper: onConnectivityStatusChanged: ERROR " +
                                     "did not complete and data is being observed: ", e)
@@ -155,8 +157,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         }
     }
 
-    suspend fun doRequest() : T{
+    suspend fun doRequest(resetAttemptCount: Boolean = false) : T{
         requestLock.withLock {
+            if(resetAttemptCount) {
+                attemptCount = 0
+                triedMainEndpoint = false
+            }
+
             while(!completed.value && coroutineContext.isActive && attemptCount <= maxAttempts) {
                 var mirrorToUse: MirrorEndpoint? = null
                 var endpointToUse: String? = null
@@ -203,6 +210,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     }
 
                     if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult) {
+                        loadedVal.complete(t)
                         return t
                     }
 
@@ -220,7 +228,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 }
             }
 
-            throw IOException("loadHelper retry count exceeded")
+            return loadedVal.getCompleted()
         }
     }
 
