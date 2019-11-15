@@ -27,22 +27,6 @@ class ContentTypePluginsTest {
 
 
     @Test
-    fun givenValidH5PFormatFile_whenImported_shouldCreateNewEntry() {
-        val inputStream = UstadMobileSystemImpl.instance.getAssetSync(context,
-                "/com/ustadmobile/port/sharedse/contentformats/multiple-choice-713.h5p")
-        val tempH5PFile = File.createTempFile("importFile", "h5p")
-        tempH5PFile.copyInputStreamToFile(inputStream)
-
-        val contentEntry =  ContentTypeUtil.getContent(tempH5PFile)
-
-        tempH5PFile.deleteOnExit()
-
-        Assert.assertTrue("ContentEntry created successfully", contentEntry.isNotEmpty())
-
-    }
-
-
-    @Test
     fun givenValidTinCanFormatFile_whenImported_shouldCreateNewEntry() {
         val inputStream = UstadMobileSystemImpl.instance.getAssetSync(context,
                 "/com/ustadmobile/port/sharedse/contentformats/ustad-tincan.zip")
