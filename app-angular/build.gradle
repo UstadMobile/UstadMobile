@@ -194,7 +194,7 @@ task executeEnd2EndTests{
   doLast{
     exec {
       workingDir appAngularPath
-      commandLine 'ng', 'e2e', '--port', portNumber ,'--webdriverUpdate=false'
+      commandLine 'ng', 'e2e', '--port', portNumber ,'--no-webdriver-update'
     }
   }
 }

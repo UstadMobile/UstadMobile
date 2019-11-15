@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
 import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
@@ -94,20 +95,20 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_select_file, context))
             view.showStorageOptions(contentType != CONTENT_CREATE_FOLDER)
             if(contentEntry.contentEntryUid != 0L){
-                author = contentEntry.author!!
+                author = contentEntry.author?: ""
                 isNewContent = false
                 updateUi(contentEntry)
             }
         })
     }
     private fun updateUi(contentEntry: ContentEntry){
-        author = contentEntry.author!!
+        author = contentEntry.author?: ""
         view.runOnUiThread(Runnable {
             view.setDescription(contentEntry.description ?: "")
             view.setEntryTitle(contentEntry.title ?: "")
             view.setThumbnail(contentEntry.thumbnailUrl)
             view.showErrorMessage("",false)
-            view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_update_file, context))
+            view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_update_content, context))
         })
     }
 
@@ -241,6 +242,26 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
     fun getSelectedStorageOption(): String{
         return selectedStorageOption
+    }
+
+    fun handleUpdateLink() {
+        val args = HashMap<String, String?>()
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_UID]  =  contentEntry.contentEntryUid.toString()
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = contentEntryParentChildJoinDao.
+                findParentByChildUuids(contentEntry.contentEntryUid)!!.cepcjParentContentEntryUid.toString()
+        impl.go(ContentEntryImportLinkView.VIEW_NAME, args, context)
+
+    }
+
+    fun handleContentButton() {
+        if(isNewContent){
+            view.startBrowseFiles()
+        }else{
+            view.showUpdateContentDialog(
+                    impl.getString(MessageID.content_entry_label_update_content, context),
+                            listOf(impl.getString(MessageID.content_from_file, context),
+                                    impl.getString(MessageID.content_from_link, context)))
+        }
     }
 
 }

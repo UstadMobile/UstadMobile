@@ -247,7 +247,7 @@ actual class ContainerManager actual constructor(container: Container,
     }
 
     companion object {
-        val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4","mkv")
+        val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4", ".avi", ".mov", ".wmv",".flv", ".mkv", ".m4v")
         private const  val BUFFER_SIZE = 2048
     }
 

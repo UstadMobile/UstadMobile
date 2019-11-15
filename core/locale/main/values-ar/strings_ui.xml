@@ -292,7 +292,10 @@
     <string name="content_entry_export">Export</string>
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
-
+    <string name="content_entry_label_update_content">Update Content</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
+    <string name="content_editor_create_new_import_link">Import from link</string>
     <string name='location_permission_message'>التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق ال Bluetooth للبحث عن الاجهزة القريبة</string>
     <string name='download_storage_permission_title'>مطلوب أذن للحصول على الملف</string>
     <string name='download_storage_permission_message'>التطبيق يلزم اذن لتحميل و حفظ المحتوى</string>

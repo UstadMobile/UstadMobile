@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
 
+import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.Html
@@ -154,10 +156,8 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        selectFileBtn.setOnClickListener {
-            if (actionListener != null) {
-                actionListener!!.browseFiles(null, "application/*")
-            }
+        selectFileBtn.setOnClickListener { v ->
+            presenter!!.handleContentButton()
         }
 
 
@@ -179,6 +179,27 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         addThumbnail.setOnClickListener { presenter!!.handleAddThumbnail() }
 
         return rootView
+    }
+
+    override fun startBrowseFiles() {
+        if (actionListener != null) {
+            actionListener!!.browseFiles(null, "application/*")
+        }
+    }
+
+    override fun showUpdateContentDialog(title: String, options: List<String>){
+
+        val builder = AlertDialog.Builder(viewContext as Context)
+        builder.setTitle(title)
+        builder.setItems(options.toTypedArray()) { dialog, which ->
+            if(which == 0){
+                startBrowseFiles()
+            }else if(which == 1){
+                presenter!!.handleUpdateLink()
+            }
+        }
+        builder.show()
+
     }
 
 

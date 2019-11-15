@@ -73,6 +73,7 @@
         "UstadMobile-lib-test-common": "file:../build/js/node_modules/UstadMobile-lib-test-common/UstadMobile-lib-test-common-0.2.12.tgz",
         "ktor-ktor-client-json": "file:../build/js/node_modules/ktor-ktor-client-json/ktor-ktor-client-json-1.2.3.tgz",
         "UstadMobile-lib-database-mpp": "file:../build/js/node_modules/UstadMobile-lib-database-mpp/UstadMobile-lib-database-mpp-0.2.12.tgz",
+        "protractor": "^5.4.2",
         "rxjs-compat": "^6.5.2",
         "UstadMobile-lib-database-test": "file:../build/js/node_modules/UstadMobile-lib-database-test/UstadMobile-lib-database-test-0.2.12.tgz"
     },
@@ -92,7 +93,6 @@
         "karma-coverage-istanbul-reporter": "~2.0.1",
         "karma-jasmine": "~1.1.2",
         "karma-jasmine-html-reporter": "^0.2.2",
-        "protractor": "~5.4.0",
         "ts-mockito": "^2.3.1",
         "ts-node": "~7.0.0",
         "tslint": "~5.11.0",

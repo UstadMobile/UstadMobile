@@ -277,8 +277,6 @@ abstract class NetworkManagerBleCommon(
                                      peerToSendMessageTo: NetworkNode,
                                      responseListener: BleMessageResponseListener): BleEntryStatusTask?
 
-    abstract fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner
-
     /**
      * Send message to a specific device
      * @param context Platform specific context
@@ -291,19 +289,6 @@ abstract class NetworkManagerBleCommon(
         makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.sendRequest()
     }
 
-
-    /**
-     * Cancel all download set and set items
-     * @param downloadJobUid The download job uid that should be canceled and deleted
-     */
-    suspend fun cancelAndDeleteDownloadJob(downloadJobUid: Int) {
-        umAppDatabase.downloadJobDao.updateJobAndItems(downloadJobUid,
-                JobStatus.CANCELED, -1, JobStatus.CANCELED)
-        val taskArgs = HashMap<String, String>()
-        taskArgs[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] = downloadJobUid.toString()
-
-        makeDeleteJobTask(context, taskArgs).run()
-    }
 
     //testing purpose only
     fun clearHistories() {

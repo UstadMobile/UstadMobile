@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -34,5 +35,14 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     @Query("UPDATE ContainerEntryFile SET compression = :compression, ceCompressedSize = :ceCompressedSize WHERE cefUid = :cefUid")
     abstract fun updateCompressedFile(compression: Int, ceCompressedSize: Long, cefUid: Long)
+
+    @Query("SELECT Count(*) from ContainerEntryFile WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid FROM ContainerEntry WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid)")
+    abstract fun countZombieEntries(): Int
+
+    @Query("SELECT ContainerEntryFile.* from ContainerEntryFile WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid FROM ContainerEntry WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) LIMIT 100")
+    abstract fun findZombieEntries(): List<ContainerEntryFile>
+
+    @Delete
+    abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)
 
 }
