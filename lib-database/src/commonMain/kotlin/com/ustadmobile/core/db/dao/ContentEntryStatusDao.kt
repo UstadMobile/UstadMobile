@@ -29,6 +29,10 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     @JsName("updateDownloadStatus")
     abstract fun updateDownloadStatus(contentEntryUid: Long, downloadStatus: Int)
 
+    @Query("UPDATE ContentEntryStatus SET downloadStatus = :downloadStatus WHERE cesUid = :contentEntryUid")
+    @JsName("updateDownloadStatusAsync")
+    abstract suspend fun updateDownloadStatusAsync(contentEntryUid: Long, downloadStatus: Int)
+
     @Query("SELECT * FROM ContentEntryStatus WHERE invalidated")
     @JsName("findAllInvalidated")
     abstract fun findAllInvalidated(): List<ContentEntryStatus>

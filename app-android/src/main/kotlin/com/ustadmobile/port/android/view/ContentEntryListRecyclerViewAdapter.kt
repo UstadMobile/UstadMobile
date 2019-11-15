@@ -166,7 +166,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                     else
                         R.drawable.ic_book_black_24dp)
 
-            if (iconFlag == ContentEntry.UNDEFINED_TYPE) {
+            if (iconFlag == ContentEntry.TYPE_UNDEFINED) {
                 iconView.visibility = View.GONE
             } else {
                 iconView.visibility = View.VISIBLE
@@ -264,13 +264,13 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         private val CONTENT_TYPE_TO_ICON_RES_MAP = HashMap<Int, Int>()
 
         init {
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.EBOOK_TYPE] = R.drawable.ic_book_black_24dp
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.AUDIO_TYPE] = R.drawable.ic_audiotrack_24px
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.VIDEO_TYPE] = R.drawable.ic_video_library_24px
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.COLLECTION_TYPE] = R.drawable.ic_collections_24px
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.DOCUMENT_TYPE] = R.drawable.ic_file_24px
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.INTERACTIVE_EXERICSE_TYPE] = R.drawable.ic_assignment_24px
-            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.ARTICLE_TYPE] = R.drawable.ic_newspaper
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_EBOOK] = R.drawable.ic_book_black_24dp
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_AUDIO] = R.drawable.ic_audiotrack_24px
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_VIDEO] = R.drawable.ic_video_library_24px
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_COLLECTION] = R.drawable.ic_collections_24px
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_DOCUMENT] = R.drawable.ic_file_24px
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_INTERACTIVE_EXERCISE] = R.drawable.ic_assignment_24px
+            CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_ARTICLE] = R.drawable.ic_newspaper
         }
 
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {

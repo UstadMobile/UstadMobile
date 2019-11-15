@@ -1,3 +1,5 @@
+import groovy.xml.XmlUtil
+
 plugins {
     id 'application'
     id 'kotlin'
@@ -8,6 +10,8 @@ plugins {
     id 'kotlinx-serialization'
     id 'com.github.psxpaul.execfork' version '0.1.11'
 }
+
+def angularDestinationPath = "$buildDir/generated/source/angular/"
 
 configurations {
     servletRuntime.extendsFrom runtime
@@ -27,10 +31,103 @@ shadowJar {
 
 sourceSets {
     main.java.srcDirs += ["$buildDir/generated/source/door"]
+    main.resources.srcDirs += [angularDestinationPath]
 }
+
+
 
 war {
     classpath configurations.servletRuntime
+}
+
+/**
+ * Add welcome file to web.xml to be used as a default file to be opened
+ */
+task addWelcomeFileToWebXml{
+   doLast{
+       def xmlFile = project.file("src/main/webapp/WEB-INF/web.xml")
+       def webXml = new XmlParser().parse(xmlFile)
+       def exists = false
+       webXml.value().each {
+           if(it.toString().contains("welcome-file-list")){
+               exists = true
+               return
+           }
+       }
+
+       if(!exists){
+           def welcome = webXml.appendNode("welcome-file-list")
+           welcome.appendNode("welcome-file","en/index.html")
+           xmlFile.withWriter {out->
+               XmlUtil.serialize(webXml, out)
+           }
+       }else{
+           println("Welcome file already added")
+       }
+   }
+}
+
+/**
+ * Prepare resources, ready for packaging
+ */
+task prepareResources{
+    doLast{
+        copy{
+            from rootProject.file("app-angular/dist").path
+            into "${angularDestinationPath}webapp"
+        }
+
+        copy{
+            from project.file("src/main/webapp").path
+            into "${angularDestinationPath}webapp"
+        }
+    }
+}
+
+/**
+ * Remove angular static files
+ */
+task removeTempResources{
+    doLast{
+        def ngResource = file(angularDestinationPath)
+        if(ngResource.exists()){
+            delete{
+                delete ngResource
+            }
+        }
+    }
+}
+
+
+/**
+ * Create a production jar with angular static files
+ */
+task prodModeJar(type: Jar){
+    from sourceSets.main.allSource
+}
+
+
+/**
+ * Create a development jar file without angular static files
+ */
+task devModJar(type: Jar){
+    from sourceSets.main.allSource
+}
+
+/**
+ * Create a production war with angular static files
+ */
+task prodModeWar(type: War){
+    from "${angularDestinationPath}webapp"
+    classpath = configurations.servletRuntime
+    webXml = file("${angularDestinationPath}webapp/WEB-INF/web.xml")
+}
+
+/**
+ * Create development war file without angular
+ */
+task devModeWar(type: War){
+    classpath = configurations.servletRuntime
 }
 
 task appRun(type: JavaExec) {
@@ -59,6 +156,14 @@ task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
 appRun.dependsOn(shadowJar)
 appRunDevMode.dependsOn(shadowJar)
 
+prepareResources.dependsOn(addWelcomeFileToWebXml,":app-angular:buildProd")
+
+prodModeJar.dependsOn(prepareResources)
+prodModeJar.finalizedBy(removeTempResources)
+
+prodModeWar.dependsOn(prepareResources)
+prodModeWar.finalizedBy(removeTempResources)
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     standaloneRuntime "io.ktor:ktor-server-netty:$version_ktor"
@@ -74,6 +179,7 @@ dependencies {
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
 
     implementation project(path: ":core", configuration: "jvmDefault")
+    implementation project(":sharedse")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
     implementation project(":lib-door-runtime")

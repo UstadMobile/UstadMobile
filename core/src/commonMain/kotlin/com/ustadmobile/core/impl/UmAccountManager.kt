@@ -49,6 +49,7 @@ object UmAccountManager {
         return getActivePersonUid(context, UstadMobileSystemImpl.instance)
     }
 
+    @JsName("getActiveAccountWithContext")
     fun getActiveAccount(context: Any): UmAccount? {
         return getActiveAccount(context, UstadMobileSystemImpl.instance)
     }
@@ -71,6 +72,7 @@ object UmAccountManager {
         }
     }
 
+    @JsName("setActiveAccountWithContext")
     fun setActiveAccount(account: UmAccount, context: Any) {
         setActiveAccount(account, context, UstadMobileSystemImpl.instance)
     }

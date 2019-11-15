@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -28,14 +28,18 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private var parentUid: Long? = null
 
+    private var noIframe: Boolean = false
+
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
+
         if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {
             showContentByParent()
         } else if (arguments.containsKey(ARG_DOWNLOADED_CONTENT)) {
             showDownloadedContent()
         }
+
     }
 
 
@@ -45,6 +49,11 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
             return
         }
         val resultTitle = entry.title
+
+        val domains = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_NO_IFRAME, "", context)!!.split(",")
+
+        noIframe = domains.contains(entry.publisher)
         if (resultTitle != null)
             fragmentViewContract.setToolbarTitle(resultTitle)
     }
@@ -118,6 +127,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         args.putAll(arguments)
         val entryUid = entry.contentEntryUid
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
+        args[ARG_NO_IFRAMES] = noIframe.toString()
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
         impl.go(destView, args, view.viewContext)
 
@@ -153,7 +163,10 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     companion object {
 
+        @JsName("ARG_CONTENT_ENTRY_UID")
         const val ARG_CONTENT_ENTRY_UID = "entryid"
+
+        const val ARG_NO_IFRAMES = "noiframe"
 
         const val ARG_DOWNLOADED_CONTENT = "downloaded"
     }

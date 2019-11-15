@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.database.Cursor
 import android.net.Uri
 import android.os.AsyncTask
@@ -30,11 +31,14 @@ import java.util.concurrent.TimeUnit
 open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
         ContentEntryEditFragment.EntryCreationActionListener, ContentWithOptionsView {
 
+
     internal var coordinatorLayout: CoordinatorLayout? = null
 
     private var entryFragment: ContentEntryEditFragment? = null
 
     private var impl: UstadMobileSystemImpl? = null
+
+    internal lateinit  var importDialog: ProgressDialog
 
 
     @SuppressLint("StaticFieldLeak") // this is a short lived task, so any leak would not be very short lived.
@@ -86,6 +90,9 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        importDialog = ProgressDialog(this)
+        importDialog.setMessage(getString(R.string.content_entry_importing))
+        importDialog.setCancelable(false)
         impl = UstadMobileSystemImpl.instance
     }
 
@@ -93,6 +100,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
         runAfterGrantingPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable{
                     runAfterFileSection(Runnable{
+                        runOnUiThread{importDialog.show()}
                         HandleFileSelectionAsyncTask(callback ?: object : UmResultCallback<String> {
                             override fun onDone(result: String?) {
                                 entryFragment!!.checkIfIsSupportedFile(File(result))
@@ -140,6 +148,14 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
 
     override fun importContentFromLink(arguments: HashMap<String, String?>) {
         impl!!.go(ContentEntryImportLinkView.VIEW_NAME, arguments, this)
+    }
+
+    override fun showProgressDialog(show: Boolean) {
+        if(show){
+            importDialog.show()
+        }else{
+            importDialog.dismiss()
+        }
     }
 
 }

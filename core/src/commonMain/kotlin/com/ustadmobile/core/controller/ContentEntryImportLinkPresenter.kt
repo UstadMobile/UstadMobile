@@ -297,6 +297,7 @@ suspend fun checkIfH5PValidAndReturnItsContent(url: String): String? {
     try {
         urlLink = Url(url)
     } catch (exception: URLParserException) {
+        println("error :$exception.message")
         return null
     }
 

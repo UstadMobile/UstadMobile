@@ -80,9 +80,9 @@ open class ContentEntry() {
 
     var languageVariantUid: Long = 0
 
-    var leaf: Boolean = false
+    var status: Int = 0
 
-    var imported: Boolean = false
+    var leaf: Boolean = false
 
     /**
      * Represents if this content entry is public for anyone to use
@@ -175,27 +175,36 @@ open class ContentEntry() {
 
         const val ALL_RIGHTS_RESERVED = 5
 
-        const val LICESNE_TYPE_CC_BY_NC_SA = 6
+        const val LICENSE_TYPE_CC_BY_NC_SA = 6
 
-        const val PUBLIC_DOMAIN = 7
-
-        const val UNDEFINED_TYPE = 0
-
-        const val COLLECTION_TYPE = 1
-
-        const val EBOOK_TYPE = 2
-
-        const val INTERACTIVE_EXERICSE_TYPE = 3
-
-        const val VIDEO_TYPE = 4
-
-        const val AUDIO_TYPE = 5
-
-        const val DOCUMENT_TYPE = 6
-
-        const val ARTICLE_TYPE = 7
+        const val LICENSE_TYPE_PUBLIC_DOMAIN = 7
 
         const val LICENSE_TYPE_OTHER = 8
+
+        const val TYPE_UNDEFINED = 0
+
+        const val TYPE_COLLECTION = 1
+
+        const val TYPE_EBOOK = 2
+
+        const val TYPE_INTERACTIVE_EXERCISE = 3
+
+        const val TYPE_VIDEO = 4
+
+        const val TYPE_AUDIO = 5
+
+        const val TYPE_DOCUMENT = 6
+
+        const val TYPE_ARTICLE = 7
+
+        const val STATUS_PUBLIC = 1
+
+        const val STATUS_IMPORTED = 2
+
+        const val STATUS_RECYCLED = 3
+
+        const val STATUS_IN_APP = 4
+
     }
 
 }

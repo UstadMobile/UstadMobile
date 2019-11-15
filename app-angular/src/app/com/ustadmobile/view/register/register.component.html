@@ -1,6 +1,6 @@
 <div class="row white default-padding-top default-content-padding-bottom 
 default-content-padding-right default-content-padding-left">
-  <form [formGroup]="umFormRegister" (ngSubmit)="startRegistration()">
+  <form [formGroup]="umFormRegister" (ngSubmit)="handleClickRegister()">
     <div class="row default-padding-top">
       <div class="col s12 l6">
         <mz-input-container>
@@ -53,7 +53,7 @@ default-content-padding-right default-content-padding-left">
         <mz-spinner [color]="'blue'" [size]="'big'">
         </mz-spinner>
       </div>
-      <div class="fixed-action-btn default-margin-right">
+      <div class="{{floating_btn_class_right}}">
         <button type="submit" mz-button class="orange darken-2" [disabled]="!formValidated" i18n="@@register">
           Register
         </button>

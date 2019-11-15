@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
@@ -16,7 +15,6 @@ import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
-import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -89,6 +87,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         }
     }
 
+    @JsName("handleCreateAccount")
     fun handleCreateAccount(){
         val args = HashMap(arguments)
         args[ARG_NEXT] = ContentEntryDetailView.VIEW_NAME

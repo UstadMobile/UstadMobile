@@ -38,6 +38,7 @@
     <string name='download_all'>Download all</string>
     <string name='nothing_selected'>Nothing selected!</string>
     <string name='next'>Next</string>
+    <string name='previous'>Previous</string>
     <string name='back'>Back</string>
     <string name='username'>Username</string>
     <string name='password'>Password</string>
@@ -107,6 +108,7 @@
     <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="success">Success</string>
 
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
@@ -143,6 +145,10 @@
 
     <!-- Update student details action button -->
     <string name="update">Update</string>
+    <string name="profile">Profile</string>
+    <string name="dialog_download_from_playstore_message">Access &amp; Share Educational Content Offline</string>
+    <string name="dialog_download_from_playstore_ok">Download now (free)</string>
+    <string name="dialog_download_from_playstore_cancel">Stay on website</string>
 
     <string name="catalog">Catalog</string>
     <string name="closed">Closed</string>
@@ -173,6 +179,7 @@
     <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
     <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
+    <string name="download_summary_title">%1$s active downloads</string>
     <string name="download_cancel_all">CANCEL ALL</string>
     <string name="download_cancel_label">Cancel download</string>
     <string name="download_pause_all">PAUSE ALL</string>
@@ -282,7 +289,13 @@
     <string name='error_message_load_page'>فشل تحميل الصفحة</string>
     <string name='error_message_update_document'>فشل تحديث المستند</string>
     <string name='content_update_massage'>تم التحديث بنجاح</string>
-
+    <string name="content_entry_export">Export</string>
+    <string name="content_entry_export_inprogress">Exporting</string>
+    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
+    <string name="content_entry_label_update_content">Update Content</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
+    <string name="content_editor_create_new_import_link">Import from link</string>
     <string name='location_permission_message'>التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق ال Bluetooth للبحث عن الاجهزة القريبة</string>
     <string name='download_storage_permission_title'>مطلوب أذن للحصول على الملف</string>
     <string name='download_storage_permission_message'>التطبيق يلزم اذن لتحميل و حفظ المحتوى</string>
@@ -292,7 +305,17 @@
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="no_account">Don\'t have an account?</string>
+    <string name="no_account">You do not have an account?</string>
+
+    <string name="xapi_clear" >Clear</string>
+    <string name="xapi_today" >Today</string>
+
+    <string name="done">Done</string>
+    <string name="select_locations">Select Locations</string>
+    <string name="select_entries">Select Entries</string>
+    <string name='new_tab'>Displaying on new Tab</string>
+    <string name="error_not_found_status">404 !</string>
+    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
 
 
 

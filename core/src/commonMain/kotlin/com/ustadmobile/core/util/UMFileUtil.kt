@@ -31,6 +31,7 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import io.ktor.http.ContentType
 import kotlin.js.JsName
 import kotlin.jvm.JvmStatic
 import kotlin.math.round
@@ -768,6 +769,18 @@ object UMFileUtil {
         } else {
             "/" + viewname + "?" + mapToQueryString(args)
         }
+    }
+
+    fun getContentType(filePath: String): ContentType {
+        val extension = filePath.substring(filePath.lastIndexOf("."))
+        val extensionMap = mapOf(
+                ".html" to ContentType.Text.Html,".xml" to ContentType.Text.Xml,
+                ".css" to ContentType.Text.CSS, ".js" to ContentType.Text.JavaScript,
+                ".txt" to ContentType.Text.Html, ".xhtml" to ContentType.Text.Html,
+                ".jpg" to ContentType.Image.JPEG,".png" to ContentType.Image.PNG,
+                ".gif" to ContentType.Image.GIF, ".mp4" to ContentType.Video.MP4,
+                ".mpeg" to ContentType.Video.MPEG, ".json" to ContentType.Application.Json)
+        return extensionMap[extension] ?: ContentType.Any
     }
 
 }

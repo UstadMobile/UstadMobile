@@ -33,6 +33,7 @@ import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LE
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.GlobalScope
@@ -70,7 +71,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         viewPager.addOnPageChangeListener(this)
 
-        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
+        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UmAppDatabase.getInstance(this).personDao,
+                UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         profileImage.setOnClickListener {
@@ -95,6 +98,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun setLoggedPerson(person: Person) {}
+
+    override fun showReportMenu(show: Boolean) {}
 
     override fun onPageScrollStateChanged(state: Int) {}
 
@@ -103,6 +109,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onPageSelected(position: Int) {
         presenter.handleShowDownloadButton(position == 0)
     }
+
+    override fun restartUI() {}
+
+    override fun showLanguageOptions() {}
+
+    override fun setCurrentLanguage(language: String?) {}
+
+    override fun setLanguageOption(languages: MutableList<String>) { }
+
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

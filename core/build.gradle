@@ -181,7 +181,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
-
+                implementation project(':lib-door-runtime')
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
 

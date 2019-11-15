@@ -1,6 +1,9 @@
 import com.github.eerohele.SaxonXsltTask
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.json.simple.JSONObject
+import java.nio.file.Files
+import java.nio.file.Paths
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -56,17 +59,12 @@ task prepareMessageIDMaps{
       jsonObj.put(String.valueOf(value),msgValue)
     }
 
-    try {
-      if(!outFile.getParentFile().exists()) {
-        outFile.getParentFile().mkdirs()
-      }
-      FileWriter jsonFile = new FileWriter(outFile.absolutePath)
-      jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
-      jsonFile.flush()
-
-    } catch (IOException e) {
-      e.printStackTrace()
+    if(!outFile.getParentFile().exists()) {
+      outFile.getParentFile().mkdirs()
     }
+    FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+    jsonFile.write(new JsonBuilder(jsonObj).toPrettyString())
+    jsonFile.flush()
   }
 
 }
@@ -140,9 +138,9 @@ new File("${rootDir.absolutePath}/core/locale/main").eachDir{File localeDir ->
 task generateLocaleFiles{}
 
 /**
- * Delete node_module directory
+ * Delete temp directories
  */
-task deleteNodeModulesDir{
+task deleteTempDirs{
   doLast{
     if(project.file("node_modules").exists()){
       exec {
@@ -151,7 +149,11 @@ task deleteNodeModulesDir{
       }
     }
 
-
+    if(rootProject.buildDir.exists()){
+      exec {
+        commandLine 'rm', '-r',rootProject.buildDir.path
+      }
+    }
   }
 }
 
@@ -169,6 +171,8 @@ task deletePackageLockJsonFile{
   }
 }
 
+
+
 /**
  * Install all offline and other dependencies from project package.json
  */
@@ -181,14 +185,16 @@ task installDependencies{
   }
 }
 
+
 /**
  * Execute actual angular e2e tests
  */
 task executeEnd2EndTests{
+  def portNumber = project.hasProperty("testport") ? testport : 4200
   doLast{
     exec {
       workingDir appAngularPath
-      commandLine 'ng', 'e2e'
+      commandLine 'ng', 'e2e', '--port', portNumber ,'--no-webdriver-update'
     }
   }
 }
@@ -206,21 +212,163 @@ task executeModuleTest{
   }
 }
 
+/**
+ * Fixing kotlinx serialization imports
+ */
+task fixRequiredImports{
+  doLast{
+    rootProject.fileTree (dir: "build/js/node_modules",
+      includes: ['**/UstadMobile-lib*.js','**/kmpxmlpullparser*.js'], exclude: '**/*.meta.js')
+      .each() { File file ->
+        String fileContent = new String(Files.readAllBytes(Paths.get(file.path)), "UTF-8")
+        if (fileContent.contains("kotlinx-serialization-runtime-js")) {
+          println("Updating ${file.name} ....")
+          fileContent = fileContent.replace("kotlinx-serialization-runtime-js", "kotlinx-serialization-kotlinx-serialization-runtime")
+          FileWriter writer = new FileWriter(file.path)
+          writer.write(fileContent)
+          writer.flush()
+        }
+      }
+  }
+}
+
+/**
+ * When executing npm install, npm run build also executes as pre-build process which execute all
+ * build scripts. This will run webpack which is configured to only run when testing js kotlin
+ * implementation on browser. To avoid that, remove all build scripts on node-forge
+ * when running app-angular build process.
+ */
+task fixNodeForgeScript{
+ doLast{
+   def packageJsonFile = rootProject.file("build/js/node_modules/node-forge/package.json")
+   if(packageJsonFile.exists()){
+     def packageJsonContent = new JsonSlurper().parseText(packageJsonFile.text)
+     packageJsonContent.scripts = "{}"
+     FileWriter writer = new FileWriter(packageJsonFile.path)
+     writer.write(new JsonBuilder(packageJsonContent).toPrettyString())
+     writer.flush()
+   }
+ }
+
+}
+
+
+/**
+ * Update libs version in package.json when version number changes
+ */
+task updateLibsVersion{
+  doLast{
+    def packageJson = project.file("package.json")
+    def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
+
+    Iterator iterator = packageJsonContent.dependencies.entrySet().iterator()
+    def dependenciesObj = new JSONObject()
+    while (iterator.hasNext())  {
+      Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next()
+      if(entry.getKey().indexOf("UstadMobile-") != -1){
+        def oldVersion = entry.getValue().substring(entry.getValue().lastIndexOf("-") + 1,entry.getValue().length() - 4)
+        dependenciesObj.put(entry.getKey(),entry.getValue().replace(oldVersion,rootProject.version))
+      }else{
+        def libFile = rootProject.file("build/js/packages_imported/${entry.getKey()}")
+        def versionToUse = entry.getValue()
+        if(libFile.exists()){
+          def oldVersion = entry.getValue().substring(entry.getValue().lastIndexOf("-") + 1,entry.getValue().length() - 4)
+          versionToUse = entry.getValue().replace(oldVersion, libFile.listFiles()[0].name)
+        }
+        dependenciesObj.put(entry.getKey(), versionToUse)
+      }
+    }
+    packageJsonContent.version = rootProject.version
+    packageJsonContent.dependencies = dependenciesObj
+    FileWriter packageJsonFileWriter = new FileWriter(packageJson.path)
+    packageJsonFileWriter.write(new JsonBuilder(packageJsonContent).toPrettyString())
+    packageJsonFileWriter.flush()
+  }
+
+}
+
+/**
+ * Configure localization scripts which will help on generating
+ * bundles for production/development purpose
+ */
+task generateLocalizationScripts{
+  doLast{
+    def angularJson = project.file("angular.json")
+    def packageJson = project.file("package.json")
+    def href = project.hasProperty("baseHref") ? baseHref + "/" : ""
+    println("Base href "+href)
+
+    def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
+    def angularJsonContent = new JsonSlurper().parseText(angularJson.text)
+    def configBuild = angularJsonContent.projects.ustadmobile.architect.build.configurations
+    def configServe = angularJsonContent.projects.ustadmobile.architect.serve.configurations
+    packageJsonContent.version = rootProject.version
+    def buildForProdCommandList = []
+    rootProject.fileTree (dir: "app-angular/src/assets/locale", include:'**messages.*.xlf')
+      .each(){ File message ->
+        def localeCode = message.name.substring(message.name.indexOf(".") + 1,message.name.lastIndexOf("."))
+        def configBuildObj = new JSONObject()
+        def configServeObj = new JSONObject()
+        def fileSrc = message.path.substring(message.path.lastIndexOf("src"))
+        configBuildObj.put("aot",true)
+        configBuildObj.put("outputPath","dist/${localeCode}/")
+        configBuildObj.put("i18nFile",fileSrc)
+        configBuildObj.put("i18nFormat","xlf")
+        configBuildObj.put("i18nLocale",localeCode)
+        configBuildObj.put("i18nMissingTranslation","error")
+        configServeObj.put("browserTarget","ustadmobile:build:${localeCode}")
+        configBuild[localeCode] = configBuildObj
+        configServe[localeCode] = configServeObj
+        packageJsonContent.scripts["start:" + localeCode] = "ng serve --configuration=${localeCode}"
+        packageJsonContent.scripts["build:" + localeCode] = "ng build --prod --i18n-locale ${localeCode}" +
+          " --i18n-format xlf --i18n-file ${fileSrc} --output-path=dist/${localeCode} --baseHref /${href}${localeCode}/"
+        buildForProdCommandList.push("npm run build:${localeCode}")
+      }
+
+    packageJsonContent.scripts["build-prod"] = buildForProdCommandList.join(" && ")
+
+    FileWriter angularJsonFileWriter = new FileWriter(angularJson.path)
+    angularJsonFileWriter.write(new JsonBuilder(angularJsonContent).toPrettyString())
+    angularJsonFileWriter.flush()
+
+    FileWriter packageJsonFileWriter = new FileWriter(packageJson.path)
+    packageJsonFileWriter.write(new JsonBuilder(packageJsonContent).toPrettyString())
+    packageJsonFileWriter.flush()
+  }
+}
+
 
 /**
  * Pack all modules under node_modules/
  */
 task packPreparedModules{
   doLast{
-    new File("${rootProject.file("build/js/node_modules").path}").eachDir {
-      def dir = it.absolutePath
+    new JsonSlurper().parseText(rootProject.file("build/js/package.json").text).workspaces.forEach{
+      def packageName = it.substring(it.indexOf("/") + 1)
+      packageName = packageName.lastIndexOf("/") == -1 ? packageName : packageName.substring(0,packageName.lastIndexOf("/"))
+      def packageDir = rootProject.file("build/js/node_modules/${packageName}")
       exec {
-        workingDir dir
-        commandLine 'npm', 'pack'
+        workingDir packageDir
+        commandLine 'npm', 'pack' , '--quiet'
       }
     }
   }
 }
+
+/**
+ * Generate JS bundles for production purpose
+ */
+task buildProd{
+  def directory = rootProject.file("app-angular").path
+  def commandScript = project.hasProperty("locale") ?  "build:"+locale :"build-prod"
+  doLast{
+    exec {
+      workingDir directory
+      commandLine 'npm', 'run' , commandScript
+    }
+  }
+}
+
 
 /**
  * Start angular end to end test
@@ -235,11 +383,13 @@ task ngTest{
 }
 
 ngTest.dependsOn(build)
+buildProd.dependsOn(build)
 build.dependsOn(installDependencies)
-installDependencies.dependsOn(packPreparedModules, deletePackageLockJsonFile)
+fixRequiredImports.dependsOn(fixNodeForgeScript)
+installDependencies.dependsOn(packPreparedModules, updateLibsVersion, deletePackageLockJsonFile)
 installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)
-generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile)
+generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,generateLocalizationScripts)
+executeEnd2EndTests.dependsOn(":app-ktor-server:testWebAppRunFork")
 
-clean.dependsOn(deleteNodeModulesDir)
-
+clean.dependsOn(deleteTempDirs)

@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 25)
+], version = 26)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -33,94 +33,138 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     override val master: Boolean
         get() = false
 
+    @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
 
+    @JsName("entryStatusResponseDao")
     abstract val entryStatusResponseDao: EntryStatusResponseDao
 
+    @JsName("downloadJobDao")
     abstract val downloadJobDao: DownloadJobDao
 
+    @JsName("downloadJobItemDao")
     abstract val downloadJobItemDao: DownloadJobItemDao
 
+    @JsName("downloadJobItemParentChildJoinDao")
     abstract val downloadJobItemParentChildJoinDao: DownloadJobItemParentChildJoinDao
 
+    @JsName("downloadJobItemHistoryDao")
     abstract val downloadJobItemHistoryDao: DownloadJobItemHistoryDao
 
+    @JsName("personDao")
     abstract val personDao: PersonDao
 
+    @JsName("clazzDao")
     abstract val clazzDao: ClazzDao
 
+    @JsName("clazzMemberDao")
     abstract val clazzMemberDao: ClazzMemberDao
 
+    @JsName("contentEntryDao")
     abstract val contentEntryDao: ContentEntryDao
 
+    @JsName("personCustomFieldDao")
     abstract val personCustomFieldDao: PersonCustomFieldDao
 
+    @JsName("personCustomFieldValueDao")
     abstract val personCustomFieldValueDao: PersonCustomFieldValueDao
 
+    @JsName("contentEntryContentCategoryJoinDao")
     abstract val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao
 
+    @JsName("contentEntryParentChildJoinDao")
     abstract val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
 
+    @JsName("contentEntryRelatedEntryJoinDao")
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
 
     // abstract val syncStatusDao: SyncStatusDao
 
+    @JsName("contentCategorySchemaDao")
     abstract val contentCategorySchemaDao: ContentCategorySchemaDao
 
+    @JsName("contentCategoryDao")
     abstract val contentCategoryDao: ContentCategoryDao
 
+    @JsName("languageDao")
     abstract val languageDao: LanguageDao
 
+    @JsName("languageVariantDao")
     abstract val languageVariantDao: LanguageVariantDao
 
+    @JsName("scrapeQueueItemDao")
     abstract val scrapeQueueItemDao: ScrapeQueueItemDao
 
+    @JsName("personAuthDao")
     abstract val personAuthDao: PersonAuthDao
 
+    @JsName("accessTokenDao")
     abstract val accessTokenDao: AccessTokenDao
 
+    @JsName("roleDao")
     abstract val roleDao: RoleDao
 
+    @JsName("personGroupDao")
     abstract val personGroupDao: PersonGroupDao
 
+    @JsName("personGroupMemberDao")
     abstract val personGroupMemberDao: PersonGroupMemberDao
 
+    @JsName("entityRoleDao")
     abstract val entityRoleDao: EntityRoleDao
 
+    @JsName("locationDao")
     abstract val locationDao: LocationDao
 
+    @JsName("locationAncestorJoinDao")
     abstract val locationAncestorJoinDao: LocationAncestorJoinDao
 
+    @JsName("personLocationJoinDao")
     abstract val personLocationJoinDao: PersonLocationJoinDao
 
+    @JsName("personPictureDao")
     abstract val personPictureDao: PersonPictureDao
 
+    @JsName("scrapeRunDao")
     abstract val scrapeRunDao: ScrapeRunDao
 
+    @JsName("contentEntryStatusDao")
     abstract val contentEntryStatusDao: ContentEntryStatusDao
 
+    @JsName("connectivityStatusDao")
     abstract val connectivityStatusDao: ConnectivityStatusDao
 
+    @JsName("containerDao")
     abstract val containerDao: ContainerDao
 
+    @JsName("containerEntryDao")
     abstract val containerEntryDao: ContainerEntryDao
 
+    @JsName("containerEntryFileDao")
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
+    @JsName("verbDao")
     abstract val verbDao: VerbDao
 
+    @JsName("xObjectDao")
     abstract val xObjectDao: XObjectDao
 
+    @JsName("statementDao")
     abstract val statementDao: StatementDao
 
+    @JsName("contextXObjectStatementJoinDao")
     abstract val contextXObjectStatementJoinDao: ContextXObjectStatementJoinDao
 
+    @JsName("stateDao")
     abstract val stateDao: StateDao
 
+    @JsName("stateContentDao")
     abstract val stateContentDao: StateContentDao
 
+    @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
     //#DOORDB_SYNCDAO
@@ -174,8 +218,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 //            return instance!!
 //        }
 
-        fun getInstance(context: Any) = lazy { Companion.getInstance(context, "UmAppDatabase") }.value
+        @JsName("getInstance")
+        fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
 
+        @JsName("getInstanceWithDbName")
         @Synchronized
         fun getInstance(context: Any, dbName: String): UmAppDatabase {
             var db = namedInstances[dbName]
@@ -192,6 +238,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
+            builder.addMigrations(object : DoorMigration(25,26){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                }
+
+            })
+
             builder.addMigrations(object : DoorMigration(20, 24) {
                 override fun migrate(database: DoorSqlDatabase) {
 

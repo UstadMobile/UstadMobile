@@ -1,11 +1,11 @@
 <header>
   <div class="navbar-fixed">
     <mz-navbar navbarClass="top-nav-height  z-depth-2 {{env.colorPrimary}}">
-      <p class="brand-logo {{toolbar_title_class}}">
+      <p class="brand-logo {{class_toolbar_title}}">
         <span (click)="goBack()" class="open-content"><i
-            class="material-icons {{toolbar_icon_class}}">{{toolbar_arrow}}</i></span>
-        <span class="truncate">{{toolbar_title}}</span></p>
-      <p class="show-on-small  open-content drawer-menu {{drawer_menu_class}}">
+            class="material-icons {{class_icon_toolbar}}">{{class_toolbar_arrow}}</i></span>
+        <span class="truncate">{{toolBarTitle}}</span></p>
+      <p class="show-on-small  open-content drawer-menu {{class_drawer_menu}}">
         <a mz-button [flat]=true id="um-drawer" (click)="dropwdown.open()">
           <i class="material-icons white-text">menu</i>
         </a>
@@ -21,60 +21,63 @@
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
 
-    <li><a (click)="navigateTo(routes.list)"><span i18n="@@libraries">Libraries</span></a></li>
-    <li><a (click)="navigateTo(routes.report)"> <span i18n="@@reports">Reports</span></a></li>
+    <li><a (click)="handleSideMenuSelected(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
+    <li *ngIf="showReports"> <a (click)="handleSideMenuSelected(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
+    <li > <a (click)="handleClickPersonIcon()"> <span i18n="@@profile">Profile</span></a></li>
+    <li > <a (click)="bottomSheetModal.openModal()"> <span i18n="@@language">Language</span></a></li>
+  </mz-dropdown> 
 
-    <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
-    <mz-dropdown-item>
-        <form *ngIf="supportedLanguages" >
-            <p class="language grey-text text-lighten-2" i18n="@@language">Languages</p>
-                <mz-select-container [inline]=false *ngIf="supportedLanguages">
-                    <select mz-select
-                      [formControl]="umFormLanguage.controls['language']" 
-                      id="options-language">
-                      <option *ngFor="let language of supportedLanguages" value="{{language.code}}">{{language.name}}</option>
-                    </select>
-                  </mz-select-container>
-            </form>
-    </mz-dropdown-item>
-  </mz-dropdown>
+
+  <mz-modal #bottomSheetModal [fixedFooter]="false" [bottomSheet]="false" [options]="modalOptions">
+    <mz-modal-content class="black">
+      <div class="collection margin-modal">
+        <a (click)="handleLanguageSelected(language, bottomSheetModal)" class="collection-item" *ngFor="let language of supportedLanguages">{{language}}</a>
+      </div>
+    </mz-modal-content>
+  </mz-modal>
 
 
   <mz-sidenav #sidenav [fixed]=true [edge]="'left'" class="show-on-medium-and-up">
 
     <mz-sidenav-header>
-      <div class="user-view">
-        <img class="circle avatar" src="../../../../../assets/images/guest_user_icon.png">
-        <div class="white-text name">UstadMobile FZ</div>
-        <div class="white-text email">angular@ustadmobile.com</div>
+      <div class="user-view" style="background: url('assets/images/top_header_bg.jpg')">
+        <i class="material-icons white-text {{class_open_profile}} open-profile" (click)="handleClickPersonIcon()">open_in_new</i>
+        <img class="circle avatar" [src]="userProfile">
+        <div class="white-text name">{{userName}}</div>
+        <div class="white-text email">{{userEmail}}</div>
       </div>
     </mz-sidenav-header>
 
-    <mz-sidenav-link [active]="true">
-      <a class="collapsible-header" (click)="navigateTo(routes.list)"><span i18n="@@libraries">Libraries</span>
-        <i class="material-icons {{icon_position_class}}">library_books</i>
+    <mz-sidenav-link [active]="activeState[0]">
+      <a class="collapsible-header" id="libs" (click)="handleSideMenuSelected(routes.entryList)"><span
+          i18n="@@libraries">Libraries</span>
+        <i class="material-icons {{class_icon_position}}">library_books</i>
       </a>
     </mz-sidenav-link>
 
-    <mz-sidenav-link>
-      <a class="collapsible-header" (click)="navigateTo(routes.report)"> <span i18n="@@reports">Reports</span>
-        <i class="material-icons {{icon_position_class}}">pie_chart</i>
+    <mz-sidenav-link *ngIf="showReports" [active]="activeState[1]">
+      <a class="collapsible-header" (click)="handleSideMenuSelected(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
+        <i class="material-icons {{class_icon_position}}">pie_chart</i>
       </a>
     </mz-sidenav-link>
     <mz-sidenav-subheader></mz-sidenav-subheader>
     <mz-sidenav-divider></mz-sidenav-divider>
 
-    <form *ngIf="supportedLanguages" >
-    <span class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</span>
-        <mz-select-container [inline]=true *ngIf="supportedLanguages">
-            <select mz-select
-              [formControl]="umFormLanguage.controls['language']" 
-              id="options-language">
-              <option *ngFor="let language of supportedLanguages" value="{{language.key}}">{{language.value}}</option>
-            </select>
-          </mz-select-container>
-    </form>
-   
+    <mz-sidenav-link>
+        <div class="row">
+          <form *ngIf="supportedLanguages" class="col s12">
+              <div class="row default-content-padding-left ">
+                  <label class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</label>
+                  <mz-select-container [inline]=true *ngIf="supportedLanguages">
+                    <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language">
+                      <option *ngFor="let language of supportedLanguages" value="{{language}}">{{language}}</option>
+                    </select>
+                  </mz-select-container>
+                </div>
+          </form>
+        </div>
+      </mz-sidenav-link>
+
   </mz-sidenav>
 
   <!-- side nav ends here-->

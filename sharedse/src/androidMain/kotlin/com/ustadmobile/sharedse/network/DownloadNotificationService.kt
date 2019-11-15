@@ -22,6 +22,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.port.sharedse.R
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -462,6 +463,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     }
 
 
+    @ExperimentalCoroutinesApi
     override fun onDestroy() {
         super.onDestroy()
         if (mNetworkServiceBound)

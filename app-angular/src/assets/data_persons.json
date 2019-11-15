@@ -1,0 +1,6 @@
+  [
+    {"personUid":1,"username":"JaneDoe","firstNames":"Jane", "lastName":"Doe", "emailAddr":"example@email.dot", "admin":true},
+    {"personUid":2,"username":"FrankDoe","firstNames":"Frank", "lastName":"Doe", "emailAddr":"example@email.dot"},
+    {"personUid":3,"username":"JamesDoe","firstNames":"James", "lastName":"Doe", "emailAddr":"example@email.dot"},
+    {"personUid":4,"username":"KenethDoe","firstNames":"Keneth", "lastName":"Doe", "emailAddr":"example@email.dot"}
+  ]

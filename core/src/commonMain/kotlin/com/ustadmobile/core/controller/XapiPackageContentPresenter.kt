@@ -42,7 +42,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
-        val containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()
+        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID] ?: error("")).toLong()
         GlobalScope.launch {
             mountedPath = containerMounter(containerUid)
 

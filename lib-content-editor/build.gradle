@@ -8,7 +8,7 @@ buildscript {
         }
     }
 }
-
+apply plugin: 'java'
 
 def rootPath = "${rootDir}/lib-content-editor/"
 def rootTemplatePath =  "${rootPath}templates/"
@@ -28,13 +28,16 @@ task copyResourcesToAndroidAssets {
     def locale = "locale"
     def templates = "/templates"
 
-    copy { from rootTemplatePath into umEditorAssetsPath + templates }
-    copy { from rootPath + tinyMce into umEditorAssetsPath +"/"+ tinyMce }
-    copy { from rootPath + fonts into umEditorAssetsPath +"/"+fonts }
-    copy { from rootPath + locale into umEditorAssetsPath +"/"+locale }
-
     doLast {
+
+        copy { from rootTemplatePath into umEditorAssetsPath + templates }
+        copy { from rootPath + tinyMce into umEditorAssetsPath +"/"+ tinyMce }
+        copy { from rootPath + fonts into umEditorAssetsPath +"/"+fonts }
+        copy { from rootPath + locale into umEditorAssetsPath +"/"+locale }
+
+        delete  "${rootPath}dist"
         delete  "${rootTemplatePath}umEditorBlankDoc"
+        delete  "${rootTemplatePath}umEditorBlankDoc.zip"
         delete  "${umEditorAssetsPath}${templates}/template_page.html"
         delete  "${umEditorAssetsPath}${templates}/umEditorBlankDoc"
     }
@@ -44,28 +47,28 @@ task copyResourcesToAndroidAssets {
 
 /* Task which creates blankDocument to be used as blank document template*/
 task createUmEditorBlankDocumentArchive(type: Zip) {
-    from blankDocPath
-    archiveName 'umEditorBlankDoc.zip'
-    destinationDir(file(rootTemplatePath))
+    from(blankDocPath) {}
+    archiveFileName = provider {'umEditorBlankDoc.zip'}
+    destinationDirectory = file(rootTemplatePath)
 }
-copyResourcesToAndroidAssets.dependsOn(createUmEditorBlankDocumentArchive)
 
 
 /*Task which creates all directories necessary for preparing a blank document template*/
 task prepareUmEditorDirectories {
 
-    copy { from rootTemplatePath + "template_page.html",
-            "${rootPath}src/epub/content.opf",
-            "${rootPath}src/epub/nav.xhtml",
-            "${rootPath}dist/css/UmEditorCore.min.css",
-            "${rootPath}lib/jquery/jquery3.3.1.min.js",
-            "${rootPath}dist/js/UmEditorCore.min.js",
-            "${rootPath}dist/js/UmWidgetManager.min.js" into blankDocPath }
-    copy {
-        from "${rootPath}src/epub/container.xml" into  "${blankDocPath}META-INF/"
+    doLast{
+        copy { from rootTemplatePath + "template_page.html",
+                "${rootPath}src/epub/content.opf",
+                "${rootPath}src/epub/nav.xhtml",
+                "${rootPath}dist/css/UmEditorCore.min.css",
+                "${rootPath}lib/jquery/jquery3.3.1.min.js",
+                "${rootPath}dist/js/UmEditorCore.min.js",
+                "${rootPath}dist/js/UmWidgetManager.min.js" into blankDocPath }
+        copy {
+            from "${rootPath}src/epub/container.xml" into  "${blankDocPath}META-INF/"
+        }
     }
 }
-createUmEditorBlankDocumentArchive.dependsOn(prepareUmEditorDirectories)
 
 
 /* Task to minify UmEditor javascript file*/
@@ -127,7 +130,6 @@ new File(rootPath +"src/css").eachFile { def file ->
 }
 task minifyUmEditorCss(dependsOn: umCssDynamicTasks) {}
 
-prepareUmEditorDirectories.dependsOn(minifyUmEditorCss,minifyUmEditorJs)
 
 
 /* Execute content template tests */
@@ -144,4 +146,9 @@ task runContentFomattingTests (type: Exec){
 
 
 /* Run all UmEditor Javascript tests */
-task test(dependsOn: [runContentFomattingTests, runContentTemplatesTest]) {doLast {}}
+task umTest(dependsOn: [runContentFomattingTests, runContentTemplatesTest]) {doLast {}}
+
+build.dependsOn(copyResourcesToAndroidAssets)
+copyResourcesToAndroidAssets.dependsOn(createUmEditorBlankDocumentArchive)
+createUmEditorBlankDocumentArchive.dependsOn(prepareUmEditorDirectories)
+prepareUmEditorDirectories.dependsOn(minifyUmEditorCss,minifyUmEditorJs)

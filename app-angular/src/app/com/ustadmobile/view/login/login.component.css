@@ -1,3 +1,13 @@
 .login-box{
     margin-top: 8% !important;
 }
+
+.register-text{
+    margin-top: 4% !important;
+}
+
+.register-now{
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 3% !important;
+}

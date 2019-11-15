@@ -39,4 +39,6 @@ object AppConfig {
 
     const val KEY_SHOW_REGISTER = "app.register_before_open"
 
+    const val KEY_NO_IFRAME = "app.no_iframe_domans"
+
 }

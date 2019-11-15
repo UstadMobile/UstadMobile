@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -15,19 +16,19 @@ import com.ustadmobile.core.view.LoginView
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
-    private var mPresenter: LoginPresenter? = null
+    private lateinit var mPresenter: LoginPresenter
 
     private var mServerUrl: String? = null
 
-    private var mUsernameTextView: TextView? = null
+    private lateinit var mUsernameTextView: TextInputEditText
 
-    private var mPasswordTextView: TextView? = null
+    private lateinit var mPasswordTextView: TextInputEditText
 
-    private var mErrorTextView: TextView? = null
+    private lateinit var mErrorTextView: TextView
 
-    private var mProgressBar: ProgressBar? = null
+    private lateinit var mProgressBar: ProgressBar
 
-    private var mLoginButton: Button? = null
+    private lateinit var mLoginButton: Button
 
     private lateinit var registerMessage : TextView
 
@@ -46,35 +47,35 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
         mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
                 this, UstadMobileSystemImpl.instance)
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        mPresenter.onCreate(bundleToMap(savedInstanceState))
         mUsernameTextView = findViewById(R.id.activity_login_username)
         mPasswordTextView = findViewById(R.id.activity_login_password)
         mLoginButton = findViewById(R.id.activity_login_button_login)
         mErrorTextView = findViewById(R.id.activity_login_errormessage)
         mProgressBar = findViewById(R.id.progressBar)
-        mProgressBar!!.isIndeterminate = true
-        mProgressBar!!.scaleY = 3f
+        mProgressBar.isIndeterminate = true
+        mProgressBar.scaleY = 3f
         findViewById<View>(R.id.activity_login_button_login).setOnClickListener { evt ->
-            mPresenter!!.handleClickLogin(mUsernameTextView!!.text.toString(),
-                    mPasswordTextView!!.text.toString(), mServerUrl!!)
+            mPresenter.handleClickLogin(mUsernameTextView.text.toString(),
+                    mPasswordTextView.text.toString(), mServerUrl!!)
         }
 
         registerNow.setOnClickListener {
-            mPresenter!!.handleCreateAccount()
+            mPresenter.handleCreateAccount()
         }
     }
 
     override fun setInProgress(inProgress: Boolean) {
-        mProgressBar!!.visibility = if (inProgress) View.VISIBLE else View.GONE
-        mPasswordTextView!!.isEnabled = !inProgress
-        mUsernameTextView!!.isEnabled = !inProgress
-        mLoginButton!!.isEnabled = !inProgress
-        mLoginButton!!.background.alpha = if (inProgress) 128 else 255
+        mProgressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
+        mPasswordTextView.isEnabled = !inProgress
+        mUsernameTextView.isEnabled = !inProgress
+        mLoginButton.isEnabled = !inProgress
+        mLoginButton.background.alpha = if (inProgress) 128 else 255
     }
 
     override fun setErrorMessage(errorMessage: String) {
-        mErrorTextView!!.visibility = View.VISIBLE
-        mErrorTextView!!.text = errorMessage
+        mErrorTextView.visibility = View.VISIBLE
+        mErrorTextView.text = errorMessage
     }
 
     override fun setServerUrl(serverUrl: String) {
@@ -82,11 +83,11 @@ class LoginActivity : UstadBaseActivity(), LoginView {
     }
 
     override fun setUsername(username: String) {
-        mUsernameTextView!!.text = username
+        mUsernameTextView.setText(username)
     }
 
     override fun setPassword(password: String) {
-        mPasswordTextView!!.text = password
+        mPasswordTextView.setText(password)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

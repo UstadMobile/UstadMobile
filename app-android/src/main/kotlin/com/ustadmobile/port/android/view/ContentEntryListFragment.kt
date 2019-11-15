@@ -53,6 +53,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         ContentEntryListRecyclerViewAdapter.AdapterViewListener,
         ContentEntryListRecyclerViewAdapter.EmptyStateListener {
 
+
     override val viewContext: Any
         get() = context!!
 
@@ -259,9 +260,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             recyclerAdapter!!.addListeners()
 
             localAvailabilityPagedListCallback = LocalAvailabilityPagedListCallback(
-                    managerAndroidBle.localAvailabilityManager, null, {availabilityMap ->
+                    managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
                 runOnUiThread(Runnable { recyclerAdapter?.updateLocalAvailability(availabilityMap) })
-            })
+            }
 
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
@@ -274,6 +275,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         super.onDetach()
         this.contentEntryListener = null
     }
+
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
