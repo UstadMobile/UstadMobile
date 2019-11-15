@@ -22,6 +22,9 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     private var showDownloadAll = false
 
+    private val homeView: HomeView = view
+
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
@@ -52,7 +55,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     fun handleShowDownloadButton(show: Boolean){
         view.runOnUiThread(Runnable {
-            view.showDownloadAllButton(show && showDownloadAll)
+            homeView.showDownloadAllButton(show && showDownloadAll)
         })
     }
 
@@ -72,7 +75,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
     }
 
     fun handleClickShareApp() {
-        view.showShareAppDialog()
+        homeView.showShareAppDialog()
     }
 
     override fun handleNavigation() {
