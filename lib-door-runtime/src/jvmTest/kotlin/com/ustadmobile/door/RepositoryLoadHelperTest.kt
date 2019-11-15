@@ -1,7 +1,9 @@
 package com.ustadmobile.door
 
 import com.nhaarman.mockitokotlin2.mock
+import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import kotlinx.coroutines.*
+import kotlinx.coroutines.time.withTimeout
 import org.junit.Assert
 import org.junit.Test
 import java.io.IOException
@@ -253,5 +255,105 @@ class RepositoryLoadHelperTest  {
                     "connectivity is restored", callCountBeforeConnectivityRestored, loadHelperCallCount.get())
         }
     }
+
+
+    @Test
+    fun givenConnectivityAvailableAndMirrorAvailable_whenDoRequestCalled_thenWillUseMainEndpoint() {
+        val mockCloudEndpoint = "http://cloudserver/endpoint"
+        val mockMirrorEndpoint = "http://localhost:2000/proxy"
+        val mockRepository = mock<DoorDatabaseRepository> {
+            on {connectivityStatus}.thenReturn(DoorDatabaseRepository.STATUS_CONNECTED)
+            on {endpoint}.thenReturn(mockCloudEndpoint)
+            onBlocking { activeMirrors() }.thenReturn(listOf(MirrorEndpoint(1, mockMirrorEndpoint, 100)))
+        }
+
+        val entity = DummyEntity(100, "Bob", "Jones")
+        val endpointUsed = CompletableDeferred<String>()
+        val repoLoadHelper = RepositoryLoadHelper<DummyEntity>(mockRepository,
+                lifecycleHelperFactory = mock {  }) {endpoint ->
+            endpointUsed.complete(endpoint)
+            entity
+        }
+
+        runBlocking {
+            repoLoadHelper.doRequest()
+            val endpointUsedRef = withTimeout(5000)  { endpointUsed.await() }
+            Assert.assertEquals("Given connectivity is available and mirror is available " +
+                    "repoloadhelper uses main endpoint", mockCloudEndpoint, endpointUsedRef)
+        }
+    }
+
+    @Test
+    fun givenNoConnectivityAvailableAndMirrorAvailable_whenDoRequestCalled_thenWillUseMirror() {
+        val mockCloudEndpoint = "http://cloudserver/endpoint"
+        val mockMirrorEndpoint = "http://localhost:2000/proxy"
+        val mockRepository = mock<DoorDatabaseRepository> {
+            on {connectivityStatus}.thenReturn(DoorDatabaseRepository.STATUS_DISCONNECTED)
+            on {endpoint}.thenReturn(mockCloudEndpoint)
+            onBlocking { activeMirrors() }.thenReturn(listOf(MirrorEndpoint(1, mockMirrorEndpoint, 100)))
+        }
+
+        val entity = DummyEntity(100, "Bob", "Jones")
+        val endpointUsed = CompletableDeferred<String>()
+        val repoLoadHelper = RepositoryLoadHelper<DummyEntity>(mockRepository,
+                lifecycleHelperFactory = mock {  }) {endpoint ->
+            endpointUsed.complete(endpoint)
+            entity
+        }
+
+        runBlocking {
+            repoLoadHelper.doRequest()
+            val endpointUsedRef = withTimeout(5000)  { endpointUsed.await() }
+            Assert.assertEquals("Given connectivity is not available and mirror is available " +
+                    "repoloadhelper uses mirror endpoint", mockMirrorEndpoint, endpointUsedRef)
+        }
+    }
+
+    @Test
+    fun givenRequestUnsuccessfulAndDataIsObserved_whenNewMirrorAvailable_thenWillRetry() {
+        val mockCloudEndpoint = "http://cloudserver/endpoint"
+        val mockMirrorEndpoint = "http://localhost:2000/proxy"
+
+        val currentConnectivityStatus = AtomicInteger(DoorDatabaseRepository.STATUS_DISCONNECTED)
+        val currentActiveMirrorList = mutableListOf<MirrorEndpoint>()
+        val mockRepository = mock<DoorDatabaseRepository> {
+            on {connectivityStatus}.thenAnswer { invocation -> currentConnectivityStatus.get() }
+            on {endpoint}.thenReturn(mockCloudEndpoint)
+            onBlocking { activeMirrors() }.thenAnswer { invocation -> currentActiveMirrorList }
+        }
+
+        val entity = DummyEntity(100, "Bob", "Jones")
+        val endpointUsed = CompletableDeferred<String>()
+        val repoLoadHelper = RepositoryLoadHelper<DummyEntity>(mockRepository,
+                lifecycleHelperFactory = mock {  }) {endpoint ->
+
+            if(currentConnectivityStatus.get() == STATUS_CONNECTED || currentActiveMirrorList.isNotEmpty()) {
+                endpointUsed.complete(endpoint)
+                entity
+            }else {
+                throw IOException("Mock offline and there is no mirror")
+            }
+
+        }
+
+        runBlocking {
+            try {
+                repoLoadHelper.doRequest()
+            }catch(e: Exception) {
+                //will fail
+            }
+
+            val endpointCompleteOnFirstRequest = endpointUsed.isCompleted
+
+
+        }
+    }
+
+    fun givenRequestUnsuccessfulAndDataIsNotObserved_whenNewMirrorAvailable_thenWillDoNothing() {
+
+    }
+
+
+
 
 }
