@@ -1,18 +1,22 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
-class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeView)
-    : UstadBaseController<HomeView>(context, arguments, view) {
-
-    val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
+class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
+                    val personDao: PersonDao, impl: UstadMobileSystemImpl)
+    : LanguageOptionPresenter(context, arguments, view, impl) {
 
     private var account: UmAccount? = null
 
@@ -27,9 +31,23 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
 
         account = UmAccountManager.getActiveAccount(context)
 
-        view.runOnUiThread(Runnable {
-            view.loadProfileIcon(if(account == null) "" else "")
-        })
+        GlobalScope.launch {
+            var showReport = false; var person: Person? = null
+            if(account != null){
+                person = personDao.findByUid(account!!.personUid)
+                if(person != null){
+                   showReport = person.admin
+                }
+            }
+
+            view.runOnUiThread(Runnable {
+                homeView.showReportMenu(showReport)
+                if(person != null){
+                    homeView.setLoggedPerson(person)
+                }
+                homeView.loadProfileIcon(if(account == null) "" else "")
+            })
+        }
     }
 
     fun handleShowDownloadButton(show: Boolean){
@@ -45,6 +63,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         impl.go("DownloadDialog", args, context)
     }
 
+    @JsName("handleClickPersonIcon")
     fun handleClickPersonIcon(){
         val args = HashMap<String, String?>()
         args.putAll(arguments)
@@ -56,8 +75,12 @@ class HomePresenter(context: Any, arguments: Map<String, String?>, view: HomeVie
         view.showShareAppDialog()
     }
 
+    override fun handleNavigation() {
+    }
+
 
     companion object {
+        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
     }
 }

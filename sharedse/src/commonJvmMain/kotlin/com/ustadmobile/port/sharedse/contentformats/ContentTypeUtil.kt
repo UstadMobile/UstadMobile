@@ -10,7 +10,6 @@ import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.epub.EpubTypePlugin
-import com.ustadmobile.port.sharedse.contentformats.h5p.H5PTypePlugin
 import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.TinCanTypePlugin
 import java.io.File
 import java.io.IOException
@@ -24,7 +23,7 @@ import java.util.zip.ZipException
  */
 object ContentTypeUtil {
 
-    private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), H5PTypePlugin(), TinCanTypePlugin())
+    private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), TinCanTypePlugin())
 
     /**
      * Get generated content entry from the imported content
@@ -34,7 +33,7 @@ object ContentTypeUtil {
         for (plugin in CONTENT_PLUGINS) {
             val contentEntry = plugin.getContentEntry(file)
             if (contentEntry != null) {
-                contentEntry.imported = true
+                contentEntry.status = ContentEntry.STATUS_IMPORTED
                 content[CONTENT_ENTRY] = contentEntry
                 content[CONTENT_MIMETYPE] = plugin.mimeTypes[0]
                 break
@@ -64,7 +63,7 @@ object ContentTypeUtil {
             if (contentEntry != null) {
                 val appDatabase = UmAppDatabase.getInstance(context)
                 val appRepo = UmAccountManager.getRepositoryForActiveAccount(context)
-                contentEntry.imported = true
+                contentEntry.status = ContentEntry.STATUS_IMPORTED
 
                 val container = Container(contentEntry)
                 container.cntLastModified = System.currentTimeMillis()

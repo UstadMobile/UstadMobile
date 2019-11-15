@@ -31,7 +31,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"/>
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
@@ -62,10 +62,7 @@
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.H5PContentActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
+
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

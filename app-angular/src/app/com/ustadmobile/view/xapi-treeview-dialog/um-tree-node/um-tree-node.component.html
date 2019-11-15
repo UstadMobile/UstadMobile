@@ -1,0 +1,10 @@
+<ul *ngIf="treeData">
+    <li *ngFor="let node of treeData">
+
+       <div class="collapsible-header" [ngStyle]="{'margin-left': ''+(node.nodeLevel * 5)+'%'}" (click)="toggleChild(node)">
+          <i style="cursor: pointer; margin-left: 10px !important;" (click)="setChecked(node)" class="material-icons">{{node.checked ? 'check_box' :'check_box_outline_blank'}}</i>
+          {{ node.nodeName }}
+          </div> 
+        <tree-view *ngIf="node.showChildren" [treeData]="node.children" ></tree-view> 
+    </li>  
+  </ul>

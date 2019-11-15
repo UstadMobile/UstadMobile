@@ -1,32 +1,42 @@
-<div class="row white default-padding-top default-content-padding-bottom default-content-padding-left default-content-padding-right">
-  <div class="col s12 l5 {{entry_thumbnail_class}} center-align">
-    <img class="responsive-img img-margin-top" src="{{entryThumbnail}}"/>
+<div
+  class="row white default-padding-top default-content-padding-bottom default-content-padding-left default-content-padding-right">
+
+  <div class="col s12 l5 {{class_entry_thumbnail}} center-align">
+    <img class="responsive-img img-margin-top" [src]="contentEntry.thumbnailUrl" />
+
   </div>
 
-  <div class="col s12 l7 {{entry_summary_class}}">
-    <p class="entry-title">{{entryTitle}}</p>
-    <p  *ngIf="entryAuthor" class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author"> Author</span>: {{entryAuthor}}</p>
+  <div class="col s12 l7 {{class_entry_summary}} default-margin-bottom">
+    <p class="entry-title">{{contentEntry.title}}</p>
+    <p *ngIf="contentEntry.author" class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author">
+        Author</span>: {{contentEntry.author}}</p>
     <label *ngIf="entryLicence" i18n="@@entry_details_license">License</label>
-    <p *ngIf="entryLicence" class="entry-content">{{entryLicence}}</p> 
-    <label *ngIf="entryDescription" i18n="@@entry_details_description">Description</label>
-    <p *ngIf="entryDescription" class="entry-content">{{entryDescription}}</p>
+    <p *ngIf="entryLicence" class="entry-content">{{entryLicence}}</p>
+    <label *ngIf="contentEntry.description" i18n="@@entry_details_description">Description</label>
+    <p *ngIf="contentEntry.description" class="entry-content">{{contentEntry.description}}</p>
     <div class="divider default-margin-bottom"></div>
-    <label *ngIf="translations.length > 0" i18n="@@also_available_in">Also available in: </label>
-    <div  *ngIf="translations.length > 0"  class="row default-padding-top">
-        
-      <mz-chip class="open-content" *ngFor="let translation of translations" (click)="openTranslation(translation)">
-      {{translation.languageName}}
+
+
+  </div>
+
+  <div class="col s12">
+    <div class="row">
+      <label class="{{class_availability_label}}" *ngIf="translations.length > 0" i18n="@@also_available_in">Also available in: </label>
+    </div>
+    <div *ngIf="translations.length > 0" class="row default-padding-top">
+      <mz-chip class="open-content" *ngFor="let translation of translations" (click)="handleClickTranslatedEntry(translation)">
+        {{translation.languageName}}
       </mz-chip>
     </div>
-
-    <div class="row default-padding-top right default-margin-right">
-          <div class="fixed-action-btn">
-              <button mz-button class="orange darken-2" i18n="@@open" (click)="openEntry()">
-                  OPEN
-                </button>
-            </div>
-    </div>
-  
-
   </div>
+
+
+  <div class="row default-padding-top default-margin-right">
+    <div class="{{floating_btn_class_right}}">
+      <button mz-button class="orange darken-2 left" i18n="@@open" (click)="handleDownloadButtonClick()">
+        OPEN
+      </button>
+    </div>
+  </div>
+
 </div>

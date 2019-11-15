@@ -1,21 +1,23 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
-import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IN_APP
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -24,6 +26,7 @@ import kotlin.js.JsName
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
+                                  private val isDownloadEnabled: Boolean,
                                   private val statusProvider: DownloadJobItemStatusProvider?,
                                   private val appRepo: UmAppDatabase,
                                   private val localAvailabilityManager: LocalAvailabilityManager?)
@@ -43,11 +46,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var statusUmLiveData: DoorLiveData<ContentEntryStatus?>? = null
 
-    private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
+    internal val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
     private var entryLiveData: DoorLiveData<ContentEntry?>? = null
 
     private var isDownloadComplete: Boolean = false
+
+    private var showEditorControls: Boolean = false
 
     private var currentContentEntry: ContentEntry = ContentEntry()
 
@@ -58,11 +63,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
-
         entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
-        entryLiveData!!.observe(this, this::onEntryChanged)
-
+        entryLiveData!!.observe(this, ::onEntryChanged)
         GlobalScope.launch {
+
             val result = appRepo.containerDao.findFilesByContentEntryUid(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setDetailsButtonEnabled(result.isNotEmpty())
@@ -96,34 +100,35 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private fun onEntryChanged(entry: ContentEntry?) {
         if (entry != null) {
-            val licenseType = getLicenseType(entry)
+            val licenseType = getLicenseType(entry.licenseType)
             view.runOnUiThread(Runnable {
                 if (currentContentEntry != entry) {
                     currentContentEntry = entry
                     view.setContentEntryLicense(licenseType)
+                    with(entry) {
+                        view.runOnUiThread(Runnable {
+                            view.showEditButton(showEditorControls
+                                    && (this.status and STATUS_IN_APP)==STATUS_IN_APP)
+                        })
+                        view.setContentEntry(this)
+                    }
                     view.setContentEntry(entry)
                 }
             })
         }
     }
 
-    private fun getLicenseType(result: ContentEntry): String {
-        when (result.licenseType) {
-            ContentEntry.LICENSE_TYPE_CC_BY -> return "CC BY"
-            ContentEntry.LICENSE_TYPE_CC_BY_SA -> return "CC BY SA"
-            ContentEntry.LICENSE_TYPE_CC_BY_SA_NC -> return "CC BY SA NC"
-            ContentEntry.LICENSE_TYPE_CC_BY_NC -> return "CC BY NC"
-            ContentEntry.LICESNE_TYPE_CC_BY_NC_SA -> return "CC BY NC SA"
-            ContentEntry.PUBLIC_DOMAIN -> return "Public Domain"
-            ContentEntry.ALL_RIGHTS_RESERVED -> return "All Rights Reserved"
-        }
-        return ""
-    }
-
-
     private fun onEntryStatusChanged(status: ContentEntryStatus?) {
 
         isDownloadComplete = status != null && status.downloadStatus == JobStatus.COMPLETE
+
+        if(currentContentEntry.contentEntryUid != 0L){
+            view.runOnUiThread(Runnable {
+                view.showExportContentIcon(showEditorControls
+                        && ((currentContentEntry.status and STATUS_IN_APP) == STATUS_IN_APP)
+                        && isDownloadComplete)
+            })
+        }
 
         val buttonLabel = impl.getString(if (status == null || !isDownloadComplete)
             MessageID.download
@@ -178,11 +183,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 if (container != null) {
                     containerUid = container.containerUid
                     val containerUidList = listOf(containerUid!!)
-                    val availableNowMap = if(localAvailabilityManager != null) {
-                        localAvailabilityManager.areContentEntriesLocallyAvailable(containerUidList)
-                    }else {
-                        mapOf()
-                    }
+                    val availableNowMap = localAvailabilityManager?.areContentEntriesLocallyAvailable(containerUidList)
+                            ?: mapOf()
 
                     view.runOnUiThread(Runnable {
                         handleLocalAvailabilityStatus(availableNowMap)
@@ -207,12 +209,71 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
+    /**
+     * Handle click download/open button
+     */
+    @JsName("handleDownloadButtonClick")
+    fun handleDownloadButtonClick(){
+
+        if(isDownloadEnabled){
+            if (isDownloadComplete) {
+
+                val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
+                        "false", context)!!.toBoolean()
+
+                if (loginFirst) {
+                    impl.go(LoginView.VIEW_NAME, args, view.viewContext)
+                } else {
+                   goToContentEntry()
+                }
+
+            } else {
+                val args = HashMap<String, String>()
+
+                //hard coded strings because these are actually in sharedse
+                args["contentEntryUid"] = this.entryUuid.toString()
+                view.runOnUiThread(Runnable { view.showDownloadOptionsDialog(args) })
+            }
+        }else{
+           goToContentEntry()
+        }
+    }
+
+    private fun goToContentEntry(){
+        view.showBaseProgressBar(true)
+        ContentEntryUtil.instance.goToContentEntry(isDownloadEnabled, entryUuid,arguments[ARG_NO_IFRAMES]?.toBoolean()!!,
+                appRepo, impl, isDownloadComplete,
+                context, object : UmCallback<Any> {
+
+            override fun onSuccess(result: Any?) {
+                view.showBaseProgressBar(false)
+            }
+
+            override fun onFailure(exception: Throwable?) {
+                if (exception != null) {
+                    val message = exception.message
+                    if (exception is NoAppFoundException) {
+                        view.runOnUiThread(Runnable {
+                            view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
+                                    MessageID.get_app,
+                                    exception.mimeType!!)
+                        })
+                    } else {
+                        view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+                    }
+                }
+            }
+        })
+    }
+
+
     @JsName("handleClickTranslatedEntry")
     fun handleClickTranslatedEntry(uid: Long) {
         val args = HashMap<String, String>()
         args[ARG_CONTENT_ENTRY_UID] = uid.toString()
         impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
     }
+
 
     @JsName("handleUpNavigation")
     fun handleUpNavigation() {
@@ -225,51 +286,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             impl.go(HomeView.VIEW_NAME, mutableMapOf(), context,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
-    }
-
-    fun handleDownloadButtonClick() {
-        if (isDownloadComplete) {
-
-            val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
-                    "false", context)!!.toBoolean()
-
-            if (loginFirst) {
-                impl.go(LoginView.VIEW_NAME, args, view.viewContext)
-            } else {
-                view.showBaseProgressBar(true)
-                ContentEntryUtil.goToContentEntry(entryUuid, appRepo, impl, isDownloadComplete,
-                        context, object : UmCallback<Any> {
-
-                    override fun onSuccess(result: Any?) {
-                        view.showBaseProgressBar(false)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        if (exception != null) {
-                            val message = exception.message
-                            if (exception is NoAppFoundException) {
-                                view.runOnUiThread(Runnable {
-                                    view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
-                                            MessageID.get_app,
-                                            exception.mimeType!!)
-                                })
-                            } else {
-                                view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
-                            }
-                        }
-                    }
-                })
-            }
-
-
-        } else {
-            val args = HashMap<String, String>()
-
-            //hard coded strings because these are actually in sharedse
-            args["contentEntryUid"] = this.entryUuid.toString()
-            view.runOnUiThread(Runnable { view.showDownloadOptionsDialog(args) })
-        }
-
     }
 
 
@@ -290,38 +306,49 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
 
-    fun handleShowEditButton(show: Boolean) {
-        view.runOnUiThread(Runnable { view.showEditButton(show) })
+
+    fun handleShowEditControls(show: Boolean) {
+        this.showEditorControls = show
     }
 
+    @JsName("handleCancelDownload")
     suspend fun handleCancelDownload() {
         val currentJobId = appRepo.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
         appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
                 JobStatus.CANCELLING)
-        appRepo.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        appRepo.contentEntryStatusDao.updateDownloadStatusAsync(entryUuid, JobStatus.CANCELED)
         statusProvider?.removeDownloadChangeListener(this)
     }
 
 
+    @JsName("handleStartEditingContent")
     fun handleStartEditingContent() {
 
         GlobalScope.launch {
             val entry = appRepo.contentEntryDao.findByEntryId(entryUuid)
-
             if (entry != null) {
                 args.putAll(arguments)
+
+                val imported = (entry.status and ContentEntry.STATUS_IMPORTED) == ContentEntry.STATUS_IMPORTED
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
-                args[ContentEntryEditView.CONTENT_TYPE] = (if (entry.imported) CONTENT_IMPORT_FILE
-                else CONTENT_CREATE_CONTENT).toString()
+                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
+                else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
-                if (entry.imported)
+                if (imported)
                     view.startFileBrowser(args)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
         }
+    }
+
+    @JsName("handleContentEntryExport")
+    fun handleContentEntryExport(){
+        val args = HashMap(arguments)
+        args[ContentEntryExportView.ARG_CONTENT_ENTRY_TITLE] = currentContentEntry.title
+        impl.go(ContentEntryExportView.VIEW_NAME, args, context)
     }
 
 
@@ -347,6 +374,20 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         const val LOCALLY_NOT_AVAILABLE_ICON = 2
 
         private const val BAD_NODE_FAILURE_THRESHOLD = 3
+
+        @JsName("getLicenseType")
+        fun getLicenseType(licenseType: Int): String {
+            when (licenseType) {
+                ContentEntry.LICENSE_TYPE_CC_BY -> return "CC BY"
+                ContentEntry.LICENSE_TYPE_CC_BY_SA -> return "CC BY SA"
+                ContentEntry.LICENSE_TYPE_CC_BY_SA_NC -> return "CC BY SA NC"
+                ContentEntry.LICENSE_TYPE_CC_BY_NC -> return "CC BY NC"
+                ContentEntry.LICENSE_TYPE_CC_BY_NC_SA -> return "CC BY NC SA"
+                ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN -> return "Public Domain"
+                ContentEntry.ALL_RIGHTS_RESERVED -> return "All Rights Reserved"
+            }
+            return ""
+        }
     }
 
 }

@@ -21,24 +21,27 @@
     <string name="confirm">Confirm</string>
     <string name='cancel'>Cancel</string>
     <string name='delete'>Delete</string>
+    <string name='new_tab'>Displaying on new Tab</string>
+
 
     <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
     <string name='loading'>Loading</string>
     <string name='deleting'>Deleting</string>
     <string name='error_opening_file'>Error opening file: </string>
-    <string name='download_in_progress'>Download in progress...</string>
-    <string name='save_to'>Save to...</string>
+    <string name='download_in_progress'>Download in progress…</string>
+    <string name='save_to'>Save to…</string>
     <string name='all_users'>All users</string>
     <string name='only_me'>Only me</string>
     <string name='mycourses'>My courses</string>
     <string name='onthisdevice'>On this device</string>
     <string name='logout'>Logout</string>
     <string name='about'>About</string>
-    <string name='download_for'>Download for...</string>
+    <string name='download_for'>Download for…</string>
     <string name='refresh'>Refresh</string>
     <string name='download_all'>Download all</string>
     <string name='nothing_selected'>Nothing selected!</string>
     <string name='next'>Next</string>
+    <string name='previous'>Previous</string>
     <string name='back'>Back</string>
     <string name='username'>Username</string>
     <string name='password'>Password</string>
@@ -92,7 +95,7 @@
     <string name='data_usage'>Data usage</string>
     <string name='app_interface_language'>App interface language</string>
     <string name="share_application">Share App</string>
-    <string name="share_via">Share via...</string>
+    <string name="share_via">Share via…</string>
     <string name="share">Share</string>
     <string name="receive">Receive</string>
     <string name="sent">Sent</string>
@@ -110,6 +113,7 @@
     <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="success">Success</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
 
@@ -145,6 +149,11 @@
 
     <!-- Update student details action button -->
     <string name="update">Update</string>
+    <string name="profile">Profile</string>
+
+    <string name="dialog_download_from_playstore_message">Access &amp; Share Educational Content Offline</string>
+    <string name="dialog_download_from_playstore_ok">Download now (free)</string>
+    <string name="dialog_download_from_playstore_cancel">Stay on website</string>
 
     <string name="catalog">Catalog</string>
     <string name="closed">Closed</string>
@@ -178,7 +187,7 @@
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">WiFi only</string>
-    <string name="download_calculating">Calculating...</string>
+    <string name="download_calculating">Calculating…</string>
     <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
     <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
@@ -304,6 +313,9 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
+    <string name="content_entry_export">Export</string>
+    <string name="content_entry_export_inprogress">Exporting</string>
+    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
     <string name="bar_chart" value="100">Bar Chart</string>
     <string name="line_graph" value="101">Line Graph</string>
@@ -320,6 +332,9 @@
     <string name="xapi_content_entry" value="304">Content Entry</string>
     <string name="xapi_location" value="305">Location</string>
     <string name="xapi_gender" value="306">Gender</string>
+    <string name="xapi_clear" >Clear</string>
+    <string name="xapi_today" >Today</string>
+
 
     <string name="from">From</string>
     <string name="tocao">To</string>
@@ -361,13 +376,16 @@
     <string name="import_title_not_entered">Title not entered</string>
 
 
-    <string name="no_account">Don\'t have an account?</string>
+    <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
 
     <string name="import_link_invalid_url">Invalid Url</string>
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
+    <string name="error_not_found_status">404 !</string>
+    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
+
 
     <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
     <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
