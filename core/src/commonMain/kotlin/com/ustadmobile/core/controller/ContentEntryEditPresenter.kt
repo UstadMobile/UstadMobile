@@ -20,8 +20,8 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IMPORTED
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IN_APP
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -72,7 +72,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         GlobalScope.launch {
             val entry = contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
-            importedEntry = (contentEntry.status and STATUS_IMPORTED) == STATUS_IMPORTED
+            importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
                     view.runOnUiThread(Runnable {
@@ -132,10 +132,10 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             contentEntry.description = description
             contentEntry.licenseType = licenceIds[licence]
             contentEntry.thumbnailUrl = thumbnailUrl
-            contentEntry.status = if(isImportedContent) STATUS_IMPORTED else 0
+            contentEntry.contentFlags = if(isImportedContent) FLAG_IMPORTED else 0
 
             if(isNewContent){
-                contentEntry.status = STATUS_IN_APP
+                contentEntry.contentFlags = FLAG_CONTENT_EDITOR
                 contentEntry.leaf = isLeaf
                 contentEntry.author = if(author.isEmpty()) account.username else author
                 contentEntry.contentEntryUid = contentEntryDao.insert(contentEntry)

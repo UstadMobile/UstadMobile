@@ -15,7 +15,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IN_APP
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import kotlinx.atomicfu.atomic
@@ -108,7 +108,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     with(entry) {
                         view.runOnUiThread(Runnable {
                             view.showEditButton(showEditorControls
-                                    && (this.status and STATUS_IN_APP)==STATUS_IN_APP)
+                                    && (this.contentFlags and FLAG_CONTENT_EDITOR)==FLAG_CONTENT_EDITOR)
                         })
                         view.setContentEntry(this)
                     }
@@ -125,7 +125,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if(currentContentEntry.contentEntryUid != 0L){
             view.runOnUiThread(Runnable {
                 view.showExportContentIcon(showEditorControls
-                        && ((currentContentEntry.status and STATUS_IN_APP) == STATUS_IN_APP)
+                        && ((currentContentEntry.contentFlags and FLAG_CONTENT_EDITOR) == FLAG_CONTENT_EDITOR)
                         && isDownloadComplete)
             })
         }
@@ -329,7 +329,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             if (entry != null) {
                 args.putAll(arguments)
 
-                val imported = (entry.status and ContentEntry.STATUS_IMPORTED) == ContentEntry.STATUS_IMPORTED
+                val imported = (entry.contentFlags and ContentEntry.FLAG_IMPORTED) == ContentEntry.FLAG_IMPORTED
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
