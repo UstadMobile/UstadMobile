@@ -30,6 +30,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_PASS
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
@@ -1243,6 +1244,21 @@ object ContentScraperUtil {
 
         return driver
     }
+
+    fun loginCK12(driver: ChromeDriver): ChromeDriver {
+
+        driver.findElement(By.cssSelector("div input#username")).sendKeys(KHAN_USERNAME)
+        driver.findElement(By.cssSelector("div input#password")).sendKeys(CK12_PASS)
+
+        driver.findElement(By.cssSelector("div.loginsubmitwrap input.btn")).click()
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        waitForJSandJQueryToLoad(waitDriver)
+        clearChromeConsoleLog(driver)
+
+        return driver
+    }
+
+
 
     fun downloadImagesFromJsonContent(images: MutableMap<String, ItemData.Content.Image?>, destDir: File, scrapeUrl: String, indexList: MutableList<LogIndex.IndexEntry>) {
         for (imageValue in images.keys) {

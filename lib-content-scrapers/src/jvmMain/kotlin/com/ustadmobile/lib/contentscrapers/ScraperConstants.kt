@@ -31,6 +31,7 @@ object ScraperConstants {
 
     const val KHAN_USERNAME = "samih@ustadmobile.com"
     const val KHAN_PASS = "ustadscraper"
+    const val CK12_PASS = "ustadscraper1"
     const val KHAN_LOGIN_LINK = "https://www.khanacademy.org/login"
     const val ANDROID_USER_AGENT = "user-agent=Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/_BuildID_) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36"
 

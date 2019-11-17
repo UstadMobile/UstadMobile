@@ -122,13 +122,18 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             driver.get(queueUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            if (driver.currentUrl.contains("signin")) {
+                ContentScraperUtil.loginCK12(driver)
+                driver.get(url.toString())
+                ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            }
             waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
                     By.cssSelector("div#browse-grid-wrapper a.dxtrack-user-action")))
         } catch (e: TimeoutException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
         }
 
-        var document  = Jsoup.parse(driver.pageSource)
+        var document = Jsoup.parse(driver.pageSource)
         driver.close()
 
         var categoryList = document.select("div[role]")
@@ -155,7 +160,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, categoryEntry, categoryCounter++)
 
             var subjectCounter = 0
-            for(subject in subjectList){
+            for (subject in subjectList) {
 
                 var hrefLink = subject.attr("href")
                 var title = subject.text()
@@ -190,6 +195,11 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             driver.get(url.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            if (driver.currentUrl.contains("signin")) {
+                ContentScraperUtil.loginCK12(driver)
+                driver.get(url.toString())
+                ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            }
         } catch (e: TimeoutException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
         }
@@ -305,13 +315,18 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
 
     @Throws(IOException::class)
-    private fun browseGradeTopics(subCategoryUrl: URL, destination: File, parent: ContentEntry) {
+    fun browseGradeTopics(subCategoryUrl: URL, destination: File, parent: ContentEntry) {
 
         val driver = ContentScraperUtil.setupLogIndexChromeDriver()
         try {
             driver.get(subCategoryUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            if (driver.currentUrl.contains("signin")) {
+                ContentScraperUtil.loginCK12(driver)
+                driver.get(subCategoryUrl.toString())
+                ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            }
         } catch (e: TimeoutException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
         }
@@ -382,13 +397,18 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
     }
 
     @Throws(IOException::class)
-    private fun browseContent(contentUrl: URL, topicDestination: File, parent: ContentEntry) {
+    fun browseContent(contentUrl: URL, topicDestination: File, parent: ContentEntry) {
 
         val driver = ContentScraperUtil.setupLogIndexChromeDriver()
         try {
             driver.get(contentUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            if (driver.currentUrl.contains("signin")) {
+                ContentScraperUtil.loginCK12(driver)
+                driver.get(contentUrl.toString())
+                ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+            }
             waitDriver.until(ExpectedConditions.elementToBeClickable(By.cssSelector("i.icon-expand"))).click()
         } catch (e: TimeoutException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
