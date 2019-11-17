@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 
 import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.Html
@@ -16,6 +15,8 @@ import androidx.fragment.app.FragmentActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONTENT_ENTRY
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONTENT_MIMETYPE
 import com.ustadmobile.core.controller.ContentEntryEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -26,6 +27,8 @@ import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -53,7 +56,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     private lateinit var toolbar: Toolbar
 
-    private var thumbnailUrl = ""
+    private var thumbnailUrl: String? = null
 
     private var selectedLicenceIndex = 0
 
@@ -63,7 +66,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     private var rootView: View? = null
 
-    private var selectedFile: File? = null
+    private lateinit var selectedFile: File
 
     private var supportedFilesList: TextView? = null
 
@@ -113,10 +116,8 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         super.onAttach(context)
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_content_entry,
                 container, false)
 
@@ -152,11 +153,13 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         presenter = ContentEntryEditPresenter(activity!!,
                 UMAndroidUtil.bundleToMap(arguments), this, umRepo.contentEntryDao,
                 umRepo.contentEntryParentChildJoinDao, umRepo.contentEntryStatusDao,
-                UmAccountManager.getActiveAccount(context!!)!!)
+                UmAccountManager.getActiveAccount(context!!)!!, UstadMobileSystemImpl.instance){
+            dir: String, mimeType:String,entry: ContentEntry -> return@ContentEntryEditPresenter importFile(dir, mimeType, entry)
+        }
 
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        selectFileBtn.setOnClickListener { v ->
+        selectFileBtn.setOnClickListener {
             presenter!!.handleContentButton()
         }
 
@@ -166,11 +169,12 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
             if (menuId == R.id.save_content) {
                 if (!isDoneBtnDisabled) {
-                    Thread {
+                    GlobalScope.launch {
                         presenter!!.handleSaveUpdateEntry(entryTitle.text.toString(),
-                                entryDescription.text.toString(), thumbnailUrl,
+                                entryDescription.text.toString(),
+                                if(thumbnailUrl != null) thumbnailUrl as String  else "",
                                 selectedLicenceIndex)
-                    }.start()
+                    }
                 }
             }
             true
@@ -178,8 +182,9 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
         addThumbnail.setOnClickListener { presenter!!.handleAddThumbnail() }
 
-        return rootView
+        return  rootView
     }
+
 
     override fun startBrowseFiles() {
         if (actionListener != null) {
@@ -191,7 +196,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
         val builder = AlertDialog.Builder(viewContext as Context)
         builder.setTitle(title)
-        builder.setItems(options.toTypedArray()) { dialog, which ->
+        builder.setItems(options.toTypedArray()) { _, which ->
             if(which == 0){
                 startBrowseFiles()
             }else if(which == 1){
@@ -208,18 +213,10 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         supportedFilesList!!.visibility = if (show) View.VISIBLE else View.GONE
     }
 
-    override fun setEntryTitle(title: String) {
-        entryTitle.setText(title)
-        toolbar.title = title
-    }
 
 
     override fun updateFileBtnLabel(label: String) {
         selectFileBtn.text = label
-    }
-
-    override fun setDescription(description: String) {
-        entryDescription.setText(description)
     }
 
 
@@ -246,9 +243,16 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         entryLicence.setSelection(index, true)
     }
 
-    override fun setThumbnail(thumbnailUrl: String?) {
-        if (thumbnailUrl != null && thumbnailUrl.isNotEmpty()) {
-            this.thumbnailUrl = thumbnailUrl
+
+    override fun setContentEntry(contentEntry: ContentEntry) {
+        entryTitle.setText(contentEntry.title)
+        toolbar.title = contentEntry.title
+
+        entryDescription.setText(contentEntry.description)
+
+        this.thumbnailUrl = contentEntry.thumbnailUrl
+
+        if (this.thumbnailUrl != null && (this.thumbnailUrl as String).isNotEmpty()) {
             Picasso.get().load(thumbnailUrl).into(entryThumbnail)
         }
     }
@@ -256,7 +260,9 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putSerializable(SELECTED_FILE, selectedFile)
+        if(::selectedFile.isInitialized){
+            outState.putSerializable(SELECTED_FILE, selectedFile)
+        }
     }
 
     override fun onViewStateRestored(@Nullable savedInstanceState: Bundle?) {
@@ -287,9 +293,8 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         val storageOptions = ArrayList<String>()
         for (umStorageDir in storageDirs) {
             val deviceStorageLabel = String.format(impl.getString(
-                    MessageID.download_storage_option_device, context!!), umStorageDir.name,
-                    UMFileUtil.formatFileSize(
-                            File(umStorageDir.dirURI).usableSpace))
+                    MessageID.download_storage_option_device, context as Any), umStorageDir.name,
+                    UMFileUtil.formatFileSize(File(umStorageDir.dirURI as String).usableSpace))
             storageOptions.add(deviceStorageLabel)
         }
 
@@ -333,29 +338,23 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     fun checkIfIsSupportedFile(file: File) {
         this.selectedFile = file
-        val content = getContent(file)
+        val content = getContent(selectedFile)
         if (::optionsActivity.isInitialized && optionsActivity.importDialog.isShowing) {
             isDoneBtnDisabled = false
             optionsActivity.importDialog.dismiss()
         }
-        presenter!!.handleSelectedFilePath(selectedFile!!.absolutePath)
-        presenter!!.handleSelectedFileToImport(content)
+        presenter!!.handleSelectedFile(selectedFile.absolutePath, selectedFile.length(),
+                if(content.containsKey(CONTENT_MIMETYPE)) content[CONTENT_MIMETYPE] as String else null,
+                if(content.containsKey(CONTENT_ENTRY)) content[CONTENT_ENTRY] as ContentEntry else null)
     }
 
     override fun dismissDialog() {
-
         dismiss()
     }
 
-    override fun importContent(content: HashMap<String, Any?>) {
-        importContentEntryFromFile(activity!!, content, presenter!!.getSelectedStorageOption(),
-                selectedFile!!, object : UmCallback<ContentEntry> {
-            override fun onSuccess(result: ContentEntry?) {
-                presenter!!.handleImportedFile(result, selectedFile!!.length())
-            }
 
-            override fun onFailure(exception: Throwable?) {}
-        })
+    private suspend fun importFile(baseDir:String, mimeType: String, contentEntry: ContentEntry): ContentEntry{
+        return importContentEntryFromFile(activity!!, contentEntry,mimeType,baseDir,selectedFile)
     }
 
     override fun showAddThumbnailMessage() {

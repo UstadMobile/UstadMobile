@@ -11,8 +11,6 @@ interface ContentEntryEditView : UstadView {
 
     fun showFileSelector(show: Boolean)
 
-    fun setEntryTitle(title: String)
-
     fun showErrorMessage(message: String?, visible: Boolean)
 
     fun showAddThumbnailMessage()
@@ -23,17 +21,14 @@ interface ContentEntryEditView : UstadView {
 
     fun showMessageAndDismissDialog(message: String?, document: Boolean)
 
-    fun setDescription(description: String)
 
-    fun setThumbnail(thumbnailUrl: String?)
+    fun setContentEntry(contentEntry: ContentEntry)
 
     fun updateFileBtnLabel(label: String)
 
     fun setUpLicence(licence: List<String>, index: Int)
 
     fun setUpStorageOption(storageDirs: List<UMStorageDir>)
-
-    fun importContent(content: HashMap<String, Any?>)
 
     fun showProgressDialog()
 

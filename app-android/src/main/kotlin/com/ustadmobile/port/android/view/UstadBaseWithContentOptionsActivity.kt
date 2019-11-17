@@ -103,7 +103,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
                         runOnUiThread{importDialog.show()}
                         HandleFileSelectionAsyncTask(callback ?: object : UmResultCallback<String> {
                             override fun onDone(result: String?) {
-                                entryFragment!!.checkIfIsSupportedFile(File(result))
+                                entryFragment!!.checkIfIsSupportedFile(File(result as String))
                             }
                         }).execute(selectedFileUri)
                     }, *mimeType)

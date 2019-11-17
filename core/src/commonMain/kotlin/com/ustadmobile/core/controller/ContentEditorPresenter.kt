@@ -35,5 +35,4 @@ expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?
     override suspend fun getDocumentPath(storage: String?): String
 
     override fun getEpubNavDocument(): EpubNavDocument?
-
 }
