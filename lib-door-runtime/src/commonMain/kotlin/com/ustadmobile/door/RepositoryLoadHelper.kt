@@ -26,6 +26,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
                               val lifecycleHelperFactory: (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper =
                                       {RepositoryLoadHelperLifecycleHelper(it)},
+                              val endpointName: String = "",
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
     var liveDataWrapper: LiveDataWrapper<*>? = null
@@ -34,9 +35,14 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     val loadedVal = CompletableDeferred<T>()
 
+    val repoHelperId = ID_ATOMICINT.getAndIncrement()
+
     init {
         repository.addWeakConnectivityListener(this)
     }
+
+    private val logPrefix
+        get() = "ID $repoHelperId "
 
     /**
      * This wrapper exists to monitor when LiveData is actively observed. The repository will wrap
@@ -67,16 +73,16 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             val numObservers = activeObservers.size
             if(numObservers == 1) {
                 active.value = activeObservers.isNotEmpty()
-                if(!completed.value) {
+                if(!loadedVal.isCompleted) {
                     //try again if needed
                     attemptCount = 0
                     GlobalScope.launch {
                         try {
-                            Napier.d("RepositoryLoadHelper: addActiveObserver: did not complete " +
+                            Napier.d("$logPrefix : addActiveObserver: did not complete " +
                                             "and data is being observed. Trying again.")
                             onActiveCb?.invoke()
                         } catch(e: IOException) {
-                            Napier.e("RepositoryLoadHelper: addActiveObserver: ERROR " +
+                            Napier.e("$logPrefix : addActiveObserver: ERROR " +
                                     "did not complete and data is being observed: ", e)
                         }
                     }
@@ -114,7 +120,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             try {
                 doRequest(resetAttemptCount = true)
             }catch(e: Exception) {
-                Napier.e("Exception running LiveDataWrapper.wrapLiveData callback", e)
+                Napier.e("$logPrefix Exception running LiveDataWrapper.wrapLiveData callback", e)
             }
         }
         liveDataWrapper = newWrapper
@@ -136,11 +142,11 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 && liveDataWrapper?.active?.value ?: false) {
             GlobalScope.launch {
                 try {
-                    Napier.d("RepositoryLoadHelper: onConnectivityStatusChanged: did not complete " +
+                    Napier.d("$logPrefix RepositoryLoadHelper: onConnectivityStatusChanged: did not complete " +
                                     "and data is being observed. Trying again.")
                     doRequest(resetAttemptCount = true)
                 } catch (e: IOException) {
-                    Napier.e("RepositoryLoadHelper: onConnectivityStatusChanged: ERROR " +
+                    Napier.e("$logPrefix RepositoryLoadHelper: onConnectivityStatusChanged: ERROR " +
                                     "did not complete and data is being observed: ", e)
                 }
             }
@@ -149,14 +155,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     override fun onNewMirrorAvailable(mirror: MirrorEndpoint) {
         if(!completed.value && liveDataWrapper?.active?.value ?: true) {
-            attemptCount = 0
             GlobalScope.launch {
                 try {
-                    Napier.d("RepositoryLoadHelper: onNewMirrorAvailable: Mirror # ${mirror.mirrorId} " +
+                    Napier.d("$logPrefix RepositoryLoadHelper: onNewMirrorAvailable: Mirror # ${mirror.mirrorId} " +
                                     "did not complete and data is being observed. Trying again.")
-                    doRequest()
+                    doRequest(resetAttemptCount = true)
                 } catch(e: IOException) {
-                    Napier.e("RepositoryLoadHelper: onNewMirrorAvailable: ERROR " +
+                    Napier.e("$logPrefix RepositoryLoadHelper: onNewMirrorAvailable: ERROR " +
                                     "did not complete and data is being observed: ", e)
                 }
             }
@@ -165,6 +170,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     suspend fun doRequest(resetAttemptCount: Boolean = false) : T{
         requestLock.withLock {
+            Napier.d("$logPrefix doRequest: resetAttemptCount = $resetAttemptCount")
             if(resetAttemptCount) {
                 attemptCount = 0
                 triedMainEndpoint = false
@@ -184,7 +190,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                     if(!isConnected && mirrorToUse == null) {
                         //it's hopeless - there is no mirror and we have no connection - give up
-                        throw IOException("LoadHelper: Repository status indicates no connectivity and there are no active mirrors")
+                        throw IOException("LoadHelper $logPrefix: Repository status indicates no connectivity and there are no active mirrors")
                     }
 
                     endpointToUse = if(mirrorToUse == null) {
@@ -193,6 +199,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         mirrorToUse.endpointUrl
                     }
 
+                    Napier.d({"$logPrefix doRequest: calling loadFn using endpoint $endpointToUse ."})
                     var t = loadFn(endpointToUse)
                     val isNullOrEmpty = if(t is List<*>) {
                         t.isEmpty()
@@ -203,27 +210,33 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     //if it came from the main endpoint, or we got some actual data, then it looks good
                     var isMainEndpointOrNotNullOrEmpty = mirrorToUse == null || !isNullOrEmpty
                     if(isMainEndpointOrNotNullOrEmpty) {
-                        completed.value = true
+                        //completed.value = true
                     }
 
-                    if(!completed.value && autoRetryOnEmptyLiveData != null) {
+                    if(!isMainEndpointOrNotNullOrEmpty && autoRetryOnEmptyLiveData != null) {
                         val liveDataVal = waitForNonEmptyLiveData()
                         if(liveDataVal != null) {
                             t = liveDataVal
                             isMainEndpointOrNotNullOrEmpty = true
-                            completed.value = true
+                            //completed.value = true
                         }
                     }
 
                     if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult) {
+                        completed.value = true
                         loadedVal.complete(t)
+                        Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse ."})
                         return t
+                    }else {
+                        Napier.e({"$logPrefix doRequest: loadFn completed from $endpointToUse but " +
+                                "not successful. IsNullOrEmpty=$isNullOrEmpty, " +
+                                "autoRetryOnEmptyLiveData=${autoRetryOnEmptyLiveData != null}"})
                     }
 
                     delay(retryDelay.toLong())
                 }catch(e: Exception) {
                     //something went wrong with the load
-                    Napier.e("RepositoryLoadHelper: Exception attempting to load from $endpointToUse",
+                    Napier.e("$logPrefix Exception attempting to load from $endpointToUse",
                             e)
                 }
 
@@ -234,6 +247,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 }
             }
 
+            Napier.d("$logPrefix doRequest: over. Is completed=${loadedVal.isCompleted}")
             return loadedVal.getCompleted()
         }
     }
@@ -245,6 +259,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     suspend fun waitForNonEmptyLiveData() : T?{
         val completableDeferred = CompletableDeferred<T>()
+        Napier.d("$logPrefix waiting for non empty live data.")
         val observer = object: DoorObserver<T> {
             override fun onChanged(t: T) {
                 if(t is List<*> && t.isNotEmpty()) {
@@ -262,6 +277,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             autoRetryOnEmptyLiveData?.removeObserver(observer)
         }
 
+        Napier.d({"$logPrefix Finished waiting for non empty live data. Result=$nonEmptyVal."})
+
         return nonEmptyVal
     }
 
@@ -269,6 +286,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         val coroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
             println("Caught $exception")
         }
+
+        val ID_ATOMICINT = atomic(0)
     }
 
 }

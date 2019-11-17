@@ -148,7 +148,7 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
                                     "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
                                             " RECEIVE Status ${bleHttpResponse.statusCode} \n==Content==\n" +
                                             "${bleHttpResponse.body}\n\n")
-                            Thread.sleep(1000)
+                            //Thread.sleep(1000)
                             return@runBlocking bleHttpResponse.asNanoHttpdResponse()
                         }catch(e: Exception) {
                             UMLog.l(UMLog.ERROR, 691,
@@ -164,7 +164,7 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
                     e.printStackTrace()
                 }
 
-                Thread.sleep(1000)
+                //Thread.sleep(1000)
                 UMLog.l(UMLog.ERROR, 691, "BLEProxyResponder: Request ID# ${bleMessage.messageId}  ERROR Sending error response")
                 NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
                         "text/plain", "failed")

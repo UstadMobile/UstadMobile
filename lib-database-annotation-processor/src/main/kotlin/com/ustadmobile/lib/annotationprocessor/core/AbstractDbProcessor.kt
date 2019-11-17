@@ -1468,9 +1468,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ?.add("val _daoResult = ")?.addDelegateFunctionCall("_dao", daoFunSpec)?.add("\n")
 
         codeBlock.takeIf { isLiveDataOrDataSourceFactory && generateGlobalScopeLaunchBlockForLiveDataTypes}
-                ?.beginControlFlow("%T.%M(%T.coroutineExceptionHandler)", GlobalScope::class,
-                        MemberName("kotlinx.coroutines", "launch"),
-                        RepositoryLoadHelper::class)
+                ?.beginControlFlow("%T.%M", GlobalScope::class,
+                        MemberName("kotlinx.coroutines", "launch"))
                 ?.beginControlFlow("try")
 
         val liveDataLoadHelperArg = if(isLiveData) ",autoRetryOnEmptyLiveData=_daoResult" else ""

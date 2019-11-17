@@ -95,6 +95,11 @@ class BleGattServer
             }
         }
 
+
+        override fun onNotificationSent(device: BluetoothDevice?, status: Int) {
+            super.onNotificationSent(device, status)
+        }
+
         override fun onCharacteristicWriteRequest(device: BluetoothDevice, requestId: Int,
                                                   characteristic: BluetoothGattCharacteristic,
                                                   preparedWrite: Boolean, responseNeeded: Boolean,
@@ -140,9 +145,10 @@ class BleGattServer
                         UMLog.l(UMLog.DEBUG, 691,
                                 "BLEGattServer: Response sent to " + device.address)
 
-                        gattServer!!.cancelConnection(device)
-                        UMLog.l(UMLog.DEBUG, 691,
-                                "BLEGattServer: Response finished, canceled connection with  " + device.address)
+                        //Don't do this as the new implementation will now likely send us another request
+//                        gattServer!!.cancelConnection(device)
+//                        UMLog.l(UMLog.DEBUG, 691,
+//                                "BLEGattServer: Response finished, canceled connection with  " + device.address)
                     }else {
                         UMLog.l(UMLog.DEBUG, 691,
                                 "BLEGattServer: ERROR: received item that required confirmation from  " + device.address)

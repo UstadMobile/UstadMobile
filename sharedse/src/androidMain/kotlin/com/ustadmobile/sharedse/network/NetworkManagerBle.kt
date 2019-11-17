@@ -133,6 +133,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
 
+    private var gattClientCallbackManager: GattClientCallbackManager? = null
+
     override val umAppDatabaseRepo by lazy {
         UmAccountManager.getRepositoryForActiveAccount(context)
     }
@@ -162,6 +164,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE scanning")
                 notifyStateChanged(STATE_STARTED)
+                gattClientCallbackManager = GattClientCallbackManager(context as Context,
+                        bluetoothAdapter!!)
                 bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
                         bleScanCallback as BluetoothAdapter.LeScanCallback?)
                 UMLog.l(UMLog.DEBUG, 689,
@@ -176,6 +180,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun stop() {
             bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
+            gattClientCallbackManager = null
             notifyStateChanged(STATE_STOPPED)
         }
     }
@@ -888,8 +893,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
      * {@inheritDoc}
      */
     actual override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask? {
-        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
-            val entryStatusTask = BleEntryStatusTaskAndroid(
+        val gattClientCallbackManagerVal = gattClientCallbackManager
+        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
+            val entryStatusTask = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal,
                     context as Context, this, containerUidsToCheck, networkNode)
             entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
             return entryStatusTask
@@ -903,8 +909,10 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     actual override fun makeEntryStatusTask(context: Any, message: BleMessage,
                                             peerToSendMessageTo: NetworkNode,
                                             responseListener: BleMessageResponseListener): BleEntryStatusTask? {
-        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
-            val task = BleEntryStatusTaskAndroid(context as Context, this, message, peerToSendMessageTo, responseListener)
+        val gattClientCallbackManagerVal = gattClientCallbackManager
+        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
+            val task = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal, context as Context,
+                    this, message, peerToSendMessageTo, responseListener)
             task.setBluetoothManager(bluetoothManager as BluetoothManager)
             return task
         }
