@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 26)
+], version = 27)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -238,9 +238,25 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
+
+            builder.addMigrations(object : DoorMigration(26,27){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN status TO contentFlags, ADD COLUMN ceInactive BOOL")
+                }
+
+            })
+
+
             builder.addMigrations(object : DoorMigration(25,26){
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                }
+
+            })
+
+            builder.addMigrations(object :DoorMigration(24, 25){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
                 }
 
             })
@@ -1268,12 +1284,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }
 
-            },
-
-            object : DoorMigration(24, 25) {
-                override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
-                }
             })
             return builder
         }
@@ -1295,10 +1305,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                               db.execSql("CREATE TABLE IF NOT EXISTS  " +
                                       "ScrapeRun  ( scrapeRunUid  SERIAL PRIMARY KEY  NOT NULL ,  " +
-                                      "scrapeType  TEXT,  status  INTEGER)")
+                                      "scrapeType  TEXT,  contentFlags  INTEGER)")
                               db.execSql("CREATE TABLE IF NOT EXISTS  ScrapeQueueItem  " +
                                       "( sqiUid  SERIAL PRIMARY KEY  NOT NULL ,  sqiContentEntryParentUid  BIGINT,  " +
-                                      "destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  time  TEXT, " +
+                                      "destDir  TEXT,  scrapeUrl  TEXT,  contentFlags  INTEGER,  runId  INTEGER,  time  TEXT, " +
                                       " itemType  INTEGER,  contentType  TEXT)")
 
 
