@@ -110,7 +110,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     fun <L> wrapLiveData(src: DoorLiveData<L>): DoorLiveData<L> {
         liveDataWrapper?.onActiveCb = null
-        val newWrapper = LiveDataWrapper<L>(src) { doRequest(resetAttemptCount = true) }
+        val newWrapper = LiveDataWrapper<L>(src) {
+            try {
+                doRequest(resetAttemptCount = true)
+            }catch(e: Exception) {
+                Napier.e("Exception running LiveDataWrapper.wrapLiveData callback", e)
+            }
+        }
         liveDataWrapper = newWrapper
         return newWrapper
     }
