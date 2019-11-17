@@ -114,7 +114,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         selectedStorageOption = storageOption
     }
 
-    fun handleSaveUpdateEntry(title: String, description: String, thumbnailUrl: String, licence: Int){
+    fun handleSaveUpdateEntry(title: String, description: String, thumbnailUrl: String, licence: Int, isActive: Boolean, isPublic: Boolean){
         if(title.isNotEmpty() and description.isNotEmpty()){
 
             if((contentType == CONTENT_IMPORT_FILE) and selectedFilePath.isEmpty()
@@ -127,6 +127,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             val isLeaf = arguments.getValue(ContentEntryEditView.CONTENT_ENTRY_LEAF)!!.toBoolean()
             contentEntry.title = title
             contentEntry.author = author
+            contentEntry.publik = isPublic
+            contentEntry.ceInactive = !isActive
             contentEntry.description = description
             contentEntry.licenseType = licenceIds[licence]
             contentEntry.thumbnailUrl = thumbnailUrl
@@ -256,5 +258,4 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                             listOf(impl.getString(MessageID.content_from_file, context), impl.getString(MessageID.content_from_link, context)))
         }
     }
-
 }

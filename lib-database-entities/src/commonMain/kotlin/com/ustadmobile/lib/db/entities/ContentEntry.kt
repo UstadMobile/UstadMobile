@@ -94,7 +94,7 @@ open class ContentEntry() {
      *
      * @param publik true if this content entry is public for anyone to use, false otherwise
      */
-    var publik: Boolean = false
+    var publik: Boolean = true
 
     /**
      * Represents if this entry is being recycled or not.

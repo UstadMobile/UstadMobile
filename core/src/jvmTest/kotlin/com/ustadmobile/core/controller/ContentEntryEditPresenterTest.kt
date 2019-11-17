@@ -106,7 +106,7 @@ class ContentEntryEditPresenterTest {
 
         presenter.handleSelectedFile(dummyFilePath,0L,"", ContentEntry("","", leaf = true, publik = true))
 
-        presenter.handleSaveUpdateEntry("Dummy","Dummy",dummyFilePath,1)
+        presenter.handleSaveUpdateEntry("Dummy","Dummy",dummyFilePath,1, isActive = true, isPublic = true)
 
         verify(mockView).showProgressDialog()
 

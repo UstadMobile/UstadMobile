@@ -297,6 +297,8 @@
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
     <string name="content_entry_label_licence">License</string>
+    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_active">Make content active</string>
     <string name="content_import_success_message">You have successfully imported a file</string>
     <string name="content_import_failure_message">Selected file is not supported, try another file</string>
     <string name="content_creation_empty_field_error">Fill out required fields and try again</string>

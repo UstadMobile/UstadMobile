@@ -277,6 +277,8 @@
     <string name='content_entry_label_select_file'>اختيار ملف</string>
     <string name='content_entry_label_update_file'>تحديث الملف</string>
     <string name='content_entry_label_licence'>رخصة</string>
+    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_active">Make content active</string>
     <string name='content_import_success_message'>تم استيراد الملف بنجاح</string>
     <string name='content_import_failure_message'>الملف المحدد غير معتمد، الرجاء اختيار ملف اخر</string>
     <string name='content_creation_empty_field_error'>الرجاء تعبئة الحقول المطلوبة ثم حاول مرة اخرى</string>
