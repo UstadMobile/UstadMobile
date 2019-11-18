@@ -121,6 +121,8 @@
                 />
 
             <RelativeLayout
+                android:clickable="true"
+                android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:id="@+id/entry_content_visibility_holder"
                 android:paddingTop="@dimen/dimen_12dp"
@@ -150,6 +152,8 @@
 
 
             <RelativeLayout
+                android:clickable="true"
+                android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:id="@+id/entry_content_inactive_holder"
                 android:paddingTop="@dimen/dimen_12dp"

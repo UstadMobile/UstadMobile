@@ -88,10 +88,6 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     private lateinit var visibilityHolder: RelativeLayout
 
-    private var isContentActive = true;
-
-    private var isContentPublic = true;
-
 
     interface EntryCreationActionListener {
 
@@ -191,7 +187,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
                         presenter!!.handleSaveUpdateEntry(entryTitle.text.toString(),
                                 entryDescription.text.toString(),
                                 if(thumbnailUrl != null) thumbnailUrl as String  else "",
-                                selectedLicenceIndex, isContentActive, isContentPublic)
+                                selectedLicenceIndex, inActiveSwitch.isChecked, visibilitySwitch.isChecked)
                     }
                 }
             }
@@ -202,16 +198,15 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
         inActiveHolder.setOnClickListener{
             inActiveSwitch.isChecked = !inActiveSwitch.isChecked
-            isContentActive = !inActiveSwitch.isChecked
         }
 
         visibilityHolder.setOnClickListener{
-            visibilitySwitch.isChecked = !visibilitySwitch.isChecked
-            isContentPublic = visibilitySwitch.isChecked
+            visibilitySwitch.isChecked = ! visibilitySwitch.isChecked
         }
 
         return  rootView
     }
+
 
 
     override fun startBrowseFiles() {

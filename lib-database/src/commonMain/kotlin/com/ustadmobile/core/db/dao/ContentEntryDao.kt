@@ -38,6 +38,17 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("downloadedRootItems")
     abstract fun downloadedRootItems(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
+
+
+    @Query("""SELECT DISTINCT ContentEntry.*, Container.*, 
+            0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 0 AS cepcjLastChangedBy
+            FROM ContentEntry 
+            LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
+            WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.ceInactive = :ceInactive """)
+    @JsName("recycledItems")
+    abstract fun recycledItems(ceInactive:Boolean = true): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
+
     @Query("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
     @JsName("findByEntryId")
     abstract suspend fun findByEntryId(entryUuid: Long): ContentEntry?
@@ -125,11 +136,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
+            AND ContentEntry.ceInactive = :ceInactive
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))""")
     @JsName("getChildrenByParentUidWithCategoryFilter")
-    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long, ceInactive: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
 
     @JsName("findLiveContentEntry")
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")

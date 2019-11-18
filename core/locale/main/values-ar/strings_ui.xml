@@ -16,6 +16,7 @@
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
+    <string name="recycled" >Recycled</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='ok'>OK</string>
@@ -288,6 +289,7 @@
     <string name='content_creation_folder_update_message'>تم تحديث المستند بنجاح</string>
     <string name='empty_state_libraries'>لا يوجد مجلدات</string>
     <string name='empty_state_downloaded'>لا يوجد تنزيلات</string>
+    <string name="empty_state_recycle">No recycled items</string>
     <string name='error_message_load_page'>فشل تحميل الصفحة</string>
     <string name='error_message_update_document'>فشل تحديث المستند</string>
     <string name='content_update_massage'>تم التحديث بنجاح</string>

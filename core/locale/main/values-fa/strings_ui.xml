@@ -124,6 +124,7 @@
     <string name='accept'>پذیرفتن</string>
     <string name='decline'>رد کردن</string>
     <string name='downloaded'>دانلود شد</string>
+    <string name="recycled" >Recycled</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='new_password'>رمز عبور جدید</string>
@@ -289,7 +290,8 @@
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
     <string name="empty_state_libraries">No folders found</string>
-    <string name="empty_state_downloaded">No downloads found</string>
+    <string name="empty_state_downloaded">No downloads items</string>
+    <string name="empty_state_recycle">No recycled entries</string>
     <string name="error_message_load_page">Failed to load the page</string>
     <string name="error_message_update_document">Failed to update document</string>
     <string name="content_update_massage">Updated successfully</string>
