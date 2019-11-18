@@ -140,7 +140,7 @@ interface ContentEditorView : ContentWithOptionsView{
 
         const val VIEW_NAME = "ContentEditor"
 
-        const val CONTENT_ENTRY_UID = "content_entry__uid"
+        const val CONTENT_ENTRY_UID = "entryid"
 
         const val CONTENT_STORAGE_OPTION = "content_storage_option"
 

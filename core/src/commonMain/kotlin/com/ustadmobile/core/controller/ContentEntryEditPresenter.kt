@@ -73,6 +73,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             val entry = contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
             importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
+
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
                     view.runOnUiThread(Runnable {

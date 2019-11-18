@@ -1305,10 +1305,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                               db.execSql("CREATE TABLE IF NOT EXISTS  " +
                                       "ScrapeRun  ( scrapeRunUid  SERIAL PRIMARY KEY  NOT NULL ,  " +
-                                      "scrapeType  TEXT,  contentFlags  INTEGER)")
+                                      "scrapeType  TEXT,  status  INTEGER)")
                               db.execSql("CREATE TABLE IF NOT EXISTS  ScrapeQueueItem  " +
                                       "( sqiUid  SERIAL PRIMARY KEY  NOT NULL ,  sqiContentEntryParentUid  BIGINT,  " +
-                                      "destDir  TEXT,  scrapeUrl  TEXT,  contentFlags  INTEGER,  runId  INTEGER,  time  TEXT, " +
+                                      "destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  time  TEXT, " +
                                       " itemType  INTEGER,  contentType  TEXT)")
 
 

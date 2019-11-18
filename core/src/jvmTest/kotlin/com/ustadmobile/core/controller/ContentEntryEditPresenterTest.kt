@@ -1,16 +1,23 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
+import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.checkJndiSetup
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.junit.Before
 import org.junit.Test
 
@@ -18,7 +25,7 @@ class ContentEntryEditPresenterTest {
 
     private val context = Any()
 
-    private var mockView: ContentEntryEditView = mock()
+    private lateinit var mockView: ContentEntryEditView
 
     private lateinit var umAppDatabase: UmAppDatabase
 
@@ -26,41 +33,42 @@ class ContentEntryEditPresenterTest {
 
     private lateinit var presenter: ContentEntryEditPresenter
 
-    private lateinit var contentEntry: ContentEntry
+    private val leafContentEntry = ContentEntry("Dummy Title","Dummy Description", leaf = true, publik = true)
 
     private val dummyFilePath = "dummyPath/dummyFile.file"
 
-    private val impl :UstadMobileSystemImpl = mock ()
+    private lateinit var impl :UstadMobileSystemImpl
 
-    private val arguments =mapOf(
+    private val entryUid = (1..10).random().toLong()
+
+
+
+    private val arguments = mutableMapOf(
             ContentEntryEditView.CONTENT_ENTRY_LEAF to "true",
-            ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID to 1.toString(),
+            ARG_CONTENT_ENTRY_UID to entryUid.toString(),
             ContentEntryEditView.CONTENT_TYPE  to CONTENT_IMPORT_FILE.toString())
 
     @Before
     fun setUp() {
         checkJndiSetup()
         umAppDatabase = UmAppDatabase.getInstance(context)
-        contentEntry = ContentEntry("","", leaf = true, publik = true)
-        contentEntry.contentEntryUid = 1L
+        umAppDatabase.clearAllTables()
+        leafContentEntry.contentEntryUid = entryUid
         val list = mutableListOf(UMStorageDir("","", removableMedia = false, isAvailable = false, isUserSpecific = false))
 
-        doAnswer {
-            (it.getArgument(1) as UmCallback<List<UMStorageDir>>).onSuccess(list)
-        }.`when`(impl).getStorageDirs(any(), any())
+        impl = mock {
+            on {getStorageDirs(any(), any())}.thenAnswer {
+                    (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(list) }
 
-        doAnswer {
-            "Dummy"
-        }.`when`(impl).getAppPref(any(), any())
+            on {getAppPref(any(), any())}.thenAnswer {""}
 
-        doAnswer {
-            "Dummy"
-        }.`when`(impl).getString(any(), any())
+            on {getString(any(), any())}.thenAnswer {""}
 
-        doAnswer {
-            Thread(it.arguments[0] as Runnable).run()
-            return@doAnswer // or you can type return@doAnswer null ​
-        }.`when`(mockView).runOnUiThread(any())
+            }
+
+        mockView = mock{
+            on {runOnUiThread(any())}.thenAnswer {Thread(it.getArgument(0) as Runnable).run()}
+        }
     }
 
 
@@ -68,22 +76,26 @@ class ContentEntryEditPresenterTest {
     fun givenFileImport_WhenFileIsSelected_thenShouldUpdateUi(){
         presenter = ContentEntryEditPresenter(context,arguments ,mockView,umAppDatabase.contentEntryDao,
                 umAppDatabase.contentEntryParentChildJoinDao, umAppDatabase.contentEntryStatusDao,umAccount, impl){
-            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter contentEntry
+            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
         }
 
         presenter.onCreate(null)
 
-        presenter.handleSelectedFile(dummyFilePath,0L,"", contentEntry)
+        presenter.handleSelectedFile(dummyFilePath,0L,"*", leafContentEntry)
 
-        verify(mockView).setContentEntry(any())
+        argumentCaptor<ContentEntry>().apply {
+            verify(mockView).setContentEntry(capture())
+            assertEquals(leafContentEntry.title, firstValue.title)
+        }
     }
 
+
     @Test
-    fun givenValidFile_whenSelected_shouldSetEntryProperties(){
+    fun givenValidFile_whenSelected_shouldCreateEntryAndSetEntryProperties(){
         presenter = ContentEntryEditPresenter(context, arguments,
                 mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
                 umAppDatabase.contentEntryStatusDao,umAccount, impl){
-            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter contentEntry
+            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
         }
 
         presenter.onCreate(null)
@@ -95,22 +107,120 @@ class ContentEntryEditPresenterTest {
 
 
     @Test
-    fun givenValidFileSelected_whenDoneClicked_shouldShowProgressDialogAndDismissItWhenDoneSaving(){
+    fun givenValidFileSelected_whenDoneButtonClicked_shouldShowProgressDialogAndDismissItWhenDoneSaving(){
         presenter = ContentEntryEditPresenter(context, arguments,
                 mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
                 umAppDatabase.contentEntryStatusDao,umAccount, impl){
-            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter contentEntry
+            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
         }
 
         presenter.onCreate(null)
 
-        presenter.handleSelectedFile(dummyFilePath,0L,"", ContentEntry("","", leaf = true, publik = true))
+        presenter.handleSelectedFile(dummyFilePath,0L,"", leafContentEntry)
 
-        presenter.handleSaveUpdateEntry("Dummy","Dummy",dummyFilePath,1, isActive = true, isPublic = true)
+        presenter.handleSaveUpdateEntry(leafContentEntry.title as String,leafContentEntry.description as String,dummyFilePath,
+                1, leafContentEntry.ceInactive, leafContentEntry.publik)
 
         verify(mockView).showProgressDialog()
 
-        verify(mockView).showMessageAndDismissDialog(any(), any())
+        verify(mockView, timeout(5000)).showMessageAndDismissDialog(any(), any())
+    }
+
+    @Test
+    fun givenOptions_whenCreateFolderOptionIsSelected_shouldHideFileImportViews(){
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
+        presenter = ContentEntryEditPresenter(context, arguments,
+                mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
+                umAppDatabase.contentEntryStatusDao,umAccount, impl){
+            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
+        }
+
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).showFileSelector(equals(false))
+
+        verify(mockView, timeout(5000)).showStorageOptions(equals(false))
+
+    }
+
+    @Test
+    fun givenOptions_whenCreateContentOptionIsSelected_shouldHideFileImportViews(){
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_CONTENT.toString()
+        presenter = ContentEntryEditPresenter(context, arguments,
+                mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
+                umAppDatabase.contentEntryStatusDao,umAccount, impl){
+            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
+        }
+
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).showFileSelector(equals(false))
+    }
+
+
+    @Test
+    fun givenOptions_whenImportFileOptionIsSelected_shouldShowFileImportViews(){
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
+        presenter = ContentEntryEditPresenter(context, arguments,
+                mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
+                umAppDatabase.contentEntryStatusDao,umAccount, impl){
+            dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
+        }
+
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).showFileSelector(equals(true))
+
+        verify(mockView, timeout(5000)).showStorageOptions(equals(true))
+
+    }
+
+
+
+    @Test
+    fun givenContentEntryExists_whenHandleFileSelectedAndHandleClickSave_thenShouldCreateNewContainerAndUpdateContentEntry(){
+        GlobalScope.launch {
+            umAppDatabase.contentEntryDao.insert(leafContentEntry)
+
+            presenter = ContentEntryEditPresenter(context, arguments,
+                    mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
+                    umAppDatabase.contentEntryStatusDao,umAccount, impl){
+                dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
+            }
+
+            presenter.onCreate(null)
+
+            presenter.handleSaveUpdateEntry(leafContentEntry.title as String,leafContentEntry.description as String,dummyFilePath,
+                    1, leafContentEntry.ceInactive, leafContentEntry.publik)
+            argumentCaptor<String>().apply {
+                verify(mockView).showMessageAndDismissDialog(capture(), any())
+                assertTrue(firstValue.contains("updated successfully"))
+            }
+
+        }
+
+    }
+
+    @Test
+    fun givenContentEntryNotExisting_whenHandleFileSelectedAndHandleClickSave_thenShouldCreateNewContentEntryAndNewContainer(){
+        GlobalScope.launch {
+
+            presenter = ContentEntryEditPresenter(context, arguments,
+                    mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
+                    umAppDatabase.contentEntryStatusDao,umAccount, impl){
+                dir: String,mimetype: String, entry: ContentEntry -> return@ContentEntryEditPresenter leafContentEntry
+            }
+
+            presenter.onCreate(null)
+
+            presenter.handleSaveUpdateEntry(leafContentEntry.title as String,leafContentEntry.description as String,dummyFilePath,
+                    1, leafContentEntry.ceInactive, leafContentEntry.publik)
+            argumentCaptor<String>().apply {
+                verify(mockView).showMessageAndDismissDialog(capture(), any())
+                assertTrue(firstValue.contains("created successfully"))
+            }
+
+        }
     }
 
 
