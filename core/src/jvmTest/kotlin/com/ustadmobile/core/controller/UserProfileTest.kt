@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.SplashScreenView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.junit.Before
@@ -26,21 +27,19 @@ class UserProfileTest {
     @Before
     fun setUp(){
         view = mock()
-        impl = mock ()
+        impl = mock {
+            on{getAppConfigString(any(), any(), any())}.thenAnswer{
+                "en-US,fa-AF,ps-AF,ar-AE"
+            }
 
-        doAnswer {
-            "en-US,fa-AF,ps-AF,ar-AE"
-        }.`when`(impl).getAppConfigString(any(), any(), any())
+            on{getAllUiLanguage(any())}.thenAnswer{
+                UstadMobileConstants.LANGUAGE_NAMES
+            }
 
-        doAnswer {
-            UstadMobileConstants.LANGUAGE_NAMES
-        }.`when`(impl).getAllUiLanguage(any())
-
-        doAnswer {
-            "en"
-        }.`when`(impl).getDisplayedLocale(any())
-
-
+            on{getDisplayedLocale(any())}.thenAnswer{
+                "en"
+            }
+        }
 
         presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context).personDao,impl)
 
@@ -56,7 +55,7 @@ class UserProfileTest {
 
         presenter.handleUserLogout()
 
-        verify(impl).go(eq(HomeView.VIEW_NAME), any(), any())
+        verify(impl).go(eq(SplashScreenView.VIEW_NAME), any(), any())
     }
 
 

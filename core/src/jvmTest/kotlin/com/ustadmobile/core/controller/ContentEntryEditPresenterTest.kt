@@ -14,8 +14,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_F
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.checkJndiSetup
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.junit.Before
@@ -100,7 +99,7 @@ class ContentEntryEditPresenterTest {
 
         presenter.onCreate(null)
 
-        presenter.handleSelectedFile(dummyFilePath,0L,"", ContentEntry("","", leaf = true, publik = true))
+        presenter.handleSelectedFile(dummyFilePath,0L,"", leafContentEntry)
 
         verify(mockView).setContentEntry(any())
     }
@@ -190,11 +189,19 @@ class ContentEntryEditPresenterTest {
 
             presenter.onCreate(null)
 
+            leafContentEntry.title = "New Dummy title"
             presenter.handleSaveUpdateEntry(leafContentEntry.title as String,leafContentEntry.description as String,dummyFilePath,
                     1, leafContentEntry.ceInactive, leafContentEntry.publik)
             argumentCaptor<String>().apply {
                 verify(mockView).showMessageAndDismissDialog(capture(), any())
-                assertTrue(firstValue.contains("updated successfully"))
+                assertTrue("New container was created and entry was updated",
+                        firstValue.contains("updated successfully"))
+
+                val contentEntry = umAppDatabase.contentEntryDao.findByEntryId(leafContentEntry.contentEntryUid)
+
+                assertNotNull("Entry was created and inserted in the Db",contentEntry)
+
+                assertEquals("Entry was updated", contentEntry?.title, leafContentEntry.title)
             }
 
         }
@@ -217,7 +224,13 @@ class ContentEntryEditPresenterTest {
                     1, leafContentEntry.ceInactive, leafContentEntry.publik)
             argumentCaptor<String>().apply {
                 verify(mockView).showMessageAndDismissDialog(capture(), any())
-                assertTrue(firstValue.contains("successfully imported a file"))
+                assertTrue("Container and entry was created",firstValue.contains("successfully imported a file"))
+
+                val contentEntry = umAppDatabase.contentEntryDao.findByEntryId(leafContentEntry.contentEntryUid)
+
+                assertNotNull("Entry was created and inserted in the Db",contentEntry)
+
+                assertEquals("File was imported", contentEntry?.contentTypeFlag, ContentEntry.FLAG_IMPORTED)
             }
 
         }
