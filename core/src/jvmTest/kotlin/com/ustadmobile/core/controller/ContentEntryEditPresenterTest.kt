@@ -217,7 +217,7 @@ class ContentEntryEditPresenterTest {
                     1, leafContentEntry.ceInactive, leafContentEntry.publik)
             argumentCaptor<String>().apply {
                 verify(mockView).showMessageAndDismissDialog(capture(), any())
-                assertTrue(firstValue.contains("created successfully"))
+                assertTrue(firstValue.contains("successfully imported a file"))
             }
 
         }
