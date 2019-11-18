@@ -159,7 +159,6 @@ class ContentEntryEditPresenterTest {
 
     @Test
     fun givenOptions_whenImportFileOptionIsSelected_shouldShowFileImportViews(){
-        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
         presenter = ContentEntryEditPresenter(context, arguments,
                 mockView,umAppDatabase.contentEntryDao,umAppDatabase.contentEntryParentChildJoinDao,
                 umAppDatabase.contentEntryStatusDao,umAccount, impl){
@@ -168,10 +167,17 @@ class ContentEntryEditPresenterTest {
 
         presenter.onCreate(null)
 
-        verify(mockView, timeout(5000)).showFileSelector(equals(true))
+        argumentCaptor<Boolean>().apply {
+            verify(mockView, timeout(5000)).showFileSelector(capture())
 
-        verify(mockView, timeout(5000)).showStorageOptions(equals(true))
+            assertTrue("File selector view was shown", firstValue)
+        }
 
+        argumentCaptor<Boolean>().apply {
+            verify(mockView, timeout(5000)).showStorageOptions(capture())
+
+            assertTrue("Storage option view was shown", firstValue)
+        }
     }
 
 

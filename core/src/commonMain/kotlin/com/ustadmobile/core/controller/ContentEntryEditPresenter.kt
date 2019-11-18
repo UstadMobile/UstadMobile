@@ -72,7 +72,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         GlobalScope.launch {
             val entry = contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
-            importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
+            importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED || contentType == CONTENT_IMPORT_FILE
 
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
@@ -92,7 +92,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         view.runOnUiThread(Runnable {
             view.setUpLicence(licenceTypes,if(contentEntry.contentEntryUid == 0L) 0
             else licenceIds.indexOf(contentEntry.licenseType))
-            view.showFileSelector(importedEntry or (contentType == CONTENT_IMPORT_FILE))
+            view.showFileSelector(importedEntry)
             view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_select_file, context))
             view.showStorageOptions(contentType != CONTENT_CREATE_FOLDER)
             if(contentEntry.contentEntryUid != 0L){
