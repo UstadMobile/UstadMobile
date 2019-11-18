@@ -1,12 +1,13 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.SplashScreenView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -55,7 +56,7 @@ class UserProfileTest {
 
         presenter.handleUserLogout()
 
-        verify(impl).go(eq(SplashScreenView.VIEW_NAME), any(), any())
+        verify(impl).go(eq(SplashScreenView.VIEW_NAME), any())
     }
 
 
