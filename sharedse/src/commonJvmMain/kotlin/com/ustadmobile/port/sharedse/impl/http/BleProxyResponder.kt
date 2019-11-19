@@ -108,67 +108,67 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: MutableMap<String, String>?, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         val networkManager = uriResource.initParameter(0, NetworkManagerBleCommon::class.java)
         val destDeviceAddr  = urlParams?.get("bleaddr")!!.substringBefore('/')
-        return BLE_LOCK.withLock {
-            runBlocking {
-                val bleRequest = session.asBleHttpRequest()
-                bleRequest.reqUri = bleRequest.reqUri.substringAfter("/$destDeviceAddr")
-                val bleRequestSerialized = Json.stringify(BleHttpRequest.serializer(), bleRequest)
-                val messageId = BleMessage.getNextMessageIdForReceiver(destDeviceAddr)
-                val bleMessage = BleMessage(BleMessage.MESSAGE_TYPE_HTTP, messageId,
-                        bleRequestSerialized.toUtf8Bytes())
-                val destDevice = NetworkNode().also { it.bluetoothMacAddress = destDeviceAddr }
-                val deferredMessage = CompletableDeferred<BleMessage?>()
-                UMLog.l(UMLog.DEBUG, 691,
-                        "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                "TO ${destDevice.bluetoothMacAddress} - ${bleRequest.reqUri} ")
-                networkManager.sendMessage(networkManager.context, bleMessage, destDevice, object : BleMessageResponseListener {
-                    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-                        if(response != null) {
-                            UMLog.l(UMLog.DEBUG, 691,
-                                    "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                            " received response ${response.payload?.size} bytes")
-                            deferredMessage.complete(response)
-                        }else {
-                            UMLog.l(UMLog.ERROR, 691,
-                                    "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                            " ERROR $error")
-                            deferredMessage.completeExceptionally(IOException("Exception onResponseReceived"))
-                        }
+        return runBlocking {
+            val bleRequest = session.asBleHttpRequest()
+            bleRequest.reqUri = bleRequest.reqUri.substringAfter("/$destDeviceAddr")
+            val bleRequestSerialized = Json.stringify(BleHttpRequest.serializer(), bleRequest)
+            val messageId = BleMessage.getNextMessageIdForReceiver(destDeviceAddr)
+            val bleMessage = BleMessage(BleMessage.MESSAGE_TYPE_HTTP, messageId,
+                    bleRequestSerialized.toUtf8Bytes())
+            val destDevice = NetworkNode().also { it.bluetoothMacAddress = destDeviceAddr }
+            val deferredMessage = CompletableDeferred<BleMessage?>()
+            UMLog.l(UMLog.DEBUG, 691,
+                    "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
+                            "TO ${destDevice.bluetoothMacAddress} - ${bleRequest.reqUri} ")
+            networkManager.sendMessage(networkManager.context, bleMessage, destDevice, object : BleMessageResponseListener {
+                override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
+                    if(response != null) {
+                        UMLog.l(UMLog.DEBUG, 691,
+                                "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
+                                        " received response ${response.payload?.size} bytes")
+                        deferredMessage.complete(response)
+                    }else {
+                        UMLog.l(UMLog.ERROR, 691,
+                                "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
+                                        " ERROR $error")
+                        deferredMessage.completeExceptionally(IOException("Exception onResponseReceived"))
                     }
-                })
-
-                try {
-                    val messageReceived = withTimeout(10000) { deferredMessage.await() }
-                    val payload = messageReceived?.payload
-                    val payloadStr = if(payload != null) String(payload) else null
-                    if(payload != null && payloadStr != null) {
-                        try {
-                            val bleHttpResponse = Json.parse(BleHttpResponse.serializer(), payloadStr)
-                            UMLog.l(UMLog.DEBUG, 691,
-                                    "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                            " RECEIVE Status ${bleHttpResponse.statusCode} \n==Content==\n" +
-                                            "${bleHttpResponse.body}\n\n")
-                            //Thread.sleep(1000)
-                            return@runBlocking bleHttpResponse.asNanoHttpdResponse()
-                        }catch(e: Exception) {
-                            UMLog.l(UMLog.ERROR, 691,
-                                    "BLEProxyResponder: Exception parsing ID# ${bleMessage.messageId} \n" +
-                                            "==Payload received ${payload.size} bytes==\n$payloadStr\n\n")
-                        }
-
-                    }
-                }catch(e: Exception) {
-                    UMLog.l(UMLog.ERROR, 691,
-                            "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                    " ERROR $e")
-                    e.printStackTrace()
                 }
+            })
 
-                //Thread.sleep(1000)
-                UMLog.l(UMLog.ERROR, 691, "BLEProxyResponder: Request ID# ${bleMessage.messageId}  ERROR Sending error response")
-                NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
-                        "text/plain", "failed")
+            try {
+                val messageReceived = withTimeout(10000) { deferredMessage.await() }
+                val payload = messageReceived?.payload
+                val payloadStr = if(payload != null) String(payload) else null
+                if(payload != null && payloadStr != null) {
+                    try {
+                        val bleHttpResponse = Json.parse(BleHttpResponse.serializer(), payloadStr)
+                        UMLog.l(UMLog.DEBUG, 691,
+                                "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
+                                        " RECEIVE Status ${bleHttpResponse.statusCode} - " +
+                                        "${bleRequest.reqUri} \n==Content==\n" +
+                                        "${bleHttpResponse.body}\n\n")
+                        //Thread.sleep(1000)
+                        return@runBlocking bleHttpResponse.asNanoHttpdResponse()
+                    }catch(e: Exception) {
+                        UMLog.l(UMLog.ERROR, 691,
+                                "BLEProxyResponder: Exception parsing ID# ${bleMessage.messageId} \n" +
+                                        "==Payload received ${payload.size} bytes==\n$payloadStr\n\n")
+                    }
+
+                }
+            }catch(e: Exception) {
+                UMLog.l(UMLog.ERROR, 691,
+                        "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
+                                " ERROR $e")
+                e.printStackTrace()
             }
+
+            //Thread.sleep(1000)
+            UMLog.l(UMLog.ERROR, 691, "BLEProxyResponder: Request ID# ${bleMessage.messageId}  ERROR Sending error response")
+            NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
+                    "text/plain", "failed")
+
         }
     }
 

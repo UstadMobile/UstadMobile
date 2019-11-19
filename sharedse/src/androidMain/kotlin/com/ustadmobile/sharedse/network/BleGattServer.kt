@@ -80,7 +80,7 @@ class BleGattServer
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
 
             Napier.d(" onCharacteristicReadRequest from ${device.address}")
-            if(characteristic.uuid == UUID.fromString(NetworkManagerBleCommon.BLE_CHARACTERISTIC)) {
+            if(characteristic.uuid in CHARACTERISTIC_UUIDS) {
                 val clientMessage = pendingReplies.firstOrNull { it.destAddr == device.address
                         && it.characteristicUuid == characteristic.uuid }
                 Napier.d(" readRequest from ${device.address}")
@@ -120,7 +120,7 @@ class BleGattServer
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite,
                     responseNeeded, offset, value)
 
-            if (NetworkManagerBleCommon.BLE_CHARACTERISTIC == characteristic.uuid.toString()) {
+            if (characteristic.uuid in CHARACTERISTIC_UUIDS) {
                 Napier.d(" write permission requested by ${device.address}")
                 if(responseNeeded) {
                     val granted = gattServer!!.sendResponse(device, requestId,
@@ -190,6 +190,8 @@ class BleGattServer
          *  https://punchthrough.com/maximizing-ble-throughput-part-2-use-larger-att-mtu-2/
          */
         const val ATT_HEADER_SIZE = 3
+
+        val CHARACTERISTIC_UUIDS = NetworkManagerBleCommon.BLE_CHARACTERISTICS.map { UUID.fromString(it) }
 
     }
 }

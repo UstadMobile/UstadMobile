@@ -195,15 +195,16 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                 val service = BluetoothGattService(parcelServiceUuid.uuid,
                         BluetoothGattService.SERVICE_TYPE_PRIMARY)
 
-                val writeCharParcelUuid = ParcelUuid(UUID.fromString(BLE_CHARACTERISTIC))
-                val writeCharacteristic = BluetoothGattCharacteristic(
-                        writeCharParcelUuid.uuid,
-                        BluetoothGattCharacteristic.PROPERTY_WRITE
-                                or BluetoothGattCharacteristic.PROPERTY_READ,
-                        BluetoothGattCharacteristic.PERMISSION_WRITE or
-                        BluetoothGattCharacteristic.PERMISSION_READ)
 
-                service.addCharacteristic(writeCharacteristic)
+                BLE_CHARACTERISTICS.forEach {charUuidStr ->
+                    val charUuid = ParcelUuid(UUID.fromString(charUuidStr)).uuid
+                    val characteristic = BluetoothGattCharacteristic(charUuid,
+                            BluetoothGattCharacteristic.PROPERTY_WRITE
+                                    or BluetoothGattCharacteristic.PROPERTY_READ,
+                            BluetoothGattCharacteristic.PERMISSION_WRITE or
+                                    BluetoothGattCharacteristic.PERMISSION_READ)
+                    service.addCharacteristic(characteristic)
+                }
 
                 gattServerAndroid = BleGattServer(mContext,
                         this@NetworkManagerBle) {input, output -> httpd.newSession(input, output)}

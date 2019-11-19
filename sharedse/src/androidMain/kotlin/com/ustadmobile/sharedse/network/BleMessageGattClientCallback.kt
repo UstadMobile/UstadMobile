@@ -289,30 +289,33 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
         Napier.d("$logPrefix: Ustadmobile Service found on ${gatt.device.address}")
         val characteristics = service.characteristics
 
-        val clientToServerCharacteristic = characteristics.firstOrNull {
-            it.uuid == UUID.fromString(NetworkManagerBleCommon.BLE_CHARACTERISTIC)
+        val ustadUuids = NetworkManagerBleCommon.BLE_CHARACTERISTICS.map { UUID.fromString(it) }
+        val ustadCharacteristics = characteristics.filter { it.uuid in ustadUuids }
+
+        if(ustadCharacteristics.isEmpty()) {
+            Napier.e("Service discovered on ${gatt.device.address} does not have ANY " +
+                    "ustad characteristics")
+            return
         }
 
-        if (clientToServerCharacteristic != null) {
-            clientToServerCharacteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-
-            GlobalScope.launch(Dispatchers.Main) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    Napier.d("$logPrefix: Requesting MTU changed from $currentMtu to " +
-                            "$MAXIMUM_MTU_SIZE")
-                    gatt.requestMtu(MAXIMUM_MTU_SIZE)
-                    var changedMtu = -1
-                    withTimeoutOrNull(MAX_DELAY_TIME) {
-                        changedMtu = mtuCompletableDeferred.await()
-                    }
-                    Napier.d("$logPrefix: Deferrable MTU change: got $changedMtu")
+        GlobalScope.launch(Dispatchers.Main) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Napier.d("$logPrefix: Requesting MTU changed from $currentMtu to " +
+                        "$MAXIMUM_MTU_SIZE")
+                gatt.requestMtu(MAXIMUM_MTU_SIZE)
+                var changedMtu = -1
+                withTimeoutOrNull(MAX_DELAY_TIME) {
+                    changedMtu = mtuCompletableDeferred.await()
                 }
-                val processor0 = PendingMessageProcessor(messageChannel, gatt, currentMtu.get(),
-                        clientToServerCharacteristic)
-                processorMap.put(clientToServerCharacteristic.uuid, processor0)
+                Napier.d("$logPrefix: Deferrable MTU change: got $changedMtu")
+            }
 
-                GlobalScope.launch(Dispatchers.Main) {
-                    processor0.process()
+            ustadCharacteristics.forEach { characteristic ->
+                GlobalScope.launch {
+                    val processor = PendingMessageProcessor(messageChannel, gatt, currentMtu.get(),
+                            characteristic)
+                    processorMap[characteristic.uuid] = processor
+                    processor.process()
                 }
             }
         }
@@ -343,28 +346,6 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
      */
     override fun onCharacteristicRead(gatt: BluetoothGatt,
                                       characteristic: BluetoothGattCharacteristic, status: Int) {
-        super.onCharacteristicRead(gatt, characteristic, status)
-        Napier.d("onCharacteristicRead")
-        readCharacteristics(gatt, characteristic)
-    }
-
-    /**
-     * Receive notification when characteristics value has been changed from GATT server's side.
-     */
-    override fun onCharacteristicChanged(gatt: BluetoothGatt,
-                                         characteristic: BluetoothGattCharacteristic) {
-        super.onCharacteristicChanged(gatt, characteristic)
-        Napier.d("onCharacteristicChanged")
-        readCharacteristics(gatt, characteristic)
-    }
-
-    /**
-     * Read values from the service clientToServerCharacteristic
-     * @param gatt Bluetooth Gatt object
-     * @param characteristic Modified service clientToServerCharacteristic to read that value from
-     */
-    private fun readCharacteristics(gatt: BluetoothGatt,
-                                    characteristic: BluetoothGattCharacteristic) {
         val processor = processorMap[characteristic.uuid]
         if(processor != null) {
             processor.readCharacteristics(gatt, characteristic)
@@ -373,15 +354,6 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                     "for clientToServerCharacteristic UUID ${characteristic.uuid}")
             //log it
         }
-    }
-
-    private fun uuidMatches(uuidString: String, vararg matches: String): Boolean {
-        for (match in matches) {
-            if (uuidString.equals(match, ignoreCase = true)) {
-                return true
-            }
-        }
-        return false
     }
 
     private fun cleanup(gatt: BluetoothGatt) {
