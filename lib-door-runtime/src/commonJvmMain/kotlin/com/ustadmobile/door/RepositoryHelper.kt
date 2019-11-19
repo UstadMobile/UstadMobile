@@ -55,9 +55,8 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = li
         }
     }
 
-    suspend fun activeMirrors() = withContext(coroutineDispatcher) {
-        mirrors.values.toList()
-    }
+    suspend fun activeMirrors() = mirrors.values.toList()
+
 
     fun addWeakConnectivityListener(listener: RepositoryConnectivityListener) {
         weakConnectivityListeners.add(WeakReference(listener))

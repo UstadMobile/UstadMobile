@@ -1474,8 +1474,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         val liveDataLoadHelperArg = if(isLiveData) ",autoRetryOnEmptyLiveData=_daoResult" else ""
         codeBlock.beginControlFlow("val _loadHelper = %T(_repo,·" +
-                "autoRetryEmptyMirrorResult·=·$autoRetryEmptyMirrorResult·$liveDataLoadHelperArg)",
-                        RepositoryLoadHelper::class)
+                "autoRetryEmptyMirrorResult·=·$autoRetryEmptyMirrorResult·$liveDataLoadHelperArg," +
+                "uri·=·%S)",
+                        RepositoryLoadHelper::class,"$daoName/${daoFunSpec.name}")
                 .add("_endpointToTry -> \n")
         codeBlock.add(generateKtorRequestCodeBlockForMethod(
                 httpEndpointVarName = "_endpointToTry",

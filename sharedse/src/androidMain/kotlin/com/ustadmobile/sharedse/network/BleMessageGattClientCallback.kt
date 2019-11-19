@@ -5,8 +5,6 @@ import android.bluetooth.*
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.github.aakira.napier.Napier
-import com.ustadmobile.sharedse.network.BleGattServer.Companion.ATT_HEADER_SIZE
-import com.ustadmobile.sharedse.network.NetworkManagerBle.Companion.USTADMOBILE_BLE_SERVICE_UUID_UUID
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MAXIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
@@ -23,26 +21,15 @@ import kotlin.math.ceil
 /**
  * This class handle all the GATT client Bluetooth Low Energy callback
  *
+ * One instance of this callback is created per server that a client wants to communicate with.
+ * When a connection is the client will discover services and then initiate an MTU change request.
  *
+ * The message will put onto a channel. Channel processing begins after the mtu has been changed.
  *
- * **Note: Operation Flow**
- *
- *
- * - When a device is connected to a BLE node, if it  has android version 5 and above
- * it will request for the MTU change and upon receiving a call back on
- * {[BleMessageGattClientCallback.onMtuChanged]} it will updateState MTU and request for
- * all available services from the GATT otherwise it will request for available services.
- * This will be achieved by calling [BluetoothGatt.discoverServices].
- * Once services are found, all characteristics in those services will be listed.
- *
- *
- * - When trying to send a message, it will need write permission from the BLE node,
- * and when requested response might be as discussed in [BleGattServer].
- *
- *
- * - If it will receive [BluetoothGatt.GATT_SUCCESS] response, then it will start data
- * transmission to the BLE node. Upon receiving response the
- * [BleMessageGattClientCallback.onCharacteristicChanged] method will be invoked.
+ * Messages must be sent one at a time per characteristic used
+ * to avoid corruption on the server or client. The client will make a characteristic write request
+ * for each packet in the outgoing request. Once all request packets have been sent the client will
+ * make a characteristic read request for each packet in the response.
  *
  * For more explanation about MTU and MTU throughput, below is an article you gan go through
  * @link https://interrupt.memfault.com/blog/ble-throughput-primer
@@ -78,16 +65,12 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
 
     private val mtuCompletableDeferred = CompletableDeferred<Int>()
 
-    private val gattReadyCompletableDeferred = CompletableDeferred<BluetoothGatt>()
-
     private val messageChannel = Channel<PendingMessage>(Channel.UNLIMITED)
 
     class PendingMessage(val messageId: Int, val outgoingMessage: BleMessage,
                          internal val incomingMessage: BleMessage = BleMessage(),
                          val messageReceived: CompletableDeferred<BleMessage> = CompletableDeferred(),
                          val responseListener: BleMessageResponseListener? = null) {
-
-        //var mtu: Int = -1
 
         lateinit var outgoingPackets: Array<ByteArray>
 
@@ -96,18 +79,19 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
         var incomingPacketNum: Int = 0
     }
 
-    private val messageProcessors: MutableMap<UUID, PendingMessageProcessor> = ConcurrentHashMap()
+    //Map of characteristic UUID -> PendingMessageProcessor
+    private val processorMap: MutableMap<UUID, PendingMessageProcessor> = ConcurrentHashMap()
 
 
     /**
      * This is a channel based request processor that will handle sending a BleMessage and receiving
      * the reply. The main class callback will call the onCharacteristicWrite and
-     * readCharacteristic methods when they match our characteristic UUID
+     * readCharacteristic methods when they match our clientToServerCharacteristic UUID
      */
     class PendingMessageProcessor(val messageChannel: Channel<PendingMessage>,
                                   var mGatt: BluetoothGatt,
                                   val mtu: Int,
-                                  var characteristic: BluetoothGattCharacteristic){
+                                  val clientToServerCharacteristic: BluetoothGattCharacteristic){
 
         val currentPendingMessage = AtomicReference<PendingMessage?>()
 
@@ -119,19 +103,12 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
             for(message in messageChannel) {
                 //send the packet itself
                 currentPendingMessage.set(message)
-                message.outgoingPackets = message.outgoingMessage.getPackets(mtu)
+                message.outgoingPackets = message.outgoingMessage.getPackets(mtu - BleGattServer.ATT_HEADER_SIZE)
                 Napier.d("$logPrefix processor received message in channel " +
                         "${message.outgoingMessage.payload?.size} bytes MTU=${mtu}")
                 try {
-                    characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                    val notificationSet = mGatt.setCharacteristicNotification(characteristic, true)
-                    if(notificationSet) {
-                        Napier.d("$logPrefix notification set OK")
-                    }else {
-                        Napier.e("$logPrefix notificatoin NOT set")
-                    }
-
-                    sendNextPacket(mGatt, characteristic)
+                    clientToServerCharacteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    sendNextPacket(mGatt, clientToServerCharacteristic)
                     val messageReceived = message.messageReceived.await()
                     message.responseListener?.onResponseReceived("",
                             messageReceived, null)
@@ -142,7 +119,6 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                             e)
                 }
                 Napier.d("$logPrefix waiting for next message")
-                delay(1000)
             }
         }
 
@@ -162,6 +138,11 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
             }
         }
 
+        fun requestReadNextPacket(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
+            val requestOk = gatt.readCharacteristic(characteristic)
+            Napier.d("${logPrefix }Request read : accepted=$requestOk")
+        }
+
         fun onCharacteristicWrite(gatt: BluetoothGatt,
                                   characteristic: BluetoothGattCharacteristic, status: Int) {
             Napier.d((if (status == BluetoothGatt.GATT_SUCCESS) "$logPrefix: Allowed to send packets"
@@ -174,53 +155,17 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                 } else {
                     Napier.v("$logPrefix sent all " +
                             "${currentPendingMessage.get()?.outgoingPackets?.size} packets - " +
-                            "${currentMessageVal.outgoingMessage.payload?.size}  bytes. Awaiting response.")
-                    //we now expect the server to send a response
+                            "${currentMessageVal.outgoingMessage.payload?.size}  bytes. Starting read.")
+
+
+                    //now read the server's reply
+                    requestReadNextPacket(gatt, characteristic)
                 }
             }
-
-            mGatt = gatt
-            this.characteristic = characteristic
-//                if (packetIteration < packets.size) {
-//                    val packetToSend = packets[packetIteration]
-//                    UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Transferring packet #${packetIteration + 1}  of size " +
-//                            "${packetToSend.size} to ${gatt.device.address} with mtu $currentMtu")
-//                    characteristic.value = packetToSend
-//                    gatt.writeCharacteristic(characteristic)
-//                    packetIteration++
-//
-//                } else {
-//                    packetIteration = 0
-//                    UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Sent packet of " +
-//                            packets.size.toString() + " packet(s) transferred successfully to " +
-//                            "the remote device =" + gatt.device.address)
-//                    //We now expect the server to send a response
-//                }
-//            } else if (packetTransferAttemptsRemaining > 0) {
-//                packetTransferAttemptsRemaining--
-//                UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Failed to send packet to ${gatt.device.address}" +
-//                        " remain $packetTransferAttemptsRemaining trial, trying now...")
-//                GlobalScope.launch(Dispatchers.Main) {
-//                    try {
-//                        delay(MAX_DELAY_TIME)
-//                        onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
-//                    } catch (e: Exception) {
-//                        UMLog.l(UMLog.ERROR, 698, "$logPrefix: Exception on retry packet write")
-//                    }
-//                }
-//
-//            } else {
-//                UMLog.l(UMLog.DEBUG, 698,
-//                        "$logPrefix: Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
-//                cleanup(gatt)
-//            }
         }
 
 
         fun readCharacteristics(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
-            mGatt = gatt
-            this.characteristic = characteristic
-
             val currentMessageVal = currentPendingMessage.get()
             if(currentMessageVal != null) {
                 val complete = currentMessageVal.incomingMessage.onPackageReceived(characteristic.value)
@@ -236,6 +181,8 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                     currentMessageVal.messageReceived.complete(currentMessageVal.incomingMessage)
                     currentMessageVal.responseListener?.onResponseReceived("",
                             currentMessageVal.incomingMessage, null)
+                }else {
+                    requestReadNextPacket(gatt, characteristic)
                 }
             }else {
                 Napier.e("$logPrefix currentMessageVal = null")
@@ -262,14 +209,6 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
         messageChannel.send(pendingMessage)
         return pendingMessage.messageReceived.await()
     }
-
-    /**
-     * Set listener to report back results on the listening part.
-     * @param responseListener BleMessageResponseListener listener
-     */
-//    internal fun setOnResponseReceived(responseListener: BleMessageResponseListener) {
-//        this.responseListener = responseListener
-//    }
 
     /**
      * Receive MTU change event when server device changed it's MTU to the requested value.
@@ -328,11 +267,13 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
         Napier.d("$logPrefix: Ustadmobile Service found on ${gatt.device.address}")
         val characteristics = service.characteristics
 
-        val characteristic = characteristics[0]
-        if (characteristic.uuid == USTADMOBILE_BLE_SERVICE_UUID_UUID) {
-            //characteristics.add(characteristic)
-            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-            gatt.setCharacteristicNotification(characteristic, true)
+        val clientToServerCharacteristic = characteristics.firstOrNull {
+            it.uuid == UUID.fromString(NetworkManagerBleCommon.BLE_CHARACTERISTIC)
+        }
+
+        if (clientToServerCharacteristic != null) {
+            clientToServerCharacteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+
             GlobalScope.launch(Dispatchers.Main) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     Napier.d("$logPrefix: Requesting MTU changed from $currentMtu to " +
@@ -344,12 +285,9 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                     }
                     Napier.d("$logPrefix: Deferrable MTU change: got $changedMtu")
                 }
-                //TODO: We are now ready to process messages
-                //onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
-
                 val processor0 = PendingMessageProcessor(messageChannel, gatt, currentMtu.get(),
-                        characteristic)
-                messageProcessors.put(characteristic.uuid, processor0)
+                        clientToServerCharacteristic)
+                processorMap.put(clientToServerCharacteristic.uuid, processor0)
 
                 GlobalScope.launch(Dispatchers.Main) {
                     processor0.process()
@@ -359,61 +297,23 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
     }
 
 
+
     /**
      * Start transmitting message packets to the peer device once given permission
-     * to write on the characteristic
+     * to write on the clientToServerCharacteristic
      */
     override fun onCharacteristicWrite(gatt: BluetoothGatt,
                                        characteristic: BluetoothGattCharacteristic, status: Int) {
         super.onCharacteristicWrite(gatt, characteristic, status)
 
-        val messageProcessor = messageProcessors[characteristic.uuid]
+        val messageProcessor = processorMap[characteristic.uuid]
         if(messageProcessor != null) {
             messageProcessor.onCharacteristicWrite(gatt, characteristic, status)
         }else {
             //log it
             Napier.v("onCharacteristicWrite no message processor " +
-                    "for characteristic UUID ${characteristic.uuid}")
+                    "for clientToServerCharacteristic UUID ${characteristic.uuid}")
         }
-
-//        UMLog.l(UMLog.DEBUG, 698, (if(status == BluetoothGatt.GATT_SUCCESS) "$logPrefix: Allowed to send packets"
-//        else "$logPrefix: Not allowed to send packets" ) + " to ${gatt.device.address}")
-//
-//        val packets = messageToSend.getPackets(currentMtu)
-//        if (status == BluetoothGatt.GATT_SUCCESS) {
-//            if (packetIteration < packets.size) {
-//                val packetToSend = packets[packetIteration]
-//                UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Transferring packet #${packetIteration + 1}  of size " +
-//                        "${packetToSend.size} to ${gatt.device.address} with mtu $currentMtu")
-//                characteristic.value = packetToSend
-//                gatt.writeCharacteristic(characteristic)
-//                packetIteration++
-//
-//            } else {
-//                packetIteration = 0
-//                UMLog.l(UMLog.DEBUG, 698,"$logPrefix: Sent packet of " +
-//                        packets.size.toString() + " packet(s) transferred successfully to " +
-//                                "the remote device =" + gatt.device.address)
-//                //We now expect the server to send a response
-//            }
-//        }else if(packetTransferAttemptsRemaining > 0) {
-//            packetTransferAttemptsRemaining--
-//            UMLog.l(UMLog.DEBUG, 698, "$logPrefix: Failed to send packet to ${gatt.device.address}" +
-//                    " remain $packetTransferAttemptsRemaining trial, trying now...")
-//            GlobalScope.launch(Dispatchers.Main) {
-//                try {
-//                    delay(MAX_DELAY_TIME)
-//                    onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
-//                }catch(e: Exception) {
-//                    UMLog.l(UMLog.ERROR, 698, "$logPrefix: Exception on retry packet write")
-//                }
-//            }
-//
-//        }else {
-//            UMLog.l(UMLog.DEBUG, 698,
-//                    "$logPrefix: Failed many times to send packet #${packetIteration} to ${gatt.device.address} disconnecting now")
-//            cleanup(gatt)
-//        }
     }
 
     /**
@@ -423,6 +323,7 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                                       characteristic: BluetoothGattCharacteristic, status: Int) {
         super.onCharacteristicRead(gatt, characteristic, status)
         Napier.d("onCharacteristicRead")
+        readCharacteristics(gatt, characteristic)
     }
 
     /**
@@ -436,51 +337,21 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
     }
 
     /**
-     * Read values from the service characteristic
+     * Read values from the service clientToServerCharacteristic
      * @param gatt Bluetooth Gatt object
-     * @param characteristic Modified service characteristic to read that value from
+     * @param characteristic Modified service clientToServerCharacteristic to read that value from
      */
     private fun readCharacteristics(gatt: BluetoothGatt,
                                     characteristic: BluetoothGattCharacteristic) {
-        val processor = messageProcessors[characteristic.uuid]
+        val processor = processorMap[characteristic.uuid]
         if(processor != null) {
             processor.readCharacteristics(gatt, characteristic)
         }else {
             Napier.v("readCharacteristic no message processor " +
-                    "for characteristic UUID ${characteristic.uuid}")
+                    "for clientToServerCharacteristic UUID ${characteristic.uuid}")
             //log it
         }
-        val messageComplete = receivedMessage.onPackageReceived(characteristic.value)
-//        if (messageComplete) {
-//            UMLog.l(UMLog.DEBUG, 698,"$logPrefix: Message received successfully")
-//            //Before we waited for the server to disconnect us. Actually we should disconnect ourselves
-//            // as per https://developer.android.com/guide/topics/connectivity/bluetooth-le "Close the client app"
-//            cleanup(gatt)
-//
-//            responseListener?.onResponseReceived(gatt.device.address, receivedMessage, null)
-//        }
     }
-
-
-//    /**
-//     * Find the matching service among services found by peer devices
-//     * @param serviceList List of all found services
-//     * @return Matching service
-//     */
-//    private fun findMatchingService(serviceList: List<BluetoothGattService>): BluetoothGattService? {
-//        for (service in serviceList) {
-//            val serviceIdString = service.uuid.toString()
-//            if (matchesServiceUuidString(serviceIdString)) {
-//                return service
-//            }
-//        }
-//        return null
-//    }
-
-    private fun matchesServiceUuidString(serviceIdString: String): Boolean {
-        return uuidMatches(serviceIdString, USTADMOBILE_BLE_SERVICE_UUID)
-    }
-
 
     private fun uuidMatches(uuidString: String, vararg matches: String): Boolean {
         for (match in matches) {

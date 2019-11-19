@@ -5,37 +5,27 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.impl.http.BleHttpRequest
 import com.ustadmobile.port.sharedse.impl.http.BleHttpResponse
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.impl.http.asBleHttpResponse
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.toUtf8Bytes
+import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This class handle all the GATT server device's Bluetooth Low Energy callback
  *
+ * Operation flow:
  *
- *
- * **Note: Operation Flow**
- *
- *
- * - When a client wants to send data it requests for a permission to write
- * on the characteristic. Upon receiving that request
- * [BluetoothGattServerCallback.onCharacteristicWriteRequest] will be invoked
- * , permission will be granted with [BluetoothGatt.GATT_SUCCESS]
- * and the packets will be received on the same
- * [BluetoothGattServerCallback.onCharacteristicWriteRequest] method.
- *
- *
- * - When a client device tries to read modified characteristic value,
- * [BluetoothGattServerCallback.onCharacteristicReadRequest] will be invoked
- * and the response will be sent back depending on what kind of device tried to read it.
- * If device has same service UUID then [BluetoothGatt.GATT_SUCCESS]
- * will be granted, otherwise [BluetoothGatt.GATT_FAILURE]
+ * When a client wants to send a BleMessage it will make one characteristicWriteRequest for each
+ * packet in the outgoing request. The server will store the packet. Once all packets are received
+ * the server will prepare a response BleMessage and store it. The client will then make a
+ * characteristicReadRequest for each packet in the response.
  *
  * @author kileha3
  */
@@ -47,8 +37,19 @@ class BleGattServer
  * @param networkManager Instance of a NetworkManagerBle for getting
  * BluetoothManager instance.
  */
-(context: Context, networkManager: NetworkManagerBle, sessionFactory: HttpSessionFactory) :
+(context: Context, networkManager: NetworkManagerBle,
+ sessionFactory: HttpSessionFactory) :
         BleGattServerCommon(context, networkManager, sessionFactory) {
+
+    class PendingReplyMessage(val destAddr: String, val characteristicUuid: UUID,
+                              val message: BleMessage, mtu: Int,
+                              val currentPacket: AtomicInteger = AtomicInteger(0)) {
+        val packetsToSend = message.getPackets(mtu - ATT_HEADER_SIZE)
+
+        val packetNum = AtomicInteger(0)
+    }
+
+    val pendingReplies: MutableList<PendingReplyMessage> = CopyOnWriteArrayList()
 
     /**
      * Get instance of a BluetoothGattServer
@@ -62,13 +63,13 @@ class BleGattServer
     val networkManagerAndroid = networkManager
 
     @get:VisibleForTesting
-            /**
-             * Grant permission a peer device to start reading characteristics values
-             *//* Reject all direct characteristics read from unknown source
-                (one of our characteristics has NO_RESPONSE set).*/
-            /**
-             * Start receiving message packets sent from peer device
-             *///Grant permission to the peer device to write on this characteristics
+    /**
+     * Grant permission a peer device to start reading characteristics values
+     *//* Reject all direct characteristics read from unknown source
+        (one of our characteristics has NO_RESPONSE set).*/
+    /**
+     * Start receiving message packets sent from peer device
+     *///Grant permission to the peer device to write on this characteristics
     //start receiving packets from the client device
     //Send back response
     //Our service doesn't require confirmation, if it does then reject sending packets
@@ -78,27 +79,39 @@ class BleGattServer
                                                  characteristic: BluetoothGattCharacteristic) {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
 
-            val needResponse = characteristic.properties == BluetoothGattCharacteristic.PROPERTY_WRITE
-            if (needResponse) {
-                UMLog.l(UMLog.DEBUG, 691,
-                        "BLEGattServer: onCharacteristicReadRequest : should not need " +
-                                "response; sending failure status to" + device.address)
-                gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0,
-                        characteristic.value)
-            } else {
-                UMLog.l(UMLog.DEBUG, 691,
-                        "BLEGattServer: onCharacteristicReadRequest sending success status " +
-                                "to" + device.address)
-                gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0,
-                        characteristic.value)
-
+            Napier.d(" onCharacteristicReadRequest from ${device.address}")
+            if(characteristic.uuid == UUID.fromString(NetworkManagerBleCommon.BLE_CHARACTERISTIC)) {
+                val clientMessage = pendingReplies.firstOrNull { it.destAddr == device.address
+                        && it.characteristicUuid == characteristic.uuid }
+                Napier.d(" readRequest from ${device.address}")
+                if(clientMessage != null) {
+                    val packetToSend = clientMessage.packetsToSend[clientMessage.packetNum.get()]
+                    val responseSent = gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS,
+                            0, packetToSend)
+                    if(responseSent) {
+                        Napier.d("SendResponse #${clientMessage.packetNum.get()} to ${device.address}")
+                        val packetSent = clientMessage.packetNum.incrementAndGet()
+                        if(packetSent == clientMessage.packetsToSend.size) {
+                            Napier.d("Response ${clientMessage.message.messageId} completely sent")
+                            pendingReplies.remove(clientMessage)
+                        }
+                    }else {
+                        Napier.e("SendResponse not accepted")
+                        gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE,
+                                0, null)
+                    }
+                }else {
+                    Napier.e("Read request: no response to send")
+                    gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE,
+                            0, null)
+                }
+            }else {
+                Napier.e("Read request: wrong characteristic")
+                gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE,
+                        0, null)
             }
         }
 
-
-        override fun onNotificationSent(device: BluetoothDevice?, status: Int) {
-            super.onNotificationSent(device, status)
-        }
 
         override fun onCharacteristicWriteRequest(device: BluetoothDevice, requestId: Int,
                                                   characteristic: BluetoothGattCharacteristic,
@@ -107,11 +120,16 @@ class BleGattServer
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite,
                     responseNeeded, offset, value)
 
-            if (USTADMOBILE_BLE_SERVICE_UUID == characteristic.uuid.toString()) {
-                val granted = gattServer!!.sendResponse(device, requestId,
-                        BluetoothGatt.GATT_SUCCESS, 0, null)
-                UMLog.l(UMLog.DEBUG, 691,
-                        "BLEGattServer: Write permission granted for " + device.address + " " + granted)
+            if (NetworkManagerBleCommon.BLE_CHARACTERISTIC == characteristic.uuid.toString()) {
+                Napier.d(" write permission requested by ${device.address}")
+                if(responseNeeded) {
+                    val granted = gattServer!!.sendResponse(device, requestId,
+                            BluetoothGatt.GATT_SUCCESS, 0, null)
+                    Napier.d("Sent response to ${device.address}. accepted=$granted")
+                }else {
+                    Napier.d("Response not required by ${device.address}")
+                }
+
                 val messageReceived = messageAssembler.handleIncomingPacket(
                         device.address, value)
                 UMLog.l(UMLog.DEBUG, 691,
@@ -123,43 +141,17 @@ class BleGattServer
                     UMLog.l(UMLog.DEBUG, 691,
                             "BLEGattServer: Request received with default MTU size of $currentMtuSize")
                     val messageToSend = handleRequest(messageReceived, device.address)
+                    pendingReplies.add(PendingReplyMessage(device.address, characteristic.uuid,
+                            messageToSend!!, currentMtuSize))
 
                     UMLog.l(UMLog.DEBUG, 691,
                             "BLEGattServer: Prepare response to send back to " + device.address)
-                    val requireConfirmation = characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE == BluetoothGattCharacteristic.PROPERTY_INDICATE
-                    if (!requireConfirmation) {
-                        val packets = messageToSend!!.getPackets(currentMtuSize - ATT_HEADER_SIZE)
-                        var packetTracker = 0
-                        for (packet in packets) {
-                            characteristic.value = packet
-                            val notified = gattServer!!.notifyCharacteristicChanged(device, characteristic, false)
-                            if (notified) {
-                                packetTracker++
-                                UMLog.l(UMLog.DEBUG, 691,
-                                        "BLEGattServer: Peer device notified on characteristics change for packet #${packetTracker} size ${packet.size}")
-                            } else {
-                                UMLog.l(UMLog.ERROR, 691,
-                                        "BLEGattServer: Failed to notify peer device for packet #${packetTracker}")
-                            }
-                        }
-                        UMLog.l(UMLog.DEBUG, 691,
-                                "BLEGattServer: Response sent to " + device.address)
-
-                        //Don't do this as the new implementation will now likely send us another request
-//                        gattServer!!.cancelConnection(device)
-//                        UMLog.l(UMLog.DEBUG, 691,
-//                                "BLEGattServer: Response finished, canceled connection with  " + device.address)
-                    }else {
-                        UMLog.l(UMLog.DEBUG, 691,
-                                "BLEGattServer: ERROR: received item that required confirmation from  " + device.address)
-                    }
-                }else {
-                    UMLog.l(UMLog.DEBUG, 691,
-                            "BLEGattServer: received null message from  " + device.address)
                 }
+
+
             }else {
                 UMLog.l(UMLog.DEBUG, 691,
-                        "BLEGattServer: wrong characteristic: ${characteristic.uuid}")
+                        "BLEGattServer: wrong clientToServerCharacteristic: ${characteristic.uuid}")
             }
         }
     }
@@ -192,8 +184,8 @@ class BleGattServer
     companion object {
 
         /**
-         * Each BLE characteristic notification etc. packet has a 1 byte Op-Code and a 2 byte
-         * Attribute Handle. When we send a characteristic the maximum amount of data we can send
+         * Each BLE clientToServerCharacteristic notification etc. packet has a 1 byte Op-Code and a 2 byte
+         * Attribute Handle. When we send a clientToServerCharacteristic the maximum amount of data we can send
          * is the MTU minus this overhead (e.g. MTU - 3). See "ATT MTU" here:
          *  https://punchthrough.com/maximizing-ble-throughput-part-2-use-larger-att-mtu-2/
          */

@@ -1,8 +1,8 @@
 package com.ustadmobile.door
 
 import androidx.paging.PagedList
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.github.aakira.napier.Napier
+import kotlinx.coroutines.*
 
 /**
  * This is a PagedList.boundaryCallback that automatically calls a given LoadHelper to load more data.
@@ -10,11 +10,11 @@ import kotlinx.coroutines.launch
 class RepositoryBoundaryCallback<T>(val loadHelper: RepositoryLoadHelper<List<T>>): PagedList.BoundaryCallback<T>() {
 
     fun loadMore() {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             try {
                 loadHelper.doRequest()
             }catch(e: Exception) {
-                e.printStackTrace()
+                Napier.e("Exception running loadHelper", e)
             }
         }
     }

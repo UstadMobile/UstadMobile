@@ -192,18 +192,24 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
             if (canDeviceAdvertise()) {
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE advertising service")
+                val service = BluetoothGattService(parcelServiceUuid.uuid,
+                        BluetoothGattService.SERVICE_TYPE_PRIMARY)
+
+                val writeCharParcelUuid = ParcelUuid(UUID.fromString(BLE_CHARACTERISTIC))
+                val writeCharacteristic = BluetoothGattCharacteristic(
+                        writeCharParcelUuid.uuid,
+                        BluetoothGattCharacteristic.PROPERTY_WRITE
+                                or BluetoothGattCharacteristic.PROPERTY_READ,
+                        BluetoothGattCharacteristic.PERMISSION_WRITE or
+                        BluetoothGattCharacteristic.PERMISSION_READ)
+
+                service.addCharacteristic(writeCharacteristic)
+
                 gattServerAndroid = BleGattServer(mContext,
                         this@NetworkManagerBle) {input, output -> httpd.newSession(input, output)}
                 bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
 
-                val service = BluetoothGattService(parcelServiceUuid.uuid,
-                        BluetoothGattService.SERVICE_TYPE_PRIMARY)
 
-                val writeCharacteristic = BluetoothGattCharacteristic(
-                        parcelServiceUuid.uuid, BluetoothGattCharacteristic.PROPERTY_WRITE,
-                        BluetoothGattCharacteristic.PERMISSION_WRITE)
-
-                service.addCharacteristic(writeCharacteristic)
                 if (gattServerAndroid == null
                         || (gattServerAndroid as BleGattServer).gattServer == null
                         || bleServiceAdvertiser == null) {

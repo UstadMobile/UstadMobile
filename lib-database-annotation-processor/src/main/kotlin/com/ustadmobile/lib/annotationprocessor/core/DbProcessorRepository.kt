@@ -441,8 +441,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 }
 
                 Repository.METHOD_DELEGATE_TO_WEB -> {
-                    codeBlock.beginControlFlow("val _loaderHelper = %T(_repo)",
-                            RepositoryLoadHelper::class)
+                    codeBlock.beginControlFlow("val _loaderHelper = %T(_repo,·uri·=·%S)",
+                            RepositoryLoadHelper::class,
+                            "${daoTypeElement.simpleName}/${daoFunSpecBuilt.name}")
                             .add("_endpointToTry -> \n")
                         .add(generateKtorRequestCodeBlockForMethod(
                             httpEndpointVarName = "_endpointToTry",

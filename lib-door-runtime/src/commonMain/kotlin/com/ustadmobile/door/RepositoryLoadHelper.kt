@@ -26,7 +26,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
                               val lifecycleHelperFactory: (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper =
                                       {RepositoryLoadHelperLifecycleHelper(it)},
-                              val endpointName: String = "",
+                              val uri: String = "",
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
     var liveDataWrapper: LiveDataWrapper<*>? = null
@@ -42,7 +42,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     }
 
     private val logPrefix
-        get() = "ID $repoHelperId "
+        get() = "ID [$uri] $repoHelperId "
 
     /**
      * This wrapper exists to monitor when LiveData is actively observed. The repository will wrap
@@ -81,7 +81,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                             Napier.d("$logPrefix : addActiveObserver: did not complete " +
                                             "and data is being observed. Trying again.")
                             onActiveCb?.invoke()
-                        } catch(e: IOException) {
+                        } catch(e: Exception) {
                             Napier.e("$logPrefix : addActiveObserver: ERROR " +
                                     "did not complete and data is being observed: ", e)
                         }
@@ -145,7 +145,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     Napier.d("$logPrefix RepositoryLoadHelper: onConnectivityStatusChanged: did not complete " +
                                     "and data is being observed. Trying again.")
                     doRequest(resetAttemptCount = true)
-                } catch (e: IOException) {
+                } catch (e: Exception) {
                     Napier.e("$logPrefix RepositoryLoadHelper: onConnectivityStatusChanged: ERROR " +
                                     "did not complete and data is being observed: ", e)
                 }
@@ -160,7 +160,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     Napier.d("$logPrefix RepositoryLoadHelper: onNewMirrorAvailable: Mirror # ${mirror.mirrorId} " +
                                     "did not complete and data is being observed. Trying again.")
                     doRequest(resetAttemptCount = true)
-                } catch(e: IOException) {
+                } catch(e: Exception) {
                     Napier.e("$logPrefix RepositoryLoadHelper: onNewMirrorAvailable: ERROR " +
                                     "did not complete and data is being observed: ", e)
                 }
@@ -230,7 +230,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     }else {
                         Napier.e({"$logPrefix doRequest: loadFn completed from $endpointToUse but " +
                                 "not successful. IsNullOrEmpty=$isNullOrEmpty, " +
-                                "autoRetryOnEmptyLiveData=${autoRetryOnEmptyLiveData != null}"})
+                                "autoRetryOnEmptyLiveData=${autoRetryOnEmptyLiveData != null}" +
+                                "autoRetryEmptyMirrorResult=$autoRetryEmptyMirrorResult"})
                     }
 
                     delay(retryDelay.toLong())
@@ -248,7 +249,11 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }
 
             Napier.d("$logPrefix doRequest: over. Is completed=${loadedVal.isCompleted}")
-            return loadedVal.getCompleted()
+            if(loadedVal.isCompleted) {
+                return loadedVal.getCompleted()
+            }else {
+                throw IOException("$logPrefix ==ERROR== NOT completed")
+            }
         }
     }
 
@@ -283,9 +288,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     }
 
     companion object {
-        val coroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
-            println("Caught $exception")
-        }
 
         val ID_ATOMICINT = atomic(0)
     }
