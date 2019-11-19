@@ -496,7 +496,8 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
 
 fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: TypeName,
                                            syncHelperDaoVarName: String = "_syncHelper",
-                                           afterInsertCode: (ClassName) -> CodeBlock = {CodeBlock.of("")},
+                                           afterInsertCode: (String, ClassName, Boolean) -> CodeBlock =
+                                                   {varName, entityTypeClassName, isListOrArray ->CodeBlock.of("")},
                                            beforeInsertCode: (String, ClassName, Boolean) -> CodeBlock =
                                                    {varName, entityTypeClassName, isListOrArray -> CodeBlock.of("")},
                                            processingEnv: ProcessingEnvironment): CodeBlock {
@@ -546,7 +547,7 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
                     .endControlFlow()
         }
 
-        runAfterCodeBlock.add(afterInsertCode(it.value))
+        runAfterCodeBlock.add(afterInsertCode(accessorVarName, it.value, isListOrArrayResult))
     }
 
     codeBlock.beginControlFlow("_db.runInTransaction(%T ", Runnable::class)
@@ -1493,15 +1494,18 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         //TODO: If entity has attachments, handle that here
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
-                afterInsertCode = {
-                    CodeBlock.builder().beginControlFlow("_httpClient.%M<Unit>",
+                afterInsertCode = {varName, entityTypeClassName, isList ->
+                    CodeBlock.builder()
+                            .beginIfNotNullOrEmptyControlFlow(varName, isList)
+                            .beginControlFlow("_httpClient.%M<Unit>",
                             CLIENT_GET_MEMBER_NAME)
                             .beginControlFlow("url")
                             .add("%M(_endpointToTry)\n", MemberName("io.ktor.http", "takeFrom"))
                             .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
-                                    "_update${SyncableEntityInfo(it, processingEnv).tracker.simpleName}Received")
+                                    "_update${SyncableEntityInfo(entityTypeClassName, processingEnv).tracker.simpleName}Received")
                             .endControlFlow()
                             .add("%M(%S, _requestId)\n", CLIENT_PARAMETER_MEMBER_NAME, "reqId")
+                            .endControlFlow()
                             .endControlFlow()
                             .build()
                 },

@@ -1,8 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.*
 
 /**
  * Generate a delegation style function call, e.g.
@@ -37,6 +35,16 @@ fun CodeBlock.Builder.addGetClientIdHeader(varName: String, serverType: Int) : C
     takeIf { serverType == DbProcessorKtorServer.SERVER_TYPE_NANOHTTPD }
             ?.add("val $varName = _session.headers.get(%S)?.toInt() ?: 0\n",
                 "X-nid")
+
+    return this
+}
+
+fun CodeBlock.Builder.beginIfNotNullOrEmptyControlFlow(varName: String, isList: Boolean) : CodeBlock.Builder{
+    if(isList) {
+        beginControlFlow("if(!$varName.isEmpty())")
+    }else {
+        beginControlFlow("if($varName != null)")
+    }
 
     return this
 }
