@@ -196,14 +196,17 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                         BluetoothGattService.SERVICE_TYPE_PRIMARY)
 
 
-                BLE_CHARACTERISTICS.forEach {charUuidStr ->
+                val androidCharacteristics = BLE_CHARACTERISTICS.map {charUuidStr ->
                     val charUuid = ParcelUuid(UUID.fromString(charUuidStr)).uuid
-                    val characteristic = BluetoothGattCharacteristic(charUuid,
+                    BluetoothGattCharacteristic(charUuid,
                             BluetoothGattCharacteristic.PROPERTY_WRITE
                                     or BluetoothGattCharacteristic.PROPERTY_READ,
                             BluetoothGattCharacteristic.PERMISSION_WRITE or
                                     BluetoothGattCharacteristic.PERMISSION_READ)
-                    service.addCharacteristic(characteristic)
+                }
+
+                androidCharacteristics.forEach {
+                    service.addCharacteristic(it)
                 }
 
                 gattServerAndroid = BleGattServer(mContext,

@@ -137,7 +137,7 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
             })
 
             try {
-                val messageReceived = withTimeout(10000) { deferredMessage.await() }
+                val messageReceived = withTimeout(20000) { deferredMessage.await() }
                 val payload = messageReceived?.payload
                 val payloadStr = if(payload != null) String(payload) else null
                 if(payload != null && payloadStr != null) {
