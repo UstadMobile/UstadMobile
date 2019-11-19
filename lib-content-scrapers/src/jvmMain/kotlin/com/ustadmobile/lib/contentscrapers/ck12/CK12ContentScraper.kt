@@ -542,6 +542,97 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
     }
 
+    fun scrapeFlexBookContent(content: File){
+
+        content.mkdirs()
+
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+
+        ContentScraperUtil.setChromeDriverLocation()
+
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
+
+        driver.get(scrapeUrl.toString())
+        val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
+        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
+        try {
+            waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.breadcrumblist"))).click()
+        } catch (e: Exception) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+        }
+        val les = ContentScraperUtil.waitForNewFiles(driver)
+        val cookieList = driver.manage().cookies
+        driver.close()
+        driver.quit()
+
+        val indexList = ArrayList<LogIndex.IndexEntry>()
+        var urlFileName = ContentScraperUtil.getFileNameFromUrl(scrapeUrl)
+
+        for (le in les) {
+
+            val log = gson.fromJson(le.message, LogResponse::class.java)
+            if (RESPONSE_RECEIVED.equals(log.message!!.method!!, ignoreCase = true)) {
+                val mimeType = log.message!!.params!!.response!!.mimeType
+                val urlString = log.message!!.params!!.response!!.url
+
+                try {
+
+                    val url = URL(urlString!!)
+                    val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(content, url)
+                    var cookies = ContentScraperUtil.returnListOfCookies(urlString, cookieList)
+                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log, cookies)
+
+                    if (file.name == urlFileName) {
+                        val startingUrl = FileUtils.readFileToString(file, UTF_ENCODING)
+                        val doc = Jsoup.parse(startingUrl)
+
+                        doc.selectFirst("div.breadcrumblist")?.remove()
+                        doc.selectFirst("header")?.remove()
+                        doc.selectFirst("footer")?.remove()
+                        doc.selectFirst("div.feedback")?.remove()
+                        doc.selectFirst("div#flexbook2_banner")?.remove()
+                        doc.selectFirst("div.ck12-annotation-toolbar-container")?.remove()
+                        doc.selectFirst("section.myAnnotations-container")?.remove()
+
+                        FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING)
+
+                    }
+
+
+                    val logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log)
+                    indexList.add(logIndex)
+
+                } catch (e: Exception) {
+                    UMLogUtil.logError("Index url failed at " + urlString!!)
+                    UMLogUtil.logDebug(le.message)
+                }
+
+            }else if(REQUEST_SENT == log.message!!.method){
+
+                if(log.message!!.params!!.redirectResponse != null){
+
+                    val mimeType = log.message!!.params!!.redirectResponse!!.mimeType
+                    val urlString = log.message!!.params!!.redirectResponse!!.url!!
+
+                    val logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, null, null, log)
+                    indexList.add(logIndex)
+
+                }
+
+
+            }
+        }
+
+
+        val logIndex = LogIndex()
+        logIndex.title = ScraperConstants.CK12
+        logIndex.entries = indexList
+
+        FileUtils.writeStringToFile(File(content, "index.json"), gson.toJson(logIndex), UTF_ENCODING)
+
+    }
+
+
     private fun appendMathJaxScript(): String {
         return "<script language=\"JavaScript\" src=\"./mathjax/MathJax.js\" type=\"text/javascript\">\n" +
                 "  </script>\n" +
@@ -823,7 +914,9 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
     companion object {
 
-        val RESPONSE_RECEIVED = "Network.responseReceived"
+        const val RESPONSE_RECEIVED = "Network.responseReceived"
+
+        const val REQUEST_SENT = "Network.requestWillBeSent"
 
     }
 

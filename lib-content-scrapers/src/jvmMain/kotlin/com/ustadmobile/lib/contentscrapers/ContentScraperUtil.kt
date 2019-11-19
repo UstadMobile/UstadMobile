@@ -254,7 +254,8 @@ object ContentScraperUtil {
      * @return the extracted file name from url link
      */
     fun getFileNameFromUrl(url: URL): String {
-        val fileName = FilenameUtils.getPath(url.path).replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_") + FilenameUtils.getName(url.path)
+        val decodedPath = URLDecoder.decode(url.path, UTF_ENCODING)
+        val fileName = FilenameUtils.getPath(decodedPath).replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_") + FilenameUtils.getName(decodedPath).replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_")
         return if (fileName.isEmpty()) {
             url.path.replace("[^a-zA-Z0-9\\.\\-]".toRegex(), "_")
         } else fileName

@@ -14,6 +14,8 @@ class LogResponse {
 
             var response: Response? = null
 
+            var redirectResponse: Response? = null
+
             inner class Response {
 
                 var mimeType: String? = null

@@ -152,24 +152,27 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         }
         try {
 
+
             val entry = containerManager.getEntry(log.path!!)
-                    ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
+                    ?: return WebResourceResponse("", "utf-8", log.headers?.get("status")?.toInt()
+                            ?: 404, "Not Found", log.headers, null)
 
             var mutMap = mutableMapOf<String, String>()
             if (log.headers != null) {
                 mutMap.putAll(log.headers!!)
             }
-            if(entry.containerEntryFile!!.compression == COMPRESSION_GZIP){
+            if (entry.containerEntryFile!!.compression == COMPRESSION_GZIP) {
                 mutMap["Content-Encoding"] = "gzip"
                 mutMap["Content-Length"] = entry.containerEntryFile!!.ceCompressedSize.toString()
             }
 
-
             var data = containerManager.getInputStream(entry)
+
 
             // if not range header, load the file as normal
             var rangeHeader: String? = request.requestHeaders["Range"]
-                    ?: return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", mutMap, data)
+                    ?: return WebResourceResponse(log.mimeType, "utf-8", log.headers?.get("status")?.toInt()
+                            ?: 200, "OK", mutMap, data)
 
             val totalLength = entry.containerEntryFile!!.ceTotalSize
             val isHEADRequest = request.method == "HEAD"

@@ -18,10 +18,10 @@ import com.ustadmobile.port.android.impl.WebChunkWebViewClient
 
 class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifier {
 
-    private var mPresenter: WebChunkPresenter? = null
+    private lateinit var mPresenter: WebChunkPresenter
 
-    private var mWebView: WebView? = null
-    private var webClient: WebChunkWebViewClient? = null
+    private lateinit var mWebView: WebView
+    private lateinit var webClient: WebChunkWebViewClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,35 +33,37 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
         supportActionBar!!.setDisplayShowTitleEnabled(false)
 
         mWebView = findViewById(R.id.activity_webchunk_webview)
-        mWebView!!.settings.javaScriptEnabled = true
-        mWebView!!.settings.domStorageEnabled = true
-        mWebView!!.settings.allowUniversalAccessFromFileURLs = true
-        mWebView!!.settings.allowFileAccessFromFileURLs = true
-        mWebView!!.settings.mediaPlaybackRequiresUserGesture = false
+        mWebView.settings.javaScriptEnabled = true
+        mWebView.settings.domStorageEnabled = true
+        mWebView.settings.allowUniversalAccessFromFileURLs = true
+        mWebView.settings.allowFileAccessFromFileURLs = true
+        mWebView.settings.mediaPlaybackRequiresUserGesture = false
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
                 bundleToMap(intent.extras), this, repository)
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        mPresenter.onCreate(bundleToMap(savedInstanceState))
 
     }
 
     override fun mountChunk(container: Container, callback: UmCallback<String>) {
-        webClient = WebChunkWebViewClient(container, mPresenter!!, this)
+        webClient = WebChunkWebViewClient(container, mPresenter, this)
         runOnUiThread {
-            mWebView!!.webViewClient = webClient
-            callback.onSuccess(webClient!!.startingUrl)
+            mWebView.webViewClient = webClient
+            callback.onSuccess(webClient.startingUrl)
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onBackPressed() {
+        if(mWebView.canGoBack()){
+            mWebView.goBack()
+        }else{
+            super.onBackPressed()
+        }
     }
 
     private fun clickUpNavigation() {
-        if (mPresenter != null) {
-            mPresenter!!.handleUpNavigation()
-        }
+        mPresenter.handleUpNavigation()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -77,7 +79,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
 
     override fun loadUrl(url: String) {
-        mWebView!!.loadUrl(url)
+        mWebView.loadUrl(url)
     }
 
     override fun showError(message: String) {
