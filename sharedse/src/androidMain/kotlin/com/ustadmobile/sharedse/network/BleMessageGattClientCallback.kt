@@ -8,14 +8,15 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MAXIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.io.IOException
-import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.ceil
 
@@ -39,7 +40,8 @@ import kotlin.math.ceil
  */
 
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-class BleMessageGattClientCallback() : BluetoothGattCallback() {
+class BleMessageGattClientCallback(val deviceAddr: String,
+                                   val clientCallbackManager: GattClientCallbackManager) : BluetoothGattCallback() {
 
     private val receivedMessage: BleMessage
 
@@ -47,18 +49,13 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
 
     private var responseListener: BleMessageResponseListener? = null
 
-    private var packetIteration = 0
-
     private val serviceDiscoveryRef = AtomicBoolean(false)
 
     private val mConnected = AtomicBoolean(true)
 
     private val mClosed = AtomicBoolean(false)
 
-    @Volatile
-    private var lastActive: Long
-
-    private var packetTransferAttemptsRemaining = 3
+    private val lastActive = AtomicLong(System.currentTimeMillis())
 
     private val MAX_DELAY_TIME  = 1000L
 
@@ -82,6 +79,19 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
 
     //Map of characteristic UUID -> PendingMessageProcessor
     private val processorMap: MutableMap<UUID, PendingMessageProcessor> = ConcurrentHashMap()
+
+    private fun scheduleCheckTimeout(gatt: BluetoothGatt, interval: Long) {
+        GlobalScope.launch {
+            delay(interval)
+            if(System.currentTimeMillis() - lastActive.get() > 15000) {
+                Napier.v("GattClient connection wtih ${gatt.device} is inactive. " +
+                        "Disconnecting and cleaning up")
+                cleanup(gatt)
+            }else {
+                scheduleCheckTimeout(gatt, interval)
+            }
+        }
+    }
 
 
     /**
@@ -218,7 +228,6 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
 
     init {
         receivedMessage = BleMessage()
-        lastActive = System.currentTimeMillis()
     }
 
     suspend fun sendMessage(outgoingMessage: BleMessage,
@@ -253,6 +262,7 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
 
         if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
             Napier.d("$logPrefix: Device connected to $remoteDeviceAddress")
+            scheduleCheckTimeout(gatt, 5000)
 
             if (!serviceDiscoveryRef.get()) {
                 Napier.d("$logPrefix: Discovering services offered by $remoteDeviceAddress")
@@ -330,6 +340,7 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
     override fun onCharacteristicWrite(gatt: BluetoothGatt,
                                        characteristic: BluetoothGattCharacteristic, status: Int) {
         super.onCharacteristicWrite(gatt, characteristic, status)
+        lastActive.set(System.currentTimeMillis())
 
         val messageProcessor = processorMap[characteristic.uuid]
         if(messageProcessor != null) {
@@ -347,6 +358,8 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
     override fun onCharacteristicRead(gatt: BluetoothGatt,
                                       characteristic: BluetoothGattCharacteristic, status: Int) {
         val processor = processorMap[characteristic.uuid]
+        lastActive.set(System.currentTimeMillis())
+
         if(processor != null) {
             processor.readCharacteristics(gatt, characteristic)
         }else {
@@ -368,6 +381,7 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                 gatt.close()
                 mClosed.set(true)
                 Napier.i("$logPrefix: closed")
+                clientCallbackManager.handleGattDisconnected(this)
             }
         } catch (e: Exception) {
             Napier.e("$logPrefix: ERROR disconnecting")

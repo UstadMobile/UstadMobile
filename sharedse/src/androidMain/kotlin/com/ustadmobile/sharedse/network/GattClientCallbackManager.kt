@@ -18,7 +18,7 @@ class GattClientCallbackManager(val context: Context,
         if(currentCallback == null){
             UMLog.l(UMLog.VERBOSE, 0, "GattClientCallbackManager: initiating " +
                     "connection connection to $deviceAddress")
-            currentCallback = BleMessageGattClientCallback()
+            currentCallback = BleMessageGattClientCallback(deviceAddress, this)
             gattClientCallbacks[deviceAddress] = currentCallback
             val remoteDevice = adapter.getRemoteDevice(deviceAddress)
 
@@ -35,6 +35,10 @@ class GattClientCallbackManager(val context: Context,
         }
 
         return currentCallback
+    }
+
+    fun handleGattDisconnected(clientCallback: BleMessageGattClientCallback){
+        gattClientCallbacks.remove(clientCallback.deviceAddr)
     }
 
 
