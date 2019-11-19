@@ -1105,6 +1105,10 @@ object ContentScraperUtil {
     @Throws(IOException::class)
     fun downloadFileFromLogIndex(url: URL, destination: File, log: LogResponse?, cookies: String?): File {
 
+        if(url.host.contains("youtube")){
+            throw IllegalArgumentException("cannot download youtube")
+        }
+
         val fileName = getFileNameFromUrl(url)
         val file = File(destination, fileName)
         if (log != null && log.message!!.params!!.response!!.requestHeaders != null || cookies != null) {
@@ -1157,13 +1161,13 @@ object ContentScraperUtil {
      * @param log          log response of index
      * @return
      */
-    fun createIndexFromLog(urlString: String, mimeType: String?, urlDirectory: File, file: File, log: LogResponse?): LogIndex.IndexEntry {
+    fun createIndexFromLog(urlString: String, mimeType: String?, urlDirectory: File?, file: File?, log: LogResponse?): LogIndex.IndexEntry {
         val logIndex = LogIndex.IndexEntry()
         logIndex.url = urlString
         logIndex.mimeType = mimeType
-        logIndex.path = urlDirectory.name + FORWARD_SLASH + file.name
+        logIndex.path = if(file != null) (urlDirectory!!.name + FORWARD_SLASH + file.name) else ""
         if (log != null) {
-            logIndex.headers = log.message!!.params!!.response!!.headers
+            logIndex.headers = log.message!!.params?.response?.headers ?: log.message!!.params?.redirectResponse?.headers
         }
         return logIndex
     }
