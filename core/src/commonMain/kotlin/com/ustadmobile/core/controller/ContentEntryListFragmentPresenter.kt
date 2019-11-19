@@ -19,6 +19,7 @@ import kotlin.js.JsName
 
 class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?,
                                         private val fragmentViewContract: ContentEntryListFragmentView,
+                                        private val contentEntryDao: ContentEntryDao,
                                         private val contentEntryDaoRepo: ContentEntryDao)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
 
@@ -116,7 +117,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
     private fun showDownloadedContent() {
-        fragmentViewContract.setContentEntryProvider(contentEntryDaoRepo.downloadedRootItems())
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.downloadedRootItems())
     }
 
 

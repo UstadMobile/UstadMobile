@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
@@ -267,8 +268,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             }
 
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(activity!!)
+            val umDb = UmAppDatabase.getInstance(context as Context)
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
-                    bundleToMap(arguments), this, umRepoDb.contentEntryDao)
+                    bundleToMap(arguments), this, umDb.contentEntryDao,
+                    umRepoDb.contentEntryDao)
             entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
         }
     }

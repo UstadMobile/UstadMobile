@@ -11,6 +11,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADM
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.io.IOException
+import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -99,6 +100,10 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                 get() = "BleMessageGattClientCallback: Request ID #" +
                         "${currentPendingMessage.get()?.outgoingMessage?.messageId} "
 
+        private var lastSendStartTime = 0L
+
+        private var lastReceiveStartTime = 0L
+
         suspend fun process() {
             for(message in messageChannel) {
                 //send the packet itself
@@ -106,13 +111,24 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                 message.outgoingPackets = message.outgoingMessage.getPackets(mtu - BleGattServer.ATT_HEADER_SIZE)
                 Napier.d("$logPrefix processor received message in channel " +
                         "${message.outgoingMessage.payload?.size} bytes MTU=${mtu}")
+                val startTime = System.currentTimeMillis()
+                lastSendStartTime = startTime
                 try {
                     clientToServerCharacteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     sendNextPacket(mGatt, clientToServerCharacteristic)
                     val messageReceived = message.messageReceived.await()
+                    val duration = System.currentTimeMillis() - startTime
+                    Napier.d({
+                        val bytesSent = message.outgoingMessage.payload?.size ?: -1
+                        val bytesReceived = messageReceived.payload?.size ?: -1
+                        val speedKBps = (bytesSent + bytesReceived).toFloat() / ((duration.toFloat() * 1024) / 1000)
+                        """$logPrefix SUCCESS sent $bytesSent bytes received 
+                        |$bytesReceived bytes in ${duration}ms (${bytesSent + bytesReceived}
+                        |@ ${String.format("%.2f", speedKBps)} KB/s
+                    """.trimMargin()})
                     message.responseListener?.onResponseReceived("",
                             messageReceived, null)
-                    Napier.d("$logPrefix message processing completed successfully")
+
                 }catch(e: Exception) {
                     Napier.e("$logPrefix MessageProcessor exception", e)
                     message.responseListener?.onResponseReceived("", null,
@@ -153,11 +169,13 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                 if (++currentMessageVal.outgoingPacketNum < currentMessageVal.outgoingPackets.size) {
                     sendNextPacket(gatt, characteristic)
                 } else {
+                    val sendDuration = System.currentTimeMillis() - lastSendStartTime
                     Napier.v("$logPrefix sent all " +
                             "${currentPendingMessage.get()?.outgoingPackets?.size} packets - " +
-                            "${currentMessageVal.outgoingMessage.payload?.size}  bytes. Starting read.")
+                            "${currentMessageVal.outgoingMessage.payload?.size}  bytes in " +
+                            "$sendDuration ms. Starting read.")
 
-
+                    lastReceiveStartTime = System.currentTimeMillis()
                     //now read the server's reply
                     requestReadNextPacket(gatt, characteristic)
                 }
@@ -176,8 +194,12 @@ class BleMessageGattClientCallback() : BluetoothGattCallback() {
                         "#${currentMessageVal.incomingPacketNum}/$totalExpectedPackets expect " +
                         "MTU= ${currentMessageVal.incomingMessage.mtu} message length= $expectedPayload bytes")
                 if(complete) {
-                    Napier.v("$logPrefix received complete message " +
-                            "${currentMessageVal.incomingMessage.payload?.size} bytes")
+                    val duration = System.currentTimeMillis() - lastReceiveStartTime
+                    val payloadSize = currentMessageVal.incomingMessage.payload?.size ?: 1
+                    val speedKbps = payloadSize.toFloat() / ((duration.toFloat() * 1024)/1000)
+                    Napier.v("$logPrefix SUCCESS received complete message " +
+                            "${currentMessageVal.incomingMessage.payload?.size} bytes in " +
+                            "$duration ms @ ${String.format("%.2f", speedKbps)} KB/s")
                     currentMessageVal.messageReceived.complete(currentMessageVal.incomingMessage)
                     currentMessageVal.responseListener?.onResponseReceived("",
                             currentMessageVal.incomingMessage, null)
