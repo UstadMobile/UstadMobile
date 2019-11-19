@@ -471,9 +471,9 @@ abstract class NetworkManagerBleCommon(
          */
         const val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
 
-        val BLE_CHARACTERISTICS = listOf("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93d",
+        val BLE_CHARACTERISTICS = listOf("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93d"/*,
                 "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e", "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93f",
-                "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93b")
+                "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93b"*/)
 
         /**
          * Peer WIFi direct group prefix
