@@ -391,6 +391,8 @@ class BleMessageGattClientCallback(val deviceAddr: String,
         runBlocking { runNextOperation(gatt) }
     }
 
+
+
     suspend fun runNextOperation(gatt: BluetoothGatt) {
         val nextOp = operationChannel.receive()
         val characteristic = activeCharacteristics.first { it.uuid == nextOp.characteristicUUID }

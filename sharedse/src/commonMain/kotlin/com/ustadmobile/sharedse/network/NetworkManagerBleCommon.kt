@@ -135,7 +135,8 @@ abstract class NetworkManagerBleCommon(
 
     val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
             this::makeEntryStatusTask, singleThreadDispatcher,
-            this::onNewBleNodeDiscovered, this::onBleNodeLost)
+            this::onNewBleNodeDiscovered, this::onBleNodeLost,
+            umAppDatabase.locallyAvailableContainerDao)
 
     private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
 

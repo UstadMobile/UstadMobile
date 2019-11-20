@@ -21,11 +21,11 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class
+    SyncNode::class, LocallyAvailableContainer::class
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 26)
+], version = 27)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -167,6 +167,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
+    abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
+
     //#DOORDB_SYNCDAO
 
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
@@ -238,13 +240,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
-            builder.addMigrations(object : DoorMigration(25,26){
-                override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
-                }
-
-            })
-
             builder.addMigrations(object : DoorMigration(20, 24) {
                 override fun migrate(database: DoorSqlDatabase) {
 
@@ -1275,6 +1270,21 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
                 }
             })
+
+            builder.addMigrations(object : DoorMigration(25,26){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                }
+
+            })
+
+            builder.addMigrations(object : DoorMigration(26, 27) {
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
+                }
+            })
+
+
             return builder
         }
 

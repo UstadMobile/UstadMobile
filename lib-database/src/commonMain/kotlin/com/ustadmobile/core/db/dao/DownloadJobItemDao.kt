@@ -133,9 +133,11 @@ abstract class DownloadJobItemDao {
              AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
              AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
              AND (((SELECT connectivityState FROM ConnectivityStatus) =  ${ConnectivityStatus.STATE_UNMETERED} ) 
-             OR ((SELECT connectivityState FROM ConnectivityStatus) = ${ConnectivityStatus.STATE_METERED} ) 
-             AND DownloadJob.meteredNetworkAllowed) 
-            ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT 6""")
+             OR (((SELECT connectivityState FROM ConnectivityStatus) = ${ConnectivityStatus.STATE_METERED} ) 
+                AND DownloadJob.meteredNetworkAllowed) 
+             OR EXISTS(SELECT laContainerUid FROM LocallyAvailableContainer WHERE 
+                laContainerUid = DownloadJobItem.djiContainerUid)) 
+             ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT 6""")
     @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 

@@ -1,10 +1,11 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.db.dao.LocallyAvailableContainerDao
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.door.MirrorEndpoint
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
+import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.db.entities.NetworkNodeWithStatusResponsesAndHistory
 import com.ustadmobile.lib.util.copyOnWriteListOf
@@ -19,12 +20,34 @@ class LocalAvailabilityManagerImpl(private val context: Any,
                                    private val entryStatusTaskMaker: StatusTaskMakerFn,
                                    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
                                    private val onNewNodeDiscovered: OnNodeStatusChangeFn = { },
-                                   private val onNodeLost: OnNodeStatusChangeFn = { })
+                                   private val onNodeLost: OnNodeStatusChangeFn = { },
+                                   private val locallyAvailableContainerDao: LocallyAvailableContainerDao)
     : LocalAvailabilityManager{
 
     private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
 
     private val activeNodes: MutableList<NetworkNodeWithStatusResponsesAndHistory> = mutableListOf()
+
+    private var dbAvailableContainerUids = mutableListOf<Long>()
+
+    private var dbLastUpdated: Long = 0
+
+    private var availablilityLastChanged: Long = 0
+
+    suspend fun updateDb() {
+        if(dbLastUpdated < availablilityLastChanged) {
+            dbLastUpdated = getSystemTimeInMillis()
+            val containersAvailableNow = activeNodes.flatMap {
+                it.statusResponses.filter { it.value.available }.map { it.value.erContainerUid }
+            }.toSet()
+            val entriesLost = dbAvailableContainerUids.filter { it !in containersAvailableNow}
+            val newEntries = containersAvailableNow.filter { it !in dbAvailableContainerUids }
+            locallyAvailableContainerDao.takeIf { entriesLost.isNotEmpty() }
+                    ?.deleteList(entriesLost.map { LocallyAvailableContainer(it) })
+            locallyAvailableContainerDao.takeIf{newEntries.isNotEmpty() }
+                    ?.insertList(newEntries.map { LocallyAvailableContainer(it) })
+        }
+    }
 
     override suspend fun handleNodeDiscovered(bluetoothAddr: String) {
         withContext(coroutineDispatcher) {
@@ -54,24 +77,26 @@ class LocalAvailabilityManagerImpl(private val context: Any,
     }
 
     fun handleBleTaskResponseReceived(entryStatusResponses: MutableList<EntryStatusResponse>, statusTask: BleEntryStatusTask) {
-        GlobalScope.launch {
-            withContext(coroutineDispatcher) {
-                val networkNode = activeNodes.firstOrNull { it.bluetoothMacAddress == statusTask.networkNode.bluetoothMacAddress }
-                if(networkNode == null)
-                    return@withContext
+        GlobalScope.launch(coroutineDispatcher) {
+            val networkNode = activeNodes.firstOrNull { it.bluetoothMacAddress == statusTask.networkNode.bluetoothMacAddress }
+            if(networkNode == null)
+                return@launch
 
-                networkNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
-                val entryStatusResponseContainerUids = entryStatusResponses.map { it.erContainerUid }
-                activeMonitoringRequests.filter { monitorRequest ->
-                    monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
-                }.forEach {
-                    val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
-                    it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
-                }
+            networkNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
+            val entryStatusResponseContainerUids = entryStatusResponses.map { it.erContainerUid }
+            activeMonitoringRequests.filter { monitorRequest ->
+                monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
+            }.forEach {
+                val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
+                it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
+            }
+
+            availablilityLastChanged = getSystemTimeInMillis()
+            launch(coroutineDispatcher) {
+                delay(1000)
+                updateDb()
             }
         }
-
-
     }
 
     override fun addMonitoringRequest(request: AvailabilityMonitorRequest) {

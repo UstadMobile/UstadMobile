@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -46,57 +47,63 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
         val endpoint = (dbRepo as DoorDatabaseRepository).endpoint
         var numEntriesReceived = -1
 
+        val repoLoadHelper =
+                RepositoryLoadHelper(dbRepo) {endpointUrl ->
+                    val _httpResponse = _httpClient.get<HttpResponse> {
+                        url {
+                            takeFrom(endpointUrl)
+                            encodedPath =
+                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/getAllEntriesRecursively"
+                        }
+                        header("X-nid", repo.clientId)
+                        parameter("contentEntryUid", contentEntryUid)
+
+                        parameter("limit", fetchEntitiesLimit)
+
+                    }
+                    val _httpResult =
+                            _httpResponse.receive<List<ContentEntryWithParentChildJoinAndMostRecentContainer>>()
+                    val _requestId = _httpResponse.headers.get("X-reqid")?.toInt() ?: -1
+                    db.containerDao.replaceList(_httpResult
+                            .filter { it.mostRecentContainer != null }
+                            .map { it.mostRecentContainer as Container }
+                    )
+                    _httpClient.get<Unit> {
+                        url {
+                            takeFrom(endpointUrl)
+                            encodedPath =
+                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContainer_trkReceived"
+                        }
+                        parameter("reqId", _requestId)
+                    }
+                    db.contentEntryParentChildJoinDao.replaceList(_httpResult
+                            .filter { it.contentEntryParentChildJoin != null }
+                            .map { it.contentEntryParentChildJoin as ContentEntryParentChildJoin }
+                    )
+                    _httpClient.get<Unit> {
+                        url {
+                            takeFrom(endpointUrl)
+                            encodedPath =
+                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntryParentChildJoin_trkReceived"
+                        }
+                        parameter("reqId", _requestId)
+                    }
+                    db.contentEntryDao.replaceList(_httpResult)
+                    _httpClient.get<Unit> {
+                        url {
+                            takeFrom(endpointUrl)
+                            encodedPath =
+                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntry_trkReceived"
+                        }
+                        parameter("reqId", _requestId)
+                    }
+
+                    _httpResult
+        }
+
         try {
-            val _httpResponse = _httpClient.get<HttpResponse> {
-                url {
-                    takeFrom(endpoint)
-                    encodedPath =
-                            "${encodedPath}${repo.dbPath}/ContentEntryDao/getAllEntriesRecursively"
-                }
-                header("X-nid", repo.clientId)
-                parameter("contentEntryUid", contentEntryUid)
-
-                parameter("limit", fetchEntitiesLimit)
-
-            }
-            val _httpResult =
-                    _httpResponse.receive<List<ContentEntryWithParentChildJoinAndMostRecentContainer>>()
-            val _requestId = _httpResponse.headers.get("X-reqid")?.toInt() ?: -1
-            db.containerDao.replaceList(_httpResult
-                    .filter { it.mostRecentContainer != null }
-                    .map { it.mostRecentContainer as Container }
-            )
-            _httpClient.get<Unit> {
-                url {
-                    takeFrom(endpoint)
-                    encodedPath =
-                            "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContainer_trkReceived"
-                }
-                parameter("reqId", _requestId)
-            }
-            db.contentEntryParentChildJoinDao.replaceList(_httpResult
-                    .filter { it.contentEntryParentChildJoin != null }
-                    .map { it.contentEntryParentChildJoin as ContentEntryParentChildJoin }
-            )
-            _httpClient.get<Unit> {
-                url {
-                    takeFrom(endpoint)
-                    encodedPath =
-                            "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntryParentChildJoin_trkReceived"
-                }
-                parameter("reqId", _requestId)
-            }
-            db.contentEntryDao.replaceList(_httpResult)
-            _httpClient.get<Unit> {
-                url {
-                    takeFrom(endpoint)
-                    encodedPath =
-                            "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntry_trkReceived"
-                }
-                parameter("reqId", _requestId)
-            }
-
-            numEntriesReceived = _httpResult.size
+            val entriesLoaded = repoLoadHelper.doRequest()
+            numEntriesReceived = entriesLoaded.size
         }catch(e: Exception) {
             UMLog.l(UMLog.ERROR, 0, "Exception preparing", e)
         }finally {

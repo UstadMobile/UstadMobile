@@ -270,10 +270,12 @@ class DownloadJobItemRunner
                 "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
         var attemptsRemaining = 3
 
-        val container = appDbRepo.containerDao
+        val container = appDb.containerDao
                 .findByUid(downloadItem.djiContainerUid)
 
-        val containerManager = ContainerManager(container!!, appDb, appDbRepo, destinationDir!!)
+        //Note: the Container must be put in the database by the preparer. Therefor it's better
+        // to use the DAO object and avoid any potential to make additional http requests
+        val containerManager = ContainerManager(container!!, appDb, appDb, destinationDir!!)
 
         val currentTimeStamp = getSystemTimeInMillis()
         val minLastSeen = currentTimeStamp - (60 * 1000)
@@ -300,7 +302,8 @@ class DownloadJobItemRunner
             currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
                     downloadItem.djiContainerUid)
 
-            val isFromCloud = currentNetworkNode == null
+            val networkNodeToUse = currentNetworkNode
+            val isFromCloud = networkNodeToUse == null
             val history = DownloadJobItemHistory()
             history.mode = if (isFromCloud) MODE_CLOUD else MODE_LOCAL
             history.startTime = getSystemTimeInMillis()
@@ -310,8 +313,9 @@ class DownloadJobItemRunner
 
             val downloadEndpoint: String?
 
-            if (isFromCloud) {
-                if (connectivityStatus!!.wifiSsid != null && connectivityStatus!!.wifiSsid!!.toUpperCase().startsWith("DIRECT-")) {
+            if (networkNodeToUse == null) {
+                if (connectivityStatus?.wifiSsid != null
+                        && connectivityStatus?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
                     //we are connected to a local peer, but need the normal wifi
                     //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
                     // set status to waiting for connection and stop
@@ -325,14 +329,14 @@ class DownloadJobItemRunner
                     }
                 }
 
-                if(connectivityStatus!!.wifiSsid != null) {
+                if(connectivityStatus?.wifiSsid != null) {
                     networkManager.lockWifi(downloadWiFiLock)
                 }
 
                 downloadEndpoint = endpointUrl
             } else {
-                if (currentNetworkNode!!.groupSsid == null
-                        || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
+                if (networkNodeToUse.groupSsid == null
+                        || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
                     if (!connectToLocalNodeNetwork()) {
                         //recording failure will push the node towards the bad threshold, after which
                         // the download will be attempted from the cloud
