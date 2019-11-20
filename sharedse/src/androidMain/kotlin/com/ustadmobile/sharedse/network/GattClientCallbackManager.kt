@@ -27,7 +27,7 @@ class GattClientCallbackManager(val context: Context,
             // TRUE otherwise they will always throw error 133.
             val useAutoConnect = Build.VERSION.SDK_INT < 21
 
-            val remoteGatt = remoteDevice.connectGatt(context, useAutoConnect, currentCallback)
+            val remoteGatt = remoteDevice.connectGatt(context, false, currentCallback)
 
             if (Build.VERSION.SDK_INT >= 21) {
                 remoteGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)

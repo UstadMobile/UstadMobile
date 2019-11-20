@@ -79,9 +79,11 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private fun checkReady(){
         if(::managerBle.isInitialized){
-            mPresenter = DownloadDialogPresenter(context as Context, managerBle,
+            val presenterVal = DownloadDialogPresenter(context as Context, managerBle,
                     bundleToMap(arguments), this, UmAppDatabase.getInstance(context as Context),
                     UmAccountManager.getRepositoryForActiveAccount(context as Context))
+            presenterVal.onCreate(null)
+            mPresenter = presenterVal
         }
     }
 
@@ -116,9 +118,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
-        if(mPresenter != null){
-            mPresenter!!.onCreate(bundleToMap(savedInstanceState))
-        }
+        checkReady()
 
         return mDialog as AlertDialog
     }
