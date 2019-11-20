@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
@@ -185,7 +186,9 @@ abstract class NetworkManagerBleCommon(
 
     protected suspend fun onBleNodeLost(bluetoothAddress: String) {
         val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
-        dbRepo.removeMirror(bleMirrorIdMap[bluetoothAddress] ?: 0)
+        val mirrorId = bleMirrorIdMap[bluetoothAddress] ?: 0
+        dbRepo.removeMirror(mirrorId)
+        Napier.v({"Removed mirror $mirrorId for $bluetoothAddress"})
     }
 
     protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {

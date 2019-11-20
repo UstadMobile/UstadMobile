@@ -43,7 +43,7 @@ class GattClientCallbackManager(val context: Context,
         }
     }
 
-    fun handleGattDisconnected(clientCallback: BleMessageGattClientCallback){
+    fun handleGattClientClosed(clientCallback: BleMessageGattClientCallback){
         lock.withLock {
             gattClientCallbacks.remove(clientCallback.deviceAddr)
         }

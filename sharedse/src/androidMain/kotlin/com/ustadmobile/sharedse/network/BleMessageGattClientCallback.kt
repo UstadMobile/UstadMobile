@@ -56,6 +56,10 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
     private val mClosed = AtomicBoolean(false)
 
+    private val disconnectRequested = AtomicBoolean(false)
+
+    private var disconnecting = false
+
     private val lastActive = AtomicLong(System.currentTimeMillis())
 
     private val MAX_DELAY_TIME  = 1000L
@@ -72,9 +76,9 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
     private val activeCharacteristics: MutableList<BluetoothGattCharacteristic> = CopyOnWriteArrayList()
 
-    class GattOperation(val opType: Int, val characteristicUUID: UUID,
+    class GattOperation(val opType: Int, val characteristicUUID: UUID?,
                         val characteristicValue: ByteArray?,
-                        val pendingMesage: PendingMessage)
+                        val pendingMesage: PendingMessage?)
 
     class PendingMessage(val messageId: Int, val outgoingMessage: BleMessage,
                          internal val incomingMessage: BleMessage = BleMessage(),
@@ -92,12 +96,12 @@ class BleMessageGattClientCallback(val deviceAddr: String,
     private val processorMap: MutableMap<UUID, PendingMessageProcessor> = ConcurrentHashMap()
 
     private fun scheduleCheckTimeout(gatt: BluetoothGatt, interval: Long) {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             delay(interval)
             if(System.currentTimeMillis() - lastActive.get() > 15000) {
                 Napier.v("GattClient connection wtih ${gatt.device} is inactive. " +
-                        "Disconnecting and cleaning up")
-                cleanup(gatt)
+                        "Requesting disconnect")
+                requestDisconnect(gatt)
             }else {
                 scheduleCheckTimeout(gatt, interval)
             }
@@ -114,12 +118,13 @@ class BleMessageGattClientCallback(val deviceAddr: String,
                                   private val operationChannel: Channel<GattOperation>,
                                   var mGatt: BluetoothGatt,
                                   val mtu: Int,
-                                  val clientToServerCharacteristic: BluetoothGattCharacteristic){
+                                  val clientToServerCharacteristic: BluetoothGattCharacteristic,
+                                  val clientCallbackId: Int){
 
         val currentPendingMessage = AtomicReference<PendingMessage?>()
 
         private val logPrefix
-                get() = "BleMessageGattClientCallback: Request ID #" +
+                get() = "BleMessageGattClientCallback($clientCallbackId): Request ID #" +
                         "${currentPendingMessage.get()?.outgoingMessage?.messageId} "
 
         private var lastSendStartTime = 0L
@@ -128,6 +133,12 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
         suspend fun process() {
             for(message in messageChannel) {
+                if(message.messageReceived.isCancelled) {
+                    Napier.d({"$logPrefix Message ${message.outgoingMessage.messageId} has been " +
+                            "canceled - not processing"})
+                    continue
+                }
+
                 //send the packet itself
                 currentPendingMessage.set(message)
                 message.outgoingPackets = message.outgoingMessage.getPackets(mtu - BleGattServer.ATT_HEADER_SIZE)
@@ -255,7 +266,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
         val pendingMessage = PendingMessage(0, outgoingMessage,
                 responseListener = responseListener)
 
-        Napier.d( "BleMessageGattClientCallback: sendMessage #" +
+        Napier.d( "$logPrefix sendMessage #" +
                 "${outgoingMessage.messageId} MTU=$currentMtu")
         messageChannel.send(pendingMessage)
         try {
@@ -287,6 +298,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
         val remoteDeviceAddress = gatt.device.address
 
+        Napier.d({"$logPrefix CONNECTIONCHANGE newState=$newState status=$status"})
         if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
             Napier.d("$logPrefix: Device connected to $remoteDeviceAddress")
             scheduleCheckTimeout(gatt, 5000)
@@ -296,9 +308,10 @@ class BleMessageGattClientCallback(val deviceAddr: String,
                 serviceDiscoveryRef.set(true)
                 gatt.discoverServices()
             }
-        } else if(status != BluetoothGatt.GATT_SUCCESS && !mClosed.get()){
-            Napier.e("$logPrefix: onConnectionChange not successful and connection is not " +
-                    "closed $status from $remoteDeviceAddress")
+        } else if(newState == BluetoothProfile.STATE_DISCONNECTED && !mClosed.get()){
+            Napier.v({"$logPrefix: onConnectionChange : now DISCONNECTED, but not yet closed." +
+                    "Requesting cleanup/close"})
+            //cleanup(gatt)
             cleanup(gatt)
             responseListener?.onResponseReceived(remoteDeviceAddress, null,
                         IOException("BLE onConnectionStateChange not successful." +
@@ -308,22 +321,30 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
 
     /**
-     * Enable notification to be sen't back when characteristics are modified
+     * Enable notification to be sent back when characteristics are modified
      * from the GATT server's side.
+     *
+     *
      */
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
         super.onServicesDiscovered(gatt, status)
         val service = gatt.services.firstOrNull { it.uuid.toString() == USTADMOBILE_BLE_SERVICE_UUID }  //findMatchingService(gatt.services)
-        if (service == null) {
+        if (activeCharacteristics.isEmpty() && service == null) {
             Napier.e("$logPrefix: ERROR Ustadmobile Service not found on " +
                     gatt.device.address)
             responseListener?.onResponseReceived(gatt.device.address, null,
                     IOException("UstadMobile service not found on device"))
-            cleanup(gatt)
+            //cleanup(gatt)
+            requestDisconnect(gatt)
             return
         }
 
-        Napier.d("$logPrefix: Ustadmobile Service found on ${gatt.device.address}")
+        if(service == null) {
+            Napier.wtf({"$logPrefix: Should not happen! characteristics were empty and service is null"})
+            return
+        }
+
+        Napier.d("$logPrefix: Ustadmobile SERVICE DISCOVERED found on ${gatt.device.address}")
         val characteristics = service.characteristics
 
         val ustadUuids = NetworkManagerBleCommon.BLE_CHARACTERISTICS.map { UUID.fromString(it) }
@@ -331,7 +352,8 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
         if(ustadCharacteristics.isEmpty()) {
             Napier.e("Service discovered on ${gatt.device.address} does not have ANY " +
-                    "ustad characteristics")
+                    "ustad characteristics - disconnecting")
+            requestDisconnect(gatt)
             return
         }
 
@@ -357,7 +379,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
             ustadCharacteristics.forEach { characteristic ->
                 GlobalScope.launch {
                     val processor = PendingMessageProcessor(messageChannel, operationChannel,
-                            gatt, currentMtu.get(), characteristic)
+                            gatt, currentMtu.get(), characteristic, callbackId)
                     processorMap[characteristic.uuid] = processor
                     processor.process()
                 }
@@ -417,18 +439,23 @@ class BleMessageGattClientCallback(val deviceAddr: String,
         var opSent = false
         do {
             val nextOp = operationChannel.receive()
-            if(nextOp.pendingMesage.messageReceived.isCancelled) {
-                Napier.d("nextOp was for canceled message: skipping operation")
+            if(nextOp.pendingMesage?.messageReceived?.isCancelled ?: false
+                    || disconnecting) {
+                if(!disconnecting) {
+                    Napier.d("nextOp was for canceled message : skipping operation")
+                }else {
+                    Napier.d("This client is actually disconnecting : skipping operation")
+                }
+
                 continue
             }
 
-
-            val characteristic = activeCharacteristics.first { it.uuid == nextOp.characteristicUUID }
+            val characteristic = activeCharacteristics.firstOrNull { it.uuid == nextOp.characteristicUUID }
 
             when(nextOp.opType) {
                 OP_READ ->  {
-                    val initiated = gatt.readCharacteristic(characteristic)
-                    Napier.d("run: readCharacteristic: ${characteristic.uuid} initiated=$initiated")
+                    val initiated = gatt.readCharacteristic(characteristic!!)
+                    Napier.d("$logPrefix run: readCharacteristic: ${characteristic.uuid} initiated=$initiated")
                 }
 
                 OP_WRITE -> {
@@ -437,10 +464,24 @@ class BleMessageGattClientCallback(val deviceAddr: String,
                         Napier.wtf("OP_WRITE request with null value.")
                         throw IllegalArgumentException("OP_WRITE requested with null value")
                     }
-                    characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    characteristic!!.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     characteristic.value = characteristicVal
                     val initiated = gatt.writeCharacteristic(characteristic)
-                    Napier.d("run: writeCharacteristic: ${characteristic.uuid} initiated=$initiated")
+                    Napier.d("$logPrefix run: writeCharacteristic: ${characteristic.uuid} initiated=$initiated")
+                }
+
+                OP_DISCONNECT -> {
+                    gatt.disconnect()
+                    Napier.d("$logPrefix run: disconnect")
+                    disconnecting = true
+                    GlobalScope.launch(Dispatchers.Main) {
+                        delay(CLOSE_TIMEOUT)
+                        cleanup(gatt)
+                    }
+
+                    //TODO
+//                    messageChannel.close()
+//                    messageChannel.cancel()
                 }
             }
             opSent = true
@@ -448,22 +489,23 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
     }
 
+    private fun requestDisconnect(gatt: BluetoothGatt) {
+        if(!disconnectRequested.getAndSet(true)) {
+            GlobalScope.launch {
+                operationChannel.send(GattOperation(OP_DISCONNECT, null, null, null))
+            }
+        }
+    }
+
     private fun cleanup(gatt: BluetoothGatt) {
         try {
-            if (mConnected.get()) {
-                gatt.disconnect()
-                mConnected.set(false)
-                Napier.i("$logPrefix: disconnected")
-            }
-
-            if (!mClosed.get()) {
+            if (!mClosed.getAndSet(true)) {
+                Napier.i("$logPrefix: closing")
                 gatt.close()
-                mClosed.set(true)
-                Napier.i("$logPrefix: closed")
-                clientCallbackManager.handleGattDisconnected(this)
+                clientCallbackManager.handleGattClientClosed(this)
             }
         } catch (e: Exception) {
-            Napier.e("$logPrefix: ERROR disconnecting")
+            Napier.e("$logPrefix: ERROR closing gatt")
         } finally {
             Napier.i("$logPrefix: cleanup done")
         }
@@ -474,7 +516,12 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
         val OP_READ = 2
 
+        val OP_DISCONNECT = 3
+
         val CALLBACK_ID_ATOMICINT = AtomicInteger()
 
+        //The time between calling disconnect and then calling close if we did not receive a callback
+        // to onConnectionStateChange confirming disconnection
+        val CLOSE_TIMEOUT = 2000L
     }
 }

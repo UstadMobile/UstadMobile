@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.dao.LocallyAvailableContainerDao
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
@@ -33,6 +34,26 @@ class LocalAvailabilityManagerImpl(private val context: Any,
     private var dbLastUpdated: Long = 0
 
     private var availablilityLastChanged: Long = 0
+
+    init {
+        GlobalScope.launch(coroutineDispatcher) {
+            while(true) {
+                delay(10000)
+                val timeNow = getSystemTimeInMillis()
+                val lostNodes = activeNodes.filter { timeNow -it.lastUpdateTimeStamp > NODE_ACTIVITY_TIMEOUT }
+                Napier.d({"Mirrors lost: ${lostNodes.joinToString { it.bluetoothMacAddress ?: "nulladdr" }}"})
+                activeNodes.removeAll(lostNodes)
+                val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
+                        .map { it.value.erContainerUid } }.toSet().toList()
+                fireAvailabilityChanged(lostContainers)
+                lostNodes.forEach {
+                    val btAddr = it.bluetoothMacAddress
+                    if(btAddr != null)
+                        onNodeLost.invoke(btAddr)
+                }
+            }
+        }
+    }
 
     suspend fun updateDb() {
         if(dbLastUpdated < availablilityLastChanged) {
@@ -84,18 +105,28 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
             networkNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
             val entryStatusResponseContainerUids = entryStatusResponses.map { it.erContainerUid }
-            activeMonitoringRequests.filter { monitorRequest ->
-                monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
-            }.forEach {
-                val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
-                it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
-            }
+//            activeMonitoringRequests.filter { monitorRequest ->
+//                monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
+//            }.forEach {
+//                val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
+//                it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
+//            }
+            fireAvailabilityChanged(entryStatusResponseContainerUids)
 
             availablilityLastChanged = getSystemTimeInMillis()
             launch(coroutineDispatcher) {
                 delay(1000)
                 updateDb()
             }
+        }
+    }
+
+    suspend fun fireAvailabilityChanged(entryStatusResponseContainerUids: List<Long>) {
+        activeMonitoringRequests.filter { monitorRequest ->
+            monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
+        }.forEach {
+            val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
+            it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
         }
     }
 
@@ -129,5 +160,9 @@ class LocalAvailabilityManagerImpl(private val context: Any,
     override suspend fun findBestLocalNodeForContentEntryDownload(containerUid: Long): NetworkNode? = withContext(coroutineDispatcher){
         activeNodes.filter { node -> node.statusResponses[containerUid]?.available ?: false }.
                 sortedBy { it.nodeFailures.size }.firstOrNull()
+    }
+
+    companion object {
+        val NODE_ACTIVITY_TIMEOUT = 30000L
     }
 }
