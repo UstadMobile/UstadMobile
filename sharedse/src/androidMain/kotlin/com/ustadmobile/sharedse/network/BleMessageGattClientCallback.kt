@@ -321,8 +321,13 @@ class BleMessageGattClientCallback(val deviceAddr: String,
         }
 
         this.activeCharacteristics.addAll(ustadCharacteristics)
+        if(Build.VERSION.SDK_INT >= 21) {
+            val initiated = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+            Napier.v({"${logPrefix }Requesting connection priority initiated=$initiated"})
+        }
 
         GlobalScope.launch(Dispatchers.Main) {
+            delay(100)//wait for connection priority to take effect
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Napier.d("$logPrefix: Requesting MTU changed from $currentMtu to " +
                         "$MAXIMUM_MTU_SIZE")
