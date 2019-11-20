@@ -140,6 +140,9 @@ class BleGattServer
 
                     UMLog.l(UMLog.DEBUG, 691,
                             "BLEGattServer: Request received with default MTU size of $currentMtuSize")
+                    //remove any stuck or pending replies that might be there
+                    pendingReplies.removeAll { it.destAddr == device.address
+                            && it.characteristicUuid == characteristic.uuid }
                     val messageToSend = handleRequest(messageReceived, device.address)
                     pendingReplies.add(PendingReplyMessage(device.address, characteristic.uuid,
                             messageToSend!!, currentMtuSize))

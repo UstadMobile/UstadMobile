@@ -304,6 +304,8 @@ abstract class NetworkManagerBleCommon(
         makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.sendRequest()
     }
 
+    abstract suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage?
+
     /**
      * Used for unit testing purposes only.
      *

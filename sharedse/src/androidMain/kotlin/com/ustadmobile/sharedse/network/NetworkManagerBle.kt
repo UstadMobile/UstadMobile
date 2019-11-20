@@ -929,6 +929,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         return null
     }
 
+    override suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage? {
+        return gattClientCallbackManager?.getGattClient(deviceAddr)?.sendMessage(bleMessage)
+    }
 
     /**
      * Start monitoring network changes

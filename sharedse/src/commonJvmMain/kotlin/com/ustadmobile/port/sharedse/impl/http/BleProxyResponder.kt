@@ -116,28 +116,15 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
             val bleMessage = BleMessage(BleMessage.MESSAGE_TYPE_HTTP, messageId,
                     bleRequestSerialized.toUtf8Bytes())
             val destDevice = NetworkNode().also { it.bluetoothMacAddress = destDeviceAddr }
-            val deferredMessage = CompletableDeferred<BleMessage?>()
             UMLog.l(UMLog.DEBUG, 691,
                     "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
                             "TO ${destDevice.bluetoothMacAddress} - ${bleRequest.reqUri} ")
-            networkManager.sendMessage(networkManager.context, bleMessage, destDevice, object : BleMessageResponseListener {
-                override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-                    if(response != null) {
-                        UMLog.l(UMLog.DEBUG, 691,
-                                "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                        " received response ${response.payload?.size} bytes")
-                        deferredMessage.complete(response)
-                    }else {
-                        UMLog.l(UMLog.ERROR, 691,
-                                "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                                        " ERROR $error")
-                        deferredMessage.completeExceptionally(IOException("Exception onResponseReceived"))
-                    }
-                }
-            })
 
             try {
-                val messageReceived = withTimeout(20000) { deferredMessage.await() }
+                val messageReceived = withTimeout(20000) {
+                    networkManager.sendBleMessage(networkManager.context, bleMessage,
+                            destDevice.bluetoothMacAddress!!)
+                }
                 val payload = messageReceived?.payload
                 val payloadStr = if(payload != null) String(payload) else null
                 if(payload != null && payloadStr != null) {

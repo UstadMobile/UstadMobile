@@ -73,7 +73,8 @@ class BleMessageGattClientCallback(val deviceAddr: String,
     private val activeCharacteristics: MutableList<BluetoothGattCharacteristic> = CopyOnWriteArrayList()
 
     class GattOperation(val opType: Int, val characteristicUUID: UUID,
-                        val characteristicValue: ByteArray?)
+                        val characteristicValue: ByteArray?,
+                        val pendingMesage: PendingMessage)
 
     class PendingMessage(val messageId: Int, val outgoingMessage: BleMessage,
                          internal val incomingMessage: BleMessage = BleMessage(),
@@ -166,7 +167,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
                 val packetNum = pendingMessageVal.outgoingPacketNum
                 GlobalScope.launch {
                     operationChannel.send(GattOperation(OP_WRITE, lastCharacteristic.uuid,
-                            pendingMessageVal.outgoingPackets[packetNum]))
+                            pendingMessageVal.outgoingPackets[packetNum], pendingMessageVal))
                     Napier.d({"$logPrefix request write: send to channel"})
                 }
             }else {
@@ -176,8 +177,15 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
         fun requestReadNextPacket(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
             GlobalScope.launch {
-                operationChannel.send(GattOperation(OP_READ, characteristic.uuid, null))
-                Napier.d("${logPrefix }Request read : sent to channel")
+                val pendingMessageVal = currentPendingMessage.get()
+                if(pendingMessageVal != null){
+                    operationChannel.send(GattOperation(OP_READ, characteristic.uuid, null,
+                            pendingMessageVal))
+                    Napier.d("${logPrefix }Request read : sent to channel")
+                }else {
+                    Napier.e("$logPrefix pendingmessageval = null")
+                }
+
             }
         }
 
@@ -250,7 +258,14 @@ class BleMessageGattClientCallback(val deviceAddr: String,
         Napier.d( "BleMessageGattClientCallback: sendMessage #" +
                 "${outgoingMessage.messageId} MTU=$currentMtu")
         messageChannel.send(pendingMessage)
-        return pendingMessage.messageReceived.await()
+        try {
+            return pendingMessage.messageReceived.await()
+        }catch(e: CancellationException) {
+            withContext(NonCancellable) {
+                pendingMessage.messageReceived.cancel()
+            }
+            throw e
+        }
     }
 
     /**
@@ -399,28 +414,38 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
 
     suspend fun runNextOperation(gatt: BluetoothGatt) {
-        val nextOp = operationChannel.receive()
-        val characteristic = activeCharacteristics.first { it.uuid == nextOp.characteristicUUID }
-
-        when(nextOp.opType) {
-            OP_READ ->  {
-                val initiated = gatt.readCharacteristic(characteristic)
-                Napier.d("run: readCharacteristic: ${characteristic.uuid} initiated=$initiated")
+        var opSent = false
+        do {
+            val nextOp = operationChannel.receive()
+            if(nextOp.pendingMesage.messageReceived.isCancelled) {
+                Napier.d("nextOp was for canceled message: skipping operation")
+                continue
             }
 
-            OP_WRITE -> {
-                val characteristicVal = nextOp.characteristicValue
-                if(characteristicVal == null) {
-                    Napier.wtf("OP_WRITE request with null value.")
-                    throw IllegalArgumentException("OP_WRITE requested with null value")
+
+            val characteristic = activeCharacteristics.first { it.uuid == nextOp.characteristicUUID }
+
+            when(nextOp.opType) {
+                OP_READ ->  {
+                    val initiated = gatt.readCharacteristic(characteristic)
+                    Napier.d("run: readCharacteristic: ${characteristic.uuid} initiated=$initiated")
                 }
-                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                characteristic.value = characteristicVal
-                val initiated = gatt.writeCharacteristic(characteristic)
-                Napier.d("run: writeCharacteristic: ${characteristic.uuid} initiated=$initiated")
 
+                OP_WRITE -> {
+                    val characteristicVal = nextOp.characteristicValue
+                    if(characteristicVal == null) {
+                        Napier.wtf("OP_WRITE request with null value.")
+                        throw IllegalArgumentException("OP_WRITE requested with null value")
+                    }
+                    characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    characteristic.value = characteristicVal
+                    val initiated = gatt.writeCharacteristic(characteristic)
+                    Napier.d("run: writeCharacteristic: ${characteristic.uuid} initiated=$initiated")
+                }
             }
-        }
+            opSent = true
+        }while(!opSent)
+
     }
 
     private fun cleanup(gatt: BluetoothGatt) {
