@@ -11,7 +11,8 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 class GattClientCallbackManager(val context: Context,
-                                val adapter: BluetoothAdapter) {
+                                val adapter: BluetoothAdapter,
+                                val nodeHistoryHandler: NodeHistoryHandler) {
 
     private val gattClientCallbacks: ConcurrentHashMap<String, BleMessageGattClientCallback> = ConcurrentHashMap()
 
@@ -23,7 +24,8 @@ class GattClientCallbackManager(val context: Context,
             if(currentCallback == null){
                 UMLog.l(UMLog.VERBOSE, 0, "GattClientCallbackManager: initiating " +
                         "connection connection to $deviceAddress")
-                currentCallback = BleMessageGattClientCallback(deviceAddress, this)
+                currentCallback = BleMessageGattClientCallback(deviceAddress, this,
+                        nodeHistoryHandler)
                 gattClientCallbacks[deviceAddress] = currentCallback
                 val remoteDevice = adapter.getRemoteDevice(deviceAddress)
 

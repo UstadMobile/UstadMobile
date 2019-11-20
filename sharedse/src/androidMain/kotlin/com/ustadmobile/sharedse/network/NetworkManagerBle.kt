@@ -165,7 +165,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                         "Starting BLE scanning")
                 notifyStateChanged(STATE_STARTED)
                 gattClientCallbackManager = GattClientCallbackManager(context as Context,
-                        bluetoothAdapter!!)
+                        bluetoothAdapter!!, localAvailabilityManager.nodeHistoryHandler)
                 bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
                         bleScanCallback as BluetoothAdapter.LeScanCallback?)
                 UMLog.l(UMLog.DEBUG, 689,

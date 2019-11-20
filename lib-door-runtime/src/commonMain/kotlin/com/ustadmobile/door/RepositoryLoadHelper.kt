@@ -185,7 +185,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     mirrorToUse = if(isConnected && !triedMainEndpoint) {
                         null as MirrorEndpoint? //use the main endpoint
                     }else {
-                        repository.activeMirrors().firstOrNull() /*firstOrNull { it.mirrorId !in mirrorsTried }*/
+                        repository.activeMirrors().maxBy { it.priority }
                     }
 
                     if(!isConnected && mirrorToUse == null) {

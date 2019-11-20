@@ -17,11 +17,14 @@ typealias StatusTaskMakerFn = suspend (context: Any, containerUidsToCheck: List<
 
 typealias OnNodeStatusChangeFn = suspend (bluetoothAddr: String) -> Unit
 
+typealias OnNodeReputationChanged = suspend (bluetoothAddr: String, reputation: Int) -> Unit
+
 class LocalAvailabilityManagerImpl(private val context: Any,
                                    private val entryStatusTaskMaker: StatusTaskMakerFn,
                                    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
                                    private val onNewNodeDiscovered: OnNodeStatusChangeFn = { },
                                    private val onNodeLost: OnNodeStatusChangeFn = { },
+                                   private val onNodeReputationChanged: OnNodeReputationChanged = { addr, evtType -> Unit },
                                    private val locallyAvailableContainerDao: LocallyAvailableContainerDao)
     : LocalAvailabilityManager{
 
@@ -35,21 +38,38 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
     private var availablilityLastChanged: Long = 0
 
+    val nodeHistoryHandler: NodeHistoryHandler = {nodeAddr, evtType ->
+        val node = activeNodes.find { it.bluetoothMacAddress == nodeAddr }
+        if(node != null && evtType == NODE_EVT_TYPE_FAIL) {
+            val timeNow = getSystemTimeInMillis()
+            node.nodeFailures.add(timeNow)
+            val forgiveThreshold = timeNow - NODE_HISTORY_TIMEOUT
+            node.nodeFailures.removeAll { it < forgiveThreshold}
+            val reputation = node.nodeFailures.size * -1
+            GlobalScope.launch(coroutineDispatcher) {
+                onNodeReputationChanged.invoke(nodeAddr, reputation)
+            }
+        }
+    }
+
     init {
         GlobalScope.launch(coroutineDispatcher) {
+            locallyAvailableContainerDao.deleteAll()
             while(true) {
                 delay(10000)
                 val timeNow = getSystemTimeInMillis()
                 val lostNodes = activeNodes.filter { timeNow -it.lastUpdateTimeStamp > NODE_ACTIVITY_TIMEOUT }
-                Napier.d({"Mirrors lost: ${lostNodes.joinToString { it.bluetoothMacAddress ?: "nulladdr" }}"})
-                activeNodes.removeAll(lostNodes)
-                val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
-                        .map { it.value.erContainerUid } }.toSet().toList()
-                fireAvailabilityChanged(lostContainers)
-                lostNodes.forEach {
-                    val btAddr = it.bluetoothMacAddress
-                    if(btAddr != null)
-                        onNodeLost.invoke(btAddr)
+                if(lostNodes.isNotEmpty()) {
+                    Napier.d({"Mirrors lost: ${lostNodes.joinToString { it.bluetoothMacAddress ?: "nulladdr" }}"})
+                    activeNodes.removeAll(lostNodes)
+                    val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
+                            .map { it.value.erContainerUid } }.toSet().toList()
+                    fireAvailabilityChanged(lostContainers)
+                    lostNodes.forEach {
+                        val btAddr = it.bluetoothMacAddress
+                        if(btAddr != null)
+                            onNodeLost.invoke(btAddr)
+                    }
                 }
             }
         }
@@ -105,12 +125,6 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
             networkNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
             val entryStatusResponseContainerUids = entryStatusResponses.map { it.erContainerUid }
-//            activeMonitoringRequests.filter { monitorRequest ->
-//                monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
-//            }.forEach {
-//                val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
-//                it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
-//            }
             fireAvailabilityChanged(entryStatusResponseContainerUids)
 
             availablilityLastChanged = getSystemTimeInMillis()
@@ -164,5 +178,7 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
     companion object {
         val NODE_ACTIVITY_TIMEOUT = 30000L
+
+        val NODE_HISTORY_TIMEOUT = 60000 * 5L
     }
 }

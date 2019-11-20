@@ -42,7 +42,8 @@ import kotlin.math.ceil
 
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 class BleMessageGattClientCallback(val deviceAddr: String,
-                                   val clientCallbackManager: GattClientCallbackManager) : BluetoothGattCallback() {
+                                   val clientCallbackManager: GattClientCallbackManager,
+                                   val nodeHistoryHandler: NodeHistoryHandler) : BluetoothGattCallback() {
 
     private val receivedMessage: BleMessage
 
@@ -317,6 +318,10 @@ class BleMessageGattClientCallback(val deviceAddr: String,
                         IOException("BLE onConnectionStateChange not successful." +
                                 "Status = " + status))
         }
+
+        if(status != BluetoothGatt.GATT_SUCCESS) {
+            nodeHistoryHandler(gatt.device.address, NODE_EVT_TYPE_FAIL)
+        }
     }
 
 
@@ -334,6 +339,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
                     gatt.device.address)
             responseListener?.onResponseReceived(gatt.device.address, null,
                     IOException("UstadMobile service not found on device"))
+            nodeHistoryHandler(gatt.device.address, NODE_EVT_TYPE_FAIL)
             //cleanup(gatt)
             requestDisconnect(gatt)
             return
@@ -341,6 +347,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
 
         if(service == null) {
             Napier.wtf({"$logPrefix: Should not happen! characteristics were empty and service is null"})
+            nodeHistoryHandler(gatt.device.address, NODE_EVT_TYPE_FAIL)
             return
         }
 
@@ -354,6 +361,7 @@ class BleMessageGattClientCallback(val deviceAddr: String,
             Napier.e("Service discovered on ${gatt.device.address} does not have ANY " +
                     "ustad characteristics - disconnecting")
             requestDisconnect(gatt)
+            nodeHistoryHandler(gatt.device.address, NODE_EVT_TYPE_FAIL)
             return
         }
 

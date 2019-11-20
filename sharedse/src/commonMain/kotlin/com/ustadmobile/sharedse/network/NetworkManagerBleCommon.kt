@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
@@ -12,7 +11,6 @@ import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sharedMutableMapOf
-import com.ustadmobile.sharedse.util.EntryTaskExecutor
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import io.ktor.client.HttpClient
 import kotlinx.atomicfu.atomic
@@ -137,6 +135,7 @@ abstract class NetworkManagerBleCommon(
     val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
             this::makeEntryStatusTask, singleThreadDispatcher,
             this::onNewBleNodeDiscovered, this::onBleNodeLost,
+            this::onBleNodeReputationChanged,
             umAppDatabase.locallyAvailableContainerDao)
 
     private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
@@ -190,6 +189,14 @@ abstract class NetworkManagerBleCommon(
         dbRepo.removeMirror(mirrorId)
         Napier.v({"Removed mirror $mirrorId for $bluetoothAddress"})
     }
+
+    protected suspend fun onBleNodeReputationChanged(bluetoothAddress: String, reputation: Int) {
+        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
+        val mirrorId = bleMirrorIdMap[bluetoothAddress] ?: 0
+        dbRepo.updateMirrorPriorities(mapOf(mirrorId to reputation))
+        Napier.d({"Update mirror reputation for $mirrorId [$bluetoothAddress] to $reputation"})
+    }
+
 
     protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
 
