@@ -207,7 +207,6 @@ abstract class FileResponder {
 
                     r.addHeader("ETag", etag)
                     range.responseHeaders.forEach { r.addHeader(it.key, it.value) }
-                    r.addHeader("Connection", "close")
                     return r
                 } else if(range?.statusCode == 416) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
