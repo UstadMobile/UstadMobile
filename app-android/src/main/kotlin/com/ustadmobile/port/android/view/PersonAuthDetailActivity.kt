@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
+import android.text.Spanned
 import android.text.TextWatcher
 import android.view.MenuItem
 import android.widget.EditText
@@ -59,11 +61,23 @@ class PersonAuthDetailActivity : UstadBaseActivity(), PersonAuthDetailView {
         passwordET = findViewById(R.id.activity_personauth_detail_password)
         updatePasswordET = findViewById(R.id.activity_personauth_detail_confirm_password)
 
-
         //Call the Presenter
         mPresenter = PersonAuthDetailPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
+        usernameET!!.filters = arrayOf(object : InputFilter {
+            override fun filter(source: CharSequence?, start: Int, end: Int,
+                                dest: Spanned?, dstart: Int, dend: Int): CharSequence? {
+                // eliminates single space
+                if (end == 1) {
+                    if (Character.isWhitespace(source?.get(0)!!)) {
+                        return ""
+                    }
+                }
+                return null
+            }
+        })
 
         usernameET!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {

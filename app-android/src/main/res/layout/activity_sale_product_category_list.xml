@@ -72,7 +72,7 @@
         android:id="@+id/activity_sale_product_category_list_sort_by_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:text="@string/sort_by"
         app:layout_constraintEnd_toStartOf="@+id/activity_sale_product_category_list_sort_by_spinner"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_category_hline" />

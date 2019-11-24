@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.InputType
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -201,6 +202,7 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
 
     override fun showSetTitle(existingTitle: String, entryUid: Long) {
         val edittext = EditText(context)
+        edittext.inputType = InputType.TYPE_TEXT_FLAG_CAP_WORDS
         edittext.setText(existingTitle)
 
         val adb = AlertDialog.Builder(context!!)

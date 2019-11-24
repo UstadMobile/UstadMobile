@@ -41,6 +41,7 @@
         android:layout_marginEnd="@dimen/dimen_16dp"
         android:ems="10"
         android:hint="@string/password"
+        android:textAlignment="viewStart"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

@@ -416,6 +416,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
             val profileImage = Uri.fromFile(output)
 
             runOnUiThread {
+                Picasso.get().invalidate(profileImage)
                 Picasso
                         .get()
                         .load(profileImage)
@@ -423,9 +424,6 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                         .centerCrop()
                         .into(productImageView)
 
-                //Click on image - open dialog to show bigger picture
-                productImageView.setOnClickListener{view ->
-                        mPresenter!!.openPictureDialog(imagePath)};
             }
 
         }

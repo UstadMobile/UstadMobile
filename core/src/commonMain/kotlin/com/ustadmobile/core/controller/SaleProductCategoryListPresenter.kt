@@ -2,8 +2,10 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.db.dao.SaleProductDao
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView
@@ -51,6 +53,8 @@ class SaleProductCategoryListPresenter(context: Any,
     private var moreRecent: Boolean = false
     private var moreCategory: Boolean = false
 
+    private var idToOrderInteger: MutableMap<Long, Int>? = null
+    private var currentSortOrder = 0
 
     init {
 
@@ -110,6 +114,8 @@ class SaleProductCategoryListPresenter(context: Any,
         if (selectProductMode) {
             view.hideFAB(true)
         }
+
+        updateSortSpinnerPreset()
     }
 
     private fun setCategoryLiveOnView(saleProductCategory:SaleProduct?){
@@ -123,6 +129,68 @@ class SaleProductCategoryListPresenter(context: Any,
         setCategoryOnView(true, true)
     }
 
+    /**
+     * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
+     * defined within this method and will automatically update the sort options without any
+     * database call.
+     */
+    private fun updateSortSpinnerPreset() {
+        val presetAL = ArrayList<String>()
+
+        idToOrderInteger = HashMap<Long, Int>()
+
+        presetAL.add(impl.getString(MessageID.sort_by_name_asc, context))
+        idToOrderInteger!!.put(presetAL.size.toLong(), SaleDao.SORT_ORDER_NAME_ASC)
+        presetAL.add(impl.getString(MessageID.sort_by_name_desc, context))
+        idToOrderInteger!!.put(presetAL.size.toLong(), SaleDao.SORT_ORDER_NAME_DESC)
+
+        val sortPresets = SaleListPresenter.arrayListToStringArray(presetAL)
+
+        view.updateSortPresets(sortPresets)
+    }
+
+    fun handleChangeSortOrder(order: Long) {
+        var orderI = order + 1
+
+        if (idToOrderInteger!!.containsKey(orderI)) {
+            currentSortOrder = idToOrderInteger!![orderI]!!
+            getAndSetProvider(currentSortOrder)
+        }
+    }
+
+    private fun getAndSetProvider(sortCode: Int) {
+
+        var allMode : Boolean = false
+        if(currentSaleProductCategory != null) {
+            if (currentSaleProductCategory!!.saleProductUid != 0L) {
+                itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(sortCode,
+                        currentSaleProductCategory!!.saleProductUid)
+                categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(sortCode,
+                        currentSaleProductCategory!!.saleProductUid)
+                allMode = false
+            } else {
+                itemProvider = productDao.sortAndFindAllActiveSNWIProvider(sortCode)
+                categoryProvider = productDao.sortAndFindActiveCategoriesProvider("", sortCode)
+                allMode = true
+            }
+            view.setListProvider(itemProvider, allMode)
+            view.setCategoriesListProvider(categoryProvider, allMode)
+        }
+
+        if (moreRecent)
+            view.runOnUiThread(Runnable{
+                view.updateToolbar(impl.getString(MessageID.most_recent, context))
+            })
+        if (moreCategory)
+            view.runOnUiThread(Runnable{
+                view.updateToolbar(impl.getString(MessageID.categories, context))
+            })
+
+
+
+
+    }
+
     private fun setCategoryOnView(recent: Boolean, category: Boolean) {
         //Update on view
         view.initFromSaleCategory(currentSaleProductCategory!!)
@@ -133,22 +201,28 @@ class SaleProductCategoryListPresenter(context: Any,
         var allMode : Boolean = false
         if (currentSaleProductCategory!!.saleProductUid != 0L) {
             view.hideEditMenu(false)
-            itemProvider = productParentJoinDao.findAllItemsInACategory(
+            itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(0,
                     currentSaleProductCategory!!.saleProductUid)
-            categoryProvider = productParentJoinDao.findAllCategoriesInACategory(
+            categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(0,
                     currentSaleProductCategory!!.saleProductUid)
             allMode = false
         } else {
             allMode = true
             view.hideEditMenu(true)
-            itemProvider = productDao.findAllActiveSNWIProvider()
-            categoryProvider = productDao.findActiveCategoriesProvider()
+            itemProvider = productDao.sortAndFindAllActiveSNWIProvider(0)
+            categoryProvider = productDao.sortAndFindActiveCategoriesProvider("" , 0)
         }
 
         if (recent)
-            view.runOnUiThread(Runnable{ view.setListProvider(itemProvider, allMode) })
+            view.runOnUiThread(Runnable{
+                view.updateToolbar(impl.getString(MessageID.most_recent, context))
+                view.setListProvider(itemProvider, allMode)
+            })
         if (category)
-            view.runOnUiThread(Runnable{ view.setCategoriesListProvider(categoryProvider, allMode) })
+            view.runOnUiThread(Runnable{
+                view.updateToolbar(impl.getString(MessageID.categories, context))
+                view.setCategoriesListProvider(categoryProvider, allMode)
+            })
 
     }
 

@@ -1,84 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
-
-    <EditText
-        android:id="@+id/activity_personauth_detail_confirm_password"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:autofillHints="@string/username"
-        android:ems="10"
-        android:hint="@string/confirm_password"
-        android:inputType="textPassword"
-        android:textColor="@color/text_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_personauth_detail_password" />
-
-    <EditText
-        android:id="@+id/activity_personauth_detail_password"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:autofillHints="@string/username"
-        android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        android:textColor="@color/text_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_personauth_detail_username" />
-
-    <com.google.android.material.appbar.AppBarLayout android:id="@+id/activity_person_auth_detail_appbar"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.Toolbar android:id="@+id/activity_person_auth_detail_toolbar"
-            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
-            app:title="@string/update_username_password" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <EditText
-        android:id="@+id/activity_personauth_detail_username"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:autofillHints="@string/username"
-        android:ems="10"
-        android:hint="@string/username"
-        android:digits="abcdefghijklmnpqrstuvwxxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^*()\|012345"
-        android:inputType="textVisiblePassword|textNoSuggestions"
-        android:textColor="@color/text_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView27" />
-
-
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_person_auth_detail_fab" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_gravity="bottom|center"
-        android:layout_marginBottom="16dp" android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp" app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_check_white_24dp" app:floating_title="@string/done"
-        app:floating_title_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/textView27"
@@ -91,5 +16,94 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_person_auth_detail_appbar" />
+
+    <EditText
+        android:id="@+id/activity_personauth_detail_username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:autofillHints="@string/username"
+        android:ems="10"
+        android:hint="@string/username"
+        android:inputType="textVisiblePassword|textNoSuggestions"
+        android:textColor="@color/text_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textAlignment="viewStart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView27" />
+
+
+    <EditText
+        android:id="@+id/activity_personauth_detail_confirm_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:autofillHints="@string/confirm_password"
+        android:ems="10"
+        android:hint="@string/confirm_password"
+        android:textAlignment="viewStart"
+        android:inputType="textPassword|textNoSuggestions"
+        android:textColor="@color/text_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_personauth_detail_password" />
+
+    <EditText
+        android:id="@+id/activity_personauth_detail_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:autofillHints="@string/password"
+        android:textAlignment="viewStart"
+        android:ems="10"
+        android:hint="@string/password"
+        android:inputType="textPassword|textNoSuggestions"
+        android:textColor="@color/text_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_personauth_detail_username" />
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/activity_person_auth_detail_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/activity_person_auth_detail_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/update_username_password" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_person_auth_detail_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_check_white_24dp"
+        app:floating_title="@string/done"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

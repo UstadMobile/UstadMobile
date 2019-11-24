@@ -237,6 +237,9 @@ class SaleProductDetailPresenter(context: Any,
             if(existingPP!=null) {
                 pictureDao.setAttachment(existingPP, imageFilePath)
             }
+
+            saleProductDao.updateAsync(currentSaleProduct!!)
+
         }
 
     }

@@ -412,7 +412,11 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 if (person.fatherNumber == null) {
                     thisValue = person.fatherName
                 } else {
-                    thisValue = person.fatherName + " (" + person.fatherNumber + ")"
+                    var fatherName = "-"
+                    if(person.fatherName != null){
+                        fatherName = person.fatherName!!
+                    }
+                    thisValue = fatherName + " (" + person.fatherNumber + ")"
                 }
                 //Also tell the view that we need to add call and text buttons for the number
 
@@ -424,7 +428,11 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 if (person.motherNum == null) {
                     thisValue = person.motherName
                 } else {
-                    thisValue = person.motherName + " (" + person.motherNum + ")"
+                    var motherName = "-"
+                    if(person.motherName != null){
+                        motherName = person.motherName!!
+                    }
+                    thisValue = motherName + " (" + person.motherNum + ")"
                 }
 
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,

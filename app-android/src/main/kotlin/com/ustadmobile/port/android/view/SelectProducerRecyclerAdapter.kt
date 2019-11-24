@@ -33,12 +33,12 @@ class SelectProducerRecyclerAdapter(
     override fun onBindViewHolder(holder: SelectProducerViewHolder, position: Int) {
 
         val entity = getItem(position)
-        val name = entity!!.firstNames + " " + entity.lastName
-        val title = holder.itemView.findViewById<TextView>(R.id.item_title_simple_title)
-        title.text = name
+        if (entity != null) {
+            val title = holder.itemView.findViewById<TextView>(R.id.item_title_simple_title)
+            title.text = entity.fullName()
 
-        title.setOnClickListener { v -> mPresenter.handleClickProducer(entity.personUid) }
-
+            title.setOnClickListener { v -> mPresenter.handleClickProducer(entity.personUid) }
+        }
     }
 
     inner class SelectProducerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

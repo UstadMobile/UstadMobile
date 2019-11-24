@@ -37,7 +37,8 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         internal var theContext: Context)
     : PagedListAdapter<SaleProduct, SelectSaleProductToSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder>(diffCallback) {
 
-    private var productPictureDaoRepo : SaleProductPictureDao? = null
+    private var productPictureDaoRepo : SaleProductPictureDao?= null
+    private var productPictureDao : SaleProductPictureDao? = null
     private var impl = UstadMobileSystemImpl.instance
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
@@ -69,36 +70,42 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         val desc = holder.itemView.findViewById<TextView>(R.id.item_sale_product_desc)
         desc.visibility = View.GONE
 
+        var imagePathLocal = ""
+        var imagePathServer = ""
 
-
-        var imagePath = ""
+        productPictureDaoRepo  =
+                UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+        productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
 
         holder.imageLoadJob?.cancel()
 
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            productPictureDaoRepo  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
-            val productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
+            //Load the local image first
+            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(
+                    entity!!.saleProductUid)
+            imagePathLocal = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
 
-
-            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
-
-            if (!imagePath.isEmpty())
-                setPictureOnView(imagePath, imageView)
+            if (imagePathLocal.isNotEmpty())
+                setPictureOnView(imagePathLocal, imageView)
             else
                 imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
 
+            //Get the server image
+            val saleProductPictureServer =
+                    productPictureDaoRepo!!.findBySaleProductUidAsync2(entity.saleProductUid)
+            imagePathServer =
+                    productPictureDaoRepo!!.getAttachmentPath(saleProductPictureServer!!)!!;
 
-            val saleProductPicture = productPictureDaoRepo!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPicture!!)!!;
+            //If local is not server (suggesting picture/entity update)
+            if(saleProductPictureLocal != saleProductPictureServer) {
 
-            if(saleProductPictureLocal != saleProductPicture) {
-
-                if (!imagePath.isEmpty())
-                    setPictureOnView(imagePath, imageView)
+                if (imagePathServer.isNotEmpty())
+                    setPictureOnView(imagePathServer, imageView)
                 else
                     imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+            }else{
+                //Do nothing
             }
         }
 

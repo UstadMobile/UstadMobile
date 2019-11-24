@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -37,6 +40,9 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
     private var menu: Menu? = null
     private var hideEdit = false
+
+    private var sortSpinner: Spinner? = null
+    internal lateinit var sortSpinnerPresets: Array<String?>
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -103,6 +109,8 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         val cRecyclerLayoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         cRecyclerView!!.layoutManager = cRecyclerLayoutManager
 
+        sortSpinner = findViewById(R.id.activity_sale_product_category_list_sort_by_spinner)
+
         //Call the Presenter
         mPresenter = SaleProductCategoryListPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
@@ -118,6 +126,14 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
             floatingActionMenu!!.close(true)
             mPresenter!!.handleClickAddSubCategory()
         }
+
+        //Sort handler
+        sortSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                mPresenter!!.handleChangeSortOrder(id)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>, allMode: Boolean) {
@@ -128,11 +144,11 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
         if(allMode){
             boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                    .saleProductDaoBoundaryCallbacks.findAllActiveSNWIProvider(factory)
+                    .saleProductDaoBoundaryCallbacks.findAllActiveSNWIProviderByNameAsc(factory)
 
         }else{
             boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                    .saleProductParentJoinDaoBoundaryCallbacks.findAllItemsInACategory(factory)
+                    .saleProductParentJoinDaoBoundaryCallbacks.findAllItemsInACategoryByNameAsc(factory)
 
         }
 
@@ -155,10 +171,10 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
         if(allMode){
             boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                    .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
+                    .saleProductDaoBoundaryCallbacks.findActiveCategoriesProviderByNameAsc(factory)
         }else{
             boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                    .saleProductParentJoinDaoBoundaryCallbacks.findAllCategoriesInACategory(factory)
+                    .saleProductParentJoinDaoBoundaryCallbacks.findAllCategoriesInACategoryByNameAsc(factory)
 
         }
 
@@ -190,14 +206,24 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
     }
 
-    override fun initFromSaleCategory(saleProductCategory: SaleProduct) {
-        if (saleProductCategory != null) {
-            runOnUiThread { toolbar!!.title = saleProductCategory.saleProductName }
+    override fun updateToolbar(title: String?) {
+        if(title != null) {
+            toolbar!!.title = title
         }
     }
 
-    override fun updateSortPresets(presets: Array<String>) {
-        //TODO:
+    override fun initFromSaleCategory(saleProductCategory: SaleProduct) {
+        if (saleProductCategory != null) {
+            runOnUiThread { updateToolbar(saleProductCategory.saleProductName) }
+        }
+    }
+
+    override fun updateSortPresets(presets: Array<String?>) {
+        this.sortSpinnerPresets = presets
+        val adapter = ArrayAdapter(this,
+                R.layout.item_simple_spinner_gray, sortSpinnerPresets)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        sortSpinner!!.adapter = adapter
     }
 
     override fun hideFAB(hide: Boolean) {
@@ -206,8 +232,6 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
     override fun hideEditMenu(hide: Boolean) {
         hideEdit = hide
-        //runOnUiThread(() -> menu.findItem(R.id.action_edit).setVisible(!hide));
-
     }
 
     companion object {

@@ -102,9 +102,11 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
             "  AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1) ,0) " +
             "  AS saleAmountPaid " +
             " FROM Sale sl " +
+            " LEFT JOIN Person ON Person.personUid = :leUid " +
             " WHERE CAST(sl.saleActive AS INTEGER) = 1 AND saleAmountPaid < saleAmount " +
+            " AND (sl.salePersonUid = Person.personUid OR CAST(Person.admin AS INTEGER) = 1 ) " +
             " )")
-    abstract fun getPaymentsDueCountLive(): DoorLiveData<Int>
+    abstract fun getPaymentsDueCountLive(leUid: Long): DoorLiveData<Int>
 
     companion object {
 

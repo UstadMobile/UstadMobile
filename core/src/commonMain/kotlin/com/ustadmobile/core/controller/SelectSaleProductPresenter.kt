@@ -51,6 +51,11 @@ class SelectSaleProductPresenter(context: Any,
     private var producerUid: Long = 0
     private var saleItemUid: Long = 0
 
+    var searchQuery: String = "%%"
+
+    fun setQuerySearch(query:String){
+        searchQuery = "%$query%"
+    }
 
     init {
 
@@ -72,7 +77,10 @@ class SelectSaleProductPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
+        updateProviders()
+    }
 
+    fun updateProviders(){
         updateRecentProvider()
         updateCategoryProvider()
         updateCollectionProvider()
@@ -80,20 +88,20 @@ class SelectSaleProductPresenter(context: Any,
 
     private fun updateRecentProvider() {
 
-        recentProvider = saleProductDao.findActiveProductsProvider()
+        recentProvider = saleProductDao.findActiveProductsProvider(searchQuery)
         view.setRecentProvider(recentProvider!!)
 
     }
 
     private fun updateCategoryProvider() {
 
-        categoryProvider = saleProductDao.findActiveCategoriesProvider()
+        categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(searchQuery,0)
         view.setCategoryProvider(categoryProvider!!)
 
     }
 
     private fun updateCollectionProvider() {
-        collectionProvider = productParentJoinDao.findAllCategoriesInCollection()
+        collectionProvider = productParentJoinDao.findAllCategoriesInCollection(searchQuery)
         view.setCollectionProvider(collectionProvider!!)
     }
 

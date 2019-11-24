@@ -56,6 +56,7 @@ class SaleListSearchPresenter(context: Any,
     private var sort = SORT_MOST_RECENT
 
     var locationUidSelected: Long = 0
+    var loggedInPersonUid : Long = 0
 
     init {
 
@@ -64,6 +65,7 @@ class SaleListSearchPresenter(context: Any,
         //Get provider Dao
         saleDao = repository.saleDao
         locationDao = repository.locationDao
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
     }
 
@@ -136,7 +138,7 @@ class SaleListSearchPresenter(context: Any,
         updateSortSpinnerPreset()
 
         //Get provider
-        umProvider = saleDao.findAllSaleFilterAndSearchProvider(
+        umProvider = saleDao.findAllSaleFilterAndSearchProvider(loggedInPersonUid!!,
                 0, 0, 1, from, to, "%", sort)
         setProvider()
     }
@@ -176,7 +178,8 @@ class SaleListSearchPresenter(context: Any,
      * Sets the people list provider set in the Presenter to the View.
      */
     private fun setProvider() {
-        umProvider = saleDao.findAllSaleFilterAndSearchProvider(locationUidSelected,
+        umProvider = saleDao.findAllSaleFilterAndSearchProvider(loggedInPersonUid!!,
+                locationUidSelected,
                 amountFrom.toLong(), amountTo.toLong(), from, to, stringQuery, sort)
         view.setListProvider(umProvider!!)
     }

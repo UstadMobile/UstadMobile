@@ -81,6 +81,19 @@ open class Person() {
         this.phoneNum = phone
     }
 
+    fun fullName():String{
+        var f = ""
+        var l = ""
+        if(firstNames != null){
+            f = firstNames as String
+        }
+        if(lastName != null){
+            l = lastName as String
+        }
+
+        return f + " " + l
+    }
+
     companion object {
 
         const val TABLE_ID = 9
@@ -92,5 +105,6 @@ open class Person() {
         const val GENDER_MALE = 2
 
         const val GENDER_OTHER = 4
+
     }
 }

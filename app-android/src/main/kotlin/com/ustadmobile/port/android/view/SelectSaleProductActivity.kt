@@ -121,7 +121,7 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
 
     override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleProduct>) {
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
+                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProviderByNameAsc(factory)
 
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 true, false,

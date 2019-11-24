@@ -34,11 +34,13 @@ interface SaleProductCategoryListView : UstadView {
     //eg: set toolbar
     fun initFromSaleCategory(saleProductCategory: SaleProduct)
 
-    fun updateSortPresets(presets: Array<String>)
+    fun updateSortPresets(presets: Array<String?>)
 
     fun hideFAB(hide: Boolean)
 
     fun hideEditMenu(hide: Boolean)
+
+    fun updateToolbar(title: String?)
 
     companion object {
 

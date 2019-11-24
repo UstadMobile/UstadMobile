@@ -40,10 +40,10 @@ class SelectSaleProductRecyclerAdapter
 
     private var impl = UstadMobileSystemImpl.instance
 
-    private var productPictureDaoRepo : SaleProductPictureDao ? = null
+    private var productPictureDaoRepo : SaleProductPictureDao?= null
+    private var productPictureDao : SaleProductPictureDao? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
-
 
         val list = LayoutInflater.from(theContext).inflate(
                 R.layout.item_sale_product_blob, parent, false)
@@ -52,7 +52,6 @@ class SelectSaleProductRecyclerAdapter
     }
 
     private fun setPictureOnView(imagePath: String, theImage: ImageView) {
-
         val imageUri = Uri.fromFile(File(imagePath))
 
         Picasso
@@ -70,38 +69,47 @@ class SelectSaleProductRecyclerAdapter
         val name = holder.itemView.findViewById<TextView>(R.id.item_sale_product_blob_title)
         val dots = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_blob_dots)
 
-        var imagePath = ""
+        var imagePathLocal = ""
+        var imagePathServer = ""
+
+        productPictureDaoRepo  =
+                UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
+        productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
 
         holder.imageLoadJob?.cancel()
 
+        imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            productPictureDaoRepo  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
-            val productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
+            //Load the local image first
+            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(
+                    entity!!.saleProductUid)
+            imagePathLocal = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
 
-
-            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
-
-            if (!imagePath.isEmpty())
-                setPictureOnView(imagePath, imageView)
+            if (imagePathLocal.isNotEmpty())
+                setPictureOnView(imagePathLocal, imageView)
             else
                 imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
 
+            //Get the server image
+            val saleProductPictureServer =
+                    productPictureDaoRepo!!.findBySaleProductUidAsync2(entity.saleProductUid)
+            imagePathServer =
+                    productPictureDaoRepo!!.getAttachmentPath(saleProductPictureServer!!)!!;
 
-            val saleProductPicture = productPictureDaoRepo!!.findBySaleProductUidAsync2(entity!!.saleProductUid)
-            imagePath = productPictureDaoRepo!!.getAttachmentPath(saleProductPicture!!)!!;
+            //If local is not server (suggesting picture/entity update)
+            if(saleProductPictureLocal != saleProductPictureServer) {
 
-            if(saleProductPictureLocal != saleProductPicture) {
-
-                if (!imagePath.isEmpty())
-                    setPictureOnView(imagePath, imageView)
+                if (imagePathServer.isNotEmpty())
+                    setPictureOnView(imagePathServer, imageView)
                 else
                     imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+            }else{
+                //Do nothing
             }
         }
-        val currentLocale = impl.getLocale(theContext)
 
+        val currentLocale = impl.getLocale(theContext)
         var saleProductNameLocale: String?=null
 
         if(currentLocale.equals("fa")){
@@ -149,7 +157,8 @@ class SelectSaleProductRecyclerAdapter
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {
-                            mPresenter.handleClickProductMulti(entity.saleProductUid, listCategory, true)
+                            mPresenter.handleClickProductMulti(entity.saleProductUid, listCategory,
+                                    true)
                             true
                         } else if (i == R.id.delete) {
                             mPresenter.handleDelteSaleProduct(entity.saleProductUid, listCategory)
@@ -171,12 +180,12 @@ class SelectSaleProductRecyclerAdapter
             dots.visibility = View.GONE
         }
 
-
-        holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.saleProductUid, listCategory) }
-
+        holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.saleProductUid,
+                listCategory) }
     }
 
-    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
+    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null)
+        : RecyclerView.ViewHolder(itemView)
 
     internal constructor(
             diffCallback: DiffUtil.ItemCallback<SaleProduct>,

@@ -16,17 +16,15 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:maxLines="2"
+        android:singleLine="false"
         android:text="TextView"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textColor="@color/text_primary"
         android:textSize="16sp"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:singleLine="false"
-        android:maxLines="2"
-        app:layout_constraintEnd_toStartOf="@+id/item_studentlist_student_simple_student_checkbox"
         app:layout_constraintStart_toEndOf="@+id/item_studentlist_student_simple_student_image"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="16dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_studentlist_student_simple_attendance_trafficlight"

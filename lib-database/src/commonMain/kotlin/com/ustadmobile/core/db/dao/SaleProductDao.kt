@@ -4,6 +4,8 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.core.db.dao.SaleDao.Companion.SORT_ORDER_NAME_ASC
+import com.ustadmobile.core.db.dao.SaleDao.Companion.SORT_ORDER_NAME_DESC
 
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -15,52 +17,26 @@ import com.ustadmobile.lib.db.entities.SaleProduct
 @Dao
 abstract class SaleProductDao : BaseDao<SaleProduct> {
 
-    //INSERT
-
-    @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveLive(): DoorLiveData<List<SaleProduct>>
-
-    @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveList(): List<SaleProduct>
-
-    @Query(ALL_ACTIVE_QUERY)
-    abstract suspend fun findAllActiveAsync() : List<SaleProduct>
-
-    @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveProvider(): DataSource.Factory<Int,SaleProduct>
-
     //FIND ALL CATEGORIES
 
-    @Query(ALL_ACTIVE_CATEGORY_QUERY)
-    abstract suspend fun findAllCategoriesAsync() : List<SaleProduct>
+    @Query(ALL_ACTIVE_QUERY + SORT_BY_NAME_ASC_QUERY)
+    abstract fun findAllActiveSNWIProviderByNameAsc(): DataSource.Factory<Int,SaleProduct>
 
-    @Query(ALL_ACTIVE_CATEGORY_QUERY)
-    abstract fun findAllCateogoriesProvider(): DataSource.Factory<Int,SaleProduct>
+    @Query(ALL_ACTIVE_QUERY + SORT_BY_NAME_DESC_QUERY)
+    abstract fun findAllActiveSNWIProviderByNameDesc(): DataSource.Factory<Int,SaleProduct>
 
-    @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveSNWILive(): DoorLiveData<List<SaleProduct>>
+    fun sortAndFindAllActiveSNWIProvider(sortCode: Int): DataSource.Factory<Int, SaleProduct>{
+        when(sortCode){
+            SaleDao.SORT_ORDER_NAME_ASC -> return findAllActiveSNWIProviderByNameAsc()
+            SaleDao.SORT_ORDER_NAME_DESC -> return findAllActiveSNWIProviderByNameDesc()
+        }
+        return findAllActiveSNWIProviderByNameAsc()
 
-    @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveSNWIList(): List<SaleProduct>
-
-    @Query(ALL_ACTIVE_QUERY)
-    abstract suspend fun findAllActiveSNWIAsync() : List<SaleProduct>
-
-    @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveSNWIProvider(): DataSource.Factory<Int,SaleProduct>
-
+    }
     //ITEMS(PRODUCTS):
-    @Query(ACTIVE_PRODUCTS_QUERY)
-    abstract fun findAllActiveProductsSNWILive(): DoorLiveData<List<SaleProduct>>
 
     @Query(ACTIVE_PRODUCTS_QUERY)
-    abstract fun findAllActiveProductsSNWIList(): List<SaleProduct>
-
-    @Query(ACTIVE_PRODUCTS_QUERY)
-    abstract suspend fun findAllActiveProductsSNWIAsync():List<SaleProduct>
-
-    @Query(ACTIVE_PRODUCTS_QUERY)
-    abstract fun findActiveProductsProvider(): DataSource.Factory<Int,SaleProduct>
+    abstract fun findActiveProductsProvider(query: String): DataSource.Factory<Int,SaleProduct>
 
     //Products not existing already in Category
     @Query(ACTIVE_PRODUCTS_NOT_IN_CATEGORY_QUERY)
@@ -68,17 +44,21 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
             saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
     //CATEGORY:
-    @Query(ACTIVE_CATEGORIES_QUERY)
-    abstract fun findAllActiveCategoriesSNWILive(): DoorLiveData<List<SaleProduct>>
 
-    @Query(ACTIVE_CATEGORIES_QUERY)
-    abstract fun findAllActiveCategoriesSNWIList(): List<SaleProduct>
 
-    @Query(ACTIVE_CATEGORIES_QUERY)
-    abstract suspend fun findAllActiveCategoriesSNWIAsync():List<SaleProduct>
+    @Query(ACTIVE_CATEGORIES_QUERY +  SORT_BY_NAME_ASC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameAsc(query: String): DataSource.Factory<Int,SaleProduct>
 
-    @Query(ACTIVE_CATEGORIES_QUERY)
-    abstract fun findActiveCategoriesProvider(): DataSource.Factory<Int,SaleProduct>
+    @Query(ACTIVE_CATEGORIES_QUERY + SORT_BY_NAME_DESC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameDesc(query: String): DataSource.Factory<Int,SaleProduct>
+
+    fun sortAndFindActiveCategoriesProvider(query: String, sortCode: Int): DataSource.Factory<Int, SaleProduct>{
+        when(sortCode){
+            SORT_ORDER_NAME_ASC -> return findActiveCategoriesProviderByNameAsc(query)
+            SORT_ORDER_NAME_DESC -> return findActiveCategoriesProviderByNameDesc(query)
+        }
+        return findActiveCategoriesProviderByNameAsc(query)
+    }
 
     //Categories not existing already in Category
     @Query(ACTIVE_CATEGORIES_NOT_IN_CATEGORY_QUERY)
@@ -86,17 +66,11 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
             saleProductCategoryUid: Long
     ): DataSource.Factory<Int, SaleProduct>
 
-    @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(uid: Long): SaleProduct?
 
-    @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long): SaleProduct?
 
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProduct?>
 
-    @Query(FIND_BY_NAME_QUERY)
-    abstract fun findByName(name: String): SaleProduct?
 
     @Query(FIND_BY_NAME_QUERY)
     abstract suspend fun findByNameAsync(name: String):SaleProduct?
@@ -125,6 +99,12 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
         const val ALL_ACTIVE_QUERY = "SELECT SaleProduct.* FROM SaleProduct " +
                 " WHERE CAST(saleProductActive AS INTEGER) = 1 "
 
+        const val ALL_ACTIVE_QUERY_WITH_SEARCH = " AND SaleProduct.saleProductName LIKE :query "
+
+        const val SORT_BY_NAME_ASC_QUERY = " ORDER BY SaleProduct.saleProductName ASC "
+
+        const val SORT_BY_NAME_DESC_QUERY = " ORDER BY SaleProduct.saleProductName DESC "
+
         const val AND_IS_CATEGORY = " AND CAST(SaleProduct.saleProductCategory AS INTEGER) = 1 "
 
         const val AND_IS_NOT_CATEGORY = " AND CAST(SaleProduct.saleProductCategory AS INTEGER) = 0 "
@@ -138,11 +118,11 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
                 "   AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1) " +
                 " AND SaleProduct.saleProductUid != :saleProductCategoryUid "
 
-        const val ALL_ACTIVE_CATEGORY_QUERY = ALL_ACTIVE_QUERY + AND_IS_CATEGORY
+        const  val ACTIVE_PRODUCTS_QUERY = ALL_ACTIVE_QUERY + ALL_ACTIVE_QUERY_WITH_SEARCH +
+                AND_IS_NOT_CATEGORY
 
-        const  val ACTIVE_PRODUCTS_QUERY = ALL_ACTIVE_QUERY + AND_IS_NOT_CATEGORY
-
-        const val ACTIVE_CATEGORIES_QUERY = ALL_ACTIVE_QUERY + AND_IS_CATEGORY
+        const val ACTIVE_CATEGORIES_QUERY = ALL_ACTIVE_QUERY + ALL_ACTIVE_QUERY_WITH_SEARCH +
+                AND_IS_CATEGORY
 
         const val ACTIVE_PRODUCTS_NOT_IN_CATEGORY_QUERY =
                 ALL_ACTIVE_QUERY + AND_IS_NOT_CATEGORY + AND_NOT_IN_CATEGORY

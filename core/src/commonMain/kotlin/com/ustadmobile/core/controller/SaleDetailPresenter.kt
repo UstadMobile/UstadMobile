@@ -58,6 +58,8 @@ class SaleDetailPresenter(context: Any,
     private var totalPayment: Long = 0
     private var totalAfterDiscount: Long = 0
 
+    private var loggedInPersonUid: Long = 0
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -71,6 +73,8 @@ class SaleDetailPresenter(context: Any,
         personDao = repository.personDao
 
         positionToLocationUid = HashMap()
+
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
     }
 
@@ -96,6 +100,7 @@ class SaleDetailPresenter(context: Any,
         } else {
             view.runOnUiThread(Runnable{ view.showPayments(false) })
             updatedSale = Sale()
+            updatedSale!!.salePersonUid = loggedInPersonUid
             updatedSale!!.saleCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
             updatedSale!!.salePreOrder = true //ie: Not delivered unless ticked.
             updatedSale!!.saleDone = false
@@ -291,6 +296,8 @@ class SaleDetailPresenter(context: Any,
 
         if (updatedSale == null) {
             updatedSale = Sale()
+            updatedSale!!.salePersonUid = loggedInPersonUid
+            updatedSale!!.saleCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         }
         if (updatedSale!!.saleLocationUid != 0L) {
             locationUid = updatedSale!!.saleLocationUid

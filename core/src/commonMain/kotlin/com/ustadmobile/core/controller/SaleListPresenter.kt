@@ -47,6 +47,8 @@ class SaleListPresenter(context: Any,
 
     private var personUid = 0L
 
+    private var loggedInPersonUid : Long ? = 0
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -54,6 +56,8 @@ class SaleListPresenter(context: Any,
         //Get provider Dao
         saleDao = repository.saleDao
         salePaymentDao = repository.salePaymentDao
+
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
     }
 
@@ -116,9 +120,9 @@ class SaleListPresenter(context: Any,
     private fun getAndSetProvider(sortCode: Int) {
 
         if(personUid != 0L){
-            umProvider = saleDao.filterAndSortSale(sortCode, personUid)
+            umProvider = saleDao.filterAndSortSaleByWeUid(loggedInPersonUid!!, sortCode, personUid)
         }else {
-            umProvider = saleDao.filterAndSortSale(filterSelected, sortCode)
+            umProvider = saleDao.filterAndSortSaleByLeUid(loggedInPersonUid!!, filterSelected, sortCode)
         }
         view.setListProvider(umProvider!!, false, false)
 
@@ -128,7 +132,7 @@ class SaleListPresenter(context: Any,
         super.onCreate(savedState)
 
         //Get provider
-        umProvider = saleDao.findAllActiveAsSaleListDetailProvider()
+        umProvider = saleDao.findAllActiveAsSaleListDetailProvider(loggedInPersonUid!!)
         view.setListProvider(umProvider!!, false, false)
 
         idToOrderInteger = HashMap()
@@ -143,8 +147,8 @@ class SaleListPresenter(context: Any,
     }
 
     fun observePreOrderAndPaymentCounters() {
-        val preOrderLiveData = saleDao.getPreOrderSaleCountLive()
-        val paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive()
+        val preOrderLiveData = saleDao.getPreOrderSaleCountLive(loggedInPersonUid!!)
+        val paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive(loggedInPersonUid!!)
 
         preOrderLiveData.observe(this, this::handlePreOrderCountUpdate)
         paymentsDueLiveData.observe(this, this::handlePaymentDueCountUpdate)
@@ -165,21 +169,21 @@ class SaleListPresenter(context: Any,
 
     fun filterAll() {
         filterSelected = ALL_SELECTED
-        umProvider = saleDao.findAllActiveAsSaleListDetailProvider()
+        umProvider = saleDao.findAllActiveAsSaleListDetailProvider(loggedInPersonUid!!)
         view.setListProvider(umProvider!!, false, false)
 
     }
 
     fun filterPreOrder() {
         filterSelected = PREORDER_SELECTED
-        umProvider = saleDao.findAllActiveSaleListDetailPreOrdersProvider()
+        umProvider = saleDao.findAllActiveSaleListDetailPreOrdersProvider(loggedInPersonUid!!)
         view.setListProvider(umProvider!!, false, true)
 
     }
 
     fun filterPaymentDue() {
         filterSelected = PAYMENT_SELECTED
-        umProvider = saleDao.findAllActiveSaleListDetailPaymentDueProvider()
+        umProvider = saleDao.findAllActiveSaleListDetailPaymentDueProvider(loggedInPersonUid!!)
         view.setListProvider(umProvider!!, true, false)
     }
 

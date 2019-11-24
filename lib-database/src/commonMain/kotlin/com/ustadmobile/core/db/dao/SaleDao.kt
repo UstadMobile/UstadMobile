@@ -37,97 +37,54 @@ abstract class SaleDao : BaseDao<Sale> {
     @Insert
     abstract override suspend fun insertAsync(entity: Sale): Long
 
-    @Query(ALL_SALES_QUERY)
-    abstract fun findAllList(): List<Sale>
-
     @Query(ALL_SALES_ACTIVE_QUERY)
     abstract fun findAllActiveLive(): DoorLiveData<List<Sale>>
 
-    @Query(ALL_SALES_ACTIVE_QUERY)
-    abstract fun findAllActiveList(): List<Sale>
-
-    @Query(ALL_SALES_ACTIVE_QUERY)
-    abstract suspend fun findAllActiveAsync():List<Sale>
-
-    @Query(ALL_SALES_ACTIVE_QUERY)
-    abstract fun findAllActiveProvider(): DataSource.Factory<Int,Sale>
-
-    @Query("$ALL_SALES_ACTIVE_QUERY AND salePreOrder = 1 ")
-    abstract fun findAllActivePreorderSalesLive(): DoorLiveData<List<Sale>>
-
-    @Query("$ALL_SALES_ACTIVE_QUERY AND salePaymentDone = 0")
-    abstract fun findAllActivePaymentDueSalesLive(): DoorLiveData<List<Sale>>
-
-    @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND CAST(saleActive AS INTEGER) = 1")
-    abstract suspend fun findAllSaleWithTitleAsync(saleTitle: String): List<Sale>
-
-    @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND CAST(saleActive AS INTEGER) = 1")
-    abstract fun findAllSaleWithTitle(saleTitle: String): List<Sale>
-
     @Query(ALL_SALE_LIST)
-    abstract fun findAllActiveAsSaleListDetailLive(): DoorLiveData<List<SaleListDetail>>
-
-    @Query(ALL_SALE_LIST)
-    abstract fun findAllActiveAsSaleListDetailList(): List<SaleListDetail>
-
-    @Query(ALL_SALE_LIST)
-    abstract suspend fun findAllActiveAsSaleListDetailAsync(): List<SaleListDetail>
-
-    @Query("$ALL_SALE_LIST AND salePreOrder = 1")
-    abstract fun findAllActiveSaleListDetailPreOrdersLive(): DoorLiveData<List<SaleListDetail>>
-
-    @Query("$ALL_SALE_LIST AND salePaymentDone = 1")
-    abstract fun findAllActiveSaleListDetailPaymentDueLive(): DoorLiveData<List<SaleListDetail>>
-
-    @Query(ALL_SALE_LIST)
-    abstract fun findAllActiveAsSaleListDetailProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllActiveAsSaleListDetailProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER)
-    abstract fun findAllActiveSaleListDetailPreOrdersProvider(): DataSource.Factory<Int,SaleListDetail>
-
-    //WE filter
-    @Query(ALL_SALE_LIST_WE_FILTER)
-    abstract fun findAllSalesWithWEFilter(weUid:Long):DataSource.Factory<Int, SaleListDetail>
+    abstract fun findAllActiveSaleListDetailPreOrdersProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     //Payments due shows the payment amount pending vs the total amount of the sale.
     @Query(ALL_SALE_LIST + FILTER_PAYMENT_DUE)
-    abstract fun findAllActiveSaleListDetailPaymentDueProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllActiveSaleListDetailPaymentDueProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_NAME_ASC)
-    abstract fun findAllSaleFilterAllSortNameAscProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_NAME_DEC)
-    abstract fun findAllSaleFilterAllSortNameDescProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_ASC)
-    abstract fun findAllSaleFilterAllSortTotalAscProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_DESC)
-    abstract fun findAllSaleFilterAllSortTotalDescProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_ORDER_DATE_DESC  )
-    abstract fun findAllSaleFilterAllSortDateAscProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_ORDER_DATE_ASC)
-    abstract fun findAllSaleFilterAllSortDateDescProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_NAME_ASC)
-    abstract fun findAllSaleFilterPreOrderSortNameAscProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortNameAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_NAME_DEC)
-    abstract fun findAllSaleFilterPreOrderSortNameDescProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortNameDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_TOTAL_AMOUNT_DESC)
-    abstract fun findAllSaleFilterPreOrderSortTotalAscProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortTotalAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_TOTAL_AMOUNT_ASC)
-    abstract fun findAllSaleFilterPreOrderSortTotalDescProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortTotalDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_DESC)
-    abstract fun findAllSaleFilterPreOrderSortDateAscProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortDateAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_ASC)
-    abstract fun findAllSaleFilterPreOrderSortDateDescProvider(): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortDateDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_ASC)
     abstract fun findAllSaleFilterAllSortNameAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
@@ -148,7 +105,7 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract fun findAllSaleFilterAllSortDateDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
 
 
-    fun filterAndSortSale(sort:Int, weUid:Long): DataSource.Factory<Int, SaleListDetail>{
+    fun filterAndSortSaleByWeUid(leUid: Long, sort:Int, weUid:Long): DataSource.Factory<Int, SaleListDetail>{
         when(sort) {
             SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProviderByWeUid(weUid)
             SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProviderByWeUid(weUid)
@@ -157,99 +114,99 @@ abstract class SaleDao : BaseDao<Sale> {
             SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProviderByWeUid(weUid)
             SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProviderByWeUid(weUid)
         }
-        return findAllActiveAsSaleListDetailProvider()
+        return findAllActiveAsSaleListDetailProvider(leUid)
     }
 
-    fun filterAndSortSale(filter: Int, sort: Int): DataSource.Factory<Int,SaleListDetail> {
+    fun filterAndSortSaleByLeUid(leUid: Long, filter: Int, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (filter) {
             ALL_SELECTED -> when (sort) {
-                SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider()
-                SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider()
-                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider()
-                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider()
-                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider()
-                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProvider()
+                SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider(leUid)
+                SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider(leUid)
+                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider(leUid)
+                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider(leUid)
+                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider(leUid)
+                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProvider(leUid)
             }
             PREORDER_SELECTED -> when (sort) {
-                SORT_ORDER_NAME_ASC -> return findAllSaleFilterPreOrderSortNameAscProvider()
-                SORT_ORDER_NAME_DESC -> return findAllSaleFilterPreOrderSortNameDescProvider()
-                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterPreOrderSortTotalAscProvider()
-                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterPreOrderSortTotalDescProvider()
-                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterPreOrderSortDateAscProvider()
-                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterPreOrderSortDateDescProvider()
+                SORT_ORDER_NAME_ASC -> return findAllSaleFilterPreOrderSortNameAscProvider(leUid)
+                SORT_ORDER_NAME_DESC -> return findAllSaleFilterPreOrderSortNameDescProvider(leUid)
+                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterPreOrderSortTotalAscProvider(leUid)
+                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterPreOrderSortTotalDescProvider(leUid)
+                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterPreOrderSortDateAscProvider(leUid)
+                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterPreOrderSortDateDescProvider(leUid)
             }
             PAYMENT_SELECTED -> {
             }
         }
-        return findAllActiveAsSaleListDetailProvider()
+        return findAllActiveAsSaleListDetailProvider(leUid)
     }
 
-    fun filterAndSortSale(filter: Int, search: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
+    fun filterAndSortSale(leUid: Long, filter: Int, search: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (filter) {
             ALL_SELECTED -> when (sort) {
-                SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider()
-                SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider()
-                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider()
-                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider()
-                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider()
-                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProvider()
+                SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider(leUid)
+                SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider(leUid)
+                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider(leUid)
+                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider(leUid)
+                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider(leUid)
+                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProvider(leUid)
             }
             PREORDER_SELECTED -> when (sort) {
-                SORT_ORDER_NAME_ASC -> return findAllSaleFilterPreOrderSortNameAscProvider()
-                SORT_ORDER_NAME_DESC -> return findAllSaleFilterPreOrderSortNameDescProvider()
-                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterPreOrderSortTotalAscProvider()
-                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterPreOrderSortTotalDescProvider()
-                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterPreOrderSortDateAscProvider()
-                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterPreOrderSortDateDescProvider()
+                SORT_ORDER_NAME_ASC -> return findAllSaleFilterPreOrderSortNameAscProvider(leUid)
+                SORT_ORDER_NAME_DESC -> return findAllSaleFilterPreOrderSortNameDescProvider(leUid)
+                SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterPreOrderSortTotalAscProvider(leUid)
+                SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterPreOrderSortTotalDescProvider(leUid)
+                SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterPreOrderSortDateAscProvider(leUid)
+                SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterPreOrderSortDateDescProvider(leUid)
             }
             PAYMENT_SELECTED -> {
             }
         }
-        return findAllActiveAsSaleListDetailProvider()
+        return findAllActiveAsSaleListDetailProvider(leUid)
     }
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY)
-    abstract fun findAllSaleItemsWithSearchFilter(locationuid: Long,
+    abstract fun findAllSaleItemsWithSearchFilter(leUid: Long, locationuid: Long,
                                                   amountl: Long, amounth: Long, from: Long,
                                                   to: Long, title: String)
             : DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_DATE_ASC)
-    abstract fun findAllSaleItemsWithSearchFilterOrderDateAsc(locationuid: Long,
+    abstract fun findAllSaleItemsWithSearchFilterOrderDateAsc(leUid: Long, locationuid: Long,
                                                               amountl: Long, amounth: Long,
                                                               from: Long, to: Long,
                                                               title: String)
             : DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_ASC)
-    abstract fun findAllSaleItemsWithSearchFilterOrderPriceAsc(locationuid: Long,
+    abstract fun findAllSaleItemsWithSearchFilterOrderPriceAsc(leUid: Long, locationuid: Long,
                                                                amountl: Long, amounth: Long,
                                                                from: Long, to: Long,
                                                                title: String)
             : DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_DESC)
-    abstract fun findAllSaleItemsWithSearchFilterOrderPriceDesc(locationuid: Long,
+    abstract fun findAllSaleItemsWithSearchFilterOrderPriceDesc(leUid: Long, locationuid: Long,
                                                                 amountl: Long, amounth: Long,
                                                                 from: Long, to: Long,
                                                                 title: String)
             : DataSource.Factory<Int,SaleListDetail>
 
 
-    fun findAllSaleFilterAndSearchProvider(locationUid: Long,
+    fun findAllSaleFilterAndSearchProvider(leUid: Long, locationUid: Long,
                    spl: Long, sph: Long, from: Long, to: Long,
                    searchQuery: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (sort) {
-            SORT_MOST_RECENT -> return findAllSaleItemsWithSearchFilterOrderDateAsc(
+            SORT_MOST_RECENT -> return findAllSaleItemsWithSearchFilterOrderDateAsc(leUid,
                     locationUid, spl, sph, from, to, searchQuery)
-            SORT_LOWEST_PRICE -> return findAllSaleItemsWithSearchFilterOrderPriceAsc(
+            SORT_LOWEST_PRICE -> return findAllSaleItemsWithSearchFilterOrderPriceAsc(leUid,
                     locationUid, spl, sph, from, to, searchQuery)
-            SORT_HIGHEST_PRICE -> return findAllSaleItemsWithSearchFilterOrderPriceDesc(
+            SORT_HIGHEST_PRICE -> return findAllSaleItemsWithSearchFilterOrderPriceDesc(leUid,
                     locationUid, spl, sph, from, to, searchQuery)
-            else -> return findAllSaleItemsWithSearchFilter(locationUid,
+            else -> return findAllSaleItemsWithSearchFilter(leUid, locationUid,
                     spl, sph, from, to, searchQuery)
         }
 
@@ -283,12 +240,24 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract suspend fun getOverDueSaleCountAsync(today: Long): Int
 
 
-    @Query(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
-            " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
-            " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
-            " FROM Sale sl WHERE CAST(sl.saleActive AS INTEGER) = 1 " +
-            " AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
-    abstract fun getPreOrderSaleCountLive(): DoorLiveData<Int>
+    @Query(" SELECT COUNT(*) FROM " +
+            "   ( " +
+            "   SELECT " +
+            "       (select " +
+            "           (case  when  " +
+            "               (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
+            "               and sip.saleItemPreOrder = 1 " +
+            "               ) " +
+            "           > 0 then 1  else 0 end " +
+            "       ) from Sale" +
+            "   )  as saleItemPreOrder " +
+            "   FROM Sale sl " +
+            "   LEFT JOIN Person ON Person.personUid = :leUid " +
+            "   WHERE CAST(sl.saleActive AS INTEGER) = 1 " +
+            "   AND (saleItemPreOrder = 1 OR salePreOrder = 1)" +
+            "   AND ( sl.salePersonUid = Person.personUid OR CAST(Person.admin AS INTEGER) = 1 ) " +
+            "   ) ")
+    abstract fun getPreOrderSaleCountLive(leUid: Long): DoorLiveData<Int>
 
 
     //REPORTING:
@@ -495,10 +464,13 @@ abstract class SaleDao : BaseDao<Sale> {
                 " LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid "
 
         const val ALL_SALE_LIST_WHERE = " WHERE CAST(sl.saleActive AS INTEGER) = 1 "
-        const val ALL_SALE_LIST_WHERE_WE =" AND WE.personUid = :weUid "
+        const val ALL_SALE_LIST_WHERE_WE =" AND WE.personUid = :weUid  "
+        const val ALL_SALE_LIST_WHERE_LE = " AND ( LE.personUid = :leUid OR CAST(LE.admin AS INTEGER) = 1 ) "
 
 
-        const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 +  ALL_SALE_LIST_WHERE
+        const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 + ALL_SALE_LIST_LJ2 +
+                ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_LE
+
         const val ALL_SALE_LIST_WE_FILTER = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 +
                 ALL_SALE_LIST_LJ2 + ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_WE
         //filter and sort

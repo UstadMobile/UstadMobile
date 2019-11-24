@@ -150,7 +150,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleProduct>) {
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
-                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProvider(factory)
+                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProviderByNameAsc(factory)
 
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, true, true, context!!)
@@ -169,8 +169,10 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     }
 
     fun searchCatalog(searchValue: String) {
-        //TODO: this
-
+        if(mPresenter != null) {
+            mPresenter!!.setQuerySearch(searchValue)
+            mPresenter!!.updateProviders()
+        }
     }
 
 
