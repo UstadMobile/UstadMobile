@@ -72,6 +72,7 @@ actual class ContainerManager actual constructor(container: Container,
     }
 
 
+    //TODO: modify this to use a function which would use a function that provides a next entry source
     @UseExperimental(ExperimentalUnsignedTypes::class)
     actual override suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource) {
         val addOpts = addOptions ?: AddEntryOptions()
