@@ -1,5 +1,8 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.Napier
+import com.tonyodev.fetch2.Error
+import com.tonyodev.fetch2.Status
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
@@ -19,11 +22,13 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
 import com.ustadmobile.lib.util.Base64Coder
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
+import com.ustadmobile.sharedse.network.fetch.*
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
@@ -116,6 +121,49 @@ class DownloadJobItemRunner
 
     private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
 
+    private val currentFetchRequests = copyOnWriteListOf<RequestMpp>()
+
+    private val currentFetchDownloads = mutableMapOf<Int, DownloadMpp>()
+
+    private val fetchStartTimes = mutableMapOf<Int, Long>()
+
+    private var numCompletedOrFailed = 0
+
+    private val currentDownloadAttempt = atomic(null as CompletableDeferred<Int>?)
+
+    private val fetchListener = object: AbstractFetchListenerMpp() {
+
+        override fun onAdded(download: DownloadMpp) {
+            Napier.d({"Download added #${download.id} ${download.url}"})
+            currentFetchDownloads[download.id] = download
+        }
+
+        override fun onStarted(download: DownloadMpp, downloadBlocks: List<DownloadBlockMpp>, totalBlocks: Int) {
+            super.onStarted(download, downloadBlocks, totalBlocks)
+            fetchStartTimes[download.id] = getSystemTimeInMillis()
+        }
+
+        override fun onCompleted(download: DownloadMpp) {
+            val downloadDuration = getSystemTimeInMillis() - (fetchStartTimes[download.id] ?: 0L)
+            val speedInKBps = (download.total * 1000 * 100) / (downloadDuration * 1024) //x100 for 2 decimal points
+            Napier.d({"Download completed #${download.id} ${download.url} Speed=${speedInKBps/100f}KB/s"})
+            numCompletedOrFailed++
+            checkFetchDownloadsCompleted()
+        }
+
+        override fun onError(download: DownloadMpp, error: Error, throwable: Throwable?) {
+            Napier.d({"Download error #${download.id} ${download.url}"}, throwable)
+            numCompletedOrFailed++
+            checkFetchDownloadsCompleted()
+        }
+
+        override fun onProgress(download: DownloadMpp, etaInMilliSeconds: Long, downloadedBytesPerSecond: Long) {
+            Napier.d({"Download progress #${download.id} ${download.url} - ${download.downloaded}bytes"})
+            currentFetchDownloads[download.id] = download
+        }
+    }
+
+
     class DownloadedEntrySource(override val pathInContainer: String,
                                 private val file: FileSe,
                                 var unCompressedLength: Long,
@@ -202,6 +250,8 @@ class DownloadJobItemRunner
                 startDownloadFnJob?.cancel()
             }
 
+            networkManager.httpFetcher.removeListener(fetchListener)
+
             withContext(mainCoroutineDispatcher) {
                 statusLiveData!!.removeObserver(statusObserver!!)
                 downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
@@ -243,6 +293,8 @@ class DownloadJobItemRunner
             downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
             downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         }
+
+        networkManager.httpFetcher.addListener(fetchListener)
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
         if (destinationDir == null) {
@@ -287,12 +339,15 @@ class DownloadJobItemRunner
         val progressUpdater = async {
             while (isActive) {
                 delay(1000)
-                var totalInProgress = 0L
-                for (i in 0 until numConcurrentEntryDownloads) {
-                    totalInProgress += inProgressDownloadCounters[i].value
-                }
-                val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
-                downloadJobItemManager.updateProgress(downloadItem.djiUid, downloadSoFar, downloadItem.downloadLength)
+//                var totalInProgress = 0L
+//                for (i in 0 until numConcurrentEntryDownloads) {
+//                    totalInProgress += inProgressDownloadCounters[i].value
+//                }
+                //val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
+                val downloadSoFar = currentFetchDownloads.values.fold(0L,
+                        { total, download -> total + download.downloaded})
+                downloadJobItemManager.updateProgress(downloadItem.djiUid, downloadSoFar,
+                        downloadItem.downloadLength)
             }
         }
 
@@ -364,94 +419,135 @@ class DownloadJobItemRunner
                     " Attempts remaining= " + attemptsRemaining)
             downloadStartTime = getSystemTimeInMillis()
 
-            try {
-                appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
+            val containerEntryList = currentHttpClient.get<List<ContainerEntryWithMd5>>(
+                    "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
+            entriesDownloaded.value = 0
 
-                val containerEntryList = currentHttpClient.get<List<ContainerEntryWithMd5>>(
-                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
-                entriesDownloaded.value = 0
+            val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
+            numEntriesToDownload = entriesToDownload.size
+            history.startTime = getSystemTimeInMillis()
 
-                val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
-                numEntriesToDownload = entriesToDownload.size
-                history.startTime = getSystemTimeInMillis()
-
-                withContext(coroutineContext) {
-                    val producer = produce {
-                        entriesToDownload.forEach { send(it) }
-                    }
-
-                    repeat(numConcurrentEntryDownloads) { procNum ->
-                        launch {
-                            for (entry in producer) {
-                                val destFile = FileSe(FileSe(destinationDir!!),
-                                        entry.ceCefUid.toString() + ".tmp")
-                                val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
-                                UMLog.l(UMLog.VERBOSE, 100, "${mkLogPrefix()}: Downloader $procNum $downloadUrl -> $destFile")
-                                val resumableDownload = ResumableDownload2(downloadUrl,
-                                        destFile.getAbsolutePath(), httpClient = currentHttpClient,
-                                        coroutineDispatcher = ioCoroutineDispatcher)
-                                resumableDownload.onDownloadProgress = { inProgressDownloadCounters[procNum].value = it }
-                                if (resumableDownload.download()) {
-                                    entriesDownloaded.incrementAndGet()
-                                    inProgressDownloadCounters[procNum].value = 0L
-                                    val completedDl = destFile.length()
-                                    completedEntriesBytesDownloaded.addAndGet(completedDl)
-
-
-                                    var `is`: FileInputStreamSe? = null
-                                    var compression = COMPRESSION_NONE
-                                    var length = 0L
-                                    try {
-                                        val sign = ByteArray(2)
-                                        `is` = FileInputStreamSe(destFile)
-                                        val magic = `is`.read(sign)
-                                        compression = if (magic == 2 && sign[0] == 0x1f.toByte() && sign[1] == 0x8b.toByte()) {
-                                            COMPRESSION_GZIP
-                                        } else {
-                                            COMPRESSION_NONE
-                                        }
-
-                                        length = resumableDownload.headers?.get("x-content-length-uncompressed")?.get(0)?.toLong()
-                                                ?: destFile.length()
-
-                                    } catch (io: IOException) {
-
-                                    } finally {
-                                        `is`?.close()
-                                    }
-
-
-                                    containerManager.addEntries(
-                                            ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
-                                                    dontUpdateTotals = true),
-                                            DownloadedEntrySource(entry.cePath!!, destFile, length,
-                                                    Base64Coder.decodeToByteArray(entry.cefMd5!!),
-                                                    destFile.getAbsolutePath(), compression))
-                                } else {
-                                    numFailures.incrementAndGet()
-                                }
-                            }
-                        }
-                    }
-                }
-
-            } catch (e: Exception) {
-                UMLog.l(UMLog.ERROR, 699,
-                        "${mkLogPrefix()} Failed to download a file from $endpointUrl", e)
+            val fetchRequests = entriesToDownload.map {
+                RequestMpp("$downloadEndpoint$CONTAINER_ENTRY_FILE_PATH${it.ceCefUid}",
+                        "$destinationDir/${it.cefMd5}")
             }
+            currentFetchRequests.clear()
+            val currentDownloadAttemptVal = CompletableDeferred<Int>()
+            currentDownloadAttempt.value = currentDownloadAttemptVal
 
-            val numFails = numFailures.value
-            recordHistoryFinished(history, numFails == 0)
-            if (numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload) {
+            networkManager.httpFetcher.enqueue(fetchRequests, object: FuncMpp<List<Pair<RequestMpp, Error>>> {
+                override fun call(result: List<Pair<RequestMpp, Error>>) {
+                    currentFetchRequests.addAll(result.map {it.first} )
+                }
+            })
+
+            val result = currentDownloadAttemptVal.await()
+//            if(result == JobStatus.COMPLETE) {
+//
+//            }
+
+
+
+
+//            try {
+//                appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
+//
+//                val containerEntryList = currentHttpClient.get<List<ContainerEntryWithMd5>>(
+//                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
+//                entriesDownloaded.value = 0
+//
+//                val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
+//                numEntriesToDownload = entriesToDownload.size
+//                history.startTime = getSystemTimeInMillis()
+//
+//                withContext(coroutineContext) {
+//                    val producer = produce {
+//                        entriesToDownload.forEach { send(it) }
+//                    }
+//
+//                    repeat(numConcurrentEntryDownloads) { procNum ->
+//                        launch {
+//                            for (entry in producer) {
+//                                val destFile = FileSe(FileSe(destinationDir!!),
+//                                        entry.ceCefUid.toString() + ".tmp")
+//                                val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
+//                                UMLog.l(UMLog.VERBOSE, 100, "${mkLogPrefix()}: Downloader $procNum $downloadUrl -> $destFile")
+//                                val resumableDownload = ResumableDownload2(downloadUrl,
+//                                        destFile.getAbsolutePath(), httpClient = currentHttpClient,
+//                                        coroutineDispatcher = ioCoroutineDispatcher)
+//                                resumableDownload.onDownloadProgress = { inProgressDownloadCounters[procNum].value = it }
+//                                if (resumableDownload.download()) {
+//                                    entriesDownloaded.incrementAndGet()
+//                                    inProgressDownloadCounters[procNum].value = 0L
+//                                    val completedDl = destFile.length()
+//                                    completedEntriesBytesDownloaded.addAndGet(completedDl)
+//
+//
+//                                    var `is`: FileInputStreamSe? = null
+//                                    var compression = COMPRESSION_NONE
+//                                    var length = 0L
+//                                    try {
+//                                        val sign = ByteArray(2)
+//                                        `is` = FileInputStreamSe(destFile)
+//                                        val magic = `is`.read(sign)
+//                                        compression = if (magic == 2 && sign[0] == 0x1f.toByte() && sign[1] == 0x8b.toByte()) {
+//                                            COMPRESSION_GZIP
+//                                        } else {
+//                                            COMPRESSION_NONE
+//                                        }
+//
+//                                        length = resumableDownload.headers?.get("x-content-length-uncompressed")?.get(0)?.toLong()
+//                                                ?: destFile.length()
+//
+//                                    } catch (io: IOException) {
+//
+//                                    } finally {
+//                                        `is`?.close()
+//                                    }
+//
+//
+//                                    containerManager.addEntries(
+//                                            ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
+//                                                    dontUpdateTotals = true),
+//                                            DownloadedEntrySource(entry.cePath!!, destFile, length,
+//                                                    Base64Coder.decodeToByteArray(entry.cefMd5!!),
+//                                                    destFile.getAbsolutePath(), compression))
+//                                } else {
+//                                    numFailures.incrementAndGet()
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//
+//            } catch (e: Exception) {
+//                UMLog.l(UMLog.ERROR, 699,
+//                        "${mkLogPrefix()} Failed to download a file from $endpointUrl", e)
+//            }
+
+
+
+            //val numFails = numFailures.value
+            //recordHistoryFinished(history, numFails == 0)
+            if(currentFetchRequestsCompleted()) {
                 break
-            } else {
-                //wait before retry
+            }else {
                 delay(retryDelay)
             }
+
+//            if (numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload) {
+//                break
+//            } else {
+//                //wait before retry
+//                delay(retryDelay)
+//            }
         }
 
 
-        val downloadCompleted = numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload
+//        val downloadCompleted =  currentFetchRequests.size == currentFetchDownloads.size
+//                && currentFetchDownloads.all { it.value.status == Status.COMPLETED }//numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload
+
+        val downloadCompleted = currentFetchRequestsCompleted()
         if (downloadCompleted) {
             val downloadTime = getSystemTimeInMillis() - downloadStartTime
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
@@ -467,6 +563,21 @@ class DownloadJobItemRunner
 
         progressUpdater.cancel()
         stop(if (downloadCompleted) JobStatus.COMPLETE else JobStatus.FAILED)
+    }
+
+    private fun currentFetchRequestsCompleted() = currentFetchRequests.size == currentFetchDownloads.size
+            && currentFetchDownloads.values.all { it.status == Status.COMPLETED }
+
+    fun checkFetchDownloadsCompleted() {
+        if(numCompletedOrFailed == currentFetchRequests.size) {
+            val newStatus = if(currentFetchDownloads.all { it.value.status == Status.COMPLETED }) {
+                JobStatus.COMPLETE
+            }else {
+                JobStatus.FAILED
+            }
+
+            currentDownloadAttempt.value?.complete(newStatus)
+        }
     }
 
     private fun recordHistoryFinished(history: DownloadJobItemHistory, successful: Boolean) {

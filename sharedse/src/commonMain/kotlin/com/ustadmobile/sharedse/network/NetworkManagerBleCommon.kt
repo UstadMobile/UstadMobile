@@ -11,6 +11,7 @@ import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sharedMutableMapOf
+import com.ustadmobile.sharedse.network.fetch.FetchMpp
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import io.ktor.client.HttpClient
 import kotlinx.atomicfu.atomic
@@ -144,6 +145,7 @@ abstract class NetworkManagerBleCommon(
 
     abstract val localHttpPort: Int
 
+    abstract val httpFetcher: FetchMpp
 
     /**
      * Only for testing - allows the unit test to set this without running the main onCreate method

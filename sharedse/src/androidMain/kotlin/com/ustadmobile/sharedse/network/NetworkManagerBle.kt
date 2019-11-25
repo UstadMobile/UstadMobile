@@ -28,6 +28,10 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
+import com.tonyodev.fetch2.Fetch
+import com.tonyodev.fetch2.FetchConfiguration
+import com.tonyodev.fetch2.Request
+import com.tonyodev.fetch2core.Func
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
@@ -58,6 +62,7 @@ import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
+import com.ustadmobile.sharedse.network.fetch.FetchMpp
 
 /**
  * This class provides methods to perform android network related communications.
@@ -132,6 +137,15 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     private val numActiveRequests = AtomicInteger()
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
+
+    val fetchAndroid: Fetch by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        Fetch.Impl.getInstance(FetchConfiguration.Builder(context as Context)
+                .setDownloadConcurrentLimit(4)
+                .build())
+    }
+
+    actual override val httpFetcher
+        get() = fetchAndroid
 
     private var gattClientCallbackManager: GattClientCallbackManager? = null
 

@@ -6,10 +6,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.sharedse.network.fetch.FetchMpp
 import kotlinx.coroutines.CoroutineDispatcher
 
 actual open class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                                                        umAppDatabase: UmAppDatabase) : NetworkManagerBleCommon(umAppDatabase) {
+
+
+
     actual override val isWiFiEnabled: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     actual override val isBleCapable: Boolean
@@ -24,6 +28,9 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
     override val localHttpPort: Int
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
+    actual override val httpFetcher: FetchMpp
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
     override val umAppDatabaseRepo by lazy {
         val activeAccount = UmAccountManager.getActiveAccount(context)
         val serverUrl = if(activeAccount!= null) {
@@ -34,6 +41,10 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
         }
         umAppDatabase.asRepository<UmAppDatabase>(context, serverUrl, "", defaultHttpClient(),
                 null)
+    }
+
+    override suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     actual override fun canDeviceAdvertise(): Boolean {
@@ -64,5 +75,7 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
     actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+
 
 }
