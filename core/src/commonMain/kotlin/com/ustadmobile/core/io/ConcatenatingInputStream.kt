@@ -35,7 +35,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
     private var currentBytePos = 0L
 
-    private var currentStreamIndex = 0
+    private var currentPartIndex = 0
 
     private var nextBoundary = 0L
 
@@ -74,15 +74,15 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
     }
 
     private fun openNextStream() {
-        if(currentStreamIndex >= parts.size - 1) {
+        if(currentPartIndex >= parts.size - 1) {
             throw IllegalStateException("Reached end of parts")
         }
 
         currentInputStream.close()
-        currentStreamIndex++
+        currentPartIndex++
 
-        currentInputStream = parts[currentStreamIndex].src()
-        nextBoundary += parts[currentStreamIndex].length
+        currentInputStream = parts[currentPartIndex].src()
+        nextBoundary += parts[currentPartIndex].length
     }
 
     override fun read(): Int {
@@ -110,7 +110,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
         }
 
         while(currentBytePos < totalLength && totalBytesRead < len && currBytesRead != -1) {
-            if(currentBytePos == nextBoundary && currentStreamIndex < parts.size) {
+            if(currentBytePos == nextBoundary && currentPartIndex < parts.size) {
                 openNextStream()
             }
 
@@ -126,7 +126,32 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
     }
 
     override fun skip(n: Long): Long {
-        return super.skip(n)
+        var bytesSkipped = 0L
+        if(nextBoundary >= (currentBytePos + n)) {
+            bytesSkipped = currentInputStream.skip(n)
+            currentBytePos += bytesSkipped
+            return bytesSkipped
+        }
+
+        //TODO: handle edge case when n > remaining bytes
+        currentInputStream.close()
+
+        while(bytesSkipped < n
+                && nextBoundary < currentBytePos + (n - bytesSkipped)
+                && currentPartIndex < parts.size - 1) {
+            bytesSkipped += (nextBoundary - currentBytePos)
+            currentBytePos = nextBoundary
+            currentPartIndex++
+
+            nextBoundary += parts[currentPartIndex].length
+        }
+
+        currentInputStream = parts[currentPartIndex].src()
+        val currentBytesSkipped = currentInputStream.skip(n - bytesSkipped)
+        bytesSkipped += currentBytesSkipped
+        currentBytePos += currentBytesSkipped
+
+        return bytesSkipped
     }
 
     companion object {
