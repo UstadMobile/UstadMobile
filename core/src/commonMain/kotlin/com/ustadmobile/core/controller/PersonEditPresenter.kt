@@ -201,9 +201,9 @@ class PersonEditPresenter
      */
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val personCustomFieldValueDao = repository.personCustomFieldValueDao
+        repository.personCustomFieldValueDao
         val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        val personCustomFieldDao = repository.personCustomFieldDao
+        repository.personCustomFieldDao
 
         customFieldDao = repository.customFieldDao
         customFieldValueDao = repository.customFieldValueDao
@@ -246,12 +246,20 @@ class PersonEditPresenter
 
         headersAndFields = cleanedResult
 
-        //Get person live data and observe
-        personLiveData = personDao.findByUidLive(personUid)
-        //Observe the live data
-        view.runOnUiThread(Runnable {
-            personLiveData!!.observe(this, this::handlePersonValueChanged)
-        })
+        GlobalScope.launch {
+            val personObj = personDao.findByUidAsync(personUid)
+            view.runOnUiThread(Runnable {
+                handlePersonValueChanged(personObj)
+            })
+        }
+
+        //TODO: Removed observe
+//        //Get person live data and observe
+//        personLiveData = personDao.findByUidLive(personUid)
+//        //Observe the live data
+//        view.runOnUiThread(Runnable {
+//            personLiveData!!.observe(this, this::handlePersonValueChanged)
+//        })
     }
 
     /**

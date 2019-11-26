@@ -118,9 +118,6 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
                 } catch (e: Exception) {
                     print("oops")
                 }
-
-
-
             }
         }
     }

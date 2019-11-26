@@ -66,11 +66,11 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
             saleProductCategoryUid: Long
     ): DataSource.Factory<Int, SaleProduct>
 
-
-
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProduct?>
 
+    @Query(FIND_BY_UID_QUERY)
+    abstract fun findByUidAsync(uid: Long): SaleProduct?
 
     @Query(FIND_BY_NAME_QUERY)
     abstract suspend fun findByNameAsync(name: String):SaleProduct?

@@ -35,7 +35,7 @@ interface SaleProductDetailView : UstadView {
 
     fun addImageFromGallery()
 
-    fun initFromSaleProduct(saleProduct: SaleProduct)
+    fun initFromSaleProduct(saleProduct: SaleProduct, isNew : Boolean)
 
     fun sendMessage(messageId: Int)
 

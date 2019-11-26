@@ -62,7 +62,4 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
         groupCL.setOnClickListener { mPresenter.goToGroupsList() }
         locationCL.setOnClickListener { mPresenter.goToLocationsList() }
     }
-
-
-    companion object {}
 }

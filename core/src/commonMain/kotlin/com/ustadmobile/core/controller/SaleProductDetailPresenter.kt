@@ -42,12 +42,15 @@ class SaleProductDetailPresenter(context: Any,
     private var isCategory: Boolean = false
 
     internal var pictureDao: SaleProductPictureDao
+    internal var pictureDaoDB : SaleProductPictureDao
 
     private val selectedToCategoriesUid: HashMap<Long, Boolean>
 
     private lateinit var pictureLiveData: DoorLiveData<SaleProductPicture?>
 
     private var productUid : Long = 0L
+
+    private var newSaleProduct: Boolean = false
 
     init {
 
@@ -57,6 +60,7 @@ class SaleProductDetailPresenter(context: Any,
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
         pictureDao = UmAccountManager.getRepositoryForActiveAccount(context).saleProductPictureDao
+        pictureDaoDB = UmAppDatabase.getInstance(context).saleProductPictureDao
 
         impl = UstadMobileSystemImpl.instance
 
@@ -87,22 +91,39 @@ class SaleProductDetailPresenter(context: Any,
         GlobalScope.launch {
             if (arguments.containsKey(ARG_SALE_PRODUCT_UID)) {
 
+                newSaleProduct = false
+
                 productUid = arguments[ARG_SALE_PRODUCT_UID]!!.toLong()
 
-                val product = saleProductDao.findByUidLive(productUid)
+                val product = saleProductDao.findByUidAsync(productUid)
                 view.runOnUiThread(Runnable {
-                    product.observe(thisP, thisP::updateView)
+                    updateView(product)
                 })
 
+                //TODO: Remove observing
+//                val product = saleProductDao.findByUidLive(productUid)
+//                view.runOnUiThread(Runnable {
+//                    product.observe(thisP, thisP::updateView)
+//                })
+
             } else {
+                newSaleProduct = true
+
                 currentSaleProduct = SaleProduct("", "", isCategory, false)
 
                 currentSaleProduct!!.saleProductUid = saleProductDao.insertAsync(currentSaleProduct!!)
+                productUid = currentSaleProduct!!.saleProductUid
 
-                val product = saleProductDao.findByUidLive(currentSaleProduct!!.saleProductUid)
+                val product = saleProductDao.findByUidAsync(currentSaleProduct!!.saleProductUid)
                 view.runOnUiThread(Runnable {
-                    product.observe(thisP, thisP::updateView)
+                    updateView(product)
                 })
+
+                //TODO: Remove observing
+//                val product = saleProductDao.findByUidLive(currentSaleProduct!!.saleProductUid)
+//                view.runOnUiThread(Runnable {
+//                    product.observe(thisP, thisP::updateView)
+//                })
 
             }
         }
@@ -119,7 +140,7 @@ class SaleProductDetailPresenter(context: Any,
         itemUid = currentSaleProduct!!.saleProductUid
 
         view.runOnUiThread(Runnable {
-            view.initFromSaleProduct(currentSaleProduct!!)
+            view.initFromSaleProduct(currentSaleProduct!!, newSaleProduct)
         })
 
         //Assign
@@ -134,14 +155,15 @@ class SaleProductDetailPresenter(context: Any,
                 itemUid)
         GlobalScope.launch(Dispatchers.Main) {
             view.runOnUiThread(Runnable {
-                view.setListProvider(categoriesProvider!!)
+                if(categoriesProvider!=null)
+                    view.setListProvider(categoriesProvider!!)
             })
         }
 
         //Update image on view
         GlobalScope.launch {
             val productPicture =
-                pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
+                    pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
             if (productPicture != null) {
                 view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
             }
@@ -232,13 +254,24 @@ class SaleProductDetailPresenter(context: Any,
                 existingPP.saleProductPictureTimestamp = DateTime.nowUnixLong()
                 productPictureUid = pictureDao.insertAsync(existingPP)
                 existingPP.saleProductPictureUid = productPictureUid
+
             }
 
             if(existingPP!=null) {
                 pictureDao.setAttachment(existingPP, imageFilePath)
             }
 
+            //Update the entity as well.
             saleProductDao.updateAsync(currentSaleProduct!!)
+
+            //Update image on view
+            GlobalScope.launch {
+                val productPicture =
+                        pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
+                if (productPicture != null) {
+                    view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
+                }
+            }
 
         }
 

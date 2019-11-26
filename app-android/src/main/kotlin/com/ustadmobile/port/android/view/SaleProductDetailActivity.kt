@@ -263,7 +263,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         runOnUiThread { categoryTitle.text = titleName }
     }
 
-    override fun initFromSaleProduct(saleProduct: SaleProduct) {
+    override fun initFromSaleProduct(saleProduct: SaleProduct, isNew: Boolean) {
         if (saleProduct != null) {
             if (saleProduct.saleProductName != null && !saleProduct.saleProductName!!.isEmpty()) {
                 titleEng.setText(saleProduct.saleProductName)
@@ -304,13 +304,11 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
             }
             if(saleProductNameLocale == null && saleProduct.saleProductName != null) {
                 saleProductNameLocale = saleProduct.saleProductName
-
             }
 
-            updateToolbarTitle(saleProductNameLocale!!)
-
-
-
+            if(!isNew) {
+                updateToolbarTitle(saleProductNameLocale!!)
+            }
         }
     }
 
