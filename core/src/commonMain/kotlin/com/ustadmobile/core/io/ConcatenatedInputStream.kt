@@ -4,10 +4,13 @@ import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_CHUNK_ID
 import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_CHUNK_LENGTH
 import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_NUM_CHUNKS
 import kotlinx.io.ByteBuffer
+import kotlinx.io.ByteOrder
 import kotlinx.io.InputStream
+import kotlinx.io.core.IoBuffer
+import kotlinx.io.core.readLongLittleEndian
 import kotlin.math.min
 
-data class ConcatenatedPart(val id: ByteArray, val length: Long)
+data class ConcatenatedPart(val id: ByteArray, val length: Long, val uncompressedLength: Long)
 
 class ConcatenatedInputStream(val src: InputStream) : InputStream(){
 
@@ -20,20 +23,23 @@ class ConcatenatedInputStream(val src: InputStream) : InputStream(){
     private val partHeaders: List<ConcatenatedPart>
 
     init {
-        val numFilesByteArray = ByteArray(LEN_NUM_CHUNKS)
-        src.read(numFilesByteArray)
-        val numFilesBuffer = ByteBuffer.allocate(LEN_NUM_CHUNKS)
-        numFilesBuffer.put(numFilesByteArray)
-        numFiles = numFilesBuffer.getInt(0)
+        val ioBuffer = IoBuffer.NoPool.borrow()
+        val byteArrBuff = ByteArray(LEN_NUM_CHUNKS)
+        src.read(byteArrBuff, 0, LEN_NUM_CHUNKS)
+        ioBuffer.writeFully(byteArrBuff, 0, LEN_NUM_CHUNKS)
 
-        val chunkLenArray = ByteArray(LEN_CHUNK_LENGTH)
+        numFiles = ioBuffer.readInt()
+        val headerBufferSize = (numFiles * (LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2)))
+        val headerByteArr = ByteArray(headerBufferSize)
+        src.read(headerByteArr)
+        ioBuffer.writeFully(headerByteArr, 0, headerBufferSize)
         partHeaders = (0 until numFiles).map {
-            val idByteArray = ByteArray(LEN_CHUNK_ID)
-            src.read(idByteArray)
-            src.read(chunkLenArray)
-            val chunkLenBuffer = ByteBuffer.allocate(LEN_CHUNK_LENGTH)
-            chunkLenBuffer.put(chunkLenArray,0, chunkLenArray.size)
-            ConcatenatedPart(idByteArray, chunkLenBuffer.getLong(0))
+            val idByteArr = ByteArray(LEN_CHUNK_ID)
+            ioBuffer.readFully(idByteArr, 0, LEN_CHUNK_ID)
+            val partLen = ioBuffer.readLongLittleEndian()
+            val partLenUncompressed = ioBuffer.readLongLittleEndian()
+            val part = ConcatenatedPart(idByteArr, partLen, partLenUncompressed)
+            part
         }
     }
 

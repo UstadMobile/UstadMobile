@@ -29,6 +29,7 @@ import java.io.BufferedOutputStream
 import java.util.zip.ZipEntry
 import kotlin.io.copyTo
 import kotlinx.coroutines.runBlocking
+import com.ustadmobile.core.util.ext.toHexString
 
 actual class ContainerManager actual constructor(container: Container,
                                                  db: UmAppDatabase,
@@ -101,7 +102,7 @@ actual class ContainerManager actual constructor(container: Container,
             })
 
             entriesParted.second.forEach {
-                val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16) }
+                val md5HexStr = it.md5Sum.toHexString()
                 val destFile = File(newFileDir, md5HexStr)
                 val currentFilePath = it.filePath
                 val isExcludedFromGzip = EXCLUDED_GZIP_TYPES.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
@@ -115,22 +116,20 @@ actual class ContainerManager actual constructor(container: Container,
                     }
                 } else {
                     //copy it
-                    GlobalScope.async {
-                        var destOutStream = null as OutputStream?
-                        var inStream = null as InputStream?
-                        try {
-                            inStream = it.inputStream
-                            destOutStream = FileOutputStream(destFile)
-                            destOutStream = if (shouldGzipNow) GZIPOutputStream(destOutStream) else destOutStream
-                            inStream.copyTo(destOutStream)
-                        } catch (e: IOException) {
-                            throw e
-                        } finally {
-                            destOutStream?.close()
-                            inStream?.close()
-                            destOutStream?.close()
-                        }
-                    }.await()
+                    var destOutStream = null as OutputStream?
+                    var inStream = null as InputStream?
+                    try {
+                        inStream = it.inputStream
+                        destOutStream = FileOutputStream(destFile)
+                        destOutStream = if (shouldGzipNow) GZIPOutputStream(destOutStream) else destOutStream
+                        inStream.copyTo(destOutStream)
+                    } catch (e: IOException) {
+                        throw e
+                    } finally {
+                        destOutStream?.close()
+                        inStream?.close()p
+                        destOutStream?.close()
+                    }
                 }
 
                 val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
