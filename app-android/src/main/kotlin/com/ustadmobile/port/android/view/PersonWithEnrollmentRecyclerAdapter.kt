@@ -28,6 +28,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
 import kotlinx.coroutines.Dispatchers
@@ -108,19 +109,19 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
     internal constructor(
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
-            activity: Activity, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
+            fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean) : super(diffCallback) {
         theContext = context
-        theActivity = activity
+        theFragment = fragment
         mPresenter = presenter
         showAttendance = attendance
         showEnrollment = enrollment
     }
 
-    internal constructor(
-            diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
+    internal constructor(context: Context,
+            diffCallback: DiffUtil.ItemCallback<Person>,
             fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
-            enrollment: Boolean) : super(diffCallback) {
+            enrollment: Boolean) : super(diffCallback as DiffUtil.ItemCallback<PersonWithEnrollment>) {
         theContext = context
         theFragment = fragment
         mPresenter = presenter
@@ -262,9 +263,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         //Update person name :
         var firstName: String? = ""
         var lastName: String? = ""
-        if (personWithEnrollment == null) {
-            return
-        }
         if (personWithEnrollment.firstNames != null) {
             firstName = personWithEnrollment.firstNames
         }
@@ -276,7 +274,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
         //Name click listener:
         val personUid = personWithEnrollment.personUid
-        studentNameTextView.setOnClickListener { v -> mPresenter!!.handleCommonPressed(personUid) }
+        studentNameTextView.setOnClickListener { mPresenter!!.handleCommonPressed(personUid) }
 
         //HEADING:
         //Remove previous add clazz member views

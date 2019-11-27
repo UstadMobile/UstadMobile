@@ -21,6 +21,7 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
     internal lateinit var locationsLayout: ConstraintLayout
     internal lateinit var auditLogLayout: ConstraintLayout
     internal lateinit var customFieldsLayout: ConstraintLayout
+    internal lateinit var userCL: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,11 +37,12 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
 
         calendatLayout = findViewById(R.id.activity_settings2_holiday_calendar_cl)
         rolesLayout = findViewById(R.id.activity_settings2_roles_cl)
-        groupsLayout = findViewById(R.id.activity_settings2_users_cl)
+        groupsLayout = findViewById(R.id.activity_settings2_groups_cl)
         rolesAssignmentLayout = findViewById(R.id.activity_settings2_roles_assignment_cl)
         locationsLayout = findViewById(R.id.activity_settings2_locations_cl)
         auditLogLayout = findViewById(R.id.activity_settings2_audit_log_cl)
         customFieldsLayout = findViewById(R.id.activity_settings2_customfields_cl)
+        userCL = findViewById(R.id.activity_settings2_users_cl)
 
         mPresenter = SettingsPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
@@ -54,6 +56,6 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
         locationsLayout.setOnClickListener { view -> mPresenter.goToLocationsList() }
         auditLogLayout.setOnClickListener { view -> mPresenter.goToAuditLogSelection() }
         customFieldsLayout.setOnClickListener { view -> mPresenter.goToCustomFieldsList() }
-
+        userCL.setOnClickListener { mPresenter.goToPeopleList() }
     }
 }

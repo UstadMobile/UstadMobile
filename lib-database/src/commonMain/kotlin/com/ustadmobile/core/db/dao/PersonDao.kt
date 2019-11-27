@@ -19,6 +19,7 @@ import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
+import kotlin.math.log
 
 
 @UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
@@ -34,6 +35,8 @@ abstract class PersonDao : BaseDao<Person> {
 
         var personUid: Long = 0
     }
+
+    inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
 
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
@@ -231,6 +234,34 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM Person where active = 1")
     abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
 
+
+    private suspend fun createPersonCommon(person: Person, loggedInPersonUid: Long): PersonWithGroup{
+        val personUid = insertAsync(person)
+        person.personUid = personUid
+
+        val personGroup = PersonGroup()
+        personGroup.groupName = if (person.firstNames != null)
+            person.firstNames + " 's individual group"
+        else
+            "" + "Individual Person group"
+
+        personGroup.groupPersonUid = person.personUid
+        val personGroupUid = insertPersonGroup(personGroup)
+        personGroup.groupUid = personGroupUid
+
+        val personGroupMember = PersonGroupMember()
+        personGroupMember.groupMemberPersonUid = personUid
+        personGroupMember.groupMemberGroupUid = personGroupUid
+        personGroupMember.groupMemberActive = true
+        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
+        personGroupMember.groupMemberUid = personGroupMemberUid
+
+        createAuditLog(personUid, loggedInPersonUid)
+
+        val personWithGroup = PersonWithGroup(personUid, personGroupUid)
+        return personWithGroup
+    }
+
     /**
      * Creates actual person and assigns it to a group for permissions' sake. Use this
      * instead of direct insert.
@@ -238,29 +269,10 @@ abstract class PersonDao : BaseDao<Person> {
      * @param person    The person entity
      * @param callback  The callback.
      */
-    suspend fun createPersonAsync(person: Person):Long  {
-        val personUid = insertAsync(person)
-        person.personUid = personUid
-
-        val personGroup = PersonGroup()
-        personGroup.groupName = if (person.firstNames != null)
-            person.firstNames
-        else
-            "" + "'s group"
-        val personGroupUid = insertPersonGroup(personGroup)
-        personGroup.groupUid = personGroupUid
-
-        val personGroupMember = PersonGroupMember()
-        personGroupMember.groupMemberPersonUid = personUid
-        personGroupMember.groupMemberGroupUid = personGroupUid
-        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
-
-        personGroupMember.groupMemberUid = personGroupMemberUid
-        return personUid
+    suspend fun createPersonAsync(person: Person, loggedInPersonUid: Long):Long  {
+        val personWithGroup = createPersonCommon(person, loggedInPersonUid)
+        return personWithGroup.personUid
     }
-
-
-    inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
 
     /**
      * Insert the person given and create a PersonGroup for it and set it to individual.
@@ -271,41 +283,16 @@ abstract class PersonDao : BaseDao<Person> {
      * Person Uids and PersonGroup Uids
      */
     suspend fun createPersonWithGroupAsync(person: Person): PersonWithGroup {
-        val personUid = insertAsync(person)
-
-        person.personUid = personUid
-
-        val personGroup = PersonGroup()
-        personGroup.groupName = if (person.firstNames != null)
-            person.firstNames!! + "'s individual group"
-        else
-            "Person individual group"
-        personGroup.groupPersonUid = personUid
-        val personGroupUid = insertPersonGroup(personGroup)
-
-        personGroup.groupUid = personGroupUid
-
-        val personGroupMember = PersonGroupMember()
-        personGroupMember.groupMemberPersonUid = personUid
-        personGroupMember.groupMemberGroupUid = personGroupUid
-        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
-
-        personGroupMember.groupMemberUid = personGroupMemberUid
-        val personWithGroup = PersonWithGroup(personUid!!, personGroupUid!!)
+        val personWithGroup = createPersonCommon(person, 0)
         return personWithGroup
 
     }
 
-    suspend fun insertPersonAsync(entity: Person, loggedInPersonUid: Long):Long {
-        val result = insertAsync(entity)
-        val personUid = result!!
-        createAuditLog(personUid, loggedInPersonUid)
-        return result
-    }
-
-    fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
-        val auditLog = AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid)
-        insertAuditLog(auditLog)
+    private fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
+        if(fromPersonUid != 0L) {
+            val auditLog = AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid)
+            insertAuditLog(auditLog)
+        }
     }
 
     @Insert
@@ -316,7 +303,6 @@ abstract class PersonDao : BaseDao<Person> {
         createAuditLog(entity.personUid, loggedInPersonUid)
         return result
     }
-
 
     companion object {
 
@@ -361,7 +347,6 @@ abstract class PersonDao : BaseDao<Person> {
         const val QUERY_SORT_BY_NAME_DESC = " ORDER BY Person.lastName DESC "
         const val QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC "
     }
-
 
     @Serializable
     data class PersonNameAndUid(var personUid: Long = 0L, var name: String = ""){

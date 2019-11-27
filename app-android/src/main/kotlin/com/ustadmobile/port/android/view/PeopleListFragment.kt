@@ -18,7 +18,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PeopleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PeopleListView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -46,6 +48,8 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
+
+    private var activityMode : Boolean = false
 
     /**
      * On Create of the View fragment. Sets up the presenter and the floating action button's
@@ -78,6 +82,12 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
         fab!!.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
+        if(activityMode){
+            val layout = rootContainer!!.findViewById<SwipeRefreshLayout>(
+                    R.id.fragment_people_list_swiperefreshlayout)
+            layout.setPadding(0,0,0,24)
+        }
+
         sortSpinner!! .onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.handleChangeSortOrder(position)
@@ -91,7 +101,10 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         pullToRefresh!!.setOnRefreshListener{
             try {
                 Thread.sleep(300)
-                (Objects.requireNonNull(activity) as BasePointActivity).forceSync()
+                if(activity is BasePointActivity) {
+                    (activity as BasePointActivity).forceSync()
+                }
+
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
@@ -108,10 +121,18 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
     override fun setPeopleListProvider(factory : DataSource.Factory<Int, PersonWithEnrollment>) {
 
-        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, context!!,
+        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(context!!, DIFF_CALLBACK_PERSON,
                 this, mPresenter!!, false, false)
+
+        //personDao.findAllPeopleWithEnrollmentBySearch
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                .personDaoBoundaryCallbacks
+                .findAllPeopleWithEnrollment(factory)
+
         //A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
 
         //Observe the data:
         val thisP = this
@@ -134,7 +155,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
     override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(context!!,
-                R.layout.spinner_item, sortSpinnerPresets)
+                R.layout.item_simple_spinner_gray, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter
     }
@@ -152,6 +173,8 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
     companion object {
 
+
+
         /**
          * Generates a new Fragment for a page fragment
          *
@@ -164,18 +187,43 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
             return fragment
         }
 
+        fun newInstance(fromActivity: Boolean): PeopleListFragment {
+            val fragment = PeopleListFragment()
+            fragment.activityMode = fromActivity
+            val args = Bundle()
+            fragment.arguments = args
+            return fragment
+        }
+
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK2: DiffUtil.ItemCallback<PersonWithEnrollment> = object : DiffUtil.ItemCallback<PersonWithEnrollment>() {
+        val DIFF_CALLBACK2: DiffUtil.ItemCallback<PersonWithEnrollment> = object
+            : DiffUtil.ItemCallback<PersonWithEnrollment>() {
             override fun areItemsTheSame(oldItem: PersonWithEnrollment,
                                          newItem: PersonWithEnrollment): Boolean {
-                return oldItem.personUid == newItem.personUid
+                return oldItem == newItem
             }
 
             override fun areContentsTheSame(oldItem: PersonWithEnrollment,
                                             newItem: PersonWithEnrollment): Boolean {
-                return oldItem.personUid == newItem.personUid
+                return oldItem == newItem
+            }
+        }
+
+        /**
+         * The DIFF CALLBACK
+         */
+        val DIFF_CALLBACK_PERSON: DiffUtil.ItemCallback<Person> = object
+            : DiffUtil.ItemCallback<Person>() {
+            override fun areItemsTheSame(oldItem: Person,
+                                         newItem: Person): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(oldItem: Person,
+                                            newItem: Person): Boolean {
+                return oldItem == newItem
             }
         }
     }

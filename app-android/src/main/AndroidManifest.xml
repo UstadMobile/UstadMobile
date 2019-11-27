@@ -297,6 +297,10 @@
             android:label="@string/change_password"
             android:theme="@style/Theme.UstadTheme"/>
 
+        <activity android:name="com.ustadmobile.port.android.view.PeopleListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/people"
+            android:theme="@style/Theme.UstadTheme"/>
 
     </application>
 

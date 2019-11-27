@@ -452,6 +452,7 @@
     <string name="new_role_assignment">New role assignment</string>
     <string name="add_new_role_assignment">Add new role assignment</string>
     <string name="role_assignment">Role assignment</string>
+    <string name="role_assignments">Role assignments</string>
     <string name="in_literal">in</string>
     <string name="assign_role_to">Assign role to</string>
     <string name="role_individual">Individual user</string>
@@ -555,5 +556,8 @@
     <string name="change_password">Change Password</string>
     <string name="current_password">Current password</string>
     <string name="confirm_new_password">Confirm new password</string>
+
+    <string name="password_unchanged">Password (Unchanged)</string>
+    <string name="confirm_password_unchanged">Confirm password (Unchanged)</string>
 
 </resources>

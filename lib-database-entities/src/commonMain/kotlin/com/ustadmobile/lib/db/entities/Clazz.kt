@@ -67,6 +67,7 @@ open class Clazz() {
         this.isAttendanceFeature = true
         this.isActivityFeature = true
         this.isSelFeature = true
+        this.isClazzActive = false
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
@@ -75,6 +76,7 @@ open class Clazz() {
         this.isAttendanceFeature = true
         this.isActivityFeature = true
         this.isSelFeature = true
+        this.isClazzActive = false
     }
 
     companion object {

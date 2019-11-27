@@ -2,23 +2,26 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ATTENDANCE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_BIRTHDAY
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CLASSES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CONFIRM_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FULL_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ROLE_ASSIGNMENTS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_HOME_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_USERNAME
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_MNE
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_OFFICER
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_SEL
@@ -67,42 +70,7 @@ class LoadInitialData {
     }
 
     private fun loadInitialData() {
-
-        //Create Admin
-        val adminPerson = personDao!!.findByUsername("admin")
-        if (adminPerson == null) {
-            //TODO: Re-do if needed.
-            //            adminPerson = new Person();
-            //            adminPerson.setAdmin(true);
-            //            adminPerson.setUsername("admin");
-            //            adminPerson.setFirstNames("Admin");
-            //            adminPerson.setLastName("Admin");
-            //
-            //            adminPerson.setPersonUid(personDao.insert(adminPerson));
-            //
-            //            PersonAuth adminPersonAuth = new PersonAuth(adminPerson.getPersonUid(),
-            //                    PersonAuthDao.ENCRYPTED_PASS_PREFIX +
-            //                            PersonAuthDao.encryptPassword("irZahle2"));
-            //            personAuthDao.insertAsync(adminPersonAuth, new UmCallback<Long>() {
-            //                @Override
-            //                public void onSuccess(Long result) {
-            //                    //Admin created.
-            //                    System.out.println("LoadInitialData: Admin created. Continuing..");
-            //                    addRolesAndPermissions();
-            //                }
-            //
-            //                @Override
-            //                public void onFailure(Throwable exception) {
-            //                    exception.printStackTrace();
-            //                }
-            //            });
-
-        } else {
-            println("LoadInitialData: Admin Already created. Continuing..")
-            addRolesAndPermissions()
-        }
-
-
+        addRolesAndPermissions()
     }
 
 
@@ -608,13 +576,52 @@ class LoadInitialData {
                 true
         ))
 
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Username",
+                FIELD_HEADING_USERNAME, //Field Label (for lookup)
+                PersonDetailPresenterField.PERSON_FIELD_UID_USERNAME, //field Uid
+                5,
+                PersonField.FIELD_TYPE_USERNAME,
+                0,
+                false,
+                true,
+                true
+        ))
+
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Password",
+                FIELD_HEADING_PASSWORD, //Field Label (for lookup)
+                PersonDetailPresenterField.PERSON_FIELD_UID_PASSWORD, //field Uid
+                6,
+                PersonField.FIELD_TYPE_PASSWORD,
+                0,
+                false,
+                false,
+                true
+        ))
+
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Confirm password",
+                FIELD_HEADING_CONFIRM_PASSWORD, //Field Label (for lookup)
+                PersonDetailPresenterField.PERSON_FIELD_UID_CONFIRM_PASSWORD, //field Uid
+                7,
+                PersonField.FIELD_TYPE_PASSWORD,
+                0,
+                false,
+                false,
+                true
+        ))
+
         //BIRTHDAY
         allTheFields.add(HeadersAndFields(
                 "ic_perm_contact_calendar_black_24dp",
                 "Date of Birth",
                 FIELD_HEADING_BIRTHDAY,
                 PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
-                5,
+                8,
                 PersonField.FIELD_TYPE_DATE,
                 0,
                 false,
@@ -627,7 +634,7 @@ class LoadInitialData {
                 "Home Address",
                 FIELD_HEADING_HOME_ADDRESS,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS,
-                6,
+                9,
                 PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
@@ -641,7 +648,7 @@ class LoadInitialData {
                 "",
                 0,
                 0,
-                7,
+                10,
                 PersonField.FIELD_TYPE_HEADER,
                 FIELD_HEADING_ATTENDANCE,
                 false,
@@ -653,7 +660,7 @@ class LoadInitialData {
                 "Total Attendance for student and days",
                 FIELD_HEADING_ATTENDANCE,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
-                8,
+                11,
                 PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
@@ -667,7 +674,7 @@ class LoadInitialData {
                 "Father with number",
                 FIELD_HEADING_FATHER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
-                11,
+                12,
                 PersonField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
@@ -679,7 +686,7 @@ class LoadInitialData {
                 "Father name",
                 FIELD_HEADING_FATHERS_NAME,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
-                12,
+                13,
                 PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
@@ -691,7 +698,7 @@ class LoadInitialData {
                 "Father  number",
                 FIELD_HEADING_FATHERS_NUMBER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
-                13,
+                14,
                 PersonField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
@@ -703,7 +710,7 @@ class LoadInitialData {
                 "Mother name",
                 FIELD_HEADING_MOTHERS_NAME,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
-                14,
+                15,
                 PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
@@ -715,7 +722,7 @@ class LoadInitialData {
                 "Mother number",
                 FIELD_HEADING_MOTHERS_NUMBER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
-                15,
+                16,
                 PersonField.FIELD_TYPE_PHONE_NUMBER,
                 0,
                 false,
@@ -727,7 +734,7 @@ class LoadInitialData {
                 "Mother with number",
                 FIELD_HEADING_MOTHER,
                 PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
-                16,
+                17,
                 PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
@@ -741,9 +748,23 @@ class LoadInitialData {
                 "",
                 0,
                 0,
-                17,
+                18,
                 PersonField.FIELD_TYPE_HEADER,
                 FIELD_HEADING_CLASSES,
+                false,
+                true,
+                true
+        ))
+
+        //ROLE ASSIGNMENTS
+        allTheFields.add(HeadersAndFields(
+                "",
+                "",
+                0,
+                0,
+                19,
+                PersonField.FIELD_TYPE_HEADER,
+                FIELD_HEADING_ROLE_ASSIGNMENTS,
                 false,
                 true,
                 true

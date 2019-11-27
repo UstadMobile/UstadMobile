@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -25,6 +24,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +57,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     private val loggedInPersonUid: Long
 
     private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
+
+    private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
 
     private var personPictureDao: PersonPictureDao
 
@@ -247,7 +249,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
 
             //Update person and generate feeds for person
-            val result = personDao.updateAsync(currentPerson!!)
+            val result = personDao.updatePersonAsync(currentPerson!!, loggedInPersonUid)
             PersonEditPresenter.generateFeedsForPersonUpdate(repository, currentPerson!!)
 
             view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
@@ -266,6 +268,13 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         setClazzListOnView()
     }
 
+    fun generateAssignedRoleAssignments(){
+        val roleAssignmentDao = repository.entityRoleDao
+        assignedRoleAssignments =
+                roleAssignmentDao.findAllActiveRoleAssignmentsByGroupPersonUid(personUid)
+        setRoleAssignmentsOnView()
+    }
+
     /**
      * Sets the Class List provider of ClazzNumWithStudents type to the view.
      */
@@ -273,6 +282,9 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         view.setClazzListProvider(assignedClazzes!!)
     }
 
+    private fun setRoleAssignmentsOnView(){
+        view.setRoleAssignmentListProvider(assignedRoleAssignments!!)
+    }
 
     /**
      * This method tells the View what to show. It will set every field item to the view.
@@ -349,6 +361,11 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 PersonField.FIELD_HEADING_MOTHERS_NUMBER -> { labelMessageId = MessageID.mothers_number }
                 PersonField.FIELD_HEADING_MOTHER -> { labelMessageId = MessageID.mother }
                 PersonField.FIELD_HEADING_CLASSES -> { labelMessageId = MessageID.classes }
+                PersonField.FIELD_HEADING_USERNAME -> { labelMessageId = MessageID.username }
+                PersonField.FIELD_HEADING_CONFIRM_PASSWORD -> { labelMessageId = MessageID.confirm_password }
+                PersonField.FIELD_HEADING_PASSWORD -> { labelMessageId = MessageID.password }
+                PersonField.FIELD_HEADING_ROLE_ASSIGNMENTS -> { labelMessageId = MessageID.role_assignments }
+
             }
 
             var headerMessageId = 0
@@ -367,6 +384,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 PersonField.FIELD_HEADING_MOTHERS_NUMBER -> { headerMessageId = MessageID.mothers_number }
                 PersonField.FIELD_HEADING_MOTHER -> { headerMessageId = MessageID.mother }
                 PersonField.FIELD_HEADING_CLASSES -> { headerMessageId = MessageID.classes }
+                PersonField.FIELD_HEADING_ROLE_ASSIGNMENTS -> { headerMessageId = MessageID.role_assignments }
             }
 
 
@@ -412,7 +430,11 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 if (person.fatherNumber == null) {
                     thisValue = person.fatherName
                 } else {
-                    thisValue = person.fatherName + " (" + person.fatherNumber + ")"
+                    var fatherName = "-"
+                    if(person.fatherName != null){
+                        fatherName = person.fatherName!!
+                    }
+                    thisValue = fatherName + " (" + person.fatherNumber + ")"
                 }
                 //Also tell the view that we need to add call and text buttons for the number
 
@@ -424,7 +446,11 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 if (person.motherNum == null) {
                     thisValue = person.motherName
                 } else {
-                    thisValue = person.motherName + " (" + person.motherNum + ")"
+                    var motherName = "-"
+                    if(person.motherName != null){
+                        motherName = person.motherName!!
+                    }
+                    thisValue = motherName + " (" + person.motherNum + ")"
                 }
 
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
@@ -469,9 +495,17 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 }
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         labelMessageId, field.fieldIcon), thisValue)
+            } else if (field.fieldUid == PERSON_FIELD_UID_USERNAME.toLong()){
+                thisValue = person.username
+                if(thisValue == null){
+                    thisValue = "-"
+                }
+                view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
+                        labelMessageId, field.fieldIcon), thisValue)
+
             } else {//this is actually a custom field
 
-                val cf = customFieldWithFieldValueMap!![field.fieldUid]
+                var cf = customFieldWithFieldValueMap!![field.fieldUid]
                 var cfLabelMessageId = 0
                 var cfFieldIcon: String? = ""
                 var cfValue: Any? = null
@@ -489,7 +523,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                             cfValue = cf.customFieldValue!!.fieldValue
                         }
                     }
-                }
+                }else cfValue = ""
 
                 view.setField(
                         field.fieldIndex,
@@ -502,6 +536,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 )
             }
         }
+
+        view.doneSettingFields()
     }
 
     private fun handleAverageLive(result:Float?){
@@ -521,12 +557,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         val fieldsIterator = fields!!.iterator()
         while (fieldsIterator.hasNext()) {
             val field = fieldsIterator.next()
-            val fieldIndex = field.fieldIndex
-            if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                //fieldsIterator.remove()
-            }else{
-                cleanedFields.add(field)
-            }
+            cleanedFields.add(field)
         }
 
         presenterFields = cleanedFields
@@ -555,7 +586,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     fun handleClickEdit() {
 
-        view.finish()
+        //view.finish()
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_UID, personUid.toString())
         impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)

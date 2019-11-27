@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 
 /**

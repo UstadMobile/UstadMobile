@@ -12,18 +12,45 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.PersonDetailPresenter
+import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.RoleAssignmentListPresenter
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
-import com.ustadmobile.lib.db.entities.Location
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.*
 
 class RoleAssignmentListRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<EntityRoleWithGroupName>,
-        internal var mPresenter: RoleAssignmentListPresenter,
+        internal var mPresenter: RoleAssignmentListPresenter?,
         internal var theActivity: Activity,
         internal var theContext: Context)
     : PagedListAdapter<EntityRoleWithGroupName, RoleAssignmentListRecyclerAdapter.RoleAssignmentListViewHolder>(diffCallback) {
+
+    val impl = UstadMobileSystemImpl.instance
+
+    private var pPresenter: PersonDetailPresenter? = null
+    private var pePresenter: PersonEditPresenter? = null
+
+
+    constructor(diffCallback: DiffUtil.ItemCallback<EntityRoleWithGroupName>,
+                mPresenter: RoleAssignmentListPresenter?,
+                personDetailPresenter: PersonDetailPresenter,
+                theActivity: Activity,
+                theContext: Context):this(diffCallback, mPresenter, theActivity, theContext){
+        if(personDetailPresenter != null) {
+            pPresenter = personDetailPresenter
+        }
+    }
+
+    constructor(diffCallback: DiffUtil.ItemCallback<EntityRoleWithGroupName>,
+                mPresenter: RoleAssignmentListPresenter?,
+                personEditPresenter: PersonEditPresenter,
+                theActivity: Activity,
+                theContext: Context):this(diffCallback, mPresenter, theActivity, theContext){
+        if(personEditPresenter != null) {
+            pePresenter = personEditPresenter
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoleAssignmentListViewHolder {
 
@@ -43,9 +70,30 @@ class RoleAssignmentListRecyclerAdapter(
         val menu = holder.itemView.findViewById<AppCompatImageView>(R.id
                 .item_title_with_desc_and_dots_dots)
 
-        holder.itemView.setOnClickListener({ v -> mPresenter.handleEditRoleAssignment(entity!!
-        .erUid) })
-        val titleText = entity!!.groupName + " -> " + entity!!.roleName
+        holder.itemView.setOnClickListener {
+            if(mPresenter != null) {
+                mPresenter!!.handleEditRoleAssignment(entity!!.erUid)
+            }
+        }
+
+        //Usually called in Person edit/detail
+        if(mPresenter == null){
+            //Reduce size
+            title.textSize = 14.toFloat()
+            desc.textSize = 14.toFloat()
+        }
+
+
+        var groupName = entity!!.groupName
+
+        if(entity.groupPersonName != null){
+            groupName = entity.groupPersonName
+        }else{
+            "A person group"
+        }
+
+        val titleText = groupName + " -> " + entity!!.roleName
+
         var scopeName: String? = null
         var assigneeName: String? = null
         when (entity.erTableId) {
@@ -74,28 +122,32 @@ class RoleAssignmentListRecyclerAdapter(
         title.setText(titleText)
         desc.setText(descText)
 
-        //Options to Edit/Delete every schedule in the list
-        menu.setOnClickListener{ v: View ->
-            //creating a popup menu
-            val popup = PopupMenu(theActivity.applicationContext, v)
+        if(mPresenter != null) {
+            //Options to Edit/Delete every schedule in the list
+            menu.setOnClickListener { v: View ->
+                //creating a popup menu
+                val popup = PopupMenu(theActivity.applicationContext, v)
 
-            popup.setOnMenuItemClickListener { item ->
-                val i = item.itemId
-                if (i == R.id.edit) {
-                    mPresenter.handleEditRoleAssignment(entity.erUid)
-                    true
-                } else if (i == R.id.delete) {
-                    mPresenter.handleDeleteRoleAssignment(entity.erUid)
-                    true
-                } else {
-                    false
+                popup.setOnMenuItemClickListener { item ->
+                    val i = item.itemId
+                    if (i == R.id.edit) {
+                        mPresenter!!.handleEditRoleAssignment(entity.erUid)
+                        true
+                    } else if (i == R.id.delete) {
+                        mPresenter!!.handleDeleteRoleAssignment(entity.erUid)
+                        true
+                    } else {
+                        false
+                    }
                 }
-            }
-            //inflating menu from xml resource
-            popup.inflate(R.menu.menu_item_schedule)
+                //inflating menu from xml resource
+                popup.inflate(R.menu.menu_item_schedule)
 
-            //displaying the popup
-            popup.show()
+                //displaying the popup
+                popup.show()
+            }
+        }else{
+            menu.visibility = View.GONE
         }
 
     }

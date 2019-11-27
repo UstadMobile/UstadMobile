@@ -4,6 +4,7 @@ package com.ustadmobile.port.android.view
 import android.app.DatePickerDialog
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -29,7 +30,9 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzEditView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.android.synthetic.main.item_simple_spinner.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -56,7 +59,6 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     internal var classDescTIP: TextInputLayout? = null
     internal var addScheduleButton: Button? = null
     internal var holidaySpinner: Spinner? = null
-    internal var locationSpinner: Spinner? = null
 
     internal var featuresTextView: TextView? = null
 
@@ -64,6 +66,11 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
     internal var fromET: EditText? = null
     internal var toET: EditText? = null
+
+    private lateinit var locationAutoCompleteView: AutoCompleteTextView
+    private lateinit var locationDataAdapter: ArrayAdapter<Location>
+
+    private var selectedLocation : Location?=null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -73,6 +80,44 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun updateLocationDataAdapter(locations: List<Location>) {
+
+        locationDataAdapter.clear()
+        locationDataAdapter.addAll(locations)
+        locationDataAdapter.notifyDataSetChanged()
+    }
+
+    private var textWatcher = object : TextWatcher {
+
+        private var handler = Handler()
+        private val DELAY: Long = 150 // milliseconds
+        private var string: Editable? = null
+
+        override fun afterTextChanged(s: Editable?) {
+            string = s
+            handler.removeCallbacks(myRunnable)
+            handler = Handler()
+            handler.postDelayed(myRunnable, DELAY)
+        }
+
+        var myRunnable = Runnable {
+            val hash = string.hashCode()
+            if (hash == locationAutoCompleteView.text.hashCode()) {
+                val name = locationAutoCompleteView.text.toString()
+                mPresenter!!.handleLocationTyped(name)
+
+            }
+        }
+
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+        }
     }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,6 +131,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         setSupportActionBar(toolbar)
         Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
         toolbar!!.setTitle(R.string.class_setup)
+
+        locationAutoCompleteView = findViewById(R.id.locationAutoCompleteTextView)
 
         //Recycler View:
         scheduleRecyclerView = findViewById(
@@ -101,6 +148,20 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         mPresenter = ClazzEditPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
+
+
+        locationDataAdapter = ArrayAdapter(this,
+                R.layout.item_simple_spinner_gray, listOf<Location>())
+        locationAutoCompleteView.setAdapter(locationDataAdapter)
+        locationAutoCompleteView.addTextChangedListener(textWatcher)
+        locationAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
+            //locationAutoCompleteView.text = null
+            val selected = parent.getItemAtPosition(position) as Location
+            mPresenter!!.selectedLocation = selected
+            locationAutoCompleteView.setText(selected!!.title)
+        }
+
 
         fromET = findViewById(R.id.activity_clazz_edit_start_date_edittext)
         toET = findViewById(R.id.activity_clazz_edit_end_date_edittext)
@@ -151,14 +212,14 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        locationSpinner = findViewById(R.id.activity_clazz_edit_location_spinner)
-        locationSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                setLocationSelected(position)
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
+//        locationSpinner = findViewById(R.id.activity_clazz_edit_location_spinner)
+//        locationSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+//                setLocationSelected(position)
+//            }
+//
+//            override fun onNothingSelected(parent: AdapterView<*>) {}
+//        }
 
         //Date preparation
         val myCalendarEnd = Calendar.getInstance()
@@ -242,7 +303,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             mPresenter!!.handleSaveCustomFieldValues(fieldId, type, valueObject!!)
         }
 
-        mPresenter!!.handleClickDone()
+        val locationEntered = locationAutoCompleteView.text
+        mPresenter!!.handleClickDone(locationEntered.toString())
     }
 
     override fun updateToolbarTitle(titleName: String) {
@@ -269,6 +331,11 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         }
 
         scheduleRecyclerView!!.adapter = scheduleListRecyclerAdapter
+    }
+
+    override fun updateLocationSetName(locationName: String) {
+
+        locationAutoCompleteView.setText(locationName)
     }
 
     override fun updateClazzEditView(updatedClazz: Clazz) {
@@ -351,11 +418,11 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     }
 
     override fun setLocationPresets(presets: Array<String>, position: Int) {
-        val adapter = ArrayAdapter(applicationContext,
-                R.layout.item_simple_spinner, presets)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        locationSpinner!!.adapter = adapter
-        locationSpinner!!.setSelection(position)
+//        val adapter = ArrayAdapter(applicationContext,
+//                R.layout.item_simple_spinner, presets)
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        locationSpinner!!.adapter = adapter
+//        locationSpinner!!.setSelection(position)
     }
 
     /**

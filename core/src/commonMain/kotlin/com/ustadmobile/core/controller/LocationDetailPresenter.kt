@@ -53,7 +53,9 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         val locationDao = repository.locationDao
         GlobalScope.launch {
             val result = locationDao.findTopLocationsAsync()
-            view.populateTopLocation(result!!)
+            view.runOnUiThread(Runnable {
+                view.populateTopLocation(result!!)
+            })
         }
     }
 
@@ -85,7 +87,9 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
         GlobalScope.launch {
             val result = locationDao.findByUidAsync(locationUid)
             updatedLocation = result
-            view.updateLocationOnView(updatedLocation!!)
+            view.runOnUiThread(Runnable {
+                view.updateLocationOnView(updatedLocation!!)
+            })
         }
 
     }
@@ -103,7 +107,9 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
             getTopLocations()
 
-            view.updateLocationOnView(updatedLocation!!)
+            view.runOnUiThread(Runnable {
+                view.updateLocationOnView(updatedLocation!!)
+            })
 
         }
     }

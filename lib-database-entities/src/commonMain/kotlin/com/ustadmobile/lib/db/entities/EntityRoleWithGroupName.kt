@@ -12,4 +12,6 @@ class EntityRoleWithGroupName : EntityRole() {
     var clazzName: String? = null
     var locationName: String? = null
     var personName: String? = null
+    var groupPersonName : String? = null
+    var groupPersonUid : Long = 0L
 }

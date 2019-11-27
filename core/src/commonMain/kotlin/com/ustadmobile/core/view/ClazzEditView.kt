@@ -5,6 +5,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Schedule
 
 /**
@@ -44,6 +45,10 @@ interface ClazzEditView : UstadView {
     fun addCustomFieldText(label: CustomField, value: String)
     fun addCustomFieldDropdown(label: CustomField, options: Array<String>, selected: Int)
     fun clearAllCustomFields()
+
+    fun updateLocationDataAdapter(locations: List<Location>)
+
+    fun updateLocationSetName(locationName : String)
 
     companion object {
 

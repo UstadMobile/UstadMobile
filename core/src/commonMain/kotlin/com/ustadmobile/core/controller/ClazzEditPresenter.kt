@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CustomFieldDao
 import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
@@ -48,6 +49,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val clazzDao = repository.clazzDao
+    private val locationDao = repository.locationDao
     private val customFieldDao: CustomFieldDao
     private val customFieldValueDao: CustomFieldValueDao
     private val customFieldValueOptionDao: CustomFieldValueOptionDao
@@ -68,6 +70,18 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     fun addToMap(viewId: Int, fieldId: Long) {
         viewIdToCustomFieldUid[viewId] = fieldId
+    }
+
+    fun handleLocationTyped(locationName: String){
+
+        val name = "%$locationName%"
+        val locationDao = UmAppDatabase.getInstance(context).locationDao
+        GlobalScope.launch {
+            val locations = locationDao.findByTitleLikeAsync(name)
+            view.runOnUiThread(Runnable {
+                view.updateLocationDataAdapter(locations)
+            })
+        }
     }
 
     private fun getAllClazzCustomFields() {
@@ -143,8 +157,10 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 //                timeZoneString = TimeZone.getDefault().getID()
                 timeZoneString = ""
 
-                val newLocationUid = repository.locationDao.insertAsync(Location("Temp Location",
-                        "Temp location", timeZoneString))
+                var tempLocation = Location("Temp Location",
+                        "Temp location", timeZoneString)
+                tempLocation.locationActive = false
+                val newLocationUid = repository.locationDao.insertAsync(tempLocation)
 
                 tempClazzLocationUid = newLocationUid!!
 
@@ -159,14 +175,26 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         var thisP = this
         this.currentClazzUid = clazzUid
 
-        //Get person live data and observe
-        val clazzLiveData = clazzDao.findByUidLive(currentClazzUid)
-        //Observe the live data
-        view.runOnUiThread(Runnable {
-            clazzLiveData.observe(thisP, thisP::handleClazzValueChanged)
-        })
+        GlobalScope.launch {
+            val clazzData = clazzDao.findByUidAsync(currentClazzUid)
+            handleClazzValueChanged(clazzData)
 
-
+            //Get location if set
+             if(clazzData!!.clazzLocationUid != 0L){
+                 val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
+                 val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
+                 view.runOnUiThread(Runnable {
+                     view.updateLocationSetName(location!!.title!!)
+                 })
+             }
+        }
+        //TODO : Removing and replacing with suspended vs live (so things dont dissapear)
+//        //Get person live data and observe
+//        val clazzLiveData = clazzDao.findByUidLive(currentClazzUid)
+//        //Observe the live data
+//        view.runOnUiThread(Runnable {
+//            clazzLiveData.observe(thisP, thisP::handleClazzValueChanged)
+//        })
 
         GlobalScope.launch {
 
@@ -232,6 +260,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         if (mOriginalClazz == null) {
             mOriginalClazz = Clazz()
+            mOriginalClazz!!.isClazzActive = false
         }
 
         if (mOriginalClazz!!.clazzHolidayUMCalendarUid != 0L) {
@@ -266,6 +295,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         if (mOriginalClazz == null) {
             mOriginalClazz = Clazz()
+            mOriginalClazz!!.isClazzActive = false
         }
 
         if (mOriginalClazz!!.clazzLocationUid != 0L) {
@@ -398,30 +428,42 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         }
     }
 
+
+    var selectedLocation : Location ? = null
+
+
     /**
      * Handles when the Class Edit screen's done/tick button is pressed. This intent denotes
      * confirmation of all changes done in the screen. Hence, the method will persist the updated
      * Class object, set it to active, and finish(close) the screen.
      *
      */
-    fun handleClickDone() {
+    fun handleClickDone(newLocation: String) {
         mUpdatedClazz!!.isClazzActive = true
         GlobalScope.launch {
-            val result = repository.locationDao.findByUidAsync(mUpdatedClazz!!.clazzLocationUid)
-            if (result!!.locationUid == tempClazzLocationUid) {
-                result.title = mUpdatedClazz!!.clazzName!! + "'s default location"
-                result.locationActive = (true)
-                repository.locationDao.update(result)
 
-                //TODO: Set Temp location to false
+            if(selectedLocation != null ){
+                //Set it
+                mUpdatedClazz!!.clazzLocationUid = selectedLocation!!.locationUid
+            }else {
+                val result = repository.locationDao.findByUidAsync(mUpdatedClazz!!.clazzLocationUid)
+                if (result!!.locationUid == tempClazzLocationUid) {
+                    if(newLocation != null && !newLocation.isEmpty()){
+                        result.title = newLocation
+                    }else {
+                        result.title = mUpdatedClazz!!.clazzName!! + "'s default location"
+                    }
+                    result.locationActive = (true)
+                    repository.locationDao.update(result)
+
+                }
             }
-        }
 
-        GlobalScope.launch {
             clazzDao.updateClazzAsync(mUpdatedClazz!!, loggedInPersonUid)
             //Close the activity.
             view.finish()
         }
+
     }
 
 

@@ -27,13 +27,13 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     @QueryLiveTables(["Clazz", "ClazzMember"])
     @Query("SELECT " +
-            " (SELECT COUNT(*) FROM Clazz Where Clazz.isClazzActive = 1) as numClazzes, " +
+            " (SELECT COUNT(*) FROM Clazz Where CAST(Clazz.isClazzActive AS INTEGER) = 1) as numClazzes, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT + ") as numStudents, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER + ") as numTeachers, " +
-            " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE Clazz.isClazzActive = 1 ) / " +
-            " (SELECT COUNT(*) FROM Clazz Where Clazz.isClazzActive = 1)) as attendanceAverage ")
+            " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 ) / " +
+            " (SELECT COUNT(*) FROM Clazz Where CAST(Clazz.isClazzActive AS INTEGER) = 1)) as attendanceAverage ")
     abstract fun getClazzSummaryLiveData(): DoorLiveData<ClazzAverage?>
 
 
@@ -142,18 +142,18 @@ abstract class ClazzDao : BaseDao<Clazz> {
         }
     }
 
-    @Query("$CLAZZ_SELECT FROM Clazz WHERE Clazz.isClazzActive = 1 ")
+    @Query("$CLAZZ_SELECT FROM Clazz WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 ")
     abstract fun findAllActiveClazzes(): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
-            " AND Clazz.isClazzActive = 1 " +
+            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.clazzName ASC")
     abstract fun findAllActiveClazzesSortByNameAsc(
             searchQuery: String, personUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT +  CLAZZ_WHERE_CLAZZMEMBER +
-            " AND Clazz.isClazzActive = 1 " +
+            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.clazzName DESC")
     abstract fun findAllActiveClazzesSortByNameDesc(
@@ -161,7 +161,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
-            " AND Clazz.isClazzActive = 1 " +
+            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.attendanceAverage ASC ")
     abstract fun findAllActiveClazzesSortByAttendanceAsc(
@@ -169,7 +169,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT +  CLAZZ_WHERE_CLAZZMEMBER +
-            " AND Clazz.isClazzActive = 1 " +
+            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY Clazz.attendanceAverage DESC ")
     abstract fun findAllActiveClazzesSortByAttendanceDesc(
@@ -177,7 +177,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
-            " AND Clazz.isClazzActive = 1 " +
+            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
             " ORDER BY teacherNames ASC ")
     abstract fun findAllActiveClazzesSortByTeacherAsc(
@@ -197,7 +197,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             "(SELECT (EXISTS (SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
             " AND clazzMemberClazzUid = Clazz.clazzUid  AND clazzMemberActive = 1 " +
             " ))) AS enrolled " +
-            "FROM Clazz WHERE Clazz.isClazzActive = 1 ORDER BY Clazz.clazzName ASC")
+            "FROM Clazz WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 ORDER BY Clazz.clazzName ASC")
     abstract fun findAllClazzesWithEnrollmentByPersonUid(personUid: Long): DataSource.Factory<Int, ClazzWithEnrollment>
 
     @Query(CLAZZ_SELECT +
@@ -357,10 +357,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
         private const val CLAZZ_WHERE_CLAZZMEMBER =
                 " FROM Clazz " +
                 " LEFT JOIN Person ON Person.personUid = :personUid " +
-                " WHERE Person.admin OR :personUid in " +
+                " WHERE (Person.admin OR :personUid in " +
                 " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
                 "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
-                " ClazzMember.clazzMemberActive = 1 ) "
+                " ClazzMember.clazzMemberActive = 1 )) "
 
 
 

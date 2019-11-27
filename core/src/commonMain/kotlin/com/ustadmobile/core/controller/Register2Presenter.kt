@@ -63,7 +63,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
 
                 if (result != null) {
                     person.personUid = result.personUid
-                    personDao.insertAsync(person)
+                    personDao.createPersonAsync(person, 0)
                     result.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(result, context)
@@ -124,7 +124,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
                     if (result.toLong() != 0L) {
                         val personUid = result.toLong()
                         person.personUid = personUid
-                        personDao.insertAsync(person)
+                        personDao.createPersonAsync(person, 0)
 
                         view.runOnUiThread(Runnable { view.setInProgress(false) })
                         val args = HashMap<String, String?>()
