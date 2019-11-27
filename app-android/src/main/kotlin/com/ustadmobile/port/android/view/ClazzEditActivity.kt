@@ -59,6 +59,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     internal var classDescTIP: TextInputLayout? = null
     internal var addScheduleButton: Button? = null
     internal var holidaySpinner: Spinner? = null
+    internal var timezoneSpinner: Spinner? = null
 
     internal var featuresTextView: TextView? = null
 
@@ -220,6 +221,15 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 //
 //            override fun onNothingSelected(parent: AdapterView<*>) {}
 //        }
+
+        timezoneSpinner = findViewById(R.id.activity_clazz_edit_timezone_spinner)
+        timezoneSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                setTimezoneSelected(position)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
 
         //Date preparation
         val myCalendarEnd = Calendar.getInstance()
@@ -425,6 +435,17 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 //        locationSpinner!!.setSelection(position)
     }
 
+    override fun setTimezonePresets(presets: Array<String?>, position: Int){
+        val adapter = ArrayAdapter(applicationContext,
+                R.layout.item_simple_spinner, presets)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        timezoneSpinner!!.adapter = adapter
+        timezoneSpinner!!.setSelection(position)
+    }
+
+    override fun setTimeZonePosition(position: Int) {
+        timezoneSpinner!!.setSelection(position)
+    }
     /**
      * Handles holiday selected
      * @param position    The id/position of the DateRange selected from the spinner.
@@ -435,6 +456,10 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
     override fun setLocationSelected(position: Int) {
         mPresenter!!.updateLocation(position)
+    }
+
+    override fun setTimezoneSelected(position: Int){
+        mPresenter!!.updateTimezone(position)
     }
 
     override fun addCustomFieldText(label: CustomField, value: String) {

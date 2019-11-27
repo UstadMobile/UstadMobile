@@ -560,4 +560,6 @@
     <string name="password_unchanged">Password (Unchanged)</string>
     <string name="confirm_password_unchanged">Confirm password (Unchanged)</string>
 
+    <string name="select_a_timezone">Select a timezone</string>
+
 </resources>
