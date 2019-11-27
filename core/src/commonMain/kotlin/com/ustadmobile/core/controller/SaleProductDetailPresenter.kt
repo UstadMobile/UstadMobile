@@ -100,11 +100,6 @@ class SaleProductDetailPresenter(context: Any,
                     updateView(product)
                 })
 
-                //TODO: Remove observing
-//                val product = saleProductDao.findByUidLive(productUid)
-//                view.runOnUiThread(Runnable {
-//                    product.observe(thisP, thisP::updateView)
-//                })
 
             } else {
                 newSaleProduct = true
@@ -118,12 +113,6 @@ class SaleProductDetailPresenter(context: Any,
                 view.runOnUiThread(Runnable {
                     updateView(product)
                 })
-
-                //TODO: Remove observing
-//                val product = saleProductDao.findByUidLive(currentSaleProduct!!.saleProductUid)
-//                view.runOnUiThread(Runnable {
-//                    product.observe(thisP, thisP::updateView)
-//                })
 
             }
         }

@@ -126,6 +126,7 @@ class SaleProductCategoryListPresenter(context: Any,
             currentSaleProductCategory = SaleProduct("", "",
                     true, false)
         }
+        //Show more recent and show category ?
         setCategoryOnView(true, true)
     }
 
@@ -191,11 +192,11 @@ class SaleProductCategoryListPresenter(context: Any,
 
     }
 
-    private fun setCategoryOnView(recent: Boolean, category: Boolean) {
+    private fun setCategoryOnView(showRecent: Boolean, showCategory: Boolean) {
         //Update on view
         view.initFromSaleCategory(currentSaleProductCategory!!)
 
-        //Get category and item providers
+        //Get showCategory and item providers
 
         //Get SaleNameWithImage for all items
         var allMode : Boolean = false
@@ -213,14 +214,14 @@ class SaleProductCategoryListPresenter(context: Any,
             categoryProvider = productDao.sortAndFindActiveCategoriesProvider("" , 0)
         }
 
-        if (recent)
+        if (showRecent)
             view.runOnUiThread(Runnable{
-                view.updateToolbar(impl.getString(MessageID.most_recent, context))
+                //view.updateToolbar(impl.getString(MessageID.most_recent, context))
                 view.setListProvider(itemProvider, allMode)
             })
-        if (category)
+        if (showCategory)
             view.runOnUiThread(Runnable{
-                view.updateToolbar(impl.getString(MessageID.categories, context))
+                //view.updateToolbar(impl.getString(MessageID.categories, context))
                 view.setCategoriesListProvider(categoryProvider, allMode)
             })
 
