@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
 
 /**
  * View responsible for Person detail view.
@@ -22,6 +23,8 @@ interface PersonDetailView : UstadView {
      */
     fun setField(index: Int, field: PersonDetailViewField, value: Any?)
 
+    fun doneSettingFields()
+
     /**
      * Set's Class list provider to the person detail page. This is a list within the person's detail
      * depicting every class that person is a member of.
@@ -29,6 +32,8 @@ interface PersonDetailView : UstadView {
      * @param clazzListProvider     The class list umprovider of ClazzWithNumStudents type.
      */
     fun setClazzListProvider(clazzListProvider: DataSource.Factory<Int, ClazzWithNumStudents>)
+
+    fun setRoleAssignmentListProvider(roleAssignmentProvider: DataSource.Factory<Int, EntityRoleWithGroupName>)
 
     /**
      * Handles click call button on the person detail page. Usually fires a call intent on the

@@ -234,44 +234,29 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " (SELECT clazzMemberActive FROM ClazzMember " +
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) AS enrolled" +
-
-//            ",  (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberPersonUid = Person.personUid " +
-//            "   AND ClazzMember.clazzMemberRole = 1) as isClazzStudent " +
-
             " FROM Person " +
             " WHERE Person.active = 1 " +
             "  AND (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberPersonUid = " +
             "       Person.personUid AND ClazzMember.clazzMemberRole = 1) = 0 " +
-//            " AND isClazzStudent = 0 " +
             "ORDER BY Person.firstNames ASC")
     abstract fun findAllEligibleTeachersWithEnrollmentForClassUid(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("SELECT " +
-
             "  Person.* , " +
-
             "  (:clazzUid) AS clazzUid,  " +
-
             " '' AS clazzName, " +
-
             "  (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "    PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
             "    picTimestamp DESC LIMIT 1) AS personPictureUid , " +
-
             "   ClazzMember.clazzMemberAttendancePercentage as attendancePercentage, " +
-
             "  (SELECT clazzMemberActive FROM ClazzMember " +
             "    WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             "    AND clazzMemberPersonUid = Person.personUid) AS enrolled, " +
-
             "   (SELECT clazzMemberRole FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = " +
             "     :clazzUid AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
-
             "FROM Person " +
-
             "LEFT JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = :clazzUid AND " +
             "   ClazzMember.clazzMemberPersonUid = Person.personUid " +
-
             "WHERE personUid IN " +
             "   ( SELECT Person.personUid FROM ClazzMember  LEFT  JOIN Person" +
             "     On ClazzMember.clazzMemberPersonUid = Person.personUid WHERE " +
@@ -282,7 +267,6 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "   ) " +
             "   AND Person.active = 1 " +
             "   AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery " +
-
             "ORDER BY clazzMemberRole ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(clazzUid: Long,
                apl: Float, aph: Float, searchQuery: String)

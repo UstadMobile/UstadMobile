@@ -69,9 +69,11 @@ class ClazzDetailEnrollStudentActivity : UstadBaseActivity(), ClazzDetailEnrollS
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_clazz_detail_enroll_student_toolbar)
+        toolbar!!.setTitle(R.string.enroll_in_class)
 
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
 
         //Get the clazz Uid from the arguments
         if (intent.hasExtra(ARG_CLAZZ_UID)) {

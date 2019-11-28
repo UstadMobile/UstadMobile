@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CustomFieldDao
 import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
@@ -17,6 +18,7 @@ import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
+import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -36,6 +38,8 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     private var mOriginalClazz: Clazz? = null
     private var mUpdatedClazz: Clazz? = null
 
+    private var timezoneSelected: String ?= ""
+
     private var tempClazzLocationUid: Long = 0
 
     private var clazzScheduleLiveData: DataSource.Factory<Int, Schedule>? = null
@@ -48,6 +52,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val clazzDao = repository.clazzDao
+    private val locationDao = repository.locationDao
     private val customFieldDao: CustomFieldDao
     private val customFieldValueDao: CustomFieldValueDao
     private val customFieldValueOptionDao: CustomFieldValueOptionDao
@@ -57,6 +62,8 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     internal var locationUidToPosition: HashMap<Long, Int>? = null
     internal var positionToLocationUid: HashMap<Int, Long>? = null
+    internal var positionToTimeZoneUid: HashMap<Long, String>? = null
+    internal var timeZoneToPositionId: HashMap<String, Int>? = null
 
     init {
         customFieldDao = repository.customFieldDao
@@ -68,6 +75,18 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     fun addToMap(viewId: Int, fieldId: Long) {
         viewIdToCustomFieldUid[viewId] = fieldId
+    }
+
+    fun handleLocationTyped(locationName: String){
+
+        val name = "%$locationName%"
+        val locationDaoDb = UmAppDatabase.getInstance(context).locationDao
+        GlobalScope.launch {
+            val locations = locationDaoDb.findByTitleLikeAsync(name)
+            view.runOnUiThread(Runnable {
+                view.updateLocationDataAdapter(locations)
+            })
+        }
     }
 
     private fun getAllClazzCustomFields() {
@@ -143,8 +162,11 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 //                timeZoneString = TimeZone.getDefault().getID()
                 timeZoneString = ""
 
-                val newLocationUid = repository.locationDao.insertAsync(Location("Temp Location",
-                        "Temp location", timeZoneString))
+                var tempLocation = Location("",
+                        "Temp location", timeZoneString)
+                tempLocation.locationActive = false
+
+                val newLocationUid = locationDao.insertAsync(tempLocation)
 
                 tempClazzLocationUid = newLocationUid!!
 
@@ -159,14 +181,24 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         var thisP = this
         this.currentClazzUid = clazzUid
 
-        //Get person live data and observe
-        val clazzLiveData = clazzDao.findByUidLive(currentClazzUid)
-        //Observe the live data
-        view.runOnUiThread(Runnable {
-            clazzLiveData.observe(thisP, thisP::handleClazzValueChanged)
-        })
+        GlobalScope.launch {
+            val clazzData = clazzDao.findByUidAsync(currentClazzUid)
+            handleClazzValueChanged(clazzData)
 
-
+            //Get location if set
+             if(clazzData!!.clazzLocationUid != 0L){
+                 val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
+                 val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
+                 view.runOnUiThread(Runnable {
+                     val locationTimeZone = location!!.timeZone
+                     if(locationTimeZone != null && !locationTimeZone.isEmpty()){
+                         view.setTimeZonePosition(timeZoneToPositionId!!.get(locationTimeZone)!!)
+//                         view.setTimezoneSelected(timeZoneToPositionId!!.get(locationTimeZone)!!)
+                     }
+                     view.updateLocationSetName(location!!.title!!)
+                 })
+             }
+        }
 
         GlobalScope.launch {
 
@@ -183,12 +215,14 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                 holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
             })
 
-
             //Locations
             locationsLiveData = repository.locationDao.findAllActiveLocationsLive()
             view.runOnUiThread(Runnable {
                 locationsLiveData!!.observe(thisP, thisP::handleAllLocationsChanged)
             })
+
+            //Timezones
+            updateTimezonePreset()
 
             getAllClazzCustomFields()
 
@@ -198,6 +232,158 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         clazzScheduleLiveData = repository.scheduleDao.findAllSchedulesByClazzUid(currentClazzUid)
         updateViewWithProvider()
     }
+
+    
+
+    /**
+     * Common method to convert Array List to String Array
+     *
+     * @param presetAL The array list of string type
+     * @return  String array
+     */
+    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
+        val objectArr = presetAL.toTypedArray()
+        val strArr = arrayOfNulls<String>(objectArr.size)
+        for (j in objectArr.indices) {
+            strArr[j] = objectArr[j]
+        }
+        return strArr
+    }
+
+
+    
+    /**
+     * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
+     * defined within this method and will automatically update the sort options without any
+     * database call.
+     */
+    private fun updateTimezonePreset() {
+        val presetAL = ArrayList<String>()
+
+        positionToTimeZoneUid = HashMap<Long, String>()
+        timeZoneToPositionId = HashMap()
+
+        presetAL.add("GMT-12:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-11:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-10:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-9:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-9:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-8:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-7:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-6:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-5:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-4:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-3:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-3:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-2:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT-1:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT0:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT1:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+
+        presetAL.add("GMT2:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT3:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT3:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT4:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT4:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT5:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT5:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT5.45")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT6:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT6:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT7:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT8:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT8.45")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT9:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT9:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT10:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT10:30")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT11:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT12:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT12.45")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT13:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+        presetAL.add("GMT14:00")
+        positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
+        timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
+
+
+        val sortPresets = arrayListToStringArray(presetAL)
+
+        view.setTimezonePresets(sortPresets,0)
+    }
+
 
 
     /**
@@ -232,6 +418,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         if (mOriginalClazz == null) {
             mOriginalClazz = Clazz()
+            mOriginalClazz!!.isClazzActive = false
         }
 
         if (mOriginalClazz!!.clazzHolidayUMCalendarUid != 0L) {
@@ -266,6 +453,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         if (mOriginalClazz == null) {
             mOriginalClazz = Clazz()
+            mOriginalClazz!!.isClazzActive = false
         }
 
         if (mOriginalClazz!!.clazzLocationUid != 0L) {
@@ -319,6 +507,13 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         if (positionToLocationUid != null && positionToLocationUid!!.containsKey(position)) {
             val locationUid = positionToLocationUid!![position]!!
             mUpdatedClazz!!.clazzLocationUid = locationUid
+        }
+    }
+
+    fun updateTimezone(position: Int) {
+        if (positionToTimeZoneUid != null && positionToTimeZoneUid!!.containsKey(position.toLong())) {
+            timezoneSelected = positionToTimeZoneUid!![position.toLong()]!!
+
         }
     }
 
@@ -398,30 +593,52 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         }
     }
 
+
+    var selectedLocation : Location ? = null
+
+
     /**
      * Handles when the Class Edit screen's done/tick button is pressed. This intent denotes
      * confirmation of all changes done in the screen. Hence, the method will persist the updated
      * Class object, set it to active, and finish(close) the screen.
      *
      */
-    fun handleClickDone() {
+    fun handleClickDone(newLocation: String) {
         mUpdatedClazz!!.isClazzActive = true
-        GlobalScope.launch {
-            val result = repository.locationDao.findByUidAsync(mUpdatedClazz!!.clazzLocationUid)
-            if (result!!.locationUid == tempClazzLocationUid) {
-                result.title = mUpdatedClazz!!.clazzName!! + "'s default location"
-                result.locationActive = (true)
-                repository.locationDao.update(result)
 
-                //TODO: Set Temp location to false
+
+        GlobalScope.launch {
+
+            if(selectedLocation != null ){
+                //Set it
+                mUpdatedClazz!!.clazzLocationUid = selectedLocation!!.locationUid
+
+            }else {
+                val clazzLocation = locationDao.findByUidAsync(mUpdatedClazz!!.clazzLocationUid)
+                if (clazzLocation!!.locationUid == tempClazzLocationUid) {
+                    if(newLocation != null && !newLocation.isEmpty()){
+                        clazzLocation.title = newLocation
+                    }else {
+                        clazzLocation.title = mUpdatedClazz!!.clazzName!! + "'s default location"
+                    }
+                    clazzLocation.locationActive = (true)
+                    locationDao.update(clazzLocation)
+                    selectedLocation = clazzLocation
+                }
+
+
             }
-        }
 
-        GlobalScope.launch {
+            if(selectedLocation != null && timezoneSelected != null && !timezoneSelected!!.isEmpty()){
+                selectedLocation!!.timeZone = timezoneSelected
+                locationDao.update(selectedLocation!!)
+            }
+
             clazzDao.updateClazzAsync(mUpdatedClazz!!, loggedInPersonUid)
             //Close the activity.
             view.finish()
         }
+
     }
 
 

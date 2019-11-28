@@ -166,17 +166,6 @@
                 android:layout_marginLeft="32dp"
                 android:layout_marginRight="8dp" />
 
-            <TextView
-                android:id="@+id/activity_clazz_edit_holiday_calendar_heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/holiday_calendar"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_location_spinner" />
-
 
             <Spinner
                 android:id="@+id/activity_clazz_edit_holiday_calendar_selected"
@@ -258,9 +247,61 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_location_title"
-                >
+                android:visibility="gone">
 
             </Spinner>
+
+            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                android:id="@+id/locationAutoCompleteTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:hint="@string/enter_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_location_title" />
+
+            <TextView
+                android:id="@+id/activity_clazz_edit_timezone_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/select_a_timezone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/locationAutoCompleteTextView" />
+
+            <Spinner
+                android:id="@+id/activity_clazz_edit_timezone_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:paddingTop="20dp"
+                android:spinnerMode="dialog"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_timezone_title">
+
+            </Spinner>
+
+            <TextView
+                android:id="@+id/activity_clazz_edit_holiday_calendar_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/holiday_calendar"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_timezone_spinner" />
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

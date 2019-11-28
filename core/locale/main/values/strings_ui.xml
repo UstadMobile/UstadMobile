@@ -390,5 +390,8 @@
     <string name="login_no_network_no_person">Person not found locally. Please get online for first login.</string>
     <string name="login_no_network_auth_fail">Person authentication failed offline.</string>
 
+    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
+
+    <string name="s_person_group">\'s person group</string>
 
 </resources>

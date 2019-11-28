@@ -148,7 +148,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
                 personPictureDao.update(existingPP)
 
                 //Update person and generate feeds for person
-                personDao.updateAsync(loggedInPerson!!)
+                personDao.updatePersonAsync(loggedInPerson!!, loggedInPersonUid)
 
                 //Update view with path
                 val picturePath = personPictureDao.getAttachmentPath(existingPP)

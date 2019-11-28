@@ -73,6 +73,9 @@ abstract class LocationDao : BaseDao<Location> {
     @Query("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     abstract suspend fun findByTitleAsync(name: String):List<Location>
 
+    @Query("SELECT * FROM Location WHERE title LIKE :name AND locationActive = 1")
+    abstract suspend fun findByTitleLikeAsync(name: String):List<Location>
+
     @Query("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     abstract fun findByTitle(name: String): List<Location>
 

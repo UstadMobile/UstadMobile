@@ -38,6 +38,11 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val clazzMemberDao = repository.clazzMemberDao
+    private val personGroupDao = repository.personGroupDao
+    private val entityRoleDao = repository.entityRoleDao
+    private val roleDao = repository.roleDao
+
+    private var teacherRole: Role? = null
 
     init {
 
@@ -50,6 +55,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             currentRole = arguments!!.get(ARG_NEW_PERSON_TYPE)!!.toInt()
         }
 
+        //Group uid usually used and given in editing Groups from GroupDetail screen.
         if (arguments!!.containsKey(GROUP_UID)) {
             groupUid = arguments!!.get(GROUP_UID)!!.toLong()
         }
@@ -73,8 +79,12 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             personWithEnrollmentUmProvider = repository.clazzMemberDao
                     .findAllStudentsWithEnrollmentForClassUid(currentClazzUid)
         } else if (groupUid != 0L) {
-            //PersonGroup enrollmnet
+            //PersonGroup enrollment - usually called from GroupDetail screen.
             personWithEnrollmentUmProvider = repository.personDao.findAllPeopleWithEnrollmentInGroup(groupUid)
+        }
+
+        GlobalScope.launch {
+            teacherRole = roleDao.findByName(Role.ROLE_NAME_TEACHER)
         }
 
         setProviderToView()
@@ -103,7 +113,11 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
         val personFieldDao = repository.personCustomFieldDao
         val customFieldValueDao = repository.personCustomFieldValueDao
         GlobalScope.launch {
-            val result = personDao.createPersonAsync(newPerson)
+            var loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+            if(loggedInPersonUid != null){
+                loggedInPersonUid = 0
+            }
+            val result = personDao.createPersonAsync(newPerson, loggedInPersonUid)
             //Also create null Custom Field values so it shows up in the Edit screen.
 
             val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
@@ -111,7 +125,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             for (everyCustomField in allCustomFields) {
                 val cfv = PersonCustomFieldValue()
                 cfv.personCustomFieldValuePersonCustomFieldUid = everyCustomField.personCustomFieldUid
-                cfv.personCustomFieldValuePersonUid = result!!
+                cfv.personCustomFieldValuePersonUid = result
                 cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
             }
 
@@ -128,8 +142,8 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
     }
 
     /**
-     * Does nothing. Any common handler goes here. Here we are doing nothing. We don't want to see Student Details
-     * when we are in the enrollment screen.
+     * Does nothing. Any common handler goes here. Here we are doing nothing.
+     * We don't want to see Student Details when we are in the enrollment screen.
      *
      * @param arg   Any argument to the handler.
      */
@@ -159,14 +173,15 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
      */
     private fun handleEnrollChanged(person: PersonWithEnrollment, enrolled: Boolean) {
 
-        if (groupUid != 0L) {
+        if (groupUid != 0L) {   //Usually called from GroupDetail screen.
             //PersonGroup enrollment.
             val groupMemberDao = repository.personGroupMemberDao
 
             GlobalScope.launch {
+
+                //Find existing group member in the group
                 val existingGroupMember = groupMemberDao.findMemberByGroupAndPersonAsync(groupUid,
                         person.personUid)
-
 
                 if (enrolled) {
                     if (existingGroupMember == null) {
@@ -199,21 +214,61 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
         }
 
         GlobalScope.launch {
-            val existingClazzMember = clazzMemberDao.findByPersonUidAndClazzUidAsync(person.personUid,
-                    currentClazzUid)
+            //Find existing clazz Member (if it exists)
+            val existingClazzMember =
+                    clazzMemberDao.findByPersonUidAndClazzUidAsync(person.personUid,
+                            currentClazzUid)
+
+            //will be true if current Role is teacher, else false.
+            var isTeacher: Boolean = currentRole == ClazzMember.ROLE_TEACHER
+
+            //Get person's individual person group
+            // Assumption: Person will always have its own group. We can create it if it
+            // doesn't exist
+            var personGroup = personGroupDao.findPersonIndividualGroup(person.personUid)
+            if(personGroup == null){
+                println(">>PERSON's GROUP NOT CREATED> ARE YOU SURE ITS NOT CREATED?>")
+                personGroup = PersonGroup()
+                personGroup.groupName = person.fullName() + "'s Individual group"
+                personGroup.groupActive = true
+                personGroup.groupPersonUid = person.personUid
+                personGroup.groupUid = personGroupDao.insert(personGroup)
+            }
+
+            //Find existing Role Assignment
+            var personClazzTeacherAssignments: List<EntityRole>
+            var personClazzTeacherAssignment: EntityRole? = null
+            if(teacherRole != null) {
+                personClazzTeacherAssignments =
+                        entityRoleDao.findByEntitiyAndPersonGroupAndRole(Clazz.TABLE_ID,
+                            currentClazzUid, personGroup.groupUid, teacherRole!!.roleUid)
+                if(!personClazzTeacherAssignments.isEmpty()){
+                    personClazzTeacherAssignment = personClazzTeacherAssignments.get(0)
+                }else{
+                    //Create new assignment
+                    if(isTeacher) {
+                        personClazzTeacherAssignment = EntityRole(Clazz.TABLE_ID, currentClazzUid,
+                                personGroup.groupUid, teacherRole!!.roleUid)
+                        personClazzTeacherAssignment.erActive = false
+                        entityRoleDao.insert(personClazzTeacherAssignment)
+                    }
+                }
+            }
+
 
             if (enrolled) {
                 if (existingClazzMember == null) {
                     //Create the ClazzMember
                     val newClazzMember = ClazzMember()
                     newClazzMember.clazzMemberClazzUid = currentClazzUid
-                    if (currentRole == ClazzMember.ROLE_TEACHER) {
+                    if (isTeacher) {
                         newClazzMember.clazzMemberRole = (ClazzMember.ROLE_TEACHER)
                     } else {
                         newClazzMember.clazzMemberRole = (ClazzMember.ROLE_STUDENT)
                     }
                     newClazzMember.clazzMemberPersonUid = person.personUid
-                    newClazzMember.clazzMemberDateJoined = UMCalendarUtil.getDateInMilliPlusDays(0)
+                    newClazzMember.clazzMemberDateJoined =
+                            UMCalendarUtil.getDateInMilliPlusDays(0)
                     newClazzMember.clazzMemberActive = true
                     val result = clazzMemberDao.insertAsync(newClazzMember)
                     newClazzMember.clazzMemberUid = result
@@ -226,11 +281,25 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
                     //else let it be
                 }
 
+                //TODOne: Also assign Teacher/Student role to the person in its person group scoped
+                // to this class.
+
+                if (isTeacher && personClazzTeacherAssignment != null) {
+                    personClazzTeacherAssignment.erActive = true
+                    entityRoleDao.insert(personClazzTeacherAssignment)
+                }
+
             } else {
                 //if already enrolled, disable ClazzMember.
                 if (existingClazzMember != null) {
                     existingClazzMember.clazzMemberActive = false
                     clazzMemberDao.update(existingClazzMember)
+                }
+
+                //TODOne: If role assignment exists then deactivate it.
+                if (isTeacher && personClazzTeacherAssignment != null) {
+                    personClazzTeacherAssignment.erActive = false
+                    entityRoleDao.insert(personClazzTeacherAssignment)
                 }
             }
         }

@@ -61,6 +61,65 @@ open class Person() {
     @LastChangedBy
     var personLastChangedBy: Int = 0
 
+    fun fullName():String{
+        var f = ""
+        var l = ""
+        if(firstNames != null){
+            f = firstNames as String
+        }
+        if(lastName != null){
+            l = lastName as String
+        }
+
+        return f + " " + l
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Person
+
+        if (personUid != other.personUid) return false
+        if (username != other.username) return false
+        if (firstNames != other.firstNames) return false
+        if (lastName != other.lastName) return false
+        if (emailAddr != other.emailAddr) return false
+        if (phoneNum != other.phoneNum) return false
+        if (gender != other.gender) return false
+        if (active != other.active) return false
+        if (admin != other.admin) return false
+        if (personNotes != other.personNotes) return false
+        if (fatherName != other.fatherName) return false
+        if (fatherNumber != other.fatherNumber) return false
+        if (motherName != other.motherName) return false
+        if (motherNum != other.motherNum) return false
+        if (dateOfBirth != other.dateOfBirth) return false
+        if (personAddress != other.personAddress) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = personUid.hashCode()
+        result = 31 * result + (username?.hashCode() ?: 0)
+        result = 31 * result + (firstNames?.hashCode() ?: 0)
+        result = 31 * result + (lastName?.hashCode() ?: 0)
+        result = 31 * result + (emailAddr?.hashCode() ?: 0)
+        result = 31 * result + (phoneNum?.hashCode() ?: 0)
+        result = 31 * result + gender
+        result = 31 * result + active.hashCode()
+        result = 31 * result + admin.hashCode()
+        result = 31 * result + (personNotes?.hashCode() ?: 0)
+        result = 31 * result + (fatherName?.hashCode() ?: 0)
+        result = 31 * result + (fatherNumber?.hashCode() ?: 0)
+        result = 31 * result + (motherName?.hashCode() ?: 0)
+        result = 31 * result + (motherNum?.hashCode() ?: 0)
+        result = 31 * result + dateOfBirth.hashCode()
+        result = 31 * result + (personAddress?.hashCode() ?: 0)
+        return result
+    }
+
     constructor(username: String, firstNames: String, lastName: String) : this() {
         this.username = username
         this.firstNames = firstNames
@@ -90,4 +149,6 @@ open class Person() {
 
         const val GENDER_OTHER = 4
     }
+
+
 }

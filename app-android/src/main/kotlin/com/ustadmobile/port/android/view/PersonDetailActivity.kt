@@ -31,6 +31,7 @@ import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonDetailPresenter
+import com.ustadmobile.core.controller.RoleAssignmentListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -39,8 +40,10 @@ import com.ustadmobile.core.view.PersonDetailViewField
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_HEIGHT
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_QUALITY
+import com.ustadmobile.core.view.RoleAssignmentListView
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_DATE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_DROPDOWN
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_FIELD
@@ -65,6 +68,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     private var mLinearLayout: LinearLayout? = null
 
     private var mRecyclerView: RecyclerView? = null
+    private var mRecyclerView2: RecyclerView? = null
 
     private var mPresenter: PersonDetailPresenter? = null
     internal var personEditImage: ImageView ? = null
@@ -84,30 +88,6 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         toolbar!!.title = name
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val i = item.itemId
-        if (i == android.R.id.home) {
-            onBackPressed()
-            return true
-
-        } else if (i == R.id.update_username_password) {
-            mPresenter!!.goToUpdateUsernamePassword()
-
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    /**
-     * Creates the options on the toolbar - specifically the Done tick menu item
-     * @param menu  The menu options
-     * @return  true. always.
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.menu_person_detail, menu)
-        mOptionsMenu = menu
-        return true
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,7 +122,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        fab!!.setOnClickListener { v -> mPresenter!!.handleClickEdit() }
+        fab!!.setOnClickListener { mPresenter!!.handleClickEdit() }
 
         val callParentTextView = findViewById<TextView>(R.id.activity_person_detail_action_call_parent_text)
         val textParentTextView = findViewById<TextView>(R.id.activity_person_detail_action_text_parent_text)
@@ -151,16 +131,16 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         val enrollInClassTextView = findViewById<TextView>(R.id.activity_person_detail_action_enroll_in_class_text)
         val enrollInClassImageView = findViewById<ImageView>(R.id.activity_person_detail_action_enroll_in_class_icon)
 
-        callParentImageView.setOnClickListener { v -> mPresenter!!.handleClickCallParent() }
-        callParentTextView.setOnClickListener { v -> mPresenter!!.handleClickCallParent() }
+        callParentImageView.setOnClickListener { mPresenter!!.handleClickCallParent() }
+        callParentTextView.setOnClickListener { mPresenter!!.handleClickCallParent() }
 
-        textParentImageView.setOnClickListener { v -> mPresenter!!.handleClickTextParent() }
-        textParentTextView.setOnClickListener { v -> mPresenter!!.handleClickTextParent() }
+        textParentImageView.setOnClickListener { mPresenter!!.handleClickTextParent() }
+        textParentTextView.setOnClickListener { mPresenter!!.handleClickTextParent() }
 
-        enrollInClassImageView.setOnClickListener { v -> mPresenter!!.handleClickEnrollInClass() }
-        enrollInClassTextView.setOnClickListener { v -> mPresenter!!.handleClickEnrollInClass() }
+        enrollInClassImageView.setOnClickListener { mPresenter!!.handleClickEnrollInClass() }
+        enrollInClassTextView.setOnClickListener { mPresenter!!.handleClickEnrollInClass() }
 
-        recordDropoutLL!!.setOnClickListener { v -> mPresenter!!.handleClickRecordDropout() }
+        recordDropoutLL!!.setOnClickListener { mPresenter!!.handleClickRecordDropout() }
 
     }
 
@@ -212,7 +192,8 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
         when (requestCode) {
-            CAMERA_PERMISSION_REQUEST -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            CAMERA_PERMISSION_REQUEST -> if (grantResults.size > 0 && grantResults[0] ==
+                    PackageManager.PERMISSION_GRANTED) {
                 startCameraIntent()
             }
         }
@@ -314,6 +295,17 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         }
     }
 
+    override fun doneSettingFields() {
+        //Add the final divider
+        val divider2 = View(this)
+        divider2.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                2
+        )
+        divider2.setBackgroundColor(Color.parseColor("#B3B3B3"))
+        //mLinearLayout!!.addView(divider2)
+    }
+
     override fun setField(index: Int, field: PersonDetailViewField, value: Any?) {
         var value = value
         if (value == null) {
@@ -324,7 +316,6 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         if (field.messageLabel != 0) {
             label = impl.getString(field.messageLabel, this)
         }
-
 
         when (field.fieldType) {
             FIELD_TYPE_HEADER -> {
@@ -363,6 +354,22 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                     //Generate the live data and set it
                     mPresenter!!.generateAssignedClazzesLiveData()
                 }
+
+                if(field.messageLabel == MessageID.role_assignments) {
+                    //Add a recyclerview of Role assignments
+                    mRecyclerView2 = RecyclerView(this)
+
+                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+                    mRecyclerView2!!.setLayoutManager(mRecyclerLayoutManager)
+
+                    //Add the layout
+                    mLinearLayout!!.addView(mRecyclerView2)
+
+                    //Generate the live data and set it
+                    mPresenter!!.generateAssignedRoleAssignments()
+                }
+
+
             }
             FIELD_TYPE_TEXT, FIELD_TYPE_FIELD -> {
 
@@ -528,6 +535,23 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         mRecyclerView!!.setAdapter(recyclerAdapter)
     }
 
+    override fun setRoleAssignmentListProvider(factory: DataSource.Factory<Int, EntityRoleWithGroupName>) {
+
+        val recyclerAdapter =
+                RoleAssignmentListRecyclerAdapter(DIFF_CALLBACK_ENTITY_ROLE_WITH_GROUPNAME,
+                        null, mPresenter!!, this, applicationContext)
+        // A warning is expected
+        val data = LivePagedListBuilder(factory, 20).build()
+        //Observe the data:
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP,
+                    Observer<PagedList<EntityRoleWithGroupName>> { recyclerAdapter.submitList(it) })
+        }
+
+        mRecyclerView2!!.setAdapter(recyclerAdapter)
+    }
+
     override fun handleClickCall(number: String) {
         startActivity(Intent(Intent.ACTION_DIAL,
                 Uri.parse("tel:$number")))
@@ -638,6 +662,23 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
             override fun areContentsTheSame(oldItem: ClazzWithNumStudents,
                                             newItem: ClazzWithNumStudents): Boolean {
                 return oldItem.clazzUid == newItem.clazzUid
+            }
+        }
+
+        /**
+         * The DIFF CALLBACK
+         */
+        val DIFF_CALLBACK_ENTITY_ROLE_WITH_GROUPNAME
+                : DiffUtil.ItemCallback<EntityRoleWithGroupName> = object
+            : DiffUtil.ItemCallback<EntityRoleWithGroupName>() {
+            override fun areItemsTheSame(oldItem: EntityRoleWithGroupName,
+                                         newItem: EntityRoleWithGroupName): Boolean {
+                return oldItem.erUid == newItem.erUid
+            }
+
+            override fun areContentsTheSame(oldItem: EntityRoleWithGroupName,
+                                            newItem: EntityRoleWithGroupName): Boolean {
+                return oldItem.erUid == newItem.erUid
             }
         }
     }

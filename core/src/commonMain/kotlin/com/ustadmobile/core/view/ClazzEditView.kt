@@ -5,6 +5,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Schedule
 
 /**
@@ -31,7 +32,8 @@ interface ClazzEditView : UstadView {
 
     fun setHolidayPresets(presets: Array<String>, position: Int)
     fun setLocationPresets(presets: Array<String>, position: Int)
-
+    fun setTimezonePresets(presets: Array<String?>, position: Int)
+    fun setTimeZonePosition(position: Int)
     /**
      * Handles holiday selected
      * @param position    The id/position of the DateRange selected from the drop-down.
@@ -40,10 +42,15 @@ interface ClazzEditView : UstadView {
 
     fun setLocationSelected(position: Int)
 
+    fun setTimezoneSelected(position: Int)
 
     fun addCustomFieldText(label: CustomField, value: String)
     fun addCustomFieldDropdown(label: CustomField, options: Array<String>, selected: Int)
     fun clearAllCustomFields()
+
+    fun updateLocationDataAdapter(locations: List<Location>)
+
+    fun updateLocationSetName(locationName : String)
 
     companion object {
 

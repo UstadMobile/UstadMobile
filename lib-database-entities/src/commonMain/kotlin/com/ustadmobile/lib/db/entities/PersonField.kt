@@ -59,7 +59,8 @@ open class PersonField {
         val FIELD_TYPE_DROPDOWN = 4
         val FIELD_TYPE_PHONE_NUMBER = 5
         val FIELD_TYPE_DATE = 6
-
+        val FIELD_TYPE_PASSWORD = 7
+        val FIELD_TYPE_USERNAME = 8
 
 
         const val FIELD_HEADING_PROFILE = 1
@@ -76,5 +77,9 @@ open class PersonField {
         const val FIELD_HEADING_MOTHERS_NUMBER = 12
         const val FIELD_HEADING_MOTHER = 13
         const val FIELD_HEADING_CLASSES = 14
+        const val FIELD_HEADING_USERNAME = 15
+        const val FIELD_HEADING_PASSWORD = 16
+        const val FIELD_HEADING_CONFIRM_PASSWORD = 17
+        const val FIELD_HEADING_ROLE_ASSIGNMENTS = 18
     }
 }
