@@ -13,6 +13,8 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
+import com.ustadmobile.sharedse.network.fetch.FetchMpp
+import com.ustadmobile.sharedse.network.fetch.FetchMppJvmImpl
 import com.ustadmobile.sharedse.util.ReverseProxyDispatcher
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -20,6 +22,7 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
@@ -98,6 +101,8 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
+    private lateinit var httpFetcherImpl: FetchMpp
+
 
     @Before
     @Throws(IOException::class)
@@ -170,6 +175,7 @@ class DownloadJobItemRunnerTest {
         val peerDb = UmAppDatabase.getInstance(context, "peerdb")
         peerDb.clearAllTables()
         peerServer = EmbeddedHTTPD(0, context, peerDb)
+        httpFetcherImpl = FetchMppJvmImpl(OkHttpClient())
         mockedEntryStatusTask = mock<BleEntryStatusTask> {}
         mockedNetworkManager = mock<NetworkManagerBleCommon> {
             on { sendMessage(any(), any(), any(), any()) } doAnswer {invocation ->
@@ -220,6 +226,8 @@ class DownloadJobItemRunnerTest {
                 }
                 Unit
             }
+
+            on { httpFetcher }.thenReturn(httpFetcherImpl)
 
             onBlocking { openDownloadJobItemManager(downloadJob.djUid) }.thenReturn(downloadJobItemManager)
         }

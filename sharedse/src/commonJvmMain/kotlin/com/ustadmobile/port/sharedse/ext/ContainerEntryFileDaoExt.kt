@@ -23,7 +23,17 @@ fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String): C
         val md5SumVal  = entryFile?.cefMd5
         val entryPathVal = entryFile?.cefPath
         if(entryFile != null && md5SumVal != null && entryPathVal != null) {
-            val md5Bytes = md5SumVal.hexStringToByteArray()
+            var md5Bytes = md5SumVal.hexStringToByteArray()
+
+            //temporary workaround to handle incorrectly recorded values
+            // previous versions of ContainerManager would not pad 0s resulting in md5sum strings
+            // that are incorrect and slightly shorter
+            if(md5Bytes.size != 16) {
+                val resizedArr = ByteArray(16)
+                System.arraycopy(md5Bytes, 0, resizedArr, 0, md5Bytes.size)
+                md5Bytes = resizedArr
+            }
+
             concatenatedMd5s += md5Bytes
             ConcatenatedPartSource( {FileInputStream(entryPathVal) },  entryFile.ceCompressedSize,
                     entryFile.ceTotalSize, md5Bytes)

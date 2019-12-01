@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOC
 import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.lib.util.sumByLong
 import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
@@ -39,6 +40,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
+import kotlin.jvm.Volatile
 import kotlin.math.max
 import kotlin.math.min
 
@@ -119,47 +121,53 @@ class DownloadJobItemRunner
 
     val startDownloadFnJobRef = atomic<Job?>(null)
 
-    private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
+//    private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
 
-    private val currentFetchRequests = copyOnWriteListOf<RequestMpp>()
-
-    private val currentFetchDownloads = mutableMapOf<Int, DownloadMpp>()
-
-    private val fetchStartTimes = mutableMapOf<Int, Long>()
-
-    private var numCompletedOrFailed = 0
+//    private val currentFetchRequests = copyOnWriteListOf<RequestMpp>()
+//
+//    private val currentFetchDownloads = mutableMapOf<Int, DownloadMpp>()
+//
+//    private val fetchStartTimes = mutableMapOf<Int, Long>()
+//
+//    private var numCompletedOrFailed = 0
 
     private val currentDownloadAttempt = atomic(null as CompletableDeferred<Int>?)
+
+    private var existingEntriesBytesDownloaded = 0L
+
+    @Volatile
+    private var currentFetchRequestId: Int = -1
 
     private val fetchListener = object: AbstractFetchListenerMpp() {
 
         override fun onAdded(download: DownloadMpp) {
-            Napier.d({"Download added #${download.id} ${download.url}"})
-            currentFetchDownloads[download.id] = download
-        }
-
-        override fun onStarted(download: DownloadMpp, downloadBlocks: List<DownloadBlockMpp>, totalBlocks: Int) {
-            super.onStarted(download, downloadBlocks, totalBlocks)
-            fetchStartTimes[download.id] = getSystemTimeInMillis()
+            if(download.id == currentFetchRequestId) {
+                Napier.d({"Download added #${download.id} ${download.url}"})
+            }
         }
 
         override fun onCompleted(download: DownloadMpp) {
-            val downloadDuration = getSystemTimeInMillis() - (fetchStartTimes[download.id] ?: 0L)
-            val speedInKBps = (download.total * 1000 * 100) / (downloadDuration * 1024) //x100 for 2 decimal points
-            Napier.d({"Download completed #${download.id} ${download.url} Speed=${speedInKBps/100f}KB/s"})
-            numCompletedOrFailed++
-            checkFetchDownloadsCompleted()
+            if(download.id == currentFetchRequestId) {
+                Napier.d({"Download completed #${download.id} ${download.url}"})
+                currentDownloadAttempt.value?.complete(JobStatus.COMPLETE)
+            }
         }
 
         override fun onError(download: DownloadMpp, error: Error, throwable: Throwable?) {
-            Napier.d({"Download error #${download.id} ${download.url}"}, throwable)
-            numCompletedOrFailed++
-            checkFetchDownloadsCompleted()
+            if(download.id == currentFetchRequestId) {
+                Napier.d({"Download error #${download.id} ${download.url}"}, throwable)
+                currentDownloadAttempt.value?.completeExceptionally(throwable ?: IOException("$error"))
+            }
         }
 
         override fun onProgress(download: DownloadMpp, etaInMilliSeconds: Long, downloadedBytesPerSecond: Long) {
-            Napier.d({"Download progress #${download.id} ${download.url} - ${download.downloaded}bytes"})
-            currentFetchDownloads[download.id] = download
+            if(download.id == currentFetchRequestId) {
+                Napier.d({"Download progress #${download.id} ${download.url} - ${download.downloaded}bytes"})
+                GlobalScope.launch {
+                    downloadJobItemManager.updateProgress(downloadItem.djiUid, download.downloaded,
+                            downloadItem.downloadLength)
+                }
+            }
         }
     }
 
@@ -322,37 +330,17 @@ class DownloadJobItemRunner
                 "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
         var attemptsRemaining = 3
 
-        val container = appDb.containerDao
-                .findByUid(downloadItem.djiContainerUid)
+        val container = appDb.containerDao.findByUid(downloadItem.djiContainerUid)
 
         //Note: the Container must be put in the database by the preparer. Therefor it's better
         // to use the DAO object and avoid any potential to make additional http requests
         val containerManager = ContainerManager(container!!, appDb, appDb, destinationDir!!)
 
         val currentTimeStamp = getSystemTimeInMillis()
-        val minLastSeen = currentTimeStamp - (60 * 1000)
-        val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
         var downloadStartTime = 0L
 
-        var numEntriesToDownload = -1
-
-        val progressUpdater = async {
-            while (isActive) {
-                delay(1000)
-//                var totalInProgress = 0L
-//                for (i in 0 until numConcurrentEntryDownloads) {
-//                    totalInProgress += inProgressDownloadCounters[i].value
-//                }
-                //val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
-                val downloadSoFar = currentFetchDownloads.values.fold(0L,
-                        { total, download -> total + download.downloaded})
-                downloadJobItemManager.updateProgress(downloadItem.djiUid, downloadSoFar,
-                        downloadItem.downloadLength)
-            }
-        }
-
+        var downloadAttemptStatus = -1
         for (attemptNum in attemptsRemaining downTo 1) {
-            numEntriesToDownload = -1
             numFailures.value = 0
             currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
                     downloadItem.djiContainerUid)
@@ -423,132 +411,43 @@ class DownloadJobItemRunner
                     "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
             entriesDownloaded.value = 0
 
-            val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
-            numEntriesToDownload = entriesToDownload.size
-            history.startTime = getSystemTimeInMillis()
+            val entriesToDownload = containerManager.linkExistingItems(containerEntryList).sortedBy { it.cefMd5 }
+            existingEntriesBytesDownloaded = containerManager.allEntries
+                    .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
 
-            val fetchRequests = entriesToDownload.map {
-                RequestMpp("$downloadEndpoint$CONTAINER_ENTRY_FILE_PATH${it.ceCefUid}",
-                        "$destinationDir/${it.cefMd5}")
-            }
-            currentFetchRequests.clear()
-            val currentDownloadAttemptVal = CompletableDeferred<Int>()
+            val entriesListStr = entriesToDownload.joinToString(separator = ";") { it.ceCefUid.toString() }
+            val fetchRequest = RequestMpp("$endpointUrl/ConcatenatedContainerEntries/$entriesListStr",
+                    "$destinationDir/${downloadItem.djiUid}.tmp")
+
+            history.startTime = getSystemTimeInMillis()
+            val currentDownloadAttemptVal  = CompletableDeferred<Int>()
             currentDownloadAttempt.value = currentDownloadAttemptVal
 
-            networkManager.httpFetcher.enqueue(fetchRequests, object: FuncMpp<List<Pair<RequestMpp, Error>>> {
-                override fun call(result: List<Pair<RequestMpp, Error>>) {
-                    currentFetchRequests.addAll(result.map {it.first} )
+            networkManager.httpFetcher.enqueue(fetchRequest, object: FuncMpp<RequestMpp> {
+                override fun call(result: RequestMpp) {
+                    currentFetchRequestId = result.id
+                }
+            },
+            object: FuncMpp<Error> {
+                override fun call(result: Error) {
+                    currentDownloadAttemptVal.completeExceptionally(IOException(result.toString()))
                 }
             })
 
-            val result = currentDownloadAttemptVal.await()
-//            if(result == JobStatus.COMPLETE) {
-//
-//            }
 
-
-
-
-//            try {
-//                appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
-//
-//                val containerEntryList = currentHttpClient.get<List<ContainerEntryWithMd5>>(
-//                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
-//                entriesDownloaded.value = 0
-//
-//                val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
-//                numEntriesToDownload = entriesToDownload.size
-//                history.startTime = getSystemTimeInMillis()
-//
-//                withContext(coroutineContext) {
-//                    val producer = produce {
-//                        entriesToDownload.forEach { send(it) }
-//                    }
-//
-//                    repeat(numConcurrentEntryDownloads) { procNum ->
-//                        launch {
-//                            for (entry in producer) {
-//                                val destFile = FileSe(FileSe(destinationDir!!),
-//                                        entry.ceCefUid.toString() + ".tmp")
-//                                val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
-//                                UMLog.l(UMLog.VERBOSE, 100, "${mkLogPrefix()}: Downloader $procNum $downloadUrl -> $destFile")
-//                                val resumableDownload = ResumableDownload2(downloadUrl,
-//                                        destFile.getAbsolutePath(), httpClient = currentHttpClient,
-//                                        coroutineDispatcher = ioCoroutineDispatcher)
-//                                resumableDownload.onDownloadProgress = { inProgressDownloadCounters[procNum].value = it }
-//                                if (resumableDownload.download()) {
-//                                    entriesDownloaded.incrementAndGet()
-//                                    inProgressDownloadCounters[procNum].value = 0L
-//                                    val completedDl = destFile.length()
-//                                    completedEntriesBytesDownloaded.addAndGet(completedDl)
-//
-//
-//                                    var `is`: FileInputStreamSe? = null
-//                                    var compression = COMPRESSION_NONE
-//                                    var length = 0L
-//                                    try {
-//                                        val sign = ByteArray(2)
-//                                        `is` = FileInputStreamSe(destFile)
-//                                        val magic = `is`.read(sign)
-//                                        compression = if (magic == 2 && sign[0] == 0x1f.toByte() && sign[1] == 0x8b.toByte()) {
-//                                            COMPRESSION_GZIP
-//                                        } else {
-//                                            COMPRESSION_NONE
-//                                        }
-//
-//                                        length = resumableDownload.headers?.get("x-content-length-uncompressed")?.get(0)?.toLong()
-//                                                ?: destFile.length()
-//
-//                                    } catch (io: IOException) {
-//
-//                                    } finally {
-//                                        `is`?.close()
-//                                    }
-//
-//
-//                                    containerManager.addEntries(
-//                                            ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
-//                                                    dontUpdateTotals = true),
-//                                            DownloadedEntrySource(entry.cePath!!, destFile, length,
-//                                                    Base64Coder.decodeToByteArray(entry.cefMd5!!),
-//                                                    destFile.getAbsolutePath(), compression))
-//                                } else {
-//                                    numFailures.incrementAndGet()
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//
-//            } catch (e: Exception) {
-//                UMLog.l(UMLog.ERROR, 699,
-//                        "${mkLogPrefix()} Failed to download a file from $endpointUrl", e)
-//            }
-
-
-
-            //val numFails = numFailures.value
-            //recordHistoryFinished(history, numFails == 0)
-            if(currentFetchRequestsCompleted()) {
-                break
-            }else {
+            try {
+                downloadAttemptStatus = currentDownloadAttemptVal.await()
+                if(downloadAttemptStatus == JobStatus.COMPLETE) {
+                    break
+                }else {
+                    delay(retryDelay)
+                }
+            }catch(e: Exception) {
                 delay(retryDelay)
             }
-
-//            if (numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload) {
-//                break
-//            } else {
-//                //wait before retry
-//                delay(retryDelay)
-//            }
         }
 
-
-//        val downloadCompleted =  currentFetchRequests.size == currentFetchDownloads.size
-//                && currentFetchDownloads.all { it.value.status == Status.COMPLETED }//numEntriesToDownload != -1 && entriesDownloaded.value == numEntriesToDownload
-
-        val downloadCompleted = currentFetchRequestsCompleted()
-        if (downloadCompleted) {
+        if (downloadAttemptStatus == JobStatus.COMPLETE) {
             val downloadTime = getSystemTimeInMillis() - downloadStartTime
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
 
@@ -561,24 +460,9 @@ class DownloadJobItemRunner
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
         }
 
-        progressUpdater.cancel()
-        stop(if (downloadCompleted) JobStatus.COMPLETE else JobStatus.FAILED)
+        stop(downloadAttemptStatus)
     }
 
-    private fun currentFetchRequestsCompleted() = currentFetchRequests.size == currentFetchDownloads.size
-            && currentFetchDownloads.values.all { it.status == Status.COMPLETED }
-
-    fun checkFetchDownloadsCompleted() {
-        if(numCompletedOrFailed == currentFetchRequests.size) {
-            val newStatus = if(currentFetchDownloads.all { it.value.status == Status.COMPLETED }) {
-                JobStatus.COMPLETE
-            }else {
-                JobStatus.FAILED
-            }
-
-            currentDownloadAttempt.value?.complete(newStatus)
-        }
-    }
 
     private fun recordHistoryFinished(history: DownloadJobItemHistory, successful: Boolean) {
         history.endTime = getSystemTimeInMillis()

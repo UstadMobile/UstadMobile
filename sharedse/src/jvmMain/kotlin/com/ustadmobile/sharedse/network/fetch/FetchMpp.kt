@@ -7,6 +7,9 @@ actual interface FetchMpp {
 
     actual fun enqueue(requests: List<RequestMpp>, func: FuncMpp<List<Pair<RequestMpp, Error>>>?): FetchMpp
 
+
+
+
     actual fun addListener(listener: FetchListenerMpp): FetchMpp
 
     actual fun removeListener(listener: FetchListenerMpp): FetchMpp

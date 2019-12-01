@@ -72,6 +72,8 @@ class MountedZipHandler : FileResponder(), RouterNanoHTTPD.UriResponder {
         override val name: String?
             get() = src.name
 
+        override val eTag: String?
+            get() = null
     }
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {

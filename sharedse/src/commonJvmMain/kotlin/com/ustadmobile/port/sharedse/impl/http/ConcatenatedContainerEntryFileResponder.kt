@@ -12,13 +12,15 @@ class ConcatenatingFileSource(val response: ConcatenatedHttpResponse): FileRespo
     override val length: Long
         get() = response.contentLength
     override val lastModifiedTime: Long
-        get() = 0L
+        get() = -1L
     override val inputStream: InputStream
         get() = response.dataSrc!!
     override val name: String?
         get() = response.etag
     override val exists: Boolean
         get() = true
+    override val eTag: String?
+        get() = response.etag
 }
 
 class ConcatenatedContainerEntryFileResponder: FileResponder(), RouterNanoHTTPD.UriResponder {

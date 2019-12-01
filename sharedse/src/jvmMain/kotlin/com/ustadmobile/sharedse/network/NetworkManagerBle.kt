@@ -7,7 +7,9 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.fetch.FetchMpp
+import com.ustadmobile.sharedse.network.fetch.FetchMppJvmImpl
 import kotlinx.coroutines.CoroutineDispatcher
+import okhttp3.OkHttpClient
 
 actual open class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                                                        umAppDatabase: UmAppDatabase) : NetworkManagerBleCommon(umAppDatabase) {
@@ -28,8 +30,9 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
     override val localHttpPort: Int
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
-    actual override val httpFetcher: FetchMpp
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    actual override val httpFetcher: FetchMpp by lazy {
+        FetchMppJvmImpl(OkHttpClient())
+    }
 
     override val umAppDatabaseRepo by lazy {
         val activeAccount = UmAccountManager.getActiveAccount(context)

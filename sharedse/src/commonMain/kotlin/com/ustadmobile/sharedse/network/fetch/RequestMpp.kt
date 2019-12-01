@@ -6,4 +6,6 @@ expect open class RequestMpp(url: String, file: String) {
 
     val file: String
 
+    val id: Int
+
 }

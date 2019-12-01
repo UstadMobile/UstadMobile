@@ -109,6 +109,10 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
     abstract suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
 
+    abstract suspend fun addEntries(addOptions: AddEntryOptions?,
+                                           newPathsToMd5Map: Map<String, ByteArray>,
+                                           provider: suspend () -> EntrySource?)
+
     abstract fun exportContainer(zipFile: String,progressListener: ExportProgressListener?)
 
     suspend fun addEntries(vararg entries: EntrySource) = addEntries(null, *entries)
