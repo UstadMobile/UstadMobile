@@ -354,8 +354,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
                 val helperParamList = funSpecBuilt.parameters.toMutableList()
                 if(isDataSourceFactory) {
-                    helperParamList += ParameterSpec.builder("_offset", INT).build()
-                    helperParamList += ParameterSpec.builder("_limit", INT).build()
+                    helperParamList += ParameterSpec.builder("offset", INT).build()
+                    helperParamList += ParameterSpec.builder("limit", INT).build()
                 }
                 helperParamList += ParameterSpec.builder("clientId", INT).build()
 
