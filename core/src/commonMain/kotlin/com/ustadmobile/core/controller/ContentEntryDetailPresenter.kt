@@ -181,7 +181,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (!isDownloadComplete) {
             GlobalScope.launch {
-                val container = appRepo.containerDao.getMostRecentContainerForContentEntry(entryUuid)
+                val container = appRepo.containerDao.getMostRecentContainerForContentEntryAsync(entryUuid)
                 if (container != null) {
                     containerUid = container.containerUid
                     val containerUidList = listOf(containerUid!!)
