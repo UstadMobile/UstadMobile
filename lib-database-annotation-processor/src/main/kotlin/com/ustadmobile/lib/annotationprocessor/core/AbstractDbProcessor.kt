@@ -232,7 +232,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
     newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
 
     if(addOffsetAndLimitParam) {
-        newSql += " LIMIT :_limit OFFSET :_offset"
+        newSql += " LIMIT :limit OFFSET :offset"
     }
 
     return newSql
@@ -1292,8 +1292,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         val queryVarsList = daoMethod.parameters.toMutableList()
         if(isDataSourceFactory){
-            queryVarsList += ParameterSpec.builder("_offset", INT).build()
-            queryVarsList += ParameterSpec.builder("_limit", INT).build()
+            queryVarsList += ParameterSpec.builder("offset", INT).build()
+            queryVarsList += ParameterSpec.builder("limit", INT).build()
         }
 
         val componentEntityType = resolveEntityFromResultType(resultType)
