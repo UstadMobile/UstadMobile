@@ -136,7 +136,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-            AND !ContentEntry.ceInactive
+            AND NOT ContentEntry.ceInactive
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))""")
