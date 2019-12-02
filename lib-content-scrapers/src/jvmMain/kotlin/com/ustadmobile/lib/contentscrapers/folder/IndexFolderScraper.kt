@@ -13,7 +13,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.PUBLIC_DOMAIN
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLIC_DOMAIN
 import com.ustadmobile.lib.db.entities.Language
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -68,7 +68,7 @@ class IndexFolderScraper {
 
 
         val parentFolder = ContentScraperUtil.createOrUpdateContentEntry(name, name,
-                filePrefix + destinationDir.path, name, PUBLIC_DOMAIN, englishLang!!.langUid, null,
+                filePrefix + destinationDir.path, name, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, 0, contentEntryDao!!)
 
@@ -95,7 +95,7 @@ class IndexFolderScraper {
                 val name = folder.name
 
                 val childEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
-                        filePrefix + folder.path, name, PUBLIC_DOMAIN, englishLang!!.langUid, null,
+                        filePrefix + folder.path, name, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null,
                         EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, 0, contentEntryDao!!)
 
@@ -149,7 +149,7 @@ class IndexFolderScraper {
                         val languageVariant = if (language != null)ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao!!, variant, language) else null
 
                         val childEntry = ContentScraperUtil.createOrUpdateContentEntry(id!!, title,
-                                filePrefix + folder.path, publisher!!, PUBLIC_DOMAIN, language?.langUid
+                                filePrefix + folder.path, publisher!!, LICENSE_TYPE_PUBLIC_DOMAIN, language?.langUid
                                 ?: 0, languageVariant?.langVariantUid,
                                 EMPTY_STRING, true, creators.toString(), EMPTY_STRING, EMPTY_STRING,
                                 EMPTY_STRING, 0, contentEntryDao!!)

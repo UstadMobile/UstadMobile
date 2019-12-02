@@ -206,7 +206,7 @@ object ScraperConstants {
     const val CK12_LESSONS = "lesson plans"
     const val CK12_READ_WORLD = "real world"
 
-    const val CONTENT_MAP_CK12 = mapOf(
+    val CONTENT_MAP_CK12 = mapOf(
             CK12_VIDEO to ContentEntry.VIDEO_TYPE,
             CK12_PLIX to ContentEntry.INTERACTIVE_EXERICSE_TYPE,
             CK12_PRACTICE to ContentEntry.INTERACTIVE_EXERICSE_TYPE,

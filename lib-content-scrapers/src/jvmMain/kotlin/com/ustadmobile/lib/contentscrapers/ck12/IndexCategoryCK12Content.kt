@@ -14,12 +14,9 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.gdl.GdlContentIndexer
 import com.ustadmobile.lib.contentscrapers.gdl.GdlContentScraper
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.lib.rest.waitForNewFiles
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
@@ -276,7 +273,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
         val listToRemove = listOfChilds.map { it.cepcjChildContentEntryUid }
         val listOfEntries = contentEntryDao.getContentEntryFromUids(listToRemove)
         listOfEntries.forEach {
-            it.publik = false
+            it.ceInactive = true
         }
         contentEntryDao.updateList(listOfEntries)
     }
@@ -347,7 +344,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
     @Throws(IOException::class)
     fun browseGradeTopics(subCategoryUrl: URL, destination: File, parent: ContentEntry) {
 
-        val driver = ContentScraperUtil.setupLogIndexChromeDriver(null)
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
         try {
             driver.get(subCategoryUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
@@ -592,7 +589,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
                 indexWorkQueue.start()
             }
 
-            val scrapePrecessor = 1
+            val scrapePrecessor = 4
             var scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 

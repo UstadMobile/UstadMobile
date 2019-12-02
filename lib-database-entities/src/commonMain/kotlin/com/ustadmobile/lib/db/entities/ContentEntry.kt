@@ -181,7 +181,7 @@ open class ContentEntry() {
 
         const val ALL_RIGHTS_RESERVED = 5
 
-        const val LICESNE_TYPE_CC_BY_NC_SA = 6
+        const val LICENSE_TYPE_CC_BY_NC_SA = 6
 
         const val LICENSE_TYPE_PUBLIC_DOMAIN = 7
 

@@ -53,11 +53,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URL
-import java.net.URLConnection
-import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -97,6 +92,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
 import kotlinx.coroutines.runBlocking
 import org.openqa.selenium.Cookie
+import java.net.*
 import java.time.temporal.TemporalQuery
 import kotlin.system.exitProcess
 
@@ -1366,7 +1362,6 @@ object ContentScraperUtil {
     }
 
     fun getLastModifiedOfFileFromContentEntry(childEntry: ContentEntry, containerDao: ContainerDao): Long {
-
         val container = containerDao.getMostRecentContainerForContentEntry(childEntry.contentEntryUid)
         return container?.cntLastModified ?: -1
 

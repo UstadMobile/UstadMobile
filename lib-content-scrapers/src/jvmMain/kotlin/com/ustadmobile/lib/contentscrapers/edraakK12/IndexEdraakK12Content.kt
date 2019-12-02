@@ -210,7 +210,7 @@ class IndexEdraakK12Content {
 
     private fun getLicenseType(license: String): Int {
         if (license.toLowerCase().contains("cc-by-nc-sa")) {
-            return ContentEntry.LICESNE_TYPE_CC_BY_NC_SA
+            return ContentEntry.LICENSE_TYPE_CC_BY_NC_SA
         } else if (license.toLowerCase().contains("all_rights_reserved")) {
             return ALL_RIGHTS_RESERVED
         } else {
