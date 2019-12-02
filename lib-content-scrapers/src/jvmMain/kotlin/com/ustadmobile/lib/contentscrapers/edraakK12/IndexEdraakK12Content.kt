@@ -119,7 +119,7 @@ class IndexEdraakK12Content {
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, arabicLang.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
         var description = ("تعليم مجانيّ\n" +
                 "إلكترونيّ باللغة العربيّة!" +
@@ -131,7 +131,7 @@ class IndexEdraakK12Content {
         val edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
                 "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang.langUid, null,
                 description, false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0)
@@ -196,7 +196,7 @@ class IndexEdraakK12Content {
                 val childEntry = ContentScraperUtil.createOrUpdateContentEntry(children.id!!, children.title,
                         sourceUrl!!, EDRAAK, getLicenseType(children.license!!), arabicLang!!.langUid, null,
                         EMPTY_STRING, isLeaf, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, childEntry, children.child_index)

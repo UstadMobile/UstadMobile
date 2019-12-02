@@ -69,13 +69,13 @@ class IndexDdlContent {
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
 
         parentDdl = ContentScraperUtil.createOrUpdateContentEntry("https://www.ddl.af/", "Darakht-e Danesh",
                 "https://www.ddl.af/", DDL, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
                 "Free and open educational resources for Afghanistan", false, EMPTY_STRING,
-                "https://ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                "https://ddl.af/storage/files/logo-dd.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentDdl!!, 5)
@@ -100,7 +100,7 @@ class IndexDdlContent {
         langEntry = ContentScraperUtil.createOrUpdateContentEntry("$lang/resources/list", langEntity.name,
                 "https://www.ddl.af/$lang/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentDdl!!, langEntry!!, langCount)
 

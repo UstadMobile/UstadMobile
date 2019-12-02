@@ -64,7 +64,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
                 val contentEntry = ContentScraperUtil.createOrUpdateContentEntry(href, title, href,
                         DDL, LICENSE_TYPE_CC_BY, language.langUid, null,
                         EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                 subjectAreaList.add(contentEntry)
 
@@ -140,7 +140,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         contentEntries = ContentScraperUtil.createOrUpdateContentEntry(urlString, doc!!.title(),
                 urlString, if (publisher != null && !publisher.isEmpty()) publisher else DDL,
                 LICENSE_TYPE_CC_BY, language.langUid, null, description, true, author,
-                thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                thumbnail, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
         for (downloadCount in downloadList.indices) {
 

@@ -128,13 +128,13 @@ class AsbScraper {
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, ScraperConstants.ROOT,
                 ScraperConstants.USTAD_MOBILE, ContentEntry.LICENSE_TYPE_CC_BY, englishLang!!.langUid, null, EMPTY_STRING,
-                false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
         val asbParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS,
                 "https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
                 englishLang.langUid, null, "Open access to picture storybooks in the languages of Africa. \n For children's literacy, enjoyment and imagination.", false, EMPTY_STRING,
-                "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4)
@@ -190,7 +190,7 @@ class AsbScraper {
 
                 val childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
                         if (language != null) language!!.langUid else 0L, if (languageVariant == null) null else languageVariant!!.langVariantUid, bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                 val readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get()
 

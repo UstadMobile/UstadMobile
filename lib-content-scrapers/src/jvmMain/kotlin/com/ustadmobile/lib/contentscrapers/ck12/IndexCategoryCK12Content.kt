@@ -155,7 +155,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
             val categoryEntry = ContentScraperUtil.createOrUpdateContentEntry(categoryTitle, categoryTitle, "ck12://$categoryTitle", CK_12,
                     LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                    EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                    EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parentEntry, categoryEntry, categoryCounter++)
 
@@ -174,7 +174,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
                 val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subjectUrl.toString(), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                        EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, categoryEntry, subjectEntry, subjectCounter++)
 
@@ -228,7 +228,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
                 val gradeEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subCategoryUrl.toString(), CK_12, LICENSE_TYPE_CC_BY_NC,
                         englishLang!!.langUid, null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, gradeEntry, count++)
 
@@ -238,25 +238,33 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
         val categoryList = doc.select("div.concept-container")
 
+
+        var listOfChilds: MutableList<ContentEntryParentChildJoin> = mutableListOf()
+        if (categoryList.isNotEmpty()) {
+            listOfChilds = contentParentChildJoinDao.findListOfChildsByParentUuid(parent.contentEntryUid).toMutableList()
+        }
+
         for (category in categoryList) {
 
             val level1CategoryTitle = category.select("span.concept-name").attr("title")
             val fakePath = "$url/$level1CategoryTitle"
 
             val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(fakePath, level1CategoryTitle, fakePath, CK_12,
-                    LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                    EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                    LICENSE_TYPE_CC_BY_NC, englishLang?.langUid ?: 0, null, EMPTY_STRING, false,
+                    EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, count++)
-
-            val firstListCategory = categoryList.select("div.level1-inner-container")
-
-            for (firstCategory in firstListCategory) {
-
-                browseListOfTopics(firstCategory, destinationDirectory, fakePath, topicEntry)
-
+            val categoryJoin = ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, count++)
+            var foundJoin = listOfChilds.find { categoryJoin == it }
+            if (foundJoin != null) {
+                listOfChilds.remove(foundJoin)
             }
+
+            browseListOfTopics(category.selectFirst("div.level1-inner-container"), destinationDirectory, fakePath, topicEntry)
         }
+        if (listOfChilds.isNotEmpty()) {
+            turnOffPublicContentEntry(listOfChilds, parent.sourceUrl)
+        }
+
 
         if (count == 0) {
             UMLogUtil.logInfo("No Topics were found to browse for url $url")
@@ -264,10 +272,20 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
     }
 
+    fun turnOffPublicContentEntry(listOfChilds: List<ContentEntryParentChildJoin>, sourceUrl: String?) {
+        val listToRemove = listOfChilds.map { it.cepcjChildContentEntryUid }
+        val listOfEntries = contentEntryDao.getContentEntryFromUids(listToRemove)
+        listOfEntries.forEach {
+            it.publik = false
+        }
+        contentEntryDao.updateList(listOfEntries)
+    }
+
     @Throws(IOException::class)
     private fun browseListOfTopics(firstCategory: Element, destinationDirectory: File, fakePath: String, parent: ContentEntry) {
 
         val secondListCategory = firstCategory.select(":root > div > div")
+        var listOfChilds = contentParentChildJoinDao.findListOfChildsByParentUuid(parent.contentEntryUid).toMutableList()
 
         var count = 0
         for (secondCategory in secondListCategory) {
@@ -280,10 +298,14 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
                 val contentUrl = URL(url, hrefLink)
 
                 val lastTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, contentUrl.toString(), CK_12,
-                        LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                        EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        LICENSE_TYPE_CC_BY_NC, englishLang?.langUid ?: 0, null, EMPTY_STRING, false,
+                        EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, lastTopicEntry, count++)
+                val secondCategoryJoin = ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, lastTopicEntry, count++)
+                var foundJoin = listOfChilds.find { secondCategoryJoin == it }
+                if (foundJoin != null) {
+                    listOfChilds.remove(foundJoin)
+                }
 
                 val topicDestination = File(destinationDirectory, title)
                 topicDestination.mkdirs()
@@ -298,17 +320,25 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
                 val appendPath = "$fakePath/$title"
 
                 val subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(appendPath, title, appendPath, CK_12,
-                        LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
+                        LICENSE_TYPE_CC_BY_NC, englishLang?.langUid ?: 0, null,
                         EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, 0, contentEntryDao)
 
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, subTopicEntry, count++)
+                val parentJoin = ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, subTopicEntry, count++)
+                var foundJoin = listOfChilds.find { parentJoin == it }
+                if (foundJoin != null) {
+                    listOfChilds.remove(foundJoin)
+                }
 
                 browseListOfTopics(secondCategory.child(1), destinationDirectory, appendPath, subTopicEntry)
 
             }
 
+        }
+
+        if (listOfChilds.isNotEmpty()) {
+            turnOffPublicContentEntry(listOfChilds, parent.sourceUrl)
         }
 
     }
@@ -317,7 +347,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
     @Throws(IOException::class)
     fun browseGradeTopics(subCategoryUrl: URL, destination: File, parent: ContentEntry) {
 
-        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver(null)
         try {
             driver.get(subCategoryUrl.toString())
             val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
@@ -347,7 +377,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
             val headingEntry = ContentScraperUtil.createOrUpdateContentEntry(fakePathTopic, headingTitle, fakePathTopic, CK_12,
                     LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                    EMPTY_STRING, thumbnailUrl, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                    EMPTY_STRING, thumbnailUrl, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, headingEntry, count++)
 
@@ -363,7 +393,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
                 val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(fakeParentTopic, title, fakeParentTopic, CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                        EMPTY_STRING, topicThumbnailUrl, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, topicThumbnailUrl, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, headingEntry, topicEntry, topicCount++)
 
@@ -381,7 +411,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
                     val subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, subTitle, contentUrl.toString(), CK_12,
                             LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                            EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                            EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry, subTopicEntry, subTopicCount++)
@@ -427,10 +457,11 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
                         By.cssSelector("div[class*=js-components-newspaper-Card-Card__groupType] span"))
                         .text
 
-                val imageLink = course.findElement(
-                        By.cssSelector("a[class*=js-components-newspaper-Card-Card__link]"))
-                        .getAttribute("href")
+                var imageLink = course.findElement(
+                        By.cssSelector("a[class*=js-components-newspaper-Card-Card] img"))
+                        .getAttribute("src")
 
+                imageLink = URL(contentUrl, imageLink).toString()
 
                 val link = course.findElement(
                         By.cssSelector("h2[class*=js-components-newspaper-Card-Card__title] a"))
@@ -447,14 +478,15 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
                 val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.path, title, url.toString().substring(0, url.toString().indexOf("?")), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, summary, true,
-                        EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                        EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING,  ScraperConstants.CONTENT_MAP_CK12[groupType?.toLowerCase()]
+                        ?: 0, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, parent, topicEntry, courseCount++)
 
                 ContentScraperUtil.createQueueItem(queueDao, url, topicEntry, topicDestination,
                         groupType.toLowerCase(), runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
 
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("error getting content from page $contentUrl with hrefLink ${course.findElement(
                         By.cssSelector("h2[class*=js-components-newspaper-Card-Card__title] a")).getAttribute("href")}")
@@ -525,16 +557,16 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
                     ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY,
                     englishLang!!.langUid, null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
             ck12ParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.ck12.org/", "CK-12 Foundation",
                     "https://www.ck12.org/", CK_12, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
                     "100% Free, Personalized Learning for Every Student", false, EMPTY_STRING,
                     "https://img1.ck12.org/media/build-20181015164501/images/ck12-logo-livetile.png",
-                    EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2)
+            //ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, ck12ParentEntry, 2)
 
             ContentScraperUtil.createQueueItem(queueDao, url, ck12ParentEntry, destination, ScraperConstants.GDLContentType.ROOT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 

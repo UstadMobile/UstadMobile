@@ -64,13 +64,13 @@ class IndexFolderScraper {
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
 
         val parentFolder = ContentScraperUtil.createOrUpdateContentEntry(name, name,
                 filePrefix + destinationDir.path, name, PUBLIC_DOMAIN, englishLang!!.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, 0, contentEntryDao!!)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentFolder, 7)
 
@@ -97,7 +97,7 @@ class IndexFolderScraper {
                 val childEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
                         filePrefix + folder.path, name, PUBLIC_DOMAIN, englishLang!!.langUid, null,
                         EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, contentEntryDao!!)
+                        EMPTY_STRING, 0, contentEntryDao!!)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, childEntry, folderCount++)
 
@@ -152,7 +152,7 @@ class IndexFolderScraper {
                                 filePrefix + folder.path, publisher!!, PUBLIC_DOMAIN, language?.langUid
                                 ?: 0, languageVariant?.langVariantUid,
                                 EMPTY_STRING, true, creators.toString(), EMPTY_STRING, EMPTY_STRING,
-                                EMPTY_STRING, contentEntryDao!!)
+                                EMPTY_STRING, 0, contentEntryDao!!)
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, childEntry, fileCount++)
 

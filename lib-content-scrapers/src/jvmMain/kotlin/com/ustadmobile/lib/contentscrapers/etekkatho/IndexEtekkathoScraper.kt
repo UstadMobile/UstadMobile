@@ -84,13 +84,13 @@ class IndexEtekkathoScraper {
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
         val parentEtek = ContentScraperUtil.createOrUpdateContentEntry("http://www.etekkatho.org/subjects/", "eTekkatho",
                 "http://www.etekkatho.org/", ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
                 "Educational resources for the Myanmar academic community", false, EMPTY_STRING,
                 "http://www.etekkatho.org/img/logos/etekkatho-myanmar-lang.png",
-                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentEtek, 7)
 
@@ -114,7 +114,7 @@ class IndexEtekkathoScraper {
                         element.text(), headingUrl.toString(),
                         ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
                         "", false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEtek, subjectEntry!!, subjectCount++)
 
@@ -129,7 +129,7 @@ class IndexEtekkathoScraper {
                 val subHeadingEntry = ContentScraperUtil.createOrUpdateContentEntry(title,
                         title, element.text() + "/" + title, ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
                         descriptionElement.text(), false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
                 headingHashMap!![title] = subHeadingEntry
 
@@ -148,7 +148,7 @@ class IndexEtekkathoScraper {
                         title, subjectEntry!!.title + "/" + title,
                         ETEKKATHO, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
                         descriptionElement.text(), false, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
                 headingHashMap!![title] = subHeadingEntry
 
@@ -234,7 +234,7 @@ class IndexEtekkathoScraper {
 
             val lessonEntry = ContentScraperUtil.createOrUpdateContentEntry(subjectUrl.query,
                     title, subjectUrlString, publisher, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null, description, true, author, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao!!, contentEntry!!, lessonEntry, subjectCount++)
 

@@ -165,7 +165,7 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
                     val categoryContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, categoryName,
                             URL(simulationUrl, path).toString(), PHET, LICENSE_TYPE_CC_BY, language.langUid, null,
                             EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                            EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                            EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                     categoryRelations.add(categoryContentEntry)
                 } catch (ie: IOException) {
@@ -281,7 +281,7 @@ class PhetContentScraper(private val url: String, private val destinationDirecto
                                     val languageContentEntry = ContentScraperUtil.createOrUpdateContentEntry(translationUrl.path, langTitle,
                                             translationUrl.toString(), PHET, LICENSE_TYPE_CC_BY, language.langUid, languageVariant?.langVariantUid,
                                             aboutDescription, true, EMPTY_STRING, thumbnailUrl,
-                                            EMPTY_STRING, EMPTY_STRING, contentEntryDao)
+                                            EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                                     langIdMap!![languageContentEntry.contentEntryUid] = langCode
 

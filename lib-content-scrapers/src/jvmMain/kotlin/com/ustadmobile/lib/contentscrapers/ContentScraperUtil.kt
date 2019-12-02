@@ -988,7 +988,7 @@ object ContentScraperUtil {
      */
     private fun createContentEntryObject(id: String, title: String?, sourceUrl: String, publisher: String, licenseType: Int,
                                          primaryLanguage: Long, languageVariant: Long?, description: String?, isLeaf: Boolean,
-                                         author: String?, thumbnailUrl: String?, licenseName: String, licenseUrl: String): ContentEntry {
+                                         author: String?, thumbnailUrl: String?, licenseName: String, licenseUrl: String, contentTypeFlag: Int): ContentEntry {
         val contentEntry = ContentEntry()
         contentEntry.entryId = id
         contentEntry.title = title
@@ -1006,6 +1006,7 @@ object ContentScraperUtil {
         contentEntry.licenseName = licenseName
         contentEntry.licenseUrl = licenseUrl
         contentEntry.publik = true
+        contentEntry.contentTypeFlag = contentTypeFlag
         return contentEntry
     }
 
@@ -1029,17 +1030,18 @@ object ContentScraperUtil {
     fun createOrUpdateContentEntry(id: String, title: String?, sourceUrl: String, publisher: String, licenseType: Int,
                                    primaryLanguage: Long, languageVariant: Long?, description: String?, isLeaf: Boolean,
                                    author: String?, thumbnailUrl: String?, licenseName: String, licenseUrl: String,
+                                   contentTypeFlag: Int,
                                    contentEntryDao: ContentEntryDao): ContentEntry {
 
         var contentEntry = contentEntryDao.findBySourceUrl(sourceUrl)
         if (contentEntry == null) {
             contentEntry = createContentEntryObject(id, title, sourceUrl, publisher, licenseType, primaryLanguage,
-                    languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl)
+                    languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl, contentTypeFlag)
             contentEntry.lastModified = System.currentTimeMillis()
             contentEntry.contentEntryUid = contentEntryDao.insert(contentEntry)
         } else {
             val changedEntry = createContentEntryObject(id, title, sourceUrl, publisher, licenseType, primaryLanguage,
-                    languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl)
+                    languageVariant, description, isLeaf, author, thumbnailUrl, licenseName, licenseUrl, contentTypeFlag)
             contentEntry = checkContentEntryChanges(changedEntry, contentEntry, contentEntryDao)
         }
         return contentEntry

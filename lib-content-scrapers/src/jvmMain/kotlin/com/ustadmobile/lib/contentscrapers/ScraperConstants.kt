@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.ustadmobile.lib.db.entities.ContentEntry
 import java.util.*
 
 object ScraperConstants {
@@ -205,6 +206,15 @@ object ScraperConstants {
     const val CK12_LESSONS = "lesson plans"
     const val CK12_READ_WORLD = "real world"
 
+    const val CONTENT_MAP_CK12 = mapOf(
+            CK12_VIDEO to ContentEntry.VIDEO_TYPE,
+            CK12_PLIX to ContentEntry.INTERACTIVE_EXERICSE_TYPE,
+            CK12_PRACTICE to ContentEntry.INTERACTIVE_EXERICSE_TYPE,
+            CK12_READ to ContentEntry.ARTICLE_TYPE,
+            CK12_ACTIVITIES to ContentEntry.ARTICLE_TYPE,
+            CK12_STUDY_AIDS to ContentEntry.ARTICLE_TYPE,
+            CK12_LESSONS to ContentEntry.ARTICLE_TYPE,
+            CK12_READ_WORLD to ContentEntry.ARTICLE_TYPE)
 
     val IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg")
     val VIDEO_EXTENSIONS = Arrays.asList("mp4")
