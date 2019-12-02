@@ -84,8 +84,6 @@ open class ContentEntry() {
 
     var leaf: Boolean = false
 
-    var imported: Boolean = false
-
     /**
      * Represents if this content entry is public for anyone to use
      *
@@ -185,13 +183,13 @@ open class ContentEntry() {
 
         const val LICESNE_TYPE_CC_BY_NC_SA = 6
 
-        const val LICENSE_TYPE_CC_BY_NC_ND = 7
+        const val LICENSE_TYPE_PUBLIC_DOMAIN = 7
 
         const val LICENSE_TYPE_OTHER = 8
 
         const val LICENSE_TYPE_CC_BY_ND = 9
 
-        const val LICENSE_TYPE_PUBLIC_DOMAIN = 7
+        const val LICENSE_TYPE_CC_BY_NC_ND = 10
 
         const val UNDEFINED_TYPE = 0
 
@@ -208,8 +206,6 @@ open class ContentEntry() {
         const val DOCUMENT_TYPE = 6
 
         const val ARTICLE_TYPE = 7
-
-        const val LICENSE_TYPE_OTHER = 8
 
         const val FLAG_IMPORTED = 1
 

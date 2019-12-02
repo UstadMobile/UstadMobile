@@ -1007,6 +1007,7 @@ object ContentScraperUtil {
         contentEntry.licenseUrl = licenseUrl
         contentEntry.publik = true
         contentEntry.contentTypeFlag = contentTypeFlag
+        contentEntry.contentFlags = ContentEntry.FLAG_SCRAPPED
         return contentEntry
     }
 
