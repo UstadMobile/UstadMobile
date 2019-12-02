@@ -20,7 +20,7 @@ class ConcatenatedInputStream(val src: InputStream) : InputStream(){
 
     private var currentPartIndex = -1
 
-    private val partHeaders: List<ConcatenatedPart>
+    val partHeaders: List<ConcatenatedPart>
 
     init {
         val ioBuffer = IoBuffer.NoPool.borrow()

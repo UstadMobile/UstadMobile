@@ -2,27 +2,27 @@ package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
 import com.tonyodev.fetch2.Error
-import com.tonyodev.fetch2.Status
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.io.ConcatenatedInputStream
+import com.ustadmobile.core.io.ConcatenatedInputStreamEntrySource
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
-import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
-import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
-import com.ustadmobile.lib.util.Base64Coder
-import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sumByLong
 import com.ustadmobile.sharedse.io.FileInputStreamSe
@@ -31,18 +31,14 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_G
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
 import com.ustadmobile.sharedse.network.fetch.*
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
-import kotlinx.atomicfu.AtomicLongArray
+import com.ustadmobile.core.util.ext.encodeBase64
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.produce
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -111,7 +107,7 @@ class DownloadJobItemRunner
 
     private var destinationDir: String? = null
 
-    private val numFailures = atomic(0)
+    //private val numFailures = atomic(0)
 
     private val entriesDownloaded = atomic(0)
 
@@ -138,10 +134,13 @@ class DownloadJobItemRunner
     @Volatile
     private var currentFetchRequestId: Int = -1
 
+    private var currentFetchDownload: DownloadMpp? = null
+
     private val fetchListener = object: AbstractFetchListenerMpp() {
 
         override fun onAdded(download: DownloadMpp) {
             if(download.id == currentFetchRequestId) {
+                currentFetchDownload = download
                 Napier.d({"Download added #${download.id} ${download.url}"})
             }
         }
@@ -169,21 +168,6 @@ class DownloadJobItemRunner
                 }
             }
         }
-    }
-
-
-    class DownloadedEntrySource(override val pathInContainer: String,
-                                private val file: FileSe,
-                                var unCompressedLength: Long,
-                                override val md5Sum: ByteArray,
-                                override val filePath: String,
-                                override val compression: Int = 0)
-                                : ContainerManagerCommon.EntrySource {
-        override val length: Long
-            get() = unCompressedLength
-
-        override val inputStream = FileInputStreamSe(file)
-
     }
 
     fun setWiFiConnectionTimeout(lWiFiConnectionTimeout: Int) {
@@ -260,6 +244,9 @@ class DownloadJobItemRunner
 
             networkManager.httpFetcher.removeListener(fetchListener)
 
+            //TODO: if download is active, pause it here
+
+
             withContext(mainCoroutineDispatcher) {
                 statusLiveData!!.removeObserver(statusObserver!!)
                 downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
@@ -307,7 +294,7 @@ class DownloadJobItemRunner
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
         if (destinationDir == null) {
             val e = IllegalArgumentException(
-                    "DownloadJobItemRunner destinationdir is null for " + downloadItem.djiDjUid)
+                    "DownloadJobItemRunner destinationdir is null for ${downloadItem.djiDjUid}")
             UMLog.l(UMLog.CRITICAL, 699,
                     mkLogPrefix() + " destinationDir = null", e)
             throw e
@@ -340,8 +327,10 @@ class DownloadJobItemRunner
         var downloadStartTime = 0L
 
         var downloadAttemptStatus = -1
+        val destTmpFile = FileSe("$destinationDir/${downloadItem.djiUid}.tmp")
+        val containerEntryFileList = mutableListOf<ContainerEntryWithMd5>()
         for (attemptNum in attemptsRemaining downTo 1) {
-            numFailures.value = 0
+            //numFailures.value = 0
             currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
                     downloadItem.djiContainerUid)
 
@@ -407,17 +396,20 @@ class DownloadJobItemRunner
                     " Attempts remaining= " + attemptsRemaining)
             downloadStartTime = getSystemTimeInMillis()
 
-            val containerEntryList = currentHttpClient.get<List<ContainerEntryWithMd5>>(
+            val containerEntryListVal = currentHttpClient.get<List<ContainerEntryWithMd5>>(
                     "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
+            containerEntryFileList.clear()
+            containerEntryFileList.addAll(containerEntryListVal)
+
             entriesDownloaded.value = 0
 
-            val entriesToDownload = containerManager.linkExistingItems(containerEntryList).sortedBy { it.cefMd5 }
+            val entriesToDownload = containerManager.linkExistingItems(containerEntryListVal).sortedBy { it.cefMd5 }
             existingEntriesBytesDownloaded = containerManager.allEntries
                     .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
 
             val entriesListStr = entriesToDownload.joinToString(separator = ";") { it.ceCefUid.toString() }
-            val fetchRequest = RequestMpp("$endpointUrl/ConcatenatedContainerEntries/$entriesListStr",
-                    "$destinationDir/${downloadItem.djiUid}.tmp")
+            val fetchRequest = RequestMpp(UMFileUtil.joinPaths(endpointUrl,
+                    ENDPOINT_CONCATENATEDFILES, entriesListStr), destTmpFile.getAbsolutePath())
 
             history.startTime = getSystemTimeInMillis()
             val currentDownloadAttemptVal  = CompletableDeferred<Int>()
@@ -456,8 +448,39 @@ class DownloadJobItemRunner
                     bytesDownloaded, downloadItem.downloadLength)
 
             val downloadSpeed = ((bytesDownloaded.toFloat() / 1024f) / (downloadTime.toFloat() / 1000f))
-            UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed download of ${bytesDownloaded}bytes " +
+            UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed " +
+                    "download of ${bytesDownloaded}bytes " +
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
+
+            var concatenatedInputStream: ConcatenatedInputStream? = null
+            try {
+                concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
+                val pathToMd5Map = containerEntryFileList.map {
+                    (it.cePath ?: "") to (it.cefMd5?.base64StringToByteArray() ?: ByteArray(0))
+                }.toMap()
+
+                //TODO: handle the situation where one md5 is linked to more than one path
+                containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = true),
+                        pathToMd5Map) {
+                    val nextPart = concatenatedInputStream.nextPart()
+                    if(nextPart != null) {
+                        val partMd5Str = nextPart.id.encodeBase64()
+                        val pathsInContainer = containerEntryFileList.filter { it.cefMd5 == partMd5Str }
+                        val firstPathInContainer = pathsInContainer.firstOrNull()?.cePath
+                        if(firstPathInContainer != null) {
+                            ConcatenatedInputStreamEntrySource(nextPart, concatenatedInputStream,
+                                    firstPathInContainer)
+                        }else {
+                            Napier.wtf({"Could not find path for md5sum $partMd5Str"})
+                            throw IllegalStateException("Could not find the path of md5sum $partMd5Str")
+                        }
+                    }else {
+                        null
+                    }
+                }
+            }finally {
+                concatenatedInputStream?.close()
+            }
         }
 
         stop(downloadAttemptStatus)

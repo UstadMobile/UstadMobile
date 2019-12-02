@@ -48,4 +48,10 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Delete
     abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)
 
+    companion object {
+
+        const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"
+
+    }
+
 }

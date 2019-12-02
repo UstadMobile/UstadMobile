@@ -49,8 +49,7 @@ actual class ContainerManager actual constructor(container: Container,
         override val length: Long
             get() = file.length()
 
-        override val inputStream: InputStream
-            get() = FileInputStream(file)
+        override val inputStream: InputStream by lazy { FileInputStream(file) }
 
         override val filePath: String?
             get() = file.getAbsolutePath()
@@ -59,13 +58,18 @@ actual class ContainerManager actual constructor(container: Container,
             val buffer = ByteArray(8 * 1024)
             var bytesRead = 0
 
-            val inStream = inputStream
             val md5Digest = MessageDigest.getInstance("MD5")
-            while (inStream.read(buffer).also { bytesRead = it } != -1) {
-                md5Digest.update(buffer, 0, bytesRead)
+            FileInputStream(file).use { inStream ->
+                while (inStream.read(buffer).also { bytesRead = it } != -1) {
+                    md5Digest.update(buffer, 0, bytesRead)
+                }
             }
 
             md5Digest.digest()
+        }
+
+        override fun dispose() {
+            inputStream.close()
         }
     }
 
@@ -142,7 +146,7 @@ actual class ContainerManager actual constructor(container: Container,
                             throw e
                         } finally {
                             destOutStream?.close()
-                            inStream?.close()
+                            nextEntry.dispose()
                             destOutStream?.close()
                         }
                     }

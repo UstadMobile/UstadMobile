@@ -4,6 +4,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ConcatenatedInputStream
 import com.ustadmobile.core.io.ConcatenatedPart
+import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.toHexString
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -60,7 +61,7 @@ class ContainerEntryFileDaoExtTest {
                 val fileMd5 = messageDigest.digest()
                 md5s.add(fileMd5)
 
-                ContainerEntryFile(fileMd5.toHexString(), file.length(), file.length(), 0,
+                ContainerEntryFile(fileMd5.encodeBase64(), file.length(), file.length(), 0,
                         System.currentTimeMillis()).also {
                     it.cefPath = file.absolutePath
                     it.cefUid = db.containerEntryFileDao.insert(it)

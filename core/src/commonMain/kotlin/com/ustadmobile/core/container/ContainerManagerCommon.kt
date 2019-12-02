@@ -46,7 +46,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
 
         /**
-         * An inputstream that provides the contents of the entry
+         * An inputstream that provides the contents of the entry. This will only be read once.
          */
         val inputStream: InputStream
 
@@ -65,6 +65,14 @@ abstract class ContainerManagerCommon(protected val container: Container,
          * The compression (if this file is already compressed)
          */
         val compression: Int
+
+        /**
+         * Dispose of any underlying resources. If the InputStream is no longer going to be used,
+         * it should be closed here. If the InputStream will be closed later (e.g. where multiple
+         * entries are being read from single stream such as a concatenatedinputstream or zip) then
+         * no action needs to be taken.
+         */
+        fun dispose()
 
     }
 

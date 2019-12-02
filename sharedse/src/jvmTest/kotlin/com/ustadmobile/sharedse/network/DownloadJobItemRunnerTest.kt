@@ -341,11 +341,11 @@ class DownloadJobItemRunnerTest {
                     downloadJobItem.djiUid)!!
 
             Assert.assertEquals("File download task completed successfully",
-                    JobStatus.COMPLETE.toLong(), item.djiStatus.toLong())
+                    JobStatus.COMPLETE, item.djiStatus)
 
             Assert.assertEquals("Correct number of ContentEntry items available in client db",
-                    container.cntNumEntries.toLong(),
-                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size.toLong())
+                    container.cntNumEntries,
+                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
 
             assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
                     serverDb, serverRepo, clientDb, clientRepo)

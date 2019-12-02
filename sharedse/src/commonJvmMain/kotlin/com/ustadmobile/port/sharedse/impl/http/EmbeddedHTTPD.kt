@@ -16,6 +16,7 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -76,6 +77,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder::class.java, appDatabase)
         addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
                 ContainerEntryListResponder::class.java, appDatabase)
+        addRoute("/$ENDPOINT_CONCATENATEDFILES/(.*)+", ConcatenatedContainerEntryFileResponder::class.java,
+                appDatabase)
         addRoute("/xapi/statements(.*)+", XapiStatementResponder::class.java, repository)
         addRoute("/xapi/activities/state(.*)+", XapiStateResponder::class.java, repository)
     }
