@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONTENT_ENTRY
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.dao.ContentEntryDao
@@ -20,8 +19,8 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IMPORTED
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.STATUS_IN_APP
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -33,27 +32,28 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                                 private val contentEntryDao: ContentEntryDao,
                                 private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao,
                                 private val contentEntryStatusDao: ContentEntryStatusDao,
-                                private val account: UmAccount)
+                                private val account: UmAccount, val impl: UstadMobileSystemImpl,
+                                val importFileFn: suspend (baseDir: String, mimeType: String, entry: ContentEntry) -> ContentEntry)
     : UstadBaseController<ContentEntryEditView>(context, arguments, view) {
-
-    val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
 
     private var contentEntry: ContentEntry = ContentEntry()
 
     private var args = HashMap(arguments)
 
-    private var author: String = ""
+    private var author = ""
 
-    private var selectedFilePath: String = ""
+    private var selectedFilePath  = ""
 
-    private var selectedStorageOption: String = ""
+    private var selectedFileMimeType  = ""
 
-    private var isNewContent: Boolean = true
+    private var selectedFileSize: Long = 0
+
+    private var selectedStorageOption = ""
+
+    private var isNewContent = true
 
     private var importedEntry = false
-
-    private var importedContent =  HashMap<String, Any?>()
 
     private val licenceTypes: List<String> = mutableListOf("CC BY","CC BY SA","CC BY SA NC",
             "CC BY NC","CC BY NC SA","Public Domain","All Rights Reserved","Other")
@@ -62,7 +62,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             ContentEntry.LICENSE_TYPE_CC_BY_SA_NC, ContentEntry.LICENSE_TYPE_CC_BY_NC, ContentEntry.ALL_RIGHTS_RESERVED,
             ContentEntry.LICENSE_TYPE_CC_BY_NC_SA, ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN,LICENSE_TYPE_OTHER)
 
-    val contentType = arguments.getValue(ContentEntryEditView.CONTENT_TYPE)?.toInt()
+    private val contentType = arguments.getValue(ContentEntryEditView.CONTENT_TYPE)?.toInt()
 
     private var isImportedContent: Boolean = contentType == CONTENT_IMPORT_FILE
 
@@ -72,7 +72,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         GlobalScope.launch {
             val entry = contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
             contentEntry = entry ?: ContentEntry()
-            importedEntry = (contentEntry.status and STATUS_IMPORTED) == STATUS_IMPORTED
+            importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED || contentType == CONTENT_IMPORT_FILE
+
             impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
                 override fun onDone(result: List<UMStorageDir>?) {
                     view.runOnUiThread(Runnable {
@@ -91,7 +92,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         view.runOnUiThread(Runnable {
             view.setUpLicence(licenceTypes,if(contentEntry.contentEntryUid == 0L) 0
             else licenceIds.indexOf(contentEntry.licenseType))
-            view.showFileSelector(importedEntry or (contentType == CONTENT_IMPORT_FILE))
+            view.showFileSelector(importedEntry)
             view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_select_file, context))
             view.showStorageOptions(contentType != CONTENT_CREATE_FOLDER)
             if(contentEntry.contentEntryUid != 0L){
@@ -104,9 +105,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
     private fun updateUi(contentEntry: ContentEntry){
         author = contentEntry.author?: ""
         view.runOnUiThread(Runnable {
-            view.setDescription(contentEntry.description ?: "")
-            view.setEntryTitle(contentEntry.title ?: "")
-            view.setThumbnail(contentEntry.thumbnailUrl)
+            view.setContentEntry(contentEntry)
             view.showErrorMessage("",false)
             view.updateFileBtnLabel(impl.getString(MessageID.content_entry_label_update_content, context))
         })
@@ -116,7 +115,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         selectedStorageOption = storageOption
     }
 
-    fun handleSaveUpdateEntry(title: String, description: String, thumbnailUrl: String, licence: Int){
+    fun handleSaveUpdateEntry(title: String, description: String, thumbnailUrl: String, licence: Int, isActive: Boolean, isPublic: Boolean){
         if(title.isNotEmpty() and description.isNotEmpty()){
 
             if((contentType == CONTENT_IMPORT_FILE) and selectedFilePath.isEmpty()
@@ -129,13 +128,14 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             val isLeaf = arguments.getValue(ContentEntryEditView.CONTENT_ENTRY_LEAF)!!.toBoolean()
             contentEntry.title = title
             contentEntry.author = author
+            contentEntry.publik = isPublic
+            contentEntry.ceInactive = !isActive
             contentEntry.description = description
             contentEntry.licenseType = licenceIds[licence]
             contentEntry.thumbnailUrl = thumbnailUrl
-            contentEntry.status = if(isImportedContent) STATUS_IMPORTED else 0
 
             if(isNewContent){
-                contentEntry.status = STATUS_IN_APP
+                contentEntry.contentFlags = if(isImportedContent) FLAG_IMPORTED else FLAG_CONTENT_EDITOR
                 contentEntry.leaf = isLeaf
                 contentEntry.author = if(author.isEmpty()) account.username else author
                 contentEntry.contentEntryUid = contentEntryDao.insert(contentEntry)
@@ -158,17 +158,21 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             when(contentType){
                 CONTENT_IMPORT_FILE -> view.runOnUiThread(Runnable {
                     if(isNewContent){
-                        importedContent[CONTENT_ENTRY] = contentEntry
 
                         view.runOnUiThread(Runnable {
                             view.showProgressDialog()
                         })
 
-                        view.importContent(importedContent)
+                        GlobalScope.launch {
+
+                            val contentEntry =  importFileFn(selectedStorageOption, selectedFileMimeType, contentEntry)
+                            handleImportedFile(contentEntry)
+                        }
                     } else
                         view.showMessageAndDismissDialog(impl.getString(
                                 MessageID.content_update_massage,context), true)
                 })
+
                 CONTENT_CREATE_FOLDER -> view.runOnUiThread(Runnable {
                     view.showMessageAndDismissDialog(impl.getString(
                             if(isNewContent) MessageID.content_creation_folder_new_message
@@ -178,8 +182,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                     view.runOnUiThread(Runnable { view.dismissDialog() })
                     args[CONTENT_ENTRY_UID] =
                             contentEntry.contentEntryUid.toString()
-                    args[CONTENT_STORAGE_OPTION] =
-                            getSelectedStorageOption()
+                    args[CONTENT_STORAGE_OPTION] = selectedStorageOption
                     if(isNewContent)
                         impl.go(ContentEditorView.VIEW_NAME, args, context)
                     else
@@ -195,7 +198,21 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
     }
 
 
-    fun handleImportedFile(newContentEntry: ContentEntry?, fileSize: Long){
+    fun handleSelectedFile(filePath: String, fileSize: Long,fileMimeType: String?, contentEntry: ContentEntry?){
+        selectedFilePath = filePath; selectedFileSize = fileSize
+
+        if(contentEntry == null){
+            view.showErrorMessage("*" + impl.getString(MessageID.content_import_failure_message, context), true)
+        }else{
+            if(fileMimeType != null){
+                selectedFileMimeType = fileMimeType
+            }
+            updateUi(contentEntry)
+        }
+
+    }
+
+    private fun handleImportedFile(newContentEntry: ContentEntry?){
         val message = impl.getString(MessageID.content_import_success_message,context)
 
         if(newContentEntry != null){
@@ -210,7 +227,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         }
 
         val status =  ContentEntryStatus(newContentEntry?.contentEntryUid!!,
-                true, fileSize)
+                true, selectedFileSize)
         status.downloadStatus = JobStatus.COMPLETE
         status.cesLeaf = true
         contentEntryStatusDao.update(status)
@@ -219,30 +236,11 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             view.showMessageAndDismissDialog(message, false)})
     }
 
-    fun handleSelectedFileToImport(content: HashMap<String, Any?>){
-        val contentEntry = if (content.containsKey(CONTENT_ENTRY))
-            content[CONTENT_ENTRY] as ContentEntry? else null
-        if(contentEntry == null){
-            view.showErrorMessage("*" + impl.getString(
-                    MessageID.content_import_failure_message, context), true)
-        }else{
-            importedContent.putAll(content)
-            updateUi(contentEntry)
-        }
-    }
-
-    fun handleSelectedFilePath(filePath: String){
-        selectedFilePath = filePath
-    }
 
     fun handleAddThumbnail(){
         view.showAddThumbnailMessage()
     }
 
-
-    fun getSelectedStorageOption(): String{
-        return selectedStorageOption
-    }
 
     fun handleUpdateLink() {
         val args = HashMap<String, String?>()
@@ -257,11 +255,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         if(isNewContent){
             view.startBrowseFiles()
         }else{
-            view.showUpdateContentDialog(
-                    impl.getString(MessageID.content_entry_label_update_content, context),
-                            listOf(impl.getString(MessageID.content_from_file, context),
-                                    impl.getString(MessageID.content_from_link, context)))
+            view.showUpdateContentDialog(impl.getString(MessageID.content_entry_label_update_content, context),
+                            listOf(impl.getString(MessageID.content_from_file, context), impl.getString(MessageID.content_from_link, context)))
         }
     }
-
 }

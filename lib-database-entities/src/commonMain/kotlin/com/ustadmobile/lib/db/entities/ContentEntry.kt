@@ -80,7 +80,7 @@ open class ContentEntry() {
 
     var languageVariantUid: Long = 0
 
-    var status: Int = 0
+    var contentFlags: Int = 0
 
     var leaf: Boolean = false
 
@@ -94,7 +94,13 @@ open class ContentEntry() {
      *
      * @param publik true if this content entry is public for anyone to use, false otherwise
      */
-    var publik: Boolean = false
+    var publik: Boolean = true
+
+    /**
+     * Represents if this entry is being recycled or not.
+     * @return true if entry was recycled false otherwise
+     */
+    var ceInactive: Boolean = false
 
     var contentTypeFlag: Int = 0
 
@@ -197,13 +203,11 @@ open class ContentEntry() {
 
         const val TYPE_ARTICLE = 7
 
-        const val STATUS_PUBLIC = 1
+        const val FLAG_IMPORTED = 1
 
-        const val STATUS_IMPORTED = 2
+        const val FLAG_CONTENT_EDITOR = 2
 
-        const val STATUS_RECYCLED = 3
-
-        const val STATUS_IN_APP = 4
+        const val FLAG_SCRAPPED = 4
 
     }
 

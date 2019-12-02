@@ -104,6 +104,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
+            SplashScreenView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SplashScreenActivity"),
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
             LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}LoginActivity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),

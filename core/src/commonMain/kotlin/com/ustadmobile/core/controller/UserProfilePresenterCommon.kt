@@ -16,7 +16,6 @@ abstract class UserProfilePresenterCommon (context: Any, arguments: Map<String, 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val account = UmAccountManager.getActiveAccount(context)
-
         if(account != null){
             GlobalScope.launch {
                 val person = personDao.findByUid(account.personUid)

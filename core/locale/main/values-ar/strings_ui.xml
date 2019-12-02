@@ -16,6 +16,7 @@
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
+    <string name="recycled" >Recycled</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='ok'>OK</string>
@@ -277,6 +278,8 @@
     <string name='content_entry_label_select_file'>اختيار ملف</string>
     <string name='content_entry_label_update_file'>تحديث الملف</string>
     <string name='content_entry_label_licence'>رخصة</string>
+    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_active">Make content active</string>
     <string name='content_import_success_message'>تم استيراد الملف بنجاح</string>
     <string name='content_import_failure_message'>الملف المحدد غير معتمد، الرجاء اختيار ملف اخر</string>
     <string name='content_creation_empty_field_error'>الرجاء تعبئة الحقول المطلوبة ثم حاول مرة اخرى</string>
@@ -286,6 +289,7 @@
     <string name='content_creation_folder_update_message'>تم تحديث المستند بنجاح</string>
     <string name='empty_state_libraries'>لا يوجد مجلدات</string>
     <string name='empty_state_downloaded'>لا يوجد تنزيلات</string>
+    <string name="empty_state_recycle">No recycled items</string>
     <string name='error_message_load_page'>فشل تحميل الصفحة</string>
     <string name='error_message_update_document'>فشل تحديث المستند</string>
     <string name='content_update_massage'>تم التحديث بنجاح</string>
@@ -303,7 +307,7 @@
 التخزين على بطاقة ذاكرة %2$s جيجابيت متوفر</string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
+    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="no_account">You do not have an account?</string>
 

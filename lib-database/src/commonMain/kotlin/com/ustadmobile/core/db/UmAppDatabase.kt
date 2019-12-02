@@ -25,7 +25,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 26)
+], version = 27)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -238,9 +238,25 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
+
+            builder.addMigrations(object : DoorMigration(26,27){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN status, ADD COLUMN contentFlags INTEGER NOT NULL DEFAULT 1, ADD COLUMN ceInactive BOOL")
+                }
+
+            })
+
+
             builder.addMigrations(object : DoorMigration(25,26){
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                }
+
+            })
+
+            builder.addMigrations(object :DoorMigration(24, 25){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
                 }
 
             })
@@ -1268,12 +1284,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }
 
-            },
-
-            object : DoorMigration(24, 25) {
-                override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
-                }
             })
             return builder
         }

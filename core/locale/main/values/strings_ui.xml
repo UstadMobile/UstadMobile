@@ -15,6 +15,7 @@
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
+    <string name="recycled" >Recycled</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='ok'>OK</string>
@@ -297,6 +298,8 @@
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
     <string name="content_entry_label_licence">License</string>
+    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_active">Make content active</string>
     <string name="content_import_success_message">You have successfully imported a file</string>
     <string name="content_import_failure_message">Selected file is not supported, try another file</string>
     <string name="content_creation_empty_field_error">Fill out required fields and try again</string>
@@ -306,11 +309,12 @@
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
     <string name="empty_state_libraries">No folders found</string>
     <string name="empty_state_downloaded">No downloads found</string>
+    <string name="empty_state_recycle">No recycled items</string>
     <string name="error_message_load_page">Failed to load the page</string>
     <string name="error_message_update_document">Failed to update document</string>
     <string name="content_update_massage">Updated successfully</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
+    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="content_entry_export">Export</string>
