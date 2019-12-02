@@ -31,10 +31,6 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private var noIframe: Boolean = false
 
-
-    private var isInActiveContent: Boolean = false
-
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         when {
@@ -63,9 +59,8 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
 
     private fun showContentByParent() {
-        this.isInActiveContent = false
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, isInActiveContent)
+        val provider = contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
         fragmentViewContract.setContentEntryProvider(provider)
 
         try {
@@ -125,7 +120,6 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
     private fun showRecycledEntries(){
-        this.isInActiveContent = true
         fragmentViewContract.setContentEntryProvider(contentEntryDao.recycledItems())
     }
 
@@ -146,13 +140,13 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, isInActiveContent))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, isInActiveContent))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
     @JsName("handleUpNavigation")
