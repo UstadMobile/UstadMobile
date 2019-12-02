@@ -6,7 +6,7 @@ import kotlinx.io.InputStream
 
 class ConcatenatedInputStreamEntrySource(private val part: ConcatenatedPart,
                                          private val srcInput: ConcatenatedInputStream,
-                                         override val pathInContainer: String): ContainerManagerCommon.EntrySource {
+                                         override val pathsInContainer: List<String>): ContainerManagerCommon.EntrySource {
 
     override val length: Long
         get() = if(part.uncompressedLength != -1L) { part.uncompressedLength } else { part.length }

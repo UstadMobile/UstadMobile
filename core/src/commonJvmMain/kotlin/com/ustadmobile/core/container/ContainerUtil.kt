@@ -9,7 +9,7 @@ class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile,
                      override val compression: Int = 0) : ContainerManagerCommon.EntrySource {
     override val length = zipEntry.size
 
-    override val pathInContainer = zipEntry.name
+    override val pathsInContainer = listOf(zipEntry.name)
 
     override val inputStream by lazy { zipFile.getInputStream(zipEntry) }
 

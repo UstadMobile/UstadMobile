@@ -403,7 +403,9 @@ class DownloadJobItemRunner
 
             entriesDownloaded.value = 0
 
-            val entriesToDownload = containerManager.linkExistingItems(containerEntryListVal).sortedBy { it.cefMd5 }
+            val entriesToDownload = containerManager.linkExistingItems(containerEntryListVal)
+                    .distinctBy { it.cefMd5 }
+                    .sortedBy { it.cefMd5 }
             existingEntriesBytesDownloaded = containerManager.allEntries
                     .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
 
@@ -459,17 +461,17 @@ class DownloadJobItemRunner
                     (it.cePath ?: "") to (it.cefMd5?.base64StringToByteArray() ?: ByteArray(0))
                 }.toMap()
 
-                //TODO: handle the situation where one md5 is linked to more than one path
                 containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = true),
                         pathToMd5Map) {
                     val nextPart = concatenatedInputStream.nextPart()
                     if(nextPart != null) {
                         val partMd5Str = nextPart.id.encodeBase64()
-                        val pathsInContainer = containerEntryFileList.filter { it.cefMd5 == partMd5Str }
-                        val firstPathInContainer = pathsInContainer.firstOrNull()?.cePath
-                        if(firstPathInContainer != null) {
+                        val pathsInContainer = containerEntryFileList.filter {
+                            it.cefMd5 == partMd5Str && it.cePath != null
+                        }
+                        if(pathsInContainer.isNotEmpty()) {
                             ConcatenatedInputStreamEntrySource(nextPart, concatenatedInputStream,
-                                    firstPathInContainer)
+                                    pathsInContainer.map { it.cePath!! })
                         }else {
                             Napier.wtf({"Could not find path for md5sum $partMd5Str"})
                             throw IllegalStateException("Could not find the path of md5sum $partMd5Str")

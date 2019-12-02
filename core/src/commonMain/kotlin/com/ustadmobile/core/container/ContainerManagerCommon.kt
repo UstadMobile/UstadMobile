@@ -40,9 +40,11 @@ abstract class ContainerManagerCommon(protected val container: Container,
         val length : Long
 
         /**
-         * The path this entry will have inside the container e.g. META-INF/container.xml
+         * The paths this entry will have inside the container e.g. META-INF/container.xml. This is
+         * normally a list of just 1, but it is theoretically possible that a container could have
+         * multiple files that have the same contents (e.g. the same md5 sum).
          */
-        val pathInContainer: String
+        val pathsInContainer: List<String>
 
 
         /**

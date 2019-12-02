@@ -44,7 +44,7 @@ actual class ContainerManager actual constructor(container: Container,
 
     val mutex = Mutex()
 
-    open class FileEntrySource(private val file: File, override val pathInContainer: String,
+    open class FileEntrySource(private val file: File, private val pathInContainer: String,
                                override val compression: Int = 0) : EntrySource {
         override val length: Long
             get() = file.length()
@@ -53,6 +53,9 @@ actual class ContainerManager actual constructor(container: Container,
 
         override val filePath: String?
             get() = file.getAbsolutePath()
+
+        override val pathsInContainer: List<String>
+            get() = listOf(pathInContainer)
 
         override val md5Sum: ByteArray by lazy {
             val buffer = ByteArray(8 * 1024)
@@ -114,12 +117,15 @@ actual class ContainerManager actual constructor(container: Container,
                 val md5StrBase64 = nextEntry.md5Sum.encodeBase64()
                 val existingFile = existingFiles[md5StrBase64]
                 if(existingFile != null) {
-                    newContainerEntries.add(ContainerEntryWithContainerEntryFile(
-                            nextEntry.pathInContainer, container, existingFile))
+                    newContainerEntries.addAll(
+                        nextEntry.pathsInContainer.map { path ->
+                            ContainerEntryWithContainerEntryFile(path, container, existingFile)
+                        }
+                    )
                 }else {
                     val destFile = File(newFileDir, nextEntry.md5Sum.toHexString())
                     val currentFilePath = nextEntry.filePath
-                    val isExcludedFromGzip = EXCLUDED_GZIP_TYPES.any { gzipIt -> nextEntry.pathInContainer.endsWith(gzipIt) }
+                    val isExcludedFromGzip = EXCLUDED_GZIP_TYPES.any { gzipIt -> nextEntry.pathsInContainer.any { it.endsWith(gzipIt) }}
                     val shouldGzipNow = if (nextEntry.compression == COMPRESSION_GZIP) {
                         false
                     } else {
@@ -155,8 +161,9 @@ actual class ContainerManager actual constructor(container: Container,
                             nextEntry.length, destFile.length(), compressionSetting, getSystemTimeInMillis())
                     containerEntryFile.cefPath = destFile.absolutePath
                     containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
-                    newContainerEntries.add(ContainerEntryWithContainerEntryFile(
-                            nextEntry.pathInContainer, container, containerEntryFile))
+                    newContainerEntries.addAll(nextEntry.pathsInContainer.map { path ->
+                        ContainerEntryWithContainerEntryFile(path, container, containerEntryFile)
+                    })
                 }
             }
 
@@ -184,7 +191,9 @@ actual class ContainerManager actual constructor(container: Container,
             throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")
 
         var currentEntry = 0
-        val pathToMd5Map: Map<String, ByteArray> = entries.map { it.pathInContainer to it.md5Sum }.toMap()
+        val pathToMd5Map: Map<String, ByteArray> = entries.flatMap { entry ->
+            entry.pathsInContainer.map { path -> path to entry.md5Sum }
+        }.toMap()
         addEntries(addOptions, pathToMd5Map) {
             if(currentEntry < entries.size) {
                 entries[currentEntry++]
