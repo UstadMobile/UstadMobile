@@ -16,4 +16,7 @@ interface ContentWithOptionsView : UstadView {
 
     @JsName("importContentFromLink")
     fun importContentFromLink(arguments: HashMap<String, String?>)
+
+    @JsName("showProgressDialog")
+    fun showProgressDialog(show: Boolean)
 }

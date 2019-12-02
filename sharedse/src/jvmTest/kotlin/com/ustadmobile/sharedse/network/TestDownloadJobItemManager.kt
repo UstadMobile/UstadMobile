@@ -253,7 +253,8 @@ class TestDownloadJobItemManager {
         System.gc()
         val memoryUsed = runtime.totalMemory() - runtime.freeMemory() - memoryBefore
         println("Map size = " + statusMap.size)
-        Assert.assertTrue(memoryUsed < 1000 * 1000 * 10)//10MB
+        Assert.assertTrue("Memory used should be less than 15MB. Is actually $memoryUsed",
+                memoryUsed < 1024 * 1024 * 15)//15MB
     }
 
     private fun findInMapByContentEntryUid(contentEntryUid: Long,

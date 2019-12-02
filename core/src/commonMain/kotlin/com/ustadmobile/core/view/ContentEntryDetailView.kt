@@ -66,6 +66,9 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("showDownloadOptionsDialog")
     fun showDownloadOptionsDialog(map: HashMap<String, String>)
 
+    @JsName("showExportContentIcon")
+    fun showExportContentIcon(visible: Boolean)
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetail"

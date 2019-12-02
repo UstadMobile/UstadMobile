@@ -1,6 +1,4 @@
-import { Subscription } from 'rxjs';
-import { UmAngularUtil } from './../util/UmAngularUtil';
-import { UmDbMockService } from './../core/db/um-db-mock.service';
+import { UmAngularUtil, appRountes } from './../util/UmAngularUtil';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
 import { OnInit, OnDestroy } from '@angular/core';
@@ -12,30 +10,37 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   public env = environment;
   protected systemImpl: any;
-  protected readonly context: UmContextWrapper;
-  protected readonly MessageID;
-  public app_name: String = "...";
-  protected viewContext: UmContextWrapper;
-  protected subscription : Subscription;
+  protected readonly context: any;
+  public readonly MessageID = null;
+  protected viewContext: any;
+  public routes = appRountes;
+  public toolBarTitle: string = '...';
+  floating_btn_class_right = ""
+  floating_btn_class_left = ""
+  showIframe: boolean = true 
+  changeColor: boolean = false 
+  userProfile: string = "assets/images/guest_user_icon.png"
+  
 
-
-  protected constructor(protected umService: UmBaseService, protected router: Router, protected route: ActivatedRoute,
-     protected umDatabase: UmDbMockService){
+  protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
-    this.context = new UmContextWrapper(router);
+    this.viewContext = this.context = new UmContextWrapper(router) 
     this.context.setActiveRoute(this.route);
-    this.viewContext = this.context; 
-    this.umService.setContext(this.context);
+    this.umService.init(this)   
+    this.showIframe = this.route.snapshot.queryParams.noiframe == "false"
+    this.floating_btn_class_right = this.umService.isLTRDirectionality() ? "fixed-action-btn-right" : "fixed-action-btn-left";
+    this.floating_btn_class_left = this.umService.isLTRDirectionality() ? "fixed-action-btn-left":"fixed-action-btn-right"
   }
 
-  ngOnInit(): void {
-    //Listen for resources being ready
-    this.subscription = this.umService.getUmObserver().subscribe(content =>{
-      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.app_name = this.getString(this.MessageID.app_name);
-      }
-    });
+  setToolbarTitle(title){
+    UmAngularUtil.fireTitleUpdate(title)
+  }
+
+  ngOnInit(): void {}
+
+  onCreate(){
+    this.umService.appName = this.getString(this.MessageID.app_name)
   }
 
   runOnUiThread(runnable){
@@ -43,15 +48,40 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   }
 
   showError(errorMessage){
-    this.umService.getToastService().show(errorMessage ? errorMessage : 
-      this.getString(this.MessageID.error), 4000, 'red', () => {});
+    if(errorMessage){
+      this.umService.getToastService().show(errorMessage, 4000, 'red', () => {});
+    }
   }
 
   getString(messageId: number){
     return this.systemImpl.getString(messageId, this.context)
   }
 
-  ngOnDestroy(){
-    this.subscription.unsubscribe();
+  openOnNewtab(url){
+    if(this.showIframe == false){
+      window.open(url,'_blank')
+    }
   }
+
+  restartUI(){
+    window.open(UmAngularUtil.getRoutePathParam().origin + "/" + this.systemImpl.getLocale(this.context) + "/", "_self")
+  }
+
+  truncate(value: string, limit: number = 40, trail: String = '…'): string {
+    let result = value || '';
+    if (value) {
+      const words = value.split(/\s+/);
+      if (words.length > Math.abs(limit)) {
+        if (limit < 0) {
+          limit *= -1;
+          result = trail + words.slice(words.length - limit, words.length).join(' ');
+        } else {
+          result = words.slice(0, limit).join(' ') + trail;
+        }
+      }
+    }  
+    return result;
+  }
+
+  ngOnDestroy(){}
 }

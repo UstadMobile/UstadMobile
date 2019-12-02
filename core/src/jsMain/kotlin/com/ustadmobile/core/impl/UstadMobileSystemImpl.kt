@@ -1,8 +1,12 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.HomeView
+import io.ktor.client.request.get
 import kotlinx.io.InputStream
+import kotlinx.io.charsets.Charsets
+import kotlinx.io.core.toByteArray
 import kotlin.browser.localStorage
 import kotlin.browser.window
 import kotlin.js.json
@@ -19,7 +23,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @JsName("stringMap")
     private var stringMap : Any = Any()
 
-    private var isBaseHomePath = false
 
     /**
      * Load all strings to be used in the app
@@ -29,7 +32,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         this.stringMap = values
     }
 
-
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -37,37 +39,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * UIViewController.
      *
      * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
-     * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
+     * @param args (Optional) Hashtable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        val basePath = if(args.containsKey(ARG_CONTENT_ENTRY_UID)
-                || isHomeBasePath(args)) "/${HomeView.VIEW_NAME}/" else "/"
-        umContext.router.navigate(arrayOf(basePath + viewName), mapToRouterParams(args))
-    }
-
-    private fun isHomeBasePath(args: Map<String, String?>): Boolean{
-        var isHomePath = false
-        for ((key, _) in args) {
-            if(key == "path"){
-                isHomePath = true
-            }
-        }
-        return isHomePath
-    }
-
-
-    private fun mapToRouterParams(args: Map<String, String?>): Any{
-        val params = json()
-        for ((key, value) in args) {
-            if(key != "path"){
-                params[key] = value
-            }else{
-                isBaseHomePath = true
-            }
-        }
-        return json("queryParams" to params, "queryParamsHandling" to "merge")
+        umContext.router.navigateByUrl("/${HomeView.VIEW_NAME}/$viewName?${UMFileUtil.mapToQueryString(args)}")
     }
 
     /**
@@ -76,7 +53,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @JsName("getString")
     actual fun getString(messageCode: Int, context: Any): String {
         val map : dynamic = this.stringMap
-        return map[messageCode].toString()
+        val mapVal = map[messageCode]
+        return mapVal?.toString() ?: ""
     }
 
     /**
@@ -235,7 +213,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val client = defaultHttpClient()
+        val content = client.get<String>( "${localStorage.getItem("doordb.endpoint.url")}H5PResources/$path")
+        return content.toByteArray(Charsets.UTF_8)
     }
 
 

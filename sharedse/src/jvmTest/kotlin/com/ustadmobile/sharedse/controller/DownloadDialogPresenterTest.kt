@@ -52,8 +52,6 @@ class DownloadDialogPresenterTest {
 
     private lateinit var mockedNetworkManager: NetworkManagerBleCommon
 
-    private lateinit var mockedDeleteTaskRunner: DeleteJobTaskRunner
-
     private var TEST_ROOT_CONTENT_ENTRY_UID: Long = 0
 
     private lateinit var contentEntrySet: RecursiveContentEntrySet
@@ -68,8 +66,6 @@ class DownloadDialogPresenterTest {
                 Thread(it.getArgument(0) as Runnable).start()
             }
         }
-        mockedDeleteTaskRunner = spy {}
-
 
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase.clearAllTables()
@@ -79,9 +75,7 @@ class DownloadDialogPresenterTest {
 
         val httpd = EmbeddedHTTPD(0, context)
         httpd.start()
-        mockedNetworkManager = spy {
-            on { makeDeleteJobTask(any(), any()) }.doReturn(mockedDeleteTaskRunner)
-        }
+        mockedNetworkManager = spy { }
         mockedNetworkManager.onCreate()
 
         contentEntrySet = insertTestContentEntries(umAppDatabase, System.currentTimeMillis())

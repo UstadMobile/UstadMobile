@@ -24,6 +24,10 @@ import kotlin.js.JsName
 @UmRepository
 abstract class PersonDao : BaseDao<Person> {
 
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<Person>)
+
     class PersonUidAndPasswordHash {
         var passwordHash: String = ""
 
@@ -123,11 +127,16 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
+    @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
-    abstract fun findByUid(uid: Long): Person?
+    abstract suspend fun findByUid(uid: Long): Person?
 
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long
+
+    @JsName("getAllPerson")
+    @Query("SELECT * FROM Person")
+    abstract fun getAllPerson(): List<Person>
 
     companion object {
 

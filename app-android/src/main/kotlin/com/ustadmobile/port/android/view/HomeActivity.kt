@@ -18,6 +18,8 @@ import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
@@ -33,6 +35,7 @@ import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LE
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.GlobalScope
@@ -70,7 +73,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         viewPager.addOnPageChangeListener(this)
 
-        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
+        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UmAppDatabase.getInstance(this).personDao,
+                UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         profileImage.setOnClickListener {
@@ -95,6 +100,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun setLoggedPerson(person: Person) {}
+
+    override fun showReportMenu(show: Boolean) {}
 
     override fun onPageScrollStateChanged(state: Int) {}
 
@@ -103,6 +111,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onPageSelected(position: Int) {
         presenter.handleShowDownloadButton(position == 0)
     }
+
+    override fun restartUI() {}
+
+    override fun showLanguageOptions() {}
+
+    override fun setCurrentLanguage(language: String?) {}
+
+    override fun setLanguageOption(languages: MutableList<String>) { }
+
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -147,38 +164,38 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         val afterPermissionGrantedRunnable = Runnable { networkManagerBle.checkP2PBleServices() }
 
         runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
-                dialogTitle, dialogMessage, {
-                    val alertDialog = AlertDialog.Builder(this@HomeActivity)
-                            .setTitle(R.string.location_permission_title)
-                            .setView(R.layout.view_locationpermission_dialogcontent)
-                            .setNegativeButton(getString(android.R.string.cancel)
-                            ) { dialog, _ -> dialog.dismiss() }
-                            .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                                runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
-                                        dialogTitle, dialogMessage)
-                            }
-                            .create()
-
-                    alertDialog.setOnShowListener {
-                        alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener {view ->
-                            val extraInfo = alertDialog.findViewById<TextView>(R.id.view_locationpermission_extra_details)!!
-                            val button = view as Button
-                            if(extraInfo.visibility == View.GONE) {
-                                extraInfo.visibility = View.VISIBLE
-                                button.text = resources.getText(R.string.less_information)
-                                button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-                                        R.drawable.ic_keyboard_arrow_up_black_24dp, 0)
-                            }else {
-                                extraInfo.visibility = View.GONE
-                                button.text = resources.getText(R.string.more_information)
-                                button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-                                        R.drawable.ic_keyboard_arrow_down_black_24dp, 0)
-                            }
-                        }
+                dialogTitle, dialogMessage) {
+            val alertDialog = AlertDialog.Builder(this@HomeActivity)
+                    .setTitle(R.string.location_permission_title)
+                    .setView(R.layout.view_locationpermission_dialogcontent)
+                    .setNegativeButton(getString(android.R.string.cancel)
+                    ) { dialog, _ -> dialog.dismiss() }
+                    .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                        runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
+                                dialogTitle, dialogMessage)
                     }
+                    .create()
 
-                    alertDialog
-                })
+            alertDialog.setOnShowListener {
+                alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener {view ->
+                    val extraInfo = alertDialog.findViewById<TextView>(R.id.view_locationpermission_extra_details)!!
+                    val button = view as Button
+                    if(extraInfo.visibility == View.GONE) {
+                        extraInfo.visibility = View.VISIBLE
+                        button.text = resources.getText(R.string.less_information)
+                        button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                R.drawable.ic_keyboard_arrow_up_black_24dp, 0)
+                    }else {
+                        extraInfo.visibility = View.GONE
+                        button.text = resources.getText(R.string.more_information)
+                        button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                R.drawable.ic_keyboard_arrow_down_black_24dp, 0)
+                    }
+                }
+            }
+
+            alertDialog
+        }
     }
 
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
@@ -186,26 +203,23 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         // Returns total number of pages
         override fun getCount(): Int {
-            return NUM_ITEMS
+            val activeAccount = UmAccountManager.getActiveAccount(context)
+            return if( activeAccount != null && activeAccount.personUid != 0L) 3 else 2
         }
 
         // Returns the fragment to display for that page
         override fun getItem(position: Int): Fragment? {
             val bundle = Bundle()
-
-            return when (position) {
+            bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
+            when (position) {
                 0 // Fragment # 0 - This will show FirstFragment
-                -> {
-                    bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
-                    ContentEntryListFragment.newInstance(bundle)
-                }
-                1 // Fragment # 0 - This will show FirstFragment different title
-                -> {
-                    bundle.putString(ARG_DOWNLOADED_CONTENT, "")
-                    ContentEntryListFragment.newInstance(bundle)
-                }
-                else -> null
+                ->  bundle.putString(ARG_LIBRARIES_CONTENT, "")
+                1 // Fragment # 1 - This will show FirstFragment different title
+                ->   bundle.putString(ARG_DOWNLOADED_CONTENT, "")
+                2 // Fragment # 2 - This will show FirstFragment different title
+                ->  bundle.putString(ARG_RECYCLED_CONTENT, "")
             }
+            return ContentEntryListFragment.newInstance(bundle)
         }
 
         // Returns the page title for the top indicator
@@ -214,15 +228,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             when (position) {
                 0 -> return impl.getString(MessageID.libraries, context)
                 1 -> return impl.getString(MessageID.downloaded, context)
+                2 -> return impl.getString(MessageID.recycled, context)
             }
             return null
 
         }
-
-        companion object {
-            private const val NUM_ITEMS = 2
-        }
-
     }
 
 

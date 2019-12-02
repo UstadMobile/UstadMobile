@@ -1,0 +1,105 @@
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-right default-content-padding-left">
+  <div class="col s12 default-form-padding {{depth_value}} default-graph-margin white default-padding-top default-padding-bottom">
+
+    <form class="col s12" [formGroup]="umFormReportOptions">
+      <div class="row">
+        <label i18n="@@xapi_options_general" class="{{env.colorPrimaryText}}">General </label>
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="[visualization_label]"
+              [formControl]="umFormReportOptions.controls['visualization']" id="graph_visualization">
+              <option *ngFor="let graph of translatedGraphList" value="{{translatedGraphList.indexOf(graph)}}">{{graph}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <label i18n="@@xapi_options_axes" class="{{env.colorPrimaryText}}">Axes </label>
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="[y_axis_label]" [formControl]="umFormReportOptions.controls['y_axis']"
+              id="graph_y_axis">
+              <option *ngFor="let axis of translatedYAxisList" value="{{translatedYAxisList.indexOf(axis)}}">{{axis}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="[x_axis_label]" [formControl]="umFormReportOptions.controls['x_axis']"
+              id="graph_x_axis">
+              <option *ngFor="let axis of translatedXAxisList" value="{{translatedXAxisList.indexOf(axis)}}">{{axis}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+
+        <div class="input-field col s12">
+          <mz-select-container [inline]=false>
+            <select mz-select [label]="[sub_group_label]" [formControl]="umFormReportOptions.controls['sub_group']"
+              id="graph_sub_group">
+              <option *ngFor="let axis of translatedXAxisList" value="{{translatedXAxisList.indexOf(axis)}}">{{axis}}</option>
+            </select>
+          </mz-select-container>
+        </div>
+
+      </div>
+
+
+
+      <div class="row">
+        <label i18n="@@xapi_options_filters" class="{{env.colorPrimaryText}}">Filters </label>
+        <div class="input-field col s12">
+
+          <mz-chip-input 
+          (add)="onAddPerson($event)"
+          (delete)="onDeletePerson($event)" id="graph_who"
+            [autocompleteOptions]="whoAutoComplete" [placeholder]="[graph_who_label]">
+          </mz-chip-input>
+        </div>
+
+        <div class="input-field col s12">
+
+          <mz-chip-input 
+          (add)="onAddVerb($event)"
+          (delete)="onDeleteVerb($event)" id="graph_did"
+            [autocompleteOptions]="didAutoComplete" [placeholder]="[graph_did_label]">
+          </mz-chip-input>
+        </div>
+
+        <div class="input-field col s12">
+          <mz-input-container >
+            <input mz-input (click)="handleWhatClicked()" value="{{inMemorySelectedNames}}" [label]="[graph_what_label]" [validate]="true"
+             id="graph_what" type="text">
+          </mz-input-container>
+        </div>
+
+
+        <div class="input-field col s12">
+          <label class="default-content-padding-left" i18n="@@xapi_options_when">When </label> 
+
+          <div class="row default-margin-top">
+              <mz-datepicker-container (click)="$event.stopPropagation()" class="col s6 default-margin-top">
+                  <input mz-datepicker [label]="[graph_when_start_label]" [options]="datepickerOptions" id="graph_when_start"
+                    [formControl]="umFormReportOptions.controls['graph_when_start']" type="text">
+                </mz-datepicker-container>
+      
+                <mz-datepicker-container  (click)="$event.stopPropagation()" class="col s6 default-margin-top">
+                  <input mz-datepicker [label]="[graph_when_end_label]" [options]="datepickerOptions" id="graph_when_end"
+                    [formControl]="umFormReportOptions.controls['graph_when_end']" type="text">
+                </mz-datepicker-container>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="{{floating_btn_class_right}}" (click)="handleViewReportPreview()">
+    <a class="btn-floating btn-large {{env.colorAcent}}">
+      <i class="large material-icons">done</i>
+    </a>
+  </div>
+
+</div>

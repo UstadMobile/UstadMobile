@@ -80,6 +80,8 @@ open class ContentEntry() {
 
     var languageVariantUid: Long = 0
 
+    var contentFlags: Int = 0
+
     var leaf: Boolean = false
 
     var imported: Boolean = false
@@ -94,7 +96,13 @@ open class ContentEntry() {
      *
      * @param publik true if this content entry is public for anyone to use, false otherwise
      */
-    var publik: Boolean = false
+    var publik: Boolean = true
+
+    /**
+     * Represents if this entry is being recycled or not.
+     * @return true if entry was recycled false otherwise
+     */
+    var ceInactive: Boolean = false
 
     var contentTypeFlag: Int = 0
 
@@ -183,7 +191,7 @@ open class ContentEntry() {
 
         const val LICENSE_TYPE_CC_BY_ND = 9
 
-        const val PUBLIC_DOMAIN = 7
+        const val LICENSE_TYPE_PUBLIC_DOMAIN = 7
 
         const val UNDEFINED_TYPE = 0
 
@@ -201,7 +209,13 @@ open class ContentEntry() {
 
         const val ARTICLE_TYPE = 7
 
+        const val LICENSE_TYPE_OTHER = 8
 
+        const val FLAG_IMPORTED = 1
+
+        const val FLAG_CONTENT_EDITOR = 2
+
+        const val FLAG_SCRAPPED = 4
     }
 
 }

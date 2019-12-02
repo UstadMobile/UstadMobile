@@ -30,5 +30,13 @@ actual class ContainerManager actual constructor(container: Container,
         TODO("not implemented on JS") //To change body of created functions use File | Settings | File Templates.
     }
 
+     actual override fun exportContainer(zipFile: String,progressListener: ExportProgressListener?){
+        TODO("not implemented on JS")
+    }
+
+    actual override fun cancelExporting() {
+        TODO("not implemented on JS")
+    }
+
 
 }

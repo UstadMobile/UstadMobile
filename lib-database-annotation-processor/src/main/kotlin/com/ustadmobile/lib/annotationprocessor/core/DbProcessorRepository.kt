@@ -495,7 +495,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .beginControlFlow("if(!_entityAttachmentsDir.exists())")
                         .add("_entityAttachmentsDir.mkdirs()\n")
                         .endControlFlow()
-                        .add("%T(${dataParam.simpleName}).%M(_destFile)\n",
+                        .add("%T(${dataParam.simpleName}).%M(_destFile, overwrite = true)\n",
                             File::class, MemberName("kotlin.io", "copyTo"))
             }else if(funEl.getAnnotation(GetAttachmentData::class.java) != null) {
                 codeBlock.add("return File(_attachmentsDir, %S + %T.separator + ${entityParam.simpleName}.${pkEl.simpleName}.toString()).absolutePath\n",

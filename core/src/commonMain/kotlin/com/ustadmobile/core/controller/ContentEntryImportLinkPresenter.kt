@@ -108,8 +108,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 headResponse = client.headRequest(url)
 
                 if (headResponse.status == 302 && isGoogleDrive) {
-                    val googleDriveUrl = headResponse.headers["location"]?.get(0)!!
-                    var response = defaultHttpClient().get<HttpResponse>(googleDriveUrl)
+                    url = headResponse.headers["location"]?.get(0)!!
+                    var response = defaultHttpClient().get<HttpResponse>(url)
                     headResponse = HeadResponse(response.status.value, response.headers.toMap())
 
                     response.discardRemaining()
@@ -297,6 +297,7 @@ suspend fun checkIfH5PValidAndReturnItsContent(url: String): String? {
     try {
         urlLink = Url(url)
     } catch (exception: URLParserException) {
+        println("error :$exception.message")
         return null
     }
 

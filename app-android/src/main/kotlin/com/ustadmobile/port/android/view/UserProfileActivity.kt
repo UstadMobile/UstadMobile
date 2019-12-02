@@ -7,9 +7,11 @@ import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.lib.db.entities.Person
 
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
@@ -35,7 +37,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         presenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
+                this, UmAppDatabase.getInstance(this).personDao,UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         logout.setOnClickListener {
@@ -47,8 +49,12 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         }
     }
 
-    override fun setUsername(username: String) {
-        supportActionBar!!.title = username
+    override fun loadProfileIcon(profile: String) {
+
+    }
+
+    override fun setLoggedPerson(person: Person) {
+        supportActionBar!!.title = person.username
     }
 
     override fun showLanguageOptions() {

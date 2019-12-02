@@ -1,20 +1,48 @@
-html, body , main{
-    height: 100%;
+html,
+body,
+main {
+  height: 100vh;
+}
+
+.not-found {
+  width: 100% !important;
+  height: 100vh !important;
+  margin-top: -30px !important;
+  padding-top: 15% !important;
+}
+
+.error-404 {
+  font-size: 10em;
+}
+
+.tag-line {
+  font-size: 1.4em;
+}
+
+.tag-line-go-back {
+  font-size: 1.3em;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.center {
+    position: absolute;
+    width: 50% !important; 
+    height: 50% !important; 
+    top: 20%;
+    left: 25%;
   }
-
-.not-found{
-    width: 100% !important;
-    height: 100% !important;
-    margin-top: -30px !important;
-    padding-top: 17% !important;
-    padding-bottom: 20% !important;
-    color: white;
-}
-
-.error-404{
-    font-size: 10em;
-}
-
-.tag-line{
-    font-size: 1.8em;
-}
+  
+  @media (min-width: 320px) and (max-width: 480px) {
+    .error-404 {
+        font-size: 8em;
+      }
+    .center {
+      position: absolute;
+      width: 90% !important;
+      height: 40% !important;
+      top: 35%;
+      left: 30%; 
+    }
+  }
+  

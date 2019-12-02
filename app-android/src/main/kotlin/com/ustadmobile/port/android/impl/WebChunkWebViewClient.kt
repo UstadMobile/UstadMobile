@@ -8,6 +8,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.controller.IndexLog
 import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
@@ -49,7 +50,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
 
             for (log in indexList) {
-                indexMap[log.url!!] = log
+                indexMap[log.url] = log
             }
             val linksMap = indexLog.links
             if (linksMap != null && linksMap.isNotEmpty()) {
@@ -216,30 +217,6 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             }
         }
         return null
-    }
-
-    inner class IndexLog {
-
-        var title: String? = null
-
-        var entries: List<IndexEntry>? = null
-
-        var links: Map<String, String>? = null
-
-        inner class IndexEntry {
-
-            var url: String? = null
-
-            var mimeType: String? = null
-
-            var path: String? = null
-
-            var headers: Map<String, String>? = null
-
-            var requestHeaders: Map<String, String>? = null
-
-        }
-
     }
 
 }

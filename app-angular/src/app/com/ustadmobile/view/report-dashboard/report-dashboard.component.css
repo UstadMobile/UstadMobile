@@ -1,17 +1,22 @@
-.selected-chip{
-    background: rgb(114, 113, 113);
-    color: black
+.selected-chip {
+  background: rgb(114, 113, 113);
+  color: black
 }
 
-.options{
-    position:relative;
-    Z-index: 1;
-    cursor: pointer
+.options {
+  position: relative;
+  Z-index: 1;
+  cursor: pointer
 }
+
 h2 {
-    font-size: 1.7em
+  font-size: 1.7em
 }
 
-.default-margin {
-    margin: 2% !important;
-  }
+.l6 {
+  min-width: 90% !important;
+}
+
+.default-graph-margin {
+  margin: 1% 3% 1% 4.5% !important;
+}
