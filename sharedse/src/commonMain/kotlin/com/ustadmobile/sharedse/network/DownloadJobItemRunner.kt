@@ -2,6 +2,7 @@ package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
 import com.tonyodev.fetch2.Error
+import com.tonyodev.fetch2.Status
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
@@ -36,9 +37,12 @@ import com.ustadmobile.core.util.ext.encodeBase64
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
+import com.ustadmobile.sharedse.network.fetch.enqueue
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -132,9 +136,14 @@ class DownloadJobItemRunner
     private var existingEntriesBytesDownloaded = 0L
 
     @Volatile
-    private var currentFetchRequestId: Int = -1
+    private var currentFetchRequestId: Int = 0
 
     private var currentFetchDownload: DownloadMpp? = null
+
+    /**
+     * Lock used for any operation that is changing the status of the Fetch download
+     */
+    private val fetchStatusLock = Mutex()
 
     private val fetchListener = object: AbstractFetchListenerMpp() {
 
@@ -148,6 +157,7 @@ class DownloadJobItemRunner
         override fun onCompleted(download: DownloadMpp) {
             if(download.id == currentFetchRequestId) {
                 Napier.d({"Download completed #${download.id} ${download.url}"})
+                currentFetchRequestId = -1
                 currentDownloadAttempt.value?.complete(JobStatus.COMPLETE)
             }
         }
@@ -155,6 +165,7 @@ class DownloadJobItemRunner
         override fun onError(download: DownloadMpp, error: Error, throwable: Throwable?) {
             if(download.id == currentFetchRequestId) {
                 Napier.d({"Download error #${download.id} ${download.url}"}, throwable)
+                currentFetchRequestId = -1
                 currentDownloadAttempt.value?.completeExceptionally(throwable ?: IOException("$error"))
             }
         }
@@ -244,7 +255,11 @@ class DownloadJobItemRunner
 
             networkManager.httpFetcher.removeListener(fetchListener)
 
-            //TODO: if download is active, pause it here
+            fetchStatusLock.withLock {
+                if(currentFetchRequestId != 0) {
+                    networkManager.httpFetcher.pause(currentFetchRequestId)
+                }
+            }
 
 
             withContext(mainCoroutineDispatcher) {
@@ -330,113 +345,110 @@ class DownloadJobItemRunner
         val destTmpFile = FileSe("$destinationDir/${downloadItem.djiUid}.tmp")
         val containerEntryFileList = mutableListOf<ContainerEntryWithMd5>()
         for (attemptNum in attemptsRemaining downTo 1) {
-            //numFailures.value = 0
-            currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
-                    downloadItem.djiContainerUid)
+            try {
+                currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
+                        downloadItem.djiContainerUid)
 
-            val networkNodeToUse = currentNetworkNode
-            val isFromCloud = networkNodeToUse == null
-            val history = DownloadJobItemHistory()
-            history.mode = if (isFromCloud) MODE_CLOUD else MODE_LOCAL
-            history.startTime = getSystemTimeInMillis()
-            history.downloadJobItemId = downloadItem.djiUid
-            history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
-            history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
+                val networkNodeToUse = currentNetworkNode
+                val isFromCloud = networkNodeToUse == null
+                val history = DownloadJobItemHistory()
+                history.mode = if (isFromCloud) MODE_CLOUD else MODE_LOCAL
+                history.startTime = getSystemTimeInMillis()
+                history.downloadJobItemId = downloadItem.djiUid
+                history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
+                history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
 
-            val downloadEndpoint: String?
+                val downloadEndpoint: String?
 
-            if (networkNodeToUse == null) {
-                if (connectivityStatus?.wifiSsid != null
-                        && connectivityStatus?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
-                    //we are connected to a local peer, but need the normal wifi
-                    //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
-                    // set status to waiting for connection and stop
-                    launch(mainCoroutineDispatcher) {
-                        if (!connectToCloudNetwork()) {
-                            //connection has failed
-                            attemptsRemaining--
-                            recordHistoryFinished(history, false)
-                            //continue
+                if (networkNodeToUse == null) {
+                    if (connectivityStatus?.wifiSsid != null
+                            && connectivityStatus?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
+                        //we are connected to a local peer, but need the normal wifi
+                        //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
+                        // set status to waiting for connection and stop
+                        launch(mainCoroutineDispatcher) {
+                            if (!connectToCloudNetwork()) {
+                                throw IOException("${mkLogPrefix()} could not connect to cloud network")
+//                                //connection has failed
+//                                attemptsRemaining--
+//                                recordHistoryFinished(history, false)
+//                                //continue
+                            }
                         }
                     }
-                }
 
-                if(connectivityStatus?.wifiSsid != null) {
-                    networkManager.lockWifi(downloadWiFiLock)
-                }
-
-                downloadEndpoint = endpointUrl
-            } else {
-                if (networkNodeToUse.groupSsid == null
-                        || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
-                    if (!connectToLocalNodeNetwork()) {
-                        //recording failure will push the node towards the bad threshold, after which
-                        // the download will be attempted from the cloud
-                        recordHistoryFinished(history, false)
-                        continue
+                    if(connectivityStatus?.wifiSsid != null) {
+                        networkManager.lockWifi(downloadWiFiLock)
                     }
+
+                    downloadEndpoint = endpointUrl
+                } else {
+                    if (networkNodeToUse.groupSsid == null
+                            || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
+                        if (!connectToLocalNodeNetwork()) {
+                            throw IOException("${mkLogPrefix()} could not connect to local node network")
+                            //recording failure will push the node towards the bad threshold, after which
+                            // the download will be attempted from the cloud
+//                            recordHistoryFinished(history, false)
+//                            continue
+                        }
+                    }
+
+                    downloadEndpoint = currentNetworkNode!!.endpointUrl
                 }
 
-                downloadEndpoint = currentNetworkNode!!.endpointUrl
-            }
-
-            val localHttpClient = networkManager.localHttpClient
-            if(localHttpClient != null) {
-                UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using local http client: $localHttpClient")
-                currentHttpClient = localHttpClient
-            }else {
-                UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
-                currentHttpClient = defaultHttpClient()
-            }
-
-            history.url = downloadEndpoint
-
-            UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                    " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
-                    " Attempts remaining= " + attemptsRemaining)
-            downloadStartTime = getSystemTimeInMillis()
-
-            val containerEntryListVal = currentHttpClient.get<List<ContainerEntryWithMd5>>(
-                    "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
-            containerEntryFileList.clear()
-            containerEntryFileList.addAll(containerEntryListVal)
-
-            entriesDownloaded.value = 0
-
-            val entriesToDownload = containerManager.linkExistingItems(containerEntryListVal)
-                    .distinctBy { it.cefMd5 }
-                    .sortedBy { it.cefMd5 }
-            existingEntriesBytesDownloaded = containerManager.allEntries
-                    .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
-
-            val entriesListStr = entriesToDownload.joinToString(separator = ";") { it.ceCefUid.toString() }
-            val fetchRequest = RequestMpp(UMFileUtil.joinPaths(endpointUrl,
-                    ENDPOINT_CONCATENATEDFILES, entriesListStr), destTmpFile.getAbsolutePath())
-
-            history.startTime = getSystemTimeInMillis()
-            val currentDownloadAttemptVal  = CompletableDeferred<Int>()
-            currentDownloadAttempt.value = currentDownloadAttemptVal
-
-            networkManager.httpFetcher.enqueue(fetchRequest, object: FuncMpp<RequestMpp> {
-                override fun call(result: RequestMpp) {
-                    currentFetchRequestId = result.id
+                val localHttpClient = networkManager.localHttpClient
+                if(localHttpClient != null) {
+                    UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using local http client: $localHttpClient")
+                    currentHttpClient = localHttpClient
+                }else {
+                    UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
+                    currentHttpClient = defaultHttpClient()
                 }
-            },
-            object: FuncMpp<Error> {
-                override fun call(result: Error) {
-                    currentDownloadAttemptVal.completeExceptionally(IOException(result.toString()))
+
+                history.url = downloadEndpoint
+
+                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+                        " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
+                        " Attempts remaining= " + attemptsRemaining)
+                downloadStartTime = getSystemTimeInMillis()
+
+                val containerEntryListVal = currentHttpClient.get<List<ContainerEntryWithMd5>>(
+                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
+                containerEntryFileList.clear()
+                containerEntryFileList.addAll(containerEntryListVal)
+
+                entriesDownloaded.value = 0
+
+                val entriesToDownload = containerManager.linkExistingItems(containerEntryListVal)
+                        .distinctBy { it.cefMd5 }
+                        .sortedBy { it.cefMd5 }
+                existingEntriesBytesDownloaded = containerManager.allEntries
+                        .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
+
+                val entriesListStr = entriesToDownload.joinToString(separator = ";") { it.ceCefUid.toString() }
+
+
+                history.startTime = getSystemTimeInMillis()
+                val currentDownloadAttemptVal  = CompletableDeferred<Int>()
+                currentDownloadAttempt.value = currentDownloadAttemptVal
+
+                fetchStatusLock.withLock {
+                    val fetchRequest = RequestMpp(UMFileUtil.joinPaths(endpointUrl,
+                            ENDPOINT_CONCATENATEDFILES, entriesListStr), destTmpFile.getAbsolutePath())
+                    currentFetchRequestId = fetchRequest.id
+                    networkManager.httpFetcher
+                            .takeIf { runnerStatus.value != JobStatus.STOPPED }
+                            ?.enqueue(fetchRequest)
                 }
-            })
 
 
-            try {
                 downloadAttemptStatus = currentDownloadAttemptVal.await()
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {
                     break
-                }else {
-                    delay(retryDelay)
                 }
             }catch(e: Exception) {
+                Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
                 delay(retryDelay)
             }
         }
@@ -464,7 +476,7 @@ class DownloadJobItemRunner
                 containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = true),
                         pathToMd5Map) {
                     val nextPart = concatenatedInputStream.nextPart()
-                    if(nextPart != null) {
+                    if(nextPart != null && !(startDownloadFnJobRef.value?.isCancelled ?: false)) {
                         val partMd5Str = nextPart.id.encodeBase64()
                         val pathsInContainer = containerEntryFileList.filter {
                             it.cefMd5 == partMd5Str && it.cePath != null
@@ -485,7 +497,7 @@ class DownloadJobItemRunner
             }
         }
 
-        stop(downloadAttemptStatus)
+        stop(if(downloadAttemptStatus != -1) downloadAttemptStatus else JobStatus.FAILED)
     }
 
 
@@ -634,5 +646,7 @@ class DownloadJobItemRunner
         const val BAD_PEER_FAILURE_THRESHOLD = 2
 
         private const val CONNECTION_TIMEOUT = 60
+
+        private val ACTIVE_FETCH_STATUSES = listOf(Status.DOWNLOADING, Status.QUEUED, Status.ADDED)
     }
 }

@@ -7,8 +7,9 @@ actual interface FetchMpp {
 
     actual fun enqueue(requests: List<RequestMpp>, func: FuncMpp<List<Pair<RequestMpp, Error>>>?): FetchMpp
 
+    actual fun pause(id: Int, func: FuncMpp<DownloadMpp>?, func2: FuncMpp<Error>?): FetchMpp
 
-
+    actual fun resume(id: Int, func: FuncMpp<DownloadMpp>?, func2: FuncMpp<Error>?): FetchMpp
 
     actual fun addListener(listener: FetchListenerMpp): FetchMpp
 

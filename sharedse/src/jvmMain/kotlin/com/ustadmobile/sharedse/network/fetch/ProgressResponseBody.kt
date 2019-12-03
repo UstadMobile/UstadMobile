@@ -29,7 +29,7 @@ class ProgressResponseBody(private val requestId: Int,
                 val bytesRead = super.read(sink, byteCount)
                 // read() returns the number of bytes read, or -1 if this source is exhausted.
                 totalBytesRead += if (bytesRead != -1L) bytesRead else 0L
-                listener(0, totalBytesRead, src.contentLength())
+                listener(requestId, totalBytesRead, src.contentLength())
                 return bytesRead
             }
         }

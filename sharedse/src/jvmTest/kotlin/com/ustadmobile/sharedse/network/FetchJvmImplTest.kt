@@ -66,7 +66,7 @@ class FetchJvmImplTest {
         destFile = downloadDestFileVal
         val fetchRequest = RequestMpp("http://localhost:${server.listeningPort}/static/top_header_bg.jpg",
                 downloadDestFileVal.absolutePath)
-        fetchImpl.enqueue(fetchRequest)
+        fetchImpl.enqueue(fetchRequest, null, null)
         runBlocking {
             withTimeout(10000) {completableDeferred.await() }
 
