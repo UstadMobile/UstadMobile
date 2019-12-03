@@ -302,6 +302,18 @@
             android:label="@string/people"
             android:theme="@style/Theme.UstadTheme"/>
 
+        <activity
+            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:label="@string/app_name"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

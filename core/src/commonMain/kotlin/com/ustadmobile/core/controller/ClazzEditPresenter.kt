@@ -52,7 +52,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val clazzDao = repository.clazzDao
+    private val clazzDaoDB = UmAppDatabase.getInstance(context).clazzDao
     private val locationDao = repository.locationDao
+    private val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
     private val customFieldDao: CustomFieldDao
     private val customFieldValueDao: CustomFieldValueDao
     private val customFieldValueOptionDao: CustomFieldValueOptionDao
@@ -166,11 +168,11 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                         "Temp location", timeZoneString)
                 tempLocation.locationActive = false
 
-                val newLocationUid = locationDao.insertAsync(tempLocation)
+                val newLocationUid = locationDaoDB.insertAsync(tempLocation)
 
                 tempClazzLocationUid = newLocationUid!!
 
-                val clazzUid = clazzDao.insertAsync(Clazz("", newLocationUid))
+                val clazzUid = clazzDaoDB.insertAsync(Clazz("", newLocationUid))
                 initFromClazz(clazzUid!!)
 
             }
@@ -182,22 +184,22 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         this.currentClazzUid = clazzUid
 
         GlobalScope.launch {
-            val clazzData = clazzDao.findByUidAsync(currentClazzUid)
+//            val clazzData = clazzDao.findByUidAsync(currentClazzUid)
+            val clazzData = clazzDaoDB.findByUidAsync(currentClazzUid)
             handleClazzValueChanged(clazzData)
 
             //Get location if set
-             if(clazzData!!.clazzLocationUid != 0L){
-                 val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
-                 val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
-                 view.runOnUiThread(Runnable {
-                     val locationTimeZone = location!!.timeZone
-                     if(locationTimeZone != null && !locationTimeZone.isEmpty()){
-                         view.setTimeZonePosition(timeZoneToPositionId!!.get(locationTimeZone)!!)
-//                         view.setTimezoneSelected(timeZoneToPositionId!!.get(locationTimeZone)!!)
-                     }
-                     view.updateLocationSetName(location!!.title!!)
-                 })
-             }
+            if(clazzData!!.clazzLocationUid != 0L){
+                val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
+                val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
+                view.runOnUiThread(Runnable {
+                    val locationTimeZone = location!!.timeZone
+                    if(locationTimeZone != null && !locationTimeZone.isEmpty()){
+                        view.setTimeZonePosition(timeZoneToPositionId!!.get(locationTimeZone)!!)
+                    }
+                    view.updateLocationSetName(location!!.title!!)
+                })
+            }
         }
 
         GlobalScope.launch {
@@ -233,7 +235,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         updateViewWithProvider()
     }
 
-    
+
 
     /**
      * Common method to convert Array List to String Array
@@ -251,7 +253,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     }
 
 
-    
+
     /**
      * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
      * defined within this method and will automatically update the sort options without any
@@ -381,16 +383,18 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
         val sortPresets = arrayListToStringArray(presetAL)
 
-        view.setTimezonePresets(sortPresets,0)
+        view.runOnUiThread(Runnable {
+            view.setTimezonePresets(sortPresets,0)
+        })
     }
-
-
 
     /**
      * Common method to update the provider st on this Presenter to the view.
      */
     private fun updateViewWithProvider() {
-        view.setClazzScheduleProvider(clazzScheduleLiveData!!)
+        view.runOnUiThread(Runnable {
+            view.setClazzScheduleProvider(clazzScheduleLiveData!!)
+        })
     }
 
     /**
@@ -479,7 +483,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      * @param newName The class name
      */
     fun updateName(newName: String) {
-        mUpdatedClazz!!.clazzName = newName
+        if(mUpdatedClazz != null && newName!=null && !newName.isEmpty()) {
+            mUpdatedClazz!!.clazzName = newName
+        }
     }
 
     /**
