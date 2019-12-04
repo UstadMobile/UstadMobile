@@ -1,0 +1,35 @@
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-right default-content-padding-left">
+  <div class="col s12 default-form-padding z-depth-1 default-graph-margin white default-padding-top default-padding-bottom">
+      <google-chart  #chart [title]="chartTitle" [type]="chartType" [data]="chartData" [columnNames]="columnNames" [options]="options"
+      [width]="width" [height]="height"> 
+    </google-chart>
+
+    <div class="row default-margin-top">
+        <table>
+            <thead>
+              <tr>
+                  <th class="{{data_class}}" i18n="@@xapi_person_header">Person</th>
+                  <th class="{{data_class}}" i18n="@@xapi_verb_header">Did When</th>
+                  <th class="{{data_class}}" i18n="@@xapi_result_header">Result</th>
+                  <th class="{{data_class}}" i18n="@@xapi_when_header">When</th>
+              </tr>
+            </thead>
+    
+            <tbody>
+              <tr *ngFor="let data of tableDataList">
+                <td class="{{data_class}}">{{data.name}}</td>
+                <td class="{{data_class}}">{{data.verb}}</td>
+                <td class="{{data_class}}">{{data.result | actionResultData}}</td>
+                <td class="{{data_class}}">{{data.whenDate | date: 'mediumDate'}}</td>
+              </tr>
+            </tbody>
+          </table>
+    </div>
+  </div>
+
+    <div class="{{floating_btn_class_right}}" (click)="handleAddToDashboard()">
+      <a class="btn-floating btn-large {{env.colorAcent}}">
+        <i class="large material-icons">add</i>
+      </a>
+    </div>
+</div>

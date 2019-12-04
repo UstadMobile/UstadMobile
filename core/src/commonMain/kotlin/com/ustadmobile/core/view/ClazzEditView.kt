@@ -21,6 +21,8 @@ interface ClazzEditView : UstadView {
 
     fun updateToolbarTitle(titleName: String)
 
+    fun setInProgress(inProgress: Boolean)
+
     /**
      * Provider for schedule of this class.
      *

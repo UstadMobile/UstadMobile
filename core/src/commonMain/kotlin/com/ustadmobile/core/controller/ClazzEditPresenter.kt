@@ -56,6 +56,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     private val locationDao = repository.locationDao
     private val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
     private val customFieldDao: CustomFieldDao
+    private val customFieldDaoDB = UmAppDatabase.getInstance(context).customFieldDao
     private val customFieldValueDao: CustomFieldValueDao
     private val customFieldValueOptionDao: CustomFieldValueOptionDao
 
@@ -205,7 +206,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         GlobalScope.launch {
 
 
-            val result = clazzDao.findByUidAsync(currentClazzUid)
+            val result = clazzDaoDB.findByUidAsync(currentClazzUid)
 
             mUpdatedClazz = result
             currentClazzUid = mUpdatedClazz!!.clazzUid
@@ -215,12 +216,6 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
             holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
             view.runOnUiThread(Runnable {
                 holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
-            })
-
-            //Locations
-            locationsLiveData = repository.locationDao.findAllActiveLocationsLive()
-            view.runOnUiThread(Runnable {
-                locationsLiveData!!.observe(thisP, thisP::handleAllLocationsChanged)
             })
 
             //Timezones
@@ -440,32 +435,32 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      * @param locations The list of Locations available.
      */
     private fun handleAllLocationsChanged(locations: List<Location>?) {
-        var selectedPosition = 0
-
-        locationUidToPosition = HashMap()
-        positionToLocationUid = HashMap()
-
-        val locationList = ArrayList<String>()
-        var pos = 0
-        for (el in locations!!) {
-            locationList.add(el.title!!)
-            locationUidToPosition!![el.locationUid] = pos
-            positionToLocationUid!![pos] = el.locationUid
-            pos++
-        }
-        val locationPreset = locationList.toTypedArray<String>()
-
-        if (mOriginalClazz == null) {
-            mOriginalClazz = Clazz()
-            mOriginalClazz!!.isClazzActive = false
-        }
-
-        if (mOriginalClazz!!.clazzLocationUid != 0L) {
-            if (locationUidToPosition!!.containsKey(mOriginalClazz!!.clazzLocationUid))
-                selectedPosition = locationUidToPosition!![mOriginalClazz!!.clazzLocationUid]!!
-        }
-
-        view.setLocationPresets(locationPreset, selectedPosition)
+//        var selectedPosition = 0
+//
+//        locationUidToPosition = HashMap()
+//        positionToLocationUid = HashMap()
+//
+//        val locationList = ArrayList<String>()
+//        var pos = 0
+//        for (el in locations!!) {
+//            locationList.add(el.title!!)
+//            locationUidToPosition!![el.locationUid] = pos
+//            positionToLocationUid!![pos] = el.locationUid
+//            pos++
+//        }
+//        val locationPreset = locationList.toTypedArray<String>()
+//
+//        if (mOriginalClazz == null) {
+//            mOriginalClazz = Clazz()
+//            mOriginalClazz!!.isClazzActive = false
+//        }
+//
+//        if (mOriginalClazz!!.clazzLocationUid != 0L) {
+//            if (locationUidToPosition!!.containsKey(mOriginalClazz!!.clazzLocationUid))
+//                selectedPosition = locationUidToPosition!![mOriginalClazz!!.clazzLocationUid]!!
+//        }
+//
+//        view.setLocationPresets(locationPreset, selectedPosition)
     }
 
     /**
@@ -611,7 +606,6 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      */
     fun handleClickDone(newLocation: String) {
         mUpdatedClazz!!.isClazzActive = true
-
 
         GlobalScope.launch {
 

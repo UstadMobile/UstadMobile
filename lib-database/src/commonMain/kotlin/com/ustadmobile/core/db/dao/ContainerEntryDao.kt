@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.*
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
@@ -58,4 +59,7 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
     @Delete
     abstract fun deleteList(entries: List<ContainerEntry>)
+
+    @Query("DELETE FROM ContainerEntry WHERE ceContainerUid IN (SELECT containerUid FROM Container WHERE containerContentEntryUid = :entryUid)")
+    abstract fun deleteByContentEntryUid(entryUid: Long)
 }

@@ -23,6 +23,7 @@ import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -75,7 +76,8 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
 
         mPresenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
+                this, UmAppDatabase.getInstance(this).personDao,
+                UstadMobileSystemImpl.instance)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         logout.setOnClickListener {
@@ -95,7 +97,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     }
 
     override fun showLanguageOptions() {
-        
+
     }
 
     override fun callFinishAffinity(){

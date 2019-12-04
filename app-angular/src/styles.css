@@ -7,6 +7,24 @@ main {
   min-height: 600px !important;
 }
 
+.fixed-action-btn-left{
+  position: fixed;
+  left: 25% !important;
+  bottom: 23px;
+  padding-top: 15px;
+  margin-bottom: 0;
+  z-index: 997;
+}
+
+.fixed-action-btn-right{
+  position: fixed;
+  right: 2% !important;
+  bottom: 23px;
+  padding-top: 15px;
+  margin-bottom: 0;
+  z-index: 997;
+}
+
 .content-app-wrapper {
   margin-top: 33px;
   background: white;
@@ -47,8 +65,16 @@ main {
   padding-right: 2% !important;
 }
 
+.default-form-padding{
+  padding: 3% !important;
+}
+
 .default-padding-top{
   padding-top: 16px !important;
+}
+
+.content-paddint-top{
+  padding-top: 5% !important;
 }
 
 .default-padding-bottom{

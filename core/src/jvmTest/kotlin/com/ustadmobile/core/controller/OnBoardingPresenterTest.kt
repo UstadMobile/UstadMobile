@@ -37,7 +37,7 @@ class OnBoardingPresenterTest {
         impl = mock()
 
         doAnswer {
-            "en-US,fa-AF,ps-AF,ar-AE"
+            "en,fa,ps,ar"
         }.`when`(impl).getAppConfigString(any(), any(), any())
 
         doAnswer {
@@ -68,7 +68,7 @@ class OnBoardingPresenterTest {
 
         presenter.handleLanguageSelected(1)
 
-        verify(impl).setLocale("en-US", context)
+        verify(impl).setLocale("ar", context)
     }
 
 

@@ -22,6 +22,14 @@
             android:background="@color/primary"
             app:layout_scrollFlags="scroll|enterAlways" />
 
+        <ProgressBar
+            android:visibility="gone"
+            android:progressDrawable="@drawable/progress_bar_drawable"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_4dp" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
 
@@ -306,23 +314,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
-
-
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_clazz_edit_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="16dp"
-        app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_done_white_24dp"
-        app:floating_title="@string/done"
-        app:floating_title_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

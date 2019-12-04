@@ -28,9 +28,9 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @QueryLiveTables(["Clazz", "ClazzMember"])
     @Query("SELECT " +
             " (SELECT COUNT(*) FROM Clazz Where CAST(Clazz.isClazzActive AS INTEGER) = 1) as numClazzes, " +
-            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT + ") as numStudents, " +
-            " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberActive = 1 " +
+            " (SELECT COUNT(*) FROM ClazzMember WHERE CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER + ") as numTeachers, " +
             " ((SELECT SUM(Clazz.attendanceAverage) FROM Clazz WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 ) / " +
             " (SELECT COUNT(*) FROM Clazz Where CAST(Clazz.isClazzActive AS INTEGER) = 1)) as attendanceAverage ")
@@ -111,20 +111,22 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract suspend fun findAllClazzesInLocationListAsync(locations: List<Long>) :
             List<ClazzWithNumStudents>
 
-    @Query("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND isClazzActive = 1")
+    @Query("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND CAST(isClazzActive AS INTEGER) = 1")
     abstract suspend fun findClazzesByUidListAsync(clazzUidList: List<Long>): List<Clazz>
 
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract suspend fun findAllActiveClazzesAsync() : List<Clazz>
 
-    @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " + " OR clazzUid in (:allClasses) AND isClazzActive = 1")
+    @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) "
+            + " OR clazzUid in (:allClasses) AND CAST(isClazzActive AS INTEGER) = 1")
     abstract suspend fun findAllClazzesInUidAndLocationAsync(allLocations: List<Long>,
                                                      allClasses: List<Long>) : List<Clazz>
 
     @Query("SELECT * FROM Clazz WHERE  clazzUid in (:allClasses) AND isClazzActive = 1")
     abstract suspend fun findAllClazzesInUidAsync(allClasses: List<Long>) : List<Clazz>
 
-    @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " + " AND isClazzActive = 1")
+    @Query("SELECT * FROM Clazz WHERE clazzLocationUid IN (:allLocations) " +
+            " AND CAST(isClazzActive AS INTEGER) = 1")
     abstract suspend fun findAllClazzesInLocationAsync(allLocations: List<Long>) : List<Clazz>
 
     suspend fun findAllClazzesByLocationAndUidList(allLocations: List<Long>,
@@ -184,18 +186,19 @@ abstract class ClazzDao : BaseDao<Clazz> {
             searchQuery: String, personUid: Long
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query("SELECT * FROM Clazz WHERE clazzName = :name and isClazzActive = 1")
+    @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
     abstract suspend fun findByClazzNameAsync(name: String): List<Clazz>
 
-    @Query("SELECT * FROM Clazz WHERE clazzName = :name and isClazzActive = 1")
+    @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
     abstract fun findByClazzName(name: String): List<Clazz>
 
     @Query("SELECT Clazz.*, (:personUid) AS personUid, " +
             "(SELECT COUNT(*) FROM ClazzMember " +
-            "WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberRole = 1) " +
+            "WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT + " ) " +
             " AS numStudents, " +
             "(SELECT (EXISTS (SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
-            " AND clazzMemberClazzUid = Clazz.clazzUid  AND clazzMemberActive = 1 " +
+            " AND clazzMemberClazzUid = Clazz.clazzUid  AND CAST(clazzMemberActive AS INTEGER) = 1 " +
             " ))) AS enrolled " +
             "FROM Clazz WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 ORDER BY Clazz.clazzName ASC")
     abstract fun findAllClazzesWithEnrollmentByPersonUid(personUid: Long): DataSource.Factory<Int, ClazzWithEnrollment>
@@ -210,14 +213,14 @@ abstract class ClazzDao : BaseDao<Clazz> {
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
             " LEFT JOIN ClazzLog " +
             " ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-            " WHERE ClazzLog.clazzLogDone = 1 " +
+            " WHERE CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
             " AND ClazzLogAttendanceRecord.attendanceStatus = 1) * 1.0 " +
             " /  " +
             "MAX(1, (SELECT COUNT(*) FROM ClazzLogAttendanceRecord  " +
             "LEFT JOIN ClazzLog " +
             " ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-            "WHERE ClazzLog.clazzLogDone = 1 " +
+            " WHERE CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
             ")) * 1.0 " +
             "Where Clazz.clazzUid = :clazzUid")
@@ -229,9 +232,9 @@ abstract class ClazzDao : BaseDao<Clazz> {
             "       FROM ClazzLogAttendanceRecord  " +
             "       LEFT JOIN ClazzLog " +
             "           ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-            "       WHERE ClazzLog.clazzLogDone = 1 " +
+            "       WHERE CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             "           AND ClazzLog.clazzLogClazzUid = :clazzUid " +
-            "           AND ClazzLogAttendanceRecord.attendanceStatus = 1   " +
+            "           AND ClazzLogAttendanceRecord.attendanceStatus =  " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
             "           AND ClazzLog.clazzLogUid " +
             "               NOT IN " +
             "               (SELECT clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid " +
@@ -243,7 +246,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             "           FROM ClazzLogAttendanceRecord  " +
             "            LEFT JOIN ClazzLog " +
             "             ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-            "            WHERE ClazzLog.clazzLogDone = 1 " +
+            "            WHERE CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             "             AND ClazzLog.clazzLogClazzUid = :clazzUid " +
             "             AND ClazzLog.clazzLogUid " +
             "               NOT IN " +
@@ -336,7 +339,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
         private const val CLAZZ_SELECT = " SELECT Clazz.*, " +
                 "(SELECT ClazzLog.logDate FROM ClazzLog " +
-                "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.clazzLogDone = 1 " +
+                "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
                 "ORDER BY ClazzLog.logDate DESC LIMIT 1) AS lastRecorded, " +
                 "(SELECT COUNT(*) " +
                 "   FROM ClazzMember WHERE " +
@@ -371,12 +374,12 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 "       FROM ClazzMember WHERE " +
                 "       ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "       AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
-                "       AND ClazzMember.clazzMemberActive = 1" +
+                "       AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1" +
                 "       ) AS numStudents, " +
                 "   (SELECT COUNT(*) FROM ClazzMember " +
                 "       WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "       AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
-                "       AND ClazzMember.clazzMemberActive = 1 " +
+                "       AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
                 "   ) AS numTeachers, " +
                 "   (SELECT GROUP_CONCAT" +
                 "       (Person.firstNames || ' ' ||  Person.lastName ) as teacherName " +
@@ -384,11 +387,11 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 "       (SELECT ClazzMember.clazzMemberPersonUid " +
                 "           FROM ClazzMember WHERE ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
                 "           AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
-                "           AND ClazzMember.clazzMemberActive = 1" +
+                "           AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1" +
                 "       ) " +
                 "   ) AS teacherNames "
 
-        private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE isClazzActive = 1"
+        private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
     }
 
 

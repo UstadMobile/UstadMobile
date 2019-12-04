@@ -5,6 +5,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import kotlin.js.JsName
 
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
 
@@ -12,6 +13,10 @@ data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: L
 @Dao
 @UmRepository
 abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
+
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<ContentEntryParentChildJoin>)
 
     @Query("SELECT ContentEntryParentChildJoin.* FROM " +
             "ContentEntryParentChildJoin " +
@@ -54,7 +59,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid) " +
             "AND EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjParentContentEntryUid = ContentEntry.contentEntryUid)")
-    abstract fun selectTopEntries(): List<ContentEntry>
+    abstract suspend fun selectTopEntries(): List<ContentEntry>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntryParentChildJoin>)

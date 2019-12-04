@@ -13,6 +13,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
@@ -52,6 +53,12 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        val showTB = UstadMobileSystemImpl.instance.getAppConfigBoolean(
+                AppConfig.LOGIN_TOOLBAR_VISIBILITY, this)
+        if(!showTB) {
+            umToolbar.visibility = View.GONE
+        }
 
         registerMessage = findViewById(R.id.activity_register_label)
         registerNow = findViewById(R.id.activity_register_now)

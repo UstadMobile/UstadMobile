@@ -152,6 +152,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         }
     }
 
+    @JsName("handleCreateAccount")
     fun handleCreateAccount(){
         val args = HashMap(arguments)
         args[ARG_NEXT] = ContentEntryDetailView.VIEW_NAME

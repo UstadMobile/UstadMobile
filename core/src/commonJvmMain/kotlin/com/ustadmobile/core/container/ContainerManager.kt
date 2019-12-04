@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -22,7 +23,12 @@ import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import java.io.BufferedInputStream
+import java.util.zip.ZipOutputStream
+import java.io.BufferedOutputStream
+import java.util.zip.ZipEntry
 import kotlin.io.copyTo
+import kotlinx.coroutines.runBlocking
 
 actual class ContainerManager actual constructor(container: Container,
                                                  db: UmAppDatabase,
@@ -183,8 +189,66 @@ actual class ContainerManager actual constructor(container: Container,
         }
     }
 
+    actual override fun exportContainer(zipFile: String,progressListener: ExportProgressListener?){
+        GlobalScope.launch{
+            destinationZipFile = zipFile
+            if(File(destinationZipFile).exists()){
+                File(destinationZipFile).delete()
+            }
+
+            val bytesToRead = ByteArray(BUFFER_SIZE)
+            var totalFilesProcessed = 0
+
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(destinationZipFile))).use {zipOut ->
+                zipOut.use {
+                    for ((fileName, containerEntryWithFile) in pathToEntryMap) {
+                        val entryWithFile = containerEntryWithFile.containerEntryFile!!
+                        val fileInputStream = FileInputStream(entryWithFile.cefPath!!)
+                        val inputStream = if(entryWithFile.compression == COMPRESSION_GZIP) GZIPInputStream(fileInputStream)
+                        else BufferedInputStream(fileInputStream, BUFFER_SIZE)
+
+                        inputStream.use { fStream ->
+                            BufferedInputStream(fStream).use { iStream ->
+                                val entry = ZipEntry(fileName)
+                                entry.time = entryWithFile.lastModified
+                                entry.size = entryWithFile.ceTotalSize
+                                zipOut.putNextEntry(entry)
+                                totalFilesProcessed += 1
+                                if(progressListener != null){
+                                    progressListener.onProcessing(((totalFilesProcessed/pathToEntryMap.size.toFloat()) * 100).toInt())
+                                }
+                                while (true) {
+                                    val bytesRead = iStream.read(bytesToRead)
+                                    if (bytesRead == -1) {
+                                        break
+                                    }
+                                    zipOut.write(bytesToRead, 0, bytesRead)
+                                }
+                            }
+                        }
+                    }
+                    zipOut.closeEntry()
+                    zipOut.close()
+                    if(progressListener != null){
+                        progressListener.onDone()
+                    }
+                }
+            }
+
+        }
+    }
+
+    actual override fun cancelExporting() {
+        if(File(destinationZipFile).exists()){
+            File(destinationZipFile).delete()
+        }
+        exporting = false
+
+    }
+
     companion object {
         val EXCLUDED_GZIP_TYPES: List<String> = listOf(".webm", ".mp4", ".avi", ".mov", ".wmv",".flv", ".mkv", ".m4v")
+        private const  val BUFFER_SIZE = 2048
     }
 
 }

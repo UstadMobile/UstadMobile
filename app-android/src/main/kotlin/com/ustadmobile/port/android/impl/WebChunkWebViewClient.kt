@@ -8,6 +8,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.controller.IndexLog
 import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
@@ -16,10 +17,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
-import fi.iki.elonen.NanoHTTPD
 import java.io.ByteArrayInputStream
-import java.io.IOException
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -52,7 +50,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
 
             for (log in indexList) {
-                indexMap[log.url!!] = log
+                indexMap[log.url] = log
             }
             val linksMap = indexLog.links
             if (linksMap != null && linksMap.isNotEmpty()) {
@@ -216,30 +214,6 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             }
         }
         return null
-    }
-
-    inner class IndexLog {
-
-        var title: String? = null
-
-        var entries: List<IndexEntry>? = null
-
-        var links: Map<String, String>? = null
-
-        inner class IndexEntry {
-
-            var url: String? = null
-
-            var mimeType: String? = null
-
-            var path: String? = null
-
-            var headers: Map<String, String>? = null
-
-            var requestHeaders: Map<String, String>? = null
-
-        }
-
     }
 
 }
