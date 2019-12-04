@@ -33,13 +33,14 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
                         val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
                         val opfDocument = OpfDocument()
                         opfDocument.loadFromOPF(xpp)
-                        contentEntry = ContentEntry()
-                        contentEntry!!.status = ContentEntry.STATUS_IMPORTED
-                        contentEntry!!.licenseType = LICENSE_TYPE_OTHER
-                        contentEntry!!.title = opfDocument.title
-                        contentEntry!!.author = opfDocument.getCreator(0).creator
-                        contentEntry!!.description = opfDocument.description
-                        contentEntry!!.leaf = true
+                        val contentEntryVal = ContentEntry()
+                        contentEntryVal.contentFlags = ContentEntry.FLAG_IMPORTED
+                        contentEntryVal.licenseType = LICENSE_TYPE_OTHER
+                        contentEntryVal.title = opfDocument.title
+                        contentEntryVal.author = opfDocument.getCreator(0).creator
+                        contentEntryVal.description = opfDocument.description
+                        contentEntryVal.leaf = true
+                        contentEntry = contentEntryVal
                         break
                     }
 

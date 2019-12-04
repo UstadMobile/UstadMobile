@@ -60,6 +60,11 @@
     </style>
 
 
+    <style name="Custom.SwitchCompat" parent="Base.Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:colorForeground">@color/text_secondary</item>
+    </style>
+
+
     <style name="FullScreenDialogStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowNoTitle">true</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
@@ -67,6 +72,7 @@
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="colorAccent">@color/accent</item>
 
         <!-- Set this to true if you want Full Screen without status bar -->
         <item name="android:windowFullscreen">false</item>

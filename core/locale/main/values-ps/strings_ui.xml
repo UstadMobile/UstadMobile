@@ -100,6 +100,7 @@
     <string name='decline'>رد کول</string>
 
     <string name='downloaded'>دانلوډ شو</string>
+    <string name="recycled" >Recycled</string>
     <string name="libraries">Libraries</string>
     <string name="pause_download">Pause download</string>
     <string name='new_password'>نوی تېرنويى</string>
@@ -252,6 +253,8 @@
     <string name="content_entry_label_select_file">Select file</string>
     <string name="content_entry_label_update_file">Update file</string>
     <string name="content_entry_label_licence">License</string>
+    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_active">Make content active</string>
     <string name="content_entry_label_update_content">Update Content</string>
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
@@ -265,11 +268,12 @@
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
     <string name="empty_state_libraries">No folders found</string>
     <string name="empty_state_downloaded">No downloads found</string>
+    <string name="empty_state_recycle">No recycled items</string>
     <string name="error_message_load_page">Failed to load the page</string>
     <string name="error_message_update_document">Failed to update document</string>
     <string name="content_update_massage">Updated successfully</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
+    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="no_account">You do not have an account?</string>

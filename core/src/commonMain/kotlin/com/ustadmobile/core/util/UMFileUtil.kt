@@ -427,7 +427,7 @@ object UMFileUtil {
     fun mapToQueryString(ht: Map<String, String?>): String {
         val sb = StringBuilder()
 
-        if (ht == null) {
+        if (ht.isEmpty()) {
             return ""
         }
 

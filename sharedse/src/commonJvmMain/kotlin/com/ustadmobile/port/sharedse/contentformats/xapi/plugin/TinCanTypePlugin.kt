@@ -26,7 +26,7 @@ class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
                         val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
                         val activity = TinCanXML.loadFromXML(xpp).launchActivity!!
                         contentEntry = ContentEntry()
-                        contentEntry!!.status = ContentEntry.STATUS_IMPORTED
+                        contentEntry!!.contentFlags = ContentEntry.FLAG_IMPORTED
                         contentEntry!!.licenseType = ContentEntry.LICENSE_TYPE_OTHER
                         contentEntry!!.title = activity.name
                         contentEntry!!.author = ""

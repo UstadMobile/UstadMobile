@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import db2.ExampleDatabase2
 import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
@@ -26,6 +27,11 @@ import com.ustadmobile.door.asRepository
 import org.junit.After
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+ import io.ktor.request.receiveOrNull
+import io.ktor.response.respond
+import io.ktor.routing.post
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
@@ -55,6 +61,13 @@ class TestDbRepo {
         tmpAttachmentsDir = Files.createTempDirectory("testdbrepoattachments").toFile()
         install(Routing) {
             ExampleDatabase2_KtorRoute(db, gson, tmpAttachmentsDir!!.absolutePath)
+            post("EncodedPostTest") {
+                val str = call.receiveOrNull<String>()
+                val entities: List<ExampleSyncableEntity> = gson.fromJson(str, object:
+                        TypeToken<List<ExampleSyncableEntity>>() {}.type)
+                println(entities)
+                call.respond(HttpStatusCode.NoContent, "")
+            }
         }
     }
 
@@ -208,6 +221,52 @@ class TestDbRepo {
 
             Assert.assertNotNull("Entity is in client database after sync",
                     serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid))
+        }
+    }
+
+    @Test
+    fun givenEntityCreatedOnClientWithUtf8Chars_whenRepoSyncCalled_thenShouldBeCorrectOnServer() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
+                "token", httpClient) as ExampleDatabase2
+        val entityName = "سلام"
+
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber =  50, esName = entityName)
+            exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            val entityInServer = serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
+            val entityOnClient = clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
+            Assert.assertNotNull("Entity found on server", entityInServer)
+            Assert.assertEquals("Name was saved correctly on client",
+                    entityOnClient!!.esName, entityName)
+            Assert.assertEquals("Name matches", entityName, entityInServer!!.esName)
+        }
+    }
+
+    @Test
+    fun givenEntityCreatedOnServerWithUtf8Chars_whenRepoSyncCalled_thenShouldBeCorrectOnClient() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
+                "token", httpClient) as ExampleDatabase2
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
+                "token", httpClient) as ExampleDatabase2
+
+        val entityName = "سلام"
+
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber =  50, esName = entityName)
+            exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            val entityFromRepoClient = clientRepo.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
+            Assert.assertNotNull("Got entity on server via client repo", entityFromRepoClient)
+            Assert.assertEquals("Name is encoded correctly", entityName, entityFromRepoClient!!.esName)
         }
     }
 
