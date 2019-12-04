@@ -23,7 +23,7 @@ class UserProfileTest {
 
     private lateinit var view: UserProfileView
 
-    private lateinit var presenter:UserProfilePresenter2
+    private lateinit var presenter:UserProfilePresenter
 
     private val context = Any()
 
@@ -44,7 +44,7 @@ class UserProfileTest {
             }
         }
 
-        presenter = UserProfilePresenter2(context, mapOf(),view,UmAppDatabase.getInstance(context).personDao,impl)
+        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context).personDao,impl)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
                 null,null), context)
