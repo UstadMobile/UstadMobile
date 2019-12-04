@@ -17,23 +17,18 @@ import kotlinx.coroutines.launch
  * Presenter for RoleAssignmentList view
  */
 class RoleAssignmentListPresenter(context: Any, arguments: Map<String, String>?,
-                                  view: RoleAssignmentListView,
+                                  view: RoleAssignmentListView?,
                                   val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
-        UstadBaseController<RoleAssignmentListView>(context, arguments!!, view) {
+        UstadBaseController<RoleAssignmentListView>(context, arguments!!, view!!) {
 
     private var umProvider: DataSource.Factory<Int, EntityRoleWithGroupName>? = null
-    internal var repository: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     private val providerDao: EntityRoleDao
-
 
     init {
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-
         //Get provider Dao
         providerDao = repository.entityRoleDao
-
-
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -42,7 +37,6 @@ class RoleAssignmentListPresenter(context: Any, arguments: Map<String, String>?,
         //Get provider
         umProvider = providerDao.findAllActiveRoleAssignments()
         view.setListProvider(umProvider!!)
-
     }
 
     fun handleEditRoleAssignment(roleEntityUid: Long) {
@@ -58,10 +52,8 @@ class RoleAssignmentListPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     fun handleClickPrimaryActionButton() {
-
         val args = HashMap<String, String>()
         impl.go(RoleAssignmentDetailView.VIEW_NAME, args, context)
     }
-
 
 }

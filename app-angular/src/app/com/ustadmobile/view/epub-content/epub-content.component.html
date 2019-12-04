@@ -1,0 +1,32 @@
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-right default-content-padding-left">
+    
+  <div *ngIf="showIframe" class="row">
+      <div class="resp-container">
+          <iframe class="resp-iframe" [src]='sanitizer.bypassSecurityTrustResourceUrl(urlToLoad)' allowfullscreen></iframe>
+        </div>
+    
+        <div class="row default-padding-top default-margin-right">
+            <div class="{{floating_btn_class_right}}">
+              <button mz-button class="orange darken-2 left" i18n="@@next" (click)="goToNextPage()">
+                Next
+              </button>
+            </div>
+          </div>
+    
+          <div class="row default-padding-top default-margin-right">
+              <div class="{{floating_btn_class_left}}">
+                <button mz-button class="orange darken-2 left" i18n="@@previous" (click)="goToPrevPage()">
+                  Previous
+                </button>
+              </div>
+            </div>
+  </div>
+
+  <div *ngIf="!showIframe" class="center empty-state-view grey-text">
+      <i class="material-icons  large extra">open_in_new</i>
+      <p class="title-label empty grey-text" i18n="@@new_tab">Displaying on new Tab</p>
+    </div>
+  </div>
+
+
+  

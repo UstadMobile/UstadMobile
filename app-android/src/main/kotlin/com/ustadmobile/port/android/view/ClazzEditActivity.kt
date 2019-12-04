@@ -4,10 +4,12 @@ package com.ustadmobile.port.android.view
 import android.app.DatePickerDialog
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.DisplayMetrics
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +31,9 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzEditView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.android.synthetic.main.item_simple_spinner.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -56,7 +60,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     internal var classDescTIP: TextInputLayout? = null
     internal var addScheduleButton: Button? = null
     internal var holidaySpinner: Spinner? = null
-    internal var locationSpinner: Spinner? = null
+    internal var timezoneSpinner: Spinner? = null
 
     internal var featuresTextView: TextView? = null
 
@@ -65,14 +69,100 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     internal var fromET: EditText? = null
     internal var toET: EditText? = null
 
+    private lateinit var locationAutoCompleteView: AutoCompleteTextView
+    private lateinit var locationDataAdapter: ArrayAdapter<Location>
+
+    private var mProgressBar: ProgressBar? = null
+
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu_done, menu)
+        return true
+    }
+
+    /**
+     * Handles Action Bar menu button click.
+     * @param item  The MenuItem clicked.
+     * @return  Boolean if handled or not.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
         when (item.itemId) {
+
             android.R.id.home -> {
                 onBackPressed()
                 return true
             }
         }
-        return super.onOptionsItemSelected(item)
+        // Handle item selection
+        val i = item.itemId
+        //If this activity started from other activity
+        if (i == R.id.menu_done) {
+            handleClickDone()
+
+            return super.onOptionsItemSelected(item)
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun updateLocationDataAdapter(locations: List<Location>) {
+
+        locationDataAdapter.clear()
+        locationDataAdapter.addAll(locations)
+        locationDataAdapter.notifyDataSetChanged()
+    }
+
+    private var textWatcher = object : TextWatcher {
+
+        private var handler = Handler()
+        private val DELAY: Long = 150 // milliseconds
+        private var string: Editable? = null
+
+        override fun afterTextChanged(s: Editable?) {
+            string = s
+            handler.removeCallbacks(myRunnable)
+            handler = Handler()
+            handler.postDelayed(myRunnable, DELAY)
+        }
+
+        var myRunnable = Runnable {
+            val hash = string.hashCode()
+            if (hash == locationAutoCompleteView.text.hashCode()) {
+                val name = locationAutoCompleteView.text.toString()
+                mPresenter!!.handleLocationTyped(name)
+
+            }
+        }
+
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+        }
+    }
+
+    override fun setInProgress(inProgress: Boolean) {
+        mProgressBar!!.visibility = if (inProgress) View.VISIBLE else View.GONE
+        disableFields(inProgress)
+    }
+
+    private fun disableFields(inProgress: Boolean){
+        classNameTIP!!.editText!!.isEnabled=!inProgress
+        classDescTIP!!.editText!!.isEnabled=!inProgress
+        fromET!!.isEnabled=!inProgress
+        toET!!.isEnabled=!inProgress
+        locationAutoCompleteView.isEnabled=!inProgress
+        timezoneSpinner!!.isEnabled=!inProgress
+        holidaySpinner!!.isEnabled=!inProgress
+
     }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,9 +173,16 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_clazz_edit_toolbar)
-        setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
         toolbar!!.setTitle(R.string.class_setup)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        mProgressBar = findViewById(R.id.progressBar)
+        mProgressBar!!.isIndeterminate = true
+        mProgressBar!!.scaleY = 3f
+
+
+        locationAutoCompleteView = findViewById(R.id.locationAutoCompleteTextView)
 
         //Recycler View:
         scheduleRecyclerView = findViewById(
@@ -101,6 +198,20 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         mPresenter = ClazzEditPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
+
+
+        locationDataAdapter = ArrayAdapter(this,
+                R.layout.item_simple_spinner_gray, listOf<Location>())
+        locationAutoCompleteView.setAdapter(locationDataAdapter)
+        locationAutoCompleteView.addTextChangedListener(textWatcher)
+        locationAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
+            //locationAutoCompleteView.text = null
+            val selected = parent.getItemAtPosition(position) as Location
+            mPresenter!!.selectedLocation = selected
+            locationAutoCompleteView.setText(selected!!.title)
+        }
+
 
         fromET = findViewById(R.id.activity_clazz_edit_start_date_edittext)
         toET = findViewById(R.id.activity_clazz_edit_end_date_edittext)
@@ -133,10 +244,6 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             }
         })
 
-        //FAB and its listener
-        val fab = findViewById<FloatingTextButton>(R.id.activity_clazz_edit_fab)
-        fab.setOnClickListener { v -> handleClickDone() }
-
         //Add schedule button listener
         addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule)
         addScheduleButton!!.setOnClickListener { v -> mPresenter!!.handleClickAddSchedule() }
@@ -151,10 +258,11 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        locationSpinner = findViewById(R.id.activity_clazz_edit_location_spinner)
-        locationSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+        timezoneSpinner = findViewById(R.id.activity_clazz_edit_timezone_spinner)
+        timezoneSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                setLocationSelected(position)
+                setTimezoneSelected(position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -223,6 +331,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
     private fun handleClickDone() {
 
+        setInProgress(true)
+
         val customCount = customFieldsLL!!.childCount
         for (i in 0 until customCount) {
             val field = customFieldsLL!!.getChildAt(i)
@@ -242,7 +352,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             mPresenter!!.handleSaveCustomFieldValues(fieldId, type, valueObject!!)
         }
 
-        mPresenter!!.handleClickDone()
+        val locationEntered = locationAutoCompleteView.text
+        mPresenter!!.handleClickDone(locationEntered.toString())
     }
 
     override fun updateToolbarTitle(titleName: String) {
@@ -269,6 +380,11 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         }
 
         scheduleRecyclerView!!.adapter = scheduleListRecyclerAdapter
+    }
+
+    override fun updateLocationSetName(locationName: String) {
+
+        locationAutoCompleteView.setText(locationName)
     }
 
     override fun updateClazzEditView(updatedClazz: Clazz) {
@@ -351,13 +467,24 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     }
 
     override fun setLocationPresets(presets: Array<String>, position: Int) {
+//        val adapter = ArrayAdapter(applicationContext,
+//                R.layout.item_simple_spinner, presets)
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        locationSpinner!!.adapter = adapter
+//        locationSpinner!!.setSelection(position)
+    }
+
+    override fun setTimezonePresets(presets: Array<String?>, position: Int){
         val adapter = ArrayAdapter(applicationContext,
                 R.layout.item_simple_spinner, presets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        locationSpinner!!.adapter = adapter
-        locationSpinner!!.setSelection(position)
+        timezoneSpinner!!.adapter = adapter
+        timezoneSpinner!!.setSelection(position)
     }
 
+    override fun setTimeZonePosition(position: Int) {
+        timezoneSpinner!!.setSelection(position)
+    }
     /**
      * Handles holiday selected
      * @param position    The id/position of the DateRange selected from the spinner.
@@ -368,6 +495,10 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
     override fun setLocationSelected(position: Int) {
         mPresenter!!.updateLocation(position)
+    }
+
+    override fun setTimezoneSelected(position: Int){
+        mPresenter!!.updateTimezone(position)
     }
 
     override fun addCustomFieldText(label: CustomField, value: String) {

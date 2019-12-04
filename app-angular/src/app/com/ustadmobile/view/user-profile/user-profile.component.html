@@ -1,0 +1,45 @@
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-left default-content-padding-right">
+
+  <div class="col s12 l5 {{class_profile_holder}} content-paddint-top">
+    <img class="responsive-img img-margin-top profile-size center" [src]="userProfile" />
+
+    <h3></h3>
+  </div>
+
+  <div class="col s0 l1"></div>
+  <div class="col s12 l6 {{class_details_holder}} content-paddint-top">
+    <form *ngIf="supportedLanguages" class="col s12">
+      <div class="row" *ngIf="loggedPerson">
+        <div class="input-field col s6">
+          <input disabled id="first_name" value="{{loggedPerson.firstNames}}" type="text" class="validate">
+          <label i18n="@@first_name" class="active" for="first_name">First Name</label>
+        </div>
+        <div class="input-field col s6">
+          <input disabled id="last_name" value="{{loggedPerson.lastName}}" type="text" class="validate">
+          <label i18n="@@last_name" class="active" for="last_name">Last Name</label>
+        </div>
+      </div>
+      <div class="row" *ngIf="loggedPerson">
+        <div class="input-field col s12">
+          <input disabled id="email" value="{{loggedPerson.emailAddr}}" type="text" class="validate">
+          <label class="active" i18n="@@email" for="email">Email Address</label>
+        </div>
+      </div>
+
+      <div class="row default-content-padding-left ">
+        <label class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</label>
+        <mz-select-container [inline]=false *ngIf="supportedLanguages">
+          <select mz-select [formControl]="umFormLanguage.controls['language']" id="options-language">
+            <option *ngFor="let language of supportedLanguages" value="{{language}}">{{language}}</option>
+          </select>
+        </mz-select-container>
+      </div>
+    </form>
+
+    <div class="row default-padding-top">
+      <a (click)="handleUserLogout()" class="waves-effect waves-light btn {{env.colorAcent}} {{class_logout_button}} default-margin-top" i18n="@@logout">
+        <i class="material-icons left">exit_to_app</i>Logout</a>
+    </div>
+
+  </div>
+</div>

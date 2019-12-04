@@ -38,6 +38,7 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
     }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
         //Setting layout:
@@ -49,6 +50,7 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Call the Presenter
+
         mPresenter = SettingsPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))

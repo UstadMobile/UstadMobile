@@ -621,6 +621,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             umFormats = umFormatHelper!!.getFormatListByType(arguments!!.getInt(FORMAT_TYPE, 0))
             umFormatHelper!!.setStateChangeListener(this)
 
+
             adapter = FormatsAdapter()
             adapter!!.setUmFormats(umFormats)
 
@@ -738,8 +739,6 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             umEditorActionView.inflateMenu(R.menu.menu_content_editor_quick_actions, true)
             umEditorActionView.setQuickActionMenuItemClickListener(this)
         }
-
-
 
         handleClipBoardContentChanges()
 
@@ -1090,6 +1089,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         if (resultCode == RESULT_OK) {
             if (requestCode == CAMERA_IMAGE_CAPTURE_REQUEST) {
                 try {
+                    presenter.handleFileImportDialog(importDialog.isShowing)
                     insertMedia(fileFromCamera)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -1208,6 +1208,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
      */
     @Throws(IOException::class)
     private fun insertMedia(rawFile: File?) {
+        progressDialog!!.isIndeterminate = true
         progressDialog!!.visibility = View.VISIBLE
 
         val mFile = if (mimeType.contains("image"))
@@ -1223,6 +1224,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             if(inserted){
                 isOpeningFilePickerOrCamera = false
                 runOnUiThread {
+                    presenter.handleFileImportDialog(importDialog.isShowing)
                     progressDialog!!.visibility = View.GONE
                     executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "insertMediaContent",
                             this@ContentEditorActivity, mFile.name, mimeType)

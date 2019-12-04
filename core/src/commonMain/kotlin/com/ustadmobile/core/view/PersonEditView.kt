@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
 
 /**
  * View for the editing a person - responsible for creating edit fields with the right edit types
@@ -28,6 +29,8 @@ interface PersonEditView : UstadView {
      * @param clazzListProvider     The class list provider of ClazzWithNumStudents type
      */
     fun setClazzListProvider(clazzListProvider: DataSource.Factory<Int, ClazzWithNumStudents>)
+
+    fun setRoleAssignmentListProvider(roleAssignmentProvider: DataSource.Factory<Int, EntityRoleWithGroupName>)
 
     /**
      * This will close the activity (and finish it)
@@ -59,11 +62,17 @@ interface PersonEditView : UstadView {
      */
     fun clearAllFields()
 
+    fun disableFields(disable: Boolean)
+
     fun addCustomFieldText(label: CustomField, value: String)
 
     fun addCustomFieldDropdown(label: CustomField, options: Array<String?>, selected: Int)
 
     fun clearAllCustomFields()
+
+    fun sendMessage(messageId: Int)
+
+    fun setInProgress(inProgress: Boolean)
 
     companion object {
 

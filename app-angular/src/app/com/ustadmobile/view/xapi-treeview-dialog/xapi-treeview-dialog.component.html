@@ -1,0 +1,16 @@
+<mz-modal [fixedFooter]="true">
+  <mz-modal-header>
+    <h4 i18n="@@select_entries">Select Entries</h4>
+  </mz-modal-header>
+  <mz-modal-content>
+
+    <div class="tree-wrapper">
+      <tree-view [treeData]="nodes"></tree-view>
+    </div>
+
+  </mz-modal-content>
+  <mz-modal-footer>
+    <button mz-button [flat]="true" (click)="handleOnClickCancel()" mz-modal-close i18n="@@cancel">Cancel</button>
+    <button mz-button [flat]="true" mz-modal-close i18n="@@done">Done</button>
+  </mz-modal-footer>
+</mz-modal>

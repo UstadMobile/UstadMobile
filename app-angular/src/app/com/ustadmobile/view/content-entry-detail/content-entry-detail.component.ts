@@ -1,12 +1,10 @@
-import { UmDbMockService } from './../../core/db/um-db-mock.service';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-import { Component } from '@angular/core';
-import { environment } from 'src/environments/environment.prod';
+import { Component, OnDestroy } from '@angular/core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import core from 'UstadMobile-core';
-import util from 'UstadMobile-lib-util';
+import entities from 'UstadMobile-lib-database-entities'
 import 'rxjs/add/operator/filter';
 
 @Component({
@@ -15,117 +13,114 @@ import 'rxjs/add/operator/filter';
   styleUrls: ['./content-entry-detail.component.css']
 })
 export class ContentEntryDetailComponent extends UmBaseComponent implements
- core.com.ustadmobile.core.view.ContentEntryDetailView, 
- core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor {
-env = environment;
-contentEntryUid = "";
-entryTitle = "";
-entryAuthor = "";
-entryLicence = "";
-entryDescription = "";
-entryThumbnail = "";
-private presenter: core.com.ustadmobile.core.controller.ContentEntryDetailPresenter;
-translations = []
-private navigationSubscription;
-entry_thumbnail_class: string;
-entry_summary_class: string;
+core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
+  core.com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor,
+  entities.com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider {
 
-constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
-  super(umService, router, route, umDb);
-  this.entry_summary_class = this.umService.isLTRDirectionality() ? "right" : "left";
-  this.entry_thumbnail_class = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
+    private presenter: core.com.ustadmobile.core.controller.ContentEntryDetailPresenter;
+    private navigationSubscription;
+    translations = [];
+    entryLicence = "";
+    class_entry_thumbnail: string;
+    class_entry_summary: string; 
+    class_availability_label: string; 
+    contentEntry = new entities.com.ustadmobile.lib.db.entities.ContentEntry()
 
-  this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe(_ => {
-      if (this.umDatabase.contentEntryDao) {
-        this.onCreate();
-      }
-    });
-}
+    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute) {
+      super(umService, router, route);
+      this.class_entry_summary = this.umService.isLTRDirectionality() ? "right" : "left";
+      this.class_availability_label = this.umService.isLTRDirectionality() ? "left" : "right";
+      this.class_entry_thumbnail = this.umService.isLTRDirectionality() ? "left" : "right thumbnail-wrapper-right";
 
-onCreate() {
-  if(this.umDatabase.contentEntryDao){
-    this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
-      UmAngularUtil.queryParamsToMap(), this,this,this,this.umDatabase);
-    this.presenter.onCreate(null);
-  }
-}
-
-ngOnInit() {
-  super.ngOnInit();
-  this.subscription = this.umService.getUmObserver().subscribe(content => {
-    if (content[UmAngularUtil.DISPATCH_RESOURCE]) {
-      this.onCreate()
+      this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(_ => {
+          UmAngularUtil.registerResourceReadyListener(this)
+        });
     }
-  });
-}
 
-openEntry() {
-  this.presenter.handleDownloadButtonClick(true, this.contentEntryUid);
-}
+    onCreate() {
+      super.onCreate()
+      this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
+        UmAngularUtil.getArgumentsFromQueryParams(), this,false, this, this.umService.getDbInstance(), this);
+      this.presenter.onCreate(null);
+    }
 
-openTranslation(translation) {
-  this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
-}
+    ngOnInit() {
+      super.ngOnInit();
+    }
 
-setContentEntry(contentEntry) {
-  this.contentEntryUid = contentEntry.contentEntryUid;
-  this.entryTitle = contentEntry.title;
-  this.entryAuthor = contentEntry.author;
-  this.entryDescription = contentEntry.description;
-  this.entryThumbnail = contentEntry.thumbnailUrl;
-}
+    handleDownloadButtonClick() {
+      this.presenter.handleDownloadButtonClick();
+    }
 
-setContentEntryLicense(license) {
-  this.entryLicence = license;
-}
+    handleClickTranslatedEntry(translation) {
+      this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
+    }
 
-setDetailsButtonEnabled() {}
+    setContentEntry(contentEntry) {
+      this.contentEntry = contentEntry; 
+      UmAngularUtil.fireTitleUpdate(this.contentEntry.title)
+    }
 
-setDownloadSize() {}
+    setContentEntryLicense(license) {
+      this.entryLicence = license;
+    }
 
-setAvailableTranslations(result) {
-  this.translations = util.com.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(result);
-}
+    setDetailsButtonEnabled() {}
 
-updateDownloadProgress() {}
+    setDownloadSize() {}
 
-setDownloadButtonVisible() {}
+    setAvailableTranslations(translations) {
+      this.translations = UmAngularUtil.kotlinListToJsArray(translations) 
+    }
 
-setButtonTextLabel() {}
+    findDownloadJobItemStatusByContentEntryUid() {}
 
-showFileOpenWithMimeTypeError() {}
+    addDownloadChangeListener() {}
 
-showFileOpenError(message) {
-  this.showError(message);
-}
+    showEditButton() {}
 
-updateLocalAvailabilityViews() {}
+    removeDownloadChangeListener() {}
 
-setLocalAvailabilityStatusViewVisible() {}
+    updateDownloadProgress() {}
 
-setTranslationLabelVisible() {}
+    setDownloadButtonVisible() {}
 
-setFlexBoxVisible() {}
+    setButtonTextLabel() {}
 
-setDownloadProgressVisible() {}
+    showFileOpenWithMimeTypeError() {}
 
-setDownloadProgressLabel() {}
+    showBaseProgressBar() {}
 
-setDownloadButtonClickableListener() {}
+    showFileOpenError(message) {
+      this.showError(message);
+    }
 
-showDownloadOptionsDialog() {}
+    updateLocalAvailabilityViews() {}
 
-startMonitoringAvailability(monitor, entryUidsToMonitor){}
+    setLocalAvailabilityStatusViewVisible() {}
 
-stopMonitoringAvailability(monitor){}
+    setTranslationLabelVisible() {}
 
-ngOnDestroy() {
-  super.ngOnDestroy()
-  this.subscription.unsubscribe();
-  if (this.navigationSubscription) {
-    this.navigationSubscription.unsubscribe();
+    setFlexBoxVisible() {}
+
+    setDownloadProgressVisible() {}
+
+    setDownloadProgressLabel() {}
+
+    setDownloadButtonClickableListener() {}
+
+    showDownloadOptionsDialog() {}
+
+    startMonitoringAvailability() {}
+
+    stopMonitoringAvailability() {}
+
+    ngOnDestroy() {
+      super.ngOnDestroy()
+      if (this.navigationSubscription) {
+        this.navigationSubscription.unsubscribe();
+      }
+    }
+
   }
-}
-
-}

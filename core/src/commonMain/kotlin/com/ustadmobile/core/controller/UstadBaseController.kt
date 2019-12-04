@@ -86,6 +86,7 @@ abstract class UstadBaseController<V : UstadView>(
     /**
      * Handle when the presenter has become visible. Analogous to Android's onResume
      */
+    @JsName("onResume")
     open fun onResume() {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {

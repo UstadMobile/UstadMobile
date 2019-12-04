@@ -47,6 +47,8 @@ object AppConfig {
 
     const val ACTION_SHARE_APP_VISIBILITY = "action_share_app_visibility"
 
+    const val KEY_NO_IFRAME = "app.no_iframe_domans"
 
+    const val LOGIN_TOOLBAR_VISIBILITY = "login_toolbar_visibility"
 
 }

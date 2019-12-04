@@ -1,0 +1,6 @@
+[
+    {"statementUid":1,"personUid":1, "resultDuration": 2400000, "resultScoreScaled": 50, "verbUid":200, "xObjectUid":0, "resultSuccess":2, "timestamp":1569171916},
+    {"statementUid":2,"personUid":1, "resultDuration": 2600000, "resultScoreScaled": 100, "verbUid":201, "xObjectUid":0, "resultSuccess":1, "timestamp":1569171916},
+    {"statementUid":3,"personUid":2, "resultDuration": 2800000, "resultScoreScaled": 50, "verbUid": 200, "xObjectUid":0, "resultSuccess":2, "timestamp":1569171916},
+    {"statementUid":4,"personUid":2, "resultDuration": 2900000, "resultScoreScaled": 70, "verbUid": 202, "xObjectUid":0, "resultSuccess":1, "timestamp":1569171916}
+]

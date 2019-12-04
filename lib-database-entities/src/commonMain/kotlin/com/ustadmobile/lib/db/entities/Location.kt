@@ -71,4 +71,14 @@ open class Location() {
 
         const val TABLE_ID = 29
     }
+
+    override fun toString(): String {
+        if (this.title != null) {
+            return this.title!!
+        }else{
+            return "Location"
+        }
+    }
+
+
 }

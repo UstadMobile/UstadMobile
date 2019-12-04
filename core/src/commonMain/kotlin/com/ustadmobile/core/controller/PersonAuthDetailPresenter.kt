@@ -92,7 +92,7 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
             currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
             GlobalScope.launch {
                 //Update locally
-                personDao.updateAsync(currentPerson!!)
+                personDao.updatePersonAsync(currentPerson!!, loggedInPersonUid)
 
                 //Update on server
                 try {

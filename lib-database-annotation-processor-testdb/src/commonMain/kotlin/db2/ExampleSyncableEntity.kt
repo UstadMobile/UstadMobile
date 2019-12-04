@@ -15,7 +15,8 @@ open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Lon
                                  @LocalChangeSeqNum var esLcsn: Int = 0,
                                  @MasterChangeSeqNum var esMcsn: Int = 0,
                                  @LastChangedBy var esLcb: Int = 0,
-                                 var esNumber: Int = 0) {
+                                 var esNumber: Int = 0,
+                                 var esName: String? = null) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

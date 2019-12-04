@@ -28,7 +28,7 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     @JsName("getMostRecentContainerForContentEntry")
-    abstract fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
+    abstract suspend fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
 
     @Query("SELECT Container.fileSize FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +

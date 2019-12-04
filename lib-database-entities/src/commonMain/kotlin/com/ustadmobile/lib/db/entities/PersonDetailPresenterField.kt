@@ -91,6 +91,10 @@ class PersonDetailPresenterField {
 
         val PERSON_FIELD_UID_ADDRESS = 13
 
+        val PERSON_FIELD_UID_USERNAME = 14
+        val PERSON_FIELD_UID_PASSWORD = 15
+        val PERSON_FIELD_UID_CONFIRM_PASSWORD = 16
+
         /* Field Uid constants for Person Custom fields begin at this value */
         val CUSTOM_FIELD_MIN_UID = 1000
     }

@@ -24,6 +24,14 @@
             android:background="@color/primary"
             app:layout_scrollFlags="scroll|enterAlways" />
 
+        <ProgressBar
+            android:visibility="gone"
+            android:progressDrawable="@drawable/progress_bar_drawable"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_4dp" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView

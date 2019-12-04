@@ -146,7 +146,9 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
                     currentPerson!!.personRoleUid = customerRole.roleUid
                 }
 
-                currentPerson!!.personUid = personDao.createPersonAsync(currentPerson!!)
+                val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+                currentPerson!!.personUid = personDao.createPersonAsync(currentPerson!!,
+                        loggedInPersonUid)
                 customerUid = currentPerson!!.personUid
 
                 view.runOnUiThread(Runnable {

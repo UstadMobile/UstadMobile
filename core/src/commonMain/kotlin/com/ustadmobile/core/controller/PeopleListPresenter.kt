@@ -160,13 +160,14 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      */
     fun handleClickPrimaryActionButton() {
         //Goes to PersonEditActivity with currentClazzUid passed as argument
+
         val newPerson = Person()
         val personDao = repository.personDao
         val personFieldDao = repository.personCustomFieldDao
         val customFieldValueDao = repository.personCustomFieldValueDao
 
         GlobalScope.launch {
-            val result = personDao.insertPersonAsync(newPerson, loggedInPersonUid!!)
+            val result = personDao.createPersonAsync(newPerson, loggedInPersonUid!!)
             //Also create null Custom Field values so it shows up in the Edit screen.
             val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
             for (everyCustomField in allCustomFields!!) {

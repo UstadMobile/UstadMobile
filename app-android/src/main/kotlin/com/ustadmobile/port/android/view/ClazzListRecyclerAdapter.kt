@@ -52,7 +52,9 @@ class ClazzListRecyclerAdapter internal constructor(
         val clazz = getItem(position)!!
         val attendancePercentage = (clazz.attendanceAverage * 100).toLong()
         val lastRecordedAttendance = ""
-        (holder.itemView.findViewById<View>(R.id.item_clazzlist_clazz_title) as TextView).text = clazz.clazzName
+        val clazzTitle: TextView = holder.itemView.findViewById(R.id.item_clazzlist_clazz_title)
+        clazzTitle.text = clazz.clazzName
+
 
         val numStudentsText = clazz.numStudents.toString() + " " + theFragment.resources
                 .getText(R.string.students_literal).toString()

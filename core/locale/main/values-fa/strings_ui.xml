@@ -9,14 +9,15 @@
     <string name="register_empty_fields">لطفاً تمام ساحات لازمی را خانه پری نمائید </string>
     <string name="register_incorrect_email">آدرس ایمیل اشتباه است </string>
 
-    <string name="wrong_user_pass_combo">نام کاربری/رمز عبور اشتباه است: دوباره امتحان کنید</string>
+    <string name='wrong_user_pass_combo'> نام کاربری اشتباه است / رمز عبور: دوباره امتحان کنید</string>
+    <string name='authenticating'> تأیید اعتبار</string>
+    <string name='course_catalog_load_error'> با عرض پوزش! خطا در بارگذاری</string>
+    <string name="download"> دانلود</string>
+
+    <string name='previous'>Previous</string>
+
+
     <string name="login_network_error">خطای شبکه: لطفا چک کنید که آنلاین هستید</string>
-    <string name="authenticating">تأیید اعتبار</string>
-    <string name="course_catalog_load_error">با عرض پوزش! خطا در بارگذاری</string>
-    <string name="download">دانلود</string>
-    <string name="downloaded" value="81">دانلود شد</string>
-    <string name="libraries">کتابخانه ها</string>
-    <string name="pause_download">مکث در دانلود</string>
     <string name="ok">درست</string>
     <string name="confirm">تائید </string>
     <string name="cancel">لغو</string>
@@ -45,7 +46,6 @@
     <string name="last_name">تخلص</string>
     <string name="first_name">اسم</string>
     <string name="create_new_account">ثبت نام کنید</string>
-    <string name="new_password">رمز عبور جدید</string>
     <string name="phone_memory">حافظه تلفن</string>
     <string name="memory_card">کارت حافظه</string>
     <string name="device">دستگاه</string>
@@ -71,8 +71,6 @@
     <string name="home">صفحه اول</string>
     <string name="add">افزودن</string>
     <string name="enter_phone_num">لطفاً شمارۀ تیلفون را داخل کنید</string>
-    <string name="phone">تیلفون</string>
-    <string name="tablet">تبلیت</string>
     <string name="enter_name">لطفاً نام را داخل کنید</string>
     <string name="attendance">حاضری</string>
     <string name="processing">در حال پروسس</string>
@@ -84,52 +82,64 @@
     <string name="connections">اتصال</string>
     <string name="notifications">یادآوری ها</string>
     <string name="connection">اتصال عمومی</string>
-    <string name="data_usage_label">مجموع مصرف داده تلفن همراه</string>
     <string name="account">حساب</string>
     <string name="data_usage">استفاده از داده</string>
-    <string name="app_interface_language">زبان اپلکیشن</string>
     <string name="enable_supernode">سوپرنود را فعال سازید</string>
-    <string name="share_application">اپلکیشن را شریک کنید</string>
-    <string name="share_via">شریک ساختن از طریق...</string>
-    <string name="share">شریک ساختن</string>
-    <string name="receive">دریافت کردن</string>
-    <string name="sent">فرستاده شد</string>
-    <string name="sending">در حال فرستادن</string>
-    <string name="send">فرستادن</string>
-    <string name="size">اندازه</string>
-    <string name="see_also">همچنان ببینید</string>
-    <string name="download_in_another_language">به زبان دیگری دانلود کنید</string>
+
     <string name="modify">اصلاح</string>
     <string name="open">باز کردن</string>
-    <string name="passed">کامیاب شدید</string>
-    <string name="in_progress">در جریان</string>
-    <string name="downloading">در حال دانلود</string>
-    <string name="waiting">در حال انتظار</string>
-    <string name="waiting_for_sender">منتظر فرستنده</string>
-    <string name="queued">در صف</string>
-    <string name="failed">ناموفق</string>
+
 
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">با عرض پوزش، این دستگاه از ارسال فایلها از طریق بلوتوت حمایت نمیکند.</string>
 
     <string name="share_offline_zip_checkbox_label">در فایل زیپ بفرستید</string>
-    <string name="share_offline_dialog_message">شما میتوانید این اپلیکیشن را از طریق آفلاین شریک سازید. در دستگاه که میخواهید با آن شریک سازید: \n1. باز کنید: تنظیمات » تنظیمات بلوتوت. \n2. خود را مطمئن سازید که دستگاه قابل مشاهده باشد.</string>
-    <string name="preparing">آماده سازی</string>
 
-    <string name="select_language">زبان را انتخاب کنید</string>
+
     <!-- For language selector where %s is replaced by the device type name -->
-    <string name="device_language">از زبان دستگاه استفاده کنید</string>
     <string name="ok_got_it">درست است، فهمیدم</string>
     <string name="dont_show_this_next_time">این را بار بعدی نشان ندهید</string>
 
-    <string name="login_successful">دخول موفق</string>
-    <string name="registration_successful">ثبت‌نام موفقانه تکمیل گردید</string>
+    <string name='data_usage_label'>مجموع مصرف داده تلفن همراه</string>
+    <string name='app_interface_language'>زبان اپلکیشن</string>
+    <string name='share_application'>اپلکیشن را شریک کنید</string>
+    <string name='share_via'>بدین وسیله شریک کنید</string>
+    <string name='share'>شریک کردن</string>
+    <string name='receive'>دریافت کردن</string>
+    <string name='sent'>فرستاده شد</string>
+    <string name='sending'>در حال فرستادن</string>
+    <string name='send'>فرستادن</string>
+    <string name='size'>اندازه</string>
+    <string name='see_also'>همچنان - ببینید</string>
+    <string name='download_in_another_language'>به زبان دیگری دانلود کنید</string>
+    <string name='passed'>کامیاب شدید</string>
+    <string name='in_progress'>در جریان</string>
+    <string name='select_language'>زبان را انتخاب کنید</string>
+    <string name='device_language'>از زبان دستگاه استفاده کنید</string>
+    <string name='downloading'>در حال دانلود</string>
+    <string name='waiting'>در حال انتظار</string>
+    <string name='queued'>در صف</string>
+    <string name='failed'> ناموفق</string>
+    <string name='success'>Success</string>
 
-    <string name="send_course_instructions">1. در دستگاه دیگر، اپلیکیشن را باز کنید، و از مینو فوقانی سمت راست، دریافت را انتخاب نمائید. \n2. دستگاه دیگر از از لست ذیل انتخاب نمائید:</string>
 
-    <string name="cancel_invite">لغو دعوت</string>
-    <string name="inviting">در حال دعوت</string>
-    <string name="try_again">دوباره کوشش نمائید</string>
+    <string name='login_successful'>دخول موفق</string>
+    <string name='registration_successful'>ثبت‌نام موفق</string>
+    <string name='share_offline_dialog_message'>می‌تواند این اپلکیشن را به‌صورت آنلاین شریک سازید. در دستگاه که شما می‌خواهید توسط آن شریک سازید:\n  تنظیمات را بازکنید &lt; تنظیمات بلوتوث\n مطمئن شوید که دستگاه قابل‌رؤیت است.\n </string>
+
+    <string name='downloaded'>دانلود شد</string>
+    <string name="recycled" >Recycled</string>
+    <string name="libraries">Libraries</string>
+    <string name="pause_download">Pause download</string>
+    <string name='new_password'>رمز عبور جدید</string>
+    <string name='phone'>تیلفون</string>
+    <string name='tablet'>تبلت</string>
+    <string name='waiting_for_sender'>منتظر فرستنده</string>
+    <string name='preparing'>آماده سازی</string>
+    <string name='send_course_instructions'>در دستگاه دیگر، اپلکیشن را بازه کنید، از بالای سمت راست مینو دریافت یا انتخاب کنید.\n دستگاه دیگر را از فهرست زیر انتخاب کنید: </string>
+    <string name='cancel_invite'>لغو دعوت</string>
+    <string name='inviting'>در حال دعوت </string>
+    <string name="try_again">Try again</string>
 
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">این بخش الزمی است</string>
@@ -139,6 +149,10 @@
 
     <!-- Update student details action button -->
     <string name="update">به روز رسانی </string>
+    <string name="profile">Profile</string>
+    <string name="dialog_download_from_playstore_message">Access &amp; Share Educational Content Offline</string>
+    <string name="dialog_download_from_playstore_ok">Download now (free)</string>
+    <string name="dialog_download_from_playstore_cancel">Stay on website</string>
 
     <string name="catalog">کتلاگ</string>
     <string name="closed">بسته شد </string>
@@ -160,6 +174,7 @@
     <string name="onboarding_offline_sharing_subheading">محتویات را  با استفاده کننده دیگر در نزدیک تان با سرعت بالا شریک سازید.</string>
     <string name="location_permission_title">اجازه موقعیت لازمی میباشد</string>
     <string name="location_permission_message">در این اپلیکیشن به اجازه موقعیت ضرورت است تا شما بتوانید محتویات آنرا آفلاین شریک سازید.</string>
+
 
     <string name="download_delete_btn_label">حذف</string>
     <string name="download_continue_stacked_label">ادامه دانلود</string>
@@ -289,6 +304,7 @@
 
 
     <string name="no_account">Don\'t have an account?</string>
+
 
 
     <!-- Untranslated bits -->

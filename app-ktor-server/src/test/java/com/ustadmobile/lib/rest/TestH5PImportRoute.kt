@@ -31,6 +31,8 @@ import java.io.IOException
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.util.test.AbstractImportLinkTest
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class TestH5PImportRoute : AbstractImportLinkTest() {
 
@@ -211,33 +213,35 @@ class TestH5PImportRoute : AbstractImportLinkTest() {
     @Test
     fun givenValidH5P_whenContentDownloaded_checkContainerIsCreated() {
 
-        mockServer.setDispatcher(dispatcher)
-        mockServer.start()
+        GlobalScope.launch {
+            mockServer.setDispatcher(dispatcher)
+            mockServer.start()
 
-        val parent = Files.createTempDirectory("h5p").toFile()
+            val parent = Files.createTempDirectory("h5p").toFile()
 
-        val body = IOUtils.toString(javaClass.getResourceAsStream("/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent"), "UTF-8")
+            val body = IOUtils.toString(javaClass.getResourceAsStream("/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent"), "UTF-8")
 
-        val contentEntry = ContentEntry()
-        contentEntry.contentEntryUid = -300
-        db.contentEntryDao.insert(contentEntry)
+            val contentEntry = ContentEntry()
+            contentEntry.contentEntryUid = -300
+            db.contentEntryDao.insert(contentEntry)
 
-        val container = Container()
-        container.containerContentEntryUid = contentEntry.contentEntryUid
-        container.mimeType = "text/html"
-        container.fileSize = 11
-        container.cntLastModified = 1212
-        container.mobileOptimized = true
-        container.containerUid = db.containerDao.insert(container)
+            val container = Container()
+            container.containerContentEntryUid = contentEntry.contentEntryUid
+            container.mimeType = "text/html"
+            container.fileSize = 11
+            container.cntLastModified = 1212
+            container.mobileOptimized = true
+            container.containerUid = db.containerDao.insert(container)
 
 
-        downloadH5PUrl(db, mockServer.url("/json/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent").toString(), -300, parent, body, container.containerUid)
+            downloadH5PUrl(db, mockServer.url("/json/com/ustadmobile/lib/rest/h5pimportroute/h5pcontent").toString(), -300, parent, body, container.containerUid)
 
-        val containerDb = db.containerDao.getMostRecentContainerForContentEntry(-300)
+            val containerDb = db.containerDao.getMostRecentContainerForContentEntry(-300)
 
-        Assert.assertTrue("index.json exists", File(parent, "index.json").exists())
-        Assert.assertTrue("contentEntry has container", containerDb != null)
-        Assert.assertTrue("", db.containerEntryDao.findByContainer(container!!.containerUid).map { it.cePath }.contains("index.json"))
+            Assert.assertTrue("index.json exists", File(parent, "index.json").exists())
+            Assert.assertTrue("contentEntry has container", containerDb != null)
+            Assert.assertTrue("", db.containerEntryDao.findByContainer(container!!.containerUid).map { it.cePath }.contains("index.json"))
+        }
 
     }
 

@@ -194,7 +194,6 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
             groupPositionToId[posIter] = everyEntity.groupUid
             posIter++
         }
-        //groupPresets = arrayOfNulls(entityList.size)
         groupPresets = entityList.toTypedArray()
 
         if (originalEntityRole == null) {

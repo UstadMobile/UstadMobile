@@ -172,7 +172,6 @@
     <string name="summary">Summary</string>
 
     <!--Sprint 7-->
-    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
     <string name="user">User</string>
     <string name="send_message">Send message</string>
     <string name="reset_password">Reset password</string>

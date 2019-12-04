@@ -1,0 +1,13 @@
+p{
+    font-size: 1.25em;
+    line-height: 1.6em; 
+}
+
+.btn-cancel{
+    font-weight: 500 !important;
+}
+
+.btn-download{
+    color: green !important;
+    font-weight: 500 !important;
+}

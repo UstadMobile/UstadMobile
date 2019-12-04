@@ -1,12 +1,16 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
+
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.junit.Before
@@ -26,21 +30,21 @@ class UserProfileTest {
     @Before
     fun setUp(){
         view = mock()
-        impl = mock ()
+        impl = mock {
+            on{getAppConfigString(any(), any(), any())}.thenAnswer{
+                "en-US,fa-AF,ps-AF,ar-AE"
+            }
 
-        doAnswer {
-            "en-US,fa-AF,ps-AF,ar-AE"
-        }.`when`(impl).getAppConfigString(any(), any(), any())
+            on{getAllUiLanguage(any())}.thenAnswer{
+                UstadMobileConstants.LANGUAGE_NAMES
+            }
 
-        doAnswer {
-            UstadMobileConstants.LANGUAGE_NAMES
-        }.`when`(impl).getAllUiLanguage(any())
+            on{getDisplayedLocale(any())}.thenAnswer{
+                "en"
+            }
+        }
 
-        doAnswer {
-            "en"
-        }.`when`(impl).getDisplayedLocale(any())
-
-        presenter = UserProfilePresenter(context, mapOf(),view,impl)
+        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context).personDao,impl)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
                 "",""), context)
@@ -58,6 +62,7 @@ class UserProfileTest {
                 AppConfig.KEY_FIRST_DEST, "BasePoint", context)
 
         verify(impl).go(eq(LoginView.VIEW_NAME), any(), any())
+
     }
 
 

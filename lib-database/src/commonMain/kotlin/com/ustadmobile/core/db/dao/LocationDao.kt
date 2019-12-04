@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.AuditLog
 import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount
+import kotlin.js.JsName
 
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, 
@@ -36,9 +37,7 @@ abstract class LocationDao : BaseDao<Location> {
 
     fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
         val auditLog = AuditLog(fromPersonUid, Location.TABLE_ID, toPersonUid)
-
         insertAuditLog(auditLog)
-
     }
 
     fun insertLocation(entity: Location, loggedInPersonUid: Long) {
@@ -51,21 +50,25 @@ abstract class LocationDao : BaseDao<Location> {
         createAuditLog(entity.locationUid, loggedInPersonUid)
     }
 
+    @JsName("findByUid")
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract fun findByUid(uid: Long): Location?
 
+    @JsName("findByUidAsync")
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): Location?
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Location?>
 
-    @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND CAST(locationActive AS INTEGER) = 1 ")
-    abstract suspend fun findTopLocationsAsync(): List<Location>
-
     @Query("SELECT * FROM Location WHERE parentLocationUid = 0")
     abstract fun findTopLocationsLive(): DoorLiveData<List<Location>>
 
+    @JsName("findTopLocationsAsync")
+    @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND CAST(locationActive AS INTEGER) = 1 ")
+    abstract suspend fun findTopLocationsAsync(): List<Location>
+
+    @JsName("findAllChildLocationsForUidAsync")
     @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND CAST(locationActive AS INTEGER) = 1 ")
     abstract suspend fun findAllChildLocationsForUidAsync(uid: Long) : List<Location>
 
@@ -74,13 +77,18 @@ abstract class LocationDao : BaseDao<Location> {
     abstract suspend fun findAllChildLocationsForUidExceptSelectedUidAsync(uid: Long, suid: Long)
             : List<Location>
 
+    @JsName("findByTitleAsync")
     @Query("SELECT * FROM Location WHERE title = :name AND CAST(locationActive AS INTEGER) = 1 ")
     abstract suspend fun findByTitleAsync(name: String):List<Location>
+
+    @Query("SELECT * FROM Location WHERE title LIKE :name AND locationActive = 1")
+    abstract suspend fun findByTitleLikeAsync(name: String):List<Location>
 
     @Query("SELECT * FROM Location WHERE title = :name AND CAST(locationActive AS INTEGER) = 1 ")
     abstract fun findByTitle(name: String): List<Location>
 
-    @Query("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0 AND CAST(locationActive AS INTEGER) = 1 ")
+    @Query("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0 " +
+            " AND CAST(locationActive AS INTEGER) = 1 ")
     abstract fun findAllTopLocationsWithCount(): DataSource.Factory<Int, LocationWithSubLocationCount>
 
     @Query("SELECT *, " +

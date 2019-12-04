@@ -42,10 +42,18 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid = 0")
     abstract fun findAllActiveGroupPersonGroupsLive(): DoorLiveData<List<PersonGroup>>
 
-    @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid != 0")
+    @Query("SELECT PersonGroup.groupMasterCsn, PersonGroup.groupLocalCsn, " +
+            " PersonGroup.groupLastChangedBy, " +
+            " PersonGroup.groupActive, PersonGroup.groupPersonUid, PersonGroup.groupUid, " +
+            " Person.firstNames||' '||Person.lastName as groupName " +
+            " FROM PersonGroup LEFT JOIN PERSON ON Person.personUid = PersonGroup.groupPersonUid " +
+            "  WHERE groupActive = 1 AND groupPersonUid != 0 " +
+            "  AND Person.active = 1")
     abstract fun findAllActivePersonPersonGroupLive(): DoorLiveData<List<PersonGroup>>
 
-    //TODO: Replace with Boolean argument
+    @Query("SELECT * FROM PersonGroup WHERE groupPersonUid = :personUid ")
+    abstract suspend fun findPersonIndividualGroup(personUid: Long): PersonGroup?
+
     @Query("UPDATE PersonGroup SET groupActive = 0 WHERE groupUid = :uid")
     abstract suspend fun inactivateGroupAsync(uid: Long) : Int
 

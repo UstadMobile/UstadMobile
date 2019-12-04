@@ -5,6 +5,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.PlatformTestUtil
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import java.util.*
@@ -26,8 +27,11 @@ class TestSyncablePkAndroid {
         val newUsername = "bob" + System.currentTimeMillis()
         val newPerson = Person(newUsername, "bob", "jones")
         val insertedPk = db.personDao.insert(newPerson)
-        Assert.assertEquals("Inserted pk was inserted under matching key",
-                newUsername, db.personDao.findByUid(insertedPk)!!.username)
+        runBlocking {
+            Assert.assertEquals("Inserted pk was inserted under matching key",
+                    newUsername, db.personDao.findByUid(insertedPk)!!.username)
+        }
+
     }
 
     @Test
@@ -43,9 +47,11 @@ class TestSyncablePkAndroid {
         }
         val insertedIds = db.personDao.insertListAndGetIds(personList)
 
-        for (i in 0 until numInsertsToRun) {
-            Assert.assertEquals("newperson$i",
-                    db.personDao.findByUid(insertedIds[i])!!.username)
+        runBlocking {
+            for (i in 0 until numInsertsToRun) {
+                Assert.assertEquals("newperson$i",
+                        db.personDao.findByUid(insertedIds[i])!!.username)
+            }
         }
     }
 

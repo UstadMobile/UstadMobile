@@ -28,6 +28,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.children
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -52,12 +53,15 @@ import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_QUALITY
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_DATE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_DROPDOWN
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_FIELD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_USERNAME
 import com.ustadmobile.port.android.generated.MessageIDMap
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +80,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     private lateinit var mLinearLayout: LinearLayout
 
     private lateinit var mRecyclerView: RecyclerView
+    private lateinit var mRecyclerView2: RecyclerView
 
     private lateinit var mPresenter: PersonEditPresenter
 
@@ -84,12 +89,35 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     internal lateinit var personEditImage: ImageView
     internal lateinit var customFieldsLL: LinearLayout
 
+    private var mProgressBar: ProgressBar? = null
+
+    override fun sendMessage(messageId: Int) {
+        val impl = UstadMobileSystemImpl.instance
+        val toast = impl.getString(messageId, this)
+        runOnUiThread {
+            Toast.makeText(
+                    this,
+                    toast,
+                    Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    override fun setInProgress(inProgress: Boolean) {
+        mProgressBar!!.visibility = if (inProgress) View.VISIBLE else View.GONE
+        disableFields(inProgress)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //Set layout:
         setContentView(R.layout.activity_person_edit)
+
+        mProgressBar = findViewById(R.id.progressBar)
+        mProgressBar!!.isIndeterminate = true
+        mProgressBar!!.scaleY = 3f
+
 
         //Toolbar
         toolbar = findViewById(R.id.activity_person_edit_toolbar)
@@ -147,7 +175,16 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
      * Clears all fields.
      */
     override fun clearAllFields() {
-        mLinearLayout!!.removeAllViews()
+        mLinearLayout.removeAllViews()
+    }
+
+    override fun disableFields(disable: Boolean){
+
+        for(child in mLinearLayout.children) {
+            if (child is TextInputLayout) {
+                (child as TextInputLayout).editText!!.isEnabled = !disable
+            }
+        }
     }
 
     /**
@@ -203,62 +240,64 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 //Add for classes
                 val impl = UstadMobileSystemImpl.instance
                 if (label == impl.getString(MessageID.classes, applicationContext)) {
+                    //Nothing in Goldozi
 
-                    //Goldozi: Not showing clazzes
+                }else if (label == impl.getString(MessageID.role_assignments, applicationContext)) {
 
-//
-//                    thisLinearLayout!!.addView(divider)
-//
-//                    //Add the Header
-//                    val header = TextView(this)
-//                    header.text = label!!.toUpperCase()
-//                    header.textSize = HEADER_TEXT_SIZE.toFloat()
-//                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
-//                    thisLinearLayout.addView(header)
-//
-//                    //Add Add new Class button
-//                    val addPersonToClazzHL = LinearLayout(this)
-//                    addPersonToClazzHL.layoutParams = parentParams
-//                    addPersonToClazzHL.orientation = LinearLayout.HORIZONTAL
-//
-//                    //Add the icon
-//                    val addIconResId = getResourceId(ADD_PERSON_ICON,
-//                            "drawable", packageName)
-//                    //ImageView addIcon = new ImageView(this);
-//                    val addIcon = AppCompatImageView(this)
-//
-//
-//                    addIcon.setImageResource(addIconResId)
-//                    addIcon.setPadding(DEFAULT_PADDING, 0, DEFAULT_TEXT_PADDING_RIGHT, 0)
-//                    addPersonToClazzHL.addView(addIcon)
-//
-//                    //Add the button
-//                    val addPersonButton = Button(this)
-//                    addPersonButton.includeFontPadding = false
-//                    addPersonButton.minHeight = 0
-//                    addPersonButton.text = impl.getString(MessageID.add_person_to_class,
-//                            applicationContext)
-//                    addPersonButton.background = null
-//                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0)
-//                    addPersonButton.setOnClickListener { v -> mPresenter.handleClickAddNewClazz() }
-//                    addPersonToClazzHL.addView(addPersonButton)
-//
-//                    mLinearLayout.addView(addPersonToClazzHL)
-//
-//                    //Add a recycler view of classes
-//                    mRecyclerView = RecyclerView(this)
-//                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-//                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-//                            ViewGroup.LayoutParams.WRAP_CONTENT)
-//                    mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
-//                    mRecyclerView.setLayoutParams(wrapParams)
-//
-//
-//                    //Add the layout
-//                    mLinearLayout.addView(mRecyclerView)
-//
-//                    //Generate the live data and set it
-//                    mPresenter.generateAssignedClazzesLiveData()
+                    thisLinearLayout!!.addView(divider)
+
+                    //Add the Header
+                    val header = TextView(this)
+                    header.text = label!!.toUpperCase()
+                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    thisLinearLayout.addView(header)
+
+                    //Add Add new Role Assignment button
+                    val addPersonToClazzHL = LinearLayout(this)
+                    addPersonToClazzHL.layoutParams = parentParams
+                    addPersonToClazzHL.orientation = LinearLayout.HORIZONTAL
+
+                    //Add the icon
+                    val addIconResId = getResourceId(ADD_ICON,
+                            "drawable", packageName)
+                    //ImageView addIcon = new ImageView(this);
+                    val addIcon = AppCompatImageView(this)
+
+
+                    addIcon.setImageResource(addIconResId)
+                    addIcon.setPadding(DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_TEXT_PADDING_RIGHT,
+                            0)
+                    addPersonToClazzHL.addView(addIcon)
+
+                    //Add the button
+                    val addPersonButton = Button(this)
+                    addPersonButton.includeFontPadding = false
+                    addPersonButton.minHeight = 0
+                    addPersonButton.text = impl.getString(MessageID.add_new_role_assignment,
+                            applicationContext)
+                    addPersonButton.background = null
+                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0)
+                    addPersonButton.setOnClickListener {
+                        v -> mPresenter.handleClickAddNewRoleAssignment() }
+                    addPersonToClazzHL.addView(addPersonButton)
+
+                    mLinearLayout.addView(addPersonToClazzHL)
+
+                    //Add a recycler view of classes
+                    mRecyclerView2 = RecyclerView(this)
+                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT)
+                    mRecyclerView2.setLayoutManager(mRecyclerLayoutManager)
+                    mRecyclerView2.setLayoutParams(wrapParams)
+
+
+                    //Add the layout
+                    mLinearLayout.addView(mRecyclerView2)
+
+                    //Generate the live data and set it
+                    mPresenter.generateAssignedRoleAssignments()
                 }else{
 
                     thisLinearLayout!!.addView(divider)
@@ -272,8 +311,8 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 }
             }
 
-            FIELD_TYPE_TEXT, FIELD_TYPE_FIELD, FIELD_TYPE_PHONE_NUMBER, FIELD_TYPE_DATE -> {
-
+            FIELD_TYPE_TEXT, FIELD_TYPE_FIELD, FIELD_TYPE_PHONE_NUMBER, FIELD_TYPE_DATE,
+            FIELD_TYPE_PASSWORD, FIELD_TYPE_USERNAME -> {
 
                 //width of editText to be width of screen - (icon put left right padding)
                 val pixelOffset = dpToPx(ADD_PERSON_ICON_WIDTH + 2 * DEFAULT_PADDING)
@@ -316,18 +355,16 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 if (fieldType == FIELD_TYPE_PHONE_NUMBER) {
                     fieldEditText.inputType = InputType.TYPE_CLASS_PHONE
                 }
+
                 if (fieldType == FIELD_TYPE_DATE) {
 
                     //Get locale
                     val currentLocale = resources.configuration.locale
 
-
-                    //TODOne: KMP date stuff
-                    //TODO:Test
                     //Date pickers's on click listener - sets text
                     val date = { view: DatePicker, year: Int, month:Int, dayOfMonth:Int ->
 
-                        val dateLong = UMCalendarUtil.getDateLongFromYMD(year, month, dayOfMonth)
+                        val dateLong = UMCalendarUtil.getDateLongFromYMD(year, month+1, dayOfMonth)
 
                         fieldEditText.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                                 dateLong, currentLocale))
@@ -341,8 +378,6 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     //date listener - opens a new date picker.
                     val dateFieldPicker = DatePickerDialog(
                             this@PersonEditActivity,
-                            //android.R.style.Widget_Holo_DatePicker,
-                            //android.R.style.Theme_Holo_Dialog,
                             R.style.CustomDatePickerDialogTheme,
                             date, cal.yearInt,
                             cal.month0, cal.dayOfMonth) //TODO: Check cal.moth0
@@ -357,6 +392,15 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 if (fieldType == FIELD_TYPE_TEXT) {
                     fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS +
                             InputType.TYPE_TEXT_FLAG_CAP_WORDS
+                }
+
+                if(fieldType == FIELD_TYPE_USERNAME){
+                    fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                }
+
+                if( fieldType == FIELD_TYPE_PASSWORD){
+                    fieldEditText.inputType = InputType.TYPE_CLASS_TEXT +
+                                        InputType.TYPE_TEXT_VARIATION_PASSWORD
                 }
 
                 if (fieldType != FIELD_TYPE_DATE) {
@@ -376,7 +420,6 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                         }
                     })
                 }
-
 
                 fieldTextInputLayout.addView(fieldEditText, textInputLayoutParams)
 
@@ -495,6 +538,25 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         }
 
         mRecyclerView!!.setAdapter(recyclerAdapter)
+    }
+
+    override fun setRoleAssignmentListProvider(factory:
+                                               DataSource.Factory<Int, EntityRoleWithGroupName>){
+
+        val recyclerAdapter =
+                RoleAssignmentListRecyclerAdapter(PersonDetailActivity.DIFF_CALLBACK_ENTITY_ROLE_WITH_GROUPNAME,
+                        null, mPresenter!!,this, applicationContext)
+        // A warning is expected
+        val data = LivePagedListBuilder(factory, 20).build()
+        //Observe the data:
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP,
+                    Observer<PagedList<EntityRoleWithGroupName>> { recyclerAdapter.submitList(it) })
+        }
+
+        mRecyclerView2!!.setAdapter(recyclerAdapter)
+
     }
 
     override fun updateToolbarTitle(titleName: String) {
@@ -701,6 +763,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         val DEFAULT_DIVIDER_HEIGHT = 2
         val DEFAULT_TEXT_PADDING_RIGHT = 4
         val ADD_PERSON_ICON = "ic_person_add_black_24dp"
+        val ADD_ICON = "ic_add_black_24dp"
         val ADD_PERSON_ICON_WIDTH = 24
         val HEADER_TEXT_SIZE = 12
         val COLOR_GREY = "#B3B3B3"

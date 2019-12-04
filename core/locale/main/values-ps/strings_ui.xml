@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name"> ‫أستاد موبايل‬</string>
-    <string name="dir">ltr</string>
-    <string name="login">ننوتول</string>
-    <string name="error">تېروتنه</string>
-    <string name="err_registering_new_user">   د نوی کارونکی په راجستر کولو کې تیروتنه</string>
-    <string name="registering"> راجستر کول</string>
-    <string name="register_empty_fields">مهربانی وکړئ ټولي اړینې برخې ډکي کړئ</string>
-    <string name="register_incorrect_email">بریشنایی پته سمه نه ده</string>
 
-    <string name="wrong_user_pass_combo">ناسم کارن نوم / پټ نوم: بیا هڅه وکړئ</string>
+    <string name="app_name"> ‫أستاد موبايل‬</string>
+    <string name='dir'>ltr</string>
+    <string name='login'> ننوتون</string>
+    <string name='error'> تېروتنه</string>
+    <string name='err_registering_new_user'>تیروتنه د نوی کارونکی په ثبت</string>
+    <string name='registering'>شاملونه</string>
+    <string name="register_empty_fields">Please fill out all required fields</string>
+    <string name="register_incorrect_email">Wrong email address</string>
+    <string name='wrong_user_pass_combo'> غلطه کارونکی نوم/شفر: بیا کوښښ وکړی</string>
+    <string name='previous'>Previous</string>
+
+    <string name='success'>Success</string>
+
     <string name="login_network_error">چک وکری په کرښه یی د جال تیروتنه! مهربانی</string>
     <string name="authenticating">تصدیق كول</string>
     <string name="course_catalog_load_error">بخښنه! تیروتنه په بارولو کښی</string>
     <string name="download">ښکته کول</string>
-    <string name="downloaded" value="81">شکته شو</string>
-    <string name="libraries">ثبت شوی</string>
-    <string name="pause_download">په ښکته کولو کې ځنډ</string>
+
     <string name="ok">هوکی</string>
     <string name="confirm">تائید</string>
     <string name="cancel">لغو کول</string>
@@ -45,7 +47,6 @@
     <string name="last_name">وروستی نوم</string>
     <string name="first_name">لومړی نوم</string>
     <string name="create_new_account">اوس ځان راجسټر کول</string>
-    <string name="new_password">نوی پټ نوم</string>
     <string name="phone_memory">د تیلیفون حافظه</string>
     <string name="memory_card">د حافظې کارډ</string>
     <string name="device">وزله</string>
@@ -71,8 +72,6 @@
     <string name="home">کور پاڼه</string>
     <string name="add">زیاتول</string>
     <string name="enter_phone_num">په مهربانۍ سره د ټېلفون شمېره ولیکئ</string>
-    <string name="phone">ټېلفون</string>
-    <string name="tablet">ټبلټ</string>
     <string name="enter_name">په مهربانۍ سره نوم ولیکئ</string>
     <string name="attendance">حاضري</string>
     <string name="processing">د پروسس کولو په حال کی</string>
@@ -105,7 +104,6 @@
     <string name="in_progress">په جریان کې</string>
     <string name="downloading">د ښکته کولو په حال کې</string>
     <string name="waiting">د انتظار کولو په حال کې</string>
-    <string name="waiting_for_sender">د استونکي په انتظار</string>
     <string name="queued">په کتار کې</string>
     <string name="failed">ناکامه</string>
 
@@ -114,7 +112,6 @@
 
     <string name="share_offline_zip_checkbox_label">د زېپ په فایل کې ولېږئ</string>
     <string name="share_offline_dialog_message">تاسو کولای شئ دا اپلیکیشن آفلاین شریک کړئ په هغه وزله کې چې تاسو غواړئ ورسره یې شریک کړئ: \n1. خلاص کړئ: سټنګ&gt; بلوټوټ سټنګ  \n2. ځان ډاډه کړئ چې وزله د لیدو وړ دی</string>
-    <string name="preparing">د چمتو کولو په حال کې</string>
 
     <string name="select_language">د ژبې غوراوی</string>
     <!-- For language selector where %s is replaced by the device type name -->
@@ -125,12 +122,20 @@
     <string name="login_successful">ننوتل په بریا ترسره شوه</string>
     <string name="registration_successful">نوم لیکنه په بریا ترسره شوه</string>
 
-    <string name="send_course_instructions">1. په بله وزله کې، اپلیکیشن خلاص کړئ، او په پورتنۍ برخه کې ښی خواته لاسته راوړل غوره کړئ \n2. بله وزله له لاندینی لیسټ څخه غوره کړئ</string>
 
-    <string name="cancel_invite">د بلني لغوه کول</string>
-    <string name="inviting">د بلنې په حال کې</string>
-    <string name="try_again">بیا هڅه وکړئ</string>
-
+    <string name='downloaded'>دانلوډ شو</string>
+    <string name="recycled" >Recycled</string>
+    <string name="libraries">Libraries</string>
+    <string name="pause_download">Pause download</string>
+    <string name='new_password'>نوی تېرنويى</string>
+    <string name='phone'>ټېلفون</string>
+    <string name='tablet'>تبلټ</string>
+    <string name='waiting_for_sender'>د استونکي په انتظار</string>
+    <string name='preparing'>چمتو کول</string>
+    <string name='send_course_instructions'>په بلې آله کې، اپلکېشن پرانیسئ، د مینو پورته ښي اړخه څخه د ترلاسه کول وټاکئ.\n  د لاندې لیسټ څخه بله آله انتخاب کړئ:</string>
+    <string name='cancel_invite'>د بلني لغوه </string>
+    <string name='inviting'>د بلنې په حال کې</string>
+    <string name="try_again">Try again</string>
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">دا برخه لازمه ده</string>
     <string name="field_password_min">لږ تر لږه ۵ توري</string>
@@ -144,6 +149,11 @@
     <string name="closed">بندول</string>
 
     <string name="cannot_update">اوسمهالول ترسره کیدای نشو</string>
+    <string name="profile">Profile</string>
+
+    <string name="dialog_download_from_playstore_message">Access &amp; Share Educational Content Offline</string>
+    <string name="dialog_download_from_playstore_ok">Download now (free)</string>
+    <string name="dialog_download_from_playstore_cancel">Stay on website</string>
 
     <string name="error_unsupported_content_type">تیروتنه: د محتوا ډول د ملاتړ وړ نه دی</string>
 
@@ -288,7 +298,6 @@
     <string name="content_editor_save_error"> د ثبتولو په وخت کې تیروتنه وشو، بیا هڅه وکړئ</string>
 
 
-    <string name="no_account">Don\'t have an account?</string>
 
     <!-- Untranslated bits -->
     <string name="other">Other</string>
@@ -305,7 +314,6 @@
     <string name="download_cancel_stacked_label">Cancel download</string>
     <string name="download_entry_state_downloading">Downloading</string>
     <string name="download_entry_state_downloaded">Downloaded</string>
-    <string name="content_editor_create_new_import_link">Import from link</string>
     <string name="bar_chart" value="100">Bar Chart</string>
     <string name="line_graph" value="101">Line Graph</string>
     <string name="score" value="200">Average Score</string>
@@ -355,5 +363,31 @@
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
+
+
+    <string name="download_summary_title">%1$s active downloads</string>
+
+    <!--Content editor -->
+
+    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_active">Make content active</string>
+    <string name="content_entry_label_update_content">Update Content</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
+    <string name="content_editor_create_new_import_link">Import from link</string>
+
+    <string name="empty_state_recycle">No recycled items</string>
+
+    <string name="no_account">You do not have an account?</string>
+    <string name="xapi_clear" >Clear</string>
+    <string name="xapi_today" >Today</string>
+
+    <string name="select_entries">Select Entries</string>
+    <string name='new_tab'>Displaying on new Tab</string>
+    <string name="content_entry_export">Export</string>
+    <string name="content_entry_export_inprogress">Exporting</string>
+    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
+    <string name="error_not_found_status">404 !</string>
+    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
 </resources>
 

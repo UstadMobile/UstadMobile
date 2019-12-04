@@ -419,8 +419,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
                         codeBlock.add("val _dataSource = ")
                                 .addDelegateFunctionCall("_dao", daoFunSpecBuilt).add("\n")
-                                .add("val _limit = 50\n")
-                        daoFunSpec.addParameter("_limit", INT)
+                                .add("val limit = 50\n")
+                        daoFunSpec.addParameter("limit", INT)
                         val callbackTypeSpec = TypeSpec.anonymousClassBuilder()
                                 .superclass(BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType))
                                 .addFunction(FunSpec.builder("loadMore")

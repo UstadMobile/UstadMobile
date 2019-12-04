@@ -22,17 +22,12 @@ import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
 
 
-/**
- * Presenter for UserProfile view
- */
-class UserProfilePresenter(context: Any,
-                           arguments: Map<String, String?>,
-                           view: UserProfileView, val impl: UstadMobileSystemImpl)
-    : UstadBaseController<UserProfileView>(context, arguments, view) {
+class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view: UserProfileView,
+                            val personDao: PersonDao, val impl: UstadMobileSystemImpl)
+    : UstadBaseController<UserProfileView>(context, arguments, view){
 
     internal var repository: UmAppDatabase =
             UmAccountManager.getRepositoryForActiveAccount(context)
-    private val personDao: PersonDao
     private var loggedInPerson: Person? = null
     private var personPictureDao: PersonPictureDao
 
@@ -43,7 +38,6 @@ class UserProfilePresenter(context: Any,
     init {
 
         //Get provider Dao
-        personDao = repository.personDao
         personPictureDao =
                 UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
 
@@ -151,7 +145,7 @@ class UserProfilePresenter(context: Any,
                 personPictureDao.update(existingPP)
 
                 //Update person and generate feeds for person
-                personDao.updateAsync(loggedInPerson!!)
+                personDao.updatePersonAsync(loggedInPerson!!, loggedInPersonUid)
 
                 //Update view with path
                 val picturePath = personPictureDao.getAttachmentPath(existingPP)

@@ -41,6 +41,11 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     abstract suspend fun userHasTableLevelPermission(accountPersonUid: Long,
              tableId: Int, permission: Long) : Boolean
 
+    @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId " +
+            " AND erEntityUid = :entityUid AND erGroupUid = :groupUid " +
+            " AND erRoleUid = :roleUid ")
+    abstract suspend fun findByEntitiyAndPersonGroupAndRole(tableId: Int, entityUid: Long, groupUid:
+    Long, roleUid: Long) : List<EntityRole>
 
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erGroupUid = :groupUid")
     abstract suspend fun findByEntitiyAndPersonGroup(tableId: Int, entityUid: Long, groupUid:
@@ -57,18 +62,12 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     abstract fun findGroupByRoleAndEntityTypeAndUidSync(tableId: Int, entityUid: Long,
                                                         roleUid: Long): List<EntityRole>
 
-    @Query("SELECT PersonGroup.groupName AS groupName, '' AS entityName, " +
-            " Clazz.clazzName AS clazzName, Location.title AS locationName, " +
-            " Person.firstNames||' '||Person.lastName AS personName, " +
-            " '' AS entityType, Role.roleName AS roleName, EntityRole.* " +
-            " FROM EntityRole  " +
-            " LEFT JOIN PersonGroup ON EntityRole.erGroupUid = PersonGroup.groupUid " +
-            " LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-            " LEFT JOIN Clazz ON EntityRole.erEntityUid = Clazz.clazzUid " +
-            " LEFT JOIN Location ON EntityRole.erEntityUid = Location.locationUid " +
-            " LEFT JOIN Person ON EntityRole.erEntityUid = Person.personUid " +
-            " WHERE EntityRole.erGroupUid != 0 AND EntityRole.erActive = 1")
+    @Query(SELECT_ROLE_ASSIGNMENT_QUERY)
     abstract fun findAllActiveRoleAssignments(): DataSource.Factory<Int, EntityRoleWithGroupName>
+
+    @Query(SELECT_ROLE_ASSIGNMENT_QUERY + ROLE_ASSIGNMENT_BY_PERSONGROUP_WHERE )
+    abstract fun findAllActiveRoleAssignmentsByGroupPersonUid(groupPersonUid: Long)
+            : DataSource.Factory<Int, EntityRoleWithGroupName>
 
     @Query("UPDATE EntityRole SET erActive = 0 where erUid = :uid ")
     abstract suspend fun inavtivateEntityRoleAsync(uid: Long) :Int
@@ -83,4 +82,24 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     @Update
     abstract suspend fun updateAsync(entity: EntityRole) :Int
 
+    companion object {
+        const val SELECT_ROLE_ASSIGNMENT_QUERY =
+                "SELECT PersonGroup.groupName AS groupName, '' AS entityName, " +
+                        " Clazz.clazzName AS clazzName, Location.title AS locationName, " +
+                        " Person.firstNames||' '||Person.lastName AS personName, " +
+                        " '' AS entityType, Role.roleName AS roleName, EntityRole.*, " +
+                        " pg.firstNames||' '||pg.lastName AS groupPersonName, " +
+                        " pg.personUid AS groupPersonUid " +
+                        " FROM EntityRole  " +
+                        " LEFT JOIN PersonGroup ON EntityRole.erGroupUid = PersonGroup.groupUid " +
+                        " LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+                        " LEFT JOIN Clazz ON EntityRole.erEntityUid = Clazz.clazzUid " +
+                        " LEFT JOIN Location ON EntityRole.erEntityUid = Location.locationUid " +
+                        " LEFT JOIN Person ON EntityRole.erEntityUid = Person.personUid " +
+                        " LEFT JOIN Person as pg ON pg.personUid = PersonGroup.groupPersonUid " +
+                        " WHERE EntityRole.erGroupUid != 0 AND EntityRole.erActive = 1 "
+
+        const val ROLE_ASSIGNMENT_BY_PERSONGROUP_WHERE =
+                " AND groupPersonUid = :groupPersonUid "
+    }
 }

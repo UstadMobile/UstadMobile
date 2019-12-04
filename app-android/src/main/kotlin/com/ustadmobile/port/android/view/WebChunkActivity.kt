@@ -41,13 +41,13 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this, repository)
+                bundleToMap(intent.extras), this, true,repository)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }
 
-    override fun mountChunk(container: Container, callback: UmCallback<String>) {
-        webClient = WebChunkWebViewClient(container, mPresenter!!, this)
+    override fun mountChunk(container: Container?, callback: UmCallback<String>) {
+        webClient = WebChunkWebViewClient(container!!, mPresenter!!, this)
         runOnUiThread {
             mWebView!!.webViewClient = webClient
             callback.onSuccess(webClient!!.url)

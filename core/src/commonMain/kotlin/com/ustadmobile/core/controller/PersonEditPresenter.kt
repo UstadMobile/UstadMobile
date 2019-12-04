@@ -6,19 +6,18 @@ import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
-import com.ustadmobile.core.view.PersonDetailEnrollClazzView
-import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
-import com.ustadmobile.core.view.PersonDetailViewField
-import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ATTENDANCE
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_BIRTHDAY
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_CLASSES
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_CONFIRM_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NUMBER
@@ -28,9 +27,12 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PASSWORD
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ATTENDANCE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_BIRTHDAY
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CLASSES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CONFIRM_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
@@ -41,8 +43,17 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ROLE_ASSIGNMENTS
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
+import com.ustadmobile.lib.util.encryptPassword
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.response.HttpResponse
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.takeFrom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -82,12 +93,16 @@ class PersonEditPresenter
 
     private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
 
+    private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
+
     //The custom fields' values
     private val customFieldWithFieldValueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     private val personDao = repository.personDao
+
+    private val personGroupDao = repository.personGroupDao
 
     private var newPersonString = ""
 
@@ -106,6 +121,13 @@ class PersonEditPresenter
 
     private val customFieldDropDownOptions: HashMap<Long, List<String>>
 
+    var passwordSet: String? = null
+    var confirmPasswordSet: String? = null
+    private var currentPerson: Person? = null
+    private var currentPersonAuth: PersonAuth? = null
+    var usernameSet: String? = null
+    private val personAuthDao: PersonAuthDao
+
     init {
 
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
@@ -122,6 +144,8 @@ class PersonEditPresenter
 
         customFieldDropDownOptions = HashMap()
         personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+
+        personAuthDao = repository.personAuthDao
 
     }
 
@@ -227,6 +251,22 @@ class PersonEditPresenter
                 resultLive.observe(thisP, thisP::handleFieldsLive)
             }
         }
+
+        if(personUid != 0L){
+            GlobalScope.launch {
+                val result = personDao.findByUidAsync(personUid)
+                currentPerson = result
+                usernameSet = currentPerson!!.username
+
+                val result2 = personAuthDao.findByUidAsync(personUid)
+                currentPersonAuth = result2
+                if (result2 == null) {
+                    currentPersonAuth = PersonAuth()
+                    currentPersonAuth!!.personAuthUid = personUid
+                    currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
+                }
+            }
+        }
     }
 
     private fun handleFieldsLive(fields: List<PersonDetailPresenterField>?){
@@ -235,13 +275,7 @@ class PersonEditPresenter
         val fieldsIterator = fields!!.iterator()
         while (fieldsIterator.hasNext()) {
             val field = fieldsIterator.next()
-            val fieldIndex = field.fieldIndex
-            if (fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21) {
-                //TODOne: Remove from iterator in Kotlin
-                //fieldsIterator.remove()
-            }else{
-                cleanedResult.add(field)
-            }
+            cleanedResult.add(field)
         }
 
         headersAndFields = cleanedResult
@@ -305,6 +339,13 @@ class PersonEditPresenter
         updateClazzListProviderToView()
     }
 
+    fun generateAssignedRoleAssignments(){
+        val roleAssignmentDao = repository.entityRoleDao
+        assignedRoleAssignments =
+                roleAssignmentDao.findAllActiveRoleAssignmentsByGroupPersonUid(personUid)
+        setRoleAssignmentsOnView()
+    }
+
     /**
      * Updates the Clazz List provider of type ClazzWithNumStudents that is set on this Presenter to
      * the View.
@@ -312,6 +353,11 @@ class PersonEditPresenter
     private fun updateClazzListProviderToView() {
         view.setClazzListProvider(assignedClazzes!!)
     }
+
+    private fun setRoleAssignmentsOnView(){
+        view.setRoleAssignmentListProvider(assignedRoleAssignments!!)
+    }
+
 
     private fun updatePersonPic(thisPerson: Person) {
         GlobalScope.launch {
@@ -362,24 +408,58 @@ class PersonEditPresenter
                 FIELD_HEADING_MOTHERS_NUMBER -> { labelMessageId = MessageID.mothers_number }
                 FIELD_HEADING_MOTHER -> { labelMessageId = MessageID.mother }
                 FIELD_HEADING_CLASSES -> { labelMessageId = MessageID.classes }
+                FIELD_HEADING_USERNAME -> { labelMessageId = MessageID.username }
+                FIELD_HEADING_PASSWORD -> {
+                    if (newPersonString == "true") {
+                        labelMessageId = MessageID.password
+                    }else {
+                        labelMessageId = MessageID.password_unchanged
+                    }
+                }
+                FIELD_HEADING_CONFIRM_PASSWORD -> {
+                    if (newPersonString == "true") {
+                        labelMessageId = MessageID.confirm_password
+                    }else {
+                        labelMessageId = MessageID.confirm_password_unchanged
+                    }
+                }
             }
 
             var headerMessageId = 0
             when(field.headerMessageId){
-                PersonField.FIELD_HEADING_PROFILE -> { headerMessageId = MessageID.profile }
-                PersonField.FIELD_HEADING_FULL_NAME -> { headerMessageId = MessageID.field_fullname }
-                PersonField.FIELD_HEADING_FIRST_NAMES -> { headerMessageId = MessageID.first_names }
-                PersonField.FIELD_HEADING_LAST_NAME -> { headerMessageId = MessageID.last_name }
-                PersonField.FIELD_HEADING_BIRTHDAY -> { headerMessageId = MessageID.birthday }
-                PersonField.FIELD_HEADING_HOME_ADDRESS -> { headerMessageId = MessageID.home_address }
-                PersonField.FIELD_HEADING_ATTENDANCE -> { headerMessageId = MessageID. attendance}
-                PersonField.FIELD_HEADING_FATHER -> { headerMessageId = MessageID.father }
-                PersonField.FIELD_HEADING_FATHERS_NAME -> { headerMessageId = MessageID.fathers_name }
-                PersonField.FIELD_HEADING_FATHERS_NUMBER -> { headerMessageId = MessageID.fathers_number }
-                PersonField.FIELD_HEADING_MOTHERS_NAME -> { headerMessageId = MessageID.mothers_name }
-                PersonField.FIELD_HEADING_MOTHERS_NUMBER -> { headerMessageId = MessageID.mothers_number }
-                PersonField.FIELD_HEADING_MOTHER -> { headerMessageId = MessageID.mother }
-                PersonField.FIELD_HEADING_CLASSES -> { headerMessageId = MessageID.classes }
+                FIELD_HEADING_PROFILE -> { headerMessageId = MessageID.profile }
+                FIELD_HEADING_FULL_NAME -> { headerMessageId = MessageID.field_fullname }
+                FIELD_HEADING_FIRST_NAMES -> { headerMessageId = MessageID.first_names }
+                FIELD_HEADING_LAST_NAME -> { headerMessageId = MessageID.last_name }
+                FIELD_HEADING_BIRTHDAY -> { headerMessageId = MessageID.birthday }
+                FIELD_HEADING_HOME_ADDRESS -> { headerMessageId = MessageID.home_address }
+                FIELD_HEADING_ATTENDANCE -> { headerMessageId = MessageID. attendance}
+                FIELD_HEADING_FATHER -> { headerMessageId = MessageID.father }
+                FIELD_HEADING_FATHERS_NAME -> { headerMessageId = MessageID.fathers_name }
+                FIELD_HEADING_FATHERS_NUMBER -> { headerMessageId = MessageID.fathers_number }
+                FIELD_HEADING_MOTHERS_NAME -> { headerMessageId = MessageID.mothers_name }
+                FIELD_HEADING_MOTHERS_NUMBER -> { headerMessageId = MessageID.mothers_number }
+                FIELD_HEADING_MOTHER -> { headerMessageId = MessageID.mother }
+                FIELD_HEADING_CLASSES -> { headerMessageId = MessageID.classes }
+                FIELD_HEADING_USERNAME -> { headerMessageId = MessageID.username }
+
+                FIELD_HEADING_PASSWORD -> {
+                    if (newPersonString == "true") {
+                        headerMessageId = MessageID.password
+                    }else {
+                        headerMessageId = MessageID.password_unchanged
+                    }
+                }
+                FIELD_HEADING_CONFIRM_PASSWORD -> {
+                    if (newPersonString == "true") {
+                        headerMessageId = MessageID.confirm_password
+                    }else {
+                        headerMessageId = MessageID.confirm_password_unchanged
+                    }
+                }
+
+                FIELD_HEADING_ROLE_ASSIGNMENTS -> { headerMessageId = MessageID.role_assignments }
+
             }
 
             var thisValue: String? = ""
@@ -466,6 +546,22 @@ class PersonEditPresenter
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
+            } else if (field.fieldUid == PERSON_FIELD_UID_USERNAME.toLong() ) {
+                usernameSet = thisPerson.username
+                thisValue = usernameSet
+
+                if(thisValue == null){
+                    thisValue = ""
+                }
+                thisView.setField(field.fieldIndex, field.fieldUid,
+                        PersonDetailViewField(field.fieldType,
+                                labelMessageId, field.fieldIcon), thisValue)
+            } else if(field.fieldUid == PERSON_FIELD_UID_PASSWORD.toLong()
+                    || field.fieldUid == PERSON_FIELD_UID_CONFIRM_PASSWORD.toLong()){
+                thisValue = ""
+                thisView.setField(field.fieldIndex, field.fieldUid,
+                        PersonDetailViewField(field.fieldType,
+                                labelMessageId, field.fieldIcon), thisValue)
             } else {//this is actually a custom field
                 var messageLabel = 0
                 var iconName: String? = null
@@ -533,7 +629,14 @@ class PersonEditPresenter
         } else if (fieldcode == PERSON_FIELD_UID_ADDRESS.toLong()) {
             personToUpdate!!.personAddress = (value as String)
 
-        } else {
+        } else if (fieldcode == PERSON_FIELD_UID_USERNAME.toLong() ){
+            usernameSet = value as String
+            personToUpdate!!.username = usernameSet
+        } else if (fieldcode == PERSON_FIELD_UID_PASSWORD.toLong() ){
+            passwordSet = value as String
+        } else if (fieldcode == PERSON_FIELD_UID_CONFIRM_PASSWORD.toLong() ){
+            confirmPasswordSet = value as String
+        }else {
             //This is actually a custom field. (old)
             GlobalScope.launch {
                 val result = personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode, personToUpdate!!.personUid)
@@ -597,6 +700,12 @@ class PersonEditPresenter
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context)
     }
 
+    fun handleClickAddNewRoleAssignment(){
+        val args = HashMap<String, String>()
+        args.put(ARG_PERSON_UID, personUid.toString())
+        impl.go(RoleAssignmentDetailView.VIEW_NAME, args, context)
+    }
+
     /**
      * Saves custom field values.
      * @param viewId
@@ -624,7 +733,9 @@ class PersonEditPresenter
             if (valueString != null && !valueString.isEmpty()) {
                 val finalValueString = valueString
                 GlobalScope.launch {
-                    val result = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(customFieldUid, personUid)
+                    val result =
+                            customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(
+                                    customFieldUid, personUid)
                     val customFieldValue: CustomFieldValue?
                     if (result == null) {
                         customFieldValue = CustomFieldValue()
@@ -651,20 +762,89 @@ class PersonEditPresenter
     fun handleClickDone() {
         mUpdatedPerson!!.active = true
         GlobalScope.launch {
-            val result = personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
+            personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
 
             //Update the custom fields
             personCustomFieldValueDao.updateListAsync(customFieldsToUpdate)
             //Start of feed generation
             generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
 
-            //Close the activity.
-            view.finish()
+            //Update password if necessary
+            val updatePassword = updatePassword()
 
+            //Update person's individual group to  set the right name of the group
+            val fullName = mUpdatedPerson!!.fullName()
+
+            val personGroup = personGroupDao.findPersonIndividualGroup(mUpdatedPerson!!.personUid)
+            if(personGroup != null){
+                personGroup.groupName = fullName + "'s individual person group"
+                personGroupDao.updateAsync(personGroup)
+            }
+
+            //Close the activity.
+            if(updatePassword) {
+                view.finish()
+            }
 
         }
 
     }
+
+    private fun updatePassword() : Boolean {
+        if (passwordSet != null && !passwordSet!!.isEmpty() && usernameSet != null
+                && !usernameSet!!.isEmpty() && currentPersonAuth != null && currentPerson != null) {
+            if (passwordSet != confirmPasswordSet) {
+                view.sendMessage(MessageID.passwords_dont_match)
+                return false
+            }
+
+            view.runOnUiThread(Runnable {
+                view.setInProgress(true)
+            })
+            currentPerson!!.username = usernameSet
+
+            currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                    encryptPassword(passwordSet!!)
+            currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
+            GlobalScope.launch {
+                //Update locally
+                personDao.updateAsync(mUpdatedPerson!!)
+
+                //Update on server
+                try {
+                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
+                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+                    {
+                        url {
+                            takeFrom(serverUrl!!)
+                            encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+                        }
+                        parameter("p0", personUid)
+                        parameter("p1", passwordSet)
+                        parameter("p2", loggedInPersonUid)
+                    }
+
+                    if(resetPasswordResponse.status == HttpStatusCode.OK) {
+                        //Update locally
+                        personAuthDao.updateAsync(currentPersonAuth!!)
+                        view.finish()
+                    }else {
+                        view.sendMessage(MessageID.unable_to_update_password)
+                        println("nope")
+                        false
+                    }
+                } catch (e: Exception) {
+                    view.sendMessage(MessageID.unable_to_update_password)
+                    print("oops")
+                    false
+                }
+            }
+            return false
+        }
+        return true
+    }
+
+
 
     companion object {
 
