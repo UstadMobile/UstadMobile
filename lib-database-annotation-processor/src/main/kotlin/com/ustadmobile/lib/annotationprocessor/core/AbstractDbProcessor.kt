@@ -374,14 +374,16 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             }else {
                 CodeBlock.of("serializer()")
             }
-            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json)\n",
+            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json.%M())\n",
                 TextContent::class, entityComponentType,
                     serializerFnCodeBlock,
                     MemberName("kotlinx.serialization", "list"),
-                    ContentType::class)
+                    ContentType::class,
+                    MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
         }else {
-            CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
-                    MemberName("io.ktor.client.features.json", "defaultSerializer"))
+            CodeBlock.of("body = %M().write(${requestBodyParam.name}, %T.Application.Json.%M())\n",
+                    MemberName("io.ktor.client.features.json", "defaultSerializer"),
+                    ContentType::class, MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
         }
 
         codeBlock.addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
