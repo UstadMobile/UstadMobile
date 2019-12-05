@@ -48,11 +48,9 @@ import com.ustadmobile.core.db.dao.SaleDao
     SaleItemReminder::class,
     DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class
 
-
-
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
-    ], version = 26)
+    ], version = 27)
 
 
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
