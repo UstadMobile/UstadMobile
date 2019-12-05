@@ -61,7 +61,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
         fragmentViewContract.setContentEntryProvider(provider)
 
         try {
@@ -121,7 +121,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
     private fun showRecycledEntries(){
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.recycledItems())
+        fragmentViewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
     }
 
 

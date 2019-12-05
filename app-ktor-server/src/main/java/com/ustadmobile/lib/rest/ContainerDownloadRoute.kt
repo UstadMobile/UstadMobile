@@ -79,13 +79,17 @@ fun Route.ContainerDownload(db: UmAppDatabase) {
             override val contentLength: Long?
                 get() = concatenatedResponse.contentLength
 
-            override val status: HttpStatusCode = HttpStatusCode.OK
+            override val status: HttpStatusCode = if(concatenatedResponse.status == 200) {
+                HttpStatusCode.OK
+            }else {
+                HttpStatusCode(concatenatedResponse.status, "ConcatenatedResponseError")
+            }
 
             override suspend fun writeTo(channel: ByteWriteChannel) {
                 var bytesRead = 0
                 val buf = ByteArray(8 * 1024)
                 while(inStream.read(buf).also { bytesRead = it } != -1) {
-                    channel.writeAvailable(buf, 0, bytesRead)
+                    channel.writeFully(buf, 0, bytesRead)
                 }
                 inStream.close()
                 channel.flush()

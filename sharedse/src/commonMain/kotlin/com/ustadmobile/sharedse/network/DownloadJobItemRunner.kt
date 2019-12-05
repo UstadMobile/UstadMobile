@@ -256,7 +256,7 @@ class DownloadJobItemRunner
             networkManager.httpFetcher.removeListener(fetchListener)
 
             fetchStatusLock.withLock {
-                if(currentFetchRequestId != 0) {
+                if(currentFetchRequestId != 0 && currentFetchDownload?.status in (ACTIVE_FETCH_STATUSES)) {
                     networkManager.httpFetcher.pause(currentFetchRequestId)
                 }
             }
@@ -343,7 +343,12 @@ class DownloadJobItemRunner
 
         var downloadAttemptStatus = -1
         val destTmpFile = FileSe("$destinationDir/${downloadItem.djiUid}.tmp")
-        val containerEntryFileList = mutableListOf<ContainerEntryWithMd5>()
+
+        //list of all container entries in the container - used to
+        val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
+
+        val containerEntriesToDownloadList = mutableListOf<ContainerEntryWithMd5>()
+
         for (attemptNum in attemptsRemaining downTo 1) {
             try {
                 currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
@@ -415,18 +420,21 @@ class DownloadJobItemRunner
 
                 val containerEntryListVal = currentHttpClient.get<List<ContainerEntryWithMd5>>(
                         "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
-                containerEntryFileList.clear()
-                containerEntryFileList.addAll(containerEntryListVal)
+                containerEntriesList.clear()
+                containerEntriesList.addAll(containerEntryListVal)
 
                 entriesDownloaded.value = 0
 
-                val entriesToDownload = containerManager.linkExistingItems(containerEntryListVal)
+                val entriesToDownloadVal = containerManager.linkExistingItems(containerEntryListVal)
                         .distinctBy { it.cefMd5 }
                         .sortedBy { it.cefMd5 }
+                containerEntriesToDownloadList.clear()
+                containerEntriesToDownloadList.addAll(entriesToDownloadVal)
+
                 existingEntriesBytesDownloaded = containerManager.allEntries
                         .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
 
-                val entriesListStr = entriesToDownload.joinToString(separator = ";") { it.ceCefUid.toString() }
+                val entriesListStr = entriesToDownloadVal.joinToString(separator = ";") { it.ceCefUid.toString() }
 
 
                 history.startTime = getSystemTimeInMillis()
@@ -467,21 +475,32 @@ class DownloadJobItemRunner
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
 
             var concatenatedInputStream: ConcatenatedInputStream? = null
+
+            //TODO Here: Make the download fail if the validation does not check out, don't crash the app
             try {
                 concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
-                val pathToMd5Map = containerEntryFileList.map {
+                val pathToMd5Map = containerEntriesList.map {
                     (it.cePath ?: "") to (it.cefMd5?.base64StringToByteArray() ?: ByteArray(0))
                 }.toMap()
 
+                var entryCount = 0
                 containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = true),
                         pathToMd5Map) {
+
                     val nextPart = concatenatedInputStream.nextPart()
                     if(nextPart != null && !(startDownloadFnJobRef.value?.isCancelled ?: false)) {
                         val partMd5Str = nextPart.id.encodeBase64()
-                        val pathsInContainer = containerEntryFileList.filter {
+                        val containerEntry = containerEntriesToDownloadList[entryCount]
+                        if(containerEntry.cefMd5 != partMd5Str) {
+                            Napier.wtf({"Wrong MD5 Sum in response! $partMd5Str"})
+                            throw IllegalStateException("Could not find the path of md5sum $partMd5Str")
+                        }
+
+                        val pathsInContainer = containerEntriesList.filter {
                             it.cefMd5 == partMd5Str && it.cePath != null
                         }
                         if(pathsInContainer.isNotEmpty()) {
+                            entryCount++
                             ConcatenatedInputStreamEntrySource(nextPart, concatenatedInputStream,
                                     pathsInContainer.map { it.cePath!! })
                         }else {
@@ -491,6 +510,7 @@ class DownloadJobItemRunner
                     }else {
                         null
                     }
+
                 }
             }finally {
                 concatenatedInputStream?.close()

@@ -177,6 +177,7 @@ dependencies {
     implementation "org.jsoup:jsoup:$version_jsoup"
     implementation "com.google.code.gson:gson:$version_gson"
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
+    implementation "ch.qos.logback:logback-classic:$version_logback"
 
     implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(":sharedse")

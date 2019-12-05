@@ -23,21 +23,32 @@ class ConcatenatedInputStream(val src: InputStream) : InputStream(){
     val partHeaders: List<ConcatenatedPart>
 
     init {
-        val ioBuffer = IoBuffer.NoPool.borrow()
-        val byteArrBuff = ByteArray(LEN_NUM_CHUNKS)
-        src.read(byteArrBuff, 0, LEN_NUM_CHUNKS)
-        ioBuffer.writeFully(byteArrBuff, 0, LEN_NUM_CHUNKS)
+        val lenByteBuffer = ByteBuffer.allocate(LEN_NUM_CHUNKS).order(ByteOrder.LITTLE_ENDIAN)
+        val lenBytes = ByteArray(LEN_NUM_CHUNKS)
+        src.read(lenBytes, 0, LEN_NUM_CHUNKS)
+        lenByteBuffer.put(lenBytes, 0, LEN_NUM_CHUNKS)
+        lenByteBuffer.clear()
+        numFiles = lenByteBuffer.getInt()
 
-        numFiles = ioBuffer.readInt()
         val headerBufferSize = (numFiles * (LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2)))
-        val headerByteArr = ByteArray(headerBufferSize)
-        src.read(headerByteArr)
-        ioBuffer.writeFully(headerByteArr, 0, headerBufferSize)
+        val headerByteBuffer = ByteBuffer.allocate(headerBufferSize).order(ByteOrder.LITTLE_ENDIAN)
+        var headerBytesTotalRead = 0
+        val headerReadByteArrayBuf = ByteArray(8 * 1024)
+
+        do {
+            val bytesRead = src.read(headerReadByteArrayBuf, 0,
+                    min(headerReadByteArrayBuf.size, headerBufferSize - headerBytesTotalRead))
+            headerBytesTotalRead += bytesRead
+            headerByteBuffer.put(headerReadByteArrayBuf, 0, bytesRead)
+        }while(headerBytesTotalRead < headerBufferSize)
+
+        headerByteBuffer.clear()
+
         partHeaders = (0 until numFiles).map {
             val idByteArr = ByteArray(LEN_CHUNK_ID)
-            ioBuffer.readFully(idByteArr, 0, LEN_CHUNK_ID)
-            val partLen = ioBuffer.readLongLittleEndian()
-            val partLenUncompressed = ioBuffer.readLongLittleEndian()
+            headerByteBuffer.get(idByteArr, 0, LEN_CHUNK_ID)
+            val partLen = headerByteBuffer.getLong()
+            val partLenUncompressed = headerByteBuffer.getLong()
             val part = ConcatenatedPart(idByteArr, partLen, partLenUncompressed)
             part
         }

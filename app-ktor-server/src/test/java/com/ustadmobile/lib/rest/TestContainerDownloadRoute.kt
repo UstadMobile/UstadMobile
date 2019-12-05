@@ -143,7 +143,7 @@ class TestContainerDownloadRoute {
         runBlocking {
             val httpClient = HttpClient()
 
-            val containerEntriesToGet = containerManager.allEntries.subList(0, 2)
+            val containerEntriesToGet = containerManager.allEntries
             val fileListStr = containerEntriesToGet.joinToString(separator = ";") { it.ceCefUid.toString() }
 
             val url = "http://localhost:8097/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES}/$fileListStr"

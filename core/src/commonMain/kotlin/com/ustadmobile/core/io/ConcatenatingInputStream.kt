@@ -1,11 +1,6 @@
 package com.ustadmobile.core.io
 
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.ByteBuffer
-import kotlinx.io.IOException
-import kotlinx.io.InputStream
-import kotlinx.io.core.IoBuffer
-import kotlinx.io.core.writeLongLittleEndian
+import kotlinx.io.*
 import kotlin.math.min
 
 data class ConcatenatedPartSource(val src: ()-> InputStream, val length: Long,
@@ -62,22 +57,21 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
     fun generateHeader(concatenatedParts: List<ConcatenatedPartSource>): ByteArray {
         val headerSize = LEN_NUM_CHUNKS + (concatenatedParts.size * (LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2)))
-        val byteBuffer = IoBuffer.Pool.borrow()
-        byteBuffer.writeInt(concatenatedParts.size)
+        val byteBuffer = ByteBuffer.allocate(headerSize).order(ByteOrder.LITTLE_ENDIAN)
+
+        byteBuffer.putInt(concatenatedParts.size)
         concatenatedParts.forEach {
             if(it.partId.size != 16) {
                 throw IOException("ConcatenatingInputStream partId MUST be 16 bytes")
             }
-            byteBuffer.writeFully(it.partId, 0, it.partId.size)
-            byteBuffer.writeLongLittleEndian(it.length)
-            byteBuffer.writeLongLittleEndian(it.uncompressedLength)
+
+            byteBuffer.put(it.partId)
+            byteBuffer.putLong(it.length)
+            byteBuffer.putLong(it.uncompressedLength)
         }
 
-        byteBuffer.resetForRead()
-        val header = ByteArray(headerSize).also {
-            byteBuffer.readFully(it, 0, headerSize)
-        }
 
+        val header = byteBuffer.array()
         return header
     }
 
