@@ -321,7 +321,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN status TO contentFlags, ADD COLUMN ceInactive BOOL")
+                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")
+                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN status TO contentFlags")
+                    database.execSQL("ALTER TABLE ContentEntry ADD COLUMN ceInactive BOOL")
                 }
 
             })
