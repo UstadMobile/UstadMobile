@@ -331,7 +331,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(object : DoorMigration(25,26){
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")
                 }
 
             })
