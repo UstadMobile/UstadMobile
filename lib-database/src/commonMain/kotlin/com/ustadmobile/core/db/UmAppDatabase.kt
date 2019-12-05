@@ -35,7 +35,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 27)
+], version = 28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -269,6 +269,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
+
+            builder.addMigrations(object : DoorMigration(27,28){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+
+                }
+
+            })
 
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {

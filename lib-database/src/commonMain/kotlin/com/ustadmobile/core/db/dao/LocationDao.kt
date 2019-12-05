@@ -31,7 +31,7 @@ abstract class LocationDao : BaseDao<Location> {
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
 
-    @Query("SELECT * FROM Location WHERE locationActive = 1")
+    @Query("SELECT * FROM Location WHERE CAST(locationActive AS INTEGER) = 1")
     abstract fun findAllActiveLocationsLive(): DoorLiveData<List<Location>>
 
     fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {

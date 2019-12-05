@@ -35,7 +35,7 @@ abstract class FeedEntryDao : BaseDao<FeedEntry> {
     @Query("SELECT * FROM FeedEntry")
     abstract fun findAll(): List<FeedEntry>
 
-    @Query("SELECT * FROM FeedEntry WHERE link = :link AND feedEntryDone = 0 " + "AND feedEntryPersonUid = :personUid")
+    @Query("SELECT * FROM FeedEntry WHERE link = :link AND CAST(feedEntryDone AS INTEGER) = 0 " + "AND feedEntryPersonUid = :personUid")
     abstract fun findByLink(personUid: Long, link: String): FeedEntry?
 
     @Query("UPDATE FeedEntry SET feedEntryDone = 1 WHERE feedEntryUid = :feedEntryUid")

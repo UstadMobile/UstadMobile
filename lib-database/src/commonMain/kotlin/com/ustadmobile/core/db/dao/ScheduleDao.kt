@@ -38,10 +38,10 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Schedule?
 
-    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
+    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
     abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DataSource.Factory<Int, Schedule>
 
-    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
+    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1")
     abstract fun findAllSchedulesByClazzUidAsList(clazzUid: Long): List<Schedule>
 
     suspend fun disableSchedule(scheduleUid: Long) {

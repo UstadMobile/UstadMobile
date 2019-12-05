@@ -16,12 +16,12 @@ abstract class CustomFieldValueOptionDao : BaseDao<CustomFieldValueOption> {
 
     @Query("SELECT * FROM CustomFieldValueOption " +
             " WHERE customFieldValueOptionFieldUid = :customFieldUid " +
-            " AND customFieldValueOptionActive = 1")
+            " AND CAST(customFieldValueOptionActive AS INTEGER) = 1")
     abstract fun findAllOptionsForField(customFieldUid: Long): DataSource.Factory<Int, CustomFieldValueOption>
 
     @Query("SELECT * FROM CustomFieldValueOption " +
             " WHERE customFieldValueOptionFieldUid = :customFieldUid " +
-            " AND customFieldValueOptionActive = 1")
+            " AND CAST(customFieldValueOptionActive AS INTEGER) = 1")
     abstract suspend fun findAllOptionsForFieldAsync(customFieldUid: Long):List<CustomFieldValueOption>
 
     @Query("UPDATE CustomFieldValueOption SET customFieldValueOptionActive = 0 WHERE" + 

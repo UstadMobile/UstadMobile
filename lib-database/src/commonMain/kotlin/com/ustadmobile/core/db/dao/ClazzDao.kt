@@ -345,7 +345,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 "   FROM ClazzMember WHERE " +
                 "   ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
-                "   AND ClazzMember.clazzMemberActive = 1) AS numStudents, " +
+                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1) AS numStudents, " +
                 " (SELECT COUNT(*) FROM ClazzMember " +
                 "   WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
@@ -354,7 +354,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 "   FROM Person where Person.personUid in (SELECT ClazzMember.clazzMemberPersonUid " +
                 "   FROM ClazzMember WHERE ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
                 "   AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
-                "   AND ClazzMember.clazzMemberActive = 1) " +
+                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1) " +
                 " ) AS teacherNames "
 
         private const val CLAZZ_WHERE_CLAZZMEMBER =
@@ -363,7 +363,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 " WHERE (Person.admin OR :personUid in " +
                 " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
                 "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
-                " ClazzMember.clazzMemberActive = 1 )) "
+                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 )) "
 
 
 
