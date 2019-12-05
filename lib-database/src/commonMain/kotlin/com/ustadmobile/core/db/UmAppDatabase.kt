@@ -268,16 +268,41 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             return db
         }
 
+        fun doesColumnExist(database: DoorSqlDatabase, table:String, fieldName: String):Boolean{
+
+             database.execSQL("PRAGMA table_info(" + table + ")")
+            return false
+        }
+
+
+//             boolean isExist = false;
+//             SQLiteDatabase db = this.getWritableDatabase();
+//             Cursor res = db.rawQuery("PRAGMA table_info("+tableName+")",null);
+//            res.moveToFirst();
+//            do {
+//                String currentColumn = res.getString(1);
+//                if (currentColumn.equals(fieldName)) {
+//                    isExist = true;
+//                }
+//            } while (res.moveToNext());
+//             return isExist;
+
+
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(object : DoorMigration(27,28){
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
-                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
-                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
-                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
-                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
-                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+                    try {
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+                    } catch (e:Exception) {
+                        print(e.message)
+                    }
 
                 }
 
@@ -285,23 +310,35 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")
-                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN status TO contentFlags")
-                    database.execSQL("ALTER TABLE ContentEntry ADD COLUMN ceInactive BOOL")
+                    try{
+                        database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")
+                        database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN status TO contentFlags")
+                        database.execSQL("ALTER TABLE ContentEntry ADD COLUMN ceInactive BOOL")
+                    } catch (e:Exception) {
+                        print(e.message)
+                    }
                 }
 
             })
 
             builder.addMigrations(object : DoorMigration(25,26){
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")
+                    try {
+                        database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")
+                    } catch (e:Exception) {
+                        print(e.message)
+                     }
                 }
 
             })
 
             builder.addMigrations(object :DoorMigration(24, 25){
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                    try{
+                        database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                    } catch (e:Exception) {
+                        print(e.message)
+                    }
                 }
 
             })
