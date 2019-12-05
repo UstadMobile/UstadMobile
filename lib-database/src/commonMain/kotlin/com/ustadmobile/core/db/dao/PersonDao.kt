@@ -210,7 +210,7 @@ abstract class PersonDao : BaseDao<Person> {
             " CASE WHEN EXISTS " +
             " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
             " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND " +
-            " CAST(PersonGroupMember.groupMemberActiveAS INTEGER) = 1) " +
+            " CAST(PersonGroupMember.groupMemberActive AS INTEGER) = 1) " +
             "   THEN 1 " +
             "   ELSE 0 " +
             " END AS enrolled " +
@@ -316,8 +316,9 @@ abstract class PersonDao : BaseDao<Person> {
 
     companion object {
 
-        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
-                " CAST ((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
+
+        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
+                " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
                 " EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
                 " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
                 " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
