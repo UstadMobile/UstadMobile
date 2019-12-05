@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
@@ -111,6 +112,10 @@ class ChangePasswordActivity : UstadBaseActivity(), ChangePasswordView {
             }
         })
 
+        updatePasswordET!!.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+            source.toString().filterNot { it.isWhitespace() }
+        })
+
         updatePasswordConfirmET!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
 
@@ -123,6 +128,10 @@ class ChangePasswordActivity : UstadBaseActivity(), ChangePasswordView {
             override fun afterTextChanged(s: Editable) {
                 mPresenter!!.updatePasswordConfirm = s.toString()
             }
+        })
+
+        updatePasswordConfirmET!!.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+            source.toString().filterNot { it.isWhitespace() }
         })
 
 

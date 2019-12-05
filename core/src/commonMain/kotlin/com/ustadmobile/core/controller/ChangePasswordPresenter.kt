@@ -21,7 +21,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-
 /**
  * Presenter for ChangePassword view
  */
@@ -80,6 +79,7 @@ class ChangePasswordPresenter(context: Any,
             }
 
             //TODO: Fix local login and then enable this check.
+            //Update: Not sure if we want this. Still keeping this block for future.
 //            if(currentPersonAuth!!.passwordHash != null && currentPersonAuth!!.passwordHash != ""){
 //                if(!currentPersonAuth!!.passwordHash!!.equals(currentPassword)){
 //                    view.sendMessage(MessageID.current_password_not_correct)

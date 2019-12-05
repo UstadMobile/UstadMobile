@@ -29,7 +29,7 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
             " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
-            " FROM Sale sl WHERE CAST(sl.saleActive AS INTEGER) = 1 AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
+            " FROM Sale sl WHERE CAST(sl.saleActive AS INTEGER) = 1 AND (saleItemPreOrder = 1 OR CAST(salePreOrder AS INTEGER) = 1)) ")
     abstract fun preOrderSaleCountLive(): Int
     
     //INSERT
@@ -246,7 +246,7 @@ abstract class SaleDao : BaseDao<Sale> {
             "       (select " +
             "           (case  when  " +
             "               (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
-            "               and sip.saleItemPreOrder = 1 " +
+            "               and CAST(sip.saleItemPreOrder AS INTEGER) = 1 " +
             "               ) " +
             "           > 0 then 1  else 0 end " +
             "       ) from Sale" +
@@ -254,7 +254,7 @@ abstract class SaleDao : BaseDao<Sale> {
             "   FROM Sale sl " +
             "   LEFT JOIN Person ON Person.personUid = :leUid " +
             "   WHERE CAST(sl.saleActive AS INTEGER) = 1 " +
-            "   AND (saleItemPreOrder = 1 OR salePreOrder = 1)" +
+            "   AND (saleItemPreOrder = 1 OR CAST(salePreOrder AS INTEGER) = 1)" +
             "   AND ( sl.salePersonUid = Person.personUid OR CAST(Person.admin AS INTEGER) = 1 ) " +
             "   ) ")
     abstract fun getPreOrderSaleCountLive(leUid: Long): DoorLiveData<Int>
@@ -360,7 +360,15 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query("SELECT " +
             "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
             "   'Product list goes here' AS topProducts, " +
-            "   PersonPicture.personPicturePersonUid as personPictureUid, " +
+            "    (SELECT CASE WHEN " +
+            "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
+            "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
+            "       ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) " +
+            "   is NULL THEN 0 ELSE " +
+            "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
+            "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
+            "    ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) " +
+            "   END ) as personPictureUid,"+
             "   Members.* " +
             " FROM PersonGroupMember " +
             "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active " +
@@ -368,7 +376,8 @@ abstract class SaleDao : BaseDao<Sale> {
             "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1" +
             "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
             " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit  OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
+            "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit " +
+            " OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
             " GROUP BY(Members.personUid)")
     abstract fun getMyWomenEntrepreneursSearch(groupUid :Long, searchBit:String):DataSource.Factory<Int, PersonWithSaleInfo>
 
@@ -581,7 +590,16 @@ abstract class SaleDao : BaseDao<Sale> {
                 "SELECT " +
                         "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
                         "   'Product list goes here' AS topProducts, " +
-                        "   PersonPicture.personPicturePersonUid as personPictureUid, "+
+                        "    (SELECT CASE WHEN " +
+                        "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
+                        "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
+                        "       ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) " +
+                        "   is NULL THEN 0 ELSE " +
+                        "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
+                        "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
+                        "    ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) " +
+                        "   END ) as personPictureUid ,"+
+
                         "   Members.* " +
                         " FROM PersonGroupMember " +
                         "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND CAST(Members.active AS INTEGER) = 1  " +
