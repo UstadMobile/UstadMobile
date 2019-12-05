@@ -186,7 +186,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Update
     abstract fun updateAsync(entity: Person):Int
 
-    @Query("Select * From Person WHERE active = 1")
+    @Query("Select * From Person WHERE CAST(active AS INTEGER) = 1")
     abstract fun findAllPeople(): List<Person>
 
     @Query("Select * From Person")
@@ -196,7 +196,7 @@ abstract class PersonDao : BaseDao<Person> {
             " from Person WHERE personUid in (:uids)")
     abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
 
-    @Query("SELECT * FROM Person WHERE admin = 1")
+    @Query("SELECT * FROM Person WHERE CAST(admin AS INTEGER) = 1")
     abstract fun findAllAdminsAsList(): List<Person>
 
 
@@ -209,11 +209,12 @@ abstract class PersonDao : BaseDao<Person> {
             " DESC LIMIT 1) AS personPictureUid, " +
             " CASE WHEN EXISTS " +
             " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND PersonGroupMember.groupMemberActive = 1) " +
+            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND " +
+            " CAST(PersonGroupMember.groupMemberActiveAS INTEGER) = 1) " +
             "   THEN 1 " +
             "   ELSE 0 " +
             " END AS enrolled " +
-            "  FROM Person WHERE Person.active = 1 ORDER BY Person.firstNames ASC")
+            "  FROM Person WHERE CAST(Person.active AS INTEGER) = 1 ORDER BY Person.firstNames ASC")
     abstract fun findAllPeopleWithEnrollmentInGroup(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Insert
@@ -236,7 +237,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
     abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query("SELECT * FROM Person where active = 1")
+    @Query("SELECT * FROM Person where CAST(active AS INTEGER) = 1")
     abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
 
 
@@ -316,26 +317,26 @@ abstract class PersonDao : BaseDao<Person> {
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
-                "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
-                "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-                "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-                "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-                "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-                " AND (" +
-                "(EntityRole.ertableId = " + Person.TABLE_ID +
-                " AND EntityRole.erEntityUid = Person.personUid) " +
-                "OR " +
-                "(EntityRole.ertableId = " + Clazz.TABLE_ID +
-                " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
-                " ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
-                "OR" +
+                " CAST ((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
+                " EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+                " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+                " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+                " WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+                "  AND (" +
+                " (EntityRole.ertableId = " + Person.TABLE_ID +
+                "  AND EntityRole.erEntityUid = Person.personUid) " +
+                " OR " +
+                " (EntityRole.ertableId = " + Clazz.TABLE_ID +
+                "  AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
+                "  ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
+                " OR" +
                 "(EntityRole.ertableId = " + Location.TABLE_ID +
                 " AND EntityRole.erEntityUid IN " +
-                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
+                " (SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
                 " WHERE locationAncestorChildLocationUid " +
-                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
-                " WHERE personLocationPersonUid = Person.personUid)))" +
-                ") AND (Role.rolePermissions & "
+                "  IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
+                "  WHERE personLocationPersonUid = Person.personUid)))" +
+                " ) AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
@@ -348,7 +349,7 @@ abstract class PersonDao : BaseDao<Person> {
                 " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
                 " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
                 " DESC LIMIT 1) AS personPictureUid, " +
-                " (0) AS enrolled FROM Person WHERE Person.active = 1 "
+                " (0) AS enrolled FROM Person WHERE CAST(Person.active AS INTEGER) = 1 "
 
         const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
             ":searchQuery "
