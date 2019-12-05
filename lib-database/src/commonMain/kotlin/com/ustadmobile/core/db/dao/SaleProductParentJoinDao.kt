@@ -42,12 +42,12 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-            " AND child.saleProductCategory = 0 " + QUERY_SORT_BY_NAME_ASC )
+            " AND CAST(child.saleProductCategory AS INTEGER) = 0 " + QUERY_SORT_BY_NAME_ASC )
     abstract fun findAllItemsInACategoryByNameAsc(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-            " AND child.saleProductCategory = 0 " + QUERY_SORT_BY_NAME_DESC )
+            " AND CAST(child.saleProductCategory AS INTEGER) = 0 " + QUERY_SORT_BY_NAME_DESC )
     abstract fun findAllItemsInACategoryByNameDesc(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
 
@@ -62,12 +62,12 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-            " AND child.saleProductCategory = 1 ")
+            " AND CAST(child.saleProductCategory AS INTEGER) = 1 ")
     abstract fun findAllCategoriesInACategoryByNameAsc(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-            " AND child.saleProductCategory = 1 ")
+            " AND CAST(child.saleProductCategory AS INTEGER) = 1 ")
     abstract fun findAllCategoriesInACategoryByNameDesc(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
 
 
@@ -86,7 +86,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
             "   WHERE SaleProduct.saleProductName = 'Collection' " +
             "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
-            " AND child.saleProductCategory = 1 ")
+            " AND CAST(child.saleProductCategory AS INTEGER) = 1 ")
     abstract fun findAllCategoriesInCollection(query: String): DataSource.Factory<Int, SaleProduct>
 
     @Query("SELECT * FROM SaleProductParentJoin WHERE " +
@@ -146,7 +146,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             "   ON Child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
             " WHERE CAST(SaleProductParentJoinActive AS INTEGER) = 1 AND " +
             " CAST(Child.saleProductActive AS INTEGER) = 1 " +
-            "   AND Child.saleProductCategory = 1 " +
+            "   AND CAST(Child.saleProductCategory AS INTEGER) = 1 " +
             " AND SaleProductParentJoinParentUid = :uid ")
     abstract suspend fun findAllChildProductTypesForUidAsync(uid: Long):List<SaleProduct>
 
