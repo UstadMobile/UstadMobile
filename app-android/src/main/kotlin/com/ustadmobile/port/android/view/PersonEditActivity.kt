@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
+import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.DisplayMetrics
@@ -442,11 +443,17 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 if(fieldType == FIELD_TYPE_USERNAME){
                     fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                    fieldEditText.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+                        source.toString().filterNot { it.isWhitespace() }
+                    })
                 }
 
                 if( fieldType == FIELD_TYPE_PASSWORD){
                     fieldEditText.inputType = InputType.TYPE_CLASS_TEXT +
                                         InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    fieldEditText.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+                        source.toString().filterNot { it.isWhitespace() }
+                    })
                 }
 
                 if (fieldType != FIELD_TYPE_DATE) {
