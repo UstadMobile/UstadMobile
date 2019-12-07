@@ -66,11 +66,9 @@ class DownloadJobItemRunner
  */
 (private val context: Any, private val downloadItem: DownloadJobItem,
  private val networkManager: NetworkManagerBleCommon, private val appDb: UmAppDatabase,
- private val appDbRepo: UmAppDatabase,
  private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val numConcurrentEntryDownloads: Int = 4,
  private val localAvailabilityManager: LocalAvailabilityManager,
  private val ioCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
@@ -111,8 +109,6 @@ class DownloadJobItemRunner
 
     private var destinationDir: String? = null
 
-    //private val numFailures = atomic(0)
-
     private val entriesDownloaded = atomic(0)
 
     private val connectionRequestActive = atomic(false)
@@ -120,16 +116,6 @@ class DownloadJobItemRunner
     private val statusRef = atomic<ConnectivityStatus?>(null)
 
     val startDownloadFnJobRef = atomic<Job?>(null)
-
-//    private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
-
-//    private val currentFetchRequests = copyOnWriteListOf<RequestMpp>()
-//
-//    private val currentFetchDownloads = mutableMapOf<Int, DownloadMpp>()
-//
-//    private val fetchStartTimes = mutableMapOf<Int, Long>()
-//
-//    private var numCompletedOrFailed = 0
 
     private val currentDownloadAttempt = atomic(null as CompletableDeferred<Int>?)
 
@@ -145,18 +131,37 @@ class DownloadJobItemRunner
      */
     private val fetchStatusLock = Mutex()
 
+    private var startTime = 0L
+
+    private val timeSinceStart
+        get() = getSystemTimeInMillis() - startTime
+
     private val fetchListener = object: AbstractFetchListenerMpp() {
 
         override fun onAdded(download: DownloadMpp) {
             if(download.id == currentFetchRequestId) {
                 currentFetchDownload = download
-                Napier.d({"Download added #${download.id} ${download.url}"})
+                Napier.d({"Download added #${download.id} ${download.url} $timeSinceStart ms after start"})
+//                startDebugMethodTracing("/sdcard/fetchstart3.trace")
+            }
+        }
+
+        override fun onQueued(download: DownloadMpp, waitingOnNetwork: Boolean) {
+            if(download.id == currentFetchRequestId) {
+                Napier.d({"Download queued #${download.id} ${download.url} $timeSinceStart ms after start"})
+            }
+        }
+
+        override fun onStarted(download: DownloadMpp, downloadBlocks: List<DownloadBlockMpp>, totalBlocks: Int) {
+            if(download.id == currentFetchRequestId) {
+                Napier.d({"Download started #${download.id} ${download.url} $timeSinceStart ms after start"})
+//                stopDebugMethodTracing()
             }
         }
 
         override fun onCompleted(download: DownloadMpp) {
             if(download.id == currentFetchRequestId) {
-                Napier.d({"Download completed #${download.id} ${download.url}"})
+                Napier.d({"Download completed #${download.id} ${download.url} $timeSinceStart ms after start"})
                 currentFetchRequestId = -1
                 currentDownloadAttempt.value?.complete(JobStatus.COMPLETE)
             }
@@ -164,7 +169,7 @@ class DownloadJobItemRunner
 
         override fun onError(download: DownloadMpp, error: Error, throwable: Throwable?) {
             if(download.id == currentFetchRequestId) {
-                Napier.d({"Download error #${download.id} ${download.url}"}, throwable)
+                Napier.d({"Download error #${download.id} ${download.url} $timeSinceStart ms after start"}, throwable)
                 currentFetchRequestId = -1
                 currentDownloadAttempt.value?.completeExceptionally(throwable ?: IOException("$error"))
             }
@@ -276,6 +281,7 @@ class DownloadJobItemRunner
 
 
     suspend fun download() {
+        startTime = getSystemTimeInMillis()
         downloadJobItemManager = networkManager.openDownloadJobItemManager(downloadItem.djiDjUid)!!
         println("Download started for  ${downloadItem.djiDjUid}")
         runnerStatus.value = JobStatus.RUNNING
@@ -330,7 +336,7 @@ class DownloadJobItemRunner
     private suspend fun startDownload() = withContext(coroutineContext) {
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
-        var attemptsRemaining = 3
+        val attemptsRemaining = 3
 
         val container = appDb.containerDao.findByUid(downloadItem.djiContainerUid)
 
@@ -338,7 +344,6 @@ class DownloadJobItemRunner
         // to use the DAO object and avoid any potential to make additional http requests
         val containerManager = ContainerManager(container!!, appDb, appDb, destinationDir!!)
 
-        val currentTimeStamp = getSystemTimeInMillis()
         var downloadStartTime = 0L
 
         var downloadAttemptStatus = -1
@@ -374,10 +379,6 @@ class DownloadJobItemRunner
                         launch(mainCoroutineDispatcher) {
                             if (!connectToCloudNetwork()) {
                                 throw IOException("${mkLogPrefix()} could not connect to cloud network")
-//                                //connection has failed
-//                                attemptsRemaining--
-//                                recordHistoryFinished(history, false)
-//                                //continue
                             }
                         }
                     }
@@ -441,6 +442,8 @@ class DownloadJobItemRunner
                 val currentDownloadAttemptVal  = CompletableDeferred<Int>()
                 currentDownloadAttempt.value = currentDownloadAttemptVal
 
+                val fetchStartTime = getSystemTimeInMillis()
+                Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
                 fetchStatusLock.withLock {
                     val fetchRequest = RequestMpp(UMFileUtil.joinPaths(endpointUrl,
                             ENDPOINT_CONCATENATEDFILES, entriesListStr), destTmpFile.getAbsolutePath())
@@ -452,6 +455,7 @@ class DownloadJobItemRunner
 
 
                 downloadAttemptStatus = currentDownloadAttemptVal.await()
+                Napier.d({"Fetch completed in ${fetchStartTime - getSystemTimeInMillis()}ms"})
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {
                     break
                 }

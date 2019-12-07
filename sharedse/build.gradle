@@ -171,7 +171,7 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-                implementation "androidx.tonyodev.fetch2rx:xfetch2rx:$version_android_fetch"
+                implementation "com.tonyodev.xfetch2:fetch2:$version_android_fetch"
 
 
                 //Begin SharedSE Android and JVM dependencies

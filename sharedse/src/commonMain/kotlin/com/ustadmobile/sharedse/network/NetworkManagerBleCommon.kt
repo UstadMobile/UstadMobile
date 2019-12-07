@@ -168,7 +168,7 @@ abstract class NetworkManagerBleCommon(
                 onItemStarted = this::onDownloadJobItemStarted,
                 onQueueEmpty = this::onDownloadQueueEmpty) {
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
-                    umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
+                    umAppDatabase,  UmAccountManager.getActiveEndpoint(context),
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
                     ioCoroutineDispatcher = ioDispatcher,
                     localAvailabilityManager = localAvailabilityManager).download()

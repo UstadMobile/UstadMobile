@@ -30,7 +30,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.tonyodev.fetch2.Fetch
 import com.tonyodev.fetch2.FetchConfiguration
+import com.tonyodev.fetch2.HttpUrlConnectionDownloader
 import com.tonyodev.fetch2.Request
+import com.tonyodev.fetch2core.Downloader
 import com.tonyodev.fetch2core.Func
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
@@ -141,6 +143,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     val fetchAndroid: Fetch by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Fetch.Impl.getInstance(FetchConfiguration.Builder(context as Context)
                 .setDownloadConcurrentLimit(4)
+                .setInternetAccessUrlCheck(null)
+                .setProgressReportingInterval(500)
+                .setHttpDownloader(HttpUrlConnectionDownloader(Downloader.FileDownloaderType.SEQUENTIAL))
                 .build())
     }
 
