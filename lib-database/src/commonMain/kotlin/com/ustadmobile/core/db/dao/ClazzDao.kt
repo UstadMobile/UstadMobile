@@ -306,8 +306,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     companion object {
 
-        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " (SELECT admin FROM Person WHERE " +
-                "personUid = :accountPersonUid) OR " +
+        const val ENTITY_LEVEL_PERMISSION_CONDITION1 =
+                " CASE WHEN EXISTS (SELECT admin FROM Person WHERE personUid " +
+                "= :accountPersonUid) THEN (SELECT admin FROM Person WHERE personUid = :accountPersonUid) ELSE 0 END " +
+                " OR " +
                 "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
                 "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
                 "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
@@ -324,10 +326,10 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
-        const val TABLE_LEVEL_PERMISSION_CONDITION1 = "(SELECT admin FROM Person WHERE personUid " +
-                "= :accountPersonUid) " +
-                "OR " +
-                "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+        const val TABLE_LEVEL_PERMISSION_CONDITION1 = " CASE WHEN EXISTS (SELECT admin FROM Person WHERE personUid " +
+                "= :accountPersonUid) THEN (SELECT admin FROM Person WHERE personUid = :accountPersonUid) ELSE 0 END " +
+                " OR " +
+                " EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
                 " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
                 " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
                 " WHERE " +

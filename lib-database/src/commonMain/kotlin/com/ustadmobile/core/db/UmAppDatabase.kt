@@ -260,6 +260,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 override fun migrate(database: DoorSqlDatabase) {
                     //do nothing
+                    println("Blank migration from 28 - 29")
                 }
             })
             builder.addMigrations(object : DoorMigration(27,28){
