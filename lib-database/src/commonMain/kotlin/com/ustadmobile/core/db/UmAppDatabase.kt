@@ -235,20 +235,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             namedInstances[dbName] = instance
         }
 
-
-//        @Synchronized
-//        fun getInstance(context: Any): UmAppDatabase {
-//            if (instance == null) {
-//                var builder = DatabaseBuilder.databaseBuilder(
-//                        context, UmAppDatabase::class, "UmAppDatabase")
-//               // builder = addMigrations(builder)
-//               //instance = addCallbacks(builder).build()
-//                instance = builder.build()
-//            }
-//
-//            return instance!!
-//        }
-
         @JsName("getInstance")
         fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
 
@@ -268,44 +254,32 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             return db
         }
 
-        fun doesColumnExist(database: DoorSqlDatabase, table:String, fieldName: String):Boolean{
-
-             database.execSQL("PRAGMA table_info(" + table + ")")
-            return false
-        }
-
-
-//             boolean isExist = false;
-//             SQLiteDatabase db = this.getWritableDatabase();
-//             Cursor res = db.rawQuery("PRAGMA table_info("+tableName+")",null);
-//            res.moveToFirst();
-//            do {
-//                String currentColumn = res.getString(1);
-//                if (currentColumn.equals(fieldName)) {
-//                    isExist = true;
-//                }
-//            } while (res.moveToNext());
-//             return isExist;
-
-
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(object : DoorMigration(27,28){
+
                 override fun migrate(database: DoorSqlDatabase) {
                     try {
-                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
-                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
-                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
-                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
-                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
-                        database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+                        println("Migrating from 27 to 28")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+
+                        database.execSQL("ALTER TABLE selQuestionSetRecognition RENAME COLUMN selQuestionSetRecognitionSelQuestionSetResponseUid TO selqsrSelQuestionSetResponseUid")
                     } catch (e:Exception) {
-                        print(e.message)
+                        print("Migration exception: " + e.message)
                     }
-
                 }
-
             })
 
             builder.addMigrations(object : DoorMigration(26,27){
