@@ -185,9 +185,20 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         this.currentClazzUid = clazzUid
 
         GlobalScope.launch {
-//            val clazzData = clazzDao.findByUidAsync(currentClazzUid)
             val clazzData = clazzDaoDB.findByUidAsync(currentClazzUid)
             handleClazzValueChanged(clazzData)
+
+            mUpdatedClazz = clazzData
+            currentClazzUid = mUpdatedClazz!!.clazzUid
+
+            //Holidays
+            holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
+            view.runOnUiThread(Runnable {
+                holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
+            })
+
+            //Timezones
+            updateTimezonePreset()
 
             //Get location if set
             if(clazzData!!.clazzLocationUid != 0L){
@@ -201,35 +212,15 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                     view.updateLocationSetName(location!!.title!!)
                 })
             }
-        }
-
-        GlobalScope.launch {
-
-
-            val result = clazzDaoDB.findByUidAsync(currentClazzUid)
-
-            mUpdatedClazz = result
-            currentClazzUid = mUpdatedClazz!!.clazzUid
-            view.runOnUiThread(Runnable{ view.updateClazzEditView(result!!) })
-
-            //Holidays
-            holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
-            view.runOnUiThread(Runnable {
-                holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
-            })
-
-            //Timezones
-            updateTimezonePreset()
 
             getAllClazzCustomFields()
 
+            //Set Schedule live data:
+            clazzScheduleLiveData = repository.scheduleDao.findAllSchedulesByClazzUid(currentClazzUid)
+            updateViewWithProvider()
+
         }
-
-        //Set Schedule live data:
-        clazzScheduleLiveData = repository.scheduleDao.findAllSchedulesByClazzUid(currentClazzUid)
-        updateViewWithProvider()
     }
-
 
 
     /**
@@ -246,8 +237,6 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         }
         return strArr
     }
-
-
 
     /**
      * Updates the sort by drop down (spinner) on the Class list. For now the sort options are

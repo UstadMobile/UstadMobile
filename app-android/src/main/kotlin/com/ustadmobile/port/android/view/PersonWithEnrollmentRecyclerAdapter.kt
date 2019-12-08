@@ -414,7 +414,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
             if (position == 0) {//First Entry. Add Teacher and Add Teacher item
                 if (!reportMode && !hideHeading) {
-                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher, holder)
+                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher, holder, position)
                 } else {
                     val x: Int
                 }
@@ -422,7 +422,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                 if (personWithEnrollment.clazzMemberRole == ClazzMember.ROLE_STUDENT) {
 
                     if (!reportMode && !hideHeading) {
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder, position)
                     } else {
                         val x: Int
                     }
@@ -439,13 +439,14 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                 }
 
             } else {
+
                 val previousPerson = getItem(position - 1)!!
 
                 if (previousPerson.clazzMemberRole == ClazzMember.ROLE_TEACHER && personWithEnrollment.clazzMemberRole == ClazzMember.ROLE_STUDENT) {
 
                     //Add student
                     if (!reportMode && !hideHeading) {
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder, position)
                     } else {
                         val x: Int
                     }
@@ -492,7 +493,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         //If we reached the end of the rv and there is only one teacher in it,
         // add the "show Student" as well.
         if (onlyTeacherExists) {
-            addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
+            addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder, position)
         } else {
             //Don't add anything.
             val x: Int
@@ -680,13 +681,14 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param role  The role (Teacher or Student) as per ClazzMember.ROLE_*
      */
     private fun addHeadingAndNew(cl: ConstraintLayout, role: Int, showAdd: Boolean,
-                                 holder: ClazzLogDetailViewHolder) {
+                                 holder: ClazzLogDetailViewHolder, pos: Int) {
 
-        //Testing if improves:
+//        //Testing if improves:
         if (role == ClazzMember.ROLE_TEACHER) {
-            removeAddStudentView(cl, holder)
-        } else {
             removeAddTeacherAddView(cl, holder)
+//            removeAddStudentView(cl, holder)
+        } else {
+            removeAddStudentView(cl, holder)
         }
 
         val addCl = ConstraintLayout(theContext)

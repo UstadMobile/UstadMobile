@@ -220,7 +220,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
         //Clazz Name
         classNameTIP = findViewById(R.id.activity_clazz_edit_name)
-        Objects.requireNonNull(classNameTIP!!.editText)!!.addTextChangedListener(object :
+        classNameTIP!!.editText!!.addTextChangedListener(object :
                 TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
@@ -233,7 +233,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
         //Clazz Desc
         classDescTIP = findViewById(R.id.activity_clazz_edit_description)
-        Objects.requireNonNull(classDescTIP!!.editText)!!.addTextChangedListener(object :
+        classDescTIP!!.editText!!.addTextChangedListener(object :
                 TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
@@ -359,7 +359,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     override fun updateToolbarTitle(titleName: String) {
         toolbar!!.title = titleName
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar!!.setTitle(R.string.class_setup)
     }
 
@@ -429,8 +429,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         val finalClazzName = clazzName
         val finalClazzDesc = clazzDesc
         runOnUiThread {
-            Objects.requireNonNull(classNameTIP!!.editText)!!.setText(finalClazzName)
-            Objects.requireNonNull(classDescTIP!!.editText)!!.setText(finalClazzDesc)
+            classNameTIP!!.editText!!.setText(finalClazzName)
+            classDescTIP!!.editText!!.setText(finalClazzDesc)
         }
 
         var startTimeLong: Long = 0

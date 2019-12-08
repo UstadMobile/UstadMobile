@@ -24,7 +24,7 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
     @Update
     abstract override fun update(entity: UMCalendar)
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1 AND " +
+    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND " +
             " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidays(): DataSource.Factory<Int, UMCalendar>
 
@@ -32,21 +32,21 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
             " (SELECT COUNT(*) FROM DateRange " +
             "   WHERE dateRangeUMCalendarUid = UMCalendar.umCalendarUid " +
             "   AND dateRange.dateRangeActive = 1) AS numEntries " +
-            " FROM UMCalendar WHERE umCalendarActive = 1 AND " +
+            " FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND " +
             " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, UMCalendarWithNumEntries>
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1")
+    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1")
     abstract fun findAllUMCalendars(): DataSource.Factory<Int, UMCalendar>
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1")
+    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1")
     abstract fun findAllUMCalendarsAsLiveDataList(): DoorLiveData<List<UMCalendar>>
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarActive = 1 AND umCalendarCategory = "
+    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND umCalendarCategory = "
             + UMCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidaysLiveData(): DoorLiveData<List<UMCalendar>>
 
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid AND umCalendarActive = 1")
+    @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid AND CAST(umCalendarActive AS INTEGER) = 1")
     abstract fun findByUidLive(uid: Long): DoorLiveData<UMCalendar?>
 
     @Update
