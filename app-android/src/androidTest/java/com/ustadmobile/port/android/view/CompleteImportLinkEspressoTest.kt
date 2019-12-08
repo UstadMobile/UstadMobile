@@ -29,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import androidx.test.rule.ServiceTestRule
 import android.os.IBinder
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 
@@ -80,7 +81,8 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
         UmAccountManager.setActiveAccount(testAccount, context)
 
         val intent = Intent()
-        intent.putExtra(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID, (-101).toString())
+        intent.putExtra(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID, (3472).toString())
+        intent.putExtra(ARG_LIBRARIES_CONTENT, "")
         mActivityRule.launchActivity(intent)
         activity = mActivityRule.activity
 
