@@ -232,7 +232,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
     newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
 
     if(addOffsetAndLimitParam) {
-        newSql += " LIMIT :_limit OFFSET :_offset"
+        newSql += " LIMIT :limit OFFSET :offset"
     }
 
     return newSql
@@ -374,14 +374,16 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             }else {
                 CodeBlock.of("serializer()")
             }
-            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json)\n",
+            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json.%M())\n",
                 TextContent::class, entityComponentType,
                     serializerFnCodeBlock,
                     MemberName("kotlinx.serialization", "list"),
-                    ContentType::class)
+                    ContentType::class,
+                    MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
         }else {
-            CodeBlock.of("body = %M().write(${requestBodyParam.name})\n",
-                    MemberName("io.ktor.client.features.json", "defaultSerializer"))
+            CodeBlock.of("body = %M().write(${requestBodyParam.name}, %T.Application.Json.%M())\n",
+                    MemberName("io.ktor.client.features.json", "defaultSerializer"),
+                    ContentType::class, MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
         }
 
         codeBlock.addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
@@ -1292,8 +1294,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         val queryVarsList = daoMethod.parameters.toMutableList()
         if(isDataSourceFactory){
-            queryVarsList += ParameterSpec.builder("_offset", INT).build()
-            queryVarsList += ParameterSpec.builder("_limit", INT).build()
+            queryVarsList += ParameterSpec.builder("offset", INT).build()
+            queryVarsList += ParameterSpec.builder("limit", INT).build()
         }
 
         val componentEntityType = resolveEntityFromResultType(resultType)
