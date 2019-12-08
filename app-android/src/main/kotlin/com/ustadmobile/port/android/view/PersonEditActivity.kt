@@ -12,10 +12,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Editable
-import android.text.InputFilter
-import android.text.InputType
-import android.text.TextWatcher
+import android.text.*
 import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
@@ -397,16 +394,34 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 if(fieldType == FIELD_TYPE_USERNAME){
                     fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                    fieldEditText.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
-                        source.toString().filterNot { it.isWhitespace() }
+                    fieldEditText.filters = arrayOf(object : InputFilter {
+                        override fun filter(source: CharSequence?, start: Int, end: Int,
+                                            dest: Spanned?, dstart: Int, dend: Int): CharSequence? {
+                            // eliminates single space
+                            if (end == 1) {
+                                if (Character.isWhitespace(source?.get(0)!!)) {
+                                    return ""
+                                }
+                            }
+                            return null
+                        }
                     })
                 }
 
                 if( fieldType == FIELD_TYPE_PASSWORD){
                     fieldEditText.inputType = InputType.TYPE_CLASS_TEXT +
                                         InputType.TYPE_TEXT_VARIATION_PASSWORD
-                    fieldEditText.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
-                        source.toString().filterNot { it.isWhitespace() }
+                    fieldEditText.filters = arrayOf(object : InputFilter {
+                        override fun filter(source: CharSequence?, start: Int, end: Int,
+                                            dest: Spanned?, dstart: Int, dend: Int): CharSequence? {
+                            // eliminates single space
+                            if (end == 1) {
+                                if (Character.isWhitespace(source?.get(0)!!)) {
+                                    return ""
+                                }
+                            }
+                            return null
+                        }
                     })
                 }
 

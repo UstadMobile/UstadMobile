@@ -385,7 +385,6 @@ class LoadInitialData {
     private fun addNextField() {
 
         if (fieldIndex >= allFields!!.size) {
-            //addSELQuestions();
             return
         }
         val field = allFields!![fieldIndex]
@@ -405,6 +404,8 @@ class LoadInitialData {
             val personField = PersonField()
 
             if (resultList!!.isEmpty()) {
+
+                println("Creating new PersonField : " + field.fieldUid)
 
                 //Create the field only if it is a field (ie not a header)
                 if (!finalIsHeader) {
@@ -444,7 +445,6 @@ class LoadInitialData {
                 }
 
             } else {
-
                 //Persist 2
                 createPersonDetailPresenterField(field, finalIsHeader, personField,
                         personDetailPresenterFieldDao!!, true)
@@ -478,6 +478,7 @@ class LoadInitialData {
             val resultList2 = personDetailPresenterFieldDao.findAllByFieldIndex(field.fieldIndex)
 
             if (resultList2!!.isEmpty()) {
+                println("Adding field : " + field.fieldUid)
 
                 //Create the Mapping between the fields and extra information like :
                 //  type(header / field)
@@ -506,6 +507,7 @@ class LoadInitialData {
 
                 //persist:
                 personDetailPresenterFieldDao.insert(pdpf1)
+            }else{
             }
 
             if (gotoNext!!) {

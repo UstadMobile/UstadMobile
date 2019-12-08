@@ -566,28 +566,30 @@ class PersonEditPresenter
                 var messageLabel = 0
                 var iconName: String? = null
                 var fieldValue: String? = null
-                if (valueMap!![field.fieldUid] != null) {
-                    if (valueMap[field.fieldUid]!!.labelMessageId != 0) {
-                        messageLabel = valueMap[field.fieldUid]!!.labelMessageId
-                    }
-                    if (valueMap[field.fieldUid]!!.fieldIcon != null) {
-                        iconName = valueMap[field.fieldUid]!!.fieldIcon
-                    }
-                    if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
-                        fieldValue = valueMap[field.fieldUid]!!
-                                .customFieldValue!!.fieldValue
-                    }
-                }
-                thisView.setField(
-                        field.fieldIndex,
-                        field.fieldUid,
-                        PersonDetailViewField(
-                                field.fieldType,
-                                messageLabel,
-                                iconName
-                        ), fieldValue
+                if (valueMap != null && valueMap.containsKey(field.fieldUid) ){
 
-                )
+                    if(valueMap!![field.fieldUid] != null) {
+                            if (valueMap[field.fieldUid]!!.labelMessageId != 0) {
+                                messageLabel = valueMap[field.fieldUid]!!.labelMessageId
+                            }
+                            if (valueMap[field.fieldUid]!!.fieldIcon != null) {
+                                iconName = valueMap[field.fieldUid]!!.fieldIcon
+                            }
+                            if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
+                                fieldValue = valueMap[field.fieldUid]!!
+                                        .customFieldValue!!.fieldValue
+                            }
+                    }
+                    thisView.setField(
+                            field.fieldIndex,
+                            field.fieldUid,
+                            PersonDetailViewField(
+                                    field.fieldType,
+                                    messageLabel,
+                                    iconName
+                            ), fieldValue
+                    )
+                }
             }
         }
     }
