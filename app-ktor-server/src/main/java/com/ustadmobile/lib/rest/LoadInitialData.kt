@@ -405,8 +405,6 @@ class LoadInitialData {
 
             if (resultList!!.isEmpty()) {
 
-                println("Creating new PersonField : " + field.fieldUid)
-
                 //Create the field only if it is a field (ie not a header)
                 if (!finalIsHeader) {
                     personField.fieldIcon = field.fieldIcon //Icon
@@ -476,6 +474,8 @@ class LoadInitialData {
 
         GlobalScope.launch {
             val resultList2 = personDetailPresenterFieldDao.findAllByFieldIndex(field.fieldIndex)
+
+            val resultList3 = personDetailPresenterFieldDao.findAllByFieldUid(field.fieldUid.toLong())
 
             if (resultList2!!.isEmpty()) {
                 println("Adding field : " + field.fieldUid)

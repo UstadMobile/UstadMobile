@@ -84,10 +84,38 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
 
     internal var customFieldsLL: LinearLayout? = null
 
+    private var weGroupNameHeader: TextView? = null
+
+
     override fun updateToolbar(name: String) {
         toolbar!!.title = name
     }
 
+    override fun updateWEGroupName(name: String) {
+        if(weGroupNameHeader != null) {
+            val impl = UstadMobileSystemImpl.instance
+            val firstBit = impl.getString(MessageID.women_entrepreneurs_group, this)
+            weGroupNameHeader!!.text = firstBit + ": " + name
+            weGroupNameHeader!!.visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
+     * the activity goes back when the back button is pressed.
+     *
+     * @param item The item selected
+     * @return true if accounted for
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -338,9 +366,16 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 header.setPadding(16, 0, 0, 2)
 
                 //Goldozi: Not showing header for classes
-                if (field.messageLabel != MessageID.classes) {
+                if (field.messageLabel != MessageID.classes && field.messageLabel != MessageID.role_assignments) {
                     mLinearLayout!!.addView(header)
                 }
+
+                if(field.messageLabel == MessageID.role_assignments){
+                    header.text = getText(R.string.no_women_embroiderers_set)
+                    weGroupNameHeader = header
+                    mLinearLayout!!.addView(weGroupNameHeader)
+                }
+
 
                 if (field.messageLabel == MessageID.classes) {
 
@@ -360,17 +395,21 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 }
 
                 if(field.messageLabel == MessageID.role_assignments) {
-                    //Add a recyclerview of Role assignments
-                    mRecyclerView2 = RecyclerView(this)
+                    //Goldozi: No Role assignment feature
+//                    //Add a recyclerview of Role assignments
+//                    mRecyclerView2 = RecyclerView(this)
+//
+//                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+//                    mRecyclerView2!!.setLayoutManager(mRecyclerLayoutManager)
+//
+//                    //Add the layout
+//                    mLinearLayout!!.addView(mRecyclerView2)
+//
+//                    //Generate the live data and set it
+//                    mPresenter!!.generateAssignedRoleAssignments()
 
-                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-                    mRecyclerView2!!.setLayoutManager(mRecyclerLayoutManager)
 
-                    //Add the layout
-                    mLinearLayout!!.addView(mRecyclerView2)
 
-                    //Generate the live data and set it
-                    mPresenter!!.generateAssignedRoleAssignments()
                 }
 
 

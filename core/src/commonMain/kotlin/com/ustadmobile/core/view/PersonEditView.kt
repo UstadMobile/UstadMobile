@@ -74,6 +74,8 @@ interface PersonEditView : UstadView {
 
     fun setInProgress(inProgress: Boolean)
 
+    fun setGroupPresets(presets: Array<String>, position: Int)
+
     companion object {
 
         val VIEW_NAME = "PersonEdit"

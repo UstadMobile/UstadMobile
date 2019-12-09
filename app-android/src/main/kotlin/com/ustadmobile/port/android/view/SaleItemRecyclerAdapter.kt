@@ -20,6 +20,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleDetailPresenter
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
 import kotlinx.coroutines.Dispatchers
@@ -113,7 +114,28 @@ class SaleItemRecyclerAdapter(
                 UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                         entity.saleItemDueDate)
 
-        itemName.text = entity.saleItemProductName
+
+        val impl = UstadMobileSystemImpl.instance
+        val currentLocale = impl.getLocale(theContext)
+        var saleProductNameLocale: String?=null
+
+        if(entity.saleItemSaleProduct != null) {
+            if (currentLocale.equals("fa")) {
+                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductNameDari
+            } else if (currentLocale.equals("ps")) {
+                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductNamePashto
+            } else {
+                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductName
+            }
+            if (saleProductNameLocale == null && entity.saleItemSaleProduct!!.saleProductName != null) {
+                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductName
+            }
+            itemName.text = saleProductNameLocale
+        }else{
+            itemName.text = entity.saleItemProductName
+        }
+
+
         itemQuantity.text = quantity.toString()
         itemPrice.text = priceString
         itemTotal.text = priceTotalString

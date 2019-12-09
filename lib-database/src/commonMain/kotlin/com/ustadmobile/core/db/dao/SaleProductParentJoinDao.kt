@@ -84,7 +84,15 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT + QUERY_WHERE_SEARCH +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
             "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
-            "   WHERE SaleProduct.saleProductName = 'Collection' " +
+            "   WHERE SaleProduct.saleProductName = 'Collections' " +
+            "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
+            " " + QUERY_SORT_BY_NAME_ASC )
+    abstract fun findAllItemsAndCategoriesInCollection(query:String): DataSource.Factory<Int, SaleProduct>
+
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT + QUERY_WHERE_SEARCH +
+            " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
+            "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
+            "   WHERE SaleProduct.saleProductName = 'Collections' " +
             "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
             " AND CAST(child.saleProductCategory AS INTEGER) = 1 ")
     abstract fun findAllCategoriesInCollection(query: String): DataSource.Factory<Int, SaleProduct>

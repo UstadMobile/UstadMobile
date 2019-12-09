@@ -130,7 +130,7 @@ class ClazzDetailEnrollStudentActivity : UstadBaseActivity(), ClazzDetailEnrollS
     override fun setStudentsProvider(factory: DataSource.Factory<Int, PersonWithEnrollment>) {
 
         val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK, applicationContext,
-                this, mPresenter!!, true, true, groupEnrollment)
+                this, mPresenter!!, false, true, groupEnrollment)
 
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:

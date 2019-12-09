@@ -109,6 +109,8 @@ class SelectSaleProductRecyclerAdapter
             }
         }
 
+
+
         val currentLocale = impl.getLocale(theContext)
         var saleProductNameLocale: String?=null
 
@@ -125,8 +127,14 @@ class SelectSaleProductRecyclerAdapter
         }
         name.text = saleProductNameLocale
 
+
         if (isCatalog) {
-            dots.visibility = View.VISIBLE
+
+            if(entity.saleProductName.equals("Collections")){
+                dots.visibility = View.GONE
+            }else {
+                dots.visibility = View.VISIBLE
+            }
             //Options to Edit/Delete every schedule in the list
             dots.setOnClickListener { v: View ->
                 if (theActivity != null) {
@@ -149,8 +157,13 @@ class SelectSaleProductRecyclerAdapter
                     //inflating menu from xml resource
                     popup.inflate(R.menu.menu_edit_delete)
                     popup.menu.findItem(R.id.edit).isVisible = true
-                    //displaying the popup
-                    popup.show()
+                    //If the category is called Collections then hide the delete button
+                    if(entity.saleProductName.equals("Collections")){
+                        dots.visibility = View.GONE
+                    }else {
+                        //displaying the popup
+                        popup.show()
+                    }
                 } else if (theFragment != null) {
                     //creating a popup menu
                     val popup = PopupMenu(theFragment!!.context, v)
@@ -171,8 +184,13 @@ class SelectSaleProductRecyclerAdapter
                     //inflating menu from xml resource
                     popup.inflate(R.menu.menu_edit_delete)
                     popup.menu.findItem(R.id.edit).isVisible = true
-                    //displaying the popup
-                    popup.show()
+                    //If the category is called Collections then hide the delete button
+                    if(entity.saleProductName.equals("Collections")){
+                        dots.visibility = View.GONE
+                    }else {
+                        //displaying the popup
+                        popup.show()
+                    }
                 }
 
             }

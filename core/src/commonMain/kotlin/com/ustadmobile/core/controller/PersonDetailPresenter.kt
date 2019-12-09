@@ -74,6 +74,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     private var personDao: PersonDao
     private var clazzMemberDao: ClazzMemberDao
     private var personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
+    private var personGroupDao: PersonGroupDao
 
     init {
 
@@ -90,6 +91,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         personDao = repository.personDao
         personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
         personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+        personGroupDao = repository.personGroupDao
     }
 
     fun addToMap(viewId: Int, fieldId: Long) {
@@ -534,6 +536,19 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                         ),
                         cfValue!!
                 )
+            }
+        }
+
+        if(person.mPersonGroupUid != 0L){
+            GlobalScope.launch {
+                val personGroup = personGroupDao.findByUidAsync(person.mPersonGroupUid)
+                if(personGroup != null){
+                    if(personGroup.groupName != null && personGroup.groupName!!.isNotEmpty()){
+                        view.runOnUiThread(Runnable {
+                            view.updateWEGroupName(personGroup.groupName!!)
+                        })
+                    }
+                }
             }
         }
 

@@ -55,7 +55,7 @@ open class Person() {
 
     var dateOfBirth: Long = 0
 
-    //Added for simplicity for roles to a person directly for Goldozi.
+    //Added for simplicity for roles to a person directly for Goldozi. (mostly used for Customers)
     var personRoleUid : Long = 0L
 
     //Added for customers to be linked to actual Locaiton for Goldozi.

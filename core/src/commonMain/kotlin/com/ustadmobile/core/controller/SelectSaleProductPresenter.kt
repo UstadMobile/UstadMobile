@@ -213,7 +213,7 @@ class SelectSaleProductPresenter(context: Any,
     fun handleClickCollectionMore() {
         GlobalScope.launch {
             try{
-                val result = saleProductDao.findByNameAsync("Collection")
+                val result = saleProductDao.findByNameAsync("Collections")
                 handleClickProduct(result!!.saleProductUid, true)
 
             }catch(e:Exception){

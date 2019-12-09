@@ -134,6 +134,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
          */
         const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY =
                 "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+                " SaleProduct.* , " +
                 " SaleProduct.saleProductName AS saleItemProductName " +
                 "FROM SaleItem " +
                 " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
@@ -143,6 +144,7 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
 
         const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY =
                 "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+                " SaleProduct.* , " +
                 " SaleProduct.saleProductName AS saleItemProductName " +
                 "FROM SaleItem " +
                 " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +

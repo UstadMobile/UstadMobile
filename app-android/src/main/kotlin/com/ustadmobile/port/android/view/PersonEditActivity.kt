@@ -87,7 +87,16 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     internal lateinit var personEditImage: ImageView
     internal lateinit var customFieldsLL: LinearLayout
 
+    var weGroupSpinner: Spinner ? = null
+
     private var mProgressBar: ProgressBar? = null
+
+    override fun setGroupPresets(presets: Array<String>, position: Int) {
+        val adapter = ArrayAdapter(applicationContext,
+                R.layout.item_simple_spinner, presets)
+        weGroupSpinner!!.adapter = adapter
+        weGroupSpinner!!.setSelection(position)
+    }
 
     override fun sendMessage(messageId: Int) {
         val impl = UstadMobileSystemImpl.instance
@@ -242,60 +251,96 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 }else if (label == impl.getString(MessageID.role_assignments, applicationContext)) {
 
+                    //Nothing in Goldozi
+//                    thisLinearLayout!!.addView(divider)
+//
+//                    //Add the Header
+//                    val header = TextView(this)
+//                    header.text = label!!.toUpperCase()
+//                    header.textSize = HEADER_TEXT_SIZE.toFloat()
+//                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+//                    thisLinearLayout.addView(header)
+//
+//                    //Add Add new Role Assignment button
+//                    val addPersonToClazzHL = LinearLayout(this)
+//                    addPersonToClazzHL.layoutParams = parentParams
+//                    addPersonToClazzHL.orientation = LinearLayout.HORIZONTAL
+//
+//                    //Add the icon
+//                    val addIconResId = getResourceId(ADD_ICON,
+//                            "drawable", packageName)
+//                    //ImageView addIcon = new ImageView(this);
+//                    val addIcon = AppCompatImageView(this)
+//
+//
+//                    addIcon.setImageResource(addIconResId)
+//                    addIcon.setPadding(DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_TEXT_PADDING_RIGHT,
+//                            0)
+//                    addPersonToClazzHL.addView(addIcon)
+//
+//                    //Add the button
+//                    val addPersonButton = Button(this)
+//                    addPersonButton.includeFontPadding = false
+//                    addPersonButton.minHeight = 0
+//                    addPersonButton.text = impl.getString(MessageID.add_new_role_assignment,
+//                            applicationContext)
+//                    addPersonButton.background = null
+//                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0)
+//                    addPersonButton.setOnClickListener {
+//                        v -> mPresenter.handleClickAddNewRoleAssignment() }
+//                    addPersonToClazzHL.addView(addPersonButton)
+//
+//                    mLinearLayout.addView(addPersonToClazzHL)
+//
+//                    //Add a recycler view of classes
+//                    mRecyclerView2 = RecyclerView(this)
+//                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+//                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+//                            ViewGroup.LayoutParams.WRAP_CONTENT)
+//                    mRecyclerView2.setLayoutManager(mRecyclerLayoutManager)
+//                    mRecyclerView2.setLayoutParams(wrapParams)
+//
+//
+//                    //Add the layout
+//                    mLinearLayout.addView(mRecyclerView2)
+//
+//                    //Generate the live data and set it
+//                    mPresenter.generateAssignedRoleAssignments()
+
+
+                    //Instead do WE Group set
+
+
+                    divider.setPadding(0, DEFAULT_PADDING_HEADER_BOTTOM, 0, 0)
                     thisLinearLayout!!.addView(divider)
 
                     //Add the Header
                     val header = TextView(this)
-                    header.text = label!!.toUpperCase()
+                    header.text = getText(R.string.women_entrepreneurs_group)
                     header.textSize = HEADER_TEXT_SIZE.toFloat()
-                    header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    header.setPadding(DEFAULT_PADDING, DEFAULT_PADDING_HEADER_BOTTOM, 0, 0)
                     thisLinearLayout.addView(header)
 
-                    //Add Add new Role Assignment button
-                    val addPersonToClazzHL = LinearLayout(this)
-                    addPersonToClazzHL.layoutParams = parentParams
-                    addPersonToClazzHL.orientation = LinearLayout.HORIZONTAL
+                    weGroupSpinner = Spinner(this)
+                    weGroupSpinner!!.setPadding(DEFAULT_PADDING*4, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
+                    weGroupSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                            mPresenter!!.updateGroup(position)
+                        }
 
-                    //Add the icon
-                    val addIconResId = getResourceId(ADD_ICON,
-                            "drawable", packageName)
-                    //ImageView addIcon = new ImageView(this);
-                    val addIcon = AppCompatImageView(this)
+                        override fun onNothingSelected(parent: AdapterView<*>) {}
+                    }
 
+                    //width of editText to be width of screen - (icon put left right padding)
+                    val pixelOffset = dpToPx(ADD_PERSON_ICON_WIDTH + 2 * DEFAULT_PADDING)
+                    val widthWithPadding = displayWidth - pixelOffset
+                    val spinnerPadding = LinearLayout.LayoutParams(widthWithPadding,
+                            LinearLayout.LayoutParams.WRAP_CONTENT)
 
-                    addIcon.setImageResource(addIconResId)
-                    addIcon.setPadding(DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_TEXT_PADDING_RIGHT,
-                            0)
-                    addPersonToClazzHL.addView(addIcon)
+                    mLinearLayout.addView(weGroupSpinner, spinnerPadding)
 
-                    //Add the button
-                    val addPersonButton = Button(this)
-                    addPersonButton.includeFontPadding = false
-                    addPersonButton.minHeight = 0
-                    addPersonButton.text = impl.getString(MessageID.add_new_role_assignment,
-                            applicationContext)
-                    addPersonButton.background = null
-                    addPersonButton.setPadding(DEFAULT_PADDING, 0, 0, 0)
-                    addPersonButton.setOnClickListener {
-                        v -> mPresenter.handleClickAddNewRoleAssignment() }
-                    addPersonToClazzHL.addView(addPersonButton)
+                    mPresenter.generateGroupList()
 
-                    mLinearLayout.addView(addPersonToClazzHL)
-
-                    //Add a recycler view of classes
-                    mRecyclerView2 = RecyclerView(this)
-                    val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-                    val wrapParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT)
-                    mRecyclerView2.setLayoutManager(mRecyclerLayoutManager)
-                    mRecyclerView2.setLayoutParams(wrapParams)
-
-
-                    //Add the layout
-                    mLinearLayout.addView(mRecyclerView2)
-
-                    //Generate the live data and set it
-                    mPresenter.generateAssignedRoleAssignments()
                 }else{
 
                     thisLinearLayout!!.addView(divider)

@@ -7,16 +7,15 @@
 
     <CheckBox
         android:id="@+id/item_category_selector_checkbox"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:paddingLeft="22dp"
+        android:shadowColor="@color/text_primary"
         android:text="CheckBox"
         android:textColor="@color/text_primary"
-        android:shadowColor="@color/text_primary"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

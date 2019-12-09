@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.SaleListDetail
 
@@ -51,10 +52,34 @@ class SaleListRecyclerAdapter
         val saleDueDateImage = holder.itemView.findViewById<ImageView>(R.id.item_sale_order_due_date_image)
 
         assert(entity != null)
+
+        val impl = UstadMobileSystemImpl.instance
+        val currentLocale = impl.getLocale(theContext)
+        var saleTitleNameTranslated: String?=null
+
+
         if (entity!!.saleTitle != null && !entity.saleTitle!!.isEmpty()) {
             saleTitle.text = entity.saleTitle
+
+            if(currentLocale.equals("fa")){
+                saleTitle.text = entity!!.saleTitleGenDari
+            }else if(currentLocale.equals("ps")){
+                saleTitle.text = entity!!.saleTitleGenPashto
+            }else{
+                saleTitle.text = entity!!.saleTitleGen
+            }
+
+
         } else if (entity.saleTitleGen != null && !entity.saleTitleGen!!.isEmpty()) {
-            saleTitle.text = entity.saleTitleGen
+
+            if(currentLocale.equals("fa")){
+                saleTitle.text = entity!!.saleTitleGenDari
+            }else if(currentLocale.equals("ps")){
+                saleTitle.text = entity!!.saleTitleGenPashto
+            }else{
+                saleTitle.text = entity!!.saleTitleGen
+            }
+
         } else {
             saleTitle.text = ""
         }

@@ -168,6 +168,8 @@
 
     <!--Sprint 6-->
     <string name="my_women_entrepreneurs">My Women Embroiderers</string>
+    <string name="women_entrepreneurs_group">Women Embroiderers Group</string>
+    <string name="no_women_embroiderers_set">No Women Embroiderers group set</string>
     <string name="top_products">Top products</string>
     <string name="summary">Summary</string>
 

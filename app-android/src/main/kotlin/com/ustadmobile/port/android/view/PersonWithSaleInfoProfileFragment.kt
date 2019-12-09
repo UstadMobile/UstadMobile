@@ -62,9 +62,15 @@ class PersonWithSaleInfoProfileFragment : UstadBaseFragment(), PersonWithSaleInf
     }
 
     override fun updatePersonOnView(person: Person) {
-        notes.setText(person.personNotes)
-        phone.setText(person.phoneNum)
-        address.setText(person.personAddress)
+        if(person.personNotes != null && person.personNotes!!.isNotEmpty()) {
+            notes.setText(person.personNotes)
+        }
+        if(person.phoneNum != null && person.phoneNum!!.isNotEmpty()) {
+            phone.setText(person.phoneNum)
+        }
+        if(person.personAddress != null && person.personAddress!!.isNotEmpty()) {
+            address.setText(person.personAddress)
+        }
     }
 
     override fun updateImageOnView(imagePath: String) {

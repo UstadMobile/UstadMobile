@@ -48,10 +48,12 @@ class SaleProductCategorySelectorRecyclerAdapter internal constructor(
         }else{
             saleProductNameLocale = saleProductCategory!!.saleProductName
         }
-        if(saleProductNameLocale == null && saleProductCategory!!.saleProductName != null) {
-            saleProductNameLocale = saleProductCategory!!.saleProductName
-
+        if(saleProductNameLocale == null && saleProductCategory.saleProductName != null) {
+            saleProductNameLocale = saleProductCategory.saleProductName
+        }else if(saleProductNameLocale!!.isEmpty()){
+            saleProductNameLocale = saleProductCategory.saleProductName
         }
+
 
         checkBox.text = saleProductNameLocale
         checkBox.isChecked = saleProductCategory.isSelected

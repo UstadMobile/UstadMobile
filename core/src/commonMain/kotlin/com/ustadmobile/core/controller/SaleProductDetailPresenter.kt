@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_ASSIGN_TO_CATEGORY_UID
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
@@ -105,6 +106,7 @@ class SaleProductDetailPresenter(context: Any,
                 newSaleProduct = true
 
                 currentSaleProduct = SaleProduct("", "", isCategory, false)
+                currentSaleProduct!!.saleProductDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
 
                 currentSaleProduct!!.saleProductUid = saleProductDao.insertAsync(currentSaleProduct!!)
                 productUid = currentSaleProduct!!.saleProductUid

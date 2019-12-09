@@ -119,7 +119,7 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
                 " AND SaleProduct.saleProductUid != :saleProductCategoryUid "
 
         const  val ACTIVE_PRODUCTS_QUERY = ALL_ACTIVE_QUERY + ALL_ACTIVE_QUERY_WITH_SEARCH +
-                AND_IS_NOT_CATEGORY
+                AND_IS_NOT_CATEGORY + " ORDER BY SaleProduct.saleProductDateAdded DESC "
 
         const val ACTIVE_CATEGORIES_QUERY = ALL_ACTIVE_QUERY + ALL_ACTIVE_QUERY_WITH_SEARCH +
                 AND_IS_CATEGORY

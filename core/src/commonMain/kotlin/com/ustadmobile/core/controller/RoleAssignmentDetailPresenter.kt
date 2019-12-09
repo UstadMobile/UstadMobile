@@ -377,10 +377,10 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
 
         if (updatedEntityRole == null || updatedEntityRole != changedEntityRole) {
             //update class edit views
-
-            view.updateRoleAssignmentOnView(updatedEntityRole!!, 0, 0)
             //Update the currently editing class object
             updatedEntityRole = changedEntityRole
+
+            view.updateRoleAssignmentOnView(updatedEntityRole!!, 0, 0)
         }
     }
 

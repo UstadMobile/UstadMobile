@@ -73,13 +73,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
 
-        android:textColorHighlight="@color/default_back_color"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
+        android:buttonTint="@color/primaryTextColor"
         android:text="@string/enroll_in_class"
         android:textAppearance="@style/TextAppearance.AppCompat"
-        android:buttonTint="@color/primary"
         android:textColor="@color/text_primary"
+        android:textColorHighlight="@color/default_back_color"
         android:visibility="invisible"
 
         app:layout_constraintBottom_toBottomOf="@+id/item_studentlist_student_simple_horizontal_divider"

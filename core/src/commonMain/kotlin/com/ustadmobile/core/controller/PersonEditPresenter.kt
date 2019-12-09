@@ -128,6 +128,11 @@ class PersonEditPresenter
     var usernameSet: String? = null
     private val personAuthDao: PersonAuthDao
 
+    private var groupUmLiveData: DoorLiveData<List<PersonGroup>>? = null
+    private var groupIdToPosition: HashMap<Long, Int>? = null
+    private val groupPositionToId: HashMap<Int, Long>
+    private var groupPresets: Array<String>? = null
+    private var personWEGroupUid : Long = 0L
     init {
 
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
@@ -146,6 +151,9 @@ class PersonEditPresenter
         personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
 
         personAuthDao = repository.personAuthDao
+
+        groupIdToPosition = HashMap()
+        groupPositionToId = HashMap()
 
     }
 
@@ -266,6 +274,53 @@ class PersonEditPresenter
                     currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
                 }
             }
+        }
+    }
+
+    fun generateGroupList(){
+        //Update group
+        groupUmLiveData = personGroupDao.findAllActiveGroupPersonGroupsLive()
+        view.runOnUiThread(Runnable {
+            groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+        })
+    }
+
+    private fun handleAllGroupsChanged(groups: List<PersonGroup>?) {
+        var selectedPosition = 0
+
+        val entityList = ArrayList<String>()
+        groupIdToPosition = HashMap()
+
+        groupIdToPosition!![0] = 0
+        groupPositionToId[0] = 0
+        entityList.add(impl.getString(MessageID.no_women_embroiderers_set, context))
+
+        var posIter = 1
+        for (everyEntity in groups!!) {
+            entityList.add(everyEntity.groupName!!)
+            groupIdToPosition!![everyEntity.groupUid] = posIter
+            groupPositionToId[posIter] = everyEntity.groupUid
+            posIter++
+        }
+        groupPresets = entityList.toTypedArray()
+
+        if (personWEGroupUid != 0L) {
+
+            if (groupIdToPosition!!.containsKey(personWEGroupUid)) {
+                selectedPosition = groupIdToPosition!![personWEGroupUid]!!
+            }
+        }
+
+        view.setGroupPresets(groupPresets!!, selectedPosition)
+    }
+
+    fun updateGroup(position: Int) {
+
+        if(position > 0) {
+            if (groupPositionToId.containsKey(position))
+                personWEGroupUid = groupPositionToId[position]!!
+        }else{
+            personWEGroupUid = 0
         }
     }
 
@@ -678,6 +733,7 @@ class PersonEditPresenter
                 setFieldsOnView(person, headersAndFields!!, view,
                         customFieldWithFieldValueMap)
                 mUpdatedPerson = person
+                personWEGroupUid = person.mPersonGroupUid
             }
         }
     }
@@ -763,6 +819,7 @@ class PersonEditPresenter
      */
     fun handleClickDone() {
         mUpdatedPerson!!.active = true
+        mUpdatedPerson!!.mPersonGroupUid = personWEGroupUid
         GlobalScope.launch {
             personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
 

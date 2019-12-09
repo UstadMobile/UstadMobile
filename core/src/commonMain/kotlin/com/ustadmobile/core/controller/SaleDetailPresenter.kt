@@ -433,7 +433,9 @@ class SaleDetailPresenter(context: Any,
             if(customer!= null && customer!!.lastName != null){
                 lastName = customer!!.lastName!!
             }
-            view.updateCustomerNameOnView(firstNames +  " " + lastName)
+            view.runOnUiThread(Runnable {
+                view.updateCustomerNameOnView(firstNames + " " + lastName)
+            })
         }
     }
 
