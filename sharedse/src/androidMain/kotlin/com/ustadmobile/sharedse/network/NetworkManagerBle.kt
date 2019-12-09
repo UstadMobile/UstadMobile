@@ -31,9 +31,8 @@ import androidx.core.net.ConnectivityManagerCompat
 import com.tonyodev.fetch2.Fetch
 import com.tonyodev.fetch2.FetchConfiguration
 import com.tonyodev.fetch2.HttpUrlConnectionDownloader
-import com.tonyodev.fetch2.Request
 import com.tonyodev.fetch2core.Downloader
-import com.tonyodev.fetch2core.Func
+import com.tonyodev.fetch2okhttp.OkHttpDownloader
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
@@ -45,7 +44,6 @@ import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,9 +60,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.networkmanager.defaultGsonSerializer
+import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
-import com.ustadmobile.sharedse.network.fetch.FetchMpp
+import okhttp3.OkHttpClient
 
 /**
  * This class provides methods to perform android network related communications.
@@ -139,6 +139,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     private val numActiveRequests = AtomicInteger()
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
+
+    private var localOkHttpClient: OkHttpClient? = null
 
     val fetchAndroid: Fetch by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Fetch.Impl.getInstance(FetchConfiguration.Builder(context as Context)
@@ -482,8 +484,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
 
     private fun handleDisconnected() {
-        localHttpClient?.close()
         localHttpClient = null
+        localHttpFetcher?.close()
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
@@ -541,14 +543,23 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                 UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
                         "client for $ssid using $socketFactory")
 
+                val localOkHttpClientVal = defaultOkHttpClient().newBuilder()
+                        .socketFactory(socketFactory)
+                        .build()
+
+                localHttpFetcher = Fetch.Impl.getInstance(FetchConfiguration.Builder(context as Context)
+                        .setHttpDownloader(OkHttpDownloader(localOkHttpClient,
+                                Downloader.FileDownloaderType.SEQUENTIAL))
+                        .build())
+
+                //closing localHttpClient would stop the underlying shared OkHttpClient's executors,
+                // pools, etc we don't want to do that
                 localHttpClient = HttpClient(OkHttp) {
                     engine {
-                        config {
-                            socketFactory(socketFactory)
-                        }
+                        preconfigured = localOkHttpClientVal
                     }
                     install(JsonFeature) {
-                        serializer = GsonSerializer()
+                        serializer = defaultGsonSerializer()
                     }
                 }
             }

@@ -1,5 +1,8 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.Antilog
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
@@ -29,6 +32,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipFile
 
@@ -44,6 +48,8 @@ class DownloadJobItemRunnerTest {
     private lateinit var peerServer: EmbeddedHTTPD
 
     private lateinit var mockedNetworkManager: NetworkManagerBleCommon
+
+    private val mockedDownloadJobItemManagerMap = mutableMapOf<Int, DownloadJobItemManager>()
 
     private var mockedNetworkManagerBleWorking = AtomicBoolean()
 
@@ -65,6 +71,8 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var webServerTmpContentEntryFile: File
 
+    private lateinit var webServerTmpContentEntryWithDuplicateFile: File
+
     private lateinit var peerTmpContentEntryFile: File
 
     private lateinit var peerContainerFileTmpDir: File
@@ -74,6 +82,8 @@ class DownloadJobItemRunnerTest {
     private val TEST_CONTENT_ENTRY_FILE_UID = 1000L
 
     private val TEST_FILE_RESOURCE_PATH = "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub"
+
+    private val TEST_FILE_WITH_DUPLICATES = "/com/ustadmobile/port/sharedse/networkmanager/thebigchicken.epub"
 
     private var context = Any()
 
@@ -93,6 +103,8 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var container: Container
 
+    private lateinit var containerWDuplicates: Container
+
     private lateinit var containerManager: ContainerManager
 
     private val MAX_LATCH_WAITING_TIME = 15000L
@@ -108,6 +120,7 @@ class DownloadJobItemRunnerTest {
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
+        Napier.base(DebugAntilog())
         clientDb = UmAppDatabase.getInstance(context, "clientdb")
         clientDb.clearAllTables()
 
@@ -177,6 +190,8 @@ class DownloadJobItemRunnerTest {
         peerServer = EmbeddedHTTPD(0, context, peerDb)
         httpFetcherImpl = FetchMppJvmImpl(OkHttpClient())
         mockedEntryStatusTask = mock<BleEntryStatusTask> {}
+        mockedDownloadJobItemManagerMap.clear()
+        mockedDownloadJobItemManagerMap[downloadJob.djUid] = downloadJobItemManager
         mockedNetworkManager = mock<NetworkManagerBleCommon> {
             on { sendMessage(any(), any(), any(), any()) } doAnswer {invocation ->
                 val bleResponseListener = invocation.arguments[3] as BleMessageResponseListener
@@ -229,7 +244,9 @@ class DownloadJobItemRunnerTest {
 
             on { httpFetcher }.thenReturn(httpFetcherImpl)
 
-            onBlocking { openDownloadJobItemManager(downloadJob.djUid) }.thenReturn(downloadJobItemManager)
+            onBlocking { openDownloadJobItemManager(any()) }.thenAnswer {
+                mockedDownloadJobItemManagerMap.get(it.arguments[0] as Int)
+            }
         }
 
         mockedNetworkManagerBleWorking.set(true)
@@ -327,7 +344,7 @@ class DownloadJobItemRunnerTest {
         runBlocking {
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus, localAvailabilityManager = mock<LocalAvailabilityManager>())
 
             val startTime = System.currentTimeMillis()
@@ -359,7 +376,7 @@ class DownloadJobItemRunnerTest {
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus, localAvailabilityManager = mock<LocalAvailabilityManager>())
 
             jobItemRunner.download()
@@ -385,7 +402,7 @@ class DownloadJobItemRunnerTest {
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus, retryDelay = 100L,
                     localAvailabilityManager = mock<LocalAvailabilityManager>())
 
@@ -408,7 +425,7 @@ class DownloadJobItemRunnerTest {
             cloudMockDispatcher.throttlePeriod = 1000
 
 
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus,
                     localAvailabilityManager = mock<LocalAvailabilityManager>())
 
@@ -447,7 +464,7 @@ class DownloadJobItemRunnerTest {
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
             val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
-                    clientRepo, cloudEndPoint, connectivityStatus,
+                    cloudEndPoint, connectivityStatus,
                     localAvailabilityManager = mock<LocalAvailabilityManager>())
 
             launch {
@@ -486,7 +503,7 @@ class DownloadJobItemRunnerTest {
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
             val jobItemRunner1 = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
-                    clientRepo, cloudEndPoint, connectivityStatus,
+                    cloudEndPoint, connectivityStatus,
                     localAvailabilityManager = mock<LocalAvailabilityManager>())
 
             launch {
@@ -507,7 +524,7 @@ class DownloadJobItemRunnerTest {
             clientDb.connectivityStatusDao.updateState(ConnectivityStatus.STATE_UNMETERED, "Dummy-Wifi")
 
             val downloadJobItemRunner2 = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
-                    clientRepo, cloudEndPoint, connectivityStatus,
+                    cloudEndPoint, connectivityStatus,
                     localAvailabilityManager = mock<LocalAvailabilityManager>())
             downloadJobItemRunner2.download()
 
@@ -542,7 +559,7 @@ class DownloadJobItemRunnerTest {
             clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
                     item.djiDjUid, true)
 
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus, localAvailabilityManager = mock<LocalAvailabilityManager>())
 
             clientDb.connectivityStatusDao.updateState(ConnectivityStatus.STATE_METERED, "")
@@ -588,7 +605,7 @@ class DownloadJobItemRunnerTest {
             cloudMockDispatcher.throttlePeriod = 1000
 
 
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus, localAvailabilityManager = mock<LocalAvailabilityManager>())
 
             launch { jobItemRunner.download() }
@@ -621,7 +638,7 @@ class DownloadJobItemRunnerTest {
             val mockAvailabilityManager = mock<LocalAvailabilityManager> {
                 onBlocking { findBestLocalNodeForContentEntryDownload(any()) }.thenReturn(networkNode)
             }
-            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus, localAvailabilityManager = mockAvailabilityManager)
 
             val startTime = System.currentTimeMillis()
@@ -652,5 +669,73 @@ class DownloadJobItemRunnerTest {
         }
 
     }
+
+    /**
+     * The container system avoids the need to download duplicate entries (files that are already
+     * present in other containers). When a download contains entries that the device already has
+     * from other containers, these items should be linked and only the new files should be downloaded.
+     */
+    @Test
+    fun givenOneItemDownloaded_whenSecondItemWithDuplicatesIsDownloaded_thenOnlyNewEntriesAreDownloadeAndBothShouldHaveContentMatchingOriginalContainers() {
+        runBlocking {
+            val container2TmpFile = File.createTempFile("DownloadJobItemRunnerTest", "c2")
+            val container2TmpDir = Files.createTempDirectory("DownloadJobItemRunnerTestC2Tmp").toFile()
+            extractTestResourceToFile(TEST_FILE_WITH_DUPLICATES, container2TmpFile)
+
+            val contentEntry2 = ContentEntry("The big chicken", "The big chicken", true, true)
+            contentEntry2.contentEntryUid = serverDb.contentEntryDao.insert(contentEntry2)
+            var container2 = Container(contentEntry2)
+            container2.containerUid = serverDb.containerDao.insert(container2)
+            val containerManager2 = ContainerManager(container2, serverDb, serverDb,
+                    container2TmpDir.absolutePath)
+            addEntriesFromZipToContainer(container2TmpFile.absolutePath, containerManager2)
+            container2 = serverDb.containerDao.findByUid(container2.containerUid)!!
+
+            clientDb.contentEntryDao.insert(contentEntry2)
+            clientDb.containerDao.insert(container2)
+
+            //Create a DownloadJob and DownloadJobItem
+            val downloadJob2 = DownloadJob(contentEntry2.contentEntryUid,
+                    System.currentTimeMillis()).also {
+                it.timeRequested = System.currentTimeMillis()
+                it.djStatus = JobStatus.QUEUED
+                it.djDestinationDir = clientContainerDir.absolutePath
+                it.djUid = clientDb.downloadJobDao.insert(it).toInt()
+            }
+
+            val downloadJobItem2 = DownloadJobItem(downloadJob2, contentEntry2.contentEntryUid,
+                    container2.containerUid, container2.fileSize).also {
+                it.djiStatus = JobStatus.QUEUED
+                it.destinationFile = File(clientContainerDir,
+                        contentEntry2.contentEntryUid.toString()).absolutePath
+            }
+
+            val downloadJobItemManager2 = DownloadJobItemManager(clientDb, downloadJob2.djUid,
+                newSingleThreadContext("DownloadJobItemRunnerTestManager"))
+            downloadJobItemManager2.insertDownloadJobItems(listOf(downloadJobItem2))
+            mockedDownloadJobItemManagerMap[downloadJob2.djUid] = downloadJobItemManager2
+
+            val item1 = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner1 = DownloadJobItemRunner(context, item1, mockedNetworkManager, clientDb,
+                    cloudEndPoint, connectivityStatus, localAvailabilityManager = mock<LocalAvailabilityManager>())
+
+            jobItemRunner1.download()
+
+            val jobItem1Status = clientDb.downloadJobDao.findByUid(downloadJobItem.djiUid)!!.djStatus
+
+            val jobItemRunner2 = DownloadJobItemRunner(context, downloadJobItem2, mockedNetworkManager,
+                    clientDb, cloudEndPoint, connectivityStatus,
+                    localAvailabilityManager = mock<LocalAvailabilityManager>())
+
+            jobItemRunner2.download()
+
+            assertContainersHaveSameContent(container.containerUid, container.containerUid,
+                    serverDb, serverDb, clientDb, clientDb)
+            assertContainersHaveSameContent(container2.containerUid, container2.containerUid,
+                    serverDb, serverDb, clientDb, clientDb)
+        }
+    }
+
 
 }

@@ -107,8 +107,9 @@ actual class ContainerManager actual constructor(container: Container,
 
             //delete any ContainerEntry that is being overwritten
             val newEntryPaths = newPathsToMd5Map.keys
-            db.containerEntryDao.deleteList(
-                    pathToEntryMap.filter { it.key in newEntryPaths }.map { it.value })
+            val overwrittenEntriesToDelete = pathToEntryMap.filter { it.key in newEntryPaths }
+                    .map { it.value }
+            db.containerEntryDao.deleteList(overwrittenEntriesToDelete)
 
 
             var nextEntrySource: EntrySource? = null

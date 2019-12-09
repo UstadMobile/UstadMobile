@@ -100,6 +100,8 @@ class DownloadJobItemRunner
 
     private lateinit var currentHttpClient: HttpClient
 
+    private lateinit var currentFetch: FetchMpp
+
     /**
      * Boolean to indicate if we are waiting for a local connection.
      */
@@ -310,8 +312,6 @@ class DownloadJobItemRunner
             downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         }
 
-        networkManager.httpFetcher.addListener(fetchListener)
-
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
         if (destinationDir == null) {
             val e = IllegalArgumentException(
@@ -368,8 +368,7 @@ class DownloadJobItemRunner
                 history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
                 history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
 
-                val downloadEndpoint: String?
-
+                val downloadEndpoint: String
                 if (networkNodeToUse == null) {
                     if (connectivityStatus?.wifiSsid != null
                             && connectivityStatus?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
@@ -388,6 +387,8 @@ class DownloadJobItemRunner
                     }
 
                     downloadEndpoint = endpointUrl
+                    currentHttpClient = defaultHttpClient()
+                    currentFetch = networkManager.httpFetcher
                 } else {
                     if (networkNodeToUse.groupSsid == null
                             || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
@@ -400,16 +401,9 @@ class DownloadJobItemRunner
                         }
                     }
 
-                    downloadEndpoint = currentNetworkNode!!.endpointUrl
-                }
-
-                val localHttpClient = networkManager.localHttpClient
-                if(localHttpClient != null) {
-                    UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using local http client: $localHttpClient")
-                    currentHttpClient = localHttpClient
-                }else {
-                    UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
-                    currentHttpClient = defaultHttpClient()
+                    downloadEndpoint = currentNetworkNode!!.endpointUrl!!
+                    currentHttpClient = networkManager.localHttpClient ?: defaultHttpClient()
+                    currentFetch = networkManager.localHttpFetcher ?: networkManager.httpFetcher
                 }
 
                 history.url = downloadEndpoint
@@ -445,11 +439,11 @@ class DownloadJobItemRunner
                 val fetchStartTime = getSystemTimeInMillis()
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
                 fetchStatusLock.withLock {
-                    val fetchRequest = RequestMpp(UMFileUtil.joinPaths(endpointUrl,
+                    currentFetch.addListener(fetchListener)
+                    val fetchRequest = RequestMpp(UMFileUtil.joinPaths(downloadEndpoint,
                             ENDPOINT_CONCATENATEDFILES, entriesListStr), destTmpFile.getAbsolutePath())
                     currentFetchRequestId = fetchRequest.id
-                    networkManager.httpFetcher
-                            .takeIf { runnerStatus.value != JobStatus.STOPPED }
+                    currentFetch.takeIf { runnerStatus.value != JobStatus.STOPPED }
                             ?.enqueue(fetchRequest)
                 }
 
@@ -462,6 +456,10 @@ class DownloadJobItemRunner
             }catch(e: Exception) {
                 Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
                 delay(retryDelay)
+            }finally {
+                fetchStatusLock.withLock {
+                    currentFetch.removeListener(fetchListener)
+                }
             }
         }
 
@@ -483,7 +481,7 @@ class DownloadJobItemRunner
             //TODO Here: Make the download fail if the validation does not check out, don't crash the app
             try {
                 concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
-                val pathToMd5Map = containerEntriesList.map {
+                val pathToMd5Map = containerEntriesToDownloadList.map {
                     (it.cePath ?: "") to (it.cefMd5?.base64StringToByteArray() ?: ByteArray(0))
                 }.toMap()
 

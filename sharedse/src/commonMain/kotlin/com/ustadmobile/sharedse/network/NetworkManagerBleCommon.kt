@@ -56,6 +56,13 @@ abstract class NetworkManagerBleCommon(
     var localHttpClient: HttpClient? = null
         protected set
 
+
+    /**
+     *
+     */
+    var localHttpFetcher: FetchMpp? = null
+        protected set
+
     /**
      * Holds all created entry status tasks
      */
