@@ -38,6 +38,7 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
     try {
         driver.get(url)
     }catch (e: InvalidArgumentException){
+        driver.quit()
         throw IllegalArgumentException(e)
     }
     val waitDriver = WebDriverWait(driver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
@@ -49,7 +50,9 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
 
     // looks in the list for starting url, checks if its not 404 otherwise return error
     entries.find { it.request.url == url }.also {
-        require(it?.response?.status != 404) { "404 Starting Url" }
+        require(it?.response?.status != 404) {
+            driver.quit()
+            "404 Starting Url" }
     }
 
     entries.forEach {
@@ -88,7 +91,6 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
             UMLogUtil.logDebug(e.message!!)
 
         }
-
 
         driver.quit()
 
