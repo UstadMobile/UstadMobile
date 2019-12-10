@@ -8,7 +8,7 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 82)
+@SyncableEntity(tableId = 83)
 @Entity
 @Serializable
 class DashboardEntryTag {
