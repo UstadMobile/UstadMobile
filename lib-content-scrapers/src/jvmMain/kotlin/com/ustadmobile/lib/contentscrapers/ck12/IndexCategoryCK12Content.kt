@@ -2,26 +2,18 @@ package com.ustadmobile.lib.contentscrapers.ck12
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_TINCAN
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.gdl.GdlContentIndexer
-import com.ustadmobile.lib.contentscrapers.gdl.GdlContentScraper
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC
-import com.ustadmobile.lib.rest.waitForNewFiles
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -466,7 +458,6 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
                 val hrefLink = link.getAttribute("href")
                 val title = link.getAttribute("title")
 
-
                 val summary = course.findElement(
                         By.cssSelector("div[class*=js-components-newspaper-Card-Card__summary]"))
                         .text
@@ -501,13 +492,13 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
         val ROOT_URL = "https://www.ck12.org/browse/"
 
-        private lateinit var queueDao: ScrapeQueueItemDao
-        private lateinit var contentEntryDao: ContentEntryDao
-        private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
-        private lateinit var languageDao: LanguageDao
-        private lateinit var containerDao: ContainerDao
-        private lateinit var db: UmAppDatabase
-        private lateinit var repository: UmAppDatabase
+        lateinit var queueDao: ScrapeQueueItemDao
+        lateinit var contentEntryDao: ContentEntryDao
+        lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
+        lateinit var languageDao: LanguageDao
+        lateinit var containerDao: ContainerDao
+        lateinit var db: UmAppDatabase
+        lateinit var repository: UmAppDatabase
         private var englishLang: Language? = null
         private lateinit var ck12ParentEntry: ContentEntry
         internal lateinit var url: URL

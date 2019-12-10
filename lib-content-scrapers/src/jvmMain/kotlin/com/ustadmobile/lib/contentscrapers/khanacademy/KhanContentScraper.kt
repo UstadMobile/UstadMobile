@@ -604,7 +604,7 @@ class KhanContentScraper : Runnable {
 
         if (driver == null) {
             ContentScraperUtil.setChromeDriverLocation()
-            driver = ContentScraperUtil.setupLogIndexChromeDriver()
+            driver = ContentScraperUtil.setupLogIndexChromeDriver(null)
         } else {
             ContentScraperUtil.clearChromeConsoleLog(driver!!)
         }

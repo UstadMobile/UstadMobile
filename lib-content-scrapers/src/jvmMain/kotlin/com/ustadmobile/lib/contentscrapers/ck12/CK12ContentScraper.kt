@@ -58,7 +58,11 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse
 import com.ustadmobile.lib.contentscrapers.ck12.practice.*
+import com.ustadmobile.lib.contentscrapers.harscraper.setupProxyWithSelenium
+import com.ustadmobile.lib.contentscrapers.harscraper.scrapeUrlwithHar
 import com.ustadmobile.lib.db.entities.ContentEntry
+import net.lightbody.bmp.BrowserMobProxyServer
+import net.lightbody.bmp.client.ClientUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
@@ -67,6 +71,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.openqa.selenium.By
+import org.openqa.selenium.Proxy
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -196,7 +201,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                     successful = true
                 }
                 CK12_PRACTICE -> {
-                    scrapePracticeContent(content)
+                    scrapePracticeContent(content, scrapeUrl)
                     successful = true
                 }
                 else -> {
@@ -239,7 +244,6 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
         val plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.lastIndexOf("?"))
 
         content.mkdirs()
-
 
         val plixUrl = generatePlixLink(plixId)
 
@@ -290,7 +294,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                     if (file.name.contains("plix.js")) {
                         var plixJs = FileUtils.readFileToString(file, UTF_ENCODING)
 
-                        if(plixJs.contains("\"trialscount.plix.\"")){
+                        if (plixJs.contains("\"trialscount.plix.\"")) {
                             val startIndex = plixJs.indexOf("\"trialscount.plix.\"")
                             val lastIndex = plixJs.lastIndexOf("():")
                             plixJs = StringBuilder(plixJs).insert(lastIndex + 3, "*/").insert(startIndex, "/*").toString()
@@ -300,7 +304,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
                     if (file.name.contains("plix.css")) {
                         var plixJs = FileUtils.readFileToString(file, UTF_ENCODING)
-                        if(plixJs.contains("@media only screen and (max-device-width:")){
+                        if (plixJs.contains("@media only screen and (max-device-width:")) {
                             val startIndex = plixJs.indexOf("@media only screen and (max-device-width:")
                             val endIndex = plixJs.indexOf(".plix{")
                             plixJs = StringBuilder(plixJs).insert(endIndex, "*/").insert(startIndex, "/*").toString()
@@ -398,7 +402,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                 urlString = urlSrc
             } else if (urlSrc.startsWith("//")) {
                 urlString = Jsoup.connect("https:$urlSrc").get().selectFirst("video source").attr("src")
-            }else{
+            } else {
                 UMLogUtil.logError("found flx video - might be youtube at $urlSrc")
                 isContentUpdated = false
                 return
@@ -458,6 +462,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
         }
         return null
     }
+
 
     private fun isPageUpdated(doc: Document): Long {
         val date = doc.select("h2:contains(Last Modified) ~ span").attr("data-date")
@@ -542,49 +547,102 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
     }
 
-    fun scrapeFlexBookContent(content: File){
+    fun scrapeFlexBookContent(content: File) {
 
         content.mkdirs()
 
-        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val proxy = BrowserMobProxyServer()
+        proxy.start()
+        var chromeDriver = setupProxyWithSelenium(proxy, getDefaultSeleniumProxy(proxy), ScraperConstants.CK12)
+        scrapeUrlwithHar(proxy, chromeDriver, scrapeUrl.toString(), content,
+                waitCondition = {
+            it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.contentarea"))).click()
+        }) {
+
+            if (scrapeUrl.toString() == it.request.url) {
+
+                val doc = Jsoup.parse(it.response.content.text)
+
+                doc.selectFirst("div.breadcrumblist")?.remove()
+                doc.selectFirst("header")?.remove()
+                doc.selectFirst("footer")?.remove()
+                doc.selectFirst("div.feedback")?.remove()
+                doc.selectFirst("div#flexbook2_banner")?.remove()
+                doc.selectFirst("div.ck12-annotation-toolbar-container")?.remove()
+                doc.selectFirst("section.myAnnotations-container")?.remove()
+
+                it.response.content.text = doc.html()
+            }
+            it
+        }
+        var harFile = File(content, "harcontent")
+        harFile.createNewFile()
+        proxy.har.writeTo(harFile)
+        proxy.stop()
+
+
+      /*  val gson = GsonBuilder().disableHtmlEscaping().create()
 
         ContentScraperUtil.setChromeDriverLocation()
 
-        val driver = ContentScraperUtil.setupLogIndexChromeDriver()
+        val seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
 
-        driver.get(scrapeUrl.toString())
+        val driver = ContentScraperUtil.setupLogIndexChromeDriver(seleniumProxy)
+        proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT, CaptureType.RESPONSE_HEADERS, CaptureType.REQUEST_HEADERS, CaptureType.RESPONSE_BINARY_CONTENT, CaptureType.REQUEST_BINARY_CONTENT)
+        proxy.newHar("ck12.org")
+
+        driver.get(scrapeUrlwithHar.toString())
         val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver)
         try {
-            waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.breadcrumblist"))).click()
+            waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.contentarea"))).click()
+            //waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.breadcrumblist"))).click()
         } catch (e: Exception) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
         }
         val les = ContentScraperUtil.waitForNewFiles(driver)
         val cookieList = driver.manage().cookies
+
+        val document = Jsoup.parse(driver.pageSource)
+        val listOfLinks = document.select("a.flexbooklink")
+        val linksMap = HashMap<String, String>()
+        listOfLinks.forEach {
+
+            var href = it.attr("href")
+            var url = URL(scrapeUrlwithHar, href)
+            val decodedPath = URLDecoder.decode(url.toString(), UTF_ENCODING)
+            var urlString = decodedPath.replaceAfter("?", "")
+            linksMap[url.toString()] = "content-detail?sourceUrl=$urlString"
+
+        }
+
         driver.close()
         driver.quit()
 
+        var entries = proxy.har.log.entries
         val indexList = ArrayList<LogIndex.IndexEntry>()
-        var urlFileName = ContentScraperUtil.getFileNameFromUrl(scrapeUrl)
+        var urlFileName = ContentScraperUtil.getFileNameFromUrl(scrapeUrlwithHar)
+        var harFile = File(destLocation, "har")
+        harFile.createNewFile()
+        proxy.har.writeTo(harFile)
 
-        for (le in les) {
+        entries.forEach {
 
-            val log = gson.fromJson(le.message, LogResponse::class.java)
-            if (RESPONSE_RECEIVED.equals(log.message!!.method!!, ignoreCase = true)) {
-                val mimeType = log.message!!.params!!.response!!.mimeType
-                val urlString = log.message!!.params!!.response!!.url
+            try {
 
-                try {
+                val request = it.request
+                val response = it.response
 
-                    val url = URL(urlString!!)
-                    val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(content, url)
-                    var cookies = ContentScraperUtil.returnListOfCookies(urlString, cookieList)
-                    val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log, cookies)
+                if (request.url.contains("accounts.google.com")) return@forEach
 
-                    if (file.name == urlFileName) {
-                        val startingUrl = FileUtils.readFileToString(file, UTF_ENCODING)
-                        val doc = Jsoup.parse(startingUrl)
+                val decodedPath = URLDecoder.decode(request.url, UTF_ENCODING)
+                val url = URL(decodedPath)
+                val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(content, url)
+                var file = File(urlDirectory, ContentScraperUtil.getFileNameFromUrl(url))
+
+                when {
+                    file.name == urlFileName -> {
+                        val doc = Jsoup.parse(response.content.text)
 
                         doc.selectFirst("div.breadcrumblist")?.remove()
                         doc.selectFirst("header")?.remove()
@@ -597,39 +655,89 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                         FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING)
 
                     }
-
-
-                    val logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log)
-                    indexList.add(logIndex)
-
-                } catch (e: Exception) {
-                    UMLogUtil.logError("Index url failed at " + urlString!!)
-                    UMLogUtil.logDebug(le.message)
+                    response.content.encoding == "base64" -> {
+                        var base = Base64.getDecoder().decode(response.content.text)
+                        FileUtils.writeByteArrayToFile(file, base)
+                    }
+                    else -> FileUtils.writeStringToFile(file, response.content.text, UTF_ENCODING)
                 }
 
-            }else if(REQUEST_SENT == log.message!!.method){
-
-                if(log.message!!.params!!.redirectResponse != null){
-
-                    val mimeType = log.message!!.params!!.redirectResponse!!.mimeType
-                    val urlString = log.message!!.params!!.redirectResponse!!.url!!
-
-                    val logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, null, null, log)
-                    indexList.add(logIndex)
-
-                }
-
+                val logIndex = ContentScraperUtil.createIndexFromHar(request.url, response.content.mimeType.replaceAfter(";", "").removeSuffix(";"), urlDirectory, file, response.headers)
+                indexList.add(logIndex)
+            } catch (e: Exception) {
+                UMLogUtil.logError("Index url failed at${it.request.url}")
+                UMLogUtil.logDebug(e.message!!)
 
             }
-        }
+
+        }*/
+
+        /* les.forEachIndexed { index, le ->
+
+             val log = gson.fromJson(le.message, LogResponse::class.java)
+             if (RESPONSE_RECEIVED.equals(log.message!!.method!!, ignoreCase = true)) {
+                 val mimeType = log.message!!.params!!.response!!.mimeType
+                 val urlString = log.message!!.params!!.response!!.url
+
+                 try {
+
+                     val url = URL(urlString!!)
+                     val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(content, url)
+                     var cookies = ContentScraperUtil.returnListOfCookies(urlString, cookieList)
+                     val file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log, cookies)
+
+                     if (file.name == urlFileName) {
+                         val startingUrl = FileUtils.readFileToString(file, UTF_ENCODING)
+                         val doc = Jsoup.parse(startingUrl)
+
+                         doc.selectFirst("div.breadcrumblist")?.remove()
+                         doc.selectFirst("header")?.remove()
+                         doc.selectFirst("footer")?.remove()
+                         doc.selectFirst("div.feedback")?.remove()
+                         doc.selectFirst("div#flexbook2_banner")?.remove()
+                         doc.selectFirst("div.ck12-annotation-toolbar-container")?.remove()
+                         doc.selectFirst("section.myAnnotations-container")?.remove()
+
+                         FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING)
+
+                     }
 
 
-        val logIndex = LogIndex()
+                     val logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log)
+                     indexList.add(logIndex)
+
+                 } catch (e: Exception) {
+                     UMLogUtil.logError("Index url failed at " + urlString!!)
+                     UMLogUtil.logDebug(le.message)
+                 }
+
+             } else if (REQUEST_SENT == log.message!!.method) {
+
+                 if (log.message!!.params!!.redirectResponse != null) {
+
+                     val mimeType = log.message!!.params!!.redirectResponse!!.mimeType
+                     val urlString = log.message!!.params!!.redirectResponse!!.url!!
+
+                     val logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, null, null, log)
+                     indexList.add(logIndex)
+
+                 }
+
+             }
+         }*/
+
+
+   /*     val logIndex = LogIndex()
         logIndex.title = ScraperConstants.CK12
         logIndex.entries = indexList
+        logIndex.links = linksMap
 
-        FileUtils.writeStringToFile(File(content, "index.json"), gson.toJson(logIndex), UTF_ENCODING)
+        FileUtils.writeStringToFile(File(content, "index.json"), gson.toJson(logIndex), UTF_ENCODING)*/
 
+    }
+
+    private fun getDefaultSeleniumProxy(proxy: BrowserMobProxyServer): Proxy {
+        return ClientUtil.createSeleniumProxy(proxy)
     }
 
 
@@ -727,11 +835,11 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
 
     @Throws(IOException::class)
-    fun scrapePracticeContent(destination: File) {
+    fun scrapePracticeContent(destination: File, startingUrl: URL) {
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
-        val practiceUrl = FilenameUtils.getBaseName(scrapeUrl.path)
+        val practiceUrl = FilenameUtils.getBaseName(startingUrl.path)
 
         val testIdLink = generatePracticeLink(practiceUrl)
 
@@ -795,7 +903,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
             val hintsList = questionResponse.response!!.hints
             for (j in hintsList!!.indices) {
-                hintsList[j] = ContentScraperUtil.downloadAllResources(hintsList[j], practiceAssetDirectory, scrapeUrl)
+                hintsList[j] = ContentScraperUtil.downloadAllResources(hintsList[j], practiceAssetDirectory, startingUrl)
             }
             questionResponse.response!!.hints = hintsList
 
@@ -805,7 +913,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
             answer.instance?.solution = ContentScraperUtil.downloadAllResources(answer.instance?.solution
                     ?: "", questionAsset, scrapeUrl)
 
-            answer.instance?.answer = downloadAllResourcesFromAnswer(answer.instance!!.answer!!, questionAsset, scrapeUrl)
+            answer.instance?.answer = downloadAllResourcesFromAnswer(answer.instance!!.answer!!, questionAsset, startingUrl)
 
             if (ScraperConstants.QUESTION_TYPE.MULTI_CHOICE.type.equals(questionResponse.response!!.questionType!!, ignoreCase = true)) {
 
@@ -816,15 +924,15 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                     val question = questionOrderList[order]
 
                     question.displayText = ContentScraperUtil.downloadAllResources(question.displayText
-                            ?: "", questionAsset, scrapeUrl)
+                            ?: "", questionAsset, startingUrl)
                     question.optionKey = ContentScraperUtil.downloadAllResources(question.optionKey
-                            ?: "", questionAsset, scrapeUrl)
+                            ?: "", questionAsset, startingUrl)
 
                     val answerObject = answerObjectsList!![order]
                     answerObject.displayText = ContentScraperUtil.downloadAllResources(answerObject.displayText
-                            ?: "", questionAsset, scrapeUrl)
+                            ?: "", questionAsset, startingUrl)
                     answerObject.optionKey = ContentScraperUtil.downloadAllResources(answerObject.optionKey
-                            ?: "", questionAsset, scrapeUrl)
+                            ?: "", questionAsset, startingUrl)
 
                 }
             }
@@ -838,13 +946,13 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
         try {
             ContentScraperUtil.generateTinCanXMLFile(destination, practiceUrl, "en", "index.html",
-                    ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapeUrl.path, "", "")
+                    ScraperConstants.ASSESMENT_TIN_CAN_FILE, startingUrl.path, "", "")
         } catch (e: TransformerException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Practice Tin can file unable to create for url$scrapeUrl")
+            UMLogUtil.logError("Practice Tin can file unable to create for url$startingUrl")
         } catch (e: ParserConfigurationException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            UMLogUtil.logError("Practice Tin can file unable to create for url$scrapeUrl")
+            UMLogUtil.logError("Practice Tin can file unable to create for url$startingUrl")
         }
 
         ContentScraperUtil.saveListAsJson(destination, questionList, ScraperConstants.QUESTIONS_JSON)

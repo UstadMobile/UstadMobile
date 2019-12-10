@@ -2,16 +2,13 @@ package com.ustadmobile.port.android.view
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Network
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.platform.app.InstrumentationRegistry
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
+import androidx.test.rule.ServiceTestRule
 import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
@@ -19,19 +16,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import com.ustadmobile.sharedse.network.NetworkManagerBleHelper
+import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.util.test.AbstractImportLinkTest
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import androidx.test.rule.ServiceTestRule
-import android.os.IBinder
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.port.android.generated.MessageIDMap
-import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 
 // TODO tests are disabled until jenkins are create its own server
 class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
@@ -87,11 +77,9 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
         activity = mActivityRule.activity
 
 
-
-
     }
 
-    //@Test
+    @Test
     fun endToEnd() {
 
         var urlString = "https://h5p.org/node/615305"

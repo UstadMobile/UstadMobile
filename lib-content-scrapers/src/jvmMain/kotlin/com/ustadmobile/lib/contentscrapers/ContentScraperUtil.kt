@@ -91,7 +91,11 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
 import kotlinx.coroutines.runBlocking
+import net.lightbody.bmp.core.har.HarNameValuePair
 import org.openqa.selenium.Cookie
+import org.openqa.selenium.Proxy
+import org.openqa.selenium.remote.CapabilityType
+import java.lang.IllegalArgumentException
 import java.net.*
 import java.time.temporal.TemporalQuery
 import kotlin.system.exitProcess
@@ -1104,7 +1108,7 @@ object ContentScraperUtil {
     @Throws(IOException::class)
     fun downloadFileFromLogIndex(url: URL, destination: File, log: LogResponse?, cookies: String?): File {
 
-        if(url.host.contains("youtube")){
+        if (url.host.contains("youtube")) {
             throw IllegalArgumentException("cannot download youtube")
         }
 
@@ -1164,11 +1168,22 @@ object ContentScraperUtil {
         val logIndex = LogIndex.IndexEntry()
         logIndex.url = urlString
         logIndex.mimeType = mimeType
-        logIndex.path = if(file != null) (urlDirectory!!.name + FORWARD_SLASH + file.name) else ""
+        logIndex.path = if (file != null) (urlDirectory!!.name + FORWARD_SLASH + file.name) else ""
         if (log != null) {
-            logIndex.headers = log.message!!.params?.response?.headers ?: log.message!!.params?.redirectResponse?.headers
+            logIndex.headers = log.message!!.params?.response?.headers
+                    ?: log.message!!.params?.redirectResponse?.headers
         }
         return logIndex
+    }
+
+    fun createIndexFromHar(urlString: String, mimeType: String?, urlDirectory: File?, file: File?, headers: MutableList<HarNameValuePair>?): LogIndex.IndexEntry {
+        val logIndex = LogIndex.IndexEntry()
+        logIndex.url = urlString
+        logIndex.mimeType = mimeType
+        logIndex.path = if (file != null) (urlDirectory!!.name + FORWARD_SLASH + file.name) else ""
+        logIndex.headers = headers?.map { it.name to it.value }?.toMap()
+        return logIndex
+
     }
 
     /**
@@ -1185,6 +1200,15 @@ object ContentScraperUtil {
         d.setCapability("goog:loggingPrefs", logPrefs)
 
         return ChromeDriver(d)
+    }
+
+    fun setupChromeDriverWithSeleniumProxy(seleniumProxy: Proxy): ChromeDriver {
+        val d = DesiredCapabilities.chrome()
+        d.setCapability("opera.arguments", "-screenwidth 411 -screenheight 731")
+        d.setCapability(CapabilityType.PROXY, seleniumProxy)
+
+        return ChromeDriver(d)
+
     }
 
     /**
@@ -1261,7 +1285,6 @@ object ContentScraperUtil {
 
         return driver
     }
-
 
 
     fun downloadImagesFromJsonContent(images: MutableMap<String, ItemData.Content.Image?>, destDir: File, scrapeUrl: String, indexList: MutableList<LogIndex.IndexEntry>) {

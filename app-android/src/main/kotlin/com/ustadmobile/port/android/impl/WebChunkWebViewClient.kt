@@ -95,6 +95,18 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                     log = indexMap[key]
                     break
                 }
+                if(key.contains("bf.dynatrace") && requestUrl.contains("bf.dynatrace")){
+                    log = indexMap[key]
+                    break
+                }
+                if(key.contains("api-js.mixpanel.com/decide") && requestUrl.contains("api-js.mixpanel.com/decide")){
+                    log = indexMap[key]
+                    break
+                }
+                if(key.contains("api-js.mixpanel.com/track") && requestUrl.contains("api-js.mixpanel.com/track")){
+                    log = indexMap[key]
+                    break
+                }
                 if (key.contains("https://www.ck12.org/assessment/api/render/questionInstance?qID") && requestUrl.toString().contains("https://www.ck12.org/assessment/api/render/questionInstance?qID")) {
                     log = indexMap[key]
                     break
@@ -158,6 +170,8 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                     ?: return WebResourceResponse("", "utf-8", log.headers?.get("status")?.toInt()
                             ?: 404, "Not Found", log.headers, null)
 
+
+
             var mutMap = mutableMapOf<String, String>()
             if (log.headers != null) {
                 mutMap.putAll(log.headers!!)
@@ -166,6 +180,16 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                 mutMap["Content-Encoding"] = "gzip"
                 mutMap["Content-Length"] = entry.containerEntryFile!!.ceCompressedSize.toString()
             }
+
+            if(!mutMap.containsKey("access-control-allow-origin")){
+                mutMap["Access-Control-Allow-Origin"] = "*"
+            }
+            mutMap["Access-Control-Allow-Headers"] = "X-Requested-With"
+
+            if(request.method == "OPTIONS"){
+                return WebResourceResponse(log.mimeType, "utf-8", log.headers?.get("status")?.toInt() ?: 200, "OK", mutMap, null)
+            }
+
 
             var data = containerManager.getInputStream(entry)
 
@@ -184,16 +208,16 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                 null
             }
             if (range != null && range.statusCode == 206) {
-                if(!isHEADRequest){
+                if (!isHEADRequest) {
                     data = RangeInputStream(data, range.fromByte, range.toByte)
                 }
 
                 range.responseHeaders.forEach { mutMap[it.key] = it.value }
                 return WebResourceResponse(log.mimeType, "utf-8", HttpURLConnection.HTTP_PARTIAL,
-                        "Partial Content", mutMap, if(isHEADRequest) null else data)
+                        "Partial Content", mutMap, if (isHEADRequest) null else data)
 
             } else if (range?.statusCode == 416) {
-                return WebResourceResponse("text/plain", "utf-8",416,
+                return WebResourceResponse("text/plain", "utf-8", 416,
                         if (isHEADRequest) "" else "Range request not satisfiable", null, null)
             } else {
 
@@ -212,7 +236,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
     private fun checkWithPattern(requestUrl: String): String? {
         for (linkPattern in linkPatterns.keys) {
-            if (linkPattern.matcher(requestUrl).lookingAt()) {
+            if (linkPattern.matcher(requestUrl).lookingAt() || requestUrl == linkPattern.toString()) {
                 return linkPatterns[linkPattern]
             }
         }

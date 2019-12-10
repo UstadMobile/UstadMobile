@@ -25,7 +25,6 @@ import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.apache.commons.pool2.impl.GenericObjectPool
 import org.jsoup.Jsoup

@@ -180,7 +180,7 @@ object ShrinkerUtil {
 
                     replacedFiles[inputFile] = outputFile
 
-                    if (ContentScraperUtil.fileHasContent(outputFile)) {
+                    if (fileHasContent(outputFile)) {
                         itemValue.href = newHref
                         itemValue.setMimeType(ScraperConstants.MIMETYPE_WEBP)
                     }
@@ -372,7 +372,7 @@ object ShrinkerUtil {
      */
     @Throws(IOException::class)
     fun convertImageToWebp(src: File, dest: File) {
-        if (!ContentScraperUtil.fileHasContent(src)) {
+        if (!fileHasContent(src)) {
             throw FileNotFoundException("convertImageToWebp: Source file: " + src.absolutePath + " does not exist")
         }
 
@@ -403,7 +403,7 @@ object ShrinkerUtil {
             process?.destroy()
         }
 
-        if (!ContentScraperUtil.fileHasContent(dest)) {
+        if (!fileHasContent(dest)) {
             throw IOException("convertImaegToWebP: source existed, but output does not " + dest.path)
         }
 
@@ -418,7 +418,7 @@ object ShrinkerUtil {
      */
     @Throws(IOException::class)
     private fun convertJpgToPng(src: File, dest: File) {
-        if (!ContentScraperUtil.fileHasContent(src)) {
+        if (!fileHasContent(src)) {
             throw FileNotFoundException("convertImageToWebp: Source file: " + src.absolutePath + " does not exist")
         }
 
@@ -446,7 +446,7 @@ object ShrinkerUtil {
             process?.destroy()
         }
 
-        if (!ContentScraperUtil.fileHasContent(dest)) {
+        if (!fileHasContent(dest)) {
             throw IOException("convertJpegToPng: source existed, but output does not " + dest.path)
         }
 
@@ -455,7 +455,7 @@ object ShrinkerUtil {
 
     @Throws(IOException::class)
     fun convertVideoToWebM(src: File, dest: File) {
-        if (!ContentScraperUtil.fileHasContent(src)) {
+        if (!fileHasContent(src)) {
             throw FileNotFoundException("convertVideoToWebm: Source file: " + src.absolutePath + " does not exist")
         }
 
@@ -486,7 +486,7 @@ object ShrinkerUtil {
         } finally {
             process?.destroy()
         }
-        if (!ContentScraperUtil.fileHasContent(dest)) {
+        if (!fileHasContent(dest)) {
             throw IOException("convertVideoToWebm: source existed, but output does not " + dest.path)
         }
 
@@ -494,7 +494,7 @@ object ShrinkerUtil {
 
     @Throws(IOException::class)
     fun convertAudioToOpos(src: File, dest: File) {
-        if (!ContentScraperUtil.fileHasContent(src)) {
+        if (!fileHasContent(src)) {
             throw FileNotFoundException("convertAudioToOpos: Source file: " + src.absolutePath + " does not exist")
         }
 
@@ -523,7 +523,7 @@ object ShrinkerUtil {
         } finally {
             process?.destroy()
         }
-        if (!ContentScraperUtil.fileHasContent(dest)) {
+        if (!fileHasContent(dest)) {
             throw IOException("convertAudioToOpos: source existed, but output does not " + dest.path)
         }
 
@@ -533,7 +533,7 @@ object ShrinkerUtil {
     @Throws(IOException::class)
     fun convertKhanVideoToWebMAndCodec2(src: File, dest: File) {
 
-        if (!ContentScraperUtil.fileHasContent(src)) {
+        if (!fileHasContent(src)) {
             throw FileNotFoundException("convertKhanToWebmAndCodec2: Source file: " + src.absolutePath + " does not exist")
         }
 
@@ -580,11 +580,11 @@ object ShrinkerUtil {
             ContentScraperUtil.deleteFile(rawFile)
         }
 
-        if (!ContentScraperUtil.fileHasContent(dest)) {
+        if (!fileHasContent(dest)) {
             throw IOException("convertVideoToWebMAndCodec: source existed, but webm output does not " + dest.path)
         }
 
-        if (!ContentScraperUtil.fileHasContent(audioFile)) {
+        if (!fileHasContent(audioFile)) {
             throw IOException("convertVideoToWebMAndCodec: source existed, but audio output does not " + dest.path)
         }
 
