@@ -118,7 +118,6 @@ kotlin {
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
                 compileOnly project(":lib-room-annotations")
-                compileOnly project(":lib-fetch-mpp")
             }
         }
 
@@ -171,8 +170,6 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-                implementation "com.tonyodev.xfetch2:fetch2:$version_android_fetch"
-                implementation "com.tonyodev.xfetch2okhttp:fetch2okhttp:$version_android_fetch"
 
 
                 //Begin SharedSE Android and JVM dependencies
@@ -198,7 +195,6 @@ kotlin {
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
 
-                implementation project(":lib-fetch-mpp")
 
                 //Begin Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

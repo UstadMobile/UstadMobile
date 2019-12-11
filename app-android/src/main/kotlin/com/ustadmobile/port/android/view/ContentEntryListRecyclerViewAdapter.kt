@@ -289,18 +289,22 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 if (if (oldItem.thumbnailUrl != null) oldItem.thumbnailUrl != newItem.thumbnailUrl else newItem.thumbnailUrl == null) {
                     return false
                 }
-                if (oldItem.contentEntryStatus != null && newItem.contentEntryStatus != null) {
 
-                    if (oldItem.contentEntryStatus!!.bytesDownloadSoFar != newItem.contentEntryStatus!!.bytesDownloadSoFar) {
+                val oldContentEntryStatus = oldItem.contentEntryStatus
+                val newItemContentEntryStatus = newItem.contentEntryStatus
+                if (oldContentEntryStatus != null && newItemContentEntryStatus != null) {
+                    if (oldContentEntryStatus.bytesDownloadSoFar != newItemContentEntryStatus.bytesDownloadSoFar) {
                         return false
                     }
-
-                    return if (oldItem.contentEntryStatus!!.downloadStatus != newItem.contentEntryStatus!!.downloadStatus) {
+                    return if (oldContentEntryStatus.downloadStatus != newItemContentEntryStatus.downloadStatus) {
                         false
-                    } else oldItem.contentEntryStatus!!.totalSize == newItem.contentEntryStatus!!.totalSize
+                    } else {
+                        oldContentEntryStatus.totalSize == newItemContentEntryStatus.totalSize
+                    }
 
-                } else
+                } else {
                     return newItem.contentEntryStatus == null && newItem.contentEntryStatus == null || newItem.contentEntryStatus == oldItem.contentEntryStatus
+                }
             }
         }
     }

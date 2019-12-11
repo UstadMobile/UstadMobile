@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.Antilog
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
@@ -16,6 +15,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
 import com.ustadmobile.sharedse.network.fetch.FetchMpp
 import com.ustadmobile.sharedse.network.fetch.FetchMppJvmImpl
 import com.ustadmobile.sharedse.util.ReverseProxyDispatcher
@@ -192,6 +192,7 @@ class DownloadJobItemRunnerTest {
         mockedEntryStatusTask = mock<BleEntryStatusTask> {}
         mockedDownloadJobItemManagerMap.clear()
         mockedDownloadJobItemManagerMap[downloadJob.djUid] = downloadJobItemManager
+        val containerDownloaderImpl = ContainerFetcherBuilder().build()
         mockedNetworkManager = mock<NetworkManagerBleCommon> {
             on { sendMessage(any(), any(), any(), any()) } doAnswer {invocation ->
                 val bleResponseListener = invocation.arguments[3] as BleMessageResponseListener
@@ -243,6 +244,8 @@ class DownloadJobItemRunnerTest {
             }
 
             on { httpFetcher }.thenReturn(httpFetcherImpl)
+
+            on { containerFetcher }.thenReturn(containerDownloaderImpl)
 
             onBlocking { openDownloadJobItemManager(any()) }.thenAnswer {
                 mockedDownloadJobItemManagerMap.get(it.arguments[0] as Int)
