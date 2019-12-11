@@ -3,15 +3,16 @@ package com.ustadmobile.core.controller
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.dao.InventoryDao
+import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.InventoryListView
-import com.ustadmobile.lib.db.entities.Inventory
+import com.ustadmobile.lib.db.entities.InventoryItem
+import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
 
 /**
- *  Presenter for MyWomenEntrepreneurs view
+ *  Presenter for InventoryListPresenter view
  **/
 class InventoryListPresenter(context: Any,
                              arguments: Map<String, String>?,
@@ -26,9 +27,9 @@ class InventoryListPresenter(context: Any,
 
     private var currentSortOrder = 0
 
-    private lateinit var rvDao: InventoryDao
+    private lateinit var rvDao: InventoryItemDao
 
-    private lateinit var factory: DataSource.Factory<Int, Inventory>
+    private lateinit var factory: DataSource.Factory<Int, SaleProductWithInventoryCount>
 
     var searchQuery: String = "%%"
 
@@ -38,7 +39,7 @@ class InventoryListPresenter(context: Any,
 
     init {
         //Initialise Daos, etc here.
-        rvDao = repository.rvDao
+        rvDao = repository.inventoryItemDao
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -62,9 +63,9 @@ class InventoryListPresenter(context: Any,
     }
 
     private fun getAndSetProvider(sortCode: Int) {
-        //TODO:
-        //factory = rvDao.filter(sortCode)
-        //view.setWEListFactory(factory)
+
+        factory = rvDao.findAllInventoryByProduct()
+        view.setListProvider(factory)
     }
 
     /**

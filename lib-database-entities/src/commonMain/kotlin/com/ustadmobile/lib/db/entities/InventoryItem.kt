@@ -12,25 +12,32 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = 84)
 @Entity
 @Serializable
-open class Inventory() {
+open class InventoryItem() {
 
     @PrimaryKey(autoGenerate = true)
-    var inventoryUid: Long = 0
+    var inventoryItemUid: Long = 0
 
     //The SaleProduct this inventory represents
-    var inventorySaleProductUid = 0
+    var inventoryItemSaleProductUid = 0
 
-    //Inventory items in stock
-    var inventoryStock : Int = 0
+    //The LE adding this
+    var inventoryItemLeUid : Long = 0
+
+    //The WE producer making this
+    var inventoryItemWeUid : Long = 0
+
+    var inventoryItemDateAdded: Long = 0
+
+    var inventoryItemActive: Boolean = true
 
     @MasterChangeSeqNum
-    var inventoryMCSN: Long = 0
+    var inventoryItemMCSN: Long = 0
 
     @LocalChangeSeqNum
-    var inventoryLCSN: Long = 0
+    var inventoryItemLCSN: Long = 0
 
     @LastChangedBy
-    var inventoryLCB: Int = 0
+    var inventoryItemLCB: Int = 0
 
     init {
     }

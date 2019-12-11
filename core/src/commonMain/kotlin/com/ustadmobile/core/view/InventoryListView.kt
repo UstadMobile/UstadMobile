@@ -1,8 +1,7 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.lib.db.entities.SaleProduct
+import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
 
 
 /**
@@ -23,8 +22,7 @@ interface InventoryListView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: DataSource.Factory<Int, SaleProduct>,
-                        paymentsDueTab: Boolean, preOrderTab: Boolean)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleProductWithInventoryCount>)
 
 
     fun updateSortSpinner(presets: Array<String?>)

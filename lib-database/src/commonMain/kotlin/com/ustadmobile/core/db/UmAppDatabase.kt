@@ -7,14 +7,6 @@ import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
-import com.ustadmobile.core.db.dao.SaleItemReminderDao
-import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
-import com.ustadmobile.core.db.dao.SaleVoiceNoteDao
-import com.ustadmobile.core.db.dao.SalePaymentDao
-import com.ustadmobile.core.db.dao.SaleProductPictureDao
-import com.ustadmobile.core.db.dao.SaleProductDao
-import com.ustadmobile.core.db.dao.SaleItemDao
-import com.ustadmobile.core.db.dao.SaleDao
 
 @Database(entities = [
     NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
@@ -46,7 +38,8 @@ import com.ustadmobile.core.db.dao.SaleDao
     SaleProductPicture::class, SaleProduct::class,
     SaleVoiceNote::class, SaleProductParentJoin::class,
     SaleItemReminder::class,
-    DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class
+    DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class,
+    InventoryItem::class, InventoryTransaction::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -220,6 +213,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val dashboardTagDao:DashboardTagDao
 
     abstract val dashboardEntryTagDao:DashboardEntryTagDao
+
+    abstract val inventoryItemDao : InventoryItemDao
+
+    abstract val inventoryTransactionDao : InventoryTransactionDao
     //End of Goldozi
 
     abstract val auditLogDao : AuditLogDao
