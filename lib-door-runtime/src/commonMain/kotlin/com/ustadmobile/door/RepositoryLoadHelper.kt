@@ -201,6 +201,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         repository.activeMirrors().maxBy { it.priority }
                     }
 
+                    if(!isConnected && mirrorToUse == null) {
+                        //it's hopeless - there is no mirror and we have no connection - give up
+                        throw IOException("$PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE $logPrefix: " +
+                                "Repository status indicates no connectivity and there are no active " +
+                                "mirrors")
+                    }
+
                     val newStatus = if(mirrorToUse != null) {
                         STATUS_LOADING_MIRROR
                     }else {
@@ -210,11 +217,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     if(newStatus != status) {
                         status = newStatus
                         fireStatusChanged(status, null)
-                    }
-
-                    if(!isConnected && mirrorToUse == null) {
-                        //it's hopeless - there is no mirror and we have no connection - give up
-                        throw IOException("LoadHelper $logPrefix: Repository status indicates no connectivity and there are no active mirrors")
                     }
 
                     endpointToUse = if(mirrorToUse == null) {
@@ -271,6 +273,10 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     //something went wrong with the load
                     Napier.e("$logPrefix Exception attempting to load from $endpointToUse",
                             e)
+                    if(e.message?.startsWith(PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE) ?: false) {
+                        Napier.d({"No connection and no mirrors available - giving up"})
+                        break
+                    }
                 }
 
                 if(mirrorToUse == null) {
@@ -285,13 +291,16 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 return loadedVal.getCompleted()
             }else {
                 val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
-                status = if(isConnected || mirrorToUse != null) {
+                val newStatus = if(isConnected || mirrorToUse != null) {
                     STATUS_FAILED_CONNECTION_ERR
                 }else {
                     STATUS_FAILED_NOCONNECTIVITYORPEERS
                 }
 
-                fireStatusChanged(status, null)
+                if(newStatus != status) {
+                    status = newStatus
+                    fireStatusChanged(status, null)
+                }
 
 
                 throw IOException("$logPrefix ==ERROR== NOT completed")
@@ -350,6 +359,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     companion object {
 
+        private const val PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE = "LoadHelper-NOCONNECTION"
+
         val ID_ATOMICINT = atomic(0)
 
         val STATUS_LOADING_CLOUD = 1
@@ -360,9 +371,9 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
         val STATUS_LOADED_NODATA = 12
 
-        val STATUS_FAILED_NOCONNECTIVITYORPEERS = 12
+        val STATUS_FAILED_NOCONNECTIVITYORPEERS = 15
 
-        val STATUS_FAILED_CONNECTION_ERR = 13
+        val STATUS_FAILED_CONNECTION_ERR = 16
 
     }
 

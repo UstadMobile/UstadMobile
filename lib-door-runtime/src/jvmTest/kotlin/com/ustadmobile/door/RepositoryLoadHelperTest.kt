@@ -105,8 +105,10 @@ class RepositoryLoadHelperTest  {
             completableDeferred.cancel()
 
             argumentCaptor<Int>().apply {
-                verify(loadCallback, times(3)).onLoadStatusChanged(capture(), anyOrNull())
-                Assert.assertEquals("Last status callback was failed with no connectivity or peers",
+                verify(loadCallback, times(2)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First status value is 0 (didnt start)", 0,
+                        firstValue)
+                Assert.assertEquals("Final value is STATUS_FAILED_NOCONNECTIVITYORPEERS",
                         STATUS_FAILED_NOCONNECTIVITYORPEERS, lastValue)
             }
 
@@ -165,11 +167,16 @@ class RepositoryLoadHelperTest  {
             verify(repoLoadCallback, timeout(5000))
                     .onLoadStatusChanged(eq(STATUS_LOADED_WITHDATA), anyOrNull())
             argumentCaptor<Int>() {
-                verify(repoLoadCallback, atLeast(2)).onLoadStatusChanged(capture(), anyOrNull())
-                Assert.assertTrue("Status failed to load due to no connectivity was shown",
-                        allValues.any { it == STATUS_FAILED_NOCONNECTIVITYORPEERS})
+                verify(repoLoadCallback, times(4)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First status value is 0 (didnt start)", 0,
+                        firstValue)
+                Assert.assertEquals("Third value is STATUS_FAILED_NOCONNECTIVITYORPEERS after first fail",
+                        STATUS_FAILED_NOCONNECTIVITYORPEERS, allValues[1])
+                Assert.assertEquals("Fourth status is LOADING_FROM_CLOUD again when connectivity is restored",
+                        STATUS_LOADING_CLOUD, allValues[2])
                 Assert.assertEquals("Last value was loaded successfully", STATUS_LOADED_WITHDATA,
                         lastValue)
+
             }
         }
     }
@@ -232,11 +239,15 @@ class RepositoryLoadHelperTest  {
             verify(repoLoadCallback, timeout(5000))
                     .onLoadStatusChanged(eq(STATUS_LOADED_WITHDATA), anyOrNull())
             argumentCaptor<Int>() {
-                verify(repoLoadCallback, atLeastOnce()).onLoadStatusChanged(capture(), anyOrNull())
-                Assert.assertEquals("Last status value is loaded with data", STATUS_LOADED_WITHDATA,
+                verify(repoLoadCallback, times(4)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First status value is 0 (didnt start)", 0,
+                        firstValue)
+                Assert.assertEquals("Third value is STATUS_FAILED_NOCONNECTIVITYORPEERS after first fail",
+                        STATUS_FAILED_NOCONNECTIVITYORPEERS, allValues[1])
+                Assert.assertEquals("Fourth status is LOADING_FROM_CLOUD again when connectivity is restored",
+                        STATUS_LOADING_CLOUD, allValues[2])
+                Assert.assertEquals("Last value was loaded successfully", STATUS_LOADED_WITHDATA,
                         lastValue)
-                Assert.assertTrue("Status was set to FAILED due to no connection",
-                        allValues.any { it == STATUS_FAILED_NOCONNECTIVITYORPEERS})
             }
         }
     }
@@ -276,7 +287,8 @@ class RepositoryLoadHelperTest  {
             Assert.assertEquals("When adding an observer there are no further calls to the load" +
                     "function", callCountBeforeObserving, loadHelperCallCount.get())
             argumentCaptor<Int>().apply {
-                verify(loadCallback, atLeastOnce())
+                verify(loadCallback, times(2)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First value is 0 (didnt start)", 0, firstValue)
                 Assert.assertEquals("Last value set is failed to load due to no connection",
                         STATUS_FAILED_NOCONNECTIVITYORPEERS, lastValue)
             }
@@ -323,9 +335,10 @@ class RepositoryLoadHelperTest  {
             Assert.assertEquals("When there is no wrapped live data, the request is not retried when" +
                     "connectivity is restored", callCountBeforeConnectivityRestored, loadHelperCallCount.get())
             argumentCaptor<Int>().apply {
-                verify(loadCallback, atLeastOnce()).onLoadStatusChanged(capture(), anyOrNull())
-                Assert.assertEquals("Last status is failed due to no connection", STATUS_FAILED_NOCONNECTIVITYORPEERS,
-                        lastValue)
+                verify(loadCallback, times(2)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First value is 0 (didnt start)", 0, firstValue)
+                Assert.assertEquals("Last value set is failed to load due to no connection",
+                        STATUS_FAILED_NOCONNECTIVITYORPEERS, lastValue)
             }
         }
     }
@@ -359,13 +372,13 @@ class RepositoryLoadHelperTest  {
 
             verify(loadCallback, timeout(5000L)).onLoadStatusChanged(STATUS_LOADED_WITHDATA, null)
             argumentCaptor<Int>().apply {
-                verify(loadCallback, atLeastOnce()).onLoadStatusChanged(capture(), anyOrNull())
-                Assert.assertEquals("Last value set was loaded successfully with data",
+                verify(loadCallback, times(3)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First status value is 0 (didnt start)", 0,
+                        firstValue)
+                Assert.assertEquals("Second status is LOADING_FROM_CLOUD",
+                        STATUS_LOADING_CLOUD, allValues[1])
+                Assert.assertEquals("Third final value is LOADED_WITH_DATA",
                         STATUS_LOADED_WITHDATA, lastValue)
-                Assert.assertTrue("Status was set to loading from cloud",
-                        allValues.any { it == STATUS_LOADING_CLOUD})
-                Assert.assertFalse("Status was not set to loading from local mirror",
-                        allValues.any { it == STATUS_LOADING_MIRROR })
             }
         }
     }
@@ -397,13 +410,13 @@ class RepositoryLoadHelperTest  {
                     "repoloadhelper uses mirror endpoint", mockMirrorEndpoint, endpointUsedRef)
             verify(loadCallback, timeout(5000)).onLoadStatusChanged(STATUS_LOADED_WITHDATA, null)
             argumentCaptor<Int>().apply {
-                verify(loadCallback, atLeastOnce()).onLoadStatusChanged(capture(), anyOrNull())
-                Assert.assertEquals("Last value set was loaded successfully with data",
+                verify(loadCallback, times(3)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First status value is 0 (didnt start)", 0,
+                        firstValue)
+                Assert.assertEquals("Second status is LOADING_FROM_CLOUD",
+                        STATUS_LOADING_MIRROR, allValues[1])
+                Assert.assertEquals("Third final value is LOADED_WITH_DATA",
                         STATUS_LOADED_WITHDATA, lastValue)
-                Assert.assertTrue("Status was set to loading from mirror",
-                        allValues.any { it == STATUS_LOADING_MIRROR})
-                Assert.assertFalse("Status was not set to loading from cloud",
-                        allValues.any { it == STATUS_LOADING_CLOUD })
             }
         }
     }
@@ -465,7 +478,12 @@ class RepositoryLoadHelperTest  {
                     endpointCompleteOnFirstRequest)
             verify(loadCallback, timeout(5000)).onLoadStatusChanged(STATUS_LOADED_WITHDATA, null)
             argumentCaptor<Int>().apply {
-                verify(loadCallback, atLeastOnce()).onLoadStatusChanged(capture(), anyOrNull())
+                verify(loadCallback, times(4)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First value is 0 (not started)", 0, firstValue)
+                Assert.assertEquals("Second value is STATUS_FAILED_NOCONNECTIVITYORPEERS",
+                        STATUS_FAILED_NOCONNECTIVITYORPEERS, secondValue)
+                Assert.assertEquals("Third value is LOADING_FROM_MIRROR", STATUS_LOADING_MIRROR,
+                        thirdValue)
                 Assert.assertEquals("Last status value set is LOADED_WITH_DATA", STATUS_LOADED_WITHDATA,
                         lastValue)
             }
@@ -498,8 +516,9 @@ class RepositoryLoadHelperTest  {
             }else {
                 throw IOException("Mock offline and there is no mirror")
             }
-
         }
+        val loadCallback = mock<RepositoryLoadHelper.RepoLoadCallback>()
+        repoLoadHelper.addRepoLoadCallback(loadCallback)
 
         runBlocking {
             try {
@@ -525,6 +544,12 @@ class RepositoryLoadHelperTest  {
                     mirrorUsed)
             Assert.assertEquals("DoRequest loader function has not been called again",
                     loadFnCountBeforeMirror, loadFnCount.get())
+            argumentCaptor<Int>().apply {
+                verify(loadCallback, timeout(5000).times(2)).onLoadStatusChanged(capture(), anyOrNull())
+                Assert.assertEquals("First callback value is 0 (not started)", 0, firstValue)
+                Assert.assertEquals("Last callback value is STATUS_FAILED_NOCONNECTIVITYORPEERS",
+                        STATUS_FAILED_NOCONNECTIVITYORPEERS, lastValue)
+            }
         }
     }
 
