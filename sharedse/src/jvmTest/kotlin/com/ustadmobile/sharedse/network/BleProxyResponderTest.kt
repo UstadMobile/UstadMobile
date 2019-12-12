@@ -1,8 +1,9 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.BleHttpRequest
 import com.ustadmobile.port.sharedse.impl.http.BleHttpResponse
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
@@ -40,6 +41,7 @@ class BleProxyResponderTest {
 
     @Before
     fun setup() {
+        Napier.base(DebugAntilog())
         httpClient = HttpClient() {
             install(JsonFeature)
         }
@@ -49,15 +51,14 @@ class BleProxyResponderTest {
         println(headerField)
 
         networkManager = mock<NetworkManagerBle> {
-            on { sendMessage(any(), any(), any(), any()) }.thenAnswer { invocation ->
-                val destNode = invocation.arguments[2] as NetworkNode
-                val nearbyDevice = nearbyDevices.firstOrNull { it.bluetoothMacAddr == destNode.bluetoothMacAddress!! }
+            onBlocking { sendBleMessage(any(), any(), any())}.thenAnswer { invocation ->
+                val destNodeAddr = invocation.arguments[2] as String
+                val nearbyDevice = nearbyDevices.firstOrNull { it.bluetoothMacAddr == destNodeAddr }
                 if(nearbyDevice == null || !nearbyDevice.bleClientResponding) {
                     println ("Nearby device = ${nearbyDevice} : does not exist or is set to not respond")
                     return@thenAnswer Unit //there is no such device around for this scenario
                 }
 
-                val responseListener  = invocation.arguments[3] as BleMessageResponseListener
                 val messageIn = invocation.arguments[1] as BleMessage
 
                 if(!nearbyDevice.bleMessageReturnsError) {
@@ -67,7 +68,7 @@ class BleProxyResponderTest {
                     val payload = Json.stringify(BleHttpResponse.serializer(), bleResponse).toUtf8Bytes()
 
                     val responseMessage = BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
-                            BleMessage.getNextMessageIdForReceiver(destNode.bluetoothMacAddress!!),
+                            BleMessage.getNextMessageIdForReceiver(destNodeAddr),
                             payload)
                     val responsePackets = responseMessage.getPackets(512)
                     val receivedMessage = BleMessage()
@@ -75,15 +76,10 @@ class BleProxyResponderTest {
                         receivedMessage.onPackageReceived(it)
                     }
 
-
-                    responseListener.onResponseReceived(destNode.bluetoothMacAddress!!,
-                            receivedMessage, null)
+                    receivedMessage
                 }else {
-                    responseListener.onResponseReceived(destNode.bluetoothMacAddress!!,
-                            null, IOException("Mock network manager sendMessage exception"))
+                    null
                 }
-
-                Unit
             }
 
             on { context}.thenReturn(Any())
