@@ -16,8 +16,6 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
-import com.ustadmobile.sharedse.network.fetch.FetchMpp
-import com.ustadmobile.sharedse.network.fetch.FetchMppJvmImpl
 import com.ustadmobile.sharedse.util.ReverseProxyDispatcher
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -25,7 +23,6 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
@@ -47,7 +44,7 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var peerServer: EmbeddedHTTPD
 
-    private lateinit var mockedNetworkManager: NetworkManagerBleCommon
+    private lateinit var mockedNetworkManager: NetworkManagerBle
 
     private val mockedDownloadJobItemManagerMap = mutableMapOf<Int, DownloadJobItemManager>()
 
@@ -113,7 +110,6 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
-    private lateinit var httpFetcherImpl: FetchMpp
 
 
     @Before
@@ -188,12 +184,10 @@ class DownloadJobItemRunnerTest {
         val peerDb = UmAppDatabase.getInstance(context, "peerdb")
         peerDb.clearAllTables()
         peerServer = EmbeddedHTTPD(0, context, peerDb)
-        httpFetcherImpl = FetchMppJvmImpl(OkHttpClient())
         mockedEntryStatusTask = mock<BleEntryStatusTask> {}
         mockedDownloadJobItemManagerMap.clear()
         mockedDownloadJobItemManagerMap[downloadJob.djUid] = downloadJobItemManager
-        val containerDownloaderImpl = ContainerFetcherBuilder().build()
-        mockedNetworkManager = mock<NetworkManagerBleCommon> {
+        mockedNetworkManager = mock {
             on { sendMessage(any(), any(), any(), any()) } doAnswer {invocation ->
                 val bleResponseListener = invocation.arguments[3] as BleMessageResponseListener
                 val destinationNode = invocation.arguments[2] as NetworkNode
@@ -243,14 +237,12 @@ class DownloadJobItemRunnerTest {
                 Unit
             }
 
-            on { httpFetcher }.thenReturn(httpFetcherImpl)
-
-            on { containerFetcher }.thenReturn(containerDownloaderImpl)
-
             onBlocking { openDownloadJobItemManager(any()) }.thenAnswer {
                 mockedDownloadJobItemManagerMap.get(it.arguments[0] as Int)
             }
         }
+        val containerDownloaderImpl = ContainerFetcherBuilder(mockedNetworkManager).build()
+        whenever(mockedNetworkManager.containerFetcher).thenReturn(containerDownloaderImpl)
 
         mockedNetworkManagerBleWorking.set(true)
 
@@ -725,7 +717,7 @@ class DownloadJobItemRunnerTest {
 
             jobItemRunner1.download()
 
-            val jobItem1Status = clientDb.downloadJobDao.findByUid(downloadJobItem.djiUid)!!.djStatus
+            val jobItem1Status = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!.djiStatus
 
             val jobItemRunner2 = DownloadJobItemRunner(context, downloadJobItem2, mockedNetworkManager,
                     clientDb, cloudEndPoint, connectivityStatus,

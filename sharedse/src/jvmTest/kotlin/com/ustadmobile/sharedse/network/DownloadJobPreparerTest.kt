@@ -1,13 +1,14 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.umRestApplication
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -24,6 +25,7 @@ class DownloadJobPreparerTest {
 
     @Before
     fun setup(){
+        Napier.base(DebugAntilog())
         serverDb.clearAllTables()
         clientDb.clearAllTables()
 
@@ -90,6 +92,8 @@ class DownloadJobPreparerTest {
             clientDb = UmAppDatabase.getInstance(Any(), "clientdb")
             clientRepo = clientDb.asRepository(Any(),"http://localhost:8087", "",
                     defaultHttpClient(), null) as UmAppDatabase
+            (clientRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+
             server = embeddedServer(Netty, 8087) {
                 umRestApplication(devMode = false, db = serverDb)
             }
