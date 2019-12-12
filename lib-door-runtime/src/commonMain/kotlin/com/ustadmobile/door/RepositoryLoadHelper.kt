@@ -376,5 +376,4 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         const val STATUS_FAILED_CONNECTION_ERR = 16
 
     }
-
 }

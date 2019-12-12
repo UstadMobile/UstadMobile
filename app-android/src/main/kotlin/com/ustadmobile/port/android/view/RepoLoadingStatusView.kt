@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import FistItemLoadedListener
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
@@ -10,7 +9,6 @@ import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_CONNECTION_ERR
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_NOCONNECTIVITYORPEERS
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
-import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
 import kotlinx.android.synthetic.main.view_repo_loading_status.view.*
@@ -21,7 +19,7 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
                                      var imageResourceToShow: Int,
                                      var textIdToShow: Int)
 
-    val statusToStatusInfoMap = mapOf(
+    private val statusToStatusInfoMap = mapOf(
             STATUS_LOADING_CLOUD to RepoLoadingStatusInfo(true,
                     R.drawable.ic_cloud_download_black_24dp, R.string.repo_loading_status_loading_cloud ),
             STATUS_LOADING_MIRROR to RepoLoadingStatusInfo(true,
@@ -29,7 +27,7 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
             STATUS_LOADED_NODATA to RepoLoadingStatusInfo(false,
                     R.drawable.ic_file_download_black_24dp, R.string.repo_loading_status_loaded_empty),
             STATUS_FAILED_CONNECTION_ERR to RepoLoadingStatusInfo(false,
-                    R.drawable.ic_signal_cellular_connected_no_internet_4_bar_black_24dp, R.string.repo_loading_status_failed_connection_error),
+                    R.drawable.ic_error_black_24dp, R.string.repo_loading_status_failed_connection_error),
             STATUS_FAILED_NOCONNECTIVITYORPEERS to RepoLoadingStatusInfo(false,
                     R.drawable.ic_signal_cellular_connected_no_internet_4_bar_black_24dp, R.string.repo_loading_status_failed_noconnection))
 
