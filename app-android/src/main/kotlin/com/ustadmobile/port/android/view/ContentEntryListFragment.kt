@@ -3,13 +3,9 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -37,7 +33,10 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.activeRange
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -53,8 +52,7 @@ import java.util.concurrent.atomic.AtomicReference
  * fragment (e.g. upon screen orientation changes).
  */
 class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
-        ContentEntryListRecyclerViewAdapter.AdapterViewListener,
-        ContentEntryListRecyclerViewAdapter.EmptyStateListener {
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener{
 
 
     override val viewContext: Any
@@ -76,7 +74,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private lateinit var rootContainer: View
 
-    private var emptyViewHolder: RelativeLayout? = null
+    private lateinit var repoLoadingStatusView: RepoLoadingStatusView
 
     internal class LocalAvailabilityPagedListCallback(private val localAvailabilityManager: LocalAvailabilityManager,
                                                       var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
@@ -184,14 +182,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         // Set the adapter
         val context = rootContainer.context
         recyclerView = rootContainer.findViewById(R.id.content_entry_list)
+        repoLoadingStatusView = rootContainer.findViewById(R.id.statusView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-
-        emptyViewHolder = rootContainer.findViewById(R.id.emptyView)
-
-        val emptyViewImage :ImageView = rootContainer.findViewById(R.id.emptyViewImage)
-        val emptyViewText: TextView = rootContainer.findViewById(R.id.emptyViewText)
-
-
 
 
         val isLibrarySection = bundleToMap(arguments).containsKey(ARG_LIBRARIES_CONTENT)
@@ -211,10 +203,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             }
         }
 
-        emptyViewImage.setImageResource(resource)
 
-        val labelText = UstadMobileSystemImpl.instance.getString(emptyMessage,context)
-        emptyViewText.text = labelText
+        repoLoadingStatusView.emptyStatusImage = resource
+        repoLoadingStatusView.emptyStatusText = emptyMessage
 
         val dividerItemDecoration = DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL)
@@ -229,9 +220,11 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             //create entry adapter here to make sure bleManager is not null
             val thisFrag = this@ContentEntryListFragment
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, thisFrag,
-                    managerAndroidBle, thisFrag).also {
+                    managerAndroidBle).also {
                 it.addListeners()
             }
+
+            recyclerAdapter?.fistItemLoadedListener = repoLoadingStatusView
 
             localAvailabilityPagedListCallback = LocalAvailabilityPagedListCallback(
                     managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
@@ -288,7 +281,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
         val data = entryProvider.asRepositoryLiveData(
-                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao)
+                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
+                repoLoadingStatusView)
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
             recyclerAdapter!!.submitList(it)
@@ -329,9 +323,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         }
     }
 
-    override fun onEntriesLoaded() {
-        emptyViewHolder!!.visibility = View.GONE
-    }
 
     override fun onDestroy() {
         super.onDestroy()

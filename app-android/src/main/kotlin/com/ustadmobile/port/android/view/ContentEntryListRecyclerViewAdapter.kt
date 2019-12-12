@@ -7,7 +7,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -26,12 +25,9 @@ import java.util.*
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
                                                                private val listener: AdapterViewListener,
-                                                               private val managerAndroidBle: NetworkManagerBle,
-                                                               var emptyStateListener: EmptyStateListener)
-    : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
+                                                               private val managerAndroidBle: NetworkManagerBle)
+    : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
          OnDownloadJobItemChangeListener {
-
-    private val containerUidsToMonitor = HashSet<Long>()
 
     private val boundViewHolders: MutableSet<ViewHolder> = HashSet()
 
@@ -71,11 +67,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         fun downloadStatusClicked(entry: ContentEntry?)
     }
 
-    interface EmptyStateListener {
-
-        fun onEntriesLoaded()
-    }
-
     override fun onViewRecycled(holder: ViewHolder) {
         synchronized(boundViewHolders) {
             boundViewHolders.remove(holder)
@@ -94,9 +85,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
         val entry = getItem(position)
-
-        emptyStateListener.onEntriesLoaded()
 
         synchronized(boundViewHolders) {
             boundViewHolders.add(holder)

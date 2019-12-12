@@ -12,6 +12,9 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
 import kotlinx.android.synthetic.main.view_repo_loading_status.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCallback, FistItemLoadedListener {
 
@@ -23,7 +26,7 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
             STATUS_LOADING_CLOUD to RepoLoadingStatusInfo(true,
                     R.drawable.ic_cloud_download_black_24dp, R.string.repo_loading_status_loading_cloud ),
             STATUS_LOADING_MIRROR to RepoLoadingStatusInfo(true,
-                    R.drawable.ic_peer_to_peer, R.string.repo_loading_status_loading_mirror),
+                    R.drawable.ic_loading_from_nearby_device, R.string.repo_loading_status_loading_mirror),
             STATUS_LOADED_NODATA to RepoLoadingStatusInfo(false,
                     R.drawable.ic_file_download_black_24dp, R.string.repo_loading_status_loaded_empty),
             STATUS_FAILED_CONNECTION_ERR to RepoLoadingStatusInfo(false,
@@ -62,15 +65,21 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
     override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
         val loadingStatusInfo = statusToStatusInfoMap[status]
         if(loadingStatusInfo != null){
-            statusViewProgress.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
-            statusViewImageInner.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
-            statusViewImageInner.tag = loadingStatusInfo.imageResourceToShow
-            statusViewImage.visibility = if(!loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
-            statusViewText.text = context.getString(loadingStatusInfo.textIdToShow)
-            if(loadingStatusInfo.progressVisible){
-                statusViewImageInner.setImageResource(loadingStatusInfo.imageResourceToShow)
-            }else{
-                statusViewImage.setImageResource(loadingStatusInfo.imageResourceToShow)
+            GlobalScope.launch(Dispatchers.Main) {
+                statusViewProgress.
+                statusViewProgress.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
+                statusViewTextInner.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
+                statusViewText.visibility = if(!loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
+                statusViewImageInner.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
+                statusViewImageInner.tag = loadingStatusInfo.imageResourceToShow
+                statusViewImage.visibility = if(!loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
+                if(loadingStatusInfo.progressVisible){
+                    statusViewTextInner.text = context.getString(loadingStatusInfo.textIdToShow)
+                    statusViewImageInner.setImageResource(loadingStatusInfo.imageResourceToShow)
+                }else{
+                    statusViewText.text = context.getString(loadingStatusInfo.textIdToShow)
+                    statusViewImage.setImageResource(loadingStatusInfo.imageResourceToShow)
+                }
             }
         }
     }

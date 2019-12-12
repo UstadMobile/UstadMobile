@@ -11,6 +11,7 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.android.synthetic.main.activity_entry_detail.view.*
+import kotlinx.android.synthetic.main.view_repo_loading_status.view.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,7 +36,7 @@ public class RepoLoadingStatusViewRoboElectricTest {
         repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADING_CLOUD,"")
 
         val iconView = repoLoadingStatusView.findViewById<ImageView>(R.id.statusViewImageInner)
-        val messageView = repoLoadingStatusView.findViewById<TextView>(R.id.statusViewText)
+        val messageView = repoLoadingStatusView.findViewById<TextView>(R.id.statusViewTextInner)
         val progressView = repoLoadingStatusView.findViewById<ProgressBar>(R.id.statusViewProgress)
 
         assertEquals("Correct loading from cloud Image resource was set successfully",

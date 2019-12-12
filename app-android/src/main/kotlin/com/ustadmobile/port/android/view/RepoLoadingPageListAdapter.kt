@@ -13,11 +13,7 @@ abstract class RepoLoadingPageListAdapter<T, VH : RecyclerView.ViewHolder>(itemC
 
     private var firstItemLoaded: Boolean = false
 
-    private var fistItemLoadedListener: FistItemLoadedListener? = null
-
-    fun setItemLoadListener(fistItemLoadedListener: FistItemLoadedListener){
-        this.fistItemLoadedListener = fistItemLoadedListener
-    }
+    var fistItemLoadedListener: FistItemLoadedListener? = null
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         if(!firstItemLoaded){
