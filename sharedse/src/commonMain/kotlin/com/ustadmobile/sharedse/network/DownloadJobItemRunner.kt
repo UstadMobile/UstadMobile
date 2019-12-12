@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
-import com.tonyodev.fetch2.Status
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
@@ -611,6 +610,5 @@ class DownloadJobItemRunner
 
         private const val CONNECTION_TIMEOUT = 60
 
-        private val ACTIVE_FETCH_STATUSES = listOf(Status.DOWNLOADING, Status.QUEUED, Status.ADDED)
     }
 }
