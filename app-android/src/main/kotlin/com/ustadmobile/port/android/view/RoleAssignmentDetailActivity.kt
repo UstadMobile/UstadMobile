@@ -202,7 +202,6 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
     override fun setGroupPresets(presets: Array<String>, position: Int) {
         val adapter = ArrayAdapter(applicationContext,
                 R.layout.item_simple_spinner, presets)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         groupSpinner!!.adapter = adapter
         groupSpinner!!.setSelection(position)
     }
@@ -210,7 +209,6 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
     override fun setRolePresets(presets: Array<String>, position: Int) {
         val adapter = ArrayAdapter(applicationContext,
                 R.layout.item_simple_spinner, presets)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         roleSpinner!!.adapter = adapter
         roleSpinner!!.setSelection(position)
     }
@@ -218,7 +216,6 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
     override fun setScopePresets(presets: Array<String?>, position: Int) {
         val adapter = ArrayAdapter(applicationContext,
                 R.layout.item_simple_spinner, presets)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         scopeSpinner!!.adapter = adapter
         scopeSpinner!!.setSelection(position)
     }
@@ -226,7 +223,6 @@ class RoleAssignmentDetailActivity : UstadBaseActivity(), RoleAssignmentDetailVi
     override fun setAssigneePresets(presets: Array<String>, position: Int) {
         val adapter = ArrayAdapter(applicationContext,
                 R.layout.item_simple_spinner, presets)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         assigneeSpinner!!.adapter = adapter
         assigneeSpinner!!.setSelection(position)
     }

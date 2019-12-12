@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
@@ -54,13 +55,11 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_LOCATION_LIST)) {
-            val locations = arguments!!.get(ARG_LOCATION_LIST) as LongArray
             //TODO: Get recursive all sub locations as well.
-            locationList = convertLongArray(locations)
+            locationList = ArgumentUtil.convertCSVStringToLongList(arguments!!.get(ARG_LOCATION_LIST)!!)
         }
         if (arguments!!.containsKey(ARG_CLAZZ_LIST)) {
-            val clazzes = arguments!!.get(ARG_CLAZZ_LIST) as LongArray
-            clazzesList = convertLongArray(clazzes)
+            clazzesList = ArgumentUtil.convertCSVStringToLongList(arguments!!.get(ARG_CLAZZ_LIST)!!)
         }
         if (arguments!!.containsKey(ARG_GENDER_DISAGGREGATE)) {
             isGenderDisaggregate = arguments!!.get(ARG_GENDER_DISAGGREGATE)!!.toBoolean()

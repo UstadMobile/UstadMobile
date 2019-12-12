@@ -101,7 +101,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             ENTITY_LEVEL_PERMISSION_CONDITION2)
     abstract fun findAllClazzesByPermission(accountPersonUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
 
-    @Query("$CLAZZ_SELECT FROM Clazz ")
+    @Query("$CLAZZ_SELECT FROM Clazz WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 ")
     abstract fun findAllClazzes(): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query("$CLAZZ_SELECT FROM Clazz WHERE clazzLocationUid in (:locations)")
@@ -344,14 +344,18 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
                 "ORDER BY ClazzLog.logDate DESC LIMIT 1) AS lastRecorded, " +
                 "(SELECT COUNT(*) " +
-                "   FROM ClazzMember WHERE " +
+                "   FROM ClazzMember " +
+                "   LEFT JOIN Person AS SP ON SP.personUid = ClazzMember.clazzMemberPersonUid " +
+                "   WHERE " +
                 "   ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
-                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1) AS numStudents, " +
+                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 " +
+                "   AND CAST(SP.active AS INTEGER) = 1 ) AS numStudents, " +
                 " (SELECT COUNT(*) FROM ClazzMember " +
+                "   LEFT JOIN Person AS CP ON CP.personUid = ClazzMember.clazzMemberPersonUid " +
                 "   WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
                 "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
-                "   AND ClazzMember.clazzMemberActive = 1 ) AS numTeachers, " +
+                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 AND CAST(CP.active AS INTEGER) = 1 ) AS numTeachers, " +
                 " (SELECT GROUP_CONCAT(Person.firstNames || ' ' ||  Person.lastName ) as teacherName " +
                 "   FROM Person where Person.personUid in (SELECT ClazzMember.clazzMemberPersonUid " +
                 "   FROM ClazzMember WHERE ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
@@ -365,7 +369,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
                 " WHERE (Person.admin OR :personUid in " +
                 " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
                 "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
-                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 )) "
+                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 ) AND CAST(Person.active AS INTEGER) = 1 ) "
 
 
 

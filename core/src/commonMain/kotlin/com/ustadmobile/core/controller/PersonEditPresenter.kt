@@ -225,9 +225,7 @@ class PersonEditPresenter
      */
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val personCustomFieldValueDao = repository.personCustomFieldValueDao
         val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        val personCustomFieldDao = repository.personCustomFieldDao
 
         customFieldDao = repository.customFieldDao
         customFieldValueDao = repository.customFieldValueDao
@@ -240,6 +238,14 @@ class PersonEditPresenter
         }
 
         getAllPersonCustomFields()
+
+        if(arguments.containsKey(ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE)){
+            val t = arguments.get(ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE).toString()
+            if(t != null && t.isNotEmpty()){
+                view.setEnrollToClass(true)
+            }
+        }
+
 
         val thisP = this
         //Get all the currently set headers and fields:
@@ -558,28 +564,30 @@ class PersonEditPresenter
                 var messageLabel = 0
                 var iconName: String? = null
                 var fieldValue: String? = null
-                if (valueMap!![field.fieldUid] != null) {
-                    if (valueMap[field.fieldUid]!!.labelMessageId != 0) {
-                        messageLabel = valueMap[field.fieldUid]!!.labelMessageId
-                    }
-                    if (valueMap[field.fieldUid]!!.fieldIcon != null) {
-                        iconName = valueMap[field.fieldUid]!!.fieldIcon
-                    }
-                    if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
-                        fieldValue = valueMap[field.fieldUid]!!
-                                .customFieldValue!!.fieldValue
-                    }
-                }
-                thisView.setField(
-                        field.fieldIndex,
-                        field.fieldUid,
-                        PersonDetailViewField(
-                                field.fieldType,
-                                messageLabel,
-                                iconName
-                        ), fieldValue
+                if (valueMap != null && valueMap.containsKey(field.fieldUid) ){
 
-                )
+                    if(valueMap!![field.fieldUid] != null) {
+                        if (valueMap[field.fieldUid]!!.labelMessageId != 0) {
+                            messageLabel = valueMap[field.fieldUid]!!.labelMessageId
+                        }
+                        if (valueMap[field.fieldUid]!!.fieldIcon != null) {
+                            iconName = valueMap[field.fieldUid]!!.fieldIcon
+                        }
+                        if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
+                            fieldValue = valueMap[field.fieldUid]!!
+                                    .customFieldValue!!.fieldValue
+                        }
+                    }
+                    thisView.setField(
+                            field.fieldIndex,
+                            field.fieldUid,
+                            PersonDetailViewField(
+                                    field.fieldType,
+                                    messageLabel,
+                                    iconName
+                            ), fieldValue
+                    )
+                }
             }
         }
     }
@@ -746,6 +754,7 @@ class PersonEditPresenter
         }
     }
 
+
     /**
      * Done click handler on the Edit / Enrollment page: Clicking done will persist and save it and
      * end the activity.
@@ -753,6 +762,7 @@ class PersonEditPresenter
      */
     fun handleClickDone() {
         mUpdatedPerson!!.active = true
+
         GlobalScope.launch {
             personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
 
@@ -831,7 +841,13 @@ class PersonEditPresenter
                     false
                 }
             }
+            view.runOnUiThread(Runnable {
+                view.setInProgress(false)
+            })
+
             return false
+
+
         }
         return true
     }

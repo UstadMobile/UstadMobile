@@ -561,4 +561,9 @@
 
     <string name="select_a_timezone">Select a timezone</string>
 
+    <string name="dismiss">Dismiss</string>
+    <string name="next_attendance_message">Your next schedule has not started yet.</string>
+    <string name="it_will_start_tomorrow">It will start tomorrow</string>
+    <string name="it_will_start_in">It will start in</string>
+
 </resources>

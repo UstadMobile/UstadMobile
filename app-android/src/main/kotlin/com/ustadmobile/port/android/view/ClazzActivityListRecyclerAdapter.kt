@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -109,6 +110,6 @@ class ClazzActivityListRecyclerAdapter internal constructor(
 
 
         holder.itemView.setOnClickListener { v ->
-            thePresenter.goToNewClazzActivityEditActivity(clazzActivity.clazzActivityUid) }
+            thePresenter.goToNewClazzActivityEditActivity(clazzActivity.clazzActivityUid, FLAG_ACTIVITY_NEW_TASK) }
     }
 }

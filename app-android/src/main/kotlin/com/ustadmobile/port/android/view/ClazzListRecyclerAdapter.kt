@@ -80,17 +80,18 @@ class ClazzListRecyclerAdapter internal constructor(
         (holder.itemView.findViewById<View>(R.id.item_clazzlist_attendance_percentage) as TextView).text = attendancePercentageText
         holder.itemView.setOnClickListener { view -> thePresenter.handleClickClazz(clazz) }
 
-        val recordAttendanceButton = holder.itemView.findViewById<Button>(R.id.item_clazzlist_attendance_record_attendance_button)
-        val recordAttendanceImageButton = holder.itemView.findViewById<ImageButton>(R.id.item_clazzlist_attendance_record_attendance_icon)
-        recordAttendanceButton.setOnClickListener { view -> thePresenter.handleClickClazzRecordAttendance(clazz) }
+//        val recordAttendanceButton = holder.itemView.findViewById<Button>(R.id.item_clazzlist_attendance_record_attendance_button)
+//        val recordAttendanceImageButton = holder.itemView.findViewById<ImageButton>(R.id.item_clazzlist_attendance_record_attendance_icon)
+//        recordAttendanceButton.setOnClickListener { view -> thePresenter.handleClickClazzRecordAttendance(clazz) }
 
-        if (recordAttendanceVisible) {
-            recordAttendanceImageButton.visibility = View.VISIBLE
-            recordAttendanceButton.visibility = View.VISIBLE
-        } else {
-            recordAttendanceImageButton.visibility = View.GONE
-            recordAttendanceButton.visibility = View.GONE
-        }
+        //Disabling as per internal issue # 7
+//        if (recordAttendanceVisible) {
+//            recordAttendanceImageButton.visibility = View.VISIBLE
+//            recordAttendanceButton.visibility = View.VISIBLE
+//        } else {
+//            recordAttendanceImageButton.visibility = View.GONE
+//            recordAttendanceButton.visibility = View.GONE
+//        }
 
         val trafficLight = holder.itemView.findViewById<ImageView>(R.id.item_clazzlist_attendance_trafficlight)
         if (attendancePercentage > 75L) {

@@ -44,11 +44,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.PersonDetailViewField
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_HEIGHT
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_QUALITY
+import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
@@ -87,7 +89,13 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     internal lateinit var personEditImage: ImageView
     internal lateinit var customFieldsLL: LinearLayout
 
+    internal lateinit var personEditImageButton: Button
+
     private var mProgressBar: ProgressBar? = null
+
+    private var enrollingToClass = false
+
+    var mOptionsMenu: Menu? = null
 
     override fun sendMessage(messageId: Int) {
         val impl = UstadMobileSystemImpl.instance
@@ -99,6 +107,10 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    override fun setEnrollToClass(enroll: Boolean) {
+        enrollingToClass = enroll
     }
 
     override fun setInProgress(inProgress: Boolean) {
@@ -136,7 +148,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         personEditImage = findViewById(R.id.activity_person_edit_student_image)
         personEditImage.setOnClickListener { v -> addImageFromCamera() }
 
-        val personEditImageButton = findViewById<Button>(R.id.activity_person_edit_student_image_button)
+        personEditImageButton = findViewById<Button>(R.id.activity_person_edit_student_image_button)
         personEditImageButton.setOnClickListener { v -> addImageFromCamera() }
 
 
@@ -174,11 +186,46 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     override fun disableFields(disable: Boolean){
 
+
+        val doneButton = mOptionsMenu!!.findItem(R.id.menu_done)
+
+        doneButton.isEnabled = !disable
+        if(disable) {
+            doneButton.icon.alpha = 130
+            personEditImageButton.alpha = .133F
+            personEditImage.alpha = .133F
+        } else{
+            doneButton.icon.alpha = 255
+            personEditImageButton.alpha = 1F
+            personEditImage.alpha = 1F
+        }
+
         for(child in mLinearLayout.children) {
-            if (child is TextInputLayout) {
-                (child as TextInputLayout).editText!!.isEnabled = !disable
+            if (child is TextView){
+                child.isEnabled = !disable
+            }
+            if(child is LinearLayout){
+                val childLL = child as LinearLayout
+                for(cc in childLL.children){
+                    if (cc is TextInputLayout) {
+                        cc.editText!!.isEnabled = !disable
+                    }
+
+                    if (cc is TextView){
+                        cc.isEnabled = !disable
+                    }
+
+                    if(cc is AppCompatImageView){
+                      if(disable){
+                          cc.alpha = .133F
+                      }else{
+                          cc.alpha = 1F
+                      }
+                    }
+                }
             }
         }
+
     }
 
     /**
@@ -270,7 +317,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     addPersonButton.setOnClickListener { v -> mPresenter.handleClickAddNewClazz() }
                     addPersonToClazzHL.addView(addPersonButton)
 
-                    mLinearLayout.addView(addPersonToClazzHL)
+                    if(!enrollingToClass) {
+                        mLinearLayout.addView(addPersonToClazzHL)
+                    }
 
                     //Add a recycler view of classes
                     mRecyclerView = RecyclerView(this)
@@ -326,7 +375,11 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                         v -> mPresenter.handleClickAddNewRoleAssignment() }
                     addPersonToClazzHL.addView(addPersonButton)
 
-                    mLinearLayout.addView(addPersonToClazzHL)
+
+                    if(!enrollingToClass) {
+                        mLinearLayout.addView(addPersonToClazzHL)
+                    }
+
 
                     //Add a recycler view of classes
                     mRecyclerView2 = RecyclerView(this)
@@ -440,9 +493,6 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 if(fieldType == FIELD_TYPE_USERNAME){
                     fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-//                    fieldEditText.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
-//                        source.toString().filterNot { it.isWhitespace() }
-//                    })
 
                     fieldEditText.filters = arrayOf(object : InputFilter {
                         override fun filter(source: CharSequence?, start: Int, end: Int,
@@ -512,6 +562,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     }
 
+
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
@@ -520,6 +571,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_done, menu)
+
+        mOptionsMenu = menu
+
         return true
     }
 
