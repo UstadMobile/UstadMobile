@@ -717,7 +717,7 @@ class DownloadJobItemRunnerTest {
 
             jobItemRunner1.download()
 
-            val jobItem1Status = clientDb.downloadJobDao.findByUid(downloadJobItem.djiUid)!!.djStatus
+            val jobItem1Status = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!.djiStatus
 
             val jobItemRunner2 = DownloadJobItemRunner(context, downloadJobItem2, mockedNetworkManager,
                     clientDb, cloudEndPoint, connectivityStatus,
