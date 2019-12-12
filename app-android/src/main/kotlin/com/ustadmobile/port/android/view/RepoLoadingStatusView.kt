@@ -20,6 +20,19 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
 
     private var message: String = ""
 
+    data class RepoLoadingStatusInfo(val progressVisible: Boolean,
+                                     val imageResourceToShow: Int,
+                                     var textIdToShow: Int)
+
+    val statusToStatusInfoMap = mapOf(
+            STATUS_LOADING_MIRROR to RepoLoadingStatusInfo(true, 0, 0 ))
+
+    var emptyStatusText: Int
+        get() = statusToStatusInfoMap[STATUS_LOADED_NODATA]?.textIdToShow ?: -1
+        set(value) {
+            statusToStatusInfoMap[STATUS_LOADED_NODATA]?.textIdToShow = value
+        }
+
     constructor(context: Context) : super(context) {
         init()
     }
@@ -46,11 +59,13 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
             STATUS_LOADING_CLOUD -> {
                 this.visibility = View.VISIBLE
                 statusViewProgress.visibility = View.VISIBLE
+                statusViewImageInner.tag = R.drawable.ic_cloud_download_black_24dp
                 statusViewText.text = context.getString(R.string.repo_loading_status_loading_cloud)
             }
 
             STATUS_LOADING_MIRROR -> {
                 this.visibility = View.VISIBLE
+                statusViewImageInner.tag = R.drawable.ic_cloud_download_black_24dp
                 statusViewProgress.visibility = View.VISIBLE
                 statusViewText.text = context.getString(R.string.repo_loading_status_loading_mirror)
             }
@@ -70,6 +85,7 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
                 this.visibility = View.VISIBLE
                 statusViewProgress.visibility = View.GONE
                 statusViewImageInner.visibility = View.GONE
+                statusViewImageInner.tag = R.drawable.ic_signal_cellular_connected_no_internet_4_bar_black_24dp
                 statusViewText.text = context.getString(R.string.repo_loading_status_failed_noconnection)
             }
 
@@ -77,6 +93,7 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
                 this.visibility = View.VISIBLE
                 statusViewProgress.visibility = View.GONE
                 statusViewImageInner.visibility = View.GONE
+                statusViewImageInner.tag = R.drawable.ic_signal_cellular_connected_no_internet_4_bar_black_24dp
                 statusViewText.text = context.getString(R.string.repo_loading_status_failed_connection_error)
             }
         }

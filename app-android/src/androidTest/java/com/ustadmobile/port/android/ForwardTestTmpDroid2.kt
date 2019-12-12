@@ -5,8 +5,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import rawhttp.core.RawHttp
-import rawhttp.core.server.TcpRawHttpServer
 import java.io.*
 import java.net.ServerSocket
 import java.util.*
