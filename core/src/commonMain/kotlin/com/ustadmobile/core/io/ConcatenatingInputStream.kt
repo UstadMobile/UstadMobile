@@ -1,10 +1,33 @@
 package com.ustadmobile.core.io
 
+import com.ustadmobile.lib.util.sumByLong
 import kotlinx.io.*
 import kotlin.math.min
 
 data class ConcatenatedPartSource(val src: ()-> InputStream, val length: Long,
-                                  val uncompressedLength: Long, val partId: ByteArray)
+                                  val uncompressedLength: Long, val partId: ByteArray) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ConcatenatedPartSource
+
+        if (src != other.src) return false
+        if (length != other.length) return false
+        if (uncompressedLength != other.uncompressedLength) return false
+        if (!partId.contentEquals(other.partId)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = src.hashCode()
+        result = 31 * result + length.hashCode()
+        result = 31 * result + uncompressedLength.hashCode()
+        result = 31 * result + partId.contentHashCode()
+        return result
+    }
+}
 
 /**
  * ConcatenatingInputStream is designed to take a list of input streams and concatenate them together.
@@ -31,7 +54,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
     private val parts: List<ConcatenatedPartSource>
 
-    var currentInputStream: InputStream
+    private var currentInputStream: InputStream
 
     private var currentBytePos = 0L
 
@@ -50,12 +73,12 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
         parts = listOf(headerPart, *concatenatedParts.toTypedArray())
 
-        totalLength = concatenatedParts.fold(0L, {acc, el -> acc + el.length}) + headerBuffer.size
+        totalLength = concatenatedParts.sumByLong { it.length } + headerBuffer.size
         currentInputStream = ByteArrayInputStream(headerBuffer)
         nextBoundary = headerBuffer.size.toLong()
     }
 
-    fun generateHeader(concatenatedParts: List<ConcatenatedPartSource>): ByteArray {
+    private fun generateHeader(concatenatedParts: List<ConcatenatedPartSource>): ByteArray {
         val headerSize = LEN_NUM_CHUNKS + (concatenatedParts.size * (LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2)))
         val byteBuffer = ByteBuffer.allocate(headerSize).order(ByteOrder.LITTLE_ENDIAN)
 
@@ -71,8 +94,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
         }
 
 
-        val header = byteBuffer.array()
-        return header
+        return  byteBuffer.array()
     }
 
     override fun available(): Int {
@@ -166,11 +188,11 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
     companion object {
 
-        val LEN_CHUNK_ID = 16
+        const val LEN_CHUNK_ID = 16
 
-        val LEN_CHUNK_LENGTH = 8
+        const val LEN_CHUNK_LENGTH = 8
 
-        val LEN_NUM_CHUNKS = 4
+        const val LEN_NUM_CHUNKS = 4
 
         //Given a list of concatenated parts calculate the length
         fun calculateLength(concatenatedParts: List<ConcatenatedPartSource>): Long {

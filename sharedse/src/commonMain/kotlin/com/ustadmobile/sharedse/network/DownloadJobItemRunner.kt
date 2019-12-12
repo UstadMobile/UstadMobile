@@ -1,8 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
-import com.tonyodev.fetch2.Error
-import com.tonyodev.fetch2.Status
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
@@ -30,10 +28,11 @@ import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
-import com.ustadmobile.sharedse.network.fetch.*
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.sharedse.network.containerfetcher.AbstractContainerFetcherListener
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherRequest
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -41,8 +40,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
-import kotlin.jvm.Volatile
-import com.ustadmobile.sharedse.network.fetch.enqueue
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -66,11 +63,9 @@ class DownloadJobItemRunner
  */
 (private val context: Any, private val downloadItem: DownloadJobItem,
  private val networkManager: NetworkManagerBleCommon, private val appDb: UmAppDatabase,
- private val appDbRepo: UmAppDatabase,
  private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val numConcurrentEntryDownloads: Int = 4,
  private val localAvailabilityManager: LocalAvailabilityManager,
  private val ioCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
@@ -111,8 +106,6 @@ class DownloadJobItemRunner
 
     private var destinationDir: String? = null
 
-    //private val numFailures = atomic(0)
-
     private val entriesDownloaded = atomic(0)
 
     private val connectionRequestActive = atomic(false)
@@ -121,65 +114,19 @@ class DownloadJobItemRunner
 
     val startDownloadFnJobRef = atomic<Job?>(null)
 
-//    private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
-
-//    private val currentFetchRequests = copyOnWriteListOf<RequestMpp>()
-//
-//    private val currentFetchDownloads = mutableMapOf<Int, DownloadMpp>()
-//
-//    private val fetchStartTimes = mutableMapOf<Int, Long>()
-//
-//    private var numCompletedOrFailed = 0
-
     private val currentDownloadAttempt = atomic(null as CompletableDeferred<Int>?)
 
     private var existingEntriesBytesDownloaded = 0L
-
-    @Volatile
-    private var currentFetchRequestId: Int = 0
-
-    private var currentFetchDownload: DownloadMpp? = null
 
     /**
      * Lock used for any operation that is changing the status of the Fetch download
      */
     private val fetchStatusLock = Mutex()
 
-    private val fetchListener = object: AbstractFetchListenerMpp() {
+    private var startTime = 0L
 
-        override fun onAdded(download: DownloadMpp) {
-            if(download.id == currentFetchRequestId) {
-                currentFetchDownload = download
-                Napier.d({"Download added #${download.id} ${download.url}"})
-            }
-        }
-
-        override fun onCompleted(download: DownloadMpp) {
-            if(download.id == currentFetchRequestId) {
-                Napier.d({"Download completed #${download.id} ${download.url}"})
-                currentFetchRequestId = -1
-                currentDownloadAttempt.value?.complete(JobStatus.COMPLETE)
-            }
-        }
-
-        override fun onError(download: DownloadMpp, error: Error, throwable: Throwable?) {
-            if(download.id == currentFetchRequestId) {
-                Napier.d({"Download error #${download.id} ${download.url}"}, throwable)
-                currentFetchRequestId = -1
-                currentDownloadAttempt.value?.completeExceptionally(throwable ?: IOException("$error"))
-            }
-        }
-
-        override fun onProgress(download: DownloadMpp, etaInMilliSeconds: Long, downloadedBytesPerSecond: Long) {
-            if(download.id == currentFetchRequestId) {
-                Napier.d({"Download progress #${download.id} ${download.url} - ${download.downloaded}bytes"})
-                GlobalScope.launch {
-                    downloadJobItemManager.updateProgress(downloadItem.djiUid, download.downloaded,
-                            downloadItem.downloadLength)
-                }
-            }
-        }
-    }
+    private val timeSinceStart
+        get() = getSystemTimeInMillis() - startTime
 
     fun setWiFiConnectionTimeout(lWiFiConnectionTimeout: Int) {
         this.lWiFiConnectionTimeout = lWiFiConnectionTimeout
@@ -253,12 +200,10 @@ class DownloadJobItemRunner
                 startDownloadFnJob?.cancel()
             }
 
-            networkManager.httpFetcher.removeListener(fetchListener)
-
             fetchStatusLock.withLock {
-                if(currentFetchRequestId != 0 && currentFetchDownload?.status in (ACTIVE_FETCH_STATUSES)) {
-                    networkManager.httpFetcher.pause(currentFetchRequestId)
-                }
+//                if(currentFetchRequestId != 0 && currentFetchDownload?.status in (ACTIVE_FETCH_STATUSES)) {
+//                    networkManager.httpFetcher.pause(currentFetchRequestId)
+//                }
             }
 
 
@@ -276,6 +221,7 @@ class DownloadJobItemRunner
 
 
     suspend fun download() {
+        startTime = getSystemTimeInMillis()
         downloadJobItemManager = networkManager.openDownloadJobItemManager(downloadItem.djiDjUid)!!
         println("Download started for  ${downloadItem.djiDjUid}")
         runnerStatus.value = JobStatus.RUNNING
@@ -304,8 +250,6 @@ class DownloadJobItemRunner
             downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         }
 
-        networkManager.httpFetcher.addListener(fetchListener)
-
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
         if (destinationDir == null) {
             val e = IllegalArgumentException(
@@ -330,7 +274,7 @@ class DownloadJobItemRunner
     private suspend fun startDownload() = withContext(coroutineContext) {
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
-        var attemptsRemaining = 3
+        val attemptsRemaining = 3
 
         val container = appDb.containerDao.findByUid(downloadItem.djiContainerUid)
 
@@ -338,7 +282,6 @@ class DownloadJobItemRunner
         // to use the DAO object and avoid any potential to make additional http requests
         val containerManager = ContainerManager(container!!, appDb, appDb, destinationDir!!)
 
-        val currentTimeStamp = getSystemTimeInMillis()
         var downloadStartTime = 0L
 
         var downloadAttemptStatus = -1
@@ -363,8 +306,7 @@ class DownloadJobItemRunner
                 history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
                 history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
 
-                val downloadEndpoint: String?
-
+                val downloadEndpoint: String
                 if (networkNodeToUse == null) {
                     if (connectivityStatus?.wifiSsid != null
                             && connectivityStatus?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
@@ -374,10 +316,6 @@ class DownloadJobItemRunner
                         launch(mainCoroutineDispatcher) {
                             if (!connectToCloudNetwork()) {
                                 throw IOException("${mkLogPrefix()} could not connect to cloud network")
-//                                //connection has failed
-//                                attemptsRemaining--
-//                                recordHistoryFinished(history, false)
-//                                //continue
                             }
                         }
                     }
@@ -387,8 +325,10 @@ class DownloadJobItemRunner
                     }
 
                     downloadEndpoint = endpointUrl
+                    currentHttpClient = defaultHttpClient()
                 } else {
                     if (networkNodeToUse.groupSsid == null
+                            || connectivityStatus?.connectivityState != ConnectivityStatus.STATE_CONNECTED_LOCAL
                             || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
                         if (!connectToLocalNodeNetwork()) {
                             throw IOException("${mkLogPrefix()} could not connect to local node network")
@@ -399,16 +339,8 @@ class DownloadJobItemRunner
                         }
                     }
 
-                    downloadEndpoint = currentNetworkNode!!.endpointUrl
-                }
-
-                val localHttpClient = networkManager.localHttpClient
-                if(localHttpClient != null) {
-                    UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using local http client: $localHttpClient")
-                    currentHttpClient = localHttpClient
-                }else {
-                    UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} using default http client")
-                    currentHttpClient = defaultHttpClient()
+                    downloadEndpoint = currentNetworkNode!!.endpointUrl!!
+                    currentHttpClient = networkManager.localHttpClient ?: defaultHttpClient()
                 }
 
                 history.url = downloadEndpoint
@@ -441,23 +373,34 @@ class DownloadJobItemRunner
                 val currentDownloadAttemptVal  = CompletableDeferred<Int>()
                 currentDownloadAttempt.value = currentDownloadAttemptVal
 
-                fetchStatusLock.withLock {
-                    val fetchRequest = RequestMpp(UMFileUtil.joinPaths(endpointUrl,
-                            ENDPOINT_CONCATENATEDFILES, entriesListStr), destTmpFile.getAbsolutePath())
-                    currentFetchRequestId = fetchRequest.id
-                    networkManager.httpFetcher
-                            .takeIf { runnerStatus.value != JobStatus.STOPPED }
-                            ?.enqueue(fetchRequest)
-                }
+                val fetchStartTime = getSystemTimeInMillis()
+                Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
+                val downloadUrl = UMFileUtil.joinPaths(downloadEndpoint, ENDPOINT_CONCATENATEDFILES,
+                        entriesListStr)
+                val containerRequest = ContainerFetcherRequest(downloadUrl,
+                        destTmpFile.getAbsolutePath())
+                val jobDeferred = networkManager.containerFetcher.enqueue(containerRequest,
+                        object: AbstractContainerFetcherListener() {
+                            override fun onProgress(request: ContainerFetcherRequest, bytesDownloaded: Long, contentLength: Long) {
+                                GlobalScope.launch {
+                                    downloadJobItemManager.updateProgress(downloadItem.djiUid,
+                                        existingEntriesBytesDownloaded + bytesDownloaded,
+                                            contentLength)
+                                }
+                            }
+                        })
 
 
-                downloadAttemptStatus = currentDownloadAttemptVal.await()
+                downloadAttemptStatus = jobDeferred.await()
+                Napier.d({"Fetch completed in ${fetchStartTime - getSystemTimeInMillis()}ms"})
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {
                     break
                 }
             }catch(e: Exception) {
                 Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
                 delay(retryDelay)
+            }finally {
+
             }
         }
 
@@ -479,7 +422,7 @@ class DownloadJobItemRunner
             //TODO Here: Make the download fail if the validation does not check out, don't crash the app
             try {
                 concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
-                val pathToMd5Map = containerEntriesList.map {
+                val pathToMd5Map = containerEntriesToDownloadList.map {
                     (it.cePath ?: "") to (it.cefMd5?.base64StringToByteArray() ?: ByteArray(0))
                 }.toMap()
 
@@ -667,6 +610,5 @@ class DownloadJobItemRunner
 
         private const val CONNECTION_TIMEOUT = 60
 
-        private val ACTIVE_FETCH_STATUSES = listOf(Status.DOWNLOADING, Status.QUEUED, Status.ADDED)
     }
 }

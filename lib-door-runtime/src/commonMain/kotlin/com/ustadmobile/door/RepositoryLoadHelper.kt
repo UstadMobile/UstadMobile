@@ -8,6 +8,7 @@ import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.github.aakira.napier.Napier
+import com.ustadmobile.door.util.threadSafeListOf
 
 //Empty / null retry:
 // On DataSourceFactory / boundary callback: alwasy - because it was called by onZeroItemsLoaded
@@ -29,6 +30,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val uri: String = "",
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
+
+    interface RepoLoadCallback {
+
+        fun onLoadStatusChanged(status: Int, remoteDevice: String?)
+
+    }
+
     var liveDataWrapper: LiveDataWrapper<*>? = null
 
     val requestLock = Mutex()
@@ -36,6 +44,12 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     val loadedVal = CompletableDeferred<T>()
 
     val repoHelperId = ID_ATOMICINT.getAndIncrement()
+
+    private val callbacks = threadSafeListOf<RepoLoadCallback>()
+
+    @Volatile
+    var status: Int = 0
+        private set
 
     init {
         repository.addWeakConnectivityListener(this)
@@ -175,9 +189,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 attemptCount = 0
                 triedMainEndpoint = false
             }
-
+            var mirrorToUse: MirrorEndpoint? = null
             while(!completed.value && coroutineContext.isActive && attemptCount <= maxAttempts) {
-                var mirrorToUse: MirrorEndpoint? = null
                 var endpointToUse: String? = null
                 try {
                     attemptCount++
@@ -186,6 +199,17 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         null as MirrorEndpoint? //use the main endpoint
                     }else {
                         repository.activeMirrors().maxBy { it.priority }
+                    }
+
+                    val newStatus = if(mirrorToUse != null) {
+                        STATUS_LOADING_MIRROR
+                    }else {
+                        STATUS_LOADING_CLOUD
+                    }
+
+                    if(newStatus != status) {
+                        status = newStatus
+                        fireStatusChanged(status, null)
                     }
 
                     if(!isConnected && mirrorToUse == null) {
@@ -223,8 +247,16 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     }
 
                     if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult) {
+                        status = if(isNullOrEmpty) {
+                            STATUS_LOADED_NODATA
+                        }else {
+                            STATUS_LOADED_WITHDATA
+                        }
+
                         completed.value = true
                         loadedVal.complete(t)
+                        fireStatusChanged(status, null)
+
                         Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse ."})
                         return t
                     }else {
@@ -252,6 +284,16 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             if(loadedVal.isCompleted) {
                 return loadedVal.getCompleted()
             }else {
+                val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
+                status = if(isConnected || mirrorToUse != null) {
+                    STATUS_FAILED_CONNECTION_ERR
+                }else {
+                    STATUS_FAILED_NOCONNECTIVITYORPEERS
+                }
+
+                fireStatusChanged(status, null)
+
+
                 throw IOException("$logPrefix ==ERROR== NOT completed")
             }
         }
@@ -287,9 +329,41 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         return nonEmptyVal
     }
 
+    fun addRepoLoadCallback(callback: RepoLoadCallback) {
+        callbacks.add(callback)
+        callback.onLoadStatusChanged(status, null)
+    }
+
+    inline fun addRepoLoadCallback(crossinline block: (Int, String?) -> Unit) {
+        addRepoLoadCallback(object: RepoLoadCallback {
+            override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
+                block(status, remoteDevice)
+            }
+        })
+    }
+
+    fun removeRepoLoadCallback(callback: RepoLoadCallback) = callbacks.remove(callback)
+
+    private fun fireStatusChanged(status: Int, remoteDevice: String?) {
+        callbacks.forEach { it.onLoadStatusChanged(status, remoteDevice) }
+    }
+
     companion object {
 
         val ID_ATOMICINT = atomic(0)
+
+        const val STATUS_LOADING_CLOUD = 1
+
+        const val STATUS_LOADING_MIRROR = 2
+
+        const val STATUS_LOADED_WITHDATA = 11
+
+        const val STATUS_LOADED_NODATA = 12
+
+        const val STATUS_FAILED_NOCONNECTIVITYORPEERS = 12
+
+        const val STATUS_FAILED_CONNECTION_ERR = 13
+
     }
 
 }

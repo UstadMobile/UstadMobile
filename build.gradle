@@ -37,6 +37,11 @@ allprojects {
         maven {
             url "https://devserver2.ustadmobile.com/repo-mvn"
         }
+
+        maven {
+            url  "https://dl.bintray.com/ustadmobile/maven"
+        }
+
         maven {
             url "https://kotlin.bintray.com/kotlinx"
         }
@@ -146,7 +151,6 @@ ext {
     version_android_seismic = "1.0.2"
     version_android_fab_extended = "0.0.4"
     version_android_rotatelayout = "3.0.0"
-    version_android_fetch = "3.1.4"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

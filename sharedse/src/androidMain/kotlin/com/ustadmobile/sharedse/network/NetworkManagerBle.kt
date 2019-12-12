@@ -28,10 +28,6 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
-import com.tonyodev.fetch2.Fetch
-import com.tonyodev.fetch2.FetchConfiguration
-import com.tonyodev.fetch2.Request
-import com.tonyodev.fetch2core.Func
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
@@ -43,7 +39,6 @@ import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
@@ -60,9 +55,15 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.networkmanager.defaultGsonSerializer
+import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
-import com.ustadmobile.sharedse.network.fetch.FetchMpp
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
+import okhttp3.OkHttpClient
+import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
+import java.net.HttpURLConnection
 
 /**
  * This class provides methods to perform android network related communications.
@@ -87,7 +88,7 @@ actual open class NetworkManagerBle
 actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                    umAppDatabase: UmAppDatabase)
     : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO,
-        umAppDatabase), EmbeddedHTTPD.ResponseListener {
+        umAppDatabase), EmbeddedHTTPD.ResponseListener, NetworkManagerWithConnectionOpener {
 
     constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD,
                 umAppDatabase: UmAppDatabase) : this(context, singleThreadDispatcher, umAppDatabase) {
@@ -138,16 +139,17 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
 
-    val fetchAndroid: Fetch by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        Fetch.Impl.getInstance(FetchConfiguration.Builder(context as Context)
-                .setDownloadConcurrentLimit(4)
-                .build())
+    private var localOkHttpClient: OkHttpClient? = null
+
+    override val containerFetcher: ContainerFetcher by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        ContainerFetcherBuilder(this).build()
     }
 
-    actual override val httpFetcher
-        get() = fetchAndroid
-
     private var gattClientCallbackManager: GattClientCallbackManager? = null
+
+    override var localConnectionOpener: ConnectionOpener? = null
+        get() = field
+        protected set
 
     override val umAppDatabaseRepo by lazy {
         UmAccountManager.getRepositoryForActiveAccount(context)
@@ -477,8 +479,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
 
     private fun handleDisconnected() {
-        localHttpClient?.close()
         localHttpClient = null
+        localConnectionOpener = null
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
@@ -536,16 +538,22 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                 UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
                         "client for $ssid using $socketFactory")
 
+                val localOkHttpClientVal = defaultOkHttpClient().newBuilder()
+                        .socketFactory(socketFactory)
+                        .build()
+
+                //closing localHttpClient would stop the underlying shared OkHttpClient's executors,
+                // pools, etc we don't want to do that
                 localHttpClient = HttpClient(OkHttp) {
                     engine {
-                        config {
-                            socketFactory(socketFactory)
-                        }
+                        preconfigured = localOkHttpClientVal
                     }
                     install(JsonFeature) {
-                        serializer = GsonSerializer()
+                        serializer = defaultGsonSerializer()
                     }
                 }
+
+                localConnectionOpener = { network.openConnection(it) as HttpURLConnection }
             }
         }
 

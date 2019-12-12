@@ -5,8 +5,20 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.toughra.ustadmobile.R
+import com.ustadmobile.door.RepositoryLoadHelper
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_CONNECTION_ERR
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_NOCONNECTIVITYORPEERS
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
+import kotlinx.android.synthetic.main.view_repo_loading_status.view.*
 
-class RepoLoadingStatusView: CoordinatorLayout{
+class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCallback {
+
+    private var imageResource: Int = 0
+
+    private var message: String = ""
 
     constructor(context: Context) : super(context) {
         init()
@@ -22,5 +34,51 @@ class RepoLoadingStatusView: CoordinatorLayout{
 
     fun init(){
         View.inflate(context, R.layout.view_repo_loading_status, this)
+    }
+
+    fun setEmptyView(imageResource: Int, message: String){
+        this.imageResource = imageResource
+        this.message = message
+    }
+
+    override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
+        when(status){
+            STATUS_LOADING_CLOUD -> {
+                this.visibility = View.VISIBLE
+                statusViewProgress.visibility = View.VISIBLE
+                statusViewText.text = context.getString(R.string.repo_loading_status_loading_cloud)
+            }
+
+            STATUS_LOADING_MIRROR -> {
+                this.visibility = View.VISIBLE
+                statusViewProgress.visibility = View.VISIBLE
+                statusViewText.text = context.getString(R.string.repo_loading_status_loading_mirror)
+            }
+
+            STATUS_LOADED_WITHDATA -> {
+                this.visibility = View.GONE
+            }
+
+            STATUS_LOADED_NODATA -> {
+                statusViewProgress.visibility = View.GONE
+                this.visibility = View.VISIBLE
+                statusViewText.text = message
+                statusViewImage.setImageResource(imageResource)
+            }
+
+            STATUS_FAILED_NOCONNECTIVITYORPEERS -> {
+                this.visibility = View.VISIBLE
+                statusViewProgress.visibility = View.GONE
+                statusViewImageInner.visibility = View.GONE
+                statusViewText.text = context.getString(R.string.repo_loading_status_failed_noconnection)
+            }
+
+            STATUS_FAILED_CONNECTION_ERR -> {
+                this.visibility = View.VISIBLE
+                statusViewProgress.visibility = View.GONE
+                statusViewImageInner.visibility = View.GONE
+                statusViewText.text = context.getString(R.string.repo_loading_status_failed_connection_error)
+            }
+        }
     }
 }

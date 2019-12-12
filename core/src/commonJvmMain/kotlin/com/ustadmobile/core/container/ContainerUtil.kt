@@ -40,7 +40,9 @@ actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: Conta
         var zipFile = null as ZipFile?
         try {
             zipFile = ZipFile(zipPath)
-            val entryList = zipFile.entries().toList().map { ZipEntrySource(it, zipFile) }.toTypedArray()
+            val entryList = zipFile.entries().toList()
+                    .filter { !it.isDirectory() }
+                    .map { ZipEntrySource(it, zipFile) }.toTypedArray()
             containerManager.addEntries(*entryList)
         } catch (e: Exception) {
             throw e

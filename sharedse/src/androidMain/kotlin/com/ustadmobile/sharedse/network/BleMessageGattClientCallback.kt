@@ -506,15 +506,18 @@ class BleMessageGattClientCallback(val deviceAddr: String,
     }
 
     private fun cleanup(gatt: BluetoothGatt) {
+        var clientCallbackHandleClosed = false
         try {
             if (!mClosed.getAndSet(true)) {
+                clientCallbackHandleClosed = true
                 Napier.i("$logPrefix: closing")
                 gatt.close()
-                clientCallbackManager.handleGattClientClosed(this)
             }
         } catch (e: Exception) {
             Napier.e("$logPrefix: ERROR closing gatt")
         } finally {
+            clientCallbackManager.takeIf { clientCallbackHandleClosed }
+                    ?.handleGattClientClosed(this)
             Napier.i("$logPrefix: cleanup done")
         }
     }

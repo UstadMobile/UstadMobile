@@ -6,15 +6,33 @@ import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_NUM_CHUNKS
 import kotlinx.io.ByteBuffer
 import kotlinx.io.ByteOrder
 import kotlinx.io.InputStream
-import kotlinx.io.core.IoBuffer
-import kotlinx.io.core.readLongLittleEndian
 import kotlin.math.min
 
-data class ConcatenatedPart(val id: ByteArray, val length: Long, val uncompressedLength: Long)
+data class ConcatenatedPart(val id: ByteArray, val length: Long, val uncompressedLength: Long) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ConcatenatedPart
+
+        if (!id.contentEquals(other.id)) return false
+        if (length != other.length) return false
+        if (uncompressedLength != other.uncompressedLength) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.contentHashCode()
+        result = 31 * result + length.hashCode()
+        result = 31 * result + uncompressedLength.hashCode()
+        return result
+    }
+}
 
 class ConcatenatedInputStream(val src: InputStream) : InputStream(){
 
-    var numFiles: Int = 0
+    private var numFiles: Int = 0
 
     private var currentPartBytesRemaining = 0L
 
@@ -75,11 +93,11 @@ class ConcatenatedInputStream(val src: InputStream) : InputStream(){
     }
 
     override fun read(): Int {
-        if(currentPartBytesRemaining > 0) {
+        return if (currentPartBytesRemaining > 0) {
             currentPartBytesRemaining--
-            return src.read()
-        }else {
-            return -1
+            src.read()
+        } else {
+            -1
         }
     }
 
@@ -92,9 +110,5 @@ class ConcatenatedInputStream(val src: InputStream) : InputStream(){
         val bytesRead = src.read(b, offset, min(len, currentPartBytesRemaining.toInt()))
         currentPartBytesRemaining -= bytesRead
         return bytesRead
-    }
-
-    override fun skip(n: Long): Long {
-        return super.skip(n)
     }
 }

@@ -2,7 +2,6 @@ package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.NetworkNode
-import com.ustadmobile.sharedse.network.fetch.FetchMpp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -20,8 +19,6 @@ expect open class NetworkManagerBle(context: Any = Any(),
     override val isVersionLollipopOrAbove: Boolean
 
     override val isVersionKitKatOrBelow: Boolean
-
-    override val httpFetcher: FetchMpp
 
     override fun canDeviceAdvertise(): Boolean
 

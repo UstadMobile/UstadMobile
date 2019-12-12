@@ -35,10 +35,6 @@ class GattClientCallbackManager(val context: Context,
                 val useAutoConnect = Build.VERSION.SDK_INT < 21
 
                 val remoteGatt = remoteDevice.connectGatt(context, false, currentCallback)
-
-//            if (Build.VERSION.SDK_INT >= 21) {
-//                remoteGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
-//            }
             }
 
             return currentCallback

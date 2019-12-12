@@ -6,9 +6,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
+        android:id="@+id/statusViewImageInner"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_launcher_icon"
+        android:layout_centerInParent="true"
+        android:tint="@color/divider"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+
+    <ImageView
         android:id="@+id/statusViewImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_launcher_icon"
+        android:layout_centerInParent="true"
+        android:tint="@color/divider"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ProgressBar
+        android:visibility="gone"
+        android:id="@+id/statusViewProgress"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:src="@drawable/ic_launcher_icon"
         android:layout_centerInParent="true"
         android:tint="@color/divider"
@@ -22,7 +50,7 @@
         android:id="@+id/statusViewText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/statusViewImage"
+        android:layout_below="@id/statusViewImageInner"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:text="Placeholder"
@@ -30,6 +58,6 @@
         android:textSize="@dimen/text_body"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/statusViewImage" />
+        app:layout_constraintTop_toBottomOf="@+id/statusViewImageInner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
