@@ -178,7 +178,6 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
         }
 
-
         //Update Activity Change options
         updateChangeOptions()
 

@@ -172,7 +172,8 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
         val lineDataMap = LinkedHashMap<Float, Float>()
         val barDataMap = LinkedHashMap<Float, Float>()
-        val toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+//        val toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+        val toDate = UMCalendarUtil.getToday235959()
         var fromDate = toDate
 
         when (duration) {

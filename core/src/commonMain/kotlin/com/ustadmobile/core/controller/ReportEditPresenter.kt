@@ -154,7 +154,7 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
      */
     fun handleTimePeriodSelected(selected: Int) {
         var selected = selected
-        toTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+        toTime = UMCalendarUtil.getToday235959()
         selected++
         when (selected) {
             TIME_PERIOD_LAST_WEEK -> fromTime = UMCalendarUtil.getDateInMilliPlusDays(-7)

@@ -121,7 +121,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
     override fun setPeopleListProvider(factory : DataSource.Factory<Int, PersonWithEnrollment>) {
 
-        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(context!!, DIFF_CALLBACK_PERSON,
+        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(context!!, DIFF_CALLBACK,
                 this, mPresenter!!, false, false)
 
         //personDao.findAllPeopleWithEnrollmentBySearch
@@ -173,8 +173,6 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
     companion object {
 
-
-
         /**
          * Generates a new Fragment for a page fragment
          *
@@ -198,7 +196,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK2: DiffUtil.ItemCallback<PersonWithEnrollment> = object
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithEnrollment> = object
             : DiffUtil.ItemCallback<PersonWithEnrollment>() {
             override fun areItemsTheSame(oldItem: PersonWithEnrollment,
                                          newItem: PersonWithEnrollment): Boolean {
@@ -207,22 +205,6 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
             override fun areContentsTheSame(oldItem: PersonWithEnrollment,
                                             newItem: PersonWithEnrollment): Boolean {
-                return oldItem == newItem
-            }
-        }
-
-        /**
-         * The DIFF CALLBACK
-         */
-        val DIFF_CALLBACK_PERSON: DiffUtil.ItemCallback<Person> = object
-            : DiffUtil.ItemCallback<Person>() {
-            override fun areItemsTheSame(oldItem: Person,
-                                         newItem: Person): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(oldItem: Person,
-                                            newItem: Person): Boolean {
                 return oldItem == newItem
             }
         }

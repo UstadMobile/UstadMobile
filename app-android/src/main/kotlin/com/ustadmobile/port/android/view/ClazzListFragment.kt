@@ -217,15 +217,16 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView {
         /**
          * The DIFF Callback.
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object
+            : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
             override fun areItemsTheSame(oldItem: ClazzWithNumStudents,
                                          newItem: ClazzWithNumStudents): Boolean {
-                return oldItem.clazzUid == newItem.clazzUid
+                return oldItem == newItem
             }
 
             override fun areContentsTheSame(oldItem: ClazzWithNumStudents,
                                             newItem: ClazzWithNumStudents): Boolean {
-                return oldItem.clazzUid == newItem.clazzUid
+                return oldItem == newItem
             }
         }
     }

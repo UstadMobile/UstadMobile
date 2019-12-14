@@ -138,7 +138,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     }
 
     internal constructor(context: Context,
-            diffCallback: DiffUtil.ItemCallback<Person>,
+            diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>,
             fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean)
             : super(diffCallback as DiffUtil.ItemCallback<PersonWithEnrollment>) {
