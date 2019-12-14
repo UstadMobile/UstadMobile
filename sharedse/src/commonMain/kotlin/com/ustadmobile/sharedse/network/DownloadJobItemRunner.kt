@@ -40,6 +40,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
+import kotlin.jvm.Volatile
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -114,16 +115,21 @@ class DownloadJobItemRunner
 
     val startDownloadFnJobRef = atomic<Job?>(null)
 
-    private val currentDownloadAttempt = atomic(null as CompletableDeferred<Int>?)
+    private val currentDownloadAttempt = atomic(null as Deferred<Int>?)
 
     private var existingEntriesBytesDownloaded = 0L
 
     /**
      * Lock used for any operation that is changing the status of the Fetch download
      */
-    private val fetchStatusLock = Mutex()
+    private val downloadStatusLock = Mutex()
 
     private var startTime = 0L
+
+    @Volatile
+    private var downloadCalled: Boolean = false
+
+    private var startDownloadFnJob: Deferred<Int>? = null
 
     private val timeSinceStart
         get() = getSystemTimeInMillis() - startTime
@@ -137,7 +143,7 @@ class DownloadJobItemRunner
      * Handle changes triggered when connectivity status changes.
      * @param newStatus changed connectivity status
      */
-    private fun handleConnectivityStatusChanged(newStatus: ConnectivityStatus?) {
+    internal fun handleConnectivityStatusChanged(newStatus: ConnectivityStatus?) {
         this.connectivityStatus = newStatus
         UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() +
                 " Connectivity state changed: " + newStatus)
@@ -147,6 +153,8 @@ class DownloadJobItemRunner
         if (connectivityStatus != null) {
             when (newStatus!!.connectivityState) {
                 STATE_METERED -> if (meteredConnectionAllowed.value == 0) {
+                    Napier.d({"${mkLogPrefix()} Connectivity state changed: on metered connection, " +
+                            "must stop now."})
                     GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
                 }
 
@@ -193,34 +201,34 @@ class DownloadJobItemRunner
      * @param newStatus new status to be set
      */
     suspend fun stop(newStatus: Int, cancel: Boolean = false) {
-        if (!runnerStatus.compareAndSet(JobStatus.STOPPED, JobStatus.STOPPED)) {
-            if (cancel) {
-                val startDownloadFnJob = startDownloadFnJobRef.value
-                println("===CANCELLING $startDownloadFnJob===")
-                startDownloadFnJob?.cancel()
+        Napier.d({"${mkLogPrefix()} stopping - waiting for lock"})
+        downloadStatusLock.withLock {
+            if (!runnerStatus.compareAndSet(JobStatus.STOPPED, JobStatus.STOPPED)) {
+                Napier.d({"${mkLogPrefix()} stopping - checking cancel"})
+                if (cancel) {
+                    startDownloadFnJob?.cancelAndJoin()
+                    currentDownloadAttempt.value?.cancelAndJoin()
+                }
+
+                withContext(mainCoroutineDispatcher) {
+                    statusLiveData!!.removeObserver(statusObserver!!)
+                    downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
+                    downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
+                }
+
+                updateItemStatus(newStatus)
+                networkManager.releaseWifiLock(downloadWiFiLock)
             }
-
-            fetchStatusLock.withLock {
-//                if(currentFetchRequestId != 0 && currentFetchDownload?.status in (ACTIVE_FETCH_STATUSES)) {
-//                    networkManager.httpFetcher.pause(currentFetchRequestId)
-//                }
-            }
-
-
-            withContext(mainCoroutineDispatcher) {
-                statusLiveData!!.removeObserver(statusObserver!!)
-                downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
-                downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
-            }
-
-            updateItemStatus(newStatus)
-            networkManager.releaseWifiLock(downloadWiFiLock)
         }
-
     }
 
 
-    suspend fun download() {
+    suspend fun download(): Deferred<Int> {
+        if(downloadCalled) {
+            throw IllegalStateException("Can only call download() once on DownloadJobItemRunner!")
+        }
+        downloadCalled = true
+
         startTime = getSystemTimeInMillis()
         downloadJobItemManager = networkManager.openDownloadJobItemManager(downloadItem.djiDjUid)!!
         println("Download started for  ${downloadItem.djiDjUid}")
@@ -259,19 +267,14 @@ class DownloadJobItemRunner
             throw e
         }
 
-        withContext(coroutineContext) {
-            val startDownloadFnJob = launch { startDownload() }
-            startDownloadFnJobRef.value = startDownloadFnJob
-            UMLog.l(UMLog.INFO, 0, "${mkLogPrefix()} launched download job and got reference")
-            startDownloadFnJob.join()
-        }
+        return GlobalScope.async { startDownload() }.also { startDownloadFnJob = it }
     }
 
 
     /**
      * Start downloading a file
      */
-    private suspend fun startDownload() = withContext(coroutineContext) {
+    private suspend fun startDownload(): Int {
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
         val attemptsRemaining = 3
@@ -292,7 +295,8 @@ class DownloadJobItemRunner
 
         val containerEntriesToDownloadList = mutableListOf<ContainerEntryWithMd5>()
 
-        for (attemptNum in attemptsRemaining downTo 1) {
+        var attemptNum = 0
+        while(attemptNum++ < 3 && coroutineContext.isActive) {
             try {
                 currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
                         downloadItem.djiContainerUid)
@@ -313,9 +317,11 @@ class DownloadJobItemRunner
                         //we are connected to a local peer, but need the normal wifi
                         //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
                         // set status to waiting for connection and stop
-                        launch(mainCoroutineDispatcher) {
-                            if (!connectToCloudNetwork()) {
-                                throw IOException("${mkLogPrefix()} could not connect to cloud network")
+                        withContext(coroutineContext) {
+                            launch(mainCoroutineDispatcher) {
+                                if (!connectToCloudNetwork()) {
+                                    throw IOException("${mkLogPrefix()} could not connect to cloud network")
+                                }
                             }
                         }
                     }
@@ -370,8 +376,7 @@ class DownloadJobItemRunner
 
 
                 history.startTime = getSystemTimeInMillis()
-                val currentDownloadAttemptVal  = CompletableDeferred<Int>()
-                currentDownloadAttempt.value = currentDownloadAttemptVal
+
 
                 val fetchStartTime = getSystemTimeInMillis()
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
@@ -379,26 +384,33 @@ class DownloadJobItemRunner
                         entriesListStr)
                 val containerRequest = ContainerFetcherRequest(downloadUrl,
                         destTmpFile.getAbsolutePath())
-                val jobDeferred = networkManager.containerFetcher.enqueue(containerRequest,
-                        object: AbstractContainerFetcherListener() {
-                            override fun onProgress(request: ContainerFetcherRequest, bytesDownloaded: Long, contentLength: Long) {
-                                GlobalScope.launch {
-                                    downloadJobItemManager.updateProgress(downloadItem.djiUid,
-                                        existingEntriesBytesDownloaded + bytesDownloaded,
-                                            contentLength)
+                var jobDeferred: Deferred<Int>? = null
+                downloadStatusLock.withLock {
+                    Napier.d({"${mkLogPrefix()} enqueuing download"})
+                    jobDeferred = networkManager.containerFetcher.enqueue(containerRequest,
+                            object: AbstractContainerFetcherListener() {
+                                override fun onProgress(request: ContainerFetcherRequest,
+                                                        bytesDownloaded: Long, contentLength: Long) {
+                                    GlobalScope.launch {
+                                        downloadJobItemManager.updateProgress(downloadItem.djiUid,
+                                                existingEntriesBytesDownloaded + bytesDownloaded,
+                                                contentLength)
+                                    }
                                 }
-                            }
-                        })
+                            })
+                    Napier.d({"${mkLogPrefix()} download queued"})
+                    currentDownloadAttempt.value = jobDeferred
+                }
+                downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
 
-
-                downloadAttemptStatus = jobDeferred.await()
-                Napier.d({"Fetch completed in ${fetchStartTime - getSystemTimeInMillis()}ms"})
+                Napier.d({"Fetch over in ${getSystemTimeInMillis() - fetchStartTime}ms status=$downloadAttemptStatus"})
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {
                     break
                 }
             }catch(e: Exception) {
                 Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
-                delay(retryDelay)
+                if(coroutineContext.isActive)
+                    delay(retryDelay)
             }finally {
 
             }
@@ -461,6 +473,8 @@ class DownloadJobItemRunner
         }
 
         stop(if(downloadAttemptStatus != -1) downloadAttemptStatus else JobStatus.FAILED)
+
+        return downloadAttemptStatus
     }
 
 

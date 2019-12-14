@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
@@ -26,6 +27,7 @@ import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 import java.io.IOException
@@ -111,12 +113,10 @@ class DownloadJobItemRunnerTest {
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
 
-
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
-        Napier.base(DebugAntilog())
         clientDb = UmAppDatabase.getInstance(context, "clientdb")
         clientDb.clearAllTables()
 
@@ -410,13 +410,13 @@ class DownloadJobItemRunnerTest {
         }
     }
 
-    //@Test
+    @Test
     fun givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToWaiting() {
         var item = clientDb.downloadJobItemDao.findByUid(
                 downloadJobItem.djiUid)!!
         runBlocking {
             //set speed to 512kbps (period unit by default is milliseconds)
-            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
+            cloudMockDispatcher.throttleBytesPerPeriod = (64 * 1000)
             cloudMockDispatcher.throttlePeriod = 1000
 
 
@@ -428,9 +428,10 @@ class DownloadJobItemRunnerTest {
                 jobItemRunner.download()
             }
 
-            delay(1000) //wait for 1 second
+            delay(2000) //wait for 2 seconds
 
-            clientDb.connectivityStatusDao.updateStateAsync(ConnectivityStatus.STATE_METERED)
+            jobItemRunner.handleConnectivityStatusChanged(
+                    ConnectivityStatus(STATE_METERED, true, null))
 
             try {
                 waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
@@ -448,6 +449,7 @@ class DownloadJobItemRunnerTest {
 
         Assert.assertEquals("File download task stopped after network status " + "change and set status to waiting",
                 JobStatus.WAITING_FOR_CONNECTION, item.djiStatus)
+        Thread.sleep(15000)
     }
 
     //@Test
@@ -733,4 +735,12 @@ class DownloadJobItemRunnerTest {
     }
 
 
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun setupLog() {
+            Napier.base(DebugAntilog())
+        }
+    }
 }

@@ -46,13 +46,6 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
     private val gattClientCallbackManager: GattClientCallbackManager
 
-    /**
-     * Get BleMessageGattClientCallback instance
-     * @return Instance of a BleMessageGattClientCallback
-     */
-//    var gattClientCallback: BleMessageGattClientCallback? = null
-//        private set
-
     private var bluetoothManager: BluetoothManager? = null
 
     private var mGattClient: BluetoothGatt? = null
@@ -126,53 +119,10 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
                 }
             }
 
-
-
-            //gattClientCallback!!.setOnResponseReceived(this)
-//            val destinationPeer = bluetoothManager!!.adapter
-//                    .getRemoteDevice(networkNode.bluetoothMacAddress)
-
-            //For device below lollipop they require autoConnect flag to be
-            // TRUE otherwise they will always throw error 133.
-//            mGattClient = destinationPeer.connectGatt(
-//                    context as Context, managerBle?.isVersionKitKatOrBelow?: false, gattClientCallback)
-
-//            if (Build.VERSION.SDK_INT >= 21) {
-//                mGattClient!!.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
-//            }
-
-//            managerBle?.handleNodeConnectionHistory(destinationPeer.address,
-//                    mGattClient != null)
-//
-//            if (mGattClient == null) {
-//                UMLog.l(UMLog.ERROR, 698,
-//                        "Failed to connect to " + destinationPeer.address)
-//
-//                GlobalScope.launch {
-//                    UmAppDatabase.getInstance(context as Context).networkNodeDao
-//                            .updateRetryCountAsync(networkNode.nodeId)
-//                }
-//
-//                onResponseReceived(networkNode.bluetoothMacAddress!!, null,
-//                        IOException("BLE failed on connectGatt to " + networkNode.bluetoothMacAddress!!))
-//            } else {
-//                UMLog.l(UMLog.DEBUG, 698,
-//                        "Connecting to " + destinationPeer.address)
-//            }
         } catch (e: IllegalArgumentException) {
             UMLog.l(UMLog.ERROR, 698,
                     "Wrong address format provided", e)
         }
 
     }
-
-//    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-//        try {
-//            super.onResponseReceived(sourceDeviceAddress, response, error)
-//        }finally {
-//            //disconnect after finishing the task
-//            mGattClient?.disconnect()
-//        }
-//
-//    }
 }

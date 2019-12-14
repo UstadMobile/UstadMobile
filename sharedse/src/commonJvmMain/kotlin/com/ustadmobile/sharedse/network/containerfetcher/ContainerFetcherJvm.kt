@@ -12,10 +12,8 @@ class ContainerFetcherJvm(private val networkManager: NetworkManagerBle): Contai
     private val coroutineCtx  = executorService.asCoroutineDispatcher()
 
     override suspend fun enqueue(request: ContainerFetcherRequest, listener: ContainerFetcherListener?): Deferred<Int> {
-        return coroutineScope {
-            async(coroutineCtx) {
+        return GlobalScope.async(coroutineCtx) {
                 ContainerDownloaderJobHttpUrlConnection(request, listener, networkManager).download()
-            }
         }
     }
 }

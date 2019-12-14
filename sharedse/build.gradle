@@ -153,6 +153,7 @@ kotlin {
                 implementation project(":lib-database-android")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
                 implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
@@ -258,8 +259,11 @@ kotlin {
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
                 implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
+                implementation "androidx.arch.core:core-testing:2.1.0"
                 implementation "androidx.test:runner:$version_android_junit_runner"
                 implementation "androidx.test:rules:$version_android_junit_runner"
+
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"

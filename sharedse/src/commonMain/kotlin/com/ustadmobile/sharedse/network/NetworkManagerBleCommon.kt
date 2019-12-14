@@ -25,7 +25,7 @@ import kotlin.jvm.Synchronized
  *
  * @property context system context to use
  * @property singleThreadDispatcher A single thread based dispatcher that is used for tracking download
- *                                  status. DownloadJobItemManager requires a single thread environment
+ *                                  status. ContainerDownloadManager requires a single thread environment
  *
  * @author kileha3
  */
@@ -174,7 +174,7 @@ abstract class NetworkManagerBleCommon(
                     umAppDatabase,  UmAccountManager.getActiveEndpoint(context),
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
                     ioCoroutineDispatcher = ioDispatcher,
-                    localAvailabilityManager = localAvailabilityManager).download()
+                    localAvailabilityManager = localAvailabilityManager).download().await()
         }
         nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
 
