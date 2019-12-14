@@ -21,6 +21,7 @@ import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_PRODUCER_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_SALE_ITEM_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEPRODUCT_UID
+import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_INVENTORY
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_PRODUCT
 import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
@@ -56,6 +57,8 @@ class SaleProductCategoryListPresenter(context: Any,
     private var idToOrderInteger: MutableMap<Long, Int>? = null
     private var currentSortOrder = 0
 
+    private var selectInventoryMode = false
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -70,6 +73,11 @@ class SaleProductCategoryListPresenter(context: Any,
         if (arguments!!.containsKey(ARG_SELECT_PRODUCT)) {
             if (arguments!!.get(ARG_SELECT_PRODUCT) == "true") {
                 selectProductMode = true
+            }
+        }
+        if (arguments!!.containsKey(ARG_SELECT_INVENTORY)) {
+            if (arguments!!.get(ARG_SELECT_INVENTORY) == "true") {
+                selectInventoryMode = true
             }
         }
         if (arguments.containsKey(ARG_PASS_PRODUCER_UID)) {
@@ -111,7 +119,7 @@ class SaleProductCategoryListPresenter(context: Any,
             setCategoryOnView(moreRecent, moreCategory)
         }
 
-        if (selectProductMode) {
+        if (selectProductMode || selectInventoryMode) {
             view.hideFAB(true)
         }
 
@@ -259,7 +267,11 @@ class SaleProductCategoryListPresenter(context: Any,
                 args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
                 impl.go(SaleItemDetailView.VIEW_NAME, args, context)
                 view.finish()
-            } else {
+            } else if (selectInventoryMode){
+                //Go to SelectProducersPresenter
+                //TODO: this
+
+            } else{
                 //Go to product detail.
                 args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
                 impl.go(SaleProductDetailView.VIEW_NAME, args, context)

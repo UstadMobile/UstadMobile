@@ -201,6 +201,8 @@
     <string name="please_select_customer">Please select a customer to save the sale</string>
     <string name="please_enter_a_name">Please enter in a name</string>
 
+    <string name="sort_by_inventory_asc">Inventory (asc)</string>
+    <string name="sort_by_inventory_desc">Inventory (desc)</string>
 
 
 </resources>

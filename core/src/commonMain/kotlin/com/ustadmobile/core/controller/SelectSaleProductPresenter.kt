@@ -35,7 +35,8 @@ import kotlinx.coroutines.launch
 class SelectSaleProductPresenter(context: Any,
                                  arguments: Map<String, String>?,
                                  view: SelectSaleProductView,
-                                 private val catalogMode: Boolean)
+                                 private val catalogMode: Boolean,
+                                 private val inventoryMode:Boolean = false)
     : UstadBaseController<SelectSaleProductView>(context, arguments!!, view) {
 
     private var recentProvider: DataSource.Factory<Int, SaleProduct>? = null
@@ -112,7 +113,21 @@ class SelectSaleProductPresenter(context: Any,
     fun handleClickProductMulti(productUid: Long, isCategory: Boolean, editMode: Boolean) {
 
         val args = HashMap<String, String>()
-        if (catalogMode) {
+        if(inventoryMode){
+            if (isCategory) {
+                if(editMode){
+                    args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
+                    impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+                }else {
+                    args.put(ARG_SALEPRODUCT_UID, productUid.toString())
+                    impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
+                }
+            } else {
+                //Go to SelectProducers
+                //TODO: This
+            }
+        }
+        else if (catalogMode) {
 
             if (isCategory) {
                 if(editMode){

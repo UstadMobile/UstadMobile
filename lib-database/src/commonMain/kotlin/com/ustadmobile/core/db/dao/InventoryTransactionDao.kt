@@ -6,6 +6,7 @@ import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.InventoryTransaction
+import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
@@ -35,7 +36,7 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
     GROUP BY saleUid, transactionDate
     """)
     abstract fun findAllInventoryByProduct(saleProductUid: Long, leUid: Long)
-            : DataSource.Factory<Int, InventoryItemDao>
+            : DataSource.Factory<Int, InventoryTransactionDetail>
 
 
 }

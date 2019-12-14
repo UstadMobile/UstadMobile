@@ -41,6 +41,19 @@ open class InventoryTransaction() {
     @LastChangedBy
     var inventoryTransactionItemLCB: Int = 0
 
+    constructor(inventoryItemUid: Long, leUid: Long) : this(){
+        inventoryTransactionInventoryItemUid = inventoryItemUid
+        inventoryTransactionFromLeUid = leUid
+        inventoryTransactionActive = true
+    }
+
+    constructor(inventoryItemUid: Long, leUid: Long, saleUid:Long):this(){
+        inventoryTransactionInventoryItemUid = inventoryItemUid
+        inventoryTransactionFromLeUid = leUid
+        inventoryTransactionActive = true
+        inventoryTransactionSaleUid = saleUid
+    }
+
     init {
     }
 

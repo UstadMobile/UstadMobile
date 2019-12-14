@@ -18,7 +18,7 @@ open class InventoryItem() {
     var inventoryItemUid: Long = 0
 
     //The SaleProduct this inventory represents
-    var inventoryItemSaleProductUid = 0
+    var inventoryItemSaleProductUid : Long = 0
 
     //The LE adding this
     var inventoryItemLeUid : Long = 0
@@ -40,6 +40,14 @@ open class InventoryItem() {
     var inventoryItemLCB: Int = 0
 
     init {
+    }
+
+    constructor(saleProductUid : Long, leUid: Long, selectedWeUid: Long, created: Long):this(){
+        inventoryItemSaleProductUid = saleProductUid
+        inventoryItemWeUid = selectedWeUid
+        inventoryItemDateAdded = created
+        inventoryItemLeUid = leUid
+        inventoryItemActive = true
     }
 
 }

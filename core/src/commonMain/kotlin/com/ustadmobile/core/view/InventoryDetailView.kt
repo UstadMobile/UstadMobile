@@ -1,13 +1,15 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 
 
 /**
- * Core View. Screen is for SelectProducer's View
+ * Core View. Screen is for SaleList's View
  */
-interface SelectProducerView : UstadView {
+interface InventoryDetailView : UstadView {
+
+    //Any argument keys:
 
     /**
      * Method to finish the screen / view.
@@ -20,18 +22,14 @@ interface SelectProducerView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: DataSource.Factory<Int, Person>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, InventoryTransactionDetail>)
 
-    fun updateSpinner(presents: Array<String?>)
+    fun updateTotalInventoryCount(count: Int)
 
     companion object {
 
-
         // This defines the view name that is an argument value in the go() in impl.
-        const val VIEW_NAME = "SelectProducer"
-
-        //Any argument keys:
-        const val ARG_PRODUCER_UID = "ArgProducerUid"
+        const val VIEW_NAME = "InventoryDetail"
     }
 
 

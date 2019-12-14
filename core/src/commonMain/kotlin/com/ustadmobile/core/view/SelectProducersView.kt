@@ -1,26 +1,19 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithInventory
 
 
 /**
  * Core View. Screen is for SelectProducer's View
  */
-interface SelectProducerView : UstadView {
+interface SelectProducersView : UstadView {
 
     /**
      * Method to finish the screen / view.
      */
     fun finish()
 
-
-    /**
-     * Sets the given provider to the view's provider adapter.
-     *
-     * @param listProvider The provider to set to the view
-     */
-    fun setListProvider(listProvider: DataSource.Factory<Int, Person>)
+    fun updateProducersOnView(producers: List<PersonWithInventory>)
 
     fun updateSpinner(presents: Array<String?>)
 
