@@ -31,6 +31,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
 
     init {
+        System.setProperty("chromedriver", System.getProperty(CHROME_PATH_KEY))
         proxy.start()
         proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.RESPONSE_CONTENT, CaptureType.RESPONSE_HEADERS, CaptureType.RESPONSE_BINARY_CONTENT)
 
