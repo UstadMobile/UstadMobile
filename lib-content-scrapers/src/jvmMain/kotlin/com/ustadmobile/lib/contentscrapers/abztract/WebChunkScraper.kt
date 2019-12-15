@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CHROME_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import net.lightbody.bmp.BrowserMobProxyServer
@@ -41,7 +42,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
         chromeDriver = ChromeDriver(options)
     }
 
-    fun startHarScrape(url: String, waitCondition :WaitConditionFn? = null, filters: List<ScrapeFilterFn> = listOf()): ContainerManager {
+    fun startHarScrape(url: String, waitCondition :WaitConditionFn? = null, block: (proxy: BrowserMobProxyServer) -> Unit, filters: List<ScrapeFilterFn> = listOf()): ContainerManager {
 
         clearAnyLogsInChrome()
         proxy.newHar("Scraper")
@@ -54,6 +55,8 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
         var entries = proxy.har.log.entries
 
         checkStartingUrlNot404(entries, url)
+
+        block.invoke(proxy)
 
         return makeHarContainer(entries, filters)
     }
@@ -141,6 +144,10 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
         }
 
         return waitDriver.until(jQueryLoad) && waitDriver.until(jsLoad)
+    }
+
+    override fun close() {
+        chromeDriver.quit()
     }
 
 
