@@ -1,10 +1,13 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManagerCommon
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CHROME_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.db.entities.Container
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
@@ -26,7 +29,7 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
 
-abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
+abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid) {
 
     var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
@@ -34,15 +37,21 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
     init {
         System.setProperty("chromedriver", System.getProperty(CHROME_PATH_KEY))
         proxy.start()
-        proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.RESPONSE_CONTENT, CaptureType.RESPONSE_HEADERS, CaptureType.RESPONSE_BINARY_CONTENT)
+        proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS,
+                CaptureType.RESPONSE_CONTENT,
+                CaptureType.RESPONSE_HEADERS,
+                CaptureType.RESPONSE_BINARY_CONTENT)
 
         var seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
+        seleniumProxy.noProxy = "<-loopback>"
         val options = ChromeOptions()
         options.setCapability(CapabilityType.PROXY, seleniumProxy)
         chromeDriver = ChromeDriver(options)
     }
 
-    fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null, filters: List<ScrapeFilterFn> = listOf(), block: (proxy: BrowserMobProxyServer) -> Unit): ContainerManager {
+    fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null,
+                       filters: List<ScrapeFilterFn> = listOf(),
+                       block: (proxy: BrowserMobProxyServer) -> Boolean): ContainerManager? {
 
         clearAnyLogsInChrome()
         proxy.newHar("Scraper")
@@ -78,6 +87,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
 
     private fun makeHarContainer(entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>): ContainerManager {
 
+        var containerManager = ContainerManager(createBaseContainer(), db, db)
 
         entries.forEach {
 
@@ -103,7 +113,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
                 when {
                     response.content.encoding == "base64" -> {
                         var base = Base64.getDecoder().decode(response.content.text)
-                        FileUtils.writeByteArrayToFile(file, base)
+                        containerManager.addEntries(ContainerManager.FileEntrySource())
                     }
                     else -> FileUtils.writeStringToFile(file, response.content.text, ScraperConstants.UTF_ENCODING)
                 }
@@ -148,6 +158,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
 
     override fun close() {
         chromeDriver.quit()
+        proxy.stop()
     }
 
 

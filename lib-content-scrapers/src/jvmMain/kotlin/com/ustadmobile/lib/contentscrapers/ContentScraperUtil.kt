@@ -477,7 +477,7 @@ object ContentScraperUtil {
      * Set the system property of the driver in your machine
      */
     fun setChromeDriverLocation() {
-        System.setProperty("chromedriver", System.getProperty(CHROME_PATH_KEY))
+
     }
 
 

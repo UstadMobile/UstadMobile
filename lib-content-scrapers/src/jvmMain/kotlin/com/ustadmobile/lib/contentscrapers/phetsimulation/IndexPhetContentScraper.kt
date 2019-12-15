@@ -156,7 +156,7 @@ class IndexPhetContentScraper {
                         val content = File(langLocation, title + ScraperConstants.ZIP_EXT)
                         if (scraper.languageUpdatedMap[langCode]!!) {
 
-                            ContentScraperUtil.insertContainer(containerDao!!, translation,
+                            ContentScraperUtil.insertContainer(containerDao, translation,
                                     true, ScraperConstants.MIMETYPE_TINCAN,
                                     content.lastModified(),
                                     content, db, repository, containerDir)

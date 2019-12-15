@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.harscraper
 
 import com.google.gson.GsonBuilder
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
@@ -8,7 +10,9 @@ import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.io.PrintWriter
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.Har
@@ -18,9 +22,12 @@ import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
 import sun.misc.FileURLMapper
 import sun.misc.IOUtils
 import java.io.File
+import java.io.OutputStream
+import java.io.StringWriter
 import java.lang.IllegalArgumentException
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
@@ -67,30 +74,18 @@ class TestHarScraper {
 
         val containerFolder = Files.createTempDirectory("harcontainer").toFile()
 
-        val harFolder = Files.createTempDirectory("harcontent").toFile()
+        var writer = StringWriter()
 
+        var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
+        var containerManager = scraper.startHarScrape(url.toString()){
+            it.har.writeTo(writer)
+            true
+        }
 
-        var proxy = BrowserMobProxyServer()
-        proxy.start()
+        var harEntry = containerManager?.getEntry("harcontent")
+        var harContent = containerManager?.getInputStream(harEntry!!)?.readBytes()?.toString(UTF_8)
 
-        var seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
-
-        seleniumProxy.noProxy = "<-loopback>"
-        var driver = setupProxyWithSelenium(proxy, seleniumProxy,"test")
-        scrapeUrlwithHar(proxy, driver, url.toString(), harFolder, null, null)
-        var harFile = File(harFolder, "harcontent")
-        harFile.createNewFile()
-        proxy.har.writeTo(harFile)
-        proxy.stop()
-
-        var container = ContentScraperUtil.insertContainer(db.containerDao, entry, true, "application/har+zip", harFolder.lastModified(), harFolder, db, db, containerFolder)
-
-        var containerManager = ContainerManager(container, db, db)
-
-        var harEntry = containerManager.getEntry("harcontent")
-        var harContent = containerManager.getInputStream(harEntry!!).readBytes().toString(UTF_8)
-
-        Assert.assertEquals("har content matches", FileUtils.readFileToString(harFile, UTF_8), harContent)
+        Assert.assertEquals("har content matches", writer.toString(), harContent)
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
@@ -99,8 +94,8 @@ class TestHarScraper {
         har.log.entries.forEach{
 
             var path = it.response.content.text
-            var pathEntry = containerManager.getEntry(path)
-            var contentBytes = containerManager.getInputStream(pathEntry!!).readBytes()
+            var pathEntry = containerManager?.getEntry(path)
+            var contentBytes = containerManager?.getInputStream(pathEntry!!)?.readBytes()
 
             var originalBytes: ByteArray?
             originalBytes = when {
