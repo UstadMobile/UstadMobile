@@ -1,28 +1,40 @@
 package com.ustadmobile.core.networkmanager.downloadmanager
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
-interface ContainerDownloadManager {
+abstract class ContainerDownloadManager {
 
-    suspend fun getDownloadJobItemByJobItemUid(jobItemUid: Int): DoorLiveData<DownloadJobItem?>
+    abstract suspend fun getDownloadJobItemByJobItemUid(jobItemUid: Int): DoorLiveData<DownloadJobItem?>
 
-    suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Int): DoorLiveData<DownloadJobItem?>
+    abstract suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
 
-    suspend fun createDownloadJob(downloadJob: DownloadJob)
+    abstract suspend fun createDownloadJob(downloadJob: DownloadJob)
 
-    suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>)
+    abstract suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>)
 
-    suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem)
+    abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem)
 
-    suspend fun enqueue(downloadJobId: Int)
+    abstract suspend fun enqueue(downloadJobId: Int)
 
-    suspend fun pause(downloadJobId: Int)
+    abstract suspend fun pause(downloadJobId: Int)
 
-    suspend fun cancel(downloadJobId: Int)
+    abstract suspend fun cancel(downloadJobId: Int)
 
-    suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean)
+    abstract suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean)
 
-    suspend fun handleConnectivityChanged(status: ConnectivityStatus)
+    abstract suspend fun handleConnectivityChanged(status: ConnectivityStatus)
+
+    fun determineParentStatusFromChildStatuses(childStatuses: List<DownloadJobItemUidAndStatus>): Int {
+        return when {
+            childStatuses.all { it.djiStatus > JobStatus.COMPLETE } -> {
+                childStatuses.maxBy { it.djiStatus }?.djiStatus ?: JobStatus.FAILED
+            }
+            childStatuses.any { it.djiStatus == JobStatus.RUNNING } -> JobStatus.RUNNING
+            childStatuses.any { it.djiStatus == JobStatus.WAITING_FOR_CONNECTION } -> JobStatus.WAITING_FOR_CONNECTION
+            else -> childStatuses.minBy { it.djiStatus }?.djiStatus ?: 0
+        }
+    }
 
 }

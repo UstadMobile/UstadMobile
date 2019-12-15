@@ -58,35 +58,6 @@ abstract class DownloadJobItemDao {
     @Insert
     abstract fun insert(jobRunItem: DownloadJobItem): Long
 
-    @Query("DELETE FROM DownloadJobItem")
-    abstract suspend fun deleteAllAsync()
-
-    /**
-     * Update the main status fields for the given DownloadJobitem
-     *
-     * @param djiUid DownloadJobItemId to updateStateAsync (primary key)
-     * @param djiStatus status property to set
-     * @param downloadedSoFar downloadedSoFar property to set
-     * @param downloadLength downloadLength property to set
-     * @param currentSpeed currentSpeed property to set
-     */
-    @Query("Update DownloadJobItem SET " +
-            "djiStatus = :djiStatus, downloadedSoFar = :downloadedSoFar, " +
-            "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
-            " WHERE djiUid = :djiUid")
-    abstract fun updateDownloadJobItemStatusIm(djiUid: Long, djiStatus: Int,
-                                                         downloadedSoFar: Long, downloadLength: Long,
-                                                         currentSpeed: Long)
-
-    @Transaction
-    open fun updateDownloadJobItemStatus(djiUid: Long, djiStatus: Int,
-                                    downloadedSoFar: Long, downloadLength: Long,
-                                    currentSpeed: Long) {
-        println("updateDownloadJobItemStatus $djiUid -> $djiStatus")
-        updateDownloadJobItemStatusIm(djiUid, djiStatus, downloadedSoFar, downloadLength,
-                currentSpeed)
-    }
-
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     abstract fun updateItemStatusInt(djiUid: Int, status: Int)
 
@@ -96,9 +67,6 @@ abstract class DownloadJobItemDao {
         updateItemStatusInt(djiUid, status)
     }
 
-
-    @Query("UPDATE DownloadJobItem SET numAttempts = numAttempts + 1 WHERE djiUid = :djiUid")
-    abstract fun incrementNumAttempts(djiUid: Int)
 
     @Query("SELECT DownloadJobItem.* FROM " +
             "DownloadJobItem " +
@@ -222,5 +190,23 @@ abstract class DownloadJobItemDao {
 
     @Query("SELECT * FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid")
     abstract fun findByDownloadJobUid(downloadJobUid: Int): List<DownloadJobItem>
+
+    @Query("""UPDATE DownloadJobItem SET djiStatus = :status, 
+        downloadedSoFar = :downloadedSoFar, 
+        downloadLength = :downloadLength
+        WHERE djiUid = :djiUid""")
+    abstract fun updateStatusAndProgress(djiUid: Int, status: Int, downloadedSoFar: Long, downloadLength: Long)
+
+    @Transaction
+    open fun updateStatusAndProgressList(downloadJobItems: List<DownloadJobItem>) {
+        downloadJobItems.forEach {
+            updateStatusAndProgress(it.djiUid, it.djiStatus, it.downloadedSoFar, it.downloadLength)
+        }
+    }
+
+    @Query("""SELECT djiUid, djiStatus FROM DownloadJobItem WHERE djiUid IN 
+        (SELECT djiChildDjiUid FROM DownloadJobItemParentChildJoin WHERE djiParentDjiUid = :parentDjiUid)""")
+    abstract fun getUidAndStatusByParentJobItem(parentDjiUid: Int): List<DownloadJobItemUidAndStatus>
+
 
 }
