@@ -32,6 +32,10 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
 
     private var fam: FloatingActionMenu? = null
 
+    override fun updateToolbar(title: String) {
+        toolbar!!.title = title
+    }
+
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options

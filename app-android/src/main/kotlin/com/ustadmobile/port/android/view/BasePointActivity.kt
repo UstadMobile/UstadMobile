@@ -84,6 +84,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
     private var salesFragment: SaleListFragment? = null
     private var classesFragment: ClazzListFragment? = null
     private var peopleListFragment: PeopleListFragment? = null
+    private var inventoryListFragment: InventoryListFragment? = null
 
     private var lastSyncTime: Long = 0
     private var syncing = false
@@ -110,6 +111,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             SelectSaleProductView.VIEW_NAME to CatalogListFragment::class.java,
             ComingSoonView.VIEW_NAME to ComingSoonFragment::class.java,
             SaleListView.VIEW_NAME to SaleListFragment::class.java,
+            InventoryListView.VIEW_NAME to InventoryListFragment::class.java,
             DashboardEntryListView.VIEW_NAME to DashboardEntryListFragment::class.java)
 
     /**
@@ -175,6 +177,8 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                     VIEW_POSITION_POSITION_REPORTS= this.bottomCount
                 everyItem.viewName == ContentListView.VIEW_NAME ->
                     VIEW_POSITION_POSITION_CONTENT = this.bottomCount
+                everyItem.viewName == InventoryListView.VIEW_NAME ->
+                    VIEW_POSITION_POSITION_INVENTORY = this.bottomCount
             }
             bottomCount++
 
@@ -227,14 +231,12 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
             runOnUiThread {
                 Picasso
-                        .get()
-                        .load(imageUri)
-                        .resize(dpToPxImagePerson(), dpToPxImagePerson())
-                        .centerCrop()
-                        .into(profileImage)
-
+                    .get()
+                    .load(imageUri)
+                    .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                    .centerCrop()
+                    .into(profileImage)
             }
-
         }
     }
 
@@ -633,6 +635,12 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             }
             VIEW_POSITION_POSITION_REPORTS -> {
             }
+
+            VIEW_POSITION_POSITION_INVENTORY -> {
+                if(inventoryListFragment != null){
+                    inventoryListFragment!!.searchInventory(query)
+                }
+            }
             else -> {
             }
         }
@@ -723,6 +731,11 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                     return f
                 }
 
+                VIEW_POSITION_POSITION_INVENTORY -> {
+                    inventoryListFragment = f as InventoryListFragment?
+                    return f
+                }
+
                 position -> {
                     return f
                 }
@@ -751,6 +764,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         var VIEW_POSITION_POSITION_PEOPLE = -1
         var VIEW_POSITION_POSITION_REPORTS = -1
         var VIEW_POSITION_POSITION_CONTENT = -1
+        var VIEW_POSITION_POSITION_INVENTORY = -1
 
         private val IMAGE_PERSON_THUMBNAIL_WIDTH = 26
 

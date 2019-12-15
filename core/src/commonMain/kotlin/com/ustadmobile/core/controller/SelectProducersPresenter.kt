@@ -4,20 +4,20 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.generated.locale.MessageID.item
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SelectProducersView
-import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_PRODUCER_UID
-import com.ustadmobile.core.view.SelectSaleProductView
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_UID
 import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.InventoryTransaction
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 /**
  * Presenter for SelectProducer view
@@ -38,6 +38,9 @@ class SelectProducersPresenter(context: Any,
     private var idToOrderInteger: HashMap<Long, Int>? = null
 
     internal var weToCount: HashMap<Long, Int>
+
+    var inventoryAddition = false
+    var inventorySelection = false
 
     val loggedInPersonUid : Long
 
@@ -69,6 +72,21 @@ class SelectProducersPresenter(context: Any,
             //Create a new SaleItem? - shouldn't happen.
             //throw exception.
         }
+
+        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)) {
+            val addition = (arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!.toString())
+            if(addition.toLowerCase().equals("true")){
+                inventoryAddition = true
+            }
+        }
+
+        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)) {
+            val selection = (arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!.toString())
+            if(selection.toLowerCase().equals("true")){
+                inventorySelection = true
+            }
+        }
+
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
         weToCount = HashMap()
@@ -136,12 +154,24 @@ class SelectProducersPresenter(context: Any,
     }
 
 
+    fun handleClickSave(){
+
+        if(inventoryAddition) {
+            handleClickSaveInventory()
+        }
+        if(inventorySelection){
+            handleClickSelectInventory()
+        }
+
+    }
+
     private fun handleClickSaveInventory(){
 
         GlobalScope.launch {
             for(weUid in weToCount.keys) {
             val count = weToCount[weUid]
-                val newInventoryItem = InventoryItem(saleProductUid, loggedInPersonUid, weUid, UMCalendarUtil.getDateInMilliPlusDays(0))
+                val newInventoryItem = InventoryItem(saleProductUid, loggedInPersonUid, weUid,
+                        UMCalendarUtil.getDateInMilliPlusDays(0))
                 providerDao.insertInventoryItem(newInventoryItem, count!!, loggedInPersonUid)
             }
             view.finish()
@@ -237,7 +267,6 @@ class SelectProducersPresenter(context: Any,
         private val SORT_ORDER_STOCK_ASC = 3
         private val SORT_ORDER_STOCK_DESC = 4
 
-        const val ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID = "saleProducersSaleProductUid"
-        const val ARG_SELECT_PRODUCERS_SALE_UID = "saleProducersSaleUid"
+
     }
 }

@@ -56,6 +56,7 @@ interface SaleProductCategoryListView : UstadView {
         const val ARG_PASS_SALE_ITEM_UID = "ArgPassSaleItemUid"
         const val ARG_MORE_RECENT = "ArgMoreRecent"
         const val ARG_MORE_CATEGORY = "ArgMoreCategory"
+        const val ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE = "ArgSaleProductCategoryInventoryMode"
     }
 
 }

@@ -183,6 +183,14 @@
             android:name="com.ustadmobile.port.android.view.SelectPersonDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.SelectProducersActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/select_producers" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.InventoryDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/sale_product_inventory" />
 
 
         <!-- End of Goldozi-->

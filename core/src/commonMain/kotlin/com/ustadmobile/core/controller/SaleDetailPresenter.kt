@@ -140,7 +140,6 @@ class SaleDetailPresenter(context: Any,
             getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
             updateSaleItemProvider(saleUid)
             updatePaymentItemProvider(saleUid)
-
             getPaymentTotalAndUpdateView()
         }
     }
@@ -167,7 +166,6 @@ class SaleDetailPresenter(context: Any,
         //Get provider
         umProvider = saleItemDao.findAllSaleItemListDetailActiveBySaleProvider(saleUid)
         view.setListProvider(umProvider)
-
     }
 
     fun updatePaymentItemProvider(saleUid: Long) {
@@ -189,10 +187,8 @@ class SaleDetailPresenter(context: Any,
                 view.runOnUiThread(Runnable {
                     resLive.observe(thisP, thisP::updateOrderTotal)
                 })
-
             }
         }
-
     }
 
     private fun updateOrderTotal(res: Long?){
@@ -376,7 +372,6 @@ class SaleDetailPresenter(context: Any,
                     view.runOnUiThread(Runnable {
                         resultLive.observe(thisP, thisP::handleUpdateSaleName)
                     })
-
                 }
             }
         }
@@ -395,7 +390,6 @@ class SaleDetailPresenter(context: Any,
         args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
         args.put(ARG_SALE_ITEM_NAME, currentSaleName)
         impl.go(SaleItemDetailView.VIEW_NAME, args, context)
-
     }
 
     fun handleClickAddPayment() {
@@ -445,13 +439,13 @@ class SaleDetailPresenter(context: Any,
         args.put(SelectPersonDialogView.ARG_SP_LE_UID,
                 UmAccountManager.getActiveAccount(context)!!.personUid.toString())
         impl.go(SelectPersonDialogView.VIEW_NAME, args, context)
-
     }
 
     fun handleClickAddSaleItem() {
 
         val saleItem = SaleItem()
         saleItem.saleItemSaleUid = updatedSale!!.saleUid
+        //TODO: Check this
         saleItem.saleItemDueDate = UMCalendarUtil.getDateInMilliPlusDays(2)
         GlobalScope.launch {
             try {
@@ -463,6 +457,7 @@ class SaleDetailPresenter(context: Any,
                 args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
                 impl.go(SelectProducerView.VIEW_NAME, args, context)
             }catch(e:Exception){
+                //TODO: Change to Log / ACRA
                 println(e.message)
             }
         }
@@ -480,7 +475,6 @@ class SaleDetailPresenter(context: Any,
     fun handleSetDelivered(delivered: Boolean) {
         updatedSale!!.saleDone = delivered
         updatedSale!!.salePreOrder = !delivered
-
     }
 
     fun handleLocationSelected(position: Int) {

@@ -7,22 +7,24 @@ import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SaleItemDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_PRODUCT_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
-import com.ustadmobile.core.view.SaleProductCategoryListView
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_CATEGORY
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_RECENT
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_PRODUCER_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_SALE_ITEM_UID
+import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEPRODUCT_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_PRODUCT
-import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
-import com.ustadmobile.core.view.SelectSaleProductView
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_MODE
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
+import com.ustadmobile.core.view.SelectSaleProductView.Companion.ARG_INVENTORY_MODE
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -36,7 +38,7 @@ class SelectSaleProductPresenter(context: Any,
                                  arguments: Map<String, String>?,
                                  view: SelectSaleProductView,
                                  private val catalogMode: Boolean,
-                                 private val inventoryMode:Boolean = false)
+                                 private var inventoryMode:Boolean = false)
     : UstadBaseController<SelectSaleProductView>(context, arguments!!, view) {
 
     private var recentProvider: DataSource.Factory<Int, SaleProduct>? = null
@@ -53,6 +55,7 @@ class SelectSaleProductPresenter(context: Any,
     private var saleItemUid: Long = 0
 
     var searchQuery: String = "%%"
+
 
     fun setQuerySearch(query:String){
         searchQuery = "%$query%"
@@ -74,11 +77,20 @@ class SelectSaleProductPresenter(context: Any,
             saleItemUid = (arguments.get(ARG_SALE_ITEM_UID)!!.toLong())
         }
 
+        if(arguments.containsKey(ARG_INVENTORY_MODE)){
+            inventoryMode = true
+        }
+
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         updateProviders()
+
+        if(inventoryMode){
+            val selectTypeTitle = impl.getString(MessageID.select_type, context)
+            view.updateToolbar(selectTypeTitle)
+        }
     }
 
     fun updateProviders(){
@@ -115,16 +127,24 @@ class SelectSaleProductPresenter(context: Any,
         val args = HashMap<String, String>()
         if(inventoryMode){
             if (isCategory) {
-                if(editMode){
-                    args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
-                    impl.go(SaleProductDetailView.VIEW_NAME, args, context)
-                }else {
-                    args.put(ARG_SALEPRODUCT_UID, productUid.toString())
-                    impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
-                }
+                args.put(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE, "true")
+                impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
             } else {
                 //Go to SelectProducers
-                //TODO: This
+
+                if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)){
+                    args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION,
+                            arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!)
+                }
+
+                if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)){
+                    args.put(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION,
+                            arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!)
+                }
+
+                view.finish()
+                args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID, productUid.toString())
+                impl.go(SelectProducersView.VIEW_NAME, args, context)
             }
         }
         else if (catalogMode) {

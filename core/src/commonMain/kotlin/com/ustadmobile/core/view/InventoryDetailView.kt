@@ -30,6 +30,8 @@ interface InventoryDetailView : UstadView {
 
         // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "InventoryDetail"
+
+        const val ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID = "ArgInventoryDetailSaleProductUid"
     }
 
 

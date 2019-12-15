@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.InventoryDetailView
+import com.ustadmobile.core.view.InventoryDetailView.Companion.ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -18,7 +19,7 @@ import kotlin.math.log
 class InventoryDetailPresenter(context: Any,
                                arguments: Map<String, String>?,
                                view: InventoryDetailView,
-                               val systemImpl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
+                               val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
                                private val repository: UmAppDatabase =
                                        UmAccountManager.getRepositoryForActiveAccount(context))
     : UstadBaseController<InventoryDetailView>(context, arguments!!, view) {
@@ -39,8 +40,10 @@ class InventoryDetailPresenter(context: Any,
         //Initialise Daos, etc here.
         rvDao = repository.inventoryTransactionDao
 
+        inventoryDao = repository.inventoryItemDao
+
         if (arguments!!.containsKey(ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID)) {
-            saleProductUid = (arguments!!.get(ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID)!!.toLong())
+            saleProductUid = (arguments.get(ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID)!!.toLong())
         } else {
             //Create a new SaleItem? - shouldn't happen.
             //throw exception.
@@ -67,8 +70,16 @@ class InventoryDetailPresenter(context: Any,
 
     }
 
+    fun handleClickSaleTransaction(saleUid:Long){
+
+    }
+
+    fun handleClickInventoryTransaction(date: Long){
+
+    }
+
     companion object{
-        const val  ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID = "ArgInventoryDetailSaleProductUid"
+
     }
 
 }

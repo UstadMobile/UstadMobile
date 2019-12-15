@@ -145,6 +145,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PeopleListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PeopleListActivity"),
             CustomerDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}CustomerDetailDialogFragment"),
             SelectPersonDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectPersonDialogFragment"),
+            InventoryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}InventoryListFragment"),
+            SelectProducersView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectProducersActivity"),
+            InventoryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}InventoryDetailActivity"),
 
             //IRC:
             BasePointView.VIEW_NAME to Class.forName("${ PACKAGE_NAME}BasePointActivity"),

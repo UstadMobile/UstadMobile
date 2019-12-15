@@ -8,14 +8,12 @@ import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.Companion.ARG_ADD_TO_CATEGORY_TYPE_CATEGORY
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.Companion.ARG_ADD_TO_CATEGORY_TYPE_ITEM
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.Companion.ARG_SALE_PRODUCT_CATEGORY_TO_ASSIGN_TO_UID
-import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_PRODUCT_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
-import com.ustadmobile.core.view.SaleProductCategoryListView
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_CATEGORY
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_RECENT
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_PRODUCER_UID
@@ -23,7 +21,6 @@ import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEPRODUCT_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_INVENTORY
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_PRODUCT
-import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -269,7 +266,21 @@ class SaleProductCategoryListPresenter(context: Any,
                 view.finish()
             } else if (selectInventoryMode){
                 //Go to SelectProducersPresenter
-                //TODO: this
+
+                if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)){
+                    args.put(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION,
+                            arguments!!.get(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!)
+                }
+
+                if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)){
+                    args.put(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION,
+                            arguments!!.get(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!)
+                }
+
+                view.finish()
+                args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID, productUid.toString())
+                impl.go(SelectProducersView.VIEW_NAME, args, context)
+
 
             } else{
                 //Go to product detail.

@@ -43,7 +43,7 @@ import kotlin.jvm.Volatile
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
-    ], version = 27)
+    ], version = 28)
 
 
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {

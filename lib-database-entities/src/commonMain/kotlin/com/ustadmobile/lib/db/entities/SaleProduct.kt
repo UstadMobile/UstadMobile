@@ -80,6 +80,41 @@ open class SaleProduct() {
         this.saleProductDesc = decs
         this.saleProductActive = isActive
         this.saleProductCategory = category
+    }
 
+    fun getNameLocale(locale: String): String{
+        var saleProductNameLocale : String?
+        if(locale.equals("fa")){
+            saleProductNameLocale = saleProductNameDari
+        }else if(locale.equals("ps")){
+            saleProductNameLocale = saleProductNamePashto
+        }else{
+            saleProductNameLocale = saleProductName
+        }
+        if(saleProductNameLocale.equals("")){
+            saleProductNameLocale = saleProductName
+        }
+        if(saleProductNameLocale == null ){
+            saleProductNameLocale = ""
+        }
+        return saleProductNameLocale
+    }
+
+    fun getDescLocale(locale: String): String{
+        var saleProductDescLocale : String?
+        if(locale.equals("fa")){
+            saleProductDescLocale = saleProductDescDari
+        }else if(locale.equals("ps")){
+            saleProductDescLocale = saleProductDescPashto
+        }else{
+            saleProductDescLocale = saleProductDesc
+        }
+        if(saleProductDescLocale.equals("")){
+            saleProductDescLocale = saleProductDesc
+        }
+        if(saleProductDescLocale == null ){
+            saleProductDescLocale = ""
+        }
+        return saleProductDescLocale
     }
 }

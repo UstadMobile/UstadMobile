@@ -21,9 +21,8 @@ import com.ustadmobile.core.controller.InventoryListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.InventoryListView
-import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.lib.db.entities.SaleListDetail
-import com.ustadmobile.lib.db.entities.SaleProduct
+import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class InventoryListFragment : UstadBaseFragment, InventoryListView {
@@ -72,7 +71,7 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        fab!!.setOnClickListener({ v -> mPresenter!!.handleClickPrimaryActionButton() })
+        fab!!.setOnClickListener({ v -> mPresenter!!.handleClickAddItems() })
 
 
         return rootContainer
@@ -112,22 +111,21 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
 
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>,
-                                 paymentsDueTab: Boolean,
-                                 preOrderTab: Boolean) {
+    override fun setListProvider(factory: DataSource.Factory<Int, SaleProductWithInventoryCount>) {
 
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                .saleProductDaoBoundaryCallbacks.findAllActiveSNWIProviderByNameAsc(factory)
+                .inventoryItemDaoBoundaryCallbacks.findAllInventoryByProduct(factory)
 
-        val recyclerAdapter = SelectSaleProductWithDescRecyclerAdapter(DIFF_SALEPRODUCT_CALLBACK, mPresenter!!,
-                paymentsDueTab, preOrderTab,this, context!!)
+        val recyclerAdapter = InventoryListRecyclerAdapter(
+                DIFF_SALEPRODUCTWITHINVENTORYCOUNT_CALLBACK, mPresenter!!,
+                activity!!, context!!)
 
         val data =
                 LivePagedListBuilder(factory, 20)
                         .setBoundaryCallback(boundaryCallback)
                         .build()
         data.observe(this,
-                Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
+                Observer<PagedList<SaleProductWithInventoryCount>> { recyclerAdapter.submitList(it) })
 
         mRecyclerView!!.adapter = recyclerAdapter
     }
@@ -161,15 +159,16 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_SALEPRODUCT_CALLBACK: DiffUtil.ItemCallback<SaleProduct> =
-                object : DiffUtil.ItemCallback<SaleProduct>() {
-            override fun areItemsTheSame(oldItem: SaleProduct,
-                                         newItem: SaleProduct): Boolean {
+        val DIFF_SALEPRODUCTWITHINVENTORYCOUNT_CALLBACK
+                : DiffUtil.ItemCallback<SaleProductWithInventoryCount> =
+                object : DiffUtil.ItemCallback<SaleProductWithInventoryCount>() {
+            override fun areItemsTheSame(oldItem: SaleProductWithInventoryCount,
+                                         newItem: SaleProductWithInventoryCount): Boolean {
                 return oldItem.saleProductUid == newItem.saleProductUid
             }
 
-            override fun areContentsTheSame(oldItem: SaleProduct,
-                                            newItem: SaleProduct): Boolean {
+            override fun areContentsTheSame(oldItem: SaleProductWithInventoryCount,
+                                            newItem: SaleProductWithInventoryCount): Boolean {
                 return oldItem.saleProductUid == newItem.saleProductUid
             }
         }

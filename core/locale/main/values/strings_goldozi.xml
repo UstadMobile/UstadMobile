@@ -201,8 +201,23 @@
     <string name="please_select_customer">Please select a customer to save the sale</string>
     <string name="please_enter_a_name">Please enter in a name</string>
 
+    <!--Sprint9-->
     <string name="sort_by_inventory_asc">Inventory (asc)</string>
     <string name="sort_by_inventory_desc">Inventory (desc)</string>
+
+    <string name="items_in_stock">items in stock</string>
+    <string name="item_in_stock">item in stock</string>
+    <string name="sort_stock_asc">Stock (ascending)</string>
+    <string name="sort_stock_desc">Stock (descending)</string>
+    <string name="sort_most_recent">most recent</string>
+    <string name="sort_lease_recent">least recent</string>
+
+    <string name="select_type">Select type</string>
+    <string name="select_producers">Select producers</string>
+
+    <string name="sale_product_inventory">Item inventory</string>
+    <string name="sell">Sell</string>
+    <string name="by">by</string>
 
 
 </resources>

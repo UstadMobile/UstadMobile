@@ -21,10 +21,19 @@ interface SelectProducersView : UstadView {
 
 
         // This defines the view name that is an argument value in the go() in impl.
-        const val VIEW_NAME = "SelectProducer"
+        const val VIEW_NAME = "SelectProducers"
 
         //Any argument keys:
-        const val ARG_PRODUCER_UID = "ArgProducerUid"
+
+        const val ARG_SELECT_PRODUCERS_INVENTORY_MODE = "ArgSelectProducersInventoryMode"
+
+        const val ARG_SELECT_PRODUCERS_INVENTORY_ADDITION = "ArgSelectProducersInventoryAddition"
+        const val ARG_SELECT_PRODUCERS_INVENTORY_SELECTION = "ArgSelectProducersInventorySelection"
+
+
+        const val ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID = "saleProducersSaleProductUid"
+        const val ARG_SELECT_PRODUCERS_SALE_UID = "saleProducersSaleUid"
+
     }
 
 

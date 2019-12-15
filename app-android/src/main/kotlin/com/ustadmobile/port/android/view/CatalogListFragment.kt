@@ -27,7 +27,6 @@ import com.ustadmobile.lib.db.entities.SaleProduct
 
 class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView {
 
-
     override val viewContext: Any
         get() = context!!
 
@@ -45,6 +44,9 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         super.onCreate(savedInstanceState)
     }
 
+    override fun updateToolbar(title: String) {
+        //TODO
+    }
 
     override fun onBackPressed(): Boolean {
         if(floatingActionMenu!!.isOpened()){

@@ -31,11 +31,15 @@ interface SelectSaleProductView : UstadView {
 
     fun showMessage(messageId: Int)
 
+    fun updateToolbar(title: String)
+
     companion object {
 
 
         // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "SelectSaleProduct"
+
+        const val ARG_INVENTORY_MODE = "ArgInventoryMode"
     }
 
 
