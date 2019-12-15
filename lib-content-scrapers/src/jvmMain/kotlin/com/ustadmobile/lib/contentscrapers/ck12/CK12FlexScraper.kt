@@ -12,7 +12,9 @@ class CK12FlexScraper(containerDir: File) : WebChunkScraper(containerDir) {
 
         startHarScrape(url, {
             it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.contentarea"))).click()
-        })
+        }){
+
+        }
 
     }
 

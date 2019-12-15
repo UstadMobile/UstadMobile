@@ -42,7 +42,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
         chromeDriver = ChromeDriver(options)
     }
 
-    fun startHarScrape(url: String, waitCondition :WaitConditionFn? = null, block: (proxy: BrowserMobProxyServer) -> Unit, filters: List<ScrapeFilterFn> = listOf()): ContainerManager {
+    fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null, filters: List<ScrapeFilterFn> = listOf(), block: (proxy: BrowserMobProxyServer) -> Unit): ContainerManager {
 
         clearAnyLogsInChrome()
         proxy.newHar("Scraper")
@@ -76,7 +76,7 @@ abstract class WebChunkScraper(containerDir: File) : Scraper(containerDir) {
     }
 
 
-    private fun makeHarContainer(entries : MutableList<HarEntry>, filters: List<ScrapeFilterFn>): ContainerManager {
+    private fun makeHarContainer(entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>): ContainerManager {
 
 
         entries.forEach {
