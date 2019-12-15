@@ -151,22 +151,27 @@ class KhanContentScraper : Runnable {
 
         var successful = false
         try {
-            driver = factory!!.borrowObject()
+            driver = factory.borrowObject()
             val content = File(destinationDirectory, destinationDirectory.name)
             var mimetype = MIMETYPE_WEB_CHUNK
-            if (ScraperConstants.KhanContentType.VIDEO.type == contentType) {
-                scrapeVideoContent(url.toString())
-                successful = true
-                mimetype = MIMETYPE_KHAN
-            } else if (ScraperConstants.KhanContentType.EXERCISE.type == contentType) {
-                scrapeExerciseContent(url.toString())
-                successful = true
-            } else if (ScraperConstants.KhanContentType.ARTICLE.type == contentType) {
-                scrapeArticleContent(url.toString())
-                successful = true
-            } else {
-                UMLogUtil.logError("unsupported kind = $contentType at url = $url")
-                throw IllegalArgumentException("unsupported kind = $contentType at url = $url")
+            when (contentType) {
+                ScraperConstants.KhanContentType.VIDEO.type -> {
+                    scrapeVideoContent(url.toString())
+                    successful = true
+                    mimetype = MIMETYPE_KHAN
+                }
+                ScraperConstants.KhanContentType.EXERCISE.type -> {
+                    scrapeExerciseContent(url.toString())
+                    successful = true
+                }
+                ScraperConstants.KhanContentType.ARTICLE.type -> {
+                    scrapeArticleContent(url.toString())
+                    successful = true
+                }
+                else -> {
+                    UMLogUtil.logError("unsupported kind = $contentType at url = $url")
+                    throw IllegalArgumentException("unsupported kind = $contentType at url = $url")
+                }
             }
 
             if (isContentUpdated) {
@@ -182,7 +187,7 @@ class KhanContentScraper : Runnable {
             ContentScraperUtil.deleteETagOrModified(destinationDirectory!!, destinationDirectory!!.name)
         }
 
-        factory?.returnObject(driver)
+        factory.returnObject(driver)
 
         queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
