@@ -377,7 +377,8 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         showMessage(message)
     }
 
-    override fun setClazzLogListProvider(factory : DataSource.Factory<Int, ClazzLogWithScheduleStartEndTimes>) {
+    override fun setClazzLogListProvider(factory : DataSource.Factory<Int,
+            ClazzLogWithScheduleStartEndTimes>) {
 
         //Create a recycler adapter to set on the Recycler View.
         val recyclerAdapter = ClazzLogListRecyclerAdapter(DIFF_CALLBACK, context!!, this,
@@ -389,11 +390,10 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
-                    Observer<PagedList<ClazzLogWithScheduleStartEndTimes>> { recyclerAdapter.submitList(it) })
+                    Observer<PagedList<ClazzLogWithScheduleStartEndTimes>> {
+                        recyclerAdapter.submitList(it) })
             mRecyclerView!!.setAdapter(recyclerAdapter)
         }
-
-
     }
 
     companion object {
@@ -438,7 +438,7 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
 
             override fun areContentsTheSame(oldItem: ClazzLogWithScheduleStartEndTimes,
                                             newItem: ClazzLogWithScheduleStartEndTimes): Boolean {
-                return oldItem.clazzLogUid == newItem.clazzLogUid
+                return oldItem == newItem
             }
         }
     }

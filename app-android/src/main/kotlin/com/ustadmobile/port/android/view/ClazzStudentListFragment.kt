@@ -411,7 +411,7 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
 
             override fun areContentsTheSame(oldItem: PersonWithEnrollment,
                                             newItem: PersonWithEnrollment): Boolean {
-                return oldItem.personUid == newItem.personUid
+                return oldItem == newItem
             }
         }
     }
