@@ -329,7 +329,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
             override fun areContentsTheSame(oldItem: ClazzActivityWithChangeTitle,
                                             newItem: ClazzActivityWithChangeTitle): Boolean {
-                return oldItem.clazzActivityUid == newItem.clazzActivityUid
+                return oldItem == newItem
             }
         }
     }
