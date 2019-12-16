@@ -1,17 +1,19 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CHROME_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
+import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
+import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
 import net.lightbody.bmp.proxy.CaptureType
+import org.apache.commons.io.FilenameUtils
+import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.remote.CapabilityType
@@ -19,9 +21,10 @@ import org.openqa.selenium.support.ui.ExpectedCondition
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.io.File
 import org.openqa.selenium.chrome.ChromeOptions
+import java.io.StringWriter
+import java.lang.IllegalArgumentException
 import java.net.URL
 import java.net.URLDecoder
-import java.util.*
 
 
 typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
@@ -33,6 +36,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
     var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
+    val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
 
     init {
         System.setProperty("chromedriver", System.getProperty(CHROME_PATH_KEY))
@@ -56,7 +60,13 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         clearAnyLogsInChrome()
         proxy.newHar("Scraper")
 
-        chromeDriver.get(url)
+
+        try {
+            chromeDriver.get(url)
+        }catch (e: InvalidArgumentException){
+            throw IllegalArgumentException(e)
+        }
+
         val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
@@ -67,7 +77,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         block.invoke(proxy)
 
-        return makeHarContainer(entries, filters)
+        return makeHarContainer(proxy, entries, filters)
     }
 
 
@@ -85,16 +95,15 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     }
 
 
-    private fun makeHarContainer(entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>): ContainerManager {
+    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>): ContainerManager {
 
-        var containerManager = ContainerManager(createBaseContainer(), db, db)
+        var containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
 
         entries.forEach {
 
             try {
 
                 val request = it.request
-                val response = it.response
 
                 if (request.url.contains("accounts.google.com")) {
                     entries.remove(it)
@@ -103,21 +112,17 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                 val decodedPath = URLDecoder.decode(request.url, ScraperConstants.UTF_ENCODING)
                 val decodedUrl = URL(decodedPath)
-                val urlDirectory = ContentScraperUtil.createDirectoryFromUrl(destinationFolder, decodedUrl)
-                var file = File(urlDirectory, request.method + "_" + ContentScraperUtil.getFileNameFromUrl(decodedUrl))
+                var containerPath = getPathNameFromUrl(decodedUrl, request.method)
 
                 filters.forEach { filterFn ->
                     filterFn.invoke(it)
                 }
 
-                when {
-                    response.content.encoding == "base64" -> {
-                        var base = Base64.getDecoder().decode(response.content.text)
-                        containerManager.addEntries(ContainerManager.FileEntrySource())
-                    }
-                    else -> FileUtils.writeStringToFile(file, response.content.text, ScraperConstants.UTF_ENCODING)
+                runBlocking {
+                    containerManager.addEntries(HarEntrySource(it, containerPath))
                 }
-                it.response.content.text = (urlDirectory.name + ScraperConstants.FORWARD_SLASH + file.name)
+
+                it.response.content.text = containerPath
                 it.request = null
 
 
@@ -127,6 +132,19 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
             }
         }
+
+        var writer = StringWriter()
+        proxy.har.writeTo(writer)
+
+        runBlocking {
+            containerManager.addEntries(StringEntrySource(writer.toString(), "harcontent"))
+        }
+
+        return containerManager
+    }
+
+    private fun getPathNameFromUrl(decodedUrl: URL, method: String): String {
+        return decodedUrl.authority.replace(regex, "_") + ScraperConstants.FORWARD_SLASH + FilenameUtils.getPath(decodedUrl.path).replace(regex, "_") + FilenameUtils.getName(decodedUrl.path).replace(regex, "_")
     }
 
     /**

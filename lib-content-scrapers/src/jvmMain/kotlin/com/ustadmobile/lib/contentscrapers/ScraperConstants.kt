@@ -179,6 +179,7 @@ object ScraperConstants {
     const val MIMETYPE_CSS = "text/css"
     const val MIMETYPE_MP4 = "video/mp4"
     const val MIMETYPE_WEB_CHUNK = "application/webchunk+zip"
+    const val MIMETYPE_HAR = "application/har+zip"
     const val MIMETYPE_TINCAN = "application/tincan+zip"
     const val MIMETYPE_WEBM = "video/webm"
     const val MIMETYPE_KHAN = "application/khan-video+zip"

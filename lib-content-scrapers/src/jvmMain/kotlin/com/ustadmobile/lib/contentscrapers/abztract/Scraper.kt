@@ -8,13 +8,16 @@ abstract class Scraper(val containerDir: File, var db: UmAppDatabase, var conten
 
     abstract fun isContentUpdated(): Boolean
 
-    abstract fun scrapeUrl(url: String, tmpLocation: File)
+    abstract fun scrapeUrl(url: String)
 
     abstract fun close()
 
-    fun createBaseContainer(): Container{
+    fun createBaseContainer(mimeType: String): Container{
         val container = Container()
         container.containerContentEntryUid = contentEntryUid
+        container.mimeType = mimeType
+        container.mobileOptimized = true
+        container.cntLastModified = System.currentTimeMillis()
         container.containerUid = db.containerDao.insert(container)
         return container
     }

@@ -9,7 +9,7 @@ import java.io.File
 
 class CK12FlexScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid) {
 
-    override fun scrapeUrl(url: String, tmpLocation: File) {
+    override fun scrapeUrl(url: String) {
 
         startHarScrape(url, {
             it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.contentarea"))).click()
