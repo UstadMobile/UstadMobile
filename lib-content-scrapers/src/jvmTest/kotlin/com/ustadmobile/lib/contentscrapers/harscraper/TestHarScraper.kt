@@ -89,7 +89,11 @@ class TestHarScraper {
 
             var path = it.response.content.text
             var pathEntry = containerManager?.getEntry(path)
-            var contentBytes = containerManager?.getInputStream(pathEntry!!)?.readBytes()
+
+            if(pathEntry == null){
+                return@forEach
+            }
+            var contentBytes = containerManager?.getInputStream(pathEntry)?.readBytes()
 
             var originalBytes: ByteArray?
             originalBytes = when {
@@ -111,7 +115,9 @@ class TestHarScraper {
 
         var url = "hello world"
 
-        TestChildHarScraper(containerFolder, db, entry.contentEntryUid).scrapeUrl(url)
+        var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
+        scraper.scrapeUrl(url)
+        scraper.close()
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -119,7 +125,37 @@ class TestHarScraper {
 
         var url = mockWebServer.url("hello world")
 
-        TestChildHarScraper(containerFolder, db, entry.contentEntryUid).scrapeUrl(url.toString())
+        var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
+        scraper.scrapeUrl(url.toString())
+        scraper.close()
+    }
+
+    @Test
+    fun givenUrlWithTimestamp_whenHarScrapped_requestDoesNotHaveTimestamp(){
+
+        var url = mockWebServer.url("index.html")
+
+        var writer = StringWriter()
+
+        var regex = "[?&]ts=[0-9]+".toRegex()
+
+        var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
+        var containerManager = scraper.startHarScrape(url.toString(), regexes = listOf(regex)){
+            true
+        }
+
+        var harEntry = containerManager?.getEntry("harcontent")
+        var harContent = containerManager?.getInputStream(harEntry!!)?.readBytes()?.toString(UTF_8)
+
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+
+        var har = gson.fromJson(harContent, Har::class.java)
+
+        har.log.entries.forEach{
+
+            Assert.assertTrue(!it.request.url.contains(regex))
+        }
+
     }
 
 

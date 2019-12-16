@@ -12,7 +12,6 @@ import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
 import net.lightbody.bmp.proxy.CaptureType
-import org.apache.commons.io.FilenameUtils
 import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeDriver
@@ -55,6 +54,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
     fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null,
                        filters: List<ScrapeFilterFn> = listOf(),
+                       regexes: List<Regex> = listOf(),
                        block: (proxy: BrowserMobProxyServer) -> Boolean): ContainerManager? {
 
         clearAnyLogsInChrome()
@@ -63,7 +63,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         try {
             chromeDriver.get(url)
-        }catch (e: InvalidArgumentException){
+        } catch (e: InvalidArgumentException) {
             throw IllegalArgumentException(e)
         }
 
@@ -77,7 +77,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         block.invoke(proxy)
 
-        return makeHarContainer(proxy, entries, filters)
+        return makeHarContainer(proxy, entries, filters, regexes)
     }
 
 
@@ -95,7 +95,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     }
 
 
-    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>): ContainerManager {
+    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<Regex>): ContainerManager {
 
         var containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
 
@@ -112,7 +112,12 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                 val decodedPath = URLDecoder.decode(request.url, ScraperConstants.UTF_ENCODING)
                 val decodedUrl = URL(decodedPath)
-                var containerPath = getPathNameFromUrl(decodedUrl, request.method)
+                var containerPath = decodedUrl.toString().replace(regex, "_")
+
+                var regexedString = decodedUrl.toString()
+                regexes.forEach { itRegex ->
+                    regexedString = regexedString.replace(itRegex, "")
+                }
 
                 filters.forEach { filterFn ->
                     filterFn.invoke(it)
@@ -123,8 +128,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 }
 
                 it.response.content.text = containerPath
-                it.request = null
-
+                it.request.url = regexedString
 
             } catch (e: Exception) {
                 UMLogUtil.logError("Index url failed at${it.request.url}")
@@ -141,10 +145,6 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         }
 
         return containerManager
-    }
-
-    private fun getPathNameFromUrl(decodedUrl: URL, method: String): String {
-        return decodedUrl.authority.replace(regex, "_") + ScraperConstants.FORWARD_SLASH + FilenameUtils.getPath(decodedUrl.path).replace(regex, "_") + FilenameUtils.getName(decodedUrl.path).replace(regex, "_")
     }
 
     /**
