@@ -54,7 +54,7 @@ kotlin {
                 implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
                 implementation "org.apache.logging.log4j:log4j-core:$version_log4j"
                 implementation "org.apache.logging.log4j:log4j-api:$version_log4j"
-                implementation "net.lightbody.bmp:browsermob-core:2.1.5"
+                implementation "net.lightbody.bmp:browsermob-core:$version_browser_proxy"
 
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"

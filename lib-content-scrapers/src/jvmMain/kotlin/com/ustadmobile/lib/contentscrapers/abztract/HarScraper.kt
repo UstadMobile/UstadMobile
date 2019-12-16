@@ -142,6 +142,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         runBlocking {
             containerManager.addEntries(StringEntrySource(writer.toString(), "harcontent"))
+            containerManager.addEntries(StringEntrySource(regexes.joinToString(),"regexList"))
         }
 
         return containerManager

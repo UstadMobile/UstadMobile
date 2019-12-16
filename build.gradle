@@ -116,6 +116,7 @@ ext {
     version_exo_player = "2.8.4"
     version_napier = "0.0.6"
     version_tellh_recyclertreeview = "1.2.0"
+    version_browser_proxy = "2.1.5"
 
     version_android_buildtools = "29.0.0"
     version_android_compile_sdk = 29
