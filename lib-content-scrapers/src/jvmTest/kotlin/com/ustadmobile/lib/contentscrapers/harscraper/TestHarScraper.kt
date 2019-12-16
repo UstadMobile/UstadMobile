@@ -135,8 +135,6 @@ class TestHarScraper {
 
         var url = mockWebServer.url("index.html")
 
-        var writer = StringWriter()
-
         var regex = "[?&]ts=[0-9]+".toRegex()
 
         var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
@@ -151,10 +149,13 @@ class TestHarScraper {
 
         var har = gson.fromJson(harContent, Har::class.java)
 
-        har.log.entries.forEach{
-
-            Assert.assertTrue(!it.request.url.contains(regex))
+        var entry = har.log.entries.find {
+            it.request.url.contains("pic_trull.jpg")
         }
+
+        Assert.assertEquals("regex was found and removed",  "http://localhost:${url.port()}/pic_trull.jpg?style=abc.css", entry!!.request.url)
+
+        scraper.close()
 
     }
 
