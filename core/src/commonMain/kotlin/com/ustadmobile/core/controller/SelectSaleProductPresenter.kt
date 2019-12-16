@@ -24,6 +24,7 @@ import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_MODE
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_UID
 import com.ustadmobile.core.view.SelectSaleProductView.Companion.ARG_INVENTORY_MODE
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
@@ -53,6 +54,7 @@ class SelectSaleProductPresenter(context: Any,
 
     private var producerUid: Long = 0
     private var saleItemUid: Long = 0
+    private var saleUid: Long = 0
 
     var searchQuery: String = "%%"
 
@@ -72,6 +74,9 @@ class SelectSaleProductPresenter(context: Any,
 
         if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
             producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())
+        }
+        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_UID)) {
+            saleUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
         }
         if (arguments.containsKey(ARG_SALE_ITEM_UID)) {
             saleItemUid = (arguments.get(ARG_SALE_ITEM_UID)!!.toLong())
@@ -144,6 +149,9 @@ class SelectSaleProductPresenter(context: Any,
 
                 view.finish()
                 args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID, productUid.toString())
+                if(saleUid != 0L) {
+                    args.put(ARG_SELECT_PRODUCERS_SALE_UID, saleUid.toString())
+                }
                 impl.go(SelectProducersView.VIEW_NAME, args, context)
             }
         }

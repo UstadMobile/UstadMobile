@@ -63,8 +63,24 @@ class InventoryDetailPresenter(context: Any,
         factory = rvDao.findAllInventoryByProduct(saleProductUid, loggedInPersonUid)
         view.setListProvider(factory)
 
+        //Image
         GlobalScope.launch {
-            val remaining = inventoryDao.findStockForSaleProduct(saleProductUid)
+            val saleProductPicture =
+                    repository.saleProductPictureDao.findBySaleProductUidAsync2(saleProductUid)
+            if(saleProductPicture != null){
+                val picPath = repository.saleProductPictureDao.getAttachmentPath(saleProductPicture)
+                view.updateImageOnView(picPath!!, true)
+            }
+
+            //Title
+            val saleProduct = repository.saleProductDao.findByUidAsync(saleProductUid)
+            view.updateToolbar(saleProduct!!.getNameLocale(impl.getLocale(context)))
+        }
+
+
+        GlobalScope.launch {
+            val remaining = inventoryDao.findStockForSaleProduct(saleProductUid,
+                    loggedInPersonUid)
             view.updateTotalInventoryCount(remaining)
         }
 

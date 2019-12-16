@@ -16,7 +16,6 @@ interface InventoryDetailView : UstadView {
      */
     fun finish()
 
-
     /**
      * Sets the given provider to the view's provider adapter.
      *
@@ -25,6 +24,10 @@ interface InventoryDetailView : UstadView {
     fun setListProvider(listProvider: DataSource.Factory<Int, InventoryTransactionDetail>)
 
     fun updateTotalInventoryCount(count: Int)
+
+    fun updateImageOnView(imagePath: String, skipCached: Boolean)
+
+    fun updateToolbar(title: String)
 
     companion object {
 

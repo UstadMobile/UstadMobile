@@ -33,10 +33,20 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
         CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1 AND 
         SaleProduct.saleProductUid = :saleProductUid AND 
         (LE.personUid = :leUid OR CASE WHEN (CAST(LE.admin as INTEGER) = 1) THEN 0 ELSE 1 END )
+        AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+        
     GROUP BY saleUid, transactionDate
     """)
     abstract fun findAllInventoryByProduct(saleProductUid: Long, leUid: Long)
             : DataSource.Factory<Int, InventoryTransactionDetail>
+
+    @Query("""
+        UPDATE InventoryTransaction SET inventoryTransactionActive = 1 
+        WHERE InventoryTransaction.inventoryTransactionSaleUid = :saleUid AND 
+        InventoryTransaction.inventoryTransactionFromLeUid = :leUid AND 
+        CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 0 
+    """)
+    abstract suspend fun activateAllTransactionsBySaleAndLe(saleUid: Long, leUid: Long): Int
 
 
 }

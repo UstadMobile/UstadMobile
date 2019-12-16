@@ -189,7 +189,11 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
             fieldHLayout.addView(icon)
 
             val seekBar = SeekBar(this)
-            seekBar.max = SEEKBAR_MAX
+            if(mPresenter!!.inventorySelection) {
+                seekBar.max = inventoryCount
+            }else{
+                seekBar.max = SEEKBAR_MAX
+            }
             seekBar.progress = 0
             seekBar.layoutParams = seekParams
             seekBar.setPadding(DEFAULT_PADDING * 2,

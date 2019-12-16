@@ -219,5 +219,8 @@
     <string name="sell">Sell</string>
     <string name="by">by</string>
 
+    <string name="select_sale_type">Select sale type</string>
+    <string name="sold_now">Sold now</string>
+
 
 </resources>

@@ -7,14 +7,19 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
+import com.ustadmobile.core.view.SaleProductCategoryListView
+import com.ustadmobile.core.view.SelectProducerView
 import com.ustadmobile.core.view.SelectProducersView
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_ITEM_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_UID
 import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.InventoryTransaction
+import com.ustadmobile.lib.db.entities.SaleItem
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -31,9 +36,9 @@ class SelectProducersPresenter(context: Any,
     internal var repository: UmAppDatabase
     private val providerDao: InventoryItemDao
     private val transactionDao: InventoryTransactionDao
-    private var saleItemUid: Long = 0
-    private var saleUid: Long = 0
-    private var saleProductUid: Long = 0
+    private var saleItemUid: Long = 0L
+    private var saleUid: Long = 0L
+    private var saleProductUid: Long = 0L
 
     private var idToOrderInteger: HashMap<Long, Int>? = null
 
@@ -44,6 +49,7 @@ class SelectProducersPresenter(context: Any,
 
     val loggedInPersonUid : Long
 
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -52,8 +58,8 @@ class SelectProducersPresenter(context: Any,
         providerDao = repository.inventoryItemDao
         transactionDao = repository.inventoryTransactionDao
 
-        if (arguments!!.containsKey(ARG_SALE_ITEM_UID)) {
-            saleItemUid = (arguments!!.get(ARG_SALE_ITEM_UID)!!.toLong())
+        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)) {
+            saleItemUid = (arguments!!.get(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)!!.toLong())
         } else {
             //Create a new SaleItem? - shouldn't happen.
             //throw exception.
@@ -181,6 +187,8 @@ class SelectProducersPresenter(context: Any,
 
     private fun handleClickSelectInventory(){
 
+        val saleItemDao = repository.saleItemDao
+        val date = UMCalendarUtil.getDateInMilliPlusDays(0)
         GlobalScope.launch {
             for (weUid in weToCount.keys) {
                 val count = weToCount.get(weUid)!!
@@ -194,15 +202,47 @@ class SelectProducersPresenter(context: Any,
                 }
                 for(item in availableItems){
                     val newInventoryTransaction = InventoryTransaction(item.inventoryItemUid,
-                            loggedInPersonUid, saleUid)
+                            loggedInPersonUid, saleUid, date)
+                    newInventoryTransaction.inventoryTransactionActive = false
 
                     transactionDao.insertAsync(newInventoryTransaction)
                 }
             }
-            val totalCount = calculateTotalCount()
 
-            //Go to Sale
-            //TODO: Call impl.go to Sale
+
+            val totalCount = calculateTotalCount()
+            var saleItem: SaleItem ? = null
+            if(saleItemUid == 0L){
+                saleItem = SaleItem()
+                saleItem.saleItemCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+                saleItem.saleItemUid = saleItemDao.insertAsync(saleItem)
+                saleItemUid = saleItem.saleItemUid
+            }else{
+                saleItem = saleItemDao.findByUid(saleItemUid)
+            }
+            if(saleItem != null) {
+                saleItem.saleItemSaleUid = saleUid
+                saleItem.saleItemQuantity = totalCount
+                saleItem.saleItemDueDate = 0
+                saleItem.saleItemProductUid = saleProductUid
+                // Multiple saleItem.saleItemProducerUid
+                saleItem.saleItemActive = true
+                saleItem.saleItemSold = true
+                saleItem.saleItemPreorder = false
+
+                saleItemDao.updateAsync(saleItem)
+                saleItem.saleItemUid = saleItemUid
+            }
+
+            val args = HashMap<String, String>()
+            val impl = UstadMobileSystemImpl.instance
+            args.put(SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID, saleProductUid.toString())
+            args.put(SelectProducerView.ARG_PRODUCER_UID, loggedInPersonUid.toString())
+            args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
+
+            impl.go(SaleItemDetailView.VIEW_NAME, args, context)
+
+            view.finish()
         }
     }
 

@@ -366,6 +366,15 @@ class SaleDetailPresenter(context: Any,
                     }
                 }
 
+                val inventoryTransactionDao = repository.inventoryTransactionDao
+                //Activate all transactions
+                GlobalScope.launch {
+                    inventoryTransactionDao.activateAllTransactionsBySaleAndLe(
+                            updatedSale!!.saleUid, updatedSale!!.salePersonUid)
+
+                }
+
+                //Generate title for this Sale
                 var thisP = this
                 GlobalScope.launch {
                     val resultLive = saleItemDao.getTitleForSaleUidLive(updatedSale!!.saleUid)
@@ -373,6 +382,7 @@ class SaleDetailPresenter(context: Any,
                         resultLive.observe(thisP, thisP::handleUpdateSaleName)
                     })
                 }
+
             }
         }
     }
@@ -441,7 +451,28 @@ class SaleDetailPresenter(context: Any,
         impl.go(SelectPersonDialogView.VIEW_NAME, args, context)
     }
 
-    fun handleClickAddSaleItem() {
+    fun handleClickAddSaleItem(){
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        impl.go(SelectSaleTypeDialogView.VIEW_NAME, args, context)
+    }
+
+    fun handleClickAddSaleItemSold(){
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        args.put(SelectSaleProductView.ARG_INVENTORY_MODE, "true")
+        args.put(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION, "true")
+        args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID,
+                currentSale!!.saleUid.toString())
+        impl.go(SelectSaleProductView.VIEW_NAME, args, context)
+    }
+
+    fun handleClickAddSaleItemPreOrder(){
+        handleClickAddSaleItemOld()
+
+    }
+
+    fun handleClickAddSaleItemOld() {
 
         val saleItem = SaleItem()
         saleItem.saleItemSaleUid = updatedSale!!.saleUid

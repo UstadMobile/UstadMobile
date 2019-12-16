@@ -47,11 +47,12 @@ open class InventoryTransaction() {
         inventoryTransactionActive = true
     }
 
-    constructor(inventoryItemUid: Long, leUid: Long, saleUid:Long):this(){
+    constructor(inventoryItemUid: Long, leUid: Long, saleUid:Long, date: Long):this(){
         inventoryTransactionInventoryItemUid = inventoryItemUid
         inventoryTransactionFromLeUid = leUid
         inventoryTransactionActive = true
         inventoryTransactionSaleUid = saleUid
+        inventoryTransactionDate = date
     }
 
     init {

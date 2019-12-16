@@ -44,7 +44,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
+class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, UstadBaseActivity(), SaleDetailView,
         CustomerDetailDialogFragment.ChoosenCustomerListener {
 
     private var toolbar: Toolbar? = null
@@ -115,6 +115,15 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView,
             player = null
         }
 
+    }
+
+    override fun onSaleTypeSelected(sale: Boolean) {
+        if(sale){
+            mPresenter!!.handleClickAddSaleItemSold()
+
+        }else{
+            mPresenter!!.handleClickAddSaleItemPreOrder()
+        }
     }
 
     private fun requestPermission() {

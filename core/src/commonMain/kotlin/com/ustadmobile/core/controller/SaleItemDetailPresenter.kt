@@ -106,45 +106,32 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         }
     }
 
-    private fun handleSaleItemLive(saleItem:SaleItem?){
-        if(saleItem!=null) {
-            saleItemDueDate = saleItem.saleItemDueDate
-        }
-    }
-
-
     private fun initFromSaleItem(saleItemUid: Long) {
 
         //Get the sale item entity
         GlobalScope.launch {
 
-            val resultLive = saleItemDao.findByUidLive(saleItemUid)
+            //Observe it.
+            val saleItemLiveData = saleItemDao.findByUidLive(saleItemUid)
+
             GlobalScope.launch(Dispatchers.Main) {
-                resultLive.observe(thisP, thisP::handleSaleItemLive)
+                saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
             }
 
             if (refreshSaleItem) {
-                //Observe it.
-                val saleItemLiveData = saleItemDao.findByUidLive(saleItemUid)
-
-                GlobalScope.launch(Dispatchers.Main) {
-                    saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
-                }
-
                 //Notification observer
                 val provider =
                         reminderDao!!.findBySaleItemUid(saleItemUid)
 
                 view.runOnUiThread(Runnable { view.setReminderProvider(provider) })
-
             }
         }
     }
 
 
-
     private fun handleSaleItemChanged(changedSaleItem: SaleItem?) {
         if(changedSaleItem!=null) {
+
             saleItemDueDate = changedSaleItem.saleItemDueDate
 
             if (currentSaleItem == null) {
@@ -240,6 +227,9 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
     fun handleClickSave() {
 
+        val inventoryTransactionDao = repository.inventoryTransactionDao
+        val saleDao = repository.saleDao
+
         if (updatedSaleItem != null) {
             updatedSaleItem!!.saleItemActive = true
 
@@ -254,20 +244,17 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
             val thisP = this
             GlobalScope.launch {
-                try {
-                    saleItemDao!!.updateAsync(updatedSaleItem!!)
-                    //Update reminders as well.
+
+                saleItemDao!!.updateAsync(updatedSaleItem!!)
+
+                //Get all reminders.
+                val remindersLive =
+                        reminderDao.findBySaleItemUidLive(updatedSaleItem!!.saleItemUid)
+                view.runOnUiThread(Runnable {
+                    remindersLive.observe(thisP, thisP::handleReminderLive)
+                })
 
 
-                    //Get all reminders.
-                    val remindersLive = reminderDao!!.findBySaleItemUidLive(updatedSaleItem!!.saleItemUid)
-                    view.runOnUiThread(Runnable {
-                        remindersLive.observe(thisP, thisP::handleReminderLive)
-                    })
-
-                } catch (e: Exception) {
-                    println(e.message)
-                }
             }
         }
     }
@@ -275,7 +262,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     private fun handleReminderLive(reminders : List<SaleItemReminder>?){
         if(!updatedSaleItem!!.saleItemSold || updatedSaleItem!!.saleItemPreorder) {
             for (everyReminder in reminders!!) {
-                val days = everyReminder!!.saleItemReminderDays
+                val days = everyReminder.saleItemReminderDays
                 if(saleTitle == null){
                     saleTitle = ""
                 }

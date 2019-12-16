@@ -19,15 +19,32 @@ import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
 abstract class InventoryItemDao: BaseDao<InventoryItem> {
 
     @Query("""
-    SELECT COUNT(*)
+    SELECT COUNT(*) - 
+                (select count(*) from inventorytransaction 
+                where 
+                inventorytransaction.inventoryTransactionInventoryItemUid in 
+                (select inventoryitemuid from inventoryitem where 
+                inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid) 
+                and inventorytransaction.inventoryTransactionSaleUid != 0) 
     FROM InventoryItem
     LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
+    LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
     WHERE
     CAST(SaleProduct.saleProductActive AS INTEGER) = 1 AND
     CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND
-    SaleProduct.saleProductUid = :saleProductUid
+    SaleProduct.saleProductUid = :saleProductUid 
+    AND (InventoryItem.InventoryItemWeUid IN (
+        SELECT MEMBER.personUid FROM PersonGroupMember 
+        LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+        LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
+         WHERE groupMemberGroupUid = LE.mPersonGroupUid 
+        AND CAST(groupMemberActive  AS INTEGER) = 1
+        ) OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 1 END )
+        AND (InventoryItem.inventoryItemLeUid = :leUid 
+		OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
     """)
-    abstract suspend fun findStockForSaleProduct(saleProductUid: Long): Int
+    abstract suspend fun findStockForSaleProduct(saleProductUid: Long,
+                                                 leUid: Long): Int
 
 
     @Query(QUERY_BY_PERSON + QUERY_SORT_BY_PERSON_ASC)
@@ -66,9 +83,17 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
         }
     }
 
-    //TODO: Only show my WE's contibution to this product
     @Query("""
-        SELECT SaleProduct.*, COUNT(*) as stock FROM InventoryItem 
+        SELECT SaleProduct.*, 
+            COUNT(*) - 
+                (select count(*) from inventorytransaction 
+                where 
+                inventorytransaction.inventoryTransactionInventoryItemUid in 
+                (select inventoryitemuid from inventoryitem where 
+                inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid) 
+                and inventorytransaction.inventoryTransactionSaleUid != 0)   
+            as stock 
+        FROM InventoryItem 
         LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
         LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
         WHERE CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
@@ -81,8 +106,10 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
         LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
          WHERE groupMemberGroupUid = LE.mPersonGroupUid 
         AND CAST(groupMemberActive  AS INTEGER) = 1
-        ) OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 0 ELSE 1 END )
-        
+        ) OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 1 END )
+        AND (InventoryItem.inventoryItemLeUid = :leUid 
+		OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+
         GROUP BY(SaleProduct.saleProductUid)
         ORDER BY InventoryItem.inventoryItemDateAdded DESC 
     """)
@@ -137,6 +164,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                     WHERE 
                     InventoryItem.InventoryItemSaleProductUid = :saleProductUid AND InventoryTransaction.InventoryTransactionSaleUid != 0)
                     AND InventoryItem.InventoryItemSaleProductUid = :saleProductUid 
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                 """
 
         const val SORT_ORDER_NAME_ASC = 1
