@@ -213,10 +213,19 @@ fun FunSpec.Builder.addParametersForHttpDb(dbTypeElement: TypeElement, isMasterD
  * when return type is Unit:
  * call.sendResponse(HttpResponse.NO_CONTENT, "")
  *
+ * @param ktorBeforeRespondCodeBlock This codeblock will be added on the KTOR response type before
+ * the call.respond line (e.g. to set headers)
+ * @param nanoHttpdAlsoCodeBlock This codeblock will be added to an also block after returning the
+ * nanohttpd response (e.g. to set headers)
+ *
  */
 fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int = SERVER_TYPE_KTOR,
+                        ktorBeforeRespondCodeBlock: CodeBlock? = null,
                         nanoHttpdAlsoCodeBlock: CodeBlock? = null): CodeBlock{
     val codeBlock = CodeBlock.builder()
+    if(ktorBeforeRespondCodeBlock != null && serverType == SERVER_TYPE_KTOR)
+        codeBlock.add(ktorBeforeRespondCodeBlock)
+
     when{
         returnType == UNIT && serverType == SERVER_TYPE_KTOR->
             codeBlock.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND)
@@ -228,7 +237,7 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
             codeBlock.addKtorResponse(varName)
 
         !isNullableResultType(returnType) && serverType == SERVER_TYPE_NANOHTTPD ->
-            codeBlock.addNanoHttpdResponse(varName)
+            codeBlock.addNanoHttpdResponse(varName, alsoCodeBlock = nanoHttpdAlsoCodeBlock)
 
 
         else -> codeBlock.beginControlFlow("if($varName != null)")
@@ -236,7 +245,7 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
                     takeIf { serverType == SERVER_TYPE_KTOR }?.addKtorResponse(varName,
                             addNonNullOperator = true)
                     takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.addNanoHttpdResponse(varName,
-                            addNonNullOperator = true)
+                            addNonNullOperator = true, alsoCodeBlock = nanoHttpdAlsoCodeBlock)
                 }
                 .nextControlFlow("else")
                 .apply {

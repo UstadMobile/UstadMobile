@@ -138,7 +138,6 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
     }
 
     override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> {
-        //var currentHolderRef = contentEntryHolders[contentEntryUid]
         var currentHolder = contentEntryHolders[contentEntryUid]?.get()
         if(currentHolder == null) {
             var currentDownloadJob = jobItemUidToHolderMap.values.firstOrNull {
@@ -183,6 +182,10 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
         }
 
         commit()
+    }
+
+    private fun updateDownloadJobStatusInternal(activeJobStatus: Int, completeJobStatus: Int) {
+        //first find the active jobs that are actually running - stop them
     }
 
     override suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem) = withContext(singleThreadContext){

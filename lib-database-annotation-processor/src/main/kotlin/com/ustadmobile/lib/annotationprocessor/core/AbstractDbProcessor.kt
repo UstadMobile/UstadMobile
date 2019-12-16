@@ -1356,8 +1356,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
                 processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName))
-        //TODO: pass the clientId header here so it can be set on the HTTP response object
         codeBlock.add(generateRespondCall(resultType, "_result", serverType,
+                ktorBeforeRespondCodeBlock = CodeBlock.of("%M.response.header(%S, _reqId)\n",
+                        DbProcessorKtorServer.CALL_MEMBER, "X-reqid"),
                 nanoHttpdAlsoCodeBlock = CodeBlock.of("it.addHeader(%S, _reqId)\n", "X-reqid")))
 
         return codeBlock.build()
