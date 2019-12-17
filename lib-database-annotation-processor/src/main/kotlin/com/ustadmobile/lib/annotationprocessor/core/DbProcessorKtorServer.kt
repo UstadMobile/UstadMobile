@@ -20,7 +20,6 @@ import com.google.gson.reflect.TypeToken
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_KTOR_OUTPUT
-import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_NANOHTTPD_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SERVER_TYPE_KTOR
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SERVER_TYPE_NANOHTTPD
 import fi.iki.elonen.NanoHTTPD
@@ -33,7 +32,6 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Compan
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.NANOHTTPD_URIRESOURCE_FUNPARAMS
 import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.Modifier
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -105,12 +103,12 @@ fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
 }
 
 fun CodeBlock.Builder.addNanoHttpdResponse(varName: String, addNonNullOperator: Boolean = false,
-                                           alsoCodeBlock: CodeBlock? = null)
+                                           applyToResponseCodeBlock: CodeBlock? = null)
         = add("return %T.newFixedLengthResponse(%T.Status.OK, %T.MIME_TYPE_JSON, _gson.toJson($varName${if(addNonNullOperator) "!!" else ""}))\n",
             NanoHTTPD::class, NanoHTTPD.Response::class, DoorConstants::class)
-        .takeIf { alsoCodeBlock != null }
-            ?.beginControlFlow(".also ")
-            ?.add(alsoCodeBlock!!)
+        .takeIf { applyToResponseCodeBlock != null }
+            ?.beginControlFlow(".apply ")
+            ?.add(applyToResponseCodeBlock!!)
             ?.endControlFlow()
 
 fun CodeBlock.Builder.addKtorResponse(varName: String, addNonNullOperator: Boolean = false)
@@ -215,13 +213,13 @@ fun FunSpec.Builder.addParametersForHttpDb(dbTypeElement: TypeElement, isMasterD
  *
  * @param ktorBeforeRespondCodeBlock This codeblock will be added on the KTOR response type before
  * the call.respond line (e.g. to set headers)
- * @param nanoHttpdAlsoCodeBlock This codeblock will be added to an also block after returning the
+ * @param nanoHttpdApplyCodeBlock This codeblock will be added to an also block after returning the
  * nanohttpd response (e.g. to set headers)
  *
  */
 fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int = SERVER_TYPE_KTOR,
                         ktorBeforeRespondCodeBlock: CodeBlock? = null,
-                        nanoHttpdAlsoCodeBlock: CodeBlock? = null): CodeBlock{
+                        nanoHttpdApplyCodeBlock: CodeBlock? = null): CodeBlock{
     val codeBlock = CodeBlock.builder()
     if(ktorBeforeRespondCodeBlock != null && serverType == SERVER_TYPE_KTOR)
         codeBlock.add(ktorBeforeRespondCodeBlock)
@@ -237,7 +235,7 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
             codeBlock.addKtorResponse(varName)
 
         !isNullableResultType(returnType) && serverType == SERVER_TYPE_NANOHTTPD ->
-            codeBlock.addNanoHttpdResponse(varName, alsoCodeBlock = nanoHttpdAlsoCodeBlock)
+            codeBlock.addNanoHttpdResponse(varName, applyToResponseCodeBlock = nanoHttpdApplyCodeBlock)
 
 
         else -> codeBlock.beginControlFlow("if($varName != null)")
@@ -245,7 +243,7 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
                     takeIf { serverType == SERVER_TYPE_KTOR }?.addKtorResponse(varName,
                             addNonNullOperator = true)
                     takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.addNanoHttpdResponse(varName,
-                            addNonNullOperator = true, alsoCodeBlock = nanoHttpdAlsoCodeBlock)
+                            addNonNullOperator = true, applyToResponseCodeBlock = nanoHttpdApplyCodeBlock)
                 }
                 .nextControlFlow("else")
                 .apply {

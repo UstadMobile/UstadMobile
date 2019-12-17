@@ -1359,7 +1359,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.add(generateRespondCall(resultType, "_result", serverType,
                 ktorBeforeRespondCodeBlock = CodeBlock.of("%M.response.header(%S, _reqId)\n",
                         DbProcessorKtorServer.CALL_MEMBER, "X-reqid"),
-                nanoHttpdAlsoCodeBlock = CodeBlock.of("it.addHeader(%S, _reqId)\n", "X-reqid")))
+                nanoHttpdApplyCodeBlock = CodeBlock.of("addHeader(%S, _reqId.toString())\n", "X-reqid")))
 
         return codeBlock.build()
     }
