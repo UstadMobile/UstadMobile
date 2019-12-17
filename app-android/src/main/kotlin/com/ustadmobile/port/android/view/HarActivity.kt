@@ -2,7 +2,9 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.webkit.WebView
+import com.ustadmobile.core.controller.HarPresenter
 import com.ustadmobile.core.impl.HarWebViewClient
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.HarAndroidView
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import kotlinx.coroutines.*
@@ -12,12 +14,16 @@ class HarActivity : UstadBaseActivity(), ViewWithErrorNotifier, HarAndroidView {
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()
 
     private lateinit var mWebView: WebView
+    private lateinit var mPresenter: HarPresenter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
+
+        mPresenter = HarPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this)
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 
     override fun loadUrl(url: String) {
