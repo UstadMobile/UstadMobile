@@ -8,12 +8,12 @@ actual class HarPresenter actual constructor(context: Any, arguments: Map<String
     : HarPresenterCommon(context, arguments, view) {
 
     lateinit var harWebViewClient: HarWebViewClient
-    var androidView = view as HarAndroidView
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
 
-        androidView.setChromeClient(harWebViewClient)
+
+        (view as HarAndroidView).setChromeClient(harWebViewClient)
     }
 }

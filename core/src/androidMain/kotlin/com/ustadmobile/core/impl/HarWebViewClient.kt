@@ -4,8 +4,9 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.ustadmobile.core.contentformats.har.HarContainer
 
-class HarWebViewClient: WebViewClient() {
+class HarWebViewClient(val harContainer: HarContainer): WebViewClient() {
 
 
 

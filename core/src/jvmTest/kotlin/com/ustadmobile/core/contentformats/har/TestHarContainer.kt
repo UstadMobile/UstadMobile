@@ -11,4 +11,24 @@ class TestHarContainer {
 
     }
 
+    @Test
+    fun givenInvalidUrl_whenWebViewLoaded_thenReturn404(){
+
+
+    }
+
+    @Test
+    fun givenUrlLoaded_whenNotInIndex_Return404ErrorResponse(){
+
+
+    }
+
+    @Test
+    fun givenUrlLoaded_whenInIndexButContainerMissing_thenReturn404ErrorResponse(){
+
+
+
+
+    }
+
 }
