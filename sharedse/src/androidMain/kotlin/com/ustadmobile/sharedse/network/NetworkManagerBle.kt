@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultGsonSerializer
 import com.ustadmobile.core.networkmanager.defaultOkHttpClient
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
@@ -64,6 +65,7 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
 import okhttp3.OkHttpClient
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import java.net.HttpURLConnection
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 
 /**
  * This class provides methods to perform android network related communications.
@@ -145,6 +147,21 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         ContainerFetcherBuilder(this).build()
     }
 
+    override val containerDownloadManager = DownloadManagerImpl(appDb = umAppDatabase) {
+        object: ContainerDownloadRunner {
+            override fun cancel() {
+
+            }
+
+            override fun pause() {
+
+            }
+
+            override var meteredDataAllowed: Boolean
+                get() = false
+                set(value) {}
+        }
+    }
     private var gattClientCallbackManager: GattClientCallbackManager? = null
 
     override var localConnectionOpener: ConnectionOpener? = null

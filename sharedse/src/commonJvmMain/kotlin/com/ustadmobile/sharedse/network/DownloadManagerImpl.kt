@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import androidx.lifecycle.MutableLiveData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLiveData
 import kotlinx.coroutines.newSingleThreadContext
@@ -10,6 +9,7 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import java.lang.ref.WeakReference
 import kotlin.collections.HashMap
@@ -24,7 +24,7 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
      * this live data. This is used to ensure that holders are not garbage collected as long as
      * anything else holds a reference to the livedata in that holder
      */
-    private inner class MutableLiveDataWithRef<T>: MutableLiveData<T> {
+    private inner class MutableLiveDataWithRef<T>: DoorMutableLiveData<T> {
 
         val reference: Any?
 
@@ -50,8 +50,8 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
             val statusChanged = updated.djiStatus != downloadJobItem?.djiStatus
             downloadJobItem = updated
 
-            liveData.postValue(updated)
-            contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData?.postValue(updated)
+            liveData.sendValue(updated)
+            contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData?.sendValue(updated)
 
             entriesToCommit.add(updated)
 
@@ -84,9 +84,9 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
                 }
 
                 entriesToCommit.add(jobItemVal)
-                liveData.postValue(jobItemVal)
+                liveData.sendValue(jobItemVal)
                 val contentEntryHolder = contentEntryHolders[jobItemVal.djiContentEntryUid]?.get()
-                contentEntryHolder?.liveData?.postValue(jobItemVal)
+                contentEntryHolder?.liveData?.sendValue(jobItemVal)
             }else {
                 throw IllegalStateException("Can't update or increment a null item")
                 //something very wrong

@@ -55,14 +55,12 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
                 GlobalScope.launch {
                     for (jobNotifier in downloadJobPreparerChannel) {
-                        val downloadJobPreparer = DownloadJobPreparer()
+                        val downloadJobPreparer = DownloadJobPreparer(
+                                downloadJobUid = jobNotifier.downloadJobUid)
                         activeDownloadJobPreparers.add(downloadJobPreparer)
-                        val jobItemManager = boundNetworkService.openDownloadJobItemManager(
-                                jobNotifier.downloadJobUid)
-                        if (jobItemManager != null) {
-                            jobItemManager.awaitLoaded()
-                            downloadJobPreparer.prepare(jobItemManager, umAppDatabase, umAppDatabaseRepo)
-                        }
+                        downloadJobPreparer.prepare(boundNetworkService.containerDownloadManager,
+                                appDatabase = umAppDatabase, appDatabaseRepo = umAppDatabaseRepo,
+                                onProgress = {})
 
                         activeDownloadJobPreparers.remove(downloadJobPreparer)
                         mNotificationManager.cancel(jobNotifier.notificationId)

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
@@ -148,6 +149,8 @@ abstract class NetworkManagerBleCommon(
     abstract val localHttpPort: Int
 
     abstract val containerFetcher: ContainerFetcher
+
+    abstract val containerDownloadManager: ContainerDownloadManager
 
 
     /**
