@@ -117,8 +117,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
         val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryDetailView.VIEW_NAME, navigation!!)
-        if (lastEntryListArgs !=
-                null) {
+        if (lastEntryListArgs != null) {
             impl.go(ContentEntryDetailView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)

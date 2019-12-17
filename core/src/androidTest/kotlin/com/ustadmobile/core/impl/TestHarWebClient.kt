@@ -11,7 +11,7 @@ class TestHarWebClient {
 
     fun givenHarContainer_whenResourceIntercept_thenReturnResource(){
 
-        
+
 
     }
 

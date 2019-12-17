@@ -1,10 +1,16 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
 import android.webkit.WebView
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HarPresenter
 import com.ustadmobile.core.impl.HarWebViewClient
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.view.HarAndroidView
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import kotlinx.coroutines.*
@@ -19,10 +25,23 @@ class HarActivity : UstadBaseActivity(), ViewWithErrorNotifier, HarAndroidView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_web_chunk)
 
 
+        setUMToolbar(R.id.activity_webchunk_toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-        mPresenter = HarPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this)
+        mWebView = findViewById(R.id.activity_webchunk_webview)
+        mWebView.settings.javaScriptEnabled = true
+        mWebView.settings.domStorageEnabled = true
+        mWebView.settings.allowUniversalAccessFromFileURLs = true
+        mWebView.settings.allowFileAccessFromFileURLs = true
+        mWebView.settings.mediaPlaybackRequiresUserGesture = false
+
+        val repository = UmAccountManager.getRepositoryForActiveAccount(this)
+        mPresenter = HarPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this, true, repository)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 
@@ -33,16 +52,49 @@ class HarActivity : UstadBaseActivity(), ViewWithErrorNotifier, HarAndroidView {
         }
     }
 
+    override fun onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun clickUpNavigation() {
+        mPresenter.handleUpNavigation()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            // Respond to the action bar's Up/Home button
+            android.R.id.home -> {
+                runOnUiThread { this.clickUpNavigation() }
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun showError(message: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        showErrorNotification(message, {}, 0)
     }
 
     override fun setToolbarTitle(title: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        umToolbar.title = title
     }
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        showErrorNotification(message, {
+            var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
+            if (appPackageName == null) {
+                appPackageName = "cn.wps.moffice_eng"
+            }
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+            } catch (anfe: android.content.ActivityNotFoundException) {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
+            }
+        }, actionMessageId)
     }
 
     override fun setChromeClient(client: HarWebViewClient) {
