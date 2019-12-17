@@ -46,7 +46,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index!!)), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
-            startingUrl = firstUrlToOpen.url!!
+            startingUrl = firstUrlToOpen.url
 
 
             for (log in indexList) {
