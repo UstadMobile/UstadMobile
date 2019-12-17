@@ -6,7 +6,4 @@ expect class HarPresenter(context: Any, arguments: Map<String, String?>,
                           view: HarView): HarPresenterCommon {
 
 
-    fun handleMountHar()
-
-
 }

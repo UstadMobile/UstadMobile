@@ -1,13 +1,8 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.lib.db.entities.Container
 import kotlin.js.JsName
 
 interface HarView : UstadView {
-
-    @JsName("mountChunk")
-    fun mountHar(container: Container?, callback: UmCallback<String>)
 
     @JsName("loadUrl")
     fun loadUrl(url: String)
