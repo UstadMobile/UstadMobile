@@ -55,6 +55,7 @@ class SaleProductCategoryListPresenter(context: Any,
     private var currentSortOrder = 0
 
     private var selectInventoryMode = false
+    private var preOrder = false
 
     init {
 
@@ -88,6 +89,12 @@ class SaleProductCategoryListPresenter(context: Any,
         }
         if (arguments.containsKey(ARG_MORE_CATEGORY)) {
             moreCategory = true
+        }
+
+        if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER)){
+            if(arguments[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER].toString().toLowerCase().equals("true")){
+                preOrder = true
+            }
         }
 
     }
@@ -277,9 +284,16 @@ class SaleProductCategoryListPresenter(context: Any,
                             arguments!!.get(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!)
                 }
 
-                view.finish()
                 args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID, productUid.toString())
-                impl.go(SelectProducersView.VIEW_NAME, args, context)
+
+                view.finish()
+
+                if(preOrder){
+                    args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+
+                }else {
+                    impl.go(SelectProducersView.VIEW_NAME, args, context)
+                }
 
 
             } else{

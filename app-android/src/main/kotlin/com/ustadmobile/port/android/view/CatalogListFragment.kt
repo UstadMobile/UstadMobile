@@ -241,7 +241,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
             }
             override fun areContentsTheSame(oldItem: SaleProduct,
                                             newItem: SaleProduct): Boolean {
-                return oldItem.saleProductUid == newItem.saleProductUid
+                return oldItem == newItem
             }
         }
     }

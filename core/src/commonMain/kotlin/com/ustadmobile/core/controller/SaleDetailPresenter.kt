@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_NAME
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMENT_DEFAULT_VALUE
 import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMENT_UID
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -176,7 +177,7 @@ class SaleDetailPresenter(context: Any,
 
     fun getTotalSaleOrderAndDiscountAndUpdateView(saleUid: Long) {
         var thisP = this
-        if(saleUid != null) {
+        if(saleUid != 0L) {
             GlobalScope.launch {
                 val resultLive = saleItemDao.getSaleItemCountFromSaleLive(saleUid)
                 view.runOnUiThread(Runnable {
@@ -460,16 +461,22 @@ class SaleDetailPresenter(context: Any,
     fun handleClickAddSaleItemSold(){
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
-        args.put(SelectSaleProductView.ARG_INVENTORY_MODE, "true")
-        args.put(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION, "true")
-        args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID,
-                currentSale!!.saleUid.toString())
+        args[SelectSaleProductView.ARG_INVENTORY_MODE] = "true"
+        args[SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = "true"
+        args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSale!!.saleUid.toString()
         impl.go(SelectSaleProductView.VIEW_NAME, args, context)
     }
 
     fun handleClickAddSaleItemPreOrder(){
-        handleClickAddSaleItemOld()
+        //handleClickAddSaleItemOld()
 
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        args[SelectSaleProductView.ARG_INVENTORY_MODE] = "true"
+        args[SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = "false"
+        args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSale!!.saleUid.toString()
+        args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+        impl.go(SelectSaleProductView.VIEW_NAME, args, context)
     }
 
     fun handleClickAddSaleItemOld() {

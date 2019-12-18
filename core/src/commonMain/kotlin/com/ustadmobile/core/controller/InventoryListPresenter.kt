@@ -75,9 +75,7 @@ class InventoryListPresenter(context: Any,
 
     private fun getAndSetProvider(sortCode: Int) {
 
-        //TODO: Update query taking sorting into account.
-
-        factory = rvDao.findAllInventoryByProduct(loggedInPersonUid, searchQuery)
+        factory = rvDao.findAllInventoryByProduct(loggedInPersonUid, searchQuery, sortCode)
         view.setListProvider(factory)
     }
 

@@ -1,11 +1,13 @@
 package com.ustadmobile.port.android.view
 
 import android.content.res.Resources
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.DigitsKeyListener
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -176,7 +178,7 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
             fieldHLayout.orientation = LinearLayout.HORIZONTAL
 
 
-            val iconName = "ic_person_add_black_24dp"
+            val iconName = "ic_person_black_24dp"
 
             val iconResId = getResourceId(iconName, "drawable", packageName)
             val icon = AppCompatImageView(this)
@@ -211,21 +213,22 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
             seekValueET.textSize = 16F
             seekValueET.setText("0")
             seekValueET.setPadding(DEFAULT_PADDING * 2,DEFAULT_PADDING,DEFAULT_PADDING,DEFAULT_PADDING)
+            seekValueET.setKeyListener(DigitsKeyListener.getInstance("0123456789"))
 
             seekValueET.addTextChangedListener(object: TextWatcher{
                 override fun afterTextChanged(p0: Editable?) {
-                    val value = p0.toString().toInt()
-                    mPresenter!!.updateWeCount(producer.personUid, value)
+                    try {
+                        val value = p0.toString().toInt()
+                        mPresenter!!.updateWeCount(producer.personUid, value)
+                    }catch (nfe: NumberFormatException){
+                        mPresenter!!.updateWeCount(producer!!.personUid, 0)
+                    }
 
                 }
 
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
-                }
-
-                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-                }
+                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             })
 
@@ -240,7 +243,21 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
                 }
             })
 
-            fieldHLayout.addView(seekBar)
+            val seekBarWithCountLL = LinearLayout(this)
+            seekBarWithCountLL.orientation = LinearLayout.VERTICAL
+            seekBarWithCountLL.addView(seekBar)
+
+            val seekBarCounter = TextView(this)
+            seekBarCounter.setPadding(DEFAULT_PADDING*2,0,0,0)
+            seekBarCounter.textSize = 12F
+
+            if(mPresenter!!.inventorySelection) {
+                val sbct = inventoryCount.toString() + " " + getText(R.string.in_stock)
+                seekBarCounter.setText(sbct)
+                seekBarWithCountLL.addView(seekBarCounter)
+            }
+
+            fieldHLayout.addView(seekBarWithCountLL)
             fieldHLayout.addView(seekValueET)
 
             mLinearLayout!!.addView(fieldHLayout)

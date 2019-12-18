@@ -28,6 +28,8 @@ open class InventoryItem() {
 
     var inventoryItemDateAdded: Long = 0
 
+    var inventoryItemDayAdded : Long = 0
+
     var inventoryItemActive: Boolean = true
 
     @MasterChangeSeqNum

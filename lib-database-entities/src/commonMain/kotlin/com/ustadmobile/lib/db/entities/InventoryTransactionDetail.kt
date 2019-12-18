@@ -14,6 +14,9 @@ class InventoryTransactionDetail()  {
     var saleUid : Long = 0
     var toLeUid : Long = 0
     var transactionDate: Long = 0
+    var leName : String = ""
+    var fromLeUid: Long = 0
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -24,6 +27,7 @@ class InventoryTransactionDetail()  {
         if (weNames != other.weNames) return false
         if (saleUid != other.saleUid) return false
         if (toLeUid != other.toLeUid) return false
+        if (leName != other.leName) return false
         if (transactionDate != other.transactionDate) return false
 
         return true

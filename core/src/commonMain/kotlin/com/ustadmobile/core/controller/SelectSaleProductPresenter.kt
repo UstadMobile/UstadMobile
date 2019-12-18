@@ -8,6 +8,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_DETAIL_PREORDER
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_PRODUCT_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_CATEGORY
@@ -24,6 +25,7 @@ import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_MODE
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_UID
 import com.ustadmobile.core.view.SelectSaleProductView.Companion.ARG_INVENTORY_MODE
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -57,6 +59,7 @@ class SelectSaleProductPresenter(context: Any,
     private var saleUid: Long = 0
 
     var searchQuery: String = "%%"
+    var preOrder = false
 
 
     fun setQuerySearch(query:String){
@@ -84,6 +87,13 @@ class SelectSaleProductPresenter(context: Any,
 
         if(arguments.containsKey(ARG_INVENTORY_MODE)){
             inventoryMode = true
+        }
+
+        if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER)){
+            val pos = arguments[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER].toString().toLowerCase()
+            if(pos.equals("true")){
+                preOrder = true
+            }
         }
 
     }
@@ -133,6 +143,9 @@ class SelectSaleProductPresenter(context: Any,
         if(inventoryMode){
             if (isCategory) {
                 args.put(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE, "true")
+                if(preOrder){
+                    args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+                }
                 impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
             } else {
                 //Go to SelectProducers
@@ -152,7 +165,17 @@ class SelectSaleProductPresenter(context: Any,
                 if(saleUid != 0L) {
                     args.put(ARG_SELECT_PRODUCERS_SALE_UID, saleUid.toString())
                 }
-                impl.go(SelectProducersView.VIEW_NAME, args, context)
+                if(preOrder){
+                    args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+                    
+                    args[ARG_SALE_ITEM_PRODUCT_UID] = productUid.toString()
+                    args[ARG_PRODUCER_UID] = UmAccountManager.getActivePersonUid(context).toString()
+                    args[ARG_SALE_ITEM_DETAIL_PREORDER] = "true"
+
+                    impl.go(SaleItemDetailView.VIEW_NAME, args, context)
+                }else {
+                    impl.go(SelectProducersView.VIEW_NAME, args, context)
+                }
             }
         }
         else if (catalogMode) {

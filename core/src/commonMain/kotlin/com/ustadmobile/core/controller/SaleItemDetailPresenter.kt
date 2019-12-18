@@ -5,13 +5,17 @@ import com.ustadmobile.core.db.dao.SaleItemDao
 import com.ustadmobile.core.db.dao.SaleItemReminderDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.AddReminderDialogView
 import com.ustadmobile.core.view.SaleItemDetailView
+import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_DETAIL_FROM_INVENTORY
+import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_DETAIL_PREORDER
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_DUE_DATE
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_NAME
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_PRODUCT_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
+import com.ustadmobile.core.view.SelectProducersView
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemReminder
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -38,9 +42,11 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     private var saleItemDueDate: Long = 0
     private var saleTitle: String? = null
     private var saleProductName: String? = null
-
+    private var fromArguments = false
     private var refreshSaleItem = true
     val thisP = this
+    private var preOrder = false
+    private var saleUid: Long = 0
 
     constructor(context: Any,
                 arguments: Map<String, String?>,
@@ -81,6 +87,10 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             saleItemUid = (arguments[ARG_SALE_ITEM_UID]!!.toLong())
         }
 
+        if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID)){
+            saleUid = (arguments[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID]!!.toLong())
+        }
+
         if (arguments.containsKey(ARG_SALE_ITEM_NAME)) {
             saleTitle = arguments[ARG_SALE_ITEM_NAME].toString()
         }
@@ -89,19 +99,38 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             saleItemDueDate = (arguments[ARG_SALE_ITEM_DUE_DATE]!!.toLong())
         }
 
-        if (arguments.containsKey(ARG_SALE_ITEM_UID)) {
-            initFromSaleItem(arguments[ARG_SALE_ITEM_UID]!!.toLong())
-        } else {
+        if(arguments.containsKey(ARG_SALE_ITEM_DETAIL_FROM_INVENTORY)){
+            val fromInventory = arguments[ARG_SALE_ITEM_DETAIL_FROM_INVENTORY].toString().toLowerCase()
+            if(fromInventory.equals("true")){
+                fromArguments = true
+                view.showQuantityTextView(fromArguments)
+            }
+        }
 
+        if(arguments.containsKey(ARG_SALE_ITEM_DETAIL_PREORDER)){
+            val fromInventory = arguments[ARG_SALE_ITEM_DETAIL_PREORDER].toString().toLowerCase()
+            if(fromInventory.equals("true")){
+                preOrder = true
+                fromArguments = false
+                view.showQuantityTextView(fromArguments)
+            }
+        }
+
+        if (arguments.containsKey(ARG_SALE_ITEM_UID)) {
+            saleItemUid = arguments[ARG_SALE_ITEM_UID]!!.toLong()
+            initFromSaleItem(saleItemUid)
+        } else {
             //Create the new SaleItem
             updatedSaleItem = SaleItem(productUid)
+            updatedSaleItem!!.saleItemPreorder = preOrder
+            updatedSaleItem!!.saleItemSaleUid = saleUid
+            if(preOrder){
+                updatedSaleItem!!.saleItemDueDate = UMCalendarUtil.getDateInMilliPlusDays(2)
+            }
             GlobalScope.launch {
-                try {
-                    val result = saleItemDao.insertAsync(updatedSaleItem!!)
-                    initFromSaleItem(result)
-                }catch(e:Exception){
-                    println(e.message)
-                }
+                saleItemUid = saleItemDao.insertAsync(updatedSaleItem!!)
+                updatedSaleItem!!.saleItemUid = saleItemUid
+                initFromSaleItem(saleItemUid)
             }
         }
     }
@@ -111,14 +140,25 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         //Get the sale item entity
         GlobalScope.launch {
 
-            //Observe it.
+            //Observe Sale Item
             val saleItemLiveData = saleItemDao.findByUidLive(saleItemUid)
 
             GlobalScope.launch(Dispatchers.Main) {
                 saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
             }
 
+            //Observe product so we can update the toolbar
+            GlobalScope.launch {
+
+                val saleProductLive = repository.saleProductDao.findByUidLive(productUid)
+                GlobalScope.launch(Dispatchers.Main) {
+                    saleProductLive.observe(thisP, thisP::handleSaleProductLive)
+                }
+            }
+
+            //Observe the notifications
             if (refreshSaleItem) {
+
                 //Notification observer
                 val provider =
                         reminderDao!!.findBySaleItemUid(saleItemUid)
@@ -138,29 +178,27 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 currentSaleItem = changedSaleItem
             }
 
-            var saleProductUid: Long = 0L
             if (updatedSaleItem == null || updatedSaleItem != changedSaleItem) {
-                saleProductUid = changedSaleItem.saleItemProductUid
                 updatedSaleItem = changedSaleItem
-            }else if(updatedSaleItem!!.saleItemProductUid != 0L){
-                saleProductUid = updatedSaleItem!!.saleItemProductUid
             }
 
-            GlobalScope.launch {
-                val saleProductLive = repository.saleProductDao.findByUidLive(saleProductUid)
-                GlobalScope.launch(Dispatchers.Main) {
-                    saleProductLive.observe(thisP, thisP::handleSaleProductLive)
-                }
-
+            if(updatedSaleItem!!.saleItemPreorder){
+                view.showQuantityTextView(false)
             }
+
+            view.updateSaleItemOnView(updatedSaleItem!!)
+
+
         }
     }
+
 
     private fun handleSaleProductLive(saleProduct : SaleProduct?){
         if(saleProduct!=null) {
             var productName: String? = ""
             productName = saleProduct!!.saleProductName
-            view.updateSaleItemOnView(updatedSaleItem!!, productName!!)
+            saleProductName = productName
+            view.updateProductTitleOnView(productName!!)
         }
     }
 
@@ -177,13 +215,8 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         view.runOnUiThread(Runnable{ view.updateTotal(p * q) })
     }
 
-    fun setSold(sold: Boolean) {
-        updatedSaleItem!!.saleItemPreorder = !sold
-        updatedSaleItem!!.saleItemSold = sold
-    }
-
     fun setPreOrder(po: Boolean) {
-        if (!updatedSaleItem!!.saleItemPreorder && po) {
+        if (po) {
             //Add 1 day reminder
             handleAddReminder(1)
         }
@@ -202,9 +235,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
 
-        if (arguments.containsKey(ARG_SALE_ITEM_UID)) {
-            args.put(ARG_SALE_ITEM_UID, arguments[ARG_SALE_ITEM_UID].toString())
-        }
+        args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
         if (arguments.containsKey(ARG_SALE_ITEM_NAME)) {
             args.put(ARG_SALE_ITEM_NAME, arguments[ARG_SALE_ITEM_NAME].toString())
         } else {
@@ -215,7 +246,10 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         }
         if (arguments.containsKey(ARG_SALE_ITEM_DUE_DATE)) {
             args.put(ARG_SALE_ITEM_DUE_DATE, arguments[ARG_SALE_ITEM_DUE_DATE].toString())
+        }else {
+            args.put(ARG_SALE_ITEM_DUE_DATE, updatedSaleItem!!.saleItemDueDate.toString())
         }
+
         impl.go(AddReminderDialogView.VIEW_NAME, args, context)
     }
 
@@ -227,8 +261,6 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
     fun handleClickSave() {
 
-        val inventoryTransactionDao = repository.inventoryTransactionDao
-        val saleDao = repository.saleDao
 
         if (updatedSaleItem != null) {
             updatedSaleItem!!.saleItemActive = true
@@ -253,9 +285,8 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 view.runOnUiThread(Runnable {
                     remindersLive.observe(thisP, thisP::handleReminderLive)
                 })
-
-
             }
+            view.finish()
         }
     }
 
@@ -269,27 +300,18 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 view.setReminderNotification(days, saleTitle!!, saleItemDueDate)
             }
         }
-        view.finish()
     }
 
     fun handleAddReminder(days: Int) {
         val reminder = SaleItemReminder(days, saleItemUid, true)
         val reminderDao = repository.saleItemReminderDao
         GlobalScope.launch {
-            try {
-                val result =
-                        reminderDao.findBySaleItemUidAndDaysAsync(saleItemUid, days)
-                if (result.size > 0) {
-                    //It has it already. Skipp it.
-                } else {
-                    try {
-                        reminderDao.insertAsync(reminder)
-                    } catch (e: Exception) {
-                        println(e.message)
-                    }
-                }
-            }catch (e:Exception){
-                println(e.message)
+            val result =
+                    reminderDao.findBySaleItemUidAndDaysAsync(saleItemUid, days)
+            if (result.size > 0) {
+                //It has it already. Skipp it.
+            } else {
+                reminderDao.insertAsync(reminder)
             }
         }
     }

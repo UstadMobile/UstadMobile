@@ -221,6 +221,7 @@
 
     <string name="select_sale_type">Select sale type</string>
     <string name="sold_now">Sold now</string>
-
+    <string name="in_stock">in stock</string>
+    <string name="by_you">by you</string>
 
 </resources>

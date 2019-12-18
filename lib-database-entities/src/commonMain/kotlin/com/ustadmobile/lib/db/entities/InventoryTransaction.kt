@@ -25,10 +25,14 @@ open class InventoryTransaction() {
     //If sale, it will be set here
     var inventoryTransactionSaleUid : Long = 0
 
+    var inventoryTransactionSaleItemUid: Long = 0
+
     //If given to another LE, it will be set here
     var inventoryTransactionToLeUid : Long = 0
 
     var inventoryTransactionDate : Long = 0
+
+    var inventoryTransactionDay : Long = 0
 
     var inventoryTransactionActive: Boolean = true
 

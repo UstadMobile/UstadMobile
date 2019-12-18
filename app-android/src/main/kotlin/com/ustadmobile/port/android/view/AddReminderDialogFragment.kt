@@ -6,27 +6,21 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
 import android.widget.NumberPicker
 import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.SaleItemDetailPresenter
+import com.ustadmobile.core.controller.AddReminderDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AddReminderDialogView
-import com.ustadmobile.core.view.DismissableDialog
-import com.ustadmobile.core.view.SaleItemDetailView
 
 
-class AddReminderDialogFragment : UstadDialogFragment(),
-        AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener,
-        DialogInterface.OnShowListener, View.OnClickListener, AddReminderDialogView,
-        DismissableDialog {
+class AddReminderDialogFragment : UstadDialogFragment(), AddReminderDialogView, DialogInterface.OnShowListener {
 
 
     override val viewContext: Any
         get() = context!!
 
-    private var mPresenter: SaleItemDetailPresenter? = null
+    private var mPresenter: AddReminderDialogPresenter? = null
     private var dialog: AlertDialog? = null
     private var rootView: View? = null
 
@@ -39,6 +33,9 @@ class AddReminderDialogFragment : UstadDialogFragment(),
         this.mAttachedContext = context
     }
 
+    override fun onShow(p0: DialogInterface?) {
+
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
@@ -70,37 +67,19 @@ class AddReminderDialogFragment : UstadDialogFragment(),
         dialog = builder.create()
         dialog!!.setOnShowListener(this)
 
-        mPresenter = SaleItemDetailPresenter(context!!,
+        mPresenter = AddReminderDialogPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments),
-                (activity as SaleItemDetailView?)!!, false)
+                this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(arguments))
 
         return dialog as AlertDialog
 
     }
 
-    //Required overrides
     override fun finish() {
-
+        dialog!!.dismiss()
     }
 
-    override fun onClick(dialog: DialogInterface, which: Int) {
 
-    }
 
-    override fun onShow(dialog: DialogInterface) {
-
-    }
-
-    override fun onClick(v: View) {
-
-    }
-
-    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>) {
-
-    }
 }

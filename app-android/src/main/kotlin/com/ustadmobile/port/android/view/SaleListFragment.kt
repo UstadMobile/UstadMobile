@@ -260,7 +260,7 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
 
             override fun areContentsTheSame(oldItem: SaleListDetail,
                                             newItem: SaleListDetail): Boolean {
-                return oldItem.saleUid == newItem.saleUid
+                return oldItem == newItem
             }
         }
     }

@@ -316,6 +316,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
+            builder.addMigrations(object : DoorMigration(27,28){
+                override fun migrate(database: DoorSqlDatabase) {
+                    //TODO: this
+                }
+
+            })
+
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry RENAME COLUMN imported TO status")

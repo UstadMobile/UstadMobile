@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.InventoryDetailView
 import com.ustadmobile.core.view.InventoryDetailView.Companion.ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID
+import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -87,11 +88,13 @@ class InventoryDetailPresenter(context: Any,
     }
 
     fun handleClickSaleTransaction(saleUid:Long){
-
+        val args = HashMap<String, String>()
+        args.put(SaleDetailView.ARG_SALE_UID, saleUid.toString())
+        impl.go(SaleDetailView.VIEW_NAME, args, context)
     }
 
-    fun handleClickInventoryTransaction(date: Long){
-
+    fun handleClickInventoryTransaction(leUid: Long, date: Long){
+        //TODO : this
     }
 
     companion object{

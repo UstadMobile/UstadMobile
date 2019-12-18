@@ -117,4 +117,44 @@ open class SaleProduct() {
         }
         return saleProductDescLocale
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as SaleProduct
+
+        if (saleProductUid != other.saleProductUid) return false
+        if (saleProductName != other.saleProductName) return false
+        if (saleProductNameDari != other.saleProductNameDari) return false
+        if (saleProductDescDari != other.saleProductDescDari) return false
+        if (saleProductNamePashto != other.saleProductNamePashto) return false
+        if (saleProductDescPashto != other.saleProductDescPashto) return false
+        if (saleProductDesc != other.saleProductDesc) return false
+        if (saleProductDateAdded != other.saleProductDateAdded) return false
+        if (saleProductPersonAdded != other.saleProductPersonAdded) return false
+        if (saleProductPictureUid != other.saleProductPictureUid) return false
+        if (saleProductActive != other.saleProductActive) return false
+        if (saleProductCategory != other.saleProductCategory) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = saleProductUid.hashCode()
+        result = 31 * result + (saleProductName?.hashCode() ?: 0)
+        result = 31 * result + (saleProductNameDari?.hashCode() ?: 0)
+        result = 31 * result + (saleProductDescDari?.hashCode() ?: 0)
+        result = 31 * result + (saleProductNamePashto?.hashCode() ?: 0)
+        result = 31 * result + (saleProductDescPashto?.hashCode() ?: 0)
+        result = 31 * result + (saleProductDesc?.hashCode() ?: 0)
+        result = 31 * result + saleProductDateAdded.hashCode()
+        result = 31 * result + saleProductPersonAdded.hashCode()
+        result = 31 * result + saleProductPictureUid.hashCode()
+        result = 31 * result + saleProductActive.hashCode()
+        result = 31 * result + saleProductCategory.hashCode()
+        return result
+    }
+
+
 }

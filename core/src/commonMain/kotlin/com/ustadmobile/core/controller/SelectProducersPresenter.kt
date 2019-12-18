@@ -5,11 +5,12 @@ import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SaleItemDetailView
+import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_DETAIL_FROM_INVENTORY
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
-import com.ustadmobile.core.view.SaleProductCategoryListView
 import com.ustadmobile.core.view.SelectProducerView
 import com.ustadmobile.core.view.SelectProducersView
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
@@ -33,7 +34,7 @@ class SelectProducersPresenter(context: Any,
     : UstadBaseController<SelectProducersView>(context, arguments!!, view) {
 
 
-    internal var repository: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     private val providerDao: InventoryItemDao
     private val transactionDao: InventoryTransactionDao
     private var saleItemUid: Long = 0L
@@ -52,49 +53,38 @@ class SelectProducersPresenter(context: Any,
 
     init {
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-
         //Get provider Dao
         providerDao = repository.inventoryItemDao
         transactionDao = repository.inventoryTransactionDao
 
         if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)) {
-            saleItemUid = (arguments!!.get(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)!!.toLong())
-        } else {
-            //Create a new SaleItem? - shouldn't happen.
-            //throw exception.
+            saleItemUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)!!.toLong())
         }
 
-        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID)) {
-            saleProductUid = (arguments!!.get(ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID)!!.toLong())
-        } else {
-            //Create a new SaleItem? - shouldn't happen.
-            //throw exception.
+        if (arguments.containsKey(ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID)) {
+            saleProductUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID)!!.toLong())
         }
 
-        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_UID)) {
-            saleUid = (arguments!!.get(ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
-        } else {
-            //Create a new SaleItem? - shouldn't happen.
-            //throw exception.
+        if (arguments.containsKey(ARG_SELECT_PRODUCERS_SALE_UID)) {
+            saleUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
         }
 
-        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)) {
-            val addition = (arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!.toString())
+        if (arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)) {
+            val addition = (arguments.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!.toString())
             if(addition.toLowerCase().equals("true")){
                 inventoryAddition = true
             }
         }
 
-        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)) {
-            val selection = (arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!.toString())
+        if (arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)) {
+            val selection = arguments.getOrElse(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)
+                { "false" }.toString()
             if(selection.toLowerCase().equals("true")){
                 inventorySelection = true
             }
         }
 
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
-
         weToCount = HashMap()
 
     }
@@ -104,38 +94,42 @@ class SelectProducersPresenter(context: Any,
 
         idToOrderInteger = HashMap<Long, Int>()
         updateSortSpinnerPreset()
-
     }
 
     fun getAndSetProvider(sortCode: Int) {
         GlobalScope.launch {
             when (sortCode) {
                 SORT_ORDER_NAME_ASC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid)
+                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                            loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_NAME_DESC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid)
+                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                            loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_STOCK_ASC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid)
+                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                            loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_STOCK_DESC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid)
+                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                            loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 else -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid)
+                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                            loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
@@ -147,13 +141,14 @@ class SelectProducersPresenter(context: Any,
 
     fun updateWeCount(weUid: Long, count: Int){
         weToCount.put(weUid, count)
+        println("Updated count : " + count)
     }
 
     private fun calculateTotalCount():Int{
         var count = 0
 
         for(weUid in weToCount.keys){
-            count = count + weToCount.get(weUid)!!
+            count += weToCount[weUid]!!
         }
 
         return count
@@ -173,11 +168,14 @@ class SelectProducersPresenter(context: Any,
 
     private fun handleClickSaveInventory(){
 
+        val addedDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+        val addedDate = UMCalendarUtil.getToday000000()
         GlobalScope.launch {
             for(weUid in weToCount.keys) {
             val count = weToCount[weUid]
                 val newInventoryItem = InventoryItem(saleProductUid, loggedInPersonUid, weUid,
-                        UMCalendarUtil.getDateInMilliPlusDays(0))
+                        addedDateTime)
+                newInventoryItem.inventoryItemDayAdded = addedDate
                 providerDao.insertInventoryItem(newInventoryItem, count!!, loggedInPersonUid)
             }
             view.finish()
@@ -188,26 +186,9 @@ class SelectProducersPresenter(context: Any,
     private fun handleClickSelectInventory(){
 
         val saleItemDao = repository.saleItemDao
-        val date = UMCalendarUtil.getDateInMilliPlusDays(0)
+        val dateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+        val date = UMCalendarUtil.getToday000000()
         GlobalScope.launch {
-            for (weUid in weToCount.keys) {
-                val count = weToCount.get(weUid)!!
-
-                //1. Get count number of unique InventoryItems and build Transactions for them.
-                val availableItems = providerDao.findAvailableInventoryItemsByProductLimit(
-                        saleProductUid, count)
-                if(availableItems.count() != count){
-                    //ERROR: We are asking for more than we have.
-                    throw Exception("Asked for more than required")
-                }
-                for(item in availableItems){
-                    val newInventoryTransaction = InventoryTransaction(item.inventoryItemUid,
-                            loggedInPersonUid, saleUid, date)
-                    newInventoryTransaction.inventoryTransactionActive = false
-
-                    transactionDao.insertAsync(newInventoryTransaction)
-                }
-            }
 
 
             val totalCount = calculateTotalCount()
@@ -226,7 +207,7 @@ class SelectProducersPresenter(context: Any,
                 saleItem.saleItemDueDate = 0
                 saleItem.saleItemProductUid = saleProductUid
                 // Multiple saleItem.saleItemProducerUid
-                saleItem.saleItemActive = true
+                saleItem.saleItemActive = false
                 saleItem.saleItemSold = true
                 saleItem.saleItemPreorder = false
 
@@ -234,11 +215,35 @@ class SelectProducersPresenter(context: Any,
                 saleItem.saleItemUid = saleItemUid
             }
 
+
+            for (weUid in weToCount.keys) {
+                val count = weToCount.get(weUid)!!
+
+                // Get count number of unique InventoryItems and build Transactions for them.
+                val availableItems = providerDao.findAvailableInventoryItemsByProductLimit(
+                        saleProductUid, count, loggedInPersonUid, weUid)
+                if(availableItems.count() != count){
+                    //ERROR: We are asking for more than we have.
+                    throw Exception("Asked for more than required")
+                }
+                for(item in availableItems){
+                    val newInventoryTransaction = InventoryTransaction(item.inventoryItemUid,
+                            loggedInPersonUid, saleUid, dateTime)
+                    newInventoryTransaction.inventoryTransactionDay = date
+                    newInventoryTransaction.inventoryTransactionActive = false
+                    newInventoryTransaction.inventoryTransactionSaleItemUid = saleItemUid
+
+                    transactionDao.insertAsync(newInventoryTransaction)
+                }
+            }
+
+
             val args = HashMap<String, String>()
             val impl = UstadMobileSystemImpl.instance
-            args.put(SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID, saleProductUid.toString())
-            args.put(SelectProducerView.ARG_PRODUCER_UID, loggedInPersonUid.toString())
-            args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
+            args[SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID] = saleProductUid.toString()
+            args[SelectProducerView.ARG_PRODUCER_UID] = loggedInPersonUid.toString()
+            args[ARG_SALE_ITEM_DETAIL_FROM_INVENTORY] = "true"
+            args[ARG_SALE_ITEM_UID] = saleItemUid.toString()
 
             impl.go(SaleItemDetailView.VIEW_NAME, args, context)
 
@@ -289,11 +294,11 @@ class SelectProducersPresenter(context: Any,
     }
 
     fun handleChangeSortOrder(order: Long) {
-        var order = order
-        order = order + 1
+        var orderPlusOne = order
+        orderPlusOne += 1
 
-        if (idToOrderInteger!!.containsKey(order)) {
-            val sortCode = idToOrderInteger!!.get(order)
+        if (idToOrderInteger!!.containsKey(orderPlusOne)) {
+            val sortCode = idToOrderInteger!!.get(orderPlusOne)
             if (sortCode != null) {
                 getAndSetProvider(sortCode)
             }

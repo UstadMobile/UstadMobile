@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.InventoryDetailPresenter
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
@@ -28,8 +29,12 @@ class InventoryDetailRecyclerAdapter internal constructor(
 
     private var impl = UstadMobileSystemImpl.instance
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InventoryListViewHolder {
+    private var loggedInPersonUid : Long = 0
+    init {
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(theContext)
+    }
 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InventoryListViewHolder {
 
         val list = LayoutInflater.from(theContext).inflate(
                 R.layout.item_inventory_transaction, parent, false)
@@ -46,6 +51,8 @@ class InventoryDetailRecyclerAdapter internal constructor(
         val desc = holder.itemView.findViewById<TextView>(R.id.item_inventory_transaction_desc)
         val date = holder.itemView.findViewById<TextView>(R.id.item_inventory_transaction_date)
         val icon = holder.itemView.findViewById<ImageView>(R.id.imageView11)
+        val from = holder.itemView.findViewById<TextView>(R.id.item_inventory_transaction_od)
+
 
         val entity = getItem(position)
 
@@ -64,6 +71,11 @@ class InventoryDetailRecyclerAdapter internal constructor(
                 entity.weNames
         type.setText(typeText)
         desc.setText(descText)
+        if(loggedInPersonUid == entity!!.fromLeUid){
+            from.setText("(" + theActivity.getText(R.string.by_you) + ")")
+        }else {
+            from.setText("(" + theActivity.getText(R.string.by) + " " + entity!!.leName + ")")
+        }
 
         val prettyDate = UMCalendarUtil.getPrettyDateFromLong(entity!!.transactionDate, "")
         date.setText(prettyDate)
@@ -72,7 +84,7 @@ class InventoryDetailRecyclerAdapter internal constructor(
             if(entity!!.saleUid != 0L){
                 mPresenter.handleClickSaleTransaction(entity!!.saleUid)
             }else{
-                mPresenter.handleClickInventoryTransaction(entity!!.transactionDate)
+                mPresenter.handleClickInventoryTransaction(entity!!.fromLeUid, entity!!.transactionDate)
             }
         })
 

@@ -114,7 +114,7 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductWithInventoryCount>) {
 
         val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                .inventoryItemDaoBoundaryCallbacks.findAllInventoryByProduct(factory)
+                .inventoryItemDaoBoundaryCallbacks.findAllInventoryByProductNameAsc(factory)
 
         val recyclerAdapter = InventoryListRecyclerAdapter(
                 DIFF_SALEPRODUCTWITHINVENTORYCOUNT_CALLBACK, mPresenter!!,
@@ -169,7 +169,7 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
 
             override fun areContentsTheSame(oldItem: SaleProductWithInventoryCount,
                                             newItem: SaleProductWithInventoryCount): Boolean {
-                return oldItem.saleProductUid == newItem.saleProductUid
+                return oldItem == newItem
             }
         }
     }

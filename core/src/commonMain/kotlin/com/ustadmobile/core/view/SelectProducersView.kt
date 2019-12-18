@@ -34,6 +34,7 @@ interface SelectProducersView : UstadView {
         const val ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID = "saleProducersSaleProductUid"
         const val ARG_SELECT_PRODUCERS_SALE_UID = "ArgSelectProducersSaleUid"
         const val ARG_SELECT_PRODUCERS_SALE_ITEM_UID = "ArgSelectProducersSaleItemUid"
+        const val ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER = "ArgSelectProducersSaleItemPreOrder"
 
     }
 

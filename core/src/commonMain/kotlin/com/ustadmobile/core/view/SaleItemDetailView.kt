@@ -17,7 +17,9 @@ interface SaleItemDetailView : UstadView {
      */
     fun finish()
 
-    fun updateSaleItemOnView(saleItem: SaleItem, productTitle: String)
+    fun updateSaleItemOnView(saleItem: SaleItem)
+
+    fun updateProductTitleOnView(productTitle: String)
 
     fun updateTotal(total: Long)
 
@@ -28,6 +30,8 @@ interface SaleItemDetailView : UstadView {
     fun setReminderProvider(paymentProvider: DataSource.Factory<Int, SaleItemReminder>)
 
     fun setReminderNotification(days: Int, message: String, saleDueDate: Long)
+
+    fun showQuantityTextView(show: Boolean)
 
     companion object {
 
@@ -42,6 +46,9 @@ interface SaleItemDetailView : UstadView {
 
         const val ARG_SALE_ITEM_NAME = "ArgSaleItemName"
         const val ARG_SALE_DUE_DAYS = "ArgSaleDueDays"
+
+        const val ARG_SALE_ITEM_DETAIL_FROM_INVENTORY = "ArgSaleItemDetailFromInventory"
+        const val ARG_SALE_ITEM_DETAIL_PREORDER = "ArgSaleItemDetailPreOrder"
     }
 
 }

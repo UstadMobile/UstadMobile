@@ -42,9 +42,8 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
     private lateinit var menu: Menu
 
     private lateinit var totalTV: TextView
-    private lateinit var saleRB: RadioButton
-    private lateinit var preOrderRB: RadioButton
     private lateinit var quantityNP: NumberPicker
+    private lateinit var quantityTV: TextView
     private lateinit var pppNP: NumberPicker
     private lateinit var pppNPET: EditText
     private lateinit var quantityNPET: EditText
@@ -62,6 +61,19 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
     private lateinit var remindersRV: RecyclerView
 
     private var preOrderSelected = false
+
+    override fun showQuantityTextView(show: Boolean) {
+
+        runOnUiThread(Runnable {
+            if (show) {
+                quantityNP.visibility = View.GONE
+                quantityTV.visibility = View.VISIBLE
+            } else {
+                quantityNP.visibility = View.VISIBLE
+                quantityTV.visibility = View.GONE
+            }
+        })
+    }
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
@@ -98,22 +110,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
 
     private fun checkAndSave(){
 
-        if(!saleRB.isChecked && !preOrderRB.isChecked){
-            sendMessage(getText(R.string.please_select_sale_as_pre_order_or_sale).toString())
-        }else {
-            mPresenter!!.handleClickSave()
-        }
-    }
-
-    fun sendMessage(toast: String) {
-
-        runOnUiThread {
-            Toast.makeText(
-                    this,
-                    toast,
-                    Toast.LENGTH_SHORT
-            ).show()
-        }
+        mPresenter!!.handleClickSave()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,9 +126,8 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         totalTV = findViewById(R.id.activity_sale_item_detail_total_amount)
-        saleRB = findViewById(R.id.activity_sale_item_detail_radiobutton_sold)
-        preOrderRB = findViewById(R.id.activity_sale_item_detail_radiobutton_preorder)
         quantityNP = findViewById(R.id.activity_sale_item_detail_quantity_numberpicker)
+        quantityTV = findViewById(R.id.activity_sale_item_detail_quantity_textview)
         quantityNPET = quantityNP!!.findViewById(Resources.getSystem().getIdentifier("numberpicker_input", "id", "android"))
         quantityNPET!!.isFocusable = false
 
@@ -182,6 +178,12 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         pppNP!!.maxValue = maxValue
         pppNP!!.value = pppDefaultValue
 
+        //Inventory total amount click listenere
+        quantityTV.setOnClickListener{
+            //TODO: GO to inventory selector
+            //Should only need SaleItemUid and LeUid
+        }
+
         //Presenter
         mPresenter = SaleItemDetailPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
@@ -212,41 +214,32 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
             }
         })
 
-        preOrderRB.setOnCheckedChangeListener { buttonView, isChecked ->
-            mPresenter!!.setPreOrder(isChecked)
-            showPreOrder(isChecked)
-            preOrderSelected = isChecked
-        }
-
-        saleRB.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter!!.setSold(isChecked) }
-
         addReminderTV.setOnClickListener { v -> mPresenter!!.handleClickAddReminder() }
     }
 
-    override fun updateSaleItemOnView(saleItem: SaleItem, productName: String) {
+    fun togglePreOrderView(isChecked : Boolean){
+        mPresenter!!.setPreOrder(isChecked)
+        showPreOrder(isChecked)
+    }
+
+    override fun updateSaleItemOnView(saleItem: SaleItem) {
         runOnUiThread {
             if (saleItem != null) {
                 val q = saleItem.saleItemQuantity
                 val ppp = saleItem.saleItemPricePerPiece
                 val total = (q * ppp).toLong()
 
-                if (productName != null && productName !== "") {
-                    toolbar.title = productName
-                }
                 if (q != 0) {
                     quantityNP.value = q
+                    quantityTV.text = q.toString()
                 }
                 if (ppp > 0) {
                     pppNP.value = ppp.toInt()
                 }
                 totalTV.text = total.toString()
-                saleRB.isChecked = saleItem.saleItemSold
 
-                if (preOrderSelected) {
-                    preOrderRB.isChecked = preOrderSelected
-                } else {
-                    preOrderRB.isChecked = saleItem.saleItemPreorder
-                }
+
+                togglePreOrderView(saleItem.saleItemPreorder)
 
 
                 val dueDate = saleItem.saleItemDueDate
@@ -256,7 +249,14 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
                 }
             }
         }
+    }
 
+    override fun updateProductTitleOnView(productName: String) {
+        runOnUiThread {
+            if (productName != null && productName !== "") {
+                toolbar.title = productName
+            }
+        }
     }
 
     override fun setReminderProvider(factory: DataSource.Factory<Int, SaleItemReminder>) {
@@ -319,12 +319,12 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
                 object : DiffUtil.ItemCallback<SaleItemReminder>() {
             override fun areItemsTheSame(oldItem: SaleItemReminder,
                                          newItem: SaleItemReminder): Boolean {
-                return oldItem == newItem
+                return oldItem.saleItemReminderUid == newItem.saleItemReminderUid
             }
 
             override fun areContentsTheSame(oldItem: SaleItemReminder,
                                             newItem: SaleItemReminder): Boolean {
-                return oldItem == newItem
+                return oldItem.saleItemReminderUid == newItem.saleItemReminderUid
             }
         }
 
