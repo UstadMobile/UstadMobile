@@ -317,8 +317,25 @@ class ContainerDownloadManagerTest {
 
     }
 
+    @Test
     fun givenDownloadEnqueuedWithNoUnmeteredConnectivity_whenConnectivityChanges_thenShouldInvokeRunner() {
+        runBlocking {
+            val mockDownloadRunner = mock<ContainerDownloadRunner>()
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
+                mockDownloadRunner
+            }
 
+            val (newDownloadJob, rootDownloadJobItem) = downloadManagerImpl.addTestRootDownload(1)
+            val childDownloadJobItem = downloadManagerImpl.addTestChildDownload(rootDownloadJobItem,
+                    DownloadJobItem(newDownloadJob, 2L, 2L, 1000L))
+            downloadManagerImpl.enqueue(newDownloadJob.djUid)
+
+            //download should not start when unmetered connectivity is not available
+            verify(mockDownloadRunner, timeout(1000).times(0)).startDownload()
+            downloadManagerImpl.handleConnectivityChanged(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
+            verifyBlocking(mockDownloadRunner, timeout(1000), { startDownload() })
+        }
     }
 
 

@@ -275,7 +275,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         val holder = loadDownloadJobItemHolder(downloadJobItem.djiUid)
         holder.postUpdate(downloadJobItem)
         commit()
-        if(downloadJobItem != null && downloadJobItem.djiStatus >= JobStatus.COMPLETE_MIN) {
+        if(downloadJobItem != null
+                && (downloadJobItem.djiStatus >= JobStatus.COMPLETE_MIN
+                        || downloadJobItem.djiStatus < JobStatus.RUNNING_MIN)) {
             val downloadRemoved = activeDownloads.remove(downloadJobItem.djiUid)
             if(downloadRemoved != null) {
                 checkQueue()
@@ -296,18 +298,16 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         commit()
     }
 
-    override suspend fun cancel(downloadJobId: Int) {
+    override suspend fun cancel(downloadJobId: Int) = withContext(singleThreadContext) {
         updateWaitingAndActiveStatuses(downloadJobId, JobStatus.CANCELED, {
             val downloadRunner = this
             println("Download runner = $downloadRunner")
-            GlobalScope.launch {
-                downloadRunner.cancel()
-            }
+            GlobalScope.launch { downloadRunner.cancel() }
         })
         commit()
     }
 
-    override suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean) {
+    override suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean) = withContext(singleThreadContext) {
         appDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(downloadJobUid, meteredDataAllowed)
         activeDownloads.values.filter { it.downloadJobItem.djiDjUid == downloadJobUid }
                 .forEach {
@@ -318,5 +318,6 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     override suspend fun handleConnectivityChanged(status: ConnectivityStatus) = withContext(singleThreadContext){
         currentConnectivityStatus = status
         connectivityLiveData.sendValue(status)
+        checkQueue()
     }
 }
