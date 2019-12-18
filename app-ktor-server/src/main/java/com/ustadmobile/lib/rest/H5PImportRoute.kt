@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.google.common.collect.Lists
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
+import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
@@ -112,7 +113,9 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             val headers = response.headers
 
-            if (headers["Content-Type"]?.startsWith("video/") == true) {
+            val mimetype = headers["Content-Type"]
+
+            if (VideoPlayerPresenterCommon.videoMimeTypeMap.keys.contains(mimetype)) {
 
                 if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
                     call.respond(HttpStatusCode.BadRequest, "File size too big")
@@ -158,6 +161,10 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 var fileName = FilenameUtils.getName(urlString)
                 if(!fileName.contains(".")){
                     fileName =  headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
+                }
+
+                if(FilenameUtils.getExtension(fileName).isNullOrEmpty()){
+                    fileName += VideoPlayerPresenterCommon.videoMimeTypeMap[mimetype]
                 }
 
                 val videoFile = File(parentDir, fileName)

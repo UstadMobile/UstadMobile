@@ -55,7 +55,7 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
     internal var srtMap = mutableMapOf<String, String>()
     internal var srtLangList = mutableListOf<String>()
 
-    lateinit var container: Container
+    var container: Container? = null
 
     lateinit var containerManager: ContainerManager
 
@@ -97,5 +97,11 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
 
+    }
+
+    companion object{
+
+        var videoExtensionList = listOf(".mp4",".mkv",".webm",".m4v")
+        var videoMimeTypeMap = mapOf("video/mp4" to ".mp4", "video/x-matroska" to ".mkv", "video/webm" to ".webm", "video/x-m4v" to ".m4v")
     }
 }
