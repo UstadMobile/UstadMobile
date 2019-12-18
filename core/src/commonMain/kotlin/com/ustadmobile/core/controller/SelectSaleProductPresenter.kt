@@ -141,37 +141,39 @@ class SelectSaleProductPresenter(context: Any,
 
         val args = HashMap<String, String>()
         if(inventoryMode){
+
+            if(saleUid != 0L) {
+                args.put(ARG_SELECT_PRODUCERS_SALE_UID, saleUid.toString())
+            }
+
+            if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)){
+                args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION,
+                        arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!)
+            }
+
+            if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)){
+                args.put(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION,
+                        arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!)
+            }
+
+            if(preOrder) {
+                args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+                args[ARG_SALE_ITEM_PRODUCT_UID] = productUid.toString()
+                args[ARG_PRODUCER_UID] = UmAccountManager.getActivePersonUid(context).toString()
+                args[ARG_SALE_ITEM_DETAIL_PREORDER] = "true"
+            }
+
             if (isCategory) {
+                args.put(ARG_SALEPRODUCT_UID, productUid.toString())
                 args.put(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE, "true")
-                if(preOrder){
-                    args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
-                }
+                view.finish()
                 impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
             } else {
+                args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID,
+                        productUid.toString())
                 //Go to SelectProducers
-
-                if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)){
-                    args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION,
-                            arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!)
-                }
-
-                if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)){
-                    args.put(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION,
-                            arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!)
-                }
-
                 view.finish()
-                args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID, productUid.toString())
-                if(saleUid != 0L) {
-                    args.put(ARG_SELECT_PRODUCERS_SALE_UID, saleUid.toString())
-                }
                 if(preOrder){
-                    args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
-                    
-                    args[ARG_SALE_ITEM_PRODUCT_UID] = productUid.toString()
-                    args[ARG_PRODUCER_UID] = UmAccountManager.getActivePersonUid(context).toString()
-                    args[ARG_SALE_ITEM_DETAIL_PREORDER] = "true"
-
                     impl.go(SaleItemDetailView.VIEW_NAME, args, context)
                 }else {
                     impl.go(SelectProducersView.VIEW_NAME, args, context)

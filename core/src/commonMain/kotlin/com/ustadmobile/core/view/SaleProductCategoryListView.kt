@@ -51,7 +51,6 @@ interface SaleProductCategoryListView : UstadView {
         //Any argument keys:
         const val ARG_SALEPRODUCT_UID = "ArgSaleProductUid"
         const val ARG_SELECT_PRODUCT = "ArgSelectProductMode"
-        const val ARG_SELECT_INVENTORY = "ArgSelectInventoryMode"
         const val ARG_PASS_PRODUCER_UID = "ArgPassProducerUid"
         const val ARG_PASS_SALE_ITEM_UID = "ArgPassSaleItemUid"
         const val ARG_MORE_RECENT = "ArgMoreRecent"

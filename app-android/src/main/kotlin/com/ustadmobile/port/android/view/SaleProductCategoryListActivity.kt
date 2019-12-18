@@ -203,7 +203,6 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
                     Toast.LENGTH_SHORT
             ).show()
         }
-
     }
 
     override fun updateToolbar(title: String?) {

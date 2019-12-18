@@ -18,8 +18,8 @@ import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_MORE_RECENT
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_PRODUCER_UID
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_PASS_SALE_ITEM_UID
+import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEPRODUCT_UID
-import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_INVENTORY
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_PRODUCT
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
@@ -57,6 +57,8 @@ class SaleProductCategoryListPresenter(context: Any,
     private var selectInventoryMode = false
     private var preOrder = false
 
+    private var saleUid: Long = 0
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -73,8 +75,8 @@ class SaleProductCategoryListPresenter(context: Any,
                 selectProductMode = true
             }
         }
-        if (arguments!!.containsKey(ARG_SELECT_INVENTORY)) {
-            if (arguments!!.get(ARG_SELECT_INVENTORY) == "true") {
+        if (arguments!!.containsKey(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE)) {
+            if (arguments!!.get(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE) == "true") {
                 selectInventoryMode = true
             }
         }
@@ -89,6 +91,9 @@ class SaleProductCategoryListPresenter(context: Any,
         }
         if (arguments.containsKey(ARG_MORE_CATEGORY)) {
             moreCategory = true
+        }
+        if (arguments!!.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID)) {
+            saleUid = (arguments.get(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
         }
 
         if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER)){
@@ -288,8 +293,17 @@ class SaleProductCategoryListPresenter(context: Any,
 
                 view.finish()
 
+                if(saleUid != 0L) {
+                    args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID, saleUid.toString())
+                }
+
                 if(preOrder){
                     args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+                    args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
+                    args[ARG_SALE_ITEM_PRODUCT_UID] = productUid.toString()
+                    args[ARG_PRODUCER_UID] = UmAccountManager.getActivePersonUid(context).toString()
+                    args[SaleItemDetailView.ARG_SALE_ITEM_DETAIL_PREORDER] = "true"
+                    impl.go(SaleItemDetailView.VIEW_NAME, args, context)
 
                 }else {
                     impl.go(SelectProducersView.VIEW_NAME, args, context)
