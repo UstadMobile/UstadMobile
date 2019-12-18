@@ -2,9 +2,11 @@ package com.ustadmobile.core.networkmanager.downloadmanager
 
 interface ContainerDownloadRunner {
 
-    fun cancel()
+    suspend fun startDownload()
 
-    fun pause()
+    suspend fun cancel()
+
+    suspend fun pause()
 
     var meteredDataAllowed: Boolean
 

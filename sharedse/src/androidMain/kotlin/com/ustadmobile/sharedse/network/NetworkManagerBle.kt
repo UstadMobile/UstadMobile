@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultGsonSerializer
 import com.ustadmobile.core.networkmanager.defaultOkHttpClient
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
@@ -147,13 +146,18 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         ContainerFetcherBuilder(this).build()
     }
 
-    override val containerDownloadManager = DownloadManagerImpl(appDb = umAppDatabase) {
+    override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase) { job, manager ->
         object: ContainerDownloadRunner {
-            override fun cancel() {
+
+            override suspend fun startDownload() {
 
             }
 
-            override fun pause() {
+            override suspend fun cancel() {
+
+            }
+
+            override suspend fun pause() {
 
             }
 

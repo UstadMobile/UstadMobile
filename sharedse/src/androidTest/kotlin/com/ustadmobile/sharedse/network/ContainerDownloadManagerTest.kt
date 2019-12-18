@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -14,13 +13,15 @@ import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.sharedse.network.ext.addTestChildDownload
 import com.ustadmobile.sharedse.network.ext.addTestRootDownload
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import org.junit.*
 import org.junit.rules.TestRule
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
 fun <T> LiveData<T>.deferredUntil(block: (T) -> Boolean): Deferred<T> {
@@ -70,7 +71,7 @@ class ContainerDownloadManagerTest {
     @Test
     fun givenParentDownloadJobCreated_whenChildItemIsAdded_thenSizeOfParentItemIsUpdated() {
         runBlocking {
-            val downloadManagerImpl = DownloadManagerImpl(appDb = clientDb) {
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
                 mock<ContainerDownloadRunner> {  }
             }
 
@@ -97,7 +98,7 @@ class ContainerDownloadManagerTest {
     fun givenParentAndChildJobCreated_whenChildItemIsUpdated_thenParentIsUpdated() {
         runBlocking {
             val dlProgressAmount = 650L
-            val downloadManagerImpl = DownloadManagerImpl(appDb = clientDb) {
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
                 mock<ContainerDownloadRunner> {  }
             }
 
@@ -121,7 +122,7 @@ class ContainerDownloadManagerTest {
     @Test
     fun givenAllOtherChildrenStatusCompleted_whenRemainingChildIsCompleted_thenParentStatusIsComplete() {
         runBlocking {
-            val downloadManagerImpl = DownloadManagerImpl(appDb = clientDb) {
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
                 mock<ContainerDownloadRunner> {  }
             }
 
@@ -154,7 +155,7 @@ class ContainerDownloadManagerTest {
     fun givenContentEntryBeingObserved_whenRelatedDownloadJobIsCreatedAndUpdated_thenOnChangeIsCalled() {
         runBlocking {
             val dlProgressAmount = 650L
-            val downloadManagerImpl = DownloadManagerImpl(appDb = clientDb) {
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
                 mock<ContainerDownloadRunner> {  }
             }
 
@@ -174,6 +175,152 @@ class ContainerDownloadManagerTest {
                     dlProgressAmount, rootEntryAfterUpdate?.downloadedSoFar)
         }
     }
+
+    @Test
+    fun givenDownloadCreated_whenEnqueued_thenShouldInvokeRunner() {
+        runBlocking {
+            val mockDownloadRunner = mock<ContainerDownloadRunner> {}
+            val downloadFnCompletable = CompletableDeferred<Int>()
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
+                downloadFnCompletable.complete(job.djiUid)
+                mockDownloadRunner
+            }
+            downloadManagerImpl.handleConnectivityChanged(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
+
+            val childLiveData = downloadManagerImpl.getDownloadJobItemByContentEntryUid(2L)
+            val childLiveDataDeferred = childLiveData.deferredUntil { it?.djiStatus == JobStatus.QUEUED }
+            val (newDownloadJob, rootDownloadJobItem) = downloadManagerImpl.addTestRootDownload(1)
+            val childDownloadJobItem = downloadManagerImpl.addTestChildDownload(rootDownloadJobItem,
+                    DownloadJobItem(newDownloadJob, 2L, 2L, 1000L))
+
+            downloadManagerImpl.enqueue(newDownloadJob.djUid)
+            val invokedDownloadJobItemUid = withTimeout(5000) { downloadFnCompletable.await() }
+            Assert.assertEquals("When download job was enqueued, the runner was invoked for the correct uid",
+                    childDownloadJobItem.djiUid, invokedDownloadJobItemUid)
+            val childLiveDataUpdated = withTimeout(5000) {childLiveDataDeferred.await() }
+            Assert.assertEquals("Livedata update was sent that download job item was enqueued",
+                    JobStatus.QUEUED, childLiveDataUpdated?.djiStatus)
+        }
+    }
+
+    @Test
+    fun givenDownloadRunning_whenDownloadCompletes_thenShouldInvokeRunnerForNextDownload() {
+        runBlocking {
+            val mockDownloadRunner = mock<ContainerDownloadRunner>()
+
+            val startedJobChannel = Channel<Int>(Channel.UNLIMITED)
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
+                GlobalScope.launch {
+                    delay(100)
+                    startedJobChannel.send(job.djiUid)
+                    manager.handleDownloadJobItemUpdated(DownloadJobItem(job).also {
+                        it.djiStatus = JobStatus.COMPLETE
+                    })
+                }
+
+                mockDownloadRunner
+            }
+            downloadManagerImpl.handleConnectivityChanged(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
+
+            val childDownloadJobs = (1..2).map {
+                val (newDownloadJob, rootDownloadJobItem) = downloadManagerImpl.addTestRootDownload(it.toLong())
+                downloadManagerImpl.addTestChildDownload(rootDownloadJobItem,
+                        DownloadJobItem(newDownloadJob, it.toLong() + 10,
+                                it.toLong() + 20, 1000L))
+            }
+
+            downloadManagerImpl.enqueue(childDownloadJobs[0].djiDjUid)
+            downloadManagerImpl.enqueue(childDownloadJobs[1].djiDjUid)
+
+            var numJobsStarted = 0
+            for(jobItemUid in startedJobChannel) {
+                Assert.assertEquals("Download job item run matches download job item uid",
+                        childDownloadJobs[numJobsStarted].djiUid, jobItemUid)
+                numJobsStarted++
+                if(numJobsStarted == childDownloadJobs.size)
+                    break
+            }
+        }
+    }
+
+    @Test
+    fun givenRunnerInvokedAndActive_whenDownloadPaused_thenShouldCallRunnerPause() {
+        runBlocking {
+            val mockDownloadRunner = mock<ContainerDownloadRunner>()
+
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
+                mockDownloadRunner
+            }
+            downloadManagerImpl.handleConnectivityChanged(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
+
+            val (newDownloadJob, rootDownloadJobItem) = downloadManagerImpl.addTestRootDownload(1)
+            val childDownloadJobItem = downloadManagerImpl.addTestChildDownload(rootDownloadJobItem,
+                    DownloadJobItem(newDownloadJob, 2L, 2L, 1000L))
+
+            downloadManagerImpl.enqueue(newDownloadJob.djUid)
+            delay(100)
+            downloadManagerImpl.pause(newDownloadJob.djUid)
+            verifyBlocking(mockDownloadRunner, timeout(5000), { pause() })
+        }
+    }
+
+
+    @Test
+    fun givenRunnerInvokedAndActive_whenDownloadCancelled_thenShouldCallRunnerCancel() {
+        runBlocking {
+            val mockDownloadRunner = mock<ContainerDownloadRunner>()
+            val startedCountdownLatch = CountDownLatch(1)
+
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
+                startedCountdownLatch.countDown()
+                mockDownloadRunner
+            }
+            downloadManagerImpl.handleConnectivityChanged(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
+
+            val (newDownloadJob, rootDownloadJobItem) = downloadManagerImpl.addTestRootDownload(1)
+            val childDownloadJobItem = downloadManagerImpl.addTestChildDownload(rootDownloadJobItem,
+                    DownloadJobItem(newDownloadJob, 2L, 2L, 1000L))
+
+            downloadManagerImpl.enqueue(newDownloadJob.djUid)
+            startedCountdownLatch.await(5, TimeUnit.SECONDS)
+            delay(100)
+            downloadManagerImpl.cancel(newDownloadJob.djUid)
+
+            verifyBlocking(mockDownloadRunner, timeout(5000), { cancel() })
+        }
+    }
+
+    @Test
+    fun givenRunnerInvokedAndActive_whenSetMeteredDataAllowedCalled_thenShouldCallSetMeteredDataAllowed() {
+        runBlocking {
+            val mockDownloadRunner = mock<ContainerDownloadRunner>()
+
+            val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
+                mockDownloadRunner
+            }
+            downloadManagerImpl.handleConnectivityChanged(
+                    ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
+
+            val (newDownloadJob, rootDownloadJobItem) = downloadManagerImpl.addTestRootDownload(1)
+            val childDownloadJobItem = downloadManagerImpl.addTestChildDownload(rootDownloadJobItem,
+                    DownloadJobItem(newDownloadJob, 2L, 2L, 1000L))
+
+            downloadManagerImpl.enqueue(newDownloadJob.djUid)
+            delay(100)
+            downloadManagerImpl.setMeteredDataAllowed(newDownloadJob.djUid, false)
+            verify(mockDownloadRunner, timeout(5000)).meteredDataAllowed = false
+        }
+
+    }
+
+    fun givenDownloadEnqueuedWithNoUnmeteredConnectivity_whenConnectivityChanges_thenShouldInvokeRunner() {
+
+    }
+
 
 
 

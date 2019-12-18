@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
@@ -17,6 +18,8 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
         NetworkManagerWithConnectionOpener{
 
 
+    override val containerDownloadManager: ContainerDownloadManager
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
     actual override val isWiFiEnabled: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.

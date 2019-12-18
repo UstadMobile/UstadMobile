@@ -25,6 +25,7 @@ suspend fun ContainerDownloadManager.addTestChildDownload(parent: DownloadJobIte
         it.djiStatus = child.djiStatus
         it.djiContentEntryUid = child.djiContentEntryUid
         it.djiContainerUid = child.djiContainerUid
+        it.djiDjUid = parent.djiDjUid
     }
 
     this.addItemsToDownloadJob(listOf(newChildItem))

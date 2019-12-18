@@ -1,9 +1,8 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLiveData
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -11,13 +10,17 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = newSingleThreadContext("UstadDownloadManager"),
-                          private val appDb: UmAppDatabase,
-                          private val downloadJobRunner: suspend (DownloadJobItem) -> ContainerDownloadRunner): ContainerDownloadManager() {
+typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
+
+class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineContext = newSingleThreadContext("UstadDownloadManager"),
+                                   private val appDb: UmAppDatabase,
+                                   private val containerDownloaderMaker: ContainerDownloaderMaker): ContainerDownloadManager() {
 
     /**
      * This class ensures that a reference is kept as long as anything still holds a reference to
@@ -99,19 +102,36 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
         }
     }
 
-    private inner class ContentEntryHolder(val contentEntryUid: Long, downloadJobItem: DownloadJobItem?) {
+    private inner class ContentEntryHolder(val contentEntryUid: Long, var downloadJobItem: DownloadJobItem?) {
 
         val liveData = MutableLiveDataWithRef<DownloadJobItem?>(this, downloadJobItem)
 
+        fun postUpdate(update: DownloadJobItem?) {
+            downloadJobItem = update
+            liveData.sendValue(update)
+        }
+
     }
+
+    private data class ActiveContainerDownload(val downloadJobItem: DownloadJobItem,
+                                               val runner: ContainerDownloadRunner)
+
 
     private val jobItemUidToHolderMap = HashMap<Int, WeakReference<DownloadJobItemHolder>>()
 
     private val contentEntryHolders = HashMap<Long, WeakReference<ContentEntryHolder>>()
 
-    private val downloadJobMap = WeakHashMap<Int, DownloadJob>()
+    private val downloadJobMap = HashMap<Int, WeakReference<DownloadJob>>()
 
     private val entriesToCommit : MutableSet<DownloadJobItem> = HashSet()
+
+    private val connectivityLiveData = DoorMutableLiveData<ConnectivityStatus?>(null)
+
+    private var currentConnectivityStatus: ConnectivityStatus? = null
+
+    private val activeDownloads: MutableMap<Int, ActiveContainerDownload> = ConcurrentHashMap()
+
+    val maxNumConcurrentDownloads = 1
 
     override suspend fun getDownloadJobItemByJobItemUid(jobItemUid: Int): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
         val holder = loadDownloadJobItemHolder(jobItemUid)
@@ -157,7 +177,7 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
 
     override suspend fun createDownloadJob(downloadJob: DownloadJob) = withContext(singleThreadContext){
         downloadJob.djUid = appDb.downloadJobDao.insert(downloadJob).toInt()
-        downloadJobMap[downloadJob.djUid] = downloadJob
+        downloadJobMap[downloadJob.djUid] = WeakReference(downloadJob)
     }
 
     override suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>) = withContext(singleThreadContext){
@@ -184,31 +204,119 @@ class DownloadManagerImpl(private val singleThreadContext: CoroutineContext = ne
         commit()
     }
 
-    private fun updateDownloadJobStatusInternal(activeJobStatus: Int, completeJobStatus: Int) {
-        //first find the active jobs that are actually running - stop them
+    /**
+     * Updates the status of all items that are waiting (e.g. queued, waiting for connectivity, etc)
+     * or those that are actively running
+     */
+    private fun updateWaitingAndActiveStatuses(downloadJobId: Int, pendingJobStatus: Int,
+                                               actionOnActiveRunners: ContainerDownloadRunner.() -> Unit) {
+
+        //On active jobs we invoke a method on the ContainerDownloadRunner itself. It is then up
+        // to the runner to take action and then update it's status accordingly.
+        val activeJobUids = mutableListOf<Int>()
+        activeDownloads.values.filter { it.downloadJobItem.djiDjUid == downloadJobId }
+                .forEach {
+                    activeJobUids.add(it.downloadJobItem.djiUid)
+                    actionOnActiveRunners.invoke(it.runner)
+                }
+
+        val jobItemHoldersUpdated = mutableSetOf<Int>()
+        jobItemUidToHolderMap.values.map { it.get() }.filter { it != null }
+                .map { it!! }
+                .filter { it.downloadJobItem?.djiDjUid == downloadJobId
+                        && (it.downloadJobItem?.djiUid ?: -1) !in activeJobUids
+                        && (it.downloadJobItem?.djiStatus ?: 0) < JobStatus.RUNNING_MIN }.forEach {
+                    val currentDji = it.downloadJobItem
+                    if(currentDji != null) {
+                        currentDji.djiStatus = pendingJobStatus
+                        jobItemHoldersUpdated.add(currentDji.djiUid)
+                        it.postUpdate(currentDji)
+                    }
+                }
+
+        this.contentEntryHolders.values.map { it.get() }.filter { it != null }
+                .map { it!! }
+                .filter { (it.downloadJobItem?.djiUid ?: 0) !in jobItemHoldersUpdated
+                        && it.downloadJobItem?.djiDjUid == downloadJobId }.forEach {
+                    val downloadJobItemVal = it.downloadJobItem
+                    if(downloadJobItemVal != null) {
+                        downloadJobItemVal.djiStatus = pendingJobStatus
+                        it.postUpdate(downloadJobItemVal)
+                    }
+                }
+
+
+
+        //Update the status of any waiting items that are not loaded in memory at the moment
+        // any item that had a status of running would be in memory.
+        appDb.downloadJobItemDao.updateWaitingItemStatus(downloadJobId, pendingJobStatus,
+                activeJobUids)
+
+    }
+
+    private suspend fun checkQueue() {
+        if(activeDownloads.size >= maxNumConcurrentDownloads) {
+            return
+        }
+
+        val nextDownload = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
+                currentConnectivityStatus?.connectivityState == ConnectivityStatus.STATE_UNMETERED)
+        if(nextDownload.isNotEmpty()) {
+            val containerDownloader = containerDownloaderMaker(nextDownload[0], this@ContainerDownloadManagerImpl)
+            activeDownloads[nextDownload[0].djiUid] = ActiveContainerDownload(nextDownload[0],
+                    containerDownloader)
+            GlobalScope.launch(Dispatchers.IO) {
+                containerDownloader.startDownload()
+            }
+        }
     }
 
     override suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem) = withContext(singleThreadContext){
-        loadDownloadJobItemHolder(downloadJobItem.djiUid).postUpdate(downloadJobItem)
+        val holder = loadDownloadJobItemHolder(downloadJobItem.djiUid)
+        holder.postUpdate(downloadJobItem)
+        commit()
+        if(downloadJobItem != null && downloadJobItem.djiStatus >= JobStatus.COMPLETE_MIN) {
+            val downloadRemoved = activeDownloads.remove(downloadJobItem.djiUid)
+            if(downloadRemoved != null) {
+                checkQueue()
+            }
+        }
     }
 
-    override suspend fun enqueue(downloadJobId: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override suspend fun enqueue(downloadJobId: Int) = withContext(singleThreadContext){
+        updateWaitingAndActiveStatuses(downloadJobId, JobStatus.QUEUED, {})
+        commit()
+        checkQueue()
     }
 
-    override suspend fun pause(downloadJobId: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override suspend fun pause(downloadJobId: Int) = withContext(singleThreadContext){
+        updateWaitingAndActiveStatuses(downloadJobId, JobStatus.PAUSED, {
+            GlobalScope.launch { pause() }
+        })
+        commit()
     }
 
     override suspend fun cancel(downloadJobId: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        updateWaitingAndActiveStatuses(downloadJobId, JobStatus.CANCELED, {
+            val downloadRunner = this
+            println("Download runner = $downloadRunner")
+            GlobalScope.launch {
+                downloadRunner.cancel()
+            }
+        })
+        commit()
     }
 
     override suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        appDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(downloadJobUid, meteredDataAllowed)
+        activeDownloads.values.filter { it.downloadJobItem.djiDjUid == downloadJobUid }
+                .forEach {
+                    it.runner.meteredDataAllowed = meteredDataAllowed
+                }
     }
 
-    override suspend fun handleConnectivityChanged(status: ConnectivityStatus) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override suspend fun handleConnectivityChanged(status: ConnectivityStatus) = withContext(singleThreadContext){
+        currentConnectivityStatus = status
+        connectivityLiveData.sendValue(status)
     }
 }

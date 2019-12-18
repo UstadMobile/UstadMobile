@@ -95,8 +95,8 @@ class DownloadDialogPresenterTest {
                     .createNewDownloadJobItemManager(downloadJob)
             println("Item manager content entry uid = ${itemManager.rootContentEntryUid}")
             runBlocking {
-                val downloadJobPreparer = DownloadJobPreparer(statusAfterPreparation = status)//TODO: fix this to use the actual server instead
-                downloadJobPreparer.prepare(itemManager, umAppDatabase, umAppDatabaseRepo)
+//                val downloadJobPreparer = DownloadJobPreparer(statusAfterPreparation = status)//TODO: fix this to use the actual server instead
+//                downloadJobPreparer.prepare(itemManager, umAppDatabase, umAppDatabaseRepo)
             }
             println("job prepared")
         }

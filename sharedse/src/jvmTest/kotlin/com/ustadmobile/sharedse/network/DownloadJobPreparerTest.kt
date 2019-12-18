@@ -4,7 +4,6 @@ import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -45,7 +44,7 @@ class DownloadJobPreparerTest {
         val downloadJob = DownloadJob(contentEntrySet.rootEntry.contentEntryUid,
                 System.currentTimeMillis())
 
-        val downloadManagerImpl = DownloadManagerImpl(appDb = clientDb) { mock() }
+        val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { mock() }
         downloadManagerImpl.createDownloadJob(downloadJob)
 
         val downloadJobPreparer = DownloadJobPreparer(downloadJobUid = downloadJob.djUid)

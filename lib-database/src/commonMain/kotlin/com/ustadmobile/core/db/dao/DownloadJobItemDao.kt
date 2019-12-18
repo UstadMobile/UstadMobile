@@ -109,6 +109,20 @@ abstract class DownloadJobItemDao {
     @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 
+    @Query("""SELECT DownloadJobItem.* FROM DownloadJobItem 
+            LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid 
+            WHERE 
+             DownloadJobItem.djiContainerUid != 0 
+             AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
+             AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
+             AND (:unmeteredNetworkAvailable OR DownloadJob.meteredNetworkAllowed 
+             OR EXISTS(SELECT laContainerUid FROM LocallyAvailableContainer WHERE 
+                laContainerUid = DownloadJobItem.djiContainerUid))
+            ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT :limit
+    """)
+    abstract fun findNextDownloadJobItems2(limit: Int, unmeteredNetworkAvailable: Boolean): List<DownloadJobItem>
+
+
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
@@ -209,4 +223,12 @@ abstract class DownloadJobItemDao {
     abstract fun getUidAndStatusByParentJobItem(parentDjiUid: Int): List<DownloadJobItemUidAndStatus>
 
 
+    /**
+     * Update the status of any waiting items.
+     */
+    @Query("""UPDATE DownloadJobItem SET djiStatus = :status 
+            WHERE djiDjUid = :downloadJobId
+            AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
+            AND DownloadJobItem.djiUid NOT IN (:excludedJobItemUids)""")
+    abstract fun updateWaitingItemStatus(downloadJobId: Int, status: Int, excludedJobItemUids: List<Int>)
 }
