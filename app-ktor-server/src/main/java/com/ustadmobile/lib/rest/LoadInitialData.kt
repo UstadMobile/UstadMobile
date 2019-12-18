@@ -83,7 +83,7 @@ class LoadInitialData {
         var selPerson = personDao!!.findByUsername("sel")
         if (selPerson == null) {
             selPerson = Person()
-            selPerson.active = true
+            selPerson.active = false
             selPerson.username = "sel"
             selPerson.firstNames = "SEL"
             selPerson.lastName = "SEL"
@@ -153,7 +153,6 @@ class LoadInitialData {
                     println("ServletContxtClass: " + "ERROR Unable to find Person Group. ERROR")
                 }
 
-
                 //Adding stuff
                 addFieldData()
 
@@ -167,7 +166,7 @@ class LoadInitialData {
         var officerPerson = personDao!!.findByUsername("officer")
         if (officerPerson == null) {
             officerPerson = Person()
-            officerPerson.active = true
+            officerPerson.active = false
             officerPerson.username = "officer"
             officerPerson.firstNames = "Officer"
             officerPerson.lastName = "Officer"

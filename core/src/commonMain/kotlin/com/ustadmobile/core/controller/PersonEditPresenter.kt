@@ -64,75 +64,79 @@ import kotlinx.coroutines.launch
  * Fields. It is also responsible for updating the data and checking for changes and handling
  * Done with Save or Discard.
  *
- */
-class PersonEditPresenter
-/**
- * Presenter's constructor where we are getting arguments and setting the newly/editable
+ * * Presenter's constructor where we are getting arguments and setting the newly/editable
  * personUid
  *
  * @param context Android context
  * @param arguments Arguments from the Activity passed here.
  * @param view  The view that called this presenter (PersonEditView->PersonEditActivity)
  */
-(context: Any, arguments: Map<String, String>?, view: PersonEditView,
- val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
+class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: PersonEditView,
+                           val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     :UstadBaseController<PersonEditView>(context, arguments!!, view) {
-
-
-    private var personLiveData: DoorLiveData<Person?>? = null
 
     //Headers and Fields
     private var headersAndFields: List<PersonDetailPresenterField>? = null
 
     var personUid: Long = 0
 
-    private var mUpdatedPerson: Person? = null
-
-    //OG person before Done/Save/Discard clicked.
-    private var mOriginalValuePerson: Person? = null
+    private var updatedPerson: Person? = null
+    private var currentPerson: Person? = null
+    private var currentPersonAuth: PersonAuth? = null
 
     private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
-
     private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
+    private var groupUmLiveData: DoorLiveData<List<PersonGroup>>? = null
 
     //The custom fields' values
     private val customFieldWithFieldValueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
-
-    private val personDao = repository.personDao
-
-    private val personGroupDao = repository.personGroupDao
+    internal var database = UmAppDatabase.getInstance(context)
 
     private var newPersonString = ""
 
     private val customFieldsToUpdate: MutableList<PersonCustomFieldValue>
 
-    private val personCustomFieldValueDao = repository.personCustomFieldValueDao
+
 
     private var loggedInPersonUid: Long? = 0L
 
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 
-    private var customFieldDao: CustomFieldDao? = null
-    private var customFieldValueDao: CustomFieldValueDao? = null
-    private var optionDao: CustomFieldValueOptionDao? = null
-    private var personPictureDao : PersonPictureDao
+    private val personDao : PersonDao
+    private val personDaoDB : PersonDao
+    private val personGroupDao : PersonGroupDao
+    private val personGroupDaoDB : PersonGroupDao
+    private var customFieldDao: CustomFieldDao
+    private var customFieldValueDao: CustomFieldValueDao
+    private var customFieldDaoDB: CustomFieldDao
+    private var customFieldValueDaoDB: CustomFieldValueDao
+    private var optionDao: CustomFieldValueOptionDao
+    private var optionDaoDB: CustomFieldValueOptionDao
+    private var personPictureDaoRepo : PersonPictureDao
+    private val personAuthDao: PersonAuthDao
+    private val personPictureDaoDB : PersonPictureDao
+    private val personCustomFieldValueDao : PersonCustomFieldValueDao
+    private val personCustomFieldValueDaoDB : PersonCustomFieldValueDao
+    private val fieldsDaoRepo : PersonDetailPresenterFieldDao
+    private val fieldsDaoDB : PersonDetailPresenterFieldDao
+    private val feedEntryDao : FeedEntryDao
+    private val feedEntryDaoDB : FeedEntryDao
 
     private val customFieldDropDownOptions: HashMap<Long, List<String>>
 
     var passwordSet: String? = null
     var confirmPasswordSet: String? = null
-    private var currentPerson: Person? = null
-    private var currentPersonAuth: PersonAuth? = null
     var usernameSet: String? = null
-    private val personAuthDao: PersonAuthDao
 
-    private var groupUmLiveData: DoorLiveData<List<PersonGroup>>? = null
     private var groupIdToPosition: HashMap<Long, Int>? = null
     private val groupPositionToId: HashMap<Int, Long>
     private var groupPresets: Array<String>? = null
     private var personWEGroupUid : Long = 0L
+
+
+
     init {
 
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
@@ -143,19 +147,118 @@ class PersonEditPresenter
             newPersonString = arguments.get(ARG_NEW_PERSON)!!.toString()
         }
 
-        customFieldsToUpdate = ArrayList()
-
-        viewIdToCustomFieldUid = HashMap()
-
-        customFieldDropDownOptions = HashMap()
-        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
-
-        personAuthDao = repository.personAuthDao
-
         groupIdToPosition = HashMap()
         groupPositionToId = HashMap()
+        customFieldsToUpdate = ArrayList()
+        viewIdToCustomFieldUid = HashMap()
+        customFieldDropDownOptions = HashMap()
+
+        personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+        customFieldDaoDB = database.customFieldDao
+        optionDaoDB = database.customFieldValueOptionDao
+        customFieldValueDaoDB = database.customFieldValueDao
+        fieldsDaoDB = database.personDetailPresenterFieldDao
+        personPictureDaoDB = database.personPictureDao
+        personDaoDB = database.personDao
+        personGroupDaoDB = database.personGroupDao
+        personCustomFieldValueDaoDB = database.personCustomFieldValueDao
+        feedEntryDaoDB = database.feedEntryDao
+
+        personAuthDao = repository.personAuthDao
+        customFieldDao = repository.customFieldDao
+        customFieldValueDao = repository.customFieldValueDao
+        optionDao = repository.customFieldValueOptionDao
+        fieldsDaoRepo = repository.personDetailPresenterFieldDao
+        personDao = repository.personDao
+        personGroupDao = repository.personGroupDao
+        personCustomFieldValueDao = repository.personCustomFieldValueDao
+        feedEntryDao = repository.feedEntryDao
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
     }
+
+    /**
+     * Presenter's Overridden onCreate that: Gets the mPerson LiveData and observe it.
+     * @param savedState    The saved state
+     */
+    override fun onCreate(savedState: Map<String, String?>?) {
+        super.onCreate(savedState)
+
+        if (newPersonString == "true") {
+            view.updateToolbarTitle(impl.getString(MessageID.new_person, context))
+        }
+
+        getAllPersonCustomFields()
+
+        val thisP = this
+
+        GlobalScope.launch {
+
+            //Get the person's Auth (create if not exist)
+            if(personUid != 0L){
+
+                currentPerson = personDaoDB.findByUidAsync(personUid)
+
+                currentPersonAuth = personAuthDao.findByUidAsync(personUid)
+                if (currentPersonAuth == null) {
+                    currentPersonAuth = PersonAuth()
+                    currentPersonAuth!!.personAuthUid = personUid
+                    currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
+                }
+            }
+
+            //Get all the currently set headers and fields:
+            val resultLive = fieldsDaoDB.findAllPersonDetailPresenterFieldsEditModeLive()
+            GlobalScope.launch(Dispatchers.Main){
+                resultLive.observe(thisP, thisP::handleFieldsLive)
+            }
+        }
+    }
+
+    //Handle fields first then person
+    private fun handleFieldsLive(fields: List<PersonDetailPresenterField>?){
+        //Build the fields list:
+        val cleanedResult = ArrayList<PersonDetailPresenterField>()
+        //Remove old custom fields
+        val fieldsIterator = fields!!.iterator()
+        while (fieldsIterator.hasNext()) {
+            val field = fieldsIterator.next()
+            cleanedResult.add(field)
+        }
+        headersAndFields = cleanedResult
+
+        //Observe the person that will update the fields with values
+        GlobalScope.launch {
+            val personObj = personDaoDB.findByUidAsync(personUid)
+            view.runOnUiThread(Runnable {
+                handlePersonValueChanged(personObj)
+            })
+        }
+    }
+
+    /**
+     * This method tells the View what to show. It will set every field item to the view.
+     * The Live Data handler calls this method when the data (via Live data) is updated.
+     *
+     * @param person The person that needs to be displayed.
+     */
+    private fun handlePersonValueChanged(person: Person?) {
+
+        if (updatedPerson == null || updatedPerson != person) {
+            //set fields on the view as they change and arrive.
+            if (person != null) {
+                updatedPerson = person
+                usernameSet = updatedPerson!!.username
+
+                setFieldsOnView(person, headersAndFields!!, view,
+                        customFieldWithFieldValueMap)
+
+                personWEGroupUid = person.mPersonGroupUid
+            }
+        }
+    }
+
 
     fun addToMap(viewId: Int, fieldId: Long) {
         viewIdToCustomFieldUid[viewId] = fieldId
@@ -215,63 +318,10 @@ class PersonEditPresenter
 
                     customFieldDropDownOptions[c.customFieldUid] = options
                     view.runOnUiThread(Runnable{
-                        //view.addComponent(finalValueString, c.getCustomFieldName());
                         val a = arrayOfNulls<String>(options.size)
                         options.toTypedArray()
                         view.addCustomFieldDropdown(c, a, finalValueSelection)
-                        //view.addCustomFieldText(c, finalValueString);
-
                     })
-                }
-            }
-        }
-    }
-
-    /**
-     * Presenter's Overridden onCreate that: Gets the mPerson LiveData and observe it.
-     * @param savedState    The saved state
-     */
-    override fun onCreate(savedState: Map<String, String?>?) {
-        super.onCreate(savedState)
-        repository.personCustomFieldValueDao
-        val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        repository.personCustomFieldDao
-
-        customFieldDao = repository.customFieldDao
-        customFieldValueDao = repository.customFieldValueDao
-        optionDao = repository.customFieldValueOptionDao
-
-        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
-
-        if (newPersonString == "true") {
-            view.updateToolbarTitle(impl.getString(MessageID.new_person, context))
-        }
-
-        getAllPersonCustomFields()
-
-        val thisP = this
-        //Get all the currently set headers and fields:
-        GlobalScope.launch {
-            val resultLive =
-                    personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditModeLive()
-
-            GlobalScope.launch(Dispatchers.Main){
-                resultLive.observe(thisP, thisP::handleFieldsLive)
-            }
-        }
-
-        if(personUid != 0L){
-            GlobalScope.launch {
-                val result = personDao.findByUidAsync(personUid)
-                currentPerson = result
-                usernameSet = currentPerson!!.username
-
-                val result2 = personAuthDao.findByUidAsync(personUid)
-                currentPersonAuth = result2
-                if (result2 == null) {
-                    currentPersonAuth = PersonAuth()
-                    currentPersonAuth!!.personAuthUid = personUid
-                    currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
                 }
             }
         }
@@ -324,33 +374,6 @@ class PersonEditPresenter
         }
     }
 
-    private fun handleFieldsLive(fields: List<PersonDetailPresenterField>?){
-        val cleanedResult = ArrayList<PersonDetailPresenterField>()
-        //Remove old custom fields
-        val fieldsIterator = fields!!.iterator()
-        while (fieldsIterator.hasNext()) {
-            val field = fieldsIterator.next()
-            cleanedResult.add(field)
-        }
-
-        headersAndFields = cleanedResult
-
-        GlobalScope.launch {
-            val personObj = personDao.findByUidAsync(personUid)
-            view.runOnUiThread(Runnable {
-                handlePersonValueChanged(personObj)
-            })
-        }
-
-        //TODO: Removed observe
-//        //Get person live data and observe
-//        personLiveData = personDao.findByUidLive(personUid)
-//        //Observe the live data
-//        view.runOnUiThread(Runnable {
-//            personLiveData!!.observe(this, this::handlePersonValueChanged)
-//        })
-    }
-
     /**
      * Updates the pic of the person after taken to the Person object directly
      *
@@ -365,22 +388,22 @@ class PersonEditPresenter
 
             var personPictureUid : Long = 0L
             var existingPP: PersonPicture ? = null
-            existingPP = personPictureDao.findByPersonUidAsync(personUid)
+            existingPP = personPictureDaoRepo.findByPersonUidAsync(personUid)
             if(existingPP == null){
                 existingPP = PersonPicture()
                 existingPP.personPicturePersonUid = personUid
                 existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-                personPictureUid = personPictureDao.insertAsync(existingPP)
+                personPictureUid = personPictureDaoRepo.insertAsync(existingPP)
                 existingPP.personPictureUid = personPictureUid
             }
 
-            personPictureDao.setAttachment(existingPP, imageFilePath)
+            personPictureDaoRepo.setAttachment(existingPP, imageFilePath)
             existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-            personPictureDao.update(existingPP)
+            personPictureDaoRepo.update(existingPP)
 
             //Update personWithpic
             personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)
-            generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
+            generateFeedsForPersonUpdate(database, updatedPerson!!)
 
         }
     }
@@ -415,11 +438,31 @@ class PersonEditPresenter
 
 
     private fun updatePersonPic(thisPerson: Person) {
+
         GlobalScope.launch {
-            val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
-            if (personPicture != null) {
-                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture)!!)
+
+            //Load the local image first
+            val personPictureLocal = personPictureDaoDB.findByPersonUidAsync(
+                    thisPerson!!.personUid)
+            if(personPictureLocal != null) {
+                val imagePathLocal = personPictureDaoRepo.getAttachmentPath(personPictureLocal!!)!!;
+
+                if (imagePathLocal.isNotEmpty())
+                    view.updateImageOnView(imagePathLocal)
             }
+
+            //Get the server image
+            val personPictureServer =
+                    personPictureDaoRepo.findByPersonUidAsync(thisPerson!!.personUid)
+            if(personPictureServer != null) {
+                val imagePathServer =
+                        personPictureDaoRepo.getAttachmentPath(personPictureServer!!)!!;
+
+                if (imagePathServer.isNotEmpty())
+                    view.updateImageOnView(imagePathServer)
+            }
+
+
         }
 
     }
@@ -696,7 +739,8 @@ class PersonEditPresenter
         }else {
             //This is actually a custom field. (old)
             GlobalScope.launch {
-                val result = personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode, personToUpdate!!.personUid)
+                val result = personCustomFieldValueDaoDB
+                        .findCustomFieldByFieldAndPersonAsync(fieldcode, personToUpdate!!.personUid)
                 if (result != null) {
                     result.fieldValue = (value.toString())
                     customFieldsToUpdate.add(result)
@@ -716,27 +760,7 @@ class PersonEditPresenter
 
     }
 
-    /**
-     * This method tells the View what to show. It will set every field item to the view.
-     * The Live Data handler calls this method when the data (via Live data) is updated.
-     *
-     * @param person The person that needs to be displayed.
-     */
-    private fun handlePersonValueChanged(person: Person?) {
-        //set the og person value
-        if (mOriginalValuePerson == null)
-            mOriginalValuePerson = person
 
-        if (mUpdatedPerson == null || mUpdatedPerson != person) {
-            //set fields on the view as they change and arrive.
-            if (person != null) {
-                setFieldsOnView(person, headersAndFields!!, view,
-                        customFieldWithFieldValueMap)
-                mUpdatedPerson = person
-                personWEGroupUid = person.mPersonGroupUid
-            }
-        }
-    }
 
     /**
      * Handles every field Edit (focus changed).
@@ -746,7 +770,7 @@ class PersonEditPresenter
      */
     fun handleFieldEdited(fieldCode: Long, value: Any) {
 
-        mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value)
+        updatedPerson = updateSansPersistPersonField(updatedPerson, fieldCode, value)
     }
 
     /**
@@ -818,31 +842,40 @@ class PersonEditPresenter
      *
      */
     fun handleClickDone() {
-        mUpdatedPerson!!.active = true
-        mUpdatedPerson!!.mPersonGroupUid = personWEGroupUid
+
+        view.runOnUiThread(Runnable {
+            view.setInProgress(true)
+        })
+
+        updatedPerson!!.active = true
+        updatedPerson!!.mPersonGroupUid = personWEGroupUid
         GlobalScope.launch {
-            personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
+            personDaoDB.updatePersonAsync(updatedPerson!!, loggedInPersonUid!!)
 
             //Update the custom fields
-            personCustomFieldValueDao.updateListAsync(customFieldsToUpdate)
+            personCustomFieldValueDaoDB.updateListAsync(customFieldsToUpdate)
             //Start of feed generation
-            generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
+            generateFeedsForPersonUpdate(database, updatedPerson!!)
 
             //Update password if necessary
             val updatePassword = updatePassword()
 
             //Update person's individual group to  set the right name of the group
-            val fullName = mUpdatedPerson!!.fullName()
+            val fullName = updatedPerson!!.fullName()
 
-            val personGroup = personGroupDao.findPersonIndividualGroup(mUpdatedPerson!!.personUid)
+            val personGroup = personGroupDaoDB.findPersonIndividualGroup(updatedPerson!!.personUid)
             if(personGroup != null){
                 personGroup.groupName = fullName + "'s individual person group"
-                personGroupDao.updateAsync(personGroup)
+                personGroupDaoDB.updateAsync(personGroup)
             }
 
             //Close the activity.
             if(updatePassword) {
                 view.finish()
+            }else{
+                view.runOnUiThread(Runnable {
+                    view.setInProgress(false)
+                })
             }
 
         }
@@ -850,16 +883,18 @@ class PersonEditPresenter
     }
 
     private fun updatePassword() : Boolean {
+
+
         if (passwordSet != null && !passwordSet!!.isEmpty() && usernameSet != null
                 && !usernameSet!!.isEmpty() && currentPersonAuth != null && currentPerson != null) {
             if (passwordSet != confirmPasswordSet) {
                 view.sendMessage(MessageID.passwords_dont_match)
+                view.runOnUiThread(Runnable {
+                    view.setInProgress(false)
+                })
                 return false
-            }
 
-            view.runOnUiThread(Runnable {
-                view.setInProgress(true)
-            })
+            }
             currentPerson!!.username = usernameSet
 
             currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX +
@@ -867,7 +902,7 @@ class PersonEditPresenter
             currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
             GlobalScope.launch {
                 //Update locally
-                personDao.updateAsync(mUpdatedPerson!!)
+                personDao.updateAsync(updatedPerson!!)
 
                 //Update on server
                 try {
@@ -888,18 +923,32 @@ class PersonEditPresenter
                         personAuthDao.updateAsync(currentPersonAuth!!)
                         view.finish()
                     }else {
+                        view.runOnUiThread(Runnable {
+                            view.setInProgress(false)
+                        })
                         view.sendMessage(MessageID.unable_to_update_password)
                         println("nope")
+
                         false
                     }
                 } catch (e: Exception) {
+                    view.runOnUiThread(Runnable {
+                        view.setInProgress(false)
+                    })
                     view.sendMessage(MessageID.unable_to_update_password)
                     print("oops")
                     false
                 }
             }
+            view.runOnUiThread(Runnable {
+                view.setInProgress(false)
+            })
             return false
         }
+        view.runOnUiThread(Runnable {
+            view.setInProgress(false)
+        })
+
         return true
     }
 

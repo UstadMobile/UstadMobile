@@ -33,6 +33,7 @@
         android:backgroundTint="@android:color/transparent"
         android:drawableLeft="@drawable/ic_group_add"
         android:drawablePadding="@dimen/dimen_16dp"
+        android:textColor="@color/primary_text"
         android:text="@string/enroll_new_student"
         android:textAlignment="textStart"
         app:layout_constraintBottom_toTopOf="@+id/activity_clazz_detail_enroll_student_recycler_view"

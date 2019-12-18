@@ -89,7 +89,11 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     var weGroupSpinner: Spinner ? = null
 
+    internal lateinit var personEditImageButton: Button
+
     private var mProgressBar: ProgressBar? = null
+
+    var mOptionsMenu: Menu? = null
 
     override fun setGroupPresets(presets: Array<String>, position: Int) {
         val adapter = ArrayAdapter(applicationContext,
@@ -146,7 +150,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         personEditImage = findViewById(R.id.activity_person_edit_student_image)
         personEditImage.setOnClickListener { v -> addImageFromCamera() }
 
-        val personEditImageButton = findViewById<Button>(R.id.activity_person_edit_student_image_button)
+        personEditImageButton = findViewById<Button>(R.id.activity_person_edit_student_image_button)
         personEditImageButton.setOnClickListener { v -> addImageFromCamera() }
 
     }
@@ -187,11 +191,46 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     override fun disableFields(disable: Boolean){
 
+
+        val doneButton = mOptionsMenu!!.findItem(R.id.menu_done)
+
+        doneButton.isEnabled = !disable
+        if(disable) {
+            doneButton.icon.alpha = 130
+            personEditImageButton.alpha = .133F
+            personEditImage.alpha = .133F
+        } else{
+            doneButton.icon.alpha = 255
+            personEditImageButton.alpha = 1F
+            personEditImage.alpha = 1F
+        }
+
         for(child in mLinearLayout.children) {
-            if (child is TextInputLayout) {
-                (child as TextInputLayout).editText!!.isEnabled = !disable
+            if (child is TextView){
+                child.isEnabled = !disable
+            }
+            if(child is LinearLayout){
+                val childLL = child as LinearLayout
+                for(cc in childLL.children){
+                    if (cc is TextInputLayout) {
+                        cc.editText!!.isEnabled = !disable
+                    }
+
+                    if (cc is TextView){
+                        cc.isEnabled = !disable
+                    }
+
+                    if(cc is AppCompatImageView){
+                        if(disable){
+                            cc.alpha = .133F
+                        }else{
+                            cc.alpha = 1F
+                        }
+                    }
+                }
             }
         }
+
     }
 
     /**
@@ -515,6 +554,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_done, menu)
+
+        mOptionsMenu = menu
+
         return true
     }
 

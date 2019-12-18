@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -60,7 +61,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
 
-    private var personPictureDao: PersonPictureDao
+    private var personPictureDaoRepo: PersonPictureDao
+    private var personPictureDaoDB: PersonPictureDao
 
     private var currentPerson: Person? = null
 
@@ -90,7 +92,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         optionDao = repository.customFieldValueOptionDao
         personDao = repository.personDao
         personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+        personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+        personPictureDaoDB = UmAppDatabase.getInstance(context).personPictureDao
         personGroupDao = repository.personGroupDao
     }
 
@@ -236,25 +239,25 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         GlobalScope.launch {
             var personPictureUid : Long = 0L
             var existingPP: PersonPicture ? = null
-            existingPP = personPictureDao.findByPersonUidAsync(personUid)
+            existingPP = personPictureDaoRepo.findByPersonUidAsync(personUid)
             if(existingPP == null){
                 existingPP = PersonPicture()
                 existingPP.personPicturePersonUid = personUid
                 existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-                personPictureUid = personPictureDao.insertAsync(existingPP)
+                personPictureUid = personPictureDaoRepo.insertAsync(existingPP)
                 existingPP.personPictureUid = personPictureUid
             }
 
-            personPictureDao.setAttachment(existingPP, imageFilePath)
+            personPictureDaoRepo.setAttachment(existingPP, imageFilePath)
             existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-            personPictureDao.update(existingPP)
+            personPictureDaoRepo.update(existingPP)
 
 
             //Update person and generate feeds for person
             val result = personDao.updatePersonAsync(currentPerson!!, loggedInPersonUid)
             PersonEditPresenter.generateFeedsForPersonUpdate(repository, currentPerson!!)
 
-            view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
+            view.updateImageOnView(personPictureDaoRepo.getAttachmentPath(existingPP)!!)
         }
     }
 
@@ -324,15 +327,32 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             view.updateToolbar(personName)
         })
 
-        GlobalScope.launch {
-            val personPicture = personPictureDao!!.findByPersonUidAsync(currentPerson!!.personUid)
-            if (personPicture != null) {
-                view.updateImageOnView(personPictureDao!!.getAttachmentPath(personPicture)!!)
+        GlobalScope.launch() {
+
+            //Load the local image first
+            val personPictureLocal = personPictureDaoDB.findByPersonUidAsync(
+                    currentPerson!!.personUid)
+            if(personPictureLocal != null) {
+                val imagePathLocal = personPictureDaoRepo.getAttachmentPath(personPictureLocal!!)!!;
+
+                if (imagePathLocal.isNotEmpty())
+                    view.updateImageOnView(imagePathLocal)
             }
+
+            //Get the server image
+            val personPictureServer =
+                    personPictureDaoRepo.findByPersonUidAsync(currentPerson!!.personUid)
+            if(personPictureServer != null) {
+                val imagePathServer =
+                        personPictureDaoRepo.getAttachmentPath(personPictureServer!!)!!;
+
+                if (imagePathServer.isNotEmpty())
+                    view.updateImageOnView(imagePathServer)
+            }
+
         }
 
         //Fields work:
-
 
         if (person.fatherNumber != null && !person.fatherNumber!!.isEmpty()) {
             oneParentNumber = person.fatherNumber!!

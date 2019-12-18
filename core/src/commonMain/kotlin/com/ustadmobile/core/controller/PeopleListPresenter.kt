@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -162,25 +163,15 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         //Goes to PersonEditActivity with currentClazzUid passed as argument
 
         val newPerson = Person()
-        val personDao = repository.personDao
-        val personFieldDao = repository.personCustomFieldDao
-        val customFieldValueDao = repository.personCustomFieldValueDao
+        val personDaoDB = UmAppDatabase.getInstance(context).personDao
 
         GlobalScope.launch {
-            val result = personDao.createPersonAsync(newPerson, loggedInPersonUid!!)
-            //Also create null Custom Field values so it shows up in the Edit screen.
-            val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
-            for (everyCustomField in allCustomFields!!) {
-                val cfv = PersonCustomFieldValue()
-                cfv.personCustomFieldValuePersonCustomFieldUid = (everyCustomField.personCustomFieldUid)
-                cfv.personCustomFieldValuePersonUid = (result)
-                cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
-            }
+            val result = personDaoDB.createPersonAsync(newPerson, loggedInPersonUid!!)
 
             val args = HashMap<String, String>()
             args.put(ARG_PERSON_UID, result.toString())
             args.put(ARG_NEW_PERSON, "true")
-            impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
+            impl.go(PersonEditView.VIEW_NAME, args, context)
 
         }
     }
@@ -194,7 +185,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
     override fun handleCommonPressed(arg: Any, arg2:Any) {
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_UID, arg.toString())
-        impl.go(PersonDetailView.VIEW_NAME, args, view.viewContext)
+        impl.go(PersonDetailView.VIEW_NAME, args, context)
     }
 
     /**

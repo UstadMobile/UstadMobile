@@ -218,7 +218,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                         AII.InventoryItemSaleProductUid = :saleProductUid AND transactions.InventoryTransactionSaleUid != 0
                         AND CAST(AII.inventoryItemActive AS INTEGER) = 1 AND CAST(transactions.inventorytransactionactive AS INTEGER) = 1)
                         
-                    AND item.InventoryItemSaleProductUid = 7483939461982584836
+                    AND item.InventoryItemSaleProductUid = :saleProductUid
                     AND CAST(item.inventoryItemActive AS INTEGER) = 1
                     AND item.inventoryItemLeUid = :leUid
                     AND item.inventoryItemWeUid = :weUid
@@ -237,24 +237,24 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                 and inventorytransaction.inventoryTransactionSaleUid != 0 
                 and cast(inventorytransaction.inventorytransactionactive as integer) = 1 )   
             as stock 
-        FROM InventoryItem 
-        LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
-        LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
-        WHERE CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
-        AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-        AND saleProductName LIKE :searchBit
-        
-        AND (InventoryItem.InventoryItemWeUid IN (
-        SELECT MEMBER.personUid FROM PersonGroupMember 
-        LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
-        LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
-         WHERE groupMemberGroupUid = LE.mPersonGroupUid 
-        AND CAST(groupMemberActive  AS INTEGER) = 1
-        ) OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 1 END )
-        AND (InventoryItem.inventoryItemLeUid = :leUid 
-		OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
-
-        GROUP BY(SaleProduct.saleProductUid)
+            FROM InventoryItem 
+            LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
+            LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
+            WHERE CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
+            AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            AND saleProductName LIKE :searchBit
+            
+            AND (InventoryItem.InventoryItemWeUid IN (
+            SELECT MEMBER.personUid FROM PersonGroupMember 
+            LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
+             WHERE groupMemberGroupUid = LE.mPersonGroupUid 
+            AND CAST(groupMemberActive  AS INTEGER) = 1
+            ) OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 1 END )
+            AND (InventoryItem.inventoryItemLeUid = :leUid 
+            OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+    
+            GROUP BY(SaleProduct.saleProductUid)
         """
 
         const val QUERY_INVENTORY_LIST_SORTBY_NAME_ASC =

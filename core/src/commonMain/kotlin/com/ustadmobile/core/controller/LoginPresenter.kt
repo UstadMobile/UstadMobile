@@ -100,9 +100,12 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(account, context)
                     view.runOnUiThread(Runnable {
+                        view.setInProgress(false)
                         view.forceSync()
+                        view.updateLastActive()
                         view.setFinishAfficinityOnView()
                     })
+
 
                     impl.go(mNextDest, context)
                 }

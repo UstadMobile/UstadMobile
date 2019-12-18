@@ -18,8 +18,7 @@
             android:id="@+id/activity_clazz_list_enroll_person_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primary"
-            android:titleTextColor="#fff"
+            android:titleTextColor="@color/primary_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_scrollFlags="scroll|enterAlways"
             tools:layout_editor_absoluteY="0dp" />
