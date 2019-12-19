@@ -544,7 +544,7 @@ class DownloadJobItemRunner
                 wiFiDirectGroupBle.value!!.passphrase)
 
         withContext(mainCoroutineDispatcher) {
-            waitForLiveData(connectivityStatusLiveData!!, (lWiFiConnectionTimeout).toLong()) {
+            waitForLiveData(connectivityStatusLiveData, (lWiFiConnectionTimeout).toLong()) {
                 statusRef.value = it
                 it != null && isExpectedWifiDirectGroup(it)
             }

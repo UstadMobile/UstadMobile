@@ -87,6 +87,7 @@ actual abstract class DoorLiveData<T> {
 
     protected fun postValue(value: T) {
         this.value.set(value)
+        initialValueLoaded = true
         activeObservers.forEach { it.onChanged(value) }
     }
 }
