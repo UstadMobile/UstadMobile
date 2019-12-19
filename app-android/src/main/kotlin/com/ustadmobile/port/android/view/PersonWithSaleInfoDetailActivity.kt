@@ -61,8 +61,6 @@ class PersonWithSaleInfoDetailActivity :UstadBaseActivity(), PersonWithSaleInfoD
         mPresenter = PersonWithSaleInfoDetailPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
-
     }
 
     /**

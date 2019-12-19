@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.InventoryDetailView.Companion.ARG_INVENTORY_DET
 import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
@@ -75,14 +76,18 @@ class InventoryDetailPresenter(context: Any,
 
             //Title
             val saleProduct = repository.saleProductDao.findByUidAsync(saleProductUid)
-            view.updateToolbar(saleProduct!!.getNameLocale(impl.getLocale(context)))
+            view.runOnUiThread(Runnable {
+                view.updateToolbar(saleProduct!!.getNameLocale(impl.getLocale(context)))
+            })
         }
 
 
         GlobalScope.launch {
             val remaining = inventoryDao.findStockForSaleProduct(saleProductUid,
                     loggedInPersonUid)
-            view.updateTotalInventoryCount(remaining)
+            view.runOnUiThread(Runnable {
+                view.updateTotalInventoryCount(remaining)
+            })
         }
 
     }

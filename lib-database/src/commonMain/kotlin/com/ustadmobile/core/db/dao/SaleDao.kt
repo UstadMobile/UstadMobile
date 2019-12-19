@@ -87,32 +87,32 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract fun findAllSaleFilterPreOrderSortDateDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_ASC)
-    abstract fun findAllSaleFilterAllSortNameAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameAscProviderByWeUid(weUid: Long, leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_NAME_DEC)
-    abstract fun findAllSaleFilterAllSortNameDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameDescProviderByWeUid(weUid: Long, leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_ASC)
-    abstract fun findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid: Long, leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_TOTAL_AMOUNT_DESC)
-    abstract fun findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid: Long, leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_ASC )
-    abstract fun findAllSaleFilterAllSortDateAscProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateAscProviderByWeUid(weUid: Long, leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST_WE_FILTER + SORT_ORDER_DATE_DESC)
-    abstract fun findAllSaleFilterAllSortDateDescProviderByWeUid(weUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateDescProviderByWeUid(weUid: Long, leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
 
     fun filterAndSortSaleByWeUid(leUid: Long, sort:Int, weUid:Long): DataSource.Factory<Int, SaleListDetail>{
         when(sort) {
-            SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProviderByWeUid(weUid)
-            SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProviderByWeUid(weUid)
-            SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid)
-            SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid)
-            SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProviderByWeUid(weUid)
-            SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProviderByWeUid(weUid)
+            SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProviderByWeUid(weUid, leUid)
+            SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProviderByWeUid(weUid, leUid)
+            SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProviderByWeUid(weUid, leUid)
+            SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProviderByWeUid(weUid, leUid)
+            SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProviderByWeUid(weUid, leUid)
+            SORT_ORDER_DATE_CREATED_ASC -> return findAllSaleFilterAllSortDateDescProviderByWeUid(weUid, leUid)
         }
         return findAllActiveAsSaleListDetailProvider(leUid)
     }
@@ -330,30 +330,30 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     //My Women Entrepreneurs
-    @Query(MY_WE + MY_WE_SORT_BY_NAME_ASC)
-    abstract fun getMyWomenEntrepreneursNameAsc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+    @Query(MY_WE_BY_LEUID + MY_WE_SORT_BY_NAME_ASC)
+    abstract fun getMyWomenEntrepreneursNameAsc(leUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
-    @Query(MY_WE + MY_WE_SORT_BY_NAME_DESC)
-    abstract fun getMyWomenEntrepreneursNameDesc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+    @Query(MY_WE_BY_LEUID + MY_WE_SORT_BY_NAME_DESC)
+    abstract fun getMyWomenEntrepreneursNameDesc(leUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
-    @Query(MY_WE + MY_WE_SORT_BY_TOTAL_ASC)
-    abstract fun getMyWomenEntrepreneursTotalAsc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+    @Query(MY_WE_BY_LEUID + MY_WE_SORT_BY_TOTAL_ASC)
+    abstract fun getMyWomenEntrepreneursTotalAsc(leUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
-    @Query(MY_WE + MY_WE_SORT_BY_TOTAL_DESC)
-    abstract fun getMyWomenEntrepreneursTotalDesc(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+    @Query(MY_WE_BY_LEUID + MY_WE_SORT_BY_TOTAL_DESC)
+    abstract fun getMyWomenEntrepreneursTotalDesc(leUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
-    @Query(MY_WE)
-    abstract fun getMyWomenEntrepreneurs(groupUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
+    @Query(MY_WE_BY_LEUID)
+    abstract fun getMyWomenEntrepreneurs(leUid :Long):DataSource.Factory<Int, PersonWithSaleInfo>
 
 
-    fun getMyWomenEntrepreneurs(groupUid:Long, sort:Int):DataSource.Factory<Int, PersonWithSaleInfo>{
+    fun getMyWomenEntrepreneurs(leUid:Long, sort:Int):DataSource.Factory<Int, PersonWithSaleInfo>{
 
         return when (sort) {
-            SORT_ORDER_NAME_ASC -> getMyWomenEntrepreneursNameAsc(groupUid)
-            SORT_ORDER_NAME_DESC -> getMyWomenEntrepreneursNameDesc(groupUid)
-            SORT_ORDER_AMOUNT_ASC -> getMyWomenEntrepreneursTotalAsc(groupUid)
-            SORT_ORDER_AMOUNT_DESC -> getMyWomenEntrepreneursTotalDesc(groupUid)
-            else -> getMyWomenEntrepreneurs(groupUid)
+            SORT_ORDER_NAME_ASC -> getMyWomenEntrepreneursNameAsc(leUid)
+            SORT_ORDER_NAME_DESC -> getMyWomenEntrepreneursNameDesc(leUid)
+            SORT_ORDER_AMOUNT_ASC -> getMyWomenEntrepreneursTotalAsc(leUid)
+            SORT_ORDER_AMOUNT_DESC -> getMyWomenEntrepreneursTotalDesc(leUid)
+            else -> getMyWomenEntrepreneurs(leUid)
         }
     }
 
@@ -402,131 +402,150 @@ abstract class SaleDao : BaseDao<Sale> {
 
         //FIND ALL ACTIVE
 
-        const val ALL_SALES_QUERY = "SELECT * FROM Sale"
-
         const val ALL_SALES_ACTIVE_QUERY = "SELECT * FROM Sale WHERE CAST(saleActive AS INTEGER) = 1 "
 
         const val ALL_SALE_LIST_SELECT =
-                " SELECT sl.*, " +
-                " (SELECT SaleItem.saleItemQuantity " +
-                "   FROM Sale stg " +
-                "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
-                "   WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
-                "   ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
-                "   )  " +
-                "   || 'x ' || " +
-                "   (SELECT SaleProduct.saleProductName " +
-                "   FROM SaleItem sitg " +
-                "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid " +
-                "   WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  " +
-                "   ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) " +
-                "   || " +
-                "   (select " +
-                "       (case  " +
-                "       when  " +
-                "       (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 " +
-                "       then '...'  " +
-                "       else '' " +
-                "   end) " +
-                "   from sale) " +
-                " AS saleTitleGen, " +
-
-                " (SELECT SaleItem.saleItemQuantity " +
-                        "   FROM Sale stg " +
-                        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
-                        "   WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
-                        "   ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
-                        "   )  " +
-                        "   || 'x ' || " +
-                        "   (SELECT CASE WHEN SaleProduct.saleProductNameDari NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END " +
-                        "   FROM SaleItem sitg " +
-                        "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid " +
-                        "   WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  " +
-                        "   ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) " +
-                        "   || " +
-                        "   (select " +
-                        "       (case  " +
-                        "       when  " +
-                        "       (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 " +
-                        "       then '...'  " +
-                        "       else '' " +
-                        "   end) " +
-                        "   from sale) " +
-                        " AS saleTitleGenDari, " +
-
-                " (SELECT SaleItem.saleItemQuantity " +
-                        "   FROM Sale stg " +
-                        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
-                        "   WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 " +
-                        "   ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
-                        "   )  " +
-                        "   || 'x ' || " +
-                        "   (SELECT CASE WHEN SaleProduct.saleProductNamePashto NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END " +
-                        "   FROM SaleItem sitg " +
-                        "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid " +
-                        "   WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  " +
-                        "   ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) " +
-                        "   || " +
-                        "   (select " +
-                        "       (case  " +
-                        "       when  " +
-                        "       (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 " +
-                        "       then '...'  " +
-                        "       else '' " +
-                        "   end) " +
-                        "   from sale) " +
-                        " AS saleTitleGenPashto, " +
-
-                " (Select GROUP_CONCAT(SaleProduct.saleProductName)  FROM SaleItem " +
-                "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
-                "   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNames, " +
-                " (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNameDari NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END)  FROM SaleItem " +
-                "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
-                "   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesDari, " +
-                " (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNamePashto NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END)  FROM SaleItem " +
-                "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
-                "   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesPashto, " +
-                " Location.title AS locationName, " +
-                " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
-                "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-                "            Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 " +
-                " ) AS saleAmount, " +
-                " (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
-                "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-                "            Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 " +
-                "           ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
-                "               WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
-                "                AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ," +
-                "           0)" +
-                " ) AS saleAmountDue, " +
-                " 'Afs' AS saleCurrency,  " +
-                " coalesce(" +
-                "    ( " +
-                "    SELECT SaleItem.saleItemDueDate FROM SaleItem LEFT JOIN Sale on Sale.saleUid = " +
-                "       SaleItem.saleItemSaleUid WHERE SaleItem.saleItemSaleUid = sl.saleUid  " +
-                "       AND CAST(Sale.saleActive AS INTEGER) = 1  AND SaleItem.saleItemPreOrder = 1 " +
-                "     ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 " +
-                "    ) ,0) AS earliestDueDate, " +
-                " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount," +
-                " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  " +
-                "   WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
-                "   AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,0) " +
-                " AS saleAmountPaid, " +
-                " (select (case  when  " +
-                "   (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
-                "       AND sip.saleItemPreOrder = 1 ) > 0  then 1  else 0 end)  from Sale)  " +
-                " AS saleItemPreOrder " +
-                " FROM Sale sl "
+            """ 
+                SELECT sl.*, 
+                (SELECT SaleItem.saleItemQuantity 
+                  FROM Sale stg 
+                  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+                  WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 
+                  ORDER BY stg.saleCreationDate ASC LIMIT 1 
+                  )  
+                  || 'x ' || 
+                  (SELECT SaleProduct.saleProductName 
+                  FROM SaleItem sitg 
+                  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid 
+                  WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
+                  ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) 
+                  || 
+                  (select 
+                      (case  
+                      when  
+                      (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 
+                      then '...'  
+                      else '' 
+                  end) 
+                  from sale) 
+                AS saleTitleGen, 
+                
+                (SELECT SaleItem.saleItemQuantity 
+                          FROM Sale stg 
+                          LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+                          WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 
+                          ORDER BY stg.saleCreationDate ASC LIMIT 1 
+                          )  
+                          || 'x ' || 
+                          (SELECT CASE WHEN SaleProduct.saleProductNameDari NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END 
+                          FROM SaleItem sitg 
+                          LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid 
+                          WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
+                          ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) 
+                          || 
+                          (select 
+                              (case  
+                              when  
+                              (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 
+                              then '...'  
+                              else '' 
+                          end) 
+                          from sale) 
+                        AS saleTitleGenDari, 
+                
+                (SELECT SaleItem.saleItemQuantity 
+                          FROM Sale stg 
+                          LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+                          WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 
+                          ORDER BY stg.saleCreationDate ASC LIMIT 1 
+                          )  
+                          || 'x ' || 
+                          (SELECT CASE WHEN SaleProduct.saleProductNamePashto NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END 
+                          FROM SaleItem sitg 
+                          LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid 
+                          WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
+                          ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) 
+                          || 
+                          (select 
+                              (case  
+                              when  
+                              (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 
+                              then '...'  
+                              else '' 
+                          end) 
+                          from sale) 
+                        AS saleTitleGenPashto, 
+                
+                (Select GROUP_CONCAT(SaleProduct.saleProductName)  FROM SaleItem 
+                  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
+                  WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNames, 
+                (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNameDari NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END)  FROM SaleItem 
+                  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
+                  WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesDari, 
+                (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNamePashto NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END)  FROM SaleItem 
+                  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
+                  WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesPashto, 
+                Location.title AS locationName, 
+                COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
+                           SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
+                           Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 
+                ) AS saleAmount, 
+                (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
+                           SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
+                           Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 
+                          ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment 
+                              WHERE SalePayment.salePaymentSaleUid = sl.saleUid 
+                               AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,
+                          0)
+                ) AS saleAmountDue, 
+                'Afs' AS saleCurrency,  
+                coalesce(
+                   ( 
+                   SELECT SaleItem.saleItemDueDate FROM SaleItem LEFT JOIN Sale on Sale.saleUid = 
+                      SaleItem.saleItemSaleUid WHERE SaleItem.saleItemSaleUid = sl.saleUid  
+                      AND CAST(Sale.saleActive AS INTEGER) = 1  AND SaleItem.saleItemPreOrder = 1 
+                    ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 
+                   ) ,0) AS earliestDueDate, 
+                (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount,
+                COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  
+                  WHERE SalePayment.salePaymentSaleUid = sl.saleUid 
+                  AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,0) 
+                AS saleAmountPaid, 
+                (select (case  when  
+                  (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid 
+                      AND sip.saleItemPreOrder = 1 ) > 0  then 1  else 0 end)  from Sale)  
+                AS saleItemPreOrder 
+                FROM Sale sl 
+            """
 
         const val ALL_SALE_LIST_LJ1 =
-                " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid  " +
-                " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 "
+            """
+                LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid  
+                LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = sl.saleUid 
+                    AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+            """
+
         const val ALL_SALE_LIST_LJ2 =
-                " LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
-                " LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid "
+            """ 
+                LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid 
+                LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid 
+            """
+
+        const val ALL_SALE_BY_WE_LJ3 = """
+            LEFT JOIN InventoryTransaction ON InventoryTransaction.inventoryTransactionSaleItemUid = SaleItem.saleItemUid 
+	        LEFT JOIN InventoryItem ON InventoryItem.inventoryItemUid = InventoryTransaction.inventoryTransactionInventoryItemUid 
+        """
 
         const val ALL_SALE_LIST_WHERE = " WHERE CAST(sl.saleActive AS INTEGER) = 1 "
-        const val ALL_SALE_LIST_WHERE_WE =" AND WE.personUid = :weUid  "
+        const val ALL_SALE_LIST_WHERE_WE =
+            """
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 
+                    AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+                    AND InventoryItem.inventoryItemWeUid = :weUid
+                    AND InventoryItem.inventoryItemLeUid = :leUid
+                    AND InventoryTransaction.inventoryTransactionFromLeUid = :leUid
+                    GROUP BY saleUid 
+            """
         const val ALL_SALE_LIST_WHERE_LE = " AND ( LE.personUid = :leUid OR CASE WHEN " +
                 " (CAST(LE.admin as INTEGER) = 1) THEN 0 ELSE 1 END ) "
 
@@ -535,7 +554,7 @@ abstract class SaleDao : BaseDao<Sale> {
                 ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_LE
 
         const val ALL_SALE_LIST_WE_FILTER = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 +
-                ALL_SALE_LIST_LJ2 + ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_WE
+                ALL_SALE_LIST_LJ2 + ALL_SALE_BY_WE_LJ3 + ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_WE
         //filter and sort
 
         const val FILTER_PREORDER = " AND (saleItemPreOrder = 1 OR salePreOrder = 1)"
@@ -640,30 +659,49 @@ abstract class SaleDao : BaseDao<Sale> {
             SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION + SALE_PERFORMANCE_REPORT_HAVING_BIT +
             SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC;
 
-        const val MY_WE =
-                "SELECT " +
-                        "   SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
-                        "   'Product list goes here' AS topProducts, " +
-                        "    (SELECT CASE WHEN " +
-                        "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
-                        "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
-                        "       ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) " +
-                        "   is NULL THEN 0 ELSE " +
-                        "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
-                        "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
-                        "    ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) " +
-                        "   END ) as personPictureUid ,"+
+        const val MY_WE_BY_LEUID =
+                """
+                    SELECT 
+                        SUM((SaleItem.saleItemPricePerPiece)) - SaleItem.saleItemDiscount AS totalSale, 
+                        GROUP_CONCAT(DISTINCT SaleProduct.saleProductName) AS topProducts, 
+                        (SELECT CASE WHEN 
+                            (SELECT PersonPicture.PersonPictureUid FROM PersonPicture 
+                            WHERE PersonPicture.personPicturePersonUid = WE.personUid 
+                            ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) 
+                            is NULL THEN 0 ELSE 
+                            (SELECT PersonPicture.PersonPictureUid FROM PersonPicture 
+                            WHERE PersonPicture.personPicturePersonUid = WE.personUid 
+                            ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) 
+                            END ) as personPictureUid ,
+                        WE.* 
+                    FROM PersonGroupMember 
+                        LEFT JOIN Person AS LE ON LE.personUid = :leUid
+                        LEFT JOIN Person AS WE ON WE.personUid = PersonGroupMember.groupMemberPersonUid 
+                        LEFT JOIN InventoryItem ON 
+                            InventoryItem.InventoryItemWeUid = WE.personUid 
+                            AND InventoryItem.InventoryItemLeUid = LE.personUid 
+                        LEFT JOIN InventoryTransaction ON 
+                            InventoryTransaction.InventoryTransactionInventoryItemUid = InventoryItem.InventoryItemUid 
+                            AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid 
+                        LEFT JOIN SaleItem ON 
+                            SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid 
+                        LEFT JOIN Sale ON 
+                            Sale.saleUid = SaleItem.saleItemSaleUid 
+                        LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = WE.personUid 
+                        LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid
+                        
+                    WHERE PersonGroupMember.groupMemberGroupUid = LE.mPersonGroupUid 
+                    AND CAST(Sale.saleActive AS INTEGER) = 1  
+                    AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 
+                    AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+                    AND CAST(WE.active AS INTEGER) = 1  
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                    
+                    GROUP BY(WE.personUid)  
+                """
 
-                        "   Members.* " +
-                        " FROM PersonGroupMember " +
-                        "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND CAST(Members.active AS INTEGER) = 1  " +
-                        "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
-                        "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1  " +
-                        "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
-                        " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-                        "   GROUP BY(Members.personUid) "
-        const val MY_WE_SORT_BY_NAME_ASC = " ORDER BY Members.firstNames ASC"
-        const val MY_WE_SORT_BY_NAME_DESC = " ORDER BY Members.firstNames DESC"
+        const val MY_WE_SORT_BY_NAME_ASC = " ORDER BY WE.firstNames ASC, WE.lastName ASC"
+        const val MY_WE_SORT_BY_NAME_DESC = " ORDER BY WE.firstNames DESC, WE.lastName DESC"
         const val MY_WE_SORT_BY_TOTAL_ASC = " ORDER BY totalSale ASC"
         const val MY_WE_SORT_BY_TOTAL_DESC = " ORDER BY totalSale DESC"
 

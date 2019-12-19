@@ -71,13 +71,13 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
         val topProducts = holder.itemView.findViewById<TextView>(R.id.item_person_top_products)
         val personPicture = holder.itemView.findViewById<AppCompatImageView>(R.id.item_person_picture)
 
-        val personName= entity!!.firstNames + " " + entity!!.lastName
-        val totalSale = entity!!.totalSale
-        val topP = entity!!.topProducts
+        val personName= entity!!.firstNames + " " + entity.lastName
+        val totalSale = entity.totalSale
+        val topP = entity.topProducts
         personTitle.setText(personName)
-        saleAmount.setText(totalSale.toString())
+        saleAmount.setText(totalSale.toString() + " " + theActivity!!.getText(R.string.currency_afs))
         val topProductsBit = UstadMobileSystemImpl.instance.getString(MessageID.top_products,
-                theContext) + " " + topP
+                theContext) + ": " + topP
         topProducts.setText(topProductsBit)
 
 

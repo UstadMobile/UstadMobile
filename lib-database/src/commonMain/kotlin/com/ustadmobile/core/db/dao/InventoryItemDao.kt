@@ -21,13 +21,15 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
     @Query("""
     SELECT COUNT(*) - 
                 (select count(*) from inventorytransaction 
+                left join inventoryitem as item on item.inventoryitemuid = inventorytransaction.inventorytransactioninventoryitemuid
                 where 
                 inventorytransaction.inventoryTransactionInventoryItemUid in 
                 (select inventoryitemuid from inventoryitem where 
                 inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 ) 
                 and inventorytransaction.inventoryTransactionSaleUid != 0
-                and cast(inventorytransaction.inventorytransactionactive as integer) = 1 ) 
+                and cast(inventorytransaction.inventorytransactionactive as integer) = 1 
+                and item.inventoryItemLeUid = MLE.personUid ) 
     FROM InventoryItem
     LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
     LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
@@ -53,12 +55,14 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
     @Query("""
     SELECT COUNT(*) - 
                 (select count(*) from inventorytransaction 
+                left join inventoryitem as item on item.inventoryitemuid = inventorytransaction.inventorytransactioninventoryitemuid
                 where 
                 inventorytransaction.inventoryTransactionInventoryItemUid in 
                 (select inventoryitemuid from inventoryitem where 
                 inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
                 AND InventoryItem.inventoryItemWeUid = :weUid ) 
-                and inventorytransaction.inventoryTransactionSaleUid != 0) AS inventoryCount
+                and inventorytransaction.inventoryTransactionSaleUid != 0
+                and item.inventoryItemLeUid = MLE.personUid) AS inventoryCount
     FROM InventoryItem
     LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
     LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
@@ -229,13 +233,15 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
             SELECT SaleProduct.*, 
             COUNT(*) - 
                 (select count(*) from inventorytransaction 
+                left join inventoryitem as item on item.inventoryitemuid = inventorytransaction.inventorytransactioninventoryitemuid
                 where 
                 inventorytransaction.inventoryTransactionInventoryItemUid in 
                 (select inventoryitemuid from inventoryitem where 
                 inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 ) 
                 and inventorytransaction.inventoryTransactionSaleUid != 0 
-                and cast(inventorytransaction.inventorytransactionactive as integer) = 1 )   
+                and cast(inventorytransaction.inventorytransactionactive as integer) = 1 
+                and item.inventoryItemLeUid = MLE.personUid)   
             as stock 
             FROM InventoryItem 
             LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid

@@ -35,7 +35,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
     private var currentSortOrder = 0
 
     private var personUid: Long =0
-    private var weGroupUid: Long =0
+    private var leUid: Long =0
     private lateinit var factory : DataSource.Factory<Int, PersonWithSaleInfo>
 
     init {
@@ -63,7 +63,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
 
     private fun observePerson(person: Person?){
         if(person!=null) {
-            weGroupUid = person.mPersonGroupUid
+            leUid = person.personUid
             //Get assigned people
             getAndSetProvider(currentSortOrder)
         }
@@ -80,9 +80,9 @@ class PersonWithSaleInfoListPresenter(context: Any,
      */
     fun handleSearchQuery(searchBit:String){
         if(searchBit == null || searchBit.isEmpty()){
-            factory = saleDao.getMyWomenEntrepreneurs(weGroupUid)
+            factory = saleDao.getMyWomenEntrepreneurs(leUid)
         }else {
-            factory = saleDao.getMyWomenEntrepreneursSearch(weGroupUid, searchBit)
+            factory = saleDao.getMyWomenEntrepreneursSearch(leUid, searchBit)
         }
         view.setWEListFactory(factory)
     }
@@ -99,7 +99,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
     }
 
     private fun getAndSetProvider(sortCode: Int) {
-        factory = saleDao.getMyWomenEntrepreneurs(weGroupUid, sortCode)
+        factory = saleDao.getMyWomenEntrepreneurs(leUid, sortCode)
         view.setWEListFactory(factory)
     }
 
@@ -117,9 +117,13 @@ class PersonWithSaleInfoListPresenter(context: Any,
 
         presetAL.add(impl.getString(MessageID.sort_by_name_asc, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SaleDao.SORT_ORDER_NAME_ASC)
-        presetAL.add(impl.getString(MessageID.sorT_by_name_desc, context))
+        presetAL.add(impl.getString(MessageID.sort_by_name_desc, context))
         idToOrderInteger!!.put(presetAL.size.toLong(), SaleDao.SORT_ORDER_NAME_DESC)
-        presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_asc, context))
+
+        presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_ascending, context))
+        idToOrderInteger!!.put(presetAL.size.toLong(), SaleDao.SORT_ORDER_AMOUNT_ASC)
+        presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_descending, context))
+        idToOrderInteger!!.put(presetAL.size.toLong(), SaleDao.SORT_ORDER_AMOUNT_DESC)
 
         val sortPresets = SaleListPresenter.arrayListToStringArray(presetAL)
 

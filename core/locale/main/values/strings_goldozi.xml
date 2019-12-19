@@ -223,5 +223,7 @@
     <string name="sold_now">Sold now</string>
     <string name="in_stock">in stock</string>
     <string name="by_you">by you</string>
+    <string name="sale_list_sort_by_total_ascending">Total (ascending)</string>
+    <string name="sale_list_sort_by_total_descending">Total (descending)</string>
 
 </resources>
