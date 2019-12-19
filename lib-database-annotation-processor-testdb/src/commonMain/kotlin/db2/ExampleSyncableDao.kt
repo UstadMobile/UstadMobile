@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.door.annotation.Repository
@@ -14,6 +15,9 @@ abstract class ExampleSyncableDao {
 
     @Insert
     abstract fun insert(syncableEntity: ExampleSyncableEntity): Long
+
+    @Update
+    abstract suspend fun updateAsync(entity: ExampleSyncableEntity):Int
 
     @Insert
     abstract suspend fun insertAsync(syncableEntity: ExampleSyncableEntity): Long
