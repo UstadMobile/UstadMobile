@@ -149,7 +149,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase) { job, manager ->
         object: ContainerDownloadRunner {
 
-            override suspend fun startDownload() {
+            override suspend fun download() {
 
             }
 

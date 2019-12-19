@@ -12,6 +12,8 @@ import com.ustadmobile.core.io.ConcatenatedInputStream
 import com.ustadmobile.core.io.ConcatenatedInputStreamEntrySource
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.door.DoorLiveData
@@ -56,35 +58,26 @@ class DownloadJobItemRunner
 /**
  * Constructor to be used when creating new instance of the runner.
  * @param downloadItem Item to be downloaded
+ * @param containerDownloadManager The containerdownloadmanager that is controlling this download
  * @param networkManager BLE network manager for network operation controls.
  * @param appDb Application database instance
  * @param endpointUrl Endpoint to get the file from.
  * @param mainCoroutineDispatcher A coroutine dispatcher that will, on Android, dispatch on the main
  * thread. This is required because Room's LiveData.observeForever must be called from the main thread
  */
-(private val context: Any, private val downloadItem: DownloadJobItem,
- private val networkManager: NetworkManagerBleCommon, private val appDb: UmAppDatabase,
- private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
+(private val context: Any,
+ private val downloadItem: DownloadJobItem,
+ private val containerDownloadManager: ContainerDownloadManager,
+ private val networkManager: NetworkManagerBleCommon,
+ private val appDb: UmAppDatabase,
+ private val endpointUrl: String,
+ private var connectivityStatus: ConnectivityStatus?,
+ private val connectivityStatusLiveData: DoorLiveData<ConnectivityStatus?>,
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val localAvailabilityManager: LocalAvailabilityManager,
- private val ioCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default) {
+ private val localAvailabilityManager: LocalAvailabilityManager): ContainerDownloadRunner {
 
-    private lateinit var downloadJobItemManager: DownloadJobItemManager
-
-    private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
-
-    private var statusObserver: DoorObserver<ConnectivityStatus?>? = null
-
-    private var downloadJobItemObserver: DoorObserver<Int>? = null
-
-    private var downloadJobItemLiveData: DoorLiveData<Int>? = null
-
-    private var downloadSetConnectivityData: DoorLiveData<Boolean>? = null
-
-    private var downloadSetConnectivityObserver: DoorObserver<Boolean>? = null
-
-    private val completedEntriesBytesDownloaded = atomic(0L)
+    private var connectivityStatusObserver: DoorObserver<ConnectivityStatus?>? = null
 
     private val runnerStatus = atomic(JobStatus.NOT_QUEUED)
 
@@ -138,6 +131,20 @@ class DownloadJobItemRunner
         this.lWiFiConnectionTimeout = lWiFiConnectionTimeout
     }
 
+    override var meteredDataAllowed: Boolean
+        get() = meteredConnectionAllowed.value == 1
+        set(value) {
+            val allowedIntVal = if(value) 1 else 0
+            meteredConnectionAllowed.value = allowedIntVal
+
+            val connectivityStatusVal = connectivityStatus
+            val meteredConnectionAllowedVal = meteredConnectionAllowed.value
+            if (meteredConnectionAllowedVal == 0 && connectivityStatusVal != null
+                    && connectivityStatusVal.connectivityState == STATE_METERED) {
+                UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() + " : no longer allowed to run on metered network - stopping")
+                GlobalScope.launch { stop(JobStatus.QUEUED, cancel = true) }
+            }
+        }
 
     /**
      * Handle changes triggered when connectivity status changes.
@@ -155,43 +162,20 @@ class DownloadJobItemRunner
                 STATE_METERED -> if (meteredConnectionAllowed.value == 0) {
                     Napier.d({"${mkLogPrefix()} Connectivity state changed: on metered connection, " +
                             "must stop now."})
-                    GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
+                    GlobalScope.launch { stop(JobStatus.QUEUED, cancel = true) }
                 }
 
-                STATE_DISCONNECTED -> GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
-            }//TODO: check CONNECTING_LOCAL - if the status changed, but we are not the job that asked for that
-        }
-    }
-
-    /**
-     * Handle changes triggered when Download set metered connection flag changes
-     * @param meteredConnection changed metered connection flag.
-     */
-    private fun handleDownloadSetMeteredConnectionAllowedChanged(meteredConnection: Boolean?) {
-        if (meteredConnection != null) {
-            if (meteredConnection) {
-                meteredConnectionAllowed.value = 1
-            } else {
-                meteredConnectionAllowed.value = 0
-            }
-
-            if (meteredConnectionAllowed.value == 0 && connectivityStatus != null
-                    && connectivityStatus!!.connectivityState == STATE_METERED) {
-                UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() + " : no longer allowed to run on metered network - stopping")
-                GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
+                STATE_DISCONNECTED -> GlobalScope.launch { stop(JobStatus.QUEUED, cancel = true) }
             }
         }
     }
 
-    /**
-     * Handle changes triggered when the download job item status changes
-     * @param newDownloadStatus changed download job item status
-     */
+    override suspend fun cancel() {
+        GlobalScope.launch { stop(JobStatus.CANCELED, cancel = true) }
+    }
 
-    private fun handleDownloadJobItemStatusChanged(newDownloadStatus: Int) {
-        if (newDownloadStatus == JobStatus.STOPPING) {
-            GlobalScope.launch { stop(JobStatus.STOPPED, cancel = true) }
-        }
+    override suspend fun pause() {
+        GlobalScope.launch { stop(JobStatus.PAUSED, cancel = true) }
     }
 
     /**
@@ -211,9 +195,7 @@ class DownloadJobItemRunner
                 }
 
                 withContext(mainCoroutineDispatcher) {
-                    statusLiveData!!.removeObserver(statusObserver!!)
-                    downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
-                    downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
+                    connectivityStatusLiveData.removeObserver(connectivityStatusObserver!!)
                 }
 
                 updateItemStatus(newStatus)
@@ -223,42 +205,32 @@ class DownloadJobItemRunner
     }
 
 
-    suspend fun download(): Deferred<Int> {
+    suspend override fun download(): Deferred<Int> {
         if(downloadCalled) {
             throw IllegalStateException("Can only call download() once on DownloadJobItemRunner!")
         }
         downloadCalled = true
 
         startTime = getSystemTimeInMillis()
-        downloadJobItemManager = networkManager.openDownloadJobItemManager(downloadItem.djiDjUid)!!
         println("Download started for  ${downloadItem.djiDjUid}")
         runnerStatus.value = JobStatus.RUNNING
         updateItemStatus(JobStatus.RUNNING)
         val downloadJobId = downloadItem.djiDjUid
-        appDb.downloadJobDao.updateStatus(downloadJobId, JobStatus.RUNNING)
 
-        statusLiveData = appDb.connectivityStatusDao.statusLive()
-        downloadJobItemLiveData = appDb.downloadJobItemDao.getLiveStatus(downloadItem.djiUid)
-
-        //get the download set
-        downloadSetConnectivityData = appDb.downloadJobDao.getLiveMeteredNetworkAllowed(downloadJobId)
-
-        downloadSetConnectivityObserver = object : DoorObserver<Boolean> {
-            override fun onChanged(t: Boolean) {
-                handleDownloadSetMeteredConnectionAllowedChanged(t)
-            }
-        }
-
-        statusObserver = ObserverFnWrapper(this::handleConnectivityStatusChanged)
-        downloadJobItemObserver = ObserverFnWrapper(this::handleDownloadJobItemStatusChanged)
+        connectivityStatusObserver = ObserverFnWrapper(this::handleConnectivityStatusChanged)
 
         withContext(mainCoroutineDispatcher) {
-            statusLiveData!!.observeForever(statusObserver!!)
-            downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
-            downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
+            connectivityStatusLiveData.observeForever(connectivityStatusObserver!!)
         }
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
+        val meteredConnectionAllowedVal = if(appDb.downloadJobDao.getMeteredNetworkAllowed(downloadJobId)) {
+            1
+        }else {
+            0
+        }
+        meteredConnectionAllowed.value = meteredConnectionAllowedVal
+
         if (destinationDir == null) {
             val e = IllegalArgumentException(
                     "DownloadJobItemRunner destinationdir is null for ${downloadItem.djiDjUid}")
@@ -392,9 +364,9 @@ class DownloadJobItemRunner
                                 override fun onProgress(request: ContainerFetcherRequest,
                                                         bytesDownloaded: Long, contentLength: Long) {
                                     GlobalScope.launch {
-                                        downloadJobItemManager.updateProgress(downloadItem.djiUid,
-                                                existingEntriesBytesDownloaded + bytesDownloaded,
-                                                contentLength)
+                                        downloadItem.downloadedSoFar = existingEntriesBytesDownloaded + bytesDownloaded
+                                        containerDownloadManager.handleDownloadJobItemUpdated(
+                                                DownloadJobItem(downloadItem))
                                     }
                                 }
                             })
@@ -418,15 +390,12 @@ class DownloadJobItemRunner
 
         if (downloadAttemptStatus == JobStatus.COMPLETE) {
             val downloadTime = getSystemTimeInMillis() - downloadStartTime
-            appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
+            downloadItem.downloadedSoFar = downloadItem.downloadLength
+            containerDownloadManager.handleDownloadJobItemUpdated(DownloadJobItem(downloadItem))
 
-            val bytesDownloaded = completedEntriesBytesDownloaded.value
-            downloadJobItemManager.updateProgress(downloadItem.djiUid,
-                    bytesDownloaded, downloadItem.downloadLength)
-
-            val downloadSpeed = ((bytesDownloaded.toFloat() / 1024f) / (downloadTime.toFloat() / 1000f))
+            val downloadSpeed = ((downloadItem.downloadedSoFar.toFloat() / 1024f) / (downloadTime.toFloat() / 1000f))
             UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed " +
-                    "download of ${bytesDownloaded}bytes " +
+                    "download of ${downloadItem.downloadedSoFar}bytes " +
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
 
             var concatenatedInputStream: ConcatenatedInputStream? = null
@@ -492,7 +461,7 @@ class DownloadJobItemRunner
     private suspend fun connectToCloudNetwork(): Boolean {
         UMLog.l(UMLog.DEBUG, 699, "${mkLogPrefix()} Reconnecting cloud network")
         networkManager.restoreWifi()
-        waitForLiveData(statusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) {
+        waitForLiveData(connectivityStatusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) {
             val checkStatus = connectivityStatus
             when {
                 checkStatus == null -> false
@@ -575,7 +544,7 @@ class DownloadJobItemRunner
                 wiFiDirectGroupBle.value!!.passphrase)
 
         withContext(mainCoroutineDispatcher) {
-            waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout).toLong()) {
+            waitForLiveData(connectivityStatusLiveData!!, (lWiFiConnectionTimeout).toLong()) {
                 statusRef.value = it
                 it != null && isExpectedWifiDirectGroup(it)
             }
@@ -596,7 +565,9 @@ class DownloadJobItemRunner
      * @see JobStatus
      */
     private suspend fun updateItemStatus(itemStatus: Int) {
-        downloadJobItemManager.updateStatus(downloadItem.djiUid, itemStatus)
+        downloadItem.djiStatus = itemStatus
+        containerDownloadManager.handleDownloadJobItemUpdated(DownloadJobItem(downloadItem))
+
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} Setting status to:  ${JobStatus.statusToString(itemStatus)}")
     }

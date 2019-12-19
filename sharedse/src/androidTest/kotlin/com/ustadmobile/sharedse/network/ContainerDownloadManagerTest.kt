@@ -331,10 +331,10 @@ class ContainerDownloadManagerTest {
             downloadManagerImpl.enqueue(newDownloadJob.djUid)
 
             //download should not start when unmetered connectivity is not available
-            verify(mockDownloadRunner, timeout(1000).times(0)).startDownload()
+            verify(mockDownloadRunner, timeout(1000).times(0)).download()
             downloadManagerImpl.handleConnectivityChanged(
                     ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED, true, "wifi"))
-            verifyBlocking(mockDownloadRunner, timeout(1000), { startDownload() })
+            verifyBlocking(mockDownloadRunner, timeout(1000), { download() })
         }
     }
 

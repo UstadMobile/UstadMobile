@@ -266,7 +266,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             activeDownloads[nextDownload[0].djiUid] = ActiveContainerDownload(nextDownload[0],
                     containerDownloader)
             GlobalScope.launch(Dispatchers.IO) {
-                containerDownloader.startDownload()
+                containerDownloader.download()
             }
         }
     }

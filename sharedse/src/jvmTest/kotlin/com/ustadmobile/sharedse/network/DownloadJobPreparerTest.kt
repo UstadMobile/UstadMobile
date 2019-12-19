@@ -44,7 +44,7 @@ class DownloadJobPreparerTest {
         val downloadJob = DownloadJob(contentEntrySet.rootEntry.contentEntryUid,
                 System.currentTimeMillis())
 
-        val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { mock() }
+        val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager -> mock() }
         downloadManagerImpl.createDownloadJob(downloadJob)
 
         val downloadJobPreparer = DownloadJobPreparer(downloadJobUid = downloadJob.djUid)
