@@ -145,24 +145,12 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     }
 
     override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase) { job, manager ->
-        object: ContainerDownloadRunner {
-
-            override suspend fun download(): Deferred<Int> {
-                return CompletableDeferred()
-            }
-
-            override suspend fun cancel() {
-
-            }
-
-            override suspend fun pause() {
-
-            }
-
-            override var meteredDataAllowed: Boolean
-                get() = false
-                set(value) {}
-        }
+        DownloadJobItemRunner(context, job, manager, this, umAppDatabase,
+                UmAccountManager.getActiveEndpoint(context),
+                connectivityStatus = manager.connectivityLiveData.getValue(),
+                mainCoroutineDispatcher = Dispatchers.Main,
+                connectivityStatusLiveData = manager.connectivityLiveData,
+                localAvailabilityManager = localAvailabilityManager)
     }
     private var gattClientCallbackManager: GattClientCallbackManager? = null
 
@@ -502,14 +490,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         localConnectionOpener = null
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
-        connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+        val status = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
+        connectivityStatusRef.value = status
         (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_DISCONNECTED
 
         GlobalScope.launch {
-            addLogs("changed to ${ConnectivityStatus.STATE_DISCONNECTED}, updating DB")
-            umAppDatabase.connectivityStatusDao
-                    .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
+            containerDownloadManager.handleConnectivityChanged(status)
         }
     }
 
@@ -577,8 +564,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         }
 
         GlobalScope.launch {
-            addLogs("changed to ${status.connectivityState}, updating DB =$umAppDatabase")
-            umAppDatabase.connectivityStatusDao.insertAsync(status)
+            containerDownloadManager.handleConnectivityChanged(status)
         }
     }
 

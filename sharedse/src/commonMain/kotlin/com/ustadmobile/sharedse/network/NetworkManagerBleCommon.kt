@@ -64,7 +64,6 @@ abstract class NetworkManagerBleCommon(
      */
     private val entryStatusTasks = mutableListOf<BleEntryStatusTask>()
 
-    private lateinit var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>
 
     private val locallyAvailableContainerUids = mutableSetOf<Long>()
 
@@ -168,20 +167,7 @@ abstract class NetworkManagerBleCommon(
     open fun onCreate() {
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
         nextDownloadItemsLiveData = umAppDatabase.downloadJobItemDao.findNextDownloadJobItems()
-//        downloadJobItemWorkQueue = LiveDataWorkQueue(nextDownloadItemsLiveData,
-//                { item1, item2 -> item1.djiUid == item2.djiUid },
-//                mainDispatcher = mainDispatcher,
-//                onItemStarted = this::onDownloadJobItemStarted,
-//                onQueueEmpty = this::onDownloadQueueEmpty) {
-//            DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
-//                    umAppDatabase,  UmAccountManager.getActiveEndpoint(context),
-//                    connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
-//                    ioCoroutineDispatcher = ioDispatcher,
-//                    localAvailabilityManager = localAvailabilityManager).download().await()
-//        }
         nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
-
-        GlobalScope.launch { downloadJobItemWorkQueue.start() }
     }
 
     protected suspend fun onNewBleNodeDiscovered(bluetoothAddress: String) {

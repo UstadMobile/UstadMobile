@@ -28,6 +28,8 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun handleConnectivityChanged(status: ConnectivityStatus)
 
+    abstract val connectivityLiveData: DoorLiveData<ConnectivityStatus?>
+
     fun determineParentStatusFromChildStatuses(childStatuses: List<DownloadJobItemUidAndStatus>): Int {
         return when {
             childStatuses.all { it.djiStatus > JobStatus.COMPLETE } -> {

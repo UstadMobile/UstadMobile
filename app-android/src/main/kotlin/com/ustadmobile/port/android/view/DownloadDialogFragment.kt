@@ -67,24 +67,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             activity = context
-            GlobalScope.launch(Dispatchers.Main) {
-                val networkManagerVal = context.networkManagerBle.await()
-                managerBle = networkManagerVal
-                checkReady()
-            }
         }
 
         super.onAttach(context)
-    }
-
-    private fun checkReady(){
-        if(::managerBle.isInitialized){
-            val presenterVal = DownloadDialogPresenter(context as Context, managerBle,
-                    bundleToMap(arguments), this, UmAppDatabase.getInstance(context as Context),
-                    UmAccountManager.getRepositoryForActiveAccount(context as Context))
-            presenterVal.onCreate(null)
-            mPresenter = presenterVal
-        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -118,7 +103,18 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
-        checkReady()
+
+
+        GlobalScope.launch(Dispatchers.Main) {
+            val networkManager = activity.networkManagerBle.await()
+            mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
+                    this@DownloadDialogFragment,
+                    UmAppDatabase.getInstance(context as Context),
+                    UmAccountManager.getRepositoryForActiveAccount(context as Context),
+                    networkManager.containerDownloadManager).also {
+                it.onCreate(null)
+            }
+        }
 
         return mDialog as AlertDialog
     }
@@ -240,9 +236,5 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     override fun onNothingSelected(parent: AdapterView<*>) {
         mPresenter!!.handleStorageOptionSelection(storageDirs[0].dirURI!!)
-    }
-
-    override fun cancelOrPauseDownload(jobId: Long, cancel: Boolean) {
-        //TODO: this should be handled using the downloadjobitemmanager, not sent back to the view
     }
 }

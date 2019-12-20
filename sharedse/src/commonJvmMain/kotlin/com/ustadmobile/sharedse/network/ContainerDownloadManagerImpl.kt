@@ -169,7 +169,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     private val entriesToCommit : MutableSet<DownloadJobItem> = HashSet()
 
-    private val connectivityLiveData = DoorMutableLiveData<ConnectivityStatus?>(null)
+    override val connectivityLiveData = DoorMutableLiveData<ConnectivityStatus?>(null)
 
     private var currentConnectivityStatus: ConnectivityStatus? = null
 
