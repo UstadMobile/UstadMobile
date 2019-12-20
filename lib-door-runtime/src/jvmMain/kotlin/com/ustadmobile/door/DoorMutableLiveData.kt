@@ -2,7 +2,7 @@ package com.ustadmobile.door
 
 actual open class DoorMutableLiveData<T> : DoorLiveData<T> {
 
-    actual constructor(value: T) {
+    actual constructor(value: T): super(value) {
 
     }
 

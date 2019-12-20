@@ -120,7 +120,7 @@ class ContainerDownloadManagerTest {
     }
 
     @Test
-    fun givenAllOtherChildrenStatusCompleted_whenRemainingChildIsCompleted_thenParentStatusIsComplete() {
+    fun givenAllOtherChildrenStatusCompleted_whenRemainingChildIsCompleted_thenParentAndJobStatusIsComplete() {
         runBlocking {
             val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager ->
                 mock<ContainerDownloadRunner> {  }
@@ -134,6 +134,8 @@ class ContainerDownloadManagerTest {
 
             val rootEntryLiveData = downloadManagerImpl.getDownloadJobItemByJobItemUid(rootDownloadJobItem.djiUid)
             val rootEntryDeferredUntilUpdate = rootEntryLiveData.deferredUntil { it?.djiStatus == JobStatus.COMPLETE }
+            val downloadJobLiveData = downloadManagerImpl.getDownloadJob(newDownloadJob.djUid)
+            val downloadJobDeferredUntilComplete = downloadJobLiveData.deferredUntil { it?.djStatus == JobStatus.COMPLETE }
 
             downloadManagerImpl.handleDownloadJobItemUpdated(DownloadJobItem(childDownloadJobItem1).also {
                 it.djiStatus = JobStatus.COMPLETE
@@ -148,6 +150,10 @@ class ContainerDownloadManagerTest {
             val completedRootEntry = withTimeout(5000L) { rootEntryDeferredUntilUpdate.await() }
             Assert.assertEquals("Parent status is set to complete when all children have completed",
                     JobStatus.COMPLETE, completedRootEntry?.djiStatus)
+
+            val completedDownloadJob = withTimeout(5000L) { downloadJobDeferredUntilComplete.await() }
+            Assert.assertEquals("Download job itself is set to completed when root entry is set to compelted",
+                    JobStatus.COMPLETE, completedDownloadJob?.djStatus)
         }
     }
 

@@ -10,6 +10,8 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
 
+    abstract suspend fun getDownloadJob(jobUid: Int): DoorLiveData<DownloadJob?>
+
     abstract suspend fun createDownloadJob(downloadJob: DownloadJob)
 
     abstract suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>)
@@ -32,7 +34,7 @@ abstract class ContainerDownloadManager {
                 childStatuses.maxBy { it.djiStatus }?.djiStatus ?: JobStatus.FAILED
             }
             childStatuses.any { it.djiStatus == JobStatus.RUNNING } -> JobStatus.RUNNING
-            childStatuses.any { it.djiStatus == JobStatus.WAITING_FOR_CONNECTION } -> JobStatus.WAITING_FOR_CONNECTION
+            childStatuses.any { it.djiStatus == JobStatus.QUEUED } -> JobStatus.QUEUED
             else -> childStatuses.minBy { it.djiStatus }?.djiStatus ?: 0
         }
     }

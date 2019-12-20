@@ -47,11 +47,19 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
         val liveData = MutableLiveDataWithRef<DownloadJobItem?>(this, downloadJobItem)
 
+        private var downloadJobHolder = loadDownloadJobHolder(downloadJobItem?.djiDjUid ?: -1)
+
         fun postUpdate(updated: DownloadJobItem, bubble: Boolean = true) {
             val deltaDownloadedSoFar = updated.downloadedSoFar - (downloadJobItem?.downloadedSoFar ?: 0L)
             val deltaDownloadLength = updated.downloadLength - (downloadJobItem?.downloadLength ?: 0L)
             val statusChanged = updated.djiStatus != downloadJobItem?.djiStatus
             downloadJobItem = updated
+
+            if(updated.djiDjUid != downloadJobHolder.downloadJobUid)
+                downloadJobHolder = loadDownloadJobHolder(updated.djiDjUid)
+
+            postUpdateToDownloadJobIfRootEntry(deltaDownloadedSoFar, deltaDownloadLength,
+                    updated.djiStatus)
 
             liveData.sendValue(updated)
             contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData?.sendValue(updated)
@@ -84,6 +92,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                         jobItemVal.djiStatus = newStatus
                         thisStatusChanged = true
                     }
+
+                    postUpdateToDownloadJobIfRootEntry(deltaDownloadedSoFar, deltaDownloadLength,
+                            newStatus)
                 }
 
                 entriesToCommit.add(jobItemVal)
@@ -100,6 +111,17 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                 it.postUpdateInternal(deltaDownloadedSoFar, deltaDownloadLength, thisStatusChanged)
             }
         }
+
+        /**
+         * If this is the root DownloadJobItem for a DownloadJob, then apply changes to the DownloadJob itself
+         */
+        private fun postUpdateToDownloadJobIfRootEntry(deltaDownloadedSoFar: Long,
+                                                       deltaDownloadLength: Long, newStatus: Int) {
+            if(parents.isEmpty()
+                    && downloadJobItem?.djiContentEntryUid == downloadJobHolder.downloadJob?.djRootContentEntryUid) {
+                downloadJobHolder.postUpdateInternal(deltaDownloadedSoFar, deltaDownloadLength, newStatus)
+            }
+        }
     }
 
     private inner class ContentEntryHolder(val contentEntryUid: Long, var downloadJobItem: DownloadJobItem?) {
@@ -113,6 +135,28 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     }
 
+    private inner class DownloadJobHolder(val downloadJobUid: Int, var downloadJob: DownloadJob?) {
+
+        val liveData = MutableLiveDataWithRef<DownloadJob?>(this, downloadJob)
+
+        fun postUpdate(update: DownloadJob) {
+            downloadJob = update
+            liveData.sendValue(update)
+        }
+
+        fun postUpdateInternal(deltaDownloadedSoFar: Long, deltaDownloadLength: Long,
+                               newStatus: Int) {
+            val downloadJobVal = downloadJob
+            if(downloadJobVal != null) {
+                downloadJobVal.bytesDownloadedSoFar += deltaDownloadedSoFar
+                downloadJobVal.totalBytesToDownload += deltaDownloadLength
+                downloadJobVal.djStatus = newStatus
+                liveData.sendValue(downloadJobVal)
+            }
+        }
+
+    }
+
     private data class ActiveContainerDownload(val downloadJobItem: DownloadJobItem,
                                                val runner: ContainerDownloadRunner)
 
@@ -121,7 +165,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     private val contentEntryHolders = HashMap<Long, WeakReference<ContentEntryHolder>>()
 
-    private val downloadJobMap = HashMap<Int, WeakReference<DownloadJob>>()
+    private val downloadJobMap = HashMap<Int, WeakReference<DownloadJobHolder>>()
 
     private val entriesToCommit : MutableSet<DownloadJobItem> = HashSet()
 
@@ -144,11 +188,22 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         if(currentHolder != null)
             return currentHolder
 
-        val downloadJob = appDb.downloadJobItemDao.findByUid(jobItemUid)
+        val downloadJobItem = appDb.downloadJobItemDao.findByUid(jobItemUid)
         val parents = appDb.downloadJobItemParentChildJoinDao.findParentsByChildUid(jobItemUid)
         val parentHolders = parents.map { loadDownloadJobItemHolder(it.djiParentDjiUid) }
-        val newHolder = DownloadJobItemHolder(jobItemUid, downloadJob, parentHolders.toMutableList())
+        val newHolder = DownloadJobItemHolder(jobItemUid, downloadJobItem, parentHolders.toMutableList())
         jobItemUidToHolderMap[jobItemUid] = WeakReference(newHolder)
+        return newHolder
+    }
+
+    private fun loadDownloadJobHolder(jobUid: Int): DownloadJobHolder {
+        val currentHolder = downloadJobMap[jobUid]?.get()
+        if(currentHolder != null)
+            return currentHolder
+
+        val downloadJob = appDb.downloadJobDao.findByUid(jobUid)
+        val newHolder = DownloadJobHolder(jobUid, downloadJob)
+        downloadJobMap[jobUid] = WeakReference(newHolder)
         return newHolder
     }
 
@@ -175,9 +230,13 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         return currentHolder.liveData
     }
 
+    override suspend fun getDownloadJob(jobUid: Int): DoorLiveData<DownloadJob?> = withContext(singleThreadContext) {
+        loadDownloadJobHolder(jobUid).liveData
+    }
+
     override suspend fun createDownloadJob(downloadJob: DownloadJob) = withContext(singleThreadContext){
         downloadJob.djUid = appDb.downloadJobDao.insert(downloadJob).toInt()
-        downloadJobMap[downloadJob.djUid] = WeakReference(downloadJob)
+        downloadJobMap[downloadJob.djUid] = WeakReference(DownloadJobHolder(downloadJob.djUid, downloadJob))
     }
 
     override suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>) = withContext(singleThreadContext){

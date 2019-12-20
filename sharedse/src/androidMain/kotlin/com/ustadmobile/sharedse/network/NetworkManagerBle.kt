@@ -41,10 +41,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.InetAddress
 import java.util.*
@@ -65,6 +61,8 @@ import okhttp3.OkHttpClient
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import java.net.HttpURLConnection
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 /**
  * This class provides methods to perform android network related communications.
@@ -149,8 +147,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase) { job, manager ->
         object: ContainerDownloadRunner {
 
-            override suspend fun download() {
-
+            override suspend fun download(): Deferred<Int> {
+                return CompletableDeferred()
             }
 
             override suspend fun cancel() {
