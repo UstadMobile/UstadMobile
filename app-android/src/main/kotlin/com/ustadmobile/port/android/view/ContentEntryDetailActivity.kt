@@ -21,6 +21,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -33,8 +34,11 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.android.synthetic.main.activity_entry_detail.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -79,6 +83,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var showExportIcon: Boolean = false
 
+    private var currentDownloadJobItemStatus: Int = -1
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
@@ -94,7 +99,9 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
-                networkManagerBle, umAppRepository, networkManagerBle.localAvailabilityManager)
+                umAppRepository,
+                networkManagerBle.localAvailabilityManager,
+                networkManagerBle.containerDownloadManager)
         presenter.handleShowEditControls(showControls)
         presenter.onCreate(bundleToMap(Bundle()))
 
@@ -217,6 +224,40 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
     }
 
+    override fun setDownloadJobItemStatus(downloadJobItem: DownloadJobItem?) {
+        if(currentDownloadJobItemStatus != downloadJobItem?.djiStatus) {
+            when {
+                //TODO: change this to allow failed etc. probably best done using an extension method in core
+                downloadJobItem == null -> {
+                    entry_download_open_button.text = resources.getText(R.string.download)
+                    entry_download_open_button.visibility = View.VISIBLE
+                    entry_detail_progress.visibility = View.GONE
+                }
+
+                downloadJobItem.djiStatus == JobStatus.COMPLETE -> {
+                    entry_download_open_button.visibility = View.VISIBLE
+                    entry_download_open_button.text = resources.getText(R.string.open)
+                    entry_detail_progress.visibility = View.GONE
+                }
+
+                downloadJobItem.djiStatus < JobStatus.COMPLETE_MIN -> {
+                    entry_download_open_button.visibility = View.GONE
+                    entry_detail_progress.visibility = View.VISIBLE
+                }
+            }
+
+            currentDownloadJobItemStatus = downloadJobItem?.djiStatus ?: 0
+        }
+
+        if(downloadJobItem != null && downloadJobItem.djiStatus > JobStatus.WAITING_MIN
+                && downloadJobItem.djiStatus <= JobStatus.COMPLETE_MIN) {
+            entry_detail_progress.progress = if(downloadJobItem.downloadLength > 0) {
+                (downloadJobItem.downloadedSoFar.toFloat()) / (downloadJobItem.downloadLength.toFloat())
+            }else {
+                0f
+            }
+        }
+    }
 
     override fun setContentEntryLicense(license: String) {
         entryDetailsLicense!!.text = license
@@ -296,7 +337,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     }
 
-    override fun showDownloadOptionsDialog(map: HashMap<String, String>) {
+    override fun showDownloadOptionsDialog(map: Map<String, String>) {
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),

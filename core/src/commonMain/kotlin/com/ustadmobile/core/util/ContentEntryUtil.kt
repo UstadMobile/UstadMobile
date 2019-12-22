@@ -13,6 +13,20 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.jvm.JvmStatic
 
+
+private val mimeTypeToViewNameMap = mapOf("application/tincan+zip" to XapiPackageContentView.VIEW_NAME)
+
+suspend fun goToContentEntry(contentEntryUid: Long,
+                            umAppDatabase: UmAppDatabase,
+                            context: Any,
+                            systemImpl: UstadMobileSystemImpl,
+                            downloadRequired: Boolean,
+                            goToContentEntryDetailViewIfNotDownloaded: Boolean = true,
+                            noIframe: Boolean = false) {
+
+}
+
+
 class ContentEntryUtil{
 
     internal lateinit var impl: UstadMobileSystemImpl
@@ -41,7 +55,7 @@ class ContentEntryUtil{
 
 
 
-    fun goToContentEntry(isDownloadEnabled:Boolean,contentEntryUid: Long,noIframe: Boolean ,dbRepo: UmAppDatabase,
+    fun goToContentEntry(isDownloadEnabled:Boolean, contentEntryUid: Long, noIframe: Boolean ,dbRepo: UmAppDatabase,
                          impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                          context: Any,
                          callback: UmCallback<Any>) {

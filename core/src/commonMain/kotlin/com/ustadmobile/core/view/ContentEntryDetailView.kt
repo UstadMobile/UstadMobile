@@ -2,12 +2,16 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 import kotlin.js.JsName
 
 interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier, UstadViewWithProgress {
 
     @JsName("setContentEntry")
     fun setContentEntry(contentEntry: ContentEntry)
+
+    @JsName("setDownloadJobItemStatus")
+    fun setDownloadJobItemStatus(downloadJobItem: DownloadJobItem?)
 
     @JsName("setContentEntryLicense")
     fun setContentEntryLicense(license: String)
@@ -61,7 +65,7 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     fun setDownloadButtonClickableListener(isDownloadComplete: Boolean)
 
     @JsName("showDownloadOptionsDialog")
-    fun showDownloadOptionsDialog(map: HashMap<String, String>)
+    fun showDownloadOptionsDialog(map: Map<String, String>)
 
     @JsName("showExportContentIcon")
     fun showExportContentIcon(visible: Boolean)

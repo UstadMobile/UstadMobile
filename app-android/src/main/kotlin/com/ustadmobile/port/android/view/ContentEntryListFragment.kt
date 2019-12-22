@@ -220,9 +220,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             //create entry adapter here to make sure bleManager is not null
             val thisFrag = this@ContentEntryListFragment
             recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, thisFrag,
-                    managerAndroidBle).also {
-                it.addListeners()
-            }
+                    managerAndroidBle.containerDownloadManager)
 
             recyclerAdapter?.fistItemLoadedListener = repoLoadingStatusView
 
@@ -326,7 +324,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun onDestroy() {
         super.onDestroy()
-        recyclerAdapter?.removeListeners()
         localAvailabilityPagedListCallback?.onDestroy()
     }
 
