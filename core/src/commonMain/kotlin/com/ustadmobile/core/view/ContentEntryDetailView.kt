@@ -16,14 +16,14 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("setContentEntryLicense")
     fun setContentEntryLicense(license: String)
 
-    @JsName("setDetailsButtonEnabled")
-    fun setDetailsButtonEnabled(enabled: Boolean)
+    @JsName("setMainButtonEnabled")
+    fun setMainButtonEnabled(enabled: Boolean)
 
     @JsName("setDownloadSize")
     fun setDownloadSize(fileSize: Long)
 
     @JsName("setAvailableTranslations")
-    fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long)
+    fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>)
 
     @JsName("updateDownloadProgress")
     fun updateDownloadProgress(progressValue: Float)
@@ -48,12 +48,6 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
 
     @JsName("setLocalAvailabilityStatusViewVisible")
     fun setLocalAvailabilityStatusViewVisible(visible: Boolean)
-
-    @JsName("setTranslationLabelVisible")
-    fun setTranslationLabelVisible(visible: Boolean)
-
-    @JsName("setFlexBoxVisible")
-    fun setFlexBoxVisible(visible: Boolean)
 
     @JsName("setDownloadProgressVisible")
     fun setDownloadProgressVisible(visible: Boolean)

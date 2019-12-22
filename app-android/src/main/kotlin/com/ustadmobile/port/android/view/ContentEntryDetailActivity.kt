@@ -29,13 +29,12 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_entry_detail.*
@@ -69,7 +68,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private lateinit var editButton: FloatingActionButton
 
-    private var flexBox: RecyclerView? = null
+    private lateinit var flexBox: RecyclerView
 
     private lateinit var downloadButton: Button
 
@@ -99,7 +98,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
-                umAppRepository,
+                umAppRepository, UmAppDatabase.getInstance(baseContext),
                 networkManagerBle.localAvailabilityManager,
                 networkManagerBle.containerDownloadManager)
         presenter.handleShowEditControls(showControls)
@@ -263,7 +262,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         entryDetailsLicense!!.text = license
     }
 
-    override fun setDetailsButtonEnabled(enabled: Boolean) {
+    override fun setMainButtonEnabled(enabled: Boolean) {
         downloadButton.isEnabled = enabled
     }
 
@@ -288,7 +287,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String) {
         showErrorNotification(message, {
-            var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
+            var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }
@@ -317,13 +316,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         localAvailabilityStatusText!!.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    override fun setTranslationLabelVisible(visible: Boolean) {
-        translationAvailableLabel!!.visibility = if (visible) View.VISIBLE else View.GONE
-    }
-
-    override fun setFlexBoxVisible(visible: Boolean) {
-        flexBox!!.visibility = if (visible) View.VISIBLE else View.GONE
-    }
 
     override fun setDownloadProgressVisible(visible: Boolean) {
         downloadProgress!!.visibility = if (visible) View.VISIBLE else View.GONE
@@ -355,14 +347,16 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         super.onDestroy()
     }
 
-    override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long) {
+    override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>) {
+
+        translationAvailableLabel!!.visibility = if (result.isNotEmpty()) View.VISIBLE else View.GONE
+        flexBox.visibility = if (result.isNotEmpty()) View.VISIBLE else View.GONE
+
         val flexboxLayoutManager = FlexboxLayoutManager(applicationContext)
         flexboxLayoutManager.flexDirection = FlexDirection.ROW
-        flexBox!!.layoutManager = flexboxLayoutManager
-
-        val adapter = ContentEntryDetailLanguageAdapter(result,
-                this, entryUuid)
-        flexBox!!.adapter = adapter
+        flexBox.layoutManager = flexboxLayoutManager
+        val adapter = ContentEntryDetailLanguageAdapter(result, this)
+        flexBox.adapter = adapter
     }
 
     override fun onClickStopDownload(view: DownloadProgressView) {

@@ -10,6 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
@@ -166,8 +167,8 @@ class WebChunkEspressoTest {
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
         val b = Bundle()
 
-        b.putString(WebChunkView.ARG_CONTAINER_UID, 10L.toString())
-        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, 1L.toString())
+        b.putString(ContentEntryDetailPresenter.ARG_CONTAINER_UID, 10L.toString())
+        b.putString(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID, 1L.toString())
         b.putString(ARG_REFERRER, path)
         launchActivityIntent.putExtras(b)
         mActivityRule.launchActivity(launchActivityIntent)
@@ -195,8 +196,8 @@ class WebChunkEspressoTest {
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/comparison-symbols-review.zip"))
 
 
-        b.putString(WebChunkView.ARG_CONTAINER_UID, 12.toString())
-        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, 1L.toString())
+        b.putString(ContentEntryDetailPresenter.ARG_CONTAINER_UID, 12.toString())
+        b.putString(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID, 1L.toString())
         b.putString(ARG_REFERRER, path)
         launchActivityIntent.putExtras(b)
         mActivityRule.launchActivity(launchActivityIntent)
@@ -217,8 +218,8 @@ class WebChunkEspressoTest {
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
         val b = Bundle()
 
-        b.putString(WebChunkView.ARG_CONTAINER_UID, 11.toString())
-        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, 1.toString())
+        b.putString(ContentEntryDetailPresenter.ARG_CONTAINER_UID, 11.toString())
+        b.putString(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID, 1.toString())
         b.putString(ARG_REFERRER, path)
         launchActivityIntent.putExtras(b)
         mActivityRule.launchActivity(launchActivityIntent)
