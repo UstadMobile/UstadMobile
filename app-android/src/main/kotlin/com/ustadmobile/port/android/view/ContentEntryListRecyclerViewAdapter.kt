@@ -67,7 +67,9 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
-        val entry = getItem(position)
+        val entry = getItem(position).also {
+            holder.entry = it
+        }
 
         synchronized(boundViewHolders) {
             boundViewHolders.add(holder)
@@ -153,7 +155,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
         internal var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
 
-        internal var entry: ContentEntry? = null
+        internal var entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer? = null
 
         internal fun updateLocallyAvailableStatus(available: Boolean) {
             val icon = if (available)
@@ -175,9 +177,10 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
         override fun onChanged(t: DownloadJobItem?) {
             if(t?.djiStatus != currentDownloadStatus) {
+                currentDownloadStatus = t?.djiStatus ?: 0
                 val context = view.context
 
-                var localAvailabilityVisible = true
+//                var localAvailabilityVisible = true
 
                 var contentDescription = if (t.isStatusQueuedOrDownloading()) {
                     context.getString(R.string.downloading)
@@ -189,7 +192,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                     downloadView.setImageResource(R.drawable.ic_pause_black_24dp)
                     contentDescription = context.getString(R.string.download_entry_state_paused)
                 } else if (t.isStatusCompletedSuccessfully()) {
-                    localAvailabilityVisible = false
+//                    localAvailabilityVisible = false
                     downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
                     contentDescription = context.getString(R.string.downloaded)
                 } else {
@@ -203,7 +206,9 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 }
             }
 
-            val localAvailabilityVisibility = if((entry?.leaf ?: false)&& !t.isStatusCompletedSuccessfully())
+            val entryVal = entry
+            val localAvailabilityVisibility = if(entryVal != null && entryVal.leaf
+                    && !t.isStatusCompletedSuccessfully())
                 View.VISIBLE
             else
                 View.GONE
