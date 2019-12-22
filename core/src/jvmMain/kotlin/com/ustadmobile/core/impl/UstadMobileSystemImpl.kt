@@ -272,7 +272,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
 
     actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?){
-        TODO("not implemented")
+
     }
 
     actual fun getSystemBaseDir(context: Any): String{
