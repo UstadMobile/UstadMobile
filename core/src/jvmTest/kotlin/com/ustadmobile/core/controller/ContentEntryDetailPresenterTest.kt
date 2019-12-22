@@ -52,6 +52,30 @@ class ContentEntryDetailPresenterTest {
 
 
     @Test
+    fun givenEntryExists_whenOnCreateCalled_thenShouldSetContentEntryObserveDownloadJobAndSetTranslations(){
+
+
+    }
+
+    @Test
+    fun givenContentEntryNotDownloaded_whenMainButtonClicked_thenShouldShowDownloadDialog(){
+
+
+    }
+
+    @Test
+    fun givenContentEntryDownloaded_whenMainButtonClicked_thenShouldInvokeGoToContentEntryFunc(){
+
+    }
+
+    @Test
+    fun givenTranslationEntryExists_whenTranslationClicked_thenShouldCallHandleTranslated(){
+
+    }
+
+
+
+    @Test
     fun givenUserIsInDetailViewFromListView_WhenUpNavigationCalled_thenShouldReturnToListView() {
 
         val args = Hashtable<String,String>()

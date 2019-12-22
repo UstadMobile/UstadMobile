@@ -17,17 +17,31 @@ import kotlin.jvm.JvmStatic
 private val mimeTypeToViewNameMap = mapOf("application/tincan+zip" to XapiPackageContentView.VIEW_NAME)
 
 suspend fun goToContentEntry(contentEntryUid: Long,
-                            umAppDatabase: UmAppDatabase,
-                            context: Any,
-                            systemImpl: UstadMobileSystemImpl,
-                            downloadRequired: Boolean,
-                            goToContentEntryDetailViewIfNotDownloaded: Boolean = true,
-                            noIframe: Boolean = false) {
+                             umAppDatabase: UmAppDatabase,
+                             context: Any,
+                             systemImpl: UstadMobileSystemImpl,
+                             downloadRequired: Boolean,
+                             goToContentEntryDetailViewIfNotDownloaded: Boolean = true,
+                             noIframe: Boolean = false) {
+
+    val containerToOpen = if(downloadRequired) {
+        //find the most recent container that is downloaded - e.g. search from downloadjobitem
+    }else {
+        //look for the most recent container
+    }
+
+    if(containerToOpen != 0) {
+
+    }else if(containerToOpen == 0 && goToContentEntryDetailViewIfNotDownloaded) {
+
+    }else {
+        //something is wrong - throw illegalargumentexception
+    }
 
 }
 
 
-class ContentEntryUtil{
+class ContentEntryUtil {
 
     internal lateinit var impl: UstadMobileSystemImpl
 
