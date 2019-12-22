@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.db.JobStatus.COMPLETE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.db.entities.*
@@ -141,6 +142,13 @@ abstract class DownloadJobItemDao {
             "WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
     abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
+
+    @Query("""SELECT Container.containerUid, Container.mimeType from DownloadJobItem 
+        LEFT JOIN Container ON DownloadJobItem.djiContainerUid = Container.containerUid 
+        WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid AND DownloadJobItem.djiStatus = $COMPLETE
+        ORDER BY Container.cntLastModified DESC LIMIT 1
+    """)
+    abstract suspend fun findMostRecentContainer(contentEntryUid: Long): ContainerUidAndMimetype?
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +

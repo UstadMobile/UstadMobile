@@ -1,7 +1,10 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
@@ -14,7 +17,30 @@ import kotlinx.coroutines.launch
 import kotlin.jvm.JvmStatic
 
 
-private val mimeTypeToViewNameMap = mapOf("application/tincan+zip" to XapiPackageContentView.VIEW_NAME)
+private val mimeTypeToViewNameMap = mapOf(
+        "application/tincan+zip" to XapiPackageContentView.VIEW_NAME,
+        "application/khan-video+zip" to VideoPlayerView.VIEW_NAME,
+        "application/webchunk+zip" to WebChunkView.VIEW_NAME,
+        "application/epub+zip" to EpubContentView.VIEW_NAME
+) + VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
+
+
+val mimeTypeToPlayStoreIdMap = mapOf(
+        "text/plain" to "com.microsoft.office.word",
+        "audio/mpeg" to "music.musicplayer",
+        "application/pdf" to "com.adobe.reader",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation" to "com.microsoft.office.powerpoint",
+        "com.microsoft.office.powerpoint" to "com.microsoft.office.powerpoint",
+        "image/jpeg" to "com.pcvirt.ImageViewer",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" to "com.microsoft.office.word")
+
+typealias GoToEntryFn = suspend (contentEntryUid: Long,
+                                 umAppDatabase: UmAppDatabase,
+                                 context: Any,
+                                 systemImpl: UstadMobileSystemImpl,
+                                 downloadRequired: Boolean,
+                                 goToContentEntryDetailViewIfNotDownloaded: Boolean,
+                                 noIframe: Boolean) -> Unit
 
 suspend fun goToContentEntry(contentEntryUid: Long,
                              umAppDatabase: UmAppDatabase,
@@ -24,206 +50,43 @@ suspend fun goToContentEntry(contentEntryUid: Long,
                              goToContentEntryDetailViewIfNotDownloaded: Boolean = true,
                              noIframe: Boolean = false) {
 
-    val containerToOpen = if(downloadRequired) {
-        //find the most recent container that is downloaded - e.g. search from downloadjobitem
-    }else {
-        //look for the most recent container
+    val containerToOpen = if (downloadRequired) {
+        umAppDatabase.downloadJobItemDao.findMostRecentContainer(contentEntryUid)
+    } else {
+        umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
     }
 
-    if(containerToOpen != 0) {
+    if (containerToOpen != null) {
 
-    }else if(containerToOpen == 0 && goToContentEntryDetailViewIfNotDownloaded) {
+        val viewName = mimeTypeToViewNameMap[containerToOpen.mimeType]
+        if (viewName == null) {
 
-    }else {
-        //something is wrong - throw illegalargumentexception
-    }
-
-}
-
-
-class ContentEntryUtil {
-
-    internal lateinit var impl: UstadMobileSystemImpl
-
-    private lateinit var dbRepo: UmAppDatabase
-
-    internal lateinit var context: Any
-
-    internal lateinit var callback: UmCallback<Any>
-
-    internal lateinit var viewName: String
-
-    private var noIframe: Boolean = false
-
-    internal val args = HashMap<String, String>()
-
-    init {
-        mimeTypeToPlayStoreIdMap["text/plain"] = "com.microsoft.office.word"
-        mimeTypeToPlayStoreIdMap["audio/mpeg"] = "music.musicplayer"
-        mimeTypeToPlayStoreIdMap["application/pdf"] = "com.adobe.reader"
-        mimeTypeToPlayStoreIdMap["application/vnd.openxmlformats-officedocument.presentationml.presentation"] = "com.microsoft.office.powerpoint"
-        mimeTypeToPlayStoreIdMap["com.microsoft.office.powerpoint"] = "com.microsoft.office.powerpoint"
-        mimeTypeToPlayStoreIdMap["image/jpeg"] = "com.pcvirt.ImageViewer"
-        mimeTypeToPlayStoreIdMap["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = "com.microsoft.office.word"
-    }
-
-
-
-    fun goToContentEntry(isDownloadEnabled:Boolean, contentEntryUid: Long, noIframe: Boolean ,dbRepo: UmAppDatabase,
-                         impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                         context: Any,
-                         callback: UmCallback<Any>) {
-        this.noIframe = noIframe
-
-        GlobalScope.launch {
-            try {
-                handleGoToView(isDownloadEnabled,contentEntryUid,null, dbRepo, impl,
-                        openEntryIfNotDownloaded, context, callback)
-            } catch (e: Exception) {
-                callback.onFailure(e)
-            }
-        }
-    }
-
-    private suspend fun handleFoundContainer(result: Container){
-
-        if (result.mimeType?.startsWith("video/") == true) {
-            result.mimeType = "video/mp4"
-        }
-
-        args[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES] = noIframe.toString()
-        when (result.mimeType) {
-            "application/zip", "application/tincan+zip" -> {
-                args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                viewName = XapiPackageContentView.VIEW_NAME
-            }
-            "video/mp4", "application/khan-video+zip" -> {
-
-                args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                viewName = VideoPlayerView.VIEW_NAME
-            }
-            "application/webchunk+zip" -> {
-
-                args[WebChunkView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                args[WebChunkView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                viewName = WebChunkView.VIEW_NAME
-            }
-            "application/epub+zip" -> {
-
-                args[EpubContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                viewName = EpubContentView.VIEW_NAME
-            }else -> {
-
-            val container = dbRepo.containerEntryDao.findByContainerAsync(result.containerUid)
+            val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
             require(container.isNotEmpty()) { "No file found" }
             val containerEntryFilePath = container[0].containerEntryFile?.cefPath
             if (containerEntryFilePath != null) {
-                impl.openFileInDefaultViewer(context, containerEntryFilePath,
-                        result.mimeType!!, callback)
+                systemImpl.openFileInDefaultViewer(context, containerEntryFilePath,
+                        containerToOpen.mimeType)
             } else {
-                TODO("Show error message here")
+                throw IllegalArgumentException("No file found")
             }
+            return
         }
 
-        }
+        val args = HashMap<String, String>()
+        args[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES] = noIframe.toString()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
+        systemImpl.go(viewName, args, context)
+
+    } else if (goToContentEntryDetailViewIfNotDownloaded) {
+
+        val args = HashMap<String, String>()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, context)
+
+    } else {
+        throw IllegalArgumentException("No file found")
     }
 
-
-    private fun goToContentEntryBySourceUrl(isDownloadEnabled:Boolean,sourceUrl: String,dbRepo: UmAppDatabase,
-                                            impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                                            context: Any,callback: UmCallback<Any>) {
-
-        GlobalScope.launch {
-            try {
-                handleGoToView(isDownloadEnabled,null,sourceUrl, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
-            } catch (e: Exception) {
-                callback.onFailure(e)
-            }
-        }
-    }
-
-
-    private suspend fun handleGoToView(isDownloadEnabled:Boolean, entryUid: Long?, sourceUrl: String?,
-                                       dbRepo: UmAppDatabase, impl: UstadMobileSystemImpl,
-                                       openEntryIfNotDownloaded: Boolean, context: Any,
-                                       callback: UmCallback<Any>){
-        if(isDownloadEnabled){
-            var entryStatus = ContentEntryWithContentEntryStatus()
-            if(entryUid != null){
-                entryStatus = dbRepo.contentEntryDao.findByUidWithContentEntryStatusAsync(entryUid)!!
-            }
-
-            if(sourceUrl != null){
-                entryStatus = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(sourceUrl)!!
-
-            }
-            val contentEntryStatus = entryStatus.contentEntryStatus
-
-            this.dbRepo = dbRepo; this.impl = impl; this.context = context; this.callback = callback
-
-            if (contentEntryStatus != null && contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
-
-                val result = dbRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entryStatus.contentEntryUid)
-                        ?: throw IllegalArgumentException("No file found")
-                handleFoundContainer(result)
-                impl.go(viewName, args, context)
-                callback.onSuccess(Any())
-
-            } else if (openEntryIfNotDownloaded) {
-                val args = HashMap<String, String>()
-                args[ARG_CONTENT_ENTRY_UID] = entryStatus.contentEntryUid.toString()
-                impl.go(ContentEntryDetailView.VIEW_NAME, args, context)
-            }
-
-        }else{
-            this.dbRepo = dbRepo; this.impl = impl; this.context = context; this.callback = callback
-            val result = dbRepo.containerDao.getMostRecentContainerForContentEntryAsync(entryUid!!)
-                    ?: throw IllegalArgumentException("No file found")
-            handleFoundContainer(result)
-            impl.go(viewName, args, context)
-            callback.onSuccess(Any())
-        }
-    }
-
-
-
-    /**
-     * Used to handle navigating when the user clicks a link in content.
-     *
-     * @param viewDestination
-     * @param dbRepo
-     * @param impl
-     * @param openEntryIfNotDownloaded
-     * @param context
-     * @param callback
-     */
-    fun goToContentEntryByViewDestination(viewDestination: String,noIframe: Boolean, dbRepo: UmAppDatabase,
-                                          impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                                          context: Any, isDownloadEnabled:Boolean, callback: UmCallback<Any>) {
-        //substitute for previously scraped content
-        val dest = viewDestination.replace("content-detail?",
-                ContentEntryDetailView.VIEW_NAME + "?")
-        this.noIframe = noIframe
-
-        val params = UMFileUtil.parseURLQueryString(dest)
-        if (params.containsKey("sourceUrl")) {
-            goToContentEntryBySourceUrl(isDownloadEnabled,params.getValue("sourceUrl")!!,dbRepo,
-                    impl, openEntryIfNotDownloaded, context,
-                    callback)
-        }
-
-    }
-
-
-    companion object{
-
-        val mimeTypeToPlayStoreIdMap = HashMap<String, String>()
-
-        /**
-         * Get an instance of the system implementation
-         */
-        @JvmStatic
-        var instance: ContentEntryUtil = ContentEntryUtil()
-    }
 }

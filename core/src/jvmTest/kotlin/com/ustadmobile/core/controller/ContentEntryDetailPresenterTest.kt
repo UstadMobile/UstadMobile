@@ -27,19 +27,10 @@ class ContentEntryDetailPresenterTest {
 
     private lateinit var umAppRepository: UmAppDatabase
 
-    private val context = object: DoorLifecycleOwner {
-        override fun addObserver(observer: DoorLifecycleObserver) {
 
-        }
-
-        override fun removeObserver(observer: DoorLifecycleObserver) {
-
-        }
-
-        override val currentState: Int
-            get() = 1
-
-    }
+    private val context = mock<DoorLifecycleOwner>() {
+        on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
+    } as Any
 
     @Before
     fun setUp() {
@@ -69,7 +60,7 @@ class ContentEntryDetailPresenterTest {
     }
 
     @Test
-    fun givenTranslationEntryExists_whenTranslationClicked_thenShouldCallHandleTranslated(){
+    fun givenTranslatedEntryExists_whenTranslationClicked_thenShouldCallHandleTranslated(){
 
     }
 
@@ -83,7 +74,7 @@ class ContentEntryDetailPresenterTest {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_FULL_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!,true, statusProvider!!, umAppRepository, mock())
+                args, mockView!!,true, umAppDatabase, umAppRepository, mock(), mock())
         presenter.onCreate(args)
 
         val argsresult = Hashtable<String,String>()
@@ -106,7 +97,7 @@ class ContentEntryDetailPresenterTest {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_NO_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView!!,true, statusProvider!!, umAppRepository, mock())
+                args, mockView!!,true, umAppDatabase, umAppRepository, mock(), mock())
         presenter.onCreate(args)
 
         args.remove(UstadMobileSystemCommon.ARG_REFERRER)

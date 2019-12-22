@@ -27,6 +27,13 @@ class TestGoToContentEntryUtil {
 
     }
 
+    @Test
+    fun givenDownloadNotRequired_whenEntryDownloadedAndMimeTypeDoesNotMatch_openInDefaultViewer(){
+
+
+
+    }
+
 
 
 

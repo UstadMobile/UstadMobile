@@ -25,6 +25,5 @@ interface WebChunkView : UstadView {
 
         const val VIEW_NAME = "WebChunk"
         const val ARG_CONTENT_ENTRY_ID = "entryId"
-        const val ARG_CONTAINER_UID = "containerUid"
     }
 }

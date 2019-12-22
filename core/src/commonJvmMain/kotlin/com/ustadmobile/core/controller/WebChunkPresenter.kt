@@ -5,15 +5,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.WebChunkView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                  view: WebChunkView,isDownloadEnabled: Boolean, private val appRepo: UmAppDatabase)
-    : WebChunkPresenterCommon(context, arguments, view, isDownloadEnabled, appRepo) {
+                                                  view: com.ustadmobile.core.view.WebChunkView, isDownloadEnabled: Boolean, appRepo: UmAppDatabase, umAppDb: UmAppDatabase)
+    : WebChunkPresenterCommon(context, arguments, view, isDownloadEnabled, appRepo, umAppDb) {
 
     actual override suspend fun handleMountChunk() {
-        val result = appRepo.containerDao.findByUidAsync(containerUid!!)
+        val result = umAppDb.containerDao.findByUidAsync(containerUid!!)
         view.mountChunk(result, object : UmCallback<String> {
             override fun onSuccess(result: String?) {
                 if (result != null) {

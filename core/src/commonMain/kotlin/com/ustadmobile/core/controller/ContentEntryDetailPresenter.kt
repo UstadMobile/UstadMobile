@@ -1,27 +1,25 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.ContentEntryUtil
+import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
-import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -29,16 +27,15 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 
-//TODO - Samih: Add db as a parameter
-//TODO - Samih - change the query on the databse to get the ContentEntryWithMostRecentContainer
-//TODO - Samih - change setFlexBoxVisible and setTranslationLabelVisible to setAvailableTranslations(list)
 // the view should handle this being empty
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
                                   private val isDownloadEnabled: Boolean,
                                   private val appRepo: UmAppDatabase,
+                                  private val appDb: UmAppDatabase,
                                   private val localAvailabilityManager: LocalAvailabilityManager?,
-                                  private val containerDownloadManager: ContainerDownloadManager?)
+                                  private val containerDownloadManager: ContainerDownloadManager?,
+                                  private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract) {
 
     private var navigation: String? = null
@@ -71,23 +68,20 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryLiveData.observe(this, ::onEntryChanged)
 
         GlobalScope.launch {
-            val result = appRepo.containerDao.findFilesByContentEntryUid(entryUuid)
+            val result = appDb.containerDao.getMostRecentContainerForContentEntryAsync(entryUuid)
             view.runOnUiThread(Runnable {
-                view.setDetailsButtonEnabled(result.isNotEmpty())
-                if (result.isNotEmpty()) {
-                    val container = result[0]
-                    view.setDownloadSize(container.fileSize)
-                }
+                view.setMainButtonEnabled(result != null)
+                view.setDownloadSize(result?.fileSize ?: 0)
             })
         }
 
-        if(containerDownloadManager != null) {
+        if (containerDownloadManager != null) {
             GlobalScope.launch(Dispatchers.Main) {
                 downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).also {
                     it.observe(this@ContentEntryDetailPresenter, view::setDownloadJobItemStatus)
                 }
             }
-        }else {
+        } else {
             view.setDownloadJobItemStatus(null)
         }
 
@@ -96,9 +90,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             view.showBaseProgressBar(true)
             val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsForContentEntryAsync(entryUuid)
             view.runOnUiThread(Runnable {
-                view.setTranslationLabelVisible(result.isNotEmpty())
-                view.setFlexBoxVisible(result.isNotEmpty())
-                view.setAvailableTranslations(result, entryUuid)
+                view.setAvailableTranslations(result)
                 view.showBaseProgressBar(false)
             })
         }
@@ -118,8 +110,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 currentContentEntry = entry
                 view.setContentEntryLicense(licenseType)
                 with(entry) {
-                    val canShowEditBtn = (((this.contentFlags and FLAG_CONTENT_EDITOR)==FLAG_CONTENT_EDITOR)
-                            || (this.contentFlags and FLAG_IMPORTED)== FLAG_IMPORTED)
+                    val canShowEditBtn = (((this.contentFlags and FLAG_CONTENT_EDITOR) == FLAG_CONTENT_EDITOR)
+                            || (this.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED)
                     view.runOnUiThread(Runnable {
                         view.showEditButton(showEditorControls && canShowEditBtn)
                     })
@@ -135,9 +127,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
      * Handle click download/open button
      */
     @JsName("handleDownloadButtonClick")
-    fun handleDownloadButtonClick(){
+    fun handleDownloadButtonClick() {
         val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
-        if(canOpen) {
+        if (canOpen) {
             val loginFirst = impl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                     "false", context)!!.toBoolean()
 
@@ -146,46 +138,33 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             } else {
                 goToContentEntry()
             }
-        }else if(isDownloadEnabled) {
+        } else if (isDownloadEnabled) {
             view.runOnUiThread(Runnable {
                 view.showDownloadOptionsDialog(mapOf("contentEntryUid" to this.entryUuid.toString()))
             })
         }
     }
 
-    private fun goToContentEntry(){
-        val appDatabase = UmAppDatabase.getInstance(context)
-//        GlobalScope.launch {
-//            com.ustadmobile.core.util.goToContentEntry(entryUuid, appDatabase, context, true,
-//                    goToContentEntryDetailViewIfNotDownloaded = false)
-//        }
-
-
-        view.showBaseProgressBar(true)
-        ContentEntryUtil.instance.goToContentEntry(isDownloadEnabled, entryUuid,
-                arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false,
-                appRepo, impl, (downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE),
-                context, object : UmCallback<Any> {
-
-            override fun onSuccess(result: Any?) {
+    private fun goToContentEntry() {
+        GlobalScope.launch {
+            try {
+                view.showBaseProgressBar(true)
+                goToEntryFn(entryUuid, appDb, context, impl, isDownloadEnabled,
+                        false,
+                        arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES]
+                                ?.toBoolean() ?: false)
+            } catch (e: Exception) {
+                if (e is NoAppFoundException) {
+                    view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
+                            MessageID.get_app,
+                            e.mimeType!!)
+                } else {
+                    view.showFileOpenError(e.message!!)
+                }
+            } finally {
                 view.showBaseProgressBar(false)
             }
-
-            override fun onFailure(exception: Throwable?) {
-                if (exception != null) {
-                    val message = exception.message
-                    if (exception is NoAppFoundException) {
-                        view.runOnUiThread(Runnable {
-                            view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
-                                    MessageID.get_app,
-                                    exception.mimeType!!)
-                        })
-                    } else {
-                        view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
-                    }
-                }
-            }
-        })
+        }
     }
 
 
@@ -255,7 +234,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
-                args[ContentEntryEditView.CONTENT_TYPE] = (if(imported) ContentEntryListView.CONTENT_IMPORT_FILE
+                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
@@ -267,7 +246,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     @JsName("handleContentEntryExport")
-    fun handleContentEntryExport(){
+    fun handleContentEntryExport() {
         val args = HashMap(arguments)
         args[ContentEntryExportView.ARG_CONTENT_ENTRY_TITLE] = currentContentEntry.title
         impl.go(ContentEntryExportView.VIEW_NAME, args, context)
@@ -276,7 +255,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     override fun onDestroy() {
         val monitoringRequest = availabilityMonitorRequest
-        if(monitoringRequest != null) {
+        if (monitoringRequest != null) {
             localAvailabilityManager?.removeMonitoringRequest(monitoringRequest)
             availabilityMonitorRequest = null
         }
@@ -287,6 +266,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     companion object {
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"
+
+        const val ARG_CONTAINER_UID = "containerUid"
 
         const val LOCALLY_AVAILABLE_ICON = 1
 
