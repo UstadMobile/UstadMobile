@@ -12,6 +12,8 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun getDownloadJob(jobUid: Int): DoorLiveData<DownloadJob?>
 
+    abstract suspend fun getDownloadJobRootItem(jobUid: Int): DownloadJobItem?
+
     abstract suspend fun createDownloadJob(downloadJob: DownloadJob)
 
     abstract suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>)

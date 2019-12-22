@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
 
 typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
 
@@ -92,15 +93,14 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                         jobItemVal.djiStatus = newStatus
                         thisStatusChanged = true
                     }
-
-                    postUpdateToDownloadJobIfRootEntry(deltaDownloadedSoFar, deltaDownloadLength,
-                            newStatus)
                 }
 
                 entriesToCommit.add(jobItemVal)
                 liveData.sendValue(jobItemVal)
                 val contentEntryHolder = contentEntryHolders[jobItemVal.djiContentEntryUid]?.get()
                 contentEntryHolder?.liveData?.sendValue(jobItemVal)
+                postUpdateToDownloadJobIfRootEntry(deltaDownloadedSoFar, deltaDownloadLength,
+                        jobItemVal.djiStatus)
             }else {
                 throw IllegalStateException("Can't update or increment a null item")
                 //something very wrong
@@ -183,12 +183,21 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         holder.liveData
     }
 
-    private fun loadDownloadJobItemHolder(jobItemUid: Int) : DownloadJobItemHolder{
+    override suspend fun getDownloadJobRootItem(jobUid: Int): DownloadJobItem? = withContext(singleThreadContext){
+        val downloadJobItemHolder = loadDownloadJobItemHolder(0) {
+            appDb.downloadJobItemDao.findRootForDownloadJob(jobUid)
+        }
+
+        downloadJobItemHolder.downloadJobItem
+    }
+
+    private fun loadDownloadJobItemHolder(jobItemUid: Int,
+                                          loadFn: () -> DownloadJobItem? = {appDb.downloadJobItemDao.findByUid(jobItemUid)}) : DownloadJobItemHolder{
         val currentHolder = jobItemUidToHolderMap[jobItemUid]?.get()
         if(currentHolder != null)
             return currentHolder
 
-        val downloadJobItem = appDb.downloadJobItemDao.findByUid(jobItemUid)
+        val downloadJobItem = loadFn()
         val parents = appDb.downloadJobItemParentChildJoinDao.findParentsByChildUid(jobItemUid)
         val parentHolders = parents.map { loadDownloadJobItemHolder(it.djiParentDjiUid) }
         val newHolder = DownloadJobItemHolder(jobItemUid, downloadJobItem, parentHolders.toMutableList())
@@ -237,6 +246,11 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     override suspend fun createDownloadJob(downloadJob: DownloadJob) = withContext(singleThreadContext){
         downloadJob.djUid = appDb.downloadJobDao.insert(downloadJob).toInt()
         downloadJobMap[downloadJob.djUid] = WeakReference(DownloadJobHolder(downloadJob.djUid, downloadJob))
+
+        val rootEntryContainer = appDb.containerDao
+                .getMostRecentContainerForContentEntry(downloadJob.djRootContentEntryUid)
+        val rootDownloadJobItem = downloadJob.makeRootDownloadJobItem(rootEntryContainer)
+        addItemsToDownloadJob(listOf(rootDownloadJobItem))
     }
 
     override suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>) = withContext(singleThreadContext){

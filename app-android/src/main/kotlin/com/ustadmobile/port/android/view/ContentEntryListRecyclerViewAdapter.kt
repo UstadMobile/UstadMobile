@@ -11,9 +11,9 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -45,7 +45,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     interface AdapterViewListener {
         fun contentEntryClicked(entry: ContentEntry?)
 
-        fun downloadStatusClicked(entry: ContentEntry?)
+        fun downloadStatusClicked(entry: ContentEntry)
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
@@ -125,13 +125,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 iconView.visibility = View.VISIBLE
             }
 
-            val viewVisibility = if (showLocallyAvailabilityViews && entry.leaf)
-                View.VISIBLE
-            else
-                View.GONE
-            holder.availabilityIcon.visibility = viewVisibility
-            holder.availabilityStatus.visibility = viewVisibility
-
             holder.downloadView.imageResource!!.contentDescription = contentDescription
             holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
@@ -160,6 +153,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
         internal var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
 
+        internal var entry: ContentEntry? = null
+
         internal fun updateLocallyAvailableStatus(available: Boolean) {
             val icon = if (available)
                 R.drawable.ic_nearby_black_24px
@@ -181,21 +176,19 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         override fun onChanged(t: DownloadJobItem?) {
             if(t?.djiStatus != currentDownloadStatus) {
                 val context = view.context
-                //val status = entry.contentEntryStatus
-                val dlStatus = t?.djiStatus ?: 0
 
                 var localAvailabilityVisible = true
 
-                var contentDescription = if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX) {
+                var contentDescription = if (t.isStatusQueuedOrDownloading()) {
                     context.getString(R.string.downloading)
                 } else {
                     context.getString(R.string.download_entry_state_queued)
                 }
 
-                if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
+                if (t.isStatusPaused()) {
                     downloadView.setImageResource(R.drawable.ic_pause_black_24dp)
                     contentDescription = context.getString(R.string.download_entry_state_paused)
-                } else if (dlStatus == JobStatus.COMPLETE) {
+                } else if (t.isStatusCompletedSuccessfully()) {
                     localAvailabilityVisible = false
                     downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
                     contentDescription = context.getString(R.string.downloaded)
@@ -203,16 +196,22 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                     downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
                 }
 
-                downloadView.progressVisibility = if(dlStatus <= JobStatus.COMPLETE_MIN) {
+                downloadView.progressVisibility = if(!t.isStatusCompleted()) {
                     View.VISIBLE
                 }else {
                     View.INVISIBLE
                 }
-
             }
 
-            if(t != null && t.djiStatus >= JobStatus.WAITING_MIN
-                    && t.djiStatus < JobStatus.COMPLETE_MIN) {
+            val localAvailabilityVisibility = if((entry?.leaf ?: false)&& !t.isStatusCompletedSuccessfully())
+                View.VISIBLE
+            else
+                View.GONE
+
+            availabilityIcon.visibility = localAvailabilityVisibility
+            availabilityStatus.visibility = localAvailabilityVisibility
+
+            if(t != null && t.isStatusPausedOrQueuedOrDownloading()) {
                 downloadView.progress = if(t.downloadLength> 0)
                     (t.downloadedSoFar* 100 / t.downloadLength).toInt()
                 else
@@ -253,6 +252,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 if (if (oldItem.thumbnailUrl != null) oldItem.thumbnailUrl != newItem.thumbnailUrl else newItem.thumbnailUrl == null) {
                     return false
                 }
+
+                return true
             }
         }
     }

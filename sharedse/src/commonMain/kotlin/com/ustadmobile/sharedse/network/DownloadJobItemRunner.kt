@@ -358,7 +358,8 @@ class DownloadJobItemRunner
                         destTmpFile.getAbsolutePath())
                 var jobDeferred: Deferred<Int>? = null
                 downloadStatusLock.withLock {
-                    Napier.d({"${mkLogPrefix()} enqueuing download"})
+                    Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadUrl fileDest=" +
+                            destTmpFile.getAbsolutePath()})
                     jobDeferred = networkManager.containerFetcher.enqueue(containerRequest,
                             object: AbstractContainerFetcherListener() {
                                 override fun onProgress(request: ContainerFetcherRequest,

@@ -13,6 +13,7 @@ import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -84,7 +85,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if(containerDownloadManager != null) {
             GlobalScope.launch(Dispatchers.Main) {
                 downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).also {
-                    it.observe(this@ContentEntryDetailPresenter, view::setDownloadJobItemStatus)
+                    it.observe(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
                 }
             }
         }else {
@@ -127,6 +128,31 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 view.setContentEntry(entry)
             }
 
+        }
+    }
+
+    private fun onDownloadJobItemChanged(downloadJobItem: DownloadJobItem?) {
+        view.setDownloadJobItemStatus(downloadJobItem)
+
+        if(availabilityMonitorRequest == null && !downloadJobItem.isStatusCompletedSuccessfully()) {
+            GlobalScope.launch {
+                val container = appRepo.containerDao.getMostRecentContainerForContentEntry(entryUuid)
+                if (container != null) {
+                    containerUid = container.containerUid
+                    val containerUidList = listOf(containerUid!!)
+                    val availableNowMap = localAvailabilityManager?.areContentEntriesLocallyAvailable(containerUidList)
+                            ?: mapOf()
+
+                    view.runOnUiThread(Runnable {
+                        handleLocalAvailabilityStatus(availableNowMap)
+                        val request = AvailabilityMonitorRequest(listOf(container.containerUid),
+                                onEntityAvailabilityChanged = this@ContentEntryDetailPresenter::handleLocalAvailabilityStatus)
+                        availabilityMonitorRequest = request
+                        localAvailabilityManager?.addMonitoringRequest(request)
+                    })
+                }
+
+            }
         }
     }
 
@@ -239,7 +265,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         appRepo.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
                 JobStatus.CANCELLING)
         appRepo.contentEntryStatusDao.updateDownloadStatusAsync(entryUuid, JobStatus.CANCELED)
-        //statusProvider?.removeDownloadChangeListener(this)
     }
 
 

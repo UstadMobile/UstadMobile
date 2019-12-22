@@ -73,6 +73,12 @@ abstract class DownloadJobItemDao {
             "WHERE DownloadJobItem.djiUid = :djiUid")
     abstract fun findByUid(djiUid: Int): DownloadJobItem?
 
+    @Query("""SELECT DownloadJobItem.* FROM
+        DownloadJobItem WHERE djiDjUid = :djUid AND
+        djiContentEntryUid = (SELECT djRootContentEntryUid FROM DownloadJob WHERE djUid = :djUid)""")
+    abstract fun findRootForDownloadJob(djUid: Int): DownloadJobItem?
+
+
     @Query("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
     abstract fun getLiveStatus(djiUid: Int): DoorLiveData<Int>
 
