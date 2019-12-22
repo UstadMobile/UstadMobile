@@ -310,12 +310,12 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         })
     }
 
-    override fun downloadStatusClicked(entry: ContentEntry?) {
+    override fun downloadStatusClicked(entry: ContentEntry) {
         val impl = UstadMobileSystemImpl.instance
         if(::ustadBaseActivity.isInitialized){
             ustadBaseActivity.runAfterGrantingPermission(
                     arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    Runnable { presenter?.handleDownloadStatusButtonClicked(entry!!) },
+                    Runnable { presenter?.handleDownloadStatusButtonClicked(entry) },
                     impl.getString(MessageID.download_storage_permission_title, context!!),
                     impl.getString(MessageID.download_storage_permission_message, context!!))
         }

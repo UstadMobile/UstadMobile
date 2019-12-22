@@ -108,14 +108,19 @@ class ContainerDownloadManagerTest {
 
             val rootEntryLiveData = downloadManagerImpl.getDownloadJobItemByJobItemUid(rootDownloadJobItem.djiUid)
             val rootEntryDeferredUntilUpdate = rootEntryLiveData.deferredUntil { it?.downloadedSoFar == dlProgressAmount }
+            val downloadJobLiveData = downloadManagerImpl.getDownloadJob(rootDownloadJobItem.djiDjUid)
+            val downloadJobDeferredUntilUpdate = downloadJobLiveData.deferredUntil { it?.bytesDownloadedSoFar == dlProgressAmount }
 
             val childUpdate = DownloadJobItem(childDownloadJobItem)
             childUpdate.downloadedSoFar = dlProgressAmount
             downloadManagerImpl.handleDownloadJobItemUpdated(childUpdate)
 
-            val rootEntryUpdated = withTimeout(5000L * 1000L) { rootEntryDeferredUntilUpdate.await() }
+            val rootEntryUpdated = withTimeout(5000L) { rootEntryDeferredUntilUpdate.await() }
             Assert.assertEquals("Root entry was updated with progress from child entry", dlProgressAmount,
                     rootEntryUpdated!!.downloadedSoFar)
+            val downloadJobUpdated = withTimeout(5000L) { downloadJobDeferredUntilUpdate.await() }
+            Assert.assertEquals("Download Job itself was updated with progress from child entry", dlProgressAmount,
+                    downloadJobUpdated!!.bytesDownloadedSoFar)
         }
     }
 

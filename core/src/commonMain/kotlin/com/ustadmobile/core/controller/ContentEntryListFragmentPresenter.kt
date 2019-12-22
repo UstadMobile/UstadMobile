@@ -22,7 +22,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                                         private val fragmentViewContract: ContentEntryListFragmentView,
                                         private val contentEntryDao: ContentEntryDao,
                                         private val contentEntryDaoRepo: ContentEntryDao)
-    : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
+    : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
 
     private var filterByLang: Long = 0
 
@@ -160,10 +160,8 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     @JsName("handleDownloadStatusButtonClicked")
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
-        val impl = UstadMobileSystemImpl.instance
-        val args = HashMap<String, String>()
-        args["contentEntryUid"] = entry.contentEntryUid.toString()
-        impl.go("DownloadDialog", args, context)
+        UstadMobileSystemImpl.instance.go("DownloadDialog",
+                mapOf("contentEntryUid" to entry.contentEntryUid.toString()), context)
     }
 
     companion object {

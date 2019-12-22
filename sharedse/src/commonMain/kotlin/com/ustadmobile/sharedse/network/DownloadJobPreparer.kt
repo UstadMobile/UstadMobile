@@ -135,22 +135,18 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                 "entry uid = " + downloadJob.djRootContentEntryUid + " download job uid = " + downloadJobUid)
         val jobItemDao = appDatabase.downloadJobItemDao
         var childItemsToCreate: List<DownloadJobItemDao.DownloadJobItemToBeCreated2>
-        val rootEntryContainer = appDatabaseRepo.containerDao
-                .getMostRecentContainerForContentEntry(downloadJob.djRootContentEntryUid)
-        val rootDownlaodJobItem = DownloadJobItemWithParents(
-                downloadJob, downloadJob.djRootContentEntryUid,
-                rootEntryContainer?.containerUid ?: 0,
-                rootEntryContainer?.fileSize ?: 0,
-                mutableListOf())
 
-        var numItemsCreated = 1
+        var numItemsCreated = 0
 
-        downloadManager.addItemsToDownloadJob(listOf(rootDownlaodJobItem))
+        val rootDownloadJobItem = downloadManager.getDownloadJobRootItem(downloadJobUid)
+        if(rootDownloadJobItem == null) {
+            throw IllegalStateException("Invalid DownloadJob: DownloadJob has no root entry")
+        }
 
         val contentEntryUidToDjiUidMap = HashMap<Long, Int>()
         val parentUids = ArrayList<Long>()
         parentUids.add(downloadJob.djRootContentEntryUid)
-        contentEntryUidToDjiUidMap[downloadJob.djRootContentEntryUid] = rootDownlaodJobItem.djiUid
+        contentEntryUidToDjiUidMap[downloadJob.djRootContentEntryUid] = rootDownloadJobItem.djiUid
 
         val createdJoinCepjUids = HashSet<Long>()
 
