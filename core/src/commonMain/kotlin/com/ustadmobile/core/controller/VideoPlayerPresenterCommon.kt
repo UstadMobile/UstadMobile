@@ -53,7 +53,7 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
     internal var srtMap = mutableMapOf<String, String>()
     internal var srtLangList = mutableListOf<String>()
 
-    lateinit var container: Container
+    var container: Container? = null
 
     lateinit var containerManager: ContainerManager
 
