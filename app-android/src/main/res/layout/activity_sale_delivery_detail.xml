@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    
+    <com.google.android.material.appbar.AppBarLayout android:id="@+id/activity_sale_delivery_detail_appbar"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:elevation="4dp" android:theme="@style/ToolbarDark"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar android:id="@+id/activity_sale_delivery_detail_toolbar"
+            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/record_delivery" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/activity_sale_delivery_detail_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_delivery_detail_appbar">
+
+        <LinearLayout
+            android:id="@+id/activity_delivery_selection_linearlayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical"
+            android:scrollbars="vertical"
+            android:visibility="visible"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    </ScrollView>
+
+
+    <TextView
+        android:id="@+id/activity_sale_delivery_detail_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/i_have_received_the_order"
+        app:layout_constraintBottom_toTopOf="@+id/activity_sale_delivery_detail_signaturepad"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/activity_sale_delivery_detail_signature_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:drawable/dialog_holo_light_frame"
+        app:layout_constraintBottom_toTopOf="@+id/activity_sale_delivery_detail_fab_accept"
+        app:layout_constraintDimensionRatio="3:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.github.gcacace.signaturepad.views.SignaturePad
+        android:id="@+id/activity_sale_delivery_detail_signaturepad"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:drawable/dialog_holo_light_frame"
+        app:layout_constraintBottom_toTopOf="@+id/activity_sale_delivery_detail_fab_clear"
+        app:layout_constraintDimensionRatio="3:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:penColor="@android:color/black"
+        app:penMaxWidth="5dp"
+        app:penMinWidth="1dp" />
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_sale_delivery_detail_fab_clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="16dp"
+        app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_clear_white_24dp"
+        app:floating_title="@string/clear"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_sale_delivery_detail_fab_accept"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_done_white_24dp"
+        app:floating_title="@string/accept"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

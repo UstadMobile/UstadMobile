@@ -18,6 +18,8 @@ interface SalePaymentDetailView : UstadView {
 
     fun updateDefaultValue(value: Long)
 
+    fun updateMaxValue(value: Long)
+
     fun updateMaxPaymentValue(value: Long)
 
     companion object {

@@ -15,8 +15,6 @@ import com.ustadmobile.lib.db.entities.SaleItemListDetail
 @Dao
 abstract class SaleItemDao : BaseDao<SaleItem> {
 
-
-
     //INSERT
 
     @Query(GENERATE_SALE_NAME)
@@ -53,17 +51,12 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
             "AND CAST(SaleItem.saleItemActive AS INTEGER) = 1")
     abstract fun getSaleItemCountFromSaleLive(saleUid: Long): DoorLiveData<Int>
 
-    @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
-    abstract fun findAllSaleItemListDetailActiveLive(): DoorLiveData<List<SaleItemListDetail>>
-
-    @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
-    abstract fun findAllSaleItemListDetailActiveProvider(): DataSource.Factory<Int,SaleItemListDetail>
-
-    @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
-    abstract fun findAllSaleItemListDetailActiveBySaleLive(saleUid: Long): DoorLiveData<List<SaleItemListDetail>>
 
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
     abstract fun findAllSaleItemListDetailActiveBySaleProvider(saleUid: Long): DataSource.Factory<Int,SaleItemListDetail>
+
+    @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
+    abstract suspend fun findAllSaleItemListDetailActiveBySaleList(saleUid: Long): List<SaleItemListDetail>
 
     @Query(TOTAL_PAID_BY_SALE_UID)
     abstract fun findTotalPaidInASale(saleUid: Long): Long
@@ -124,33 +117,21 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
 
         const val ALL_ACTIVE_QUERY = "SELECT * FROM SaleItem WHERE CAST(saleItemActive AS INTEGER) = 1"
 
-        /**
-         * long saleItemPictureUid;
-         * String saleItemProductName;
-         * int saleItemQuantityCount;
-         * float saleItemPrice;
-         * float saleItemDiscountPerItem;
-         * boolean saleItemDelivered;
-         */
-        const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY =
-                "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
-                " SaleProduct.* , " +
-                " SaleProduct.saleProductName AS saleItemProductName " +
-                "FROM SaleItem " +
-                " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
-                " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
-                "   SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
-                "WHERE CAST(saleItemActive AS INTEGER) = 1"
-
         const val ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY =
-                "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
-                " SaleProduct.* , " +
-                " SaleProduct.saleProductName AS saleItemProductName " +
-                "FROM SaleItem " +
-                " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
-                " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
-                "   SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 " +
-                "WHERE CAST(saleItemActive AS INTEGER) = 1 AND SaleItem.saleItemSaleUid = :saleUid"
+                """ 
+                    SELECT SaleItem.*, 
+                        SaleProduct.* , 
+                        (SELECT count(*) FROM inventorytransaction WHERE 
+                            inventorytransactionsaleitemuid = SaleItem.saleItemUid AND 
+                            CAST(inventorytransactionactive AS INTEGER) = 1 
+                            AND inventoryTransactionSaleDeliveryUid != 0 ) as deliveredCount
+                    FROM SaleItem 
+                        LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid 
+                        LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = 
+                            SaleProduct.saleProductUid AND SaleProductPicture.saleProductPictureIndex = 0 
+                    WHERE 
+                        CAST(saleItemActive AS INTEGER) = 1 AND SaleItem.saleItemSaleUid = :saleUid 
+                """
 
         //Total amount of every sale per sale uid
 

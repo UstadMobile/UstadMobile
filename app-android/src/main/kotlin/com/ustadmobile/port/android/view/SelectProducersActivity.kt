@@ -1,33 +1,30 @@
 package com.ustadmobile.port.android.view
 
 import android.content.res.Resources
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
+import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectProducersPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.SelectProducersView
 import com.ustadmobile.lib.db.entities.PersonWithInventory
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
-import android.util.DisplayMetrics
-import androidx.core.content.ContextCompat
-import androidx.databinding.adapters.TextViewBindingAdapter
-import com.squareup.picasso.Picasso
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
 import com.ustadmobile.port.android.view.PersonEditActivity.Companion.dpToPx
 import kotlinx.coroutines.Dispatchers
@@ -133,7 +130,22 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
 
     }
 
+
     override fun updateProducersOnView(producers: List<PersonWithInventory>) {
+
+        mLinearLayout!!.removeAllViews()
+
+        for(producer in producers){
+
+            val personWithInventorySelection = PersonWithInventorySelectionView(this, producer, mPresenter!!)
+            mLinearLayout!!.addView(personWithInventorySelection)
+
+        }
+    }
+
+
+
+    fun updateProducersOnView2(producers: List<PersonWithInventory>) {
 
         mLinearLayout!!.removeAllViews()
 
@@ -219,9 +231,9 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
                 override fun afterTextChanged(p0: Editable?) {
                     try {
                         val value = p0.toString().toInt()
-                        mPresenter!!.updateWeCount(producer.personUid, value)
+                        mPresenter!!.updateWeCount(producer.personUid, value, 0)
                     }catch (nfe: NumberFormatException){
-                        mPresenter!!.updateWeCount(producer!!.personUid, 0)
+                        mPresenter!!.updateWeCount(producer!!.personUid, 0, 0)
                     }
 
                 }

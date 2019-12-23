@@ -9,8 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class SaleItemListDetail() : SaleItem() {
 
-    var saleItemPictureUid: Long = 0
-    var saleItemProductName: String ?= null
+    var deliveredCount = 0
 
     @Embedded
     var saleItemSaleProduct: SaleProduct? = null

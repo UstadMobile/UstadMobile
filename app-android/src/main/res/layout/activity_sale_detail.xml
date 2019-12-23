@@ -264,17 +264,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_discount" />
 
             <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/total_colon"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@+id/textView21"
-                app:layout_constraintTop_toBottomOf="@+id/view2" />
-
-            <TextView
                 android:id="@+id/activity_sale_detail_order_after_discount_tota"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -285,17 +274,157 @@
                 app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency3"
                 app:layout_constraintTop_toBottomOf="@+id/view2" />
 
-            <CheckBox
-                android:id="@+id/activity_sale_detail_delivered"
+            <TextView
+                android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="12dp"
-                android:text="@string/delivered"
+                android:layout_marginTop="8dp"
+                android:text="@string/total_colon"
+                android:textAppearance="@style/TextAppearance.AppCompat"
                 android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/textView21"
+                app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+
+
+            <!-- Deliveries -->
+
+            <TextView
+                android:id="@+id/activity_sale_detail_delivieries_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/deliveries"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView" />
 
+            <View
+                android:id="@+id/anotherHLineDeliveriesRelated"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/divider"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivieries_title" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:background="?android:attr/selectableItemBackground"
+                android:id="@+id/activity_sale_detail_add_deliveries_cl"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/anotherHLineDeliveriesRelated">
+
+
+                <ImageView
+                    android:id="@+id/activity_sale_detail_add_deliveries_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_add_black_24dp" />
+
+                <TextView
+                    android:id="@+id/activity_sale_detail_add_deliveries_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/add_delivery"
+                    android:textColor="@color/text_primary"
+                    app:layout_constraintStart_toEndOf="@+id/activity_sale_detail_add_deliveries_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:id="@+id/hlinebeforeDeliveriesRV"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/divider"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_deliveries_cl" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activity_sale_detail_deliveries_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="8dp"
+                android:scrollbars="vertical"
+                android:visibility="visible"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hlinebeforeDeliveriesRV">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+
+            <!-- Delivered-->
+
+<!--                        <CheckBox-->
+<!--                            android:id="@+id/activity_sale_detail_delivered"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_marginStart="8dp"-->
+<!--                            android:layout_marginTop="12dp"-->
+<!--                            android:text="@string/delivered"-->
+<!--                            android:visibility="invisible"-->
+<!--                            app:layout_constraintStart_toStartOf="parent"-->
+<!--                            app:layout_constraintTop_toBottomOf="@+id/textView" />-->
+
+<!--                        <TextView-->
+<!--                            android:id="@+id/activity_sale_detail_signature_title"-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_marginStart="8dp"-->
+<!--                            android:layout_marginTop="8dp"-->
+<!--                            android:layout_marginEnd="8dp"-->
+<!--                            android:text="@string/delivery_signature"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constraintStart_toStartOf="parent"-->
+<!--                            app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered"-->
+<!--                            tools:visibility="invisible" />-->
+
+<!--                        <androidx.appcompat.widget.AppCompatImageButton-->
+<!--                            android:id="@+id/activity_sale_detail_signature_button"-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="100dp"-->
+<!--                            android:layout_marginStart="8dp"-->
+<!--                            android:layout_marginEnd="8dp"-->
+<!--                            android:backgroundTint="#F9F9F9"-->
+<!--                            android:elevation="2dp"-->
+<!--                            android:scaleType="fitStart"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constraintStart_toStartOf="parent"-->
+<!--                            app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_signature_title"-->
+<!--                            tools:visibility="invisible" />-->
+
+<!--                        <View-->
+<!--                            android:id="@+id/hlineAfterSignature"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="1dp"-->
+<!--                            android:layout_marginTop="4dp"-->
+<!--                            android:background="@color/divider"-->
+<!--                            android:visibility="invisible"-->
+<!--                            app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_signature_button" />-->
+
+
+            <!-- Payments -->
 
             <TextView
                 android:id="@+id/activity_sale_detail_payments_title"
@@ -309,7 +438,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/hlineAfterSignature" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_deliveries_recyclerview" />
 
             <View
                 android:id="@+id/anotherHLinePaymentRelated"
@@ -505,41 +634,7 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/activity_sale_detail_signature_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:text="@string/delivery_signature"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered"
-                tools:visibility="invisible" />
 
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/activity_sale_detail_signature_button"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="#F9F9F9"
-                android:elevation="2dp"
-                android:scaleType="fitStart"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_signature_title"
-                tools:visibility="invisible" />
-
-            <View
-                android:id="@+id/hlineAfterSignature"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="4dp"
-                android:background="@color/divider"
-                android:visibility="invisible"
-                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_signature_button" />
 
 
 

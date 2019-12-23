@@ -99,6 +99,10 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
     @Query(QUERY_BY_PERSON + QUERY_SORT_BY_STOCK_DESC)
     abstract suspend fun findStockByPersonStockDesc(saleProductUid: Long, leUid: Long) : List<PersonWithInventory>
 
+    @Query(QUERY_BY_PERSON_FOR_SALE_SALEITEM)
+    abstract suspend fun findStockBySaleItemAndSale(saleUid: Long, saleItemUid: Long,
+                                                    saleProductUid: Long, leUid: Long): List<PersonWithInventory>
+
     @Insert
     abstract suspend fun insertTransaction(inventoryTransaction: InventoryTransaction)
 
@@ -188,7 +192,63 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                     AND InventoryItem.inventoryItemWeUid = Person.personUid
                     AND InventoryItem.inventoryItemLeUid = MLE.personUid
                     AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-            ) as inventoryCount
+            ) as inventoryCount, 
+            0 as inventorySelected
+        FROM Person
+        LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
+        WHERE 
+            CAST(Person.mPersonGroupUid AS INTEGER)= 0 AND 
+            CAST(Person.admin AS INTEGER) = 0 AND 
+            CAST(Person.personRoleUid AS INTEGER) = 0 AND 
+            CAST(Person.active AS INTEGER) = 1 AND
+            (Person.personUid IN (
+                SELECT MEMBER.personUid FROM PersonGroupMember 
+                LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+                 WHERE groupMemberGroupUid = MLE.mPersonGroupUid 
+                AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
+                OR 
+                CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+            
+        """
+        const val QUERY_BY_PERSON_FOR_SALE_SALEITEM = """
+        SELECT 
+            Person.*,
+            (
+                SELECT 
+                    ( COUNT(*) - 
+                        (	select count(*) from inventorytransaction 
+                            where 
+                            inventorytransaction.inventoryTransactionInventoryItemUid in 
+                            (	select inventoryitemuid from inventoryitem where 
+                                inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
+                                AND InventoryItem.inventoryItemWeUid = Person.personUid
+                                AND InventoryItem.inventoryItemLeUid = MLE.personUid
+                                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                            ) 
+                            and inventorytransaction.inventoryTransactionSaleUid != 0 
+                            and cast(inventorytransaction.inventoryTransactionActive AS INTEGER) = 1 )
+                    ) 
+                FROM InventoryItem
+                    LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
+                WHERE
+                    CAST(SaleProduct.saleProductActive AS INTEGER) = 1 AND
+                    CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND
+                    SaleProduct.saleProductUid = :saleProductUid 
+                    AND InventoryItem.inventoryItemWeUid = Person.personUid
+                    AND InventoryItem.inventoryItemLeUid = MLE.personUid
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            ) as inventoryCount, 
+            (
+               select COUNT(*) from inventorytransaction
+				left join inventoryitem on inventoryitem.inventoryitemuid = InventoryTransaction.inventoryTransactionInventoryItemUid where 
+				inventorytransaction.inventoryTransactionSaleUid = :saleUid 
+				and inventorytransaction.inventoryTransactionSaleItemUid = :saleItemUid
+				and CAST(inventorytransaction.inventorytransactionactive AS INTEGER) = 1
+				AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+				AND InventoryItem.inventoryItemWeUid = Person.personUid
+				AND InventoryItem.inventoryItemLeUid = InventoryTransaction.inventoryTransactionFromLeUid
+            ) 
+             as inventorySelected 
         FROM Person
         LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
         WHERE 

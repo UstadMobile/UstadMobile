@@ -154,14 +154,21 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
     }
 
     override fun updateSalePaymentOnView(payment: SalePayment) {
-        amountNP!!.value = payment.salePaymentPaidAmount.toInt()
+
+        val value = payment.salePaymentPaidAmount.toInt()
+        amountNP!!.value = value
 
         paymentDateET!!.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                 payment.salePaymentPaidDate))
     }
 
+    override fun updateMaxValue(value: Long) {
+        amountNP!!.maxValue = value.toInt()
+    }
+
     override fun updateDefaultValue(value: Long) {
         updateMaxPaymentValue(value)
         amountNP!!.value = value.toInt()
+        amountNPET!!.setText(value.toString())
     }
 }

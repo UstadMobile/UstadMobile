@@ -88,17 +88,12 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
     private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
     private var groupUmLiveData: DoorLiveData<List<PersonGroup>>? = null
 
-    //The custom fields' values
-    private val customFieldWithFieldValueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>? = null
-
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     internal var database = UmAppDatabase.getInstance(context)
 
     private var newPersonString = ""
 
     private val customFieldsToUpdate: MutableList<PersonCustomFieldValue>
-
-
 
     private var loggedInPersonUid: Long? = 0L
 
@@ -147,8 +142,10 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
             newPersonString = arguments.get(ARG_NEW_PERSON)!!.toString()
         }
 
+        //Goldozi:
         groupIdToPosition = HashMap()
         groupPositionToId = HashMap()
+
         customFieldsToUpdate = ArrayList()
         viewIdToCustomFieldUid = HashMap()
         customFieldDropDownOptions = HashMap()
@@ -251,8 +248,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 updatedPerson = person
                 usernameSet = updatedPerson!!.username
 
-                setFieldsOnView(person, headersAndFields!!, view,
-                        customFieldWithFieldValueMap)
+                setFieldsOnView(person, headersAndFields!!, view)
 
                 personWEGroupUid = person.mPersonGroupUid
             }
@@ -436,11 +432,8 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
         view.setRoleAssignmentListProvider(assignedRoleAssignments!!)
     }
 
-
     private fun updatePersonPic(thisPerson: Person) {
-
         GlobalScope.launch {
-
             //Load the local image first
             val personPictureLocal = personPictureDaoDB.findByPersonUidAsync(
                     thisPerson!!.personUid)
@@ -461,10 +454,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 if (imagePathServer.isNotEmpty())
                     view.updateImageOnView(imagePathServer)
             }
-
-
         }
-
     }
 
     /**
@@ -476,8 +466,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
      * @param valueMap  The Custom fields value map
      */
     private fun setFieldsOnView(thisPerson: Person, allFields: List<PersonDetailPresenterField>,
-                                thisView: PersonEditView,
-                                valueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>?) {
+                                thisView: PersonEditView) {
 
         //TODO: Locale on Kotlin Core
 //        val currnetLocale = Locale.getDefault()
@@ -660,34 +649,10 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
-            } else {//this is actually a custom field
+            } else {//unknown field
                 var messageLabel = 0
                 var iconName: String? = null
                 var fieldValue: String? = null
-                if (valueMap != null && valueMap.containsKey(field.fieldUid) ){
-
-                    if(valueMap!![field.fieldUid] != null) {
-                            if (valueMap[field.fieldUid]!!.labelMessageId != 0) {
-                                messageLabel = valueMap[field.fieldUid]!!.labelMessageId
-                            }
-                            if (valueMap[field.fieldUid]!!.fieldIcon != null) {
-                                iconName = valueMap[field.fieldUid]!!.fieldIcon
-                            }
-                            if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
-                                fieldValue = valueMap[field.fieldUid]!!
-                                        .customFieldValue!!.fieldValue
-                            }
-                    }
-                    thisView.setField(
-                            field.fieldIndex,
-                            field.fieldUid,
-                            PersonDetailViewField(
-                                    field.fieldType,
-                                    messageLabel,
-                                    iconName
-                            ), fieldValue
-                    )
-                }
             }
         }
     }

@@ -39,7 +39,7 @@ import kotlin.jvm.Volatile
     SaleVoiceNote::class, SaleProductParentJoin::class,
     SaleItemReminder::class,
     DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class,
-    InventoryItem::class, InventoryTransaction::class
+    InventoryItem::class, InventoryTransaction::class, SaleDelivery::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -217,6 +217,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val inventoryItemDao : InventoryItemDao
 
     abstract val inventoryTransactionDao : InventoryTransactionDao
+
+    abstract val saleDeliveryDao: SaleDeliveryDao
     //End of Goldozi
 
     abstract val auditLogDao : AuditLogDao

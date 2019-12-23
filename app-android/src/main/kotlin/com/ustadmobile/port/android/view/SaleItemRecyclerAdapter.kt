@@ -63,7 +63,6 @@ class SaleItemRecyclerAdapter(
 
         val entity = getItem(position)
 
-        val pictureUid = entity!!.saleItemPictureUid
         val imageView = holder.itemView.findViewById<ImageView>(R.id.item_sale_item_image)
         var imagePath = ""
 
@@ -73,7 +72,7 @@ class SaleItemRecyclerAdapter(
 
             productPictureDao  = UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
 
-            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity.saleItemProductUid)
+            val saleProductPicture = productPictureDao!!.findBySaleProductUidAsync2(entity!!.saleItemProductUid)
             imagePath = productPictureDao!!.getAttachmentPath(saleProductPicture!!)!!;
 
             if (!imagePath.isEmpty())
@@ -102,8 +101,8 @@ class SaleItemRecyclerAdapter(
 
         val itemWhole = holder.itemView.findViewById<ConstraintLayout>(R.id.item_sale_item_cl)
 
-        dueDate.visibility = if (entity.saleItemPreorder) View.VISIBLE else View.INVISIBLE
-        dueDateImage.visibility = if (entity.saleItemPreorder) View.VISIBLE else View.INVISIBLE
+        dueDate.visibility = if (entity!!.saleItemPreorder) View.VISIBLE else View.INVISIBLE
+        dueDateImage.visibility = if (entity!!.saleItemPreorder) View.VISIBLE else View.INVISIBLE
 
         val quantity = entity.saleItemQuantity
         val price = entity.saleItemPricePerPiece
@@ -117,29 +116,10 @@ class SaleItemRecyclerAdapter(
 
         val impl = UstadMobileSystemImpl.instance
         val currentLocale = impl.getLocale(theContext)
-        var saleProductNameLocale: String?=null
-
-        if(entity.saleItemSaleProduct != null) {
-            if (currentLocale.equals("fa")) {
-                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductNameDari
-            } else if (currentLocale.equals("ps")) {
-                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductNamePashto
-            } else {
-                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductName
-            }
-            if (saleProductNameLocale == null && entity.saleItemSaleProduct!!.saleProductName != null) {
-                saleProductNameLocale = entity.saleItemSaleProduct!!.saleProductName
-            }
-            itemName.text = saleProductNameLocale
-        }else{
-            itemName.text = entity.saleItemProductName
-        }
-
-
+        itemName.text = entity.saleItemSaleProduct!!.getNameLocale(currentLocale)
         itemQuantity.text = quantity.toString()
         itemPrice.text = priceString
         itemTotal.text = priceTotalString
-
         dueDate.text = dueString
 
         itemWhole.setOnClickListener { v: View -> mPresenter.handleClickSaleItemEdit(entity.saleItemUid) }

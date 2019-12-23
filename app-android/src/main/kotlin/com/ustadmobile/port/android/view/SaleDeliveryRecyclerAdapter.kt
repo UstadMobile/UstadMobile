@@ -3,36 +3,31 @@ package com.ustadmobile.port.android.view
 import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.TextView
-
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleDetailPresenter
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.lib.db.entities.SalePayment
+import com.ustadmobile.lib.db.entities.SaleDelivery
 
-class SalePaymentRecyclerAdapter(
-        diffCallback: DiffUtil.ItemCallback<SalePayment>,
+class SaleDeliveryRecyclerAdapter(
+        diffCallback: DiffUtil.ItemCallback<SaleDelivery>,
         internal var mPresenter: SaleDetailPresenter,
         internal var theActivity: Activity,
-        internal var theContext: Context) : PagedListAdapter<SalePayment, SalePaymentRecyclerAdapter.SaleDetailViewHolder>(diffCallback) {
+        internal var theContext: Context) : PagedListAdapter<SaleDelivery,
+        SaleDeliveryRecyclerAdapter.SaleDetailViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SaleDetailViewHolder {
-
-
         val list = LayoutInflater.from(theContext).inflate(
                 R.layout.item_key_value, parent, false)
         return SaleDetailViewHolder(list)
-
     }
 
     override fun onBindViewHolder(holder: SaleDetailViewHolder, position: Int) {
@@ -40,20 +35,16 @@ class SalePaymentRecyclerAdapter(
         val entity = getItem(position)
 
         val prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                entity!!.salePaymentPaidDate)
+                entity!!.saleDeliveryDate)
         val keyTV = holder.itemView.findViewById<TextView>(R.id.item_reminder_days_tv)
         val valueTV = holder.itemView.findViewById<TextView>(R.id.item_key_value_value)
         val cl = holder.itemView.findViewById<ConstraintLayout>(R.id.item_key_value_cl)
 
-        cl.setOnClickListener{mPresenter.handleEditPayment(entity.salePaymentUid)}
-
-        val amountText = entity.salePaymentPaidAmount.toString() + " " +
-                entity.salePaymentCurrency
         keyTV.text = prettyDate
-        valueTV.text = amountText
-
+        valueTV.visibility = View.INVISIBLE
         val dots = holder.itemView.findViewById<AppCompatImageView>(R.id.item_reminder_dots_iv)
 
+        cl.setOnClickListener{mPresenter.handleEditDelivery(entity.saleDeliveryUid)}
 
         //Options to Edit/Delete every schedule in the list
         dots.setOnClickListener { v: View ->
@@ -63,10 +54,10 @@ class SalePaymentRecyclerAdapter(
             popup.setOnMenuItemClickListener { item ->
                 val i = item.itemId
                 if (i == R.id.edit) {
-                    mPresenter.handleEditPayment(entity.salePaymentUid)
+                    mPresenter.handleEditDelivery(entity.saleDeliveryUid)
                     true
                 } else if (i == R.id.delete) {
-                    mPresenter.handleDeletePayment(entity.salePaymentUid)
+                    mPresenter.handleDeleteDelivery(entity.saleDeliveryUid)
                     true
                 } else {
                     false

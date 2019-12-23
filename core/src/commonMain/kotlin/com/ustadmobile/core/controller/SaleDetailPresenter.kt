@@ -9,6 +9,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.SaleDeliveryDetailView.Companion.ARG_SALE_DELIVERY_SALE_UID
+import com.ustadmobile.core.view.SaleDeliveryDetailView.Companion.ARG_SALE_DELIVERY_UID
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_GEN_NAME
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_NAME
@@ -35,11 +37,14 @@ class SaleDetailPresenter(context: Any,
 
     private lateinit var umProvider: DataSource.Factory<Int,SaleItemListDetail>
     private lateinit var pProvider: DataSource.Factory<Int,SalePayment>
+    private lateinit var dProvider: DataSource.Factory<Int,SaleDelivery>
     internal var repository: UmAppDatabase
     private val saleItemDao: SaleItemDao
+    private val saleDeliveryDao : SaleDeliveryDao
     private val saleDao: SaleDao
     private val saleVoiceNoteDao: SaleVoiceNoteDao
     private val salePaymentDao: SalePaymentDao
+    private val inventoryTransactionDao : InventoryTransactionDao
     private val personDao: PersonDao
     private val currentSaleItem: SaleItem? = null
     private var currentSale: Sale? = null
@@ -72,6 +77,8 @@ class SaleDetailPresenter(context: Any,
         locationDao = repository.locationDao
         saleVoiceNoteDao = UmAccountManager.getRepositoryForActiveAccount(context).saleVoiceNoteDao
         personDao = repository.personDao
+        saleDeliveryDao = repository.saleDeliveryDao
+        inventoryTransactionDao = repository.inventoryTransactionDao
 
         positionToLocationUid = HashMap()
 
@@ -92,24 +99,27 @@ class SaleDetailPresenter(context: Any,
             isShowSaveButton = true
             view.runOnUiThread(Runnable{
                 view.showCalculations(true)
-                view.showSignature(true)
+                view.showDeliveries(true)
                 view.showDelivered(true)
                 view.showNotes(true)
                 view.showPayments(true)
             })
 
         } else {
-            view.runOnUiThread(Runnable{ view.showPayments(false) })
+            view.runOnUiThread(Runnable{
+                view.showPayments(false)
+                view.showDelivered(false)
+            })
             updatedSale = Sale()
             updatedSale!!.salePersonUid = loggedInPersonUid
             updatedSale!!.saleCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
             updatedSale!!.salePreOrder = true //ie: Not delivered unless ticked.
             updatedSale!!.saleDone = false
             updatedSale!!.saleActive = false
-            view.showSignature(false)
 
             GlobalScope.launch {
                 val result = saleDao.insertAsync(updatedSale!!)
+                updatedSale!!.saleUid = result
                 initFromSale(result)
             }
         }
@@ -141,8 +151,14 @@ class SaleDetailPresenter(context: Any,
             getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
             updateSaleItemProvider(saleUid)
             updatePaymentItemProvider(saleUid)
+            updateDeliveriesProvider(saleUid)
             getPaymentTotalAndUpdateView()
         }
+    }
+
+    private fun updateDeliveriesProvider(saleUid: Long){
+        dProvider = saleDeliveryDao.findAllDeliveriesBySaleUid(saleUid)
+        view.setDeliveriesProvider(dProvider)
     }
 
     fun updateSaleOnView(sale:Sale?){
@@ -208,6 +224,7 @@ class SaleDetailPresenter(context: Any,
                 view.showDelivered(true)
                 view.showCalculations(true)
                 view.showPayments(true)
+                view.showDelivered(true)
             })
         }
     }
@@ -423,6 +440,18 @@ class SaleDetailPresenter(context: Any,
         }
     }
 
+    fun handleClickAddDelivery(){
+
+        GlobalScope.launch {
+            val impl = UstadMobileSystemImpl.instance
+            val args = HashMap<String, String>()
+
+            args.put(ARG_SALE_DELIVERY_SALE_UID, updatedSale!!.saleUid.toString())
+            impl.go(SaleDeliveryDetailView.VIEW_NAME, args, context)
+        }
+
+    }
+
     fun updateCustomerUid(cUid: Long){
         customerUid = cUid
         updatedSale!!.saleCustomerUid = customerUid
@@ -468,7 +497,6 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleClickAddSaleItemPreOrder(){
-        //handleClickAddSaleItemOld()
 
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
@@ -477,28 +505,6 @@ class SaleDetailPresenter(context: Any,
         args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSale!!.saleUid.toString()
         args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
         impl.go(SelectSaleProductView.VIEW_NAME, args, context)
-    }
-
-    fun handleClickAddSaleItemOld() {
-
-        val saleItem = SaleItem()
-        saleItem.saleItemSaleUid = updatedSale!!.saleUid
-        //TODO: Check this
-        saleItem.saleItemDueDate = UMCalendarUtil.getDateInMilliPlusDays(2)
-        GlobalScope.launch {
-            try {
-                val saleItemUid = saleItemDao.insertAsync(saleItem)
-                saleItem.saleItemUid = saleItemUid
-
-                val impl = UstadMobileSystemImpl.instance
-                val args = HashMap<String, String>()
-                args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
-                impl.go(SelectProducerView.VIEW_NAME, args, context)
-            }catch(e:Exception){
-                //TODO: Change to Log / ACRA
-                println(e.message)
-            }
-        }
     }
 
     fun handleDiscountChanged(discount: Long) {
@@ -537,13 +543,36 @@ class SaleDetailPresenter(context: Any,
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args.put(ARG_SALE_PAYMENT_UID, salePaymentUid.toString())
+        args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE,
+                (totalAfterDiscount - totalPayment).toString())
         impl.go(SalePaymentDetailView.VIEW_NAME, args, context)
     }
 
-    fun handleClickAddSignature() {
+    fun handleEditDelivery(saleDeliveryUid: Long){
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
-        args.put(ARG_SALE_UID, currentSale!!.saleUid.toString())
-        impl.go(SaleDetailSignatureView.VIEW_NAME, args, context)
+        args.put(ARG_SALE_DELIVERY_UID, saleDeliveryUid.toString())
+        args.put(ARG_SALE_DELIVERY_SALE_UID, currentSale!!.saleUid.toString())
+        impl.go(SaleDeliveryDetailView.VIEW_NAME, args, context)
+    }
+
+    fun handleDeleteDelivery(saleDeliveryUid: Long){
+
+        if(saleDeliveryUid != 0L && currentSale!!.saleUid != 0L){
+            //1. Get all transactions that have the given delivery uid and current sale uid.
+            //2. Update to false.
+            //3. Update Delivery to false too
+            GlobalScope.launch {
+                inventoryTransactionDao.deactivateAllTransactionsBySaleDeliveryAndSale(
+                        saleDeliveryUid, currentSale!!.saleUid)
+                val saleDelivery = saleDeliveryDao.findByUidAsync(saleDeliveryUid)
+                saleDelivery!!.saleDeliveryActive = false
+                saleDeliveryDao.updateAsync(saleDelivery)
+            }
+
+
+        }
+
+
     }
 }

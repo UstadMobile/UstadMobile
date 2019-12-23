@@ -30,10 +30,7 @@ class SalePaymentDetailPresenter(context: Any,
 
 
     init {
-
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-
-        //Get provider Dao
         paymentDao = repository.salePaymentDao
     }
 
@@ -52,36 +49,36 @@ class SalePaymentDetailPresenter(context: Any,
 
     }
 
-    fun initFromSalePaymentUid(uid: Long) {
+    private fun initFromSalePaymentUid(uid: Long) {
         val thisP = this
         GlobalScope.launch {
-            try{
-                val resultLive = paymentDao.findByUidLive(uid)
-                view.runOnUiThread(Runnable {
-                    resultLive.observe(thisP, thisP::updatePaymentOnView)
-                })
-
-
-//                val result = paymentDao.findByUidAsync(uid)
-//                currentPayment = result
-//                view.runOnUiThread(Runnable { view.updateSalePaymentOnView(currentPayment!!) })
-//                if (balanceDue > 0) {
-//                    view.runOnUiThread(Runnable { view.updateDefaultValue(balanceDue) })
-//                }
-            }catch(e:Exception){
-                println(e.message)
-            }
+            val resultLive = paymentDao.findByUidLive(uid)
+            view.runOnUiThread(Runnable {
+                resultLive.observe(thisP, thisP::updatePaymentOnView)
+            })
         }
     }
 
-    fun updatePaymentOnView(salePayment:SalePayment?){
+    private fun updatePaymentOnView(salePayment:SalePayment?){
         if(salePayment!= null){
             currentPayment = salePayment
+            val amountL = currentPayment!!.salePaymentPaidAmount
+            val amount = amountL.toInt()
 
-            view.runOnUiThread(Runnable { view.updateSalePaymentOnView(currentPayment!!) })
-            if (balanceDue > 0) {
-                view.runOnUiThread(Runnable { view.updateDefaultValue(balanceDue) })
+            if (balanceDue > 0 &&  amount == 0) {
+                view.runOnUiThread(Runnable {
+                    view.updateDefaultValue(balanceDue)
+                })
             }
+
+            if(balanceDue > 0 && amount > 0){
+                view.updateDefaultValue(amountL)
+                view.updateMaxValue(amount + balanceDue)
+            }
+
+            view.runOnUiThread(Runnable {
+                view.updateSalePaymentOnView(currentPayment!!)
+            })
 
         }
     }

@@ -547,7 +547,7 @@ abstract class SaleDao : BaseDao<Sale> {
                     GROUP BY saleUid 
             """
         const val ALL_SALE_LIST_WHERE_LE = " AND ( LE.personUid = :leUid OR CASE WHEN " +
-                " (CAST(LE.admin as INTEGER) = 1) THEN 0 ELSE 1 END ) "
+                " (CAST(LE.admin as INTEGER) = 1) THEN 0 ELSE 1 END ) GROUP BY saleUid "
 
 
         const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 + ALL_SALE_LIST_LJ2 +

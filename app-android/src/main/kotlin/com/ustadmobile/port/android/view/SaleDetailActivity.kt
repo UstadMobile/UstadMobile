@@ -37,6 +37,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.lib.db.entities.Sale
+import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
 import com.ustadmobile.lib.db.entities.SalePayment
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, UstadBaseActivity(), SaleDetailView,
+class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
+        UstadBaseActivity(), SaleDetailView,
         CustomerDetailDialogFragment.ChoosenCustomerListener {
 
     private var toolbar: Toolbar? = null
@@ -56,7 +58,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
     private lateinit var locationSpinner: Spinner
     private lateinit var discountET: EditText
     private lateinit var orderNotesET: EditText
-    private lateinit var deliveredCB: CheckBox
     private lateinit var orderTotal: TextView
     private lateinit var totalAfterDiscount: TextView
     private lateinit var addItemCL: ConstraintLayout
@@ -90,18 +91,17 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
     private var fromFile = false
 
     private var paymentTV: TextView? = null
-    private var addPaymentCL: ConstraintLayout? = null
+    private lateinit var addPaymentCL: ConstraintLayout
     private var pRecyclerView: RecyclerView? = null
     private var balanceDueTV: TextView? = null
     private var balanceTV: TextView? = null
     private var balanceCurrencyTV: TextView? = null
     private var paymentHLineBeforeRV: View? = null
     private var anotherOneHLine: View? = null
-    private var signatureHLine: View? = null
 
-    //Signature
-    private var signatureTitleTV: TextView? = null
-    private var signatureIB: AppCompatImageButton? = null
+    private lateinit var deliveriesTV : TextView
+    private lateinit var addDeliveriesCL : ConstraintLayout
+    private lateinit var dRecyclerView: RecyclerView
 
     override fun onStop() {
         super.onStop()
@@ -369,23 +369,18 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         val pRecyclerLayoutManager = LinearLayoutManager(this)
         pRecyclerView!!.layoutManager = pRecyclerLayoutManager
 
-
         locationSpinner = findViewById(R.id.activity_sale_detail_location_spinner)
         discountET = findViewById(R.id.activity_sale_detail_discount)
-        discountET!!.setText("0")
-        deliveredCB = findViewById(R.id.activity_sale_detail_delivered)
+        discountET.setText("0")
         orderTotal = findViewById(R.id.activity_sale_detail_order_total)
-        orderTotal!!.text = "0"
+        orderTotal.text = "0"
         totalAfterDiscount = findViewById(R.id.activity_sale_detail_order_after_discount_tota)
-        totalAfterDiscount!!.text = "0"
+        totalAfterDiscount.text = "0"
         orderNotesET = findViewById(R.id.activity_sale_detail_order_notes)
         addItemCL = findViewById(R.id.activity_sale_detail_add_cl)
         recordVoiceNotesIB = findViewById(R.id.activity_sale_detail_order_notes_record_voice_note_ib)
         playIB = findViewById(R.id.activity_sale_detail_order_notes_play_image_button)
         stopIB = findViewById(R.id.activity_sale_detail_order_notes_delete_ib)
-        signatureTitleTV = findViewById(R.id.activity_sale_detail_signature_title)
-        signatureIB = findViewById(R.id.activity_sale_detail_signature_button)
-        signatureHLine = findViewById(R.id.hlineAfterSignature)
         customerET = findViewById(R.id.activity_sale_detail_customer_edittext)
 
         c1 = findViewById(R.id.textView21)
@@ -395,7 +390,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         c5 = findViewById(R.id.textView)
         c6 = findViewById(R.id.textView23)
         hlineCalc = findViewById(R.id.view2)
-
 
         paymentTV = findViewById(R.id.activity_sale_detail_payments_title)
         addPaymentCL = findViewById(R.id.activity_sale_detail_add_payments_cl)
@@ -407,12 +401,19 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         paymentHLineBeforeRV = findViewById(R.id.hlinebeforePaymentRV)
         anotherOneHLine = findViewById(R.id.anotherHLinePaymentRelated)
 
+        deliveriesTV = findViewById(R.id.activity_sale_detail_delivieries_title)
+        addDeliveriesCL = findViewById(R.id.activity_sale_detail_add_deliveries_cl)
+        dRecyclerView = findViewById(R.id.activity_sale_detail_deliveries_recyclerview)
+
+        val dRecyclerLayoutManager = LinearLayoutManager(this)
+        dRecyclerView.layoutManager = dRecyclerLayoutManager
+
         //Call the Presenter
         mPresenter = SaleDetailPresenter(this,
                 bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
-        discountET!!.addTextChangedListener(object : TextWatcher {
+        discountET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
@@ -423,8 +424,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
                     discount = java.lang.Long.valueOf(s.toString())
                 }
                 mPresenter!!.handleDiscountChanged(discount)
-
-
             }
         })
 
@@ -438,11 +437,12 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
             }
         })
 
-        deliveredCB.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter!!.handleSetDelivered(isChecked) }
 
         addItemCL.setOnClickListener { v -> mPresenter!!.handleClickAddSaleItem() }
 
         addPaymentCL!!.setOnClickListener { v -> mPresenter!!.handleClickAddPayment() }
+
+        addDeliveriesCL.setOnClickListener{mPresenter!!.handleClickAddDelivery() }
 
         customerET.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
 
@@ -488,8 +488,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
 
             }
         })
-
-        signatureIB!!.setOnClickListener { v -> mPresenter!!.handleClickAddSignature() }
     }
 
     override fun updateCustomerNameOnView(customerName: String) {
@@ -522,7 +520,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         }
 
         //Observe the data:
-        //data.observe(this, recyclerAdapter::submitList);
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP, customObserver)
@@ -551,9 +548,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
             mPresenter!!.getTotalPaymentsAndUpdateTotalView(saleUid)
         }
 
-
         //Observe the data:
-        //data.observe(this, recyclerAdapter::submitList);
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP, customObserver)
@@ -561,6 +556,33 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
 
         //set the adapter
         pRecyclerView!!.adapter = recyclerAdapter
+
+    }
+
+    override fun setDeliveriesProvider(factory: DataSource.Factory<Int, SaleDelivery>) {
+        val recyclerAdapter = SaleDeliveryRecyclerAdapter(DIFF_CALLBACK_DELIVERY, mPresenter!!, this,
+                this)
+
+        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+                .saleDeliveryDaoBoundaryCallbacks.findAllDeliveriesBySaleUid(factory)
+
+        // get the provider, set , observe, etc.
+        val data = LivePagedListBuilder(factory, 20)
+                .setBoundaryCallback(boundaryCallback)
+                .build()
+
+        val customObserver = Observer{ o:PagedList<SaleDelivery> ->
+            recyclerAdapter.submitList(o)
+        }
+
+        //Observe the data:
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP, customObserver)
+        }
+
+        //set the adapter
+        dRecyclerView.adapter = recyclerAdapter
 
     }
 
@@ -618,7 +640,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         runOnUiThread {
             if (sale != null) {
                 saleUid = sale.saleUid
-                deliveredCB!!.isChecked = sale.saleDone
+
                 orderNotesET!!.setText(sale.saleNotes)
                 var discountValue = "0"
                 if (sale.saleDiscount > 0) {
@@ -641,8 +663,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
                         val pd = PictureDrawable(adjustedPic)
 
                         runOnUiThread {
-                            signatureIB!!.invalidateDrawable(signatureIB!!.background)
-                            signatureIB!!.background = pd
+//                            signatureIB!!.invalidateDrawable(signatureIB!!.background)
+//                            signatureIB!!.background = pd
                         }
 
 
@@ -708,13 +730,11 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         totalAfterDiscount!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         totalAfterDiscount!!.isEnabled = show
         hlineCalc!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        signatureIB!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        signatureHLine!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        signatureTitleTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+
     }
 
     override fun showDelivered(show: Boolean) {
-        deliveredCB!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        //TODO: Remove or replace
     }
 
     override fun showNotes(show: Boolean) {
@@ -723,11 +743,11 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
 
     }
 
-    override fun showSignature(show: Boolean) {
+    override fun showDeliveries(show: Boolean) {
         runOnUiThread {
-            signatureIB!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            signatureHLine!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            signatureTitleTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            deliveriesTV.visibility = if(show) View.VISIBLE else View.INVISIBLE
+            addDeliveriesCL.visibility = if(show) View.VISIBLE else View.INVISIBLE
+            dRecyclerView.visibility = if(show) View.VISIBLE else View.INVISIBLE
         }
     }
 
@@ -741,6 +761,10 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
         balanceDueTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         paymentHLineBeforeRV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         anotherOneHLine!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+
+        deliveriesTV.visibility = if(show) View.VISIBLE else View.INVISIBLE
+        addDeliveriesCL.visibility = if(show) View.VISIBLE else View.INVISIBLE
+        dRecyclerView.visibility = if(show) View.VISIBLE else View.INVISIBLE
 
     }
 
@@ -756,7 +780,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
             recordVoiceNotesIB!!.setImageResource(R.drawable.ic_delete_black_24dp)
             recorded = true
             fromFile = true
-
         }
     }
 
@@ -797,6 +820,21 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener, 
             override fun areContentsTheSame(oldItem: SalePayment,
                                             newItem: SalePayment): Boolean {
                 return oldItem.salePaymentUid == newItem.salePaymentUid
+            }
+        }
+
+        /**
+         * The DIFF CALLBACK
+         */
+        val DIFF_CALLBACK_DELIVERY: ItemCallback<SaleDelivery> = object : DiffUtil.ItemCallback<SaleDelivery>() {
+            override fun areItemsTheSame(oldItem: SaleDelivery,
+                                         newItem: SaleDelivery): Boolean {
+                return oldItem.saleDeliveryUid == newItem.saleDeliveryUid
+            }
+
+            override fun areContentsTheSame(oldItem: SaleDelivery,
+                                            newItem: SaleDelivery): Boolean {
+                return oldItem == newItem
             }
         }
     }

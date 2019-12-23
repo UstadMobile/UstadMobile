@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 class SelectProducersPresenter(context: Any,
                                arguments: Map<String, String>?,
                                view: SelectProducersView)
-    : UstadBaseController<SelectProducersView>(context, arguments!!, view) {
+    : CommonInventorySelectionPresenter<SelectProducersView>(context, arguments!!, view) {
 
 
     internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -46,7 +46,6 @@ class SelectProducersPresenter(context: Any,
     internal var weToCount: HashMap<Long, Int>
 
     var inventoryAddition = false
-    var inventorySelection = false
 
     val loggedInPersonUid : Long
 
@@ -139,9 +138,9 @@ class SelectProducersPresenter(context: Any,
     }
 
 
-    fun updateWeCount(weUid: Long, count: Int){
+    override fun updateWeCount(weUid: Long, count: Int, saleItemUid: Long){
+        //Don't need to do anything with saleItemUid > usually 0 here. 
         weToCount.put(weUid, count)
-        println("Updated count : " + count)
     }
 
     private fun calculateTotalCount():Int{

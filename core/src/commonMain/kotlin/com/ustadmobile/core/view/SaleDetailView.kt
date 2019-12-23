@@ -3,6 +3,7 @@ package com.ustadmobile.core.view
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.Sale
+import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
 import com.ustadmobile.lib.db.entities.SalePayment
 
@@ -36,6 +37,8 @@ interface SaleDetailView : UstadView {
      */
     fun setPaymentProvider(paymentProvider: DataSource.Factory<Int, SalePayment>)
 
+    fun setDeliveriesProvider(factory: DataSource.Factory<Int, SaleDelivery>)
+
     fun updateOrderTotal(orderTotal: Long)
 
     fun updateOrderTotalAfterDiscount(discount: Long)
@@ -52,7 +55,7 @@ interface SaleDetailView : UstadView {
     fun showCalculations(show: Boolean)
     fun showDelivered(show: Boolean)
     fun showNotes(show: Boolean)
-    fun showSignature(show: Boolean)
+    fun showDeliveries(show: Boolean)
     fun showPayments(show: Boolean)
 
     fun updateSaleVoiceNoteOnView(fileName: String)

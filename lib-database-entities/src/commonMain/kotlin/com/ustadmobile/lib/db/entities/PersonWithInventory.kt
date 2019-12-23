@@ -10,5 +10,6 @@ import kotlinx.serialization.Serializable
 class PersonWithInventory() : Person() {
 
         var inventoryCount = 0
+        var inventorySelected = 0
 
 }

@@ -36,6 +36,8 @@ open class InventoryTransaction() {
 
     var inventoryTransactionActive: Boolean = true
 
+    var inventoryTransactionSaleDeliveryUid : Long = 0
+
     @MasterChangeSeqNum
     var inventoryTransactionItemMCSN: Long = 0
 
