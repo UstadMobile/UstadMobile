@@ -115,7 +115,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             val mimetype = headers["Content-Type"]
 
-            if (VideoPlayerPresenterCommon.videoMimeTypeMap.keys.contains(mimetype)) {
+            if (VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
 
                 if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
                     call.respond(HttpStatusCode.BadRequest, "File size too big")
@@ -164,7 +164,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 }
 
                 if(FilenameUtils.getExtension(fileName).isNullOrEmpty()){
-                    fileName += VideoPlayerPresenterCommon.videoMimeTypeMap[mimetype]
+                    fileName += VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
                 }
 
                 val videoFile = File(parentDir, fileName)
