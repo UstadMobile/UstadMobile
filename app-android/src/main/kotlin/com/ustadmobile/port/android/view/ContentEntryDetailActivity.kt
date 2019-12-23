@@ -100,7 +100,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 bundleToMap(intent.extras), this, true,
                 umAppRepository, UmAppDatabase.getInstance(baseContext),
                 networkManagerBle.localAvailabilityManager,
-                networkManagerBle.containerDownloadManager)
+                networkManagerBle.containerDownloadManager,
+                UstadMobileSystemImpl.instance)
         presenter.handleShowEditControls(showControls)
         presenter.onCreate(bundleToMap(Bundle()))
 
