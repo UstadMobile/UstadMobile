@@ -233,7 +233,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
             presenter = ContentEntryListFragmentPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
-                    umRepoDb.contentEntryDao).also {
+                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context)).also {
                 it.onCreate(bundleToMap(savedInstanceState))
             }
         }
