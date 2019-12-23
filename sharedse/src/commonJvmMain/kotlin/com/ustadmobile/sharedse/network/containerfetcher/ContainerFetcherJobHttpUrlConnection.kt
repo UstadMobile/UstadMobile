@@ -62,8 +62,11 @@ class ContainerDownloaderJobHttpUrlConnection(val request: ContainerFetcherReque
 
                 val buf = ByteArray(8192)
                 var bytesRead = 0
+                var totalBytesRead = 0L
                 while(isActive && inStream.read(buf).also { bytesRead = it } != -1) {
                     fileOut.write(buf, 0, bytesRead)
+                    totalBytesRead += bytesRead
+                    bytesSoFar.set(totalBytesRead)
                 }
                 fileOut.flush()
 
