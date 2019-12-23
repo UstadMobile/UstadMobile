@@ -23,6 +23,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("allEntries")
     abstract fun allEntries(): List<ContentEntry>
 
+    //This is used for debugging purpose on JS - Don't delete
+    @Query("SELECT * FROM ContentEntry")
+    @JsName("allEntriesAsync")
+    abstract suspend  fun allEntriesAsync(): List<ContentEntry>
+
 
     @Query("SELECT * FROM ContentEntry WHERE publik")
     @JsName("publicContentEntries")

@@ -49,7 +49,7 @@ export class UmAngularUtil {
     const params = args.params ? args.params : null
     const search = this.removeParam(this.isWithoutEntryUid(route) 
     ? this.ARG_CONTENT_ENTRY_UID:"", (params ? params : this.getRoutePathParam().search))
-    let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null"))) 
+    let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null&libraries=null":"?ref=null"))) 
     return core.com.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString); 
   }

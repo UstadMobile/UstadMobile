@@ -126,7 +126,7 @@ class EpubContentPresenterTest {
                 any<UmCallback<String>>())
         verify<EpubContentView>(mockEpubView, timeout(15000)).setContainerTitle(opf!!.title!!)
 
-        verify<EpubContentView>(mockEpubView, timeout(15000)).setSpineUrls(any(), eq(0))
+        verify<EpubContentView>(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
 
         val linearSpineUrls = hrefListReference.get() as Array<String>
         val client = HttpClient()
