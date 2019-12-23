@@ -30,7 +30,7 @@ data class ConcatenatedPart(val id: ByteArray, val length: Long, val uncompresse
     }
 }
 
-class ConcatenatedInputStream(val src: InputStream) : InputStream(){
+class ConcatenatedInputStream(val src: InputStream) : KioInputStream(){
 
     private var numFiles: Int = 0
 
