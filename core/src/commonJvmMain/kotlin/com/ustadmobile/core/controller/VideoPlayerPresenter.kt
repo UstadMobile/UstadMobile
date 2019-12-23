@@ -33,7 +33,7 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
                     val containerEntryFile = entry.containerEntryFile
 
                     if (containerEntryPath != null && containerEntryFile != null) {
-                        if (videoExtensionList.contains(containerEntryPath)) {
+                        if (VIDEO_EXT_LIST.contains(containerEntryPath)) {
                             videoPath = containerEntryFile.cefPath
                         } else if (containerEntryPath == "audio.c2") {
                             audioEntry = entry
