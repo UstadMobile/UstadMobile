@@ -109,7 +109,7 @@ class EpubContentPresenterTest {
     @Throws(IOException::class)
     fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() {
         val args = HashMap<String, String>()
-        args[EpubContentView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[ContentEntryDetailPresenter.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
 
         val hrefListReference = AtomicReference<Any>()
 

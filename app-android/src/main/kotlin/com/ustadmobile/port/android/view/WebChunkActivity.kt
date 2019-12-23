@@ -7,10 +7,11 @@ import android.view.MenuItem
 import android.webkit.WebView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.WebChunkPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.util.ContentEntryUtil
+import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
@@ -41,7 +42,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this, true,repository)
+                bundleToMap(intent.extras), this, true, repository, UmAppDatabase.getInstance(viewContext))
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }
@@ -90,7 +91,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
         showErrorNotification(message, {
-            var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
+            var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }

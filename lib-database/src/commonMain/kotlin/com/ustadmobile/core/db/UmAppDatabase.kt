@@ -21,7 +21,7 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class
+    SyncNode::class, LocallyAvailableContainer::class
 
     //#DOORDB_TRACKER_ENTITIES
 
@@ -166,6 +166,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao
+
+    abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
 
     //#DOORDB_SYNCDAO
 
@@ -1285,6 +1287,21 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
 
             })
+
+            builder.addMigrations(object : DoorMigration(25,26){
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+                }
+
+            })
+
+            builder.addMigrations(object : DoorMigration(26, 27) {
+                override fun migrate(database: DoorSqlDatabase) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
+                }
+            })
+
+
             return builder
         }
 

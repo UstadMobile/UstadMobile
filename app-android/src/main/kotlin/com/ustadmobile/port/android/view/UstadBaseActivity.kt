@@ -26,6 +26,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
@@ -43,6 +44,7 @@ import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
 import java.lang.ref.WeakReference
@@ -73,7 +75,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     /**
      * @return Active NetworkManagerBleCommon
      */
-    var networkManagerBle: NetworkManagerBle? = null
+    val networkManagerBle = CompletableDeferred<NetworkManagerBle>()
+
+    @Volatile
+    private var bleServiceBound = false
 
     private var fragmentList: MutableList<WeakReference<Fragment>>? = null
 
@@ -125,15 +130,17 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                     .service
             serviceVal.runWhenNetworkManagerReady {
                 UMLog.l(UMLog.DEBUG, 0, "BleService Connection: service = $serviceVal")
-                networkManagerBle = serviceVal.networkManagerBle
+
+                val networkManagerBleVal = serviceVal.networkManagerBle!!
+                //this runs after service is ready
+                networkManagerBle.complete(networkManagerBleVal)
+                //networkManagerBle = serviceVal.networkManagerBle
                 bleServiceBound = true
-                onBleNetworkServiceBound(networkManagerBle!!)
+                onBleNetworkServiceBound(serviceVal.networkManagerBle!!)
                 runWhenServiceConnectedQueue.setReady(true)
 
-                //TODO: this is being used for testing purposes only and should be removed
-                if (networkManagerBle != null) {
-                    instance.networkManager = networkManagerBle
-                }
+//                //TODO: this is being used for testing purposes only and should be removed
+                UstadMobileSystemImpl.instance.networkManager = networkManagerBleVal
             }
         }
 
@@ -145,8 +152,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var mSyncServiceBound = false
 
-    @Volatile
-    private var bleServiceBound = false
+
     private var shakeDetector: ShakeDetector? = null
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
@@ -155,8 +161,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         get() = this
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
 
+    //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
+    @SuppressLint("ObsoleteSdkInt")
+    override fun onCreate(savedInstanceState: Bundle?) {
         //enable webview debugging
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
@@ -388,6 +396,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         super.onBackPressed()
     }
 
+    //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
+    @SuppressLint("ObsoleteSdkInt")
     override fun attachBaseContext(newBase: Context) {
         val res = newBase.resources
         val config = res.configuration
@@ -435,7 +445,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     /**
      * Responsible for running task after checking permissions
      *
-     * @param permission    Permission to be checked
+     * @param permissions    Permission to be checked
      * @param runnable      Future task to be executed
      * @param dialogTitle   Permission dialog title
      * @param dialogMessage Permission dialog message
@@ -490,12 +500,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         val requiredPermissions: MutableList<String> = mutableListOf<String>()
         for (permission in permissions) {
             if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                requiredPermissions.add(permission);
+                requiredPermissions.add(permission)
             }
         }
 
         return requiredPermissions.isEmpty()
-
     }
 
 

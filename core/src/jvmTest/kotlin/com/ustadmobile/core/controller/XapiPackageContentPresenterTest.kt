@@ -101,7 +101,7 @@ class XapiPackageContentPresenterTest {
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
-        args.put(XapiPackageContentView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+        args.put(ContentEntryDetailPresenter.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
 
         val xapiPresenter = XapiPackageContentPresenter(
                 context, args, mockXapiPackageContentView!!) {

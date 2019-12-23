@@ -67,6 +67,8 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
         override val exists: Boolean
             get() = src.exists
 
+        override val eTag: String?
+            get() = null
     }
 
 

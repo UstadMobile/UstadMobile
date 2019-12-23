@@ -4,13 +4,14 @@
 
     <application
         android:name="com.ustadmobile.port.android.App"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@drawable/ic_launcher_icon"
         android:roundIcon="@drawable/ic_launcher_icon"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.UstadTheme"
         android:supportsRtl="true"
+        tools:replace="android:allowBackup"
         tools:ignore="GoogleAppIndexingWarning">
 
         <!--

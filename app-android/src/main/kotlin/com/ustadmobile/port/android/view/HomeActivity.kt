@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -22,7 +23,6 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Compani
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -41,6 +41,13 @@ import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import android.content.Intent.ACTION_SEND
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import com.ustadmobile.core.db.UmAppDatabase
+import kotlinx.coroutines.Dispatchers
+import java.io.File
+
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
 
@@ -49,6 +56,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private lateinit var downloadAllBtn: FloatingTextButton
 
     private lateinit var profileImage: CircleImageView
+
+    private var shareAppDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,21 +132,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
-            R.id.action_clear_history -> {
-                GlobalScope.launch {
-                    val database = UmAppDatabase.getInstance(this)
-                    database.networkNodeDao.deleteAllAsync()
-                    database.entryStatusResponseDao.deleteAllAsync()
-                    database.downloadJobItemHistoryDao.deleteAllAsync()
-                    database.downloadJobDao.deleteAllAsync()
-                    database.downloadJobItemDao.deleteAllAsync()
-                    database.contentEntryStatusDao.deleteAllAsync()
-                }
-                networkManagerBle?.clearHistories()
-            }
             R.id.create_new_content -> {
                 val args = HashMap<String,String?>()
                 args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
@@ -149,6 +145,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                         this)
             }
             R.id.action_send_feedback -> hearShake()
+            R.id.action_share_app -> presenter.handleClickShareApp()
         }
 
         return super.onOptionsItemSelected(item)
@@ -197,6 +194,12 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             alertDialog
         }
     }
+
+    override fun showShareAppDialog() {
+        val dialog = ShareAppOfflineDialogFragment()
+        dialog.show(supportFragmentManager, "SHARE_APP_DIALOG")
+    }
+
 
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
         private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance

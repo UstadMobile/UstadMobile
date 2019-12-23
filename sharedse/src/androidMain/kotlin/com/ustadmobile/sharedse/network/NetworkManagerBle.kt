@@ -28,6 +28,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
@@ -38,24 +39,30 @@ import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import okhttp3.Dispatcher
 import java.io.IOException
 import java.net.InetAddress
 import java.util.*
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.networkmanager.defaultGsonSerializer
+import com.ustadmobile.core.networkmanager.defaultOkHttpClient
+import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
+import okhttp3.OkHttpClient
+import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
+import java.net.HttpURLConnection
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 /**
  * This class provides methods to perform android network related communications.
@@ -77,10 +84,13 @@ actual open class NetworkManagerBle
  *
  * @param context Platform specific application context
  */
-actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
-    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO), EmbeddedHTTPD.ResponseListener {
+actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
+                   umAppDatabase: UmAppDatabase)
+    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO,
+        umAppDatabase), EmbeddedHTTPD.ResponseListener, NetworkManagerWithConnectionOpener {
 
-    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD) : this(context, singleThreadDispatcher) {
+    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD,
+                umAppDatabase: UmAppDatabase) : this(context, singleThreadDispatcher, umAppDatabase) {
         this.httpd = httpd
     }
 
@@ -113,7 +123,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     private val wifiLockReference = AtomicReference<WifiManager.WifiLock>()
 
-    private var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager? = null
+    private lateinit var wifiP2pGroupServiceManager: WifiP2PGroupServiceManager
 
     internal lateinit var managerHelper : NetworkManagerBleHelper
 
@@ -127,6 +137,33 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     private val numActiveRequests = AtomicInteger()
 
     val enablePromptsSnackbarManager = EnablePromptsSnackbarManager()
+
+    private var localOkHttpClient: OkHttpClient? = null
+
+    override val containerFetcher: ContainerFetcher by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        ContainerFetcherBuilder(this).build()
+    }
+
+    override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase) { job, manager ->
+        DownloadJobItemRunner(context, job, manager, this, umAppDatabase,
+                UmAccountManager.getActiveEndpoint(context),
+                connectivityStatus = manager.connectivityLiveData.getValue(),
+                mainCoroutineDispatcher = Dispatchers.Main,
+                connectivityStatusLiveData = manager.connectivityLiveData,
+                localAvailabilityManager = localAvailabilityManager)
+    }
+    private var gattClientCallbackManager: GattClientCallbackManager? = null
+
+    override var localConnectionOpener: ConnectionOpener? = null
+        get() = field
+        protected set
+
+    override val umAppDatabaseRepo by lazy {
+        UmAccountManager.getRepositoryForActiveAccount(context)
+    }
+
+    override val localHttpPort: Int
+        get() = httpd.listeningPort
 
     /**
      * Receiver to handle bluetooth state changes
@@ -150,6 +187,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE scanning")
                 notifyStateChanged(STATE_STARTED)
+                gattClientCallbackManager = GattClientCallbackManager(context as Context,
+                        bluetoothAdapter!!, localAvailabilityManager.nodeHistoryHandler)
                 bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
                         bleScanCallback as BluetoothAdapter.LeScanCallback?)
                 UMLog.l(UMLog.DEBUG, 689,
@@ -164,6 +203,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun stop() {
             bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
+            gattClientCallbackManager = null
             notifyStateChanged(STATE_STOPPED)
         }
     }
@@ -175,18 +215,28 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             if (canDeviceAdvertise()) {
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE advertising service")
-                gattServerAndroid = BleGattServer(mContext,
-                        this@NetworkManagerBle)
-                bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
-
                 val service = BluetoothGattService(parcelServiceUuid.uuid,
                         BluetoothGattService.SERVICE_TYPE_PRIMARY)
 
-                val writeCharacteristic = BluetoothGattCharacteristic(
-                        parcelServiceUuid.uuid, BluetoothGattCharacteristic.PROPERTY_WRITE,
-                        BluetoothGattCharacteristic.PERMISSION_WRITE)
 
-                service.addCharacteristic(writeCharacteristic)
+                val androidCharacteristics = BLE_CHARACTERISTICS.map {charUuidStr ->
+                    val charUuid = ParcelUuid(UUID.fromString(charUuidStr)).uuid
+                    BluetoothGattCharacteristic(charUuid,
+                            BluetoothGattCharacteristic.PROPERTY_WRITE
+                                    or BluetoothGattCharacteristic.PROPERTY_READ,
+                            BluetoothGattCharacteristic.PERMISSION_WRITE or
+                                    BluetoothGattCharacteristic.PERMISSION_READ)
+                }
+
+                androidCharacteristics.forEach {
+                    service.addCharacteristic(it)
+                }
+
+                gattServerAndroid = BleGattServer(mContext,
+                        this@NetworkManagerBle) {input, output -> httpd.newSession(input, output)}
+                bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
+
+
                 if (gattServerAndroid == null
                         || (gattServerAndroid as BleGattServer).gattServer == null
                         || bleServiceAdvertiser == null) {
@@ -260,44 +310,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             }
         }
     }
-
-    /**
-     * This is a simple broadcast receiver that can be used to wait until a given WiFi SSID appears
-     * in the scan results
-     */
-    internal inner class NetworkScanResultsReceiver(private val targetNetworkSsid: String): BroadcastReceiver() {
-
-        val latch = CountDownLatch(1)
-
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if(latch.count > 0) {
-                val results = wifiManager.scanResults
-                val updated: String
-                if(Build.VERSION.SDK_INT >= 23) {
-                    updated = if(intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false) ?: false) {
-                        "Updated"
-                    }else {
-                        "Not updated"
-                    }
-                }else {
-                    updated = "Not known if updated"
-                }
-
-
-                val networksSeen = results.map { normalizeAndroidWifiSsid(it.SSID) }
-                UMLog.l(UMLog.DEBUG, 0, "NetworkManager BLE: scan results ($updated): networks found: ${networksSeen.joinToString()}")
-                if(targetNetworkSsid in networksSeen) {
-                    UMLog.l(UMLog.DEBUG, 0, "NetworkManagerBle: Saw target in scan results: $targetNetworkSsid")
-                    latch.countDown()
-                }
-            }
-        }
-
-        fun waitForNetworkToBeSeen(timeout: Int): Boolean {
-            return latch.await(timeout.toLong(), TimeUnit.MILLISECONDS)
-        }
-    }
-
 
 
     /**
@@ -474,17 +486,17 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
 
     private fun handleDisconnected() {
-        localHttpClient?.close()
         localHttpClient = null
+        localConnectionOpener = null
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
-        connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+        val status = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
+        connectivityStatusRef.value = status
+        (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_DISCONNECTED
 
         GlobalScope.launch {
-            addLogs("changed to ${ConnectivityStatus.STATE_DISCONNECTED}, updating DB")
-            umAppDatabase.connectivityStatusDao
-                    .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
+            containerDownloadManager.handleConnectivityChanged(status)
         }
     }
 
@@ -516,11 +528,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         val status = ConnectivityStatus(state, true, ssid)
         addLogs("changed to $state")
         connectivityStatusRef.value = status
+        (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
 
         //get network SSID
         if (ssid != null /*&& ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)*/) {
             if(ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
                 status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
+                //TODO: set repo status
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -530,22 +544,27 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
                         "client for $ssid using $socketFactory")
 
+                val localOkHttpClientVal = defaultOkHttpClient().newBuilder()
+                        .socketFactory(socketFactory)
+                        .build()
+
+                //closing localHttpClient would stop the underlying shared OkHttpClient's executors,
+                // pools, etc we don't want to do that
                 localHttpClient = HttpClient(OkHttp) {
                     engine {
-                        config {
-                            socketFactory(socketFactory)
-                        }
+                        preconfigured = localOkHttpClientVal
                     }
                     install(JsonFeature) {
-                        serializer = GsonSerializer()
+                        serializer = defaultGsonSerializer()
                     }
                 }
+
+                localConnectionOpener = { network.openConnection(it) as HttpURLConnection }
             }
         }
 
         GlobalScope.launch {
-            addLogs("changed to ${status.connectivityState}, updating DB =$umAppDatabase")
-            umAppDatabase.connectivityStatusDao.insertAsync(status)
+            containerDownloadManager.handleConnectivityChanged(status)
         }
     }
 
@@ -576,13 +595,14 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         if (wifiP2pManager == null) {
             wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
         }
+
         wifiP2PCapable.set(wifiP2pManager != null)
         wifiP2pGroupServiceManager = WifiP2PGroupServiceManager(this)
 
 
         if (wifiP2PCapable.get()) {
             wifiP2pChannel = wifiP2pManager!!.initialize(mContext, getMainLooper(), null)
-            mContext.registerReceiver(wifiP2pGroupServiceManager!!.wifiP2pBroadcastReceiver,
+            mContext.registerReceiver(wifiP2pGroupServiceManager.wifiP2pBroadcastReceiver,
                     IntentFilter(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION))
         }
 
@@ -619,6 +639,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
 
         updateEnableServicesPromptsRequired()
+        httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
 
         super.onCreate()
     }
@@ -909,8 +930,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask? {
-        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
-            val entryStatusTask = BleEntryStatusTaskAndroid(
+        val gattClientCallbackManagerVal = gattClientCallbackManager
+        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
+            val entryStatusTask = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal,
                     context as Context, this, containerUidsToCheck, networkNode)
             entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
             return entryStatusTask
@@ -924,14 +946,19 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     actual override fun makeEntryStatusTask(context: Any, message: BleMessage,
                                             peerToSendMessageTo: NetworkNode,
                                             responseListener: BleMessageResponseListener): BleEntryStatusTask? {
-        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
-            val task = BleEntryStatusTaskAndroid(context as Context, this, message, peerToSendMessageTo, responseListener)
+        val gattClientCallbackManagerVal = gattClientCallbackManager
+        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
+            val task = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal, context as Context,
+                    this, message, peerToSendMessageTo, responseListener)
             task.setBluetoothManager(bluetoothManager as BluetoothManager)
             return task
         }
         return null
     }
 
+    override suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage? {
+        return gattClientCallbackManager?.getGattClient(deviceAddr)?.sendMessage(bleMessage)
+    }
 
     /**
      * Start monitoring network changes

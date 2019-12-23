@@ -190,7 +190,7 @@ class EpubContentPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val containerUid = (arguments[EpubContentView.ARG_CONTAINER_UID]?.toLong() ?: 0)
+        val containerUid = (arguments[ContentEntryDetailPresenter.ARG_CONTAINER_UID]?.toLong() ?: 0)
         view.setProgressBarProgress(-1)
         view.setProgressBarVisible(true)
         view.mountContainer(containerUid, mountedCallbackHandler)

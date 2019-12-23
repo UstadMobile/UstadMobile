@@ -312,5 +312,10 @@
     <string name="error_not_found_status">404 !</string>
     <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
 
+    <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
+    <string name="repo_loading_status_loading_mirror">Loading from mirror</string>
+    <string name="repo_loading_status_loaded_empty">No content found</string>
+    <string name="repo_loading_status_failed_noconnection">No connection</string>
+    <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
 </resources>

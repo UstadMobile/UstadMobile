@@ -54,8 +54,10 @@ import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.zip.GZIPInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import java.lang.IllegalArgumentException
 
 
 /**
@@ -257,7 +259,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 startIntent.putExtra(ARG_REFERRER, referrer)
             }
             startIntent.flags = flags
-            if(argsBundle != null)
+            if (argsBundle != null)
                 startIntent.putExtras(argsBundle)
 
             ctx.startActivity(startIntent)
@@ -497,24 +499,47 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                       callback: UmCallback<Any>) {
-        var mMimeType = mimeType;
+    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
+        var mMimeType = mimeType
         val ctx = context as Context
         val intent = Intent(Intent.ACTION_VIEW)
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        val uri = FileProvider.getUriForFile(ctx, BuildConfig.APPLICATION_ID, File(path))
-        if (mMimeType == null || mMimeType.isEmpty()) {
+        var file = File(path)
+
+        if (isFileGzipped(file)) {
+
+            var gzipIn: GZIPInputStream? = null
+            var destOut: FileOutputStream? = null
+            try {
+                gzipIn = GZIPInputStream(FileInputStream(File(path)))
+                var destFile = File(file.parentFile, file.name + "unzip")
+                destOut = FileOutputStream(destFile)
+                UMIOUtils.readFully(gzipIn, destOut)
+                file = destFile
+            } finally {
+                gzipIn?.close()
+                destOut?.flush()
+                destOut?.close()
+            }
+        }
+        val uri = FileProvider.getUriForFile(ctx, context.packageName, file)
+        if (mMimeType.isNullOrEmpty()) {
             mMimeType = "*/*"
         }
         intent.setDataAndType(uri, mMimeType)
         val pm = ctx.packageManager
         if (intent.resolveActivity(pm) != null) {
             ctx.startActivity(intent)
-            UmCallbackUtil.onSuccessIfNotNull(callback, null)
         } else {
-            UmCallbackUtil.onFailIfNotNull(callback,
-                    NoAppFoundException("No activity found for mimetype", mMimeType))
+            throw NoAppFoundException("No activity found for mimetype: $mMimeType", mMimeType)
+        }
+    }
+
+    private fun isFileGzipped(file: File): Boolean {
+        file.inputStream().use {
+            val signature = ByteArray(2)
+            val nread = it.read(signature)
+            return nread == 2 && signature[0] == GZIPInputStream.GZIP_MAGIC.toByte() && signature[1] == (GZIPInputStream.GZIP_MAGIC shr 8).toByte()
         }
     }
 

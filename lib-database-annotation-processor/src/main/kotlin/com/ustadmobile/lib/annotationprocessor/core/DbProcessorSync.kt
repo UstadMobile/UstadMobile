@@ -121,7 +121,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                     useFilerAsDefault = false)
 
             val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-            syncRouteFileSpec.writeAllSpecs(writeImpl = true,
+            syncRouteFileSpec.writeAllSpecs(writeImpl = true, writeKtor = true,
                     outputSpecArgName = AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT,
                     useFilerAsDefault = true)
         }
@@ -187,7 +187,7 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         val abstractDaoClassName = ClassName(packageName,
                 abstractDaoSimpleName)
-        specs.route.fileSpec.addImport("io.ktor.response", "header")
+        specs.ktorRoute.fileSpec.addImport("io.ktor.response", "header")
 
 
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
@@ -242,7 +242,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                 val entityParamName = "__" + replaceEntityFunSpec.parameters[0].name
                 val pkEl = processingEnv.elementUtils.getTypeElement(
                     entityType.qualifiedName).enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
-                codeBlock.add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec, multipartHelperVarName,
+                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec, multipartHelperVarName,
                         beforeDaoCallCode = CodeBlock.builder()
                                 .beginControlFlow("if(_multipartHelper.containsAllAttachments($entityParamName.map{it.${pkEl.simpleName}.toString()}))")
                                 .add("_multipartHelper.moveTmpFiles(%T(_attachmentsDir, %S))\n",
@@ -255,7 +255,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                                 .endControlFlow()
                                 .build()))
             }else {
-                codeBlock.add(generateKtorPassToDaoCodeBlock(replaceEntityFunSpec))
+                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec))
             }
 
             codeBlock.endControlFlow()
@@ -263,14 +263,14 @@ class DbProcessorSync: AbstractDbProcessor() {
                 codeBlock.add(generateGetAttachmentDataCodeBlock(entityType))
             }
 
-            codeBlock.add(generateUpdateTrackerReceivedCodeBlock(syncableEntityInfo.tracker,
+            codeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityInfo.tracker,
                     syncHelperVarName = "_dao"))
 
         }
         codeBlock.endControlFlow()
 
         daoRouteFn.addCode(codeBlock.build())
-        specs.route.fileSpec.addFunction(daoRouteFn.build())
+        specs.ktorRoute.fileSpec.addFunction(daoRouteFn.build())
         return specs.toBuiltFileSpecs()
     }
 
@@ -309,6 +309,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                         .build())
+                .addRepositoryHelperDelegateCalls("_repo")
 
         val syncFnCodeBlock = CodeBlock.builder()
 
@@ -363,6 +364,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             val entitySyncCodeBlock = CodeBlock.builder()
                     .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
                             syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
+                    .add("_loadHelper.doRequest()\n")
 
             val hasAttachments = entityType.getAnnotation(EntityWithAttachment::class.java) != null
 

@@ -18,6 +18,10 @@ expect class ContainerManager : ContainerManagerCommon {
 
     override suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
 
+    override suspend fun addEntries(addOptions: AddEntryOptions?,
+                                    newPathsToMd5Map: Map<String, ByteArray>,
+                                    provider: suspend () -> EntrySource?)
+
     fun getInputStream(containerEntry: ContainerEntryWithContainerEntryFile): InputStream
 
     fun getEntry(pathInContainer: String): ContainerEntryWithContainerEntryFile?

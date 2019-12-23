@@ -9,6 +9,7 @@ import androidx.test.espresso.web.assertion.WebViewAssertions.webContent
 import androidx.test.espresso.web.matcher.DomMatchers.hasElementWithId
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.platform.app.InstrumentationRegistry
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -60,7 +61,7 @@ class XapiPackageContentActivityEspressoTest {
 
     fun launchActivity() {
         val launchIntent = Intent()
-        launchIntent.putExtra(XapiPackageContentView.ARG_CONTAINER_UID,
+        launchIntent.putExtra(ContentEntryDetailPresenter.ARG_CONTAINER_UID,
                 tempXapiPackageContainer!!.container.containerUid.toString())
         mActivityRule.launchActivity(launchIntent)
     }
