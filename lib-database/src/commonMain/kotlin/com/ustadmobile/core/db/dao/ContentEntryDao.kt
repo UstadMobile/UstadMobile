@@ -23,11 +23,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("allEntries")
     abstract fun allEntries(): List<ContentEntry>
 
-    //This is used for debugging purpose on JS - Don't delete
-    @Query("SELECT * FROM ContentEntry")
-    @JsName("allEntriesAsync")
-    abstract suspend  fun allEntriesAsync(): List<ContentEntry>
-
 
     @Query("SELECT * FROM ContentEntry WHERE publik")
     @JsName("publicContentEntries")
@@ -147,6 +142,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))""")
     @JsName("getChildrenByParentUidWithCategoryFilter")
     abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
+
+    @Query("SELECT ContentEntry.* FROM ContentEntry "+
+            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid" +
+            " WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
+    @JsName("getChildrenByAll")
+    abstract fun getChildrenByAll(parentUid: Long): List<ContentEntry>
 
 
     @JsName("findLiveContentEntry")
