@@ -98,9 +98,9 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
             GlobalScope.launch {
                 try {
-                    val entry = umAppDb.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(sourceUrl)
+                    val entry = appRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    goToEntryFn(entry.contentEntryUid, appRepo, context, impl, true,
+                    goToEntryFn(entry.contentEntryUid, umAppDb, context, impl, true,
                             true,
                             arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES]?.toBoolean()!!)
                 } catch (e: Exception) {

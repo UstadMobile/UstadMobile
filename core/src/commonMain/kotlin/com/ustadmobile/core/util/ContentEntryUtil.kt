@@ -1,20 +1,12 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlin.jvm.JvmStatic
 
 
 private val mimeTypeToViewNameMap = mapOf(
@@ -51,7 +43,7 @@ suspend fun goToContentEntry(contentEntryUid: Long,
                              noIframe: Boolean = false) {
 
     val containerToOpen = if (downloadRequired) {
-        umAppDatabase.downloadJobItemDao.findMostRecentContainer(contentEntryUid)
+        umAppDatabase.downloadJobItemDao.findMostRecentContainerDownloaded(contentEntryUid)
     } else {
         umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
     }
