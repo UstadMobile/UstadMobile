@@ -154,7 +154,7 @@ abstract class DownloadJobItemDao {
         WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid AND DownloadJobItem.djiStatus = $COMPLETE
         ORDER BY Container.cntLastModified DESC LIMIT 1
     """)
-    abstract suspend fun findMostRecentContainer(contentEntryUid: Long): ContainerUidAndMimetype?
+    abstract suspend fun findMostRecentContainerDownloaded(contentEntryUid: Long): ContainerUidAndMimetype?
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +
