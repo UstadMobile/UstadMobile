@@ -20,7 +20,8 @@ import kotlin.js.JsName
 
 class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String?>,
                                         private val fragmentViewContract: ContentEntryListFragmentView,
-                                        private val contentEntryDao: ContentEntryDao)
+                                        private val contentEntryDao: ContentEntryDao,
+                                        private val contentEntryDaoRepo: ContentEntryDao)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
 
     private var filterByLang: Long = 0
@@ -60,18 +61,18 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
         fragmentViewContract.setContentEntryProvider(provider)
 
         try {
-            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDao.findLiveContentEntry(parentUid!!)
+            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid!!)
             entryLiveData.observe(this, this::onContentEntryChanged)
         } catch (e: Exception) {
             fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
         }
 
         GlobalScope.launch {
-            val result = contentEntryDao.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
+            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
             if (result.size > 1) {
                 val selectLang = Language()
                 selectLang.name = "Language"
@@ -88,7 +89,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         }
 
         GlobalScope.launch {
-            val result = contentEntryDao.findListOfCategoriesAsync(parentUid!!)
+            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid!!)
             val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
             for (schema in result) {
                 var data: MutableList<DistinctCategorySchema>? =
@@ -120,7 +121,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
     private fun showRecycledEntries(){
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.recycledItems())
+        fragmentViewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
     }
 
 
@@ -159,10 +160,8 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     @JsName("handleDownloadStatusButtonClicked")
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
-        val impl = UstadMobileSystemImpl.instance
-        val args = HashMap<String, String>()
-        args["contentEntryUid"] = entry.contentEntryUid.toString()
-        impl.go("DownloadDialog", args, context)
+        UstadMobileSystemImpl.instance.go("DownloadDialog",
+                mapOf("contentEntryUid" to entry.contentEntryUid.toString()), context)
     }
 
     companion object {

@@ -94,8 +94,6 @@ interface EpubContentView : UstadView {
 
         const val VIEW_NAME = "EpubContent"
 
-        const val ARG_CONTAINER_UID = "containerUid"
-
         const val ARG_INITIAL_PAGE_HREF = "initialPageHref"
 
 

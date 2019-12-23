@@ -65,7 +65,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     private fun loadFromDb() {
         val downloadJob = db.downloadJobDao.findByUid(downloadJobUid)
         rootContentEntryUid = downloadJob?.djRootContentEntryUid?: 0L
-        UMLog.l(UMLog.DEBUG, 420, "DownloadJobItemManager: load " +
+        UMLog.l(UMLog.DEBUG, 420, "ContainerDownloadManager: load " +
                 "Download job uid " + downloadJobUid + " root content entry uid = " +
                 rootContentEntryUid)
 
@@ -267,7 +267,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     }
 
     private fun doCommit(itemsToCommit: List<DownloadJobItemStatus>) {
-        db.downloadJobItemDao.updateDownloadJobItemsProgress(itemsToCommit)
+        db.downloadJobItemDao.updateDownloadJobItemsProgressList(itemsToCommit)
     }
 
     fun close() {

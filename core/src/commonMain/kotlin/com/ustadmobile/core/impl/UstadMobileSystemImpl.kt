@@ -163,8 +163,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun getManifestPreference(key: String, context: Any): String?
 
 
-    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                         callback: UmCallback<Any>)
+    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?)
 
     /**
      * Get an asset Synchronously

@@ -4,6 +4,6 @@ class NetworkNodeWithStatusResponsesAndHistory : NetworkNode() {
 
     val statusResponses: MutableMap<Long, EntryStatusResponse> = mutableMapOf()
 
-    val nodeFailures: List<Long> = mutableListOf()
+    val nodeFailures: MutableList<Long> = mutableListOf()
 
 }

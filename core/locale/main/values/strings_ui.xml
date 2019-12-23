@@ -397,6 +397,12 @@
     <string name="enable">Enable</string>
     <string name="more_information">More information</string>
     <string name="less_information">Less information</string>
+    
+    <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
+    <string name="repo_loading_status_loading_mirror">Loading from peer </string>
+    <string name="repo_loading_status_loaded_empty">No content found</string>
+    <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
+    <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
 
 

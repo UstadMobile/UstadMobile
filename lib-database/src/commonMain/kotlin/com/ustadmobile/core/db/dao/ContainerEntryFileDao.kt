@@ -14,6 +14,9 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
     abstract fun findEntriesByMd5Sums(md5Sums: List<String>): List<ContainerEntryFile>
 
+    @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefUid IN (:uidList)")
+    abstract fun findEntriesByUids(uidList: List<Long>): List<ContainerEntryFile>
+
     @Query("UPDATE ContainerEntryFile SET cefPath = :path WHERE cefUid = :cefUid")
     abstract fun updateFilePath(cefUid: Long, path: String)
 
@@ -44,5 +47,11 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     @Delete
     abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)
+
+    companion object {
+
+        const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"
+
+    }
 
 }

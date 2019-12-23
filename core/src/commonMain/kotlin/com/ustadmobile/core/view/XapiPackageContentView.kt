@@ -17,8 +17,6 @@ interface XapiPackageContentView : UstadView, ViewWithErrorNotifier {
     companion object {
 
         const val VIEW_NAME = "XapiContent"
-
-        const val ARG_CONTAINER_UID = "containerUid"
     }
 
 }

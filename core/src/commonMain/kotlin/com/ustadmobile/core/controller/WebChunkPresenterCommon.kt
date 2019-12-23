@@ -1,20 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ContentEntryUtil
+import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.WebChunkView
-import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTENT_ENTRY_ID
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -44,8 +41,13 @@ open class IndexLog {
 
 }
 
-abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>, view: WebChunkView,
-                                       private val isDownloadEnabled: Boolean,private val appRepo: UmAppDatabase)
+abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>,
+                                       view: WebChunkView,
+                                       private val isDownloadEnabled: Boolean,
+                                       private val appRepo: UmAppDatabase,
+                                       val umAppDb: UmAppDatabase,
+                                       private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
+
     : UstadBaseController<WebChunkView>(context, arguments, view) {
 
     private var navigation: String? = null
@@ -58,14 +60,14 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
-        containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
+        var entryUuid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID)!!.toLong()
+        containerUid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTAINER_UID)!!.toLong()
 
         navigation = arguments[ARG_REFERRER] ?: ""
 
         GlobalScope.launch {
             try {
-                val result = appRepo.contentEntryDao.getContentByUuidAsync(entryUuid)
+                val result = umAppDb.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.runOnUiThread(Runnable {
                     val resultTitle = result?.title
                     if (resultTitle != null)
@@ -88,30 +90,32 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
         val impl = UstadMobileSystemImpl.instance
 
-        ContentEntryUtil.instance.goToContentEntryByViewDestination(
-                sourceUrl, arguments[ARG_NO_IFRAMES]?.toBoolean()!!,
-                appRepo, impl,
-                true,
-                context,isDownloadEnabled, object : UmCallback<Any> {
-            override fun onSuccess(result: Any?) {
+        val dest = sourceUrl.replace("content-detail?",
+                ContentEntryDetailView.VIEW_NAME + "?")
+        val params = UMFileUtil.parseURLQueryString(dest)
 
-            }
+        if (params.containsKey("sourceUrl")) {
 
-            override fun onFailure(exception: Throwable?) {
-                if (exception != null) {
-                    val message = exception.message
-                    if (exception is NoAppFoundException) {
-                        view.runOnUiThread(Runnable {
-                            view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
-                                    MessageID.get_app,
-                                    exception.mimeType!!)
-                        })
+            GlobalScope.launch {
+                try {
+                    val entry = appRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
+                            ?: throw IllegalArgumentException("No File found")
+                    goToEntryFn(entry.contentEntryUid, umAppDb, context, impl, true,
+                            true,
+                            arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES]?.toBoolean()!!)
+                } catch (e: Exception) {
+                    if (e is NoAppFoundException) {
+                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                                MessageID.get_app,
+                                e.mimeType!!)
                     } else {
-                        view.runOnUiThread(Runnable { view.showError(message!!) })
+                        view.showError(e.message!!)
                     }
                 }
+
             }
-        })
+
+        }
     }
 
     fun handleUpNavigation() {

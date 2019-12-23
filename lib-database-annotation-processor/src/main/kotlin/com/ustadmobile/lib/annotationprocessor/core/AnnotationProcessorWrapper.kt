@@ -46,6 +46,8 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
 
         const val OPTION_KTOR_OUTPUT = "doordb_ktor_out"
 
+        const val OPTION_NANOHTTPD_OUTPUT = "doordb_nanohttpd_out"
+
         const val OPTION_JS_OUTPUT = "doordb_js_out"
     }
 

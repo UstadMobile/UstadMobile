@@ -20,6 +20,7 @@ import androidx.test.rule.GrantPermissionRule
 import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.JobStatus
@@ -374,9 +375,9 @@ class ContentEntryDetailEspressoTest {
 
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity::class.java.canonicalName),
-                hasExtra(equalTo(WebChunkView.ARG_CONTAINER_UID),
+                hasExtra(equalTo(ContentEntryDetailPresenter.ARG_CONTAINER_UID),
                         equalTo(18.toString())),
-                hasExtra(equalTo(WebChunkView.ARG_CONTENT_ENTRY_ID),
+                hasExtra(equalTo(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID),
                 equalTo(14.toString()))))
 
     }

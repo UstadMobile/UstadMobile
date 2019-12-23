@@ -12,8 +12,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import kotlinx.coroutines.GlobalScope
@@ -21,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 
 abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
-                                 private val db: UmAppDatabase, private val repo: UmAppDatabase)
+                                          private val db: UmAppDatabase, private val repo: UmAppDatabase)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
 
 
@@ -59,7 +57,7 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
 
     lateinit var containerManager: ContainerManager
 
-    abstract  fun handleOnResume()
+    abstract fun handleOnResume()
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -68,8 +66,8 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
         contentEntryDao = db.contentEntryDao
 
         navigation = arguments[ARG_REFERRER] ?: ""
-        val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
-        containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
+        val entryUuid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID)!!.toLong()
+        containerUid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTAINER_UID)!!.toLong()
 
         GlobalScope.launch {
             val contentEntry = contentEntryDao.getContentByUuidAsync(entryUuid)
@@ -99,9 +97,11 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
 
     }
 
-    companion object{
 
-        var videoExtensionList = listOf(".mp4",".mkv",".webm",".m4v")
-        var videoMimeTypeMap = mapOf("video/mp4" to ".mp4", "video/x-matroska" to ".mkv", "video/webm" to ".webm", "video/x-m4v" to ".m4v")
+    companion object {
+
+        val VIDEO_EXT_LIST = listOf(".mp4", ".mkv", ".webm", ".m4v")
+
+        var VIDEO_MIME_MAP = mapOf("video/mp4" to ".mp4", "video/x-matroska" to ".mkv", "video/webm" to ".webm", "video/x-m4v" to ".m4v")
     }
 }

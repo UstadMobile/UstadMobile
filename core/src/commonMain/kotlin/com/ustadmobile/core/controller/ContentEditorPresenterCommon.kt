@@ -291,7 +291,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
             if(openPreview){
                 val args = HashMap<String, String?>()
                 args.putAll(arguments)
-                args[EpubContentView.ARG_CONTAINER_UID] = containerUid.toString()
+                args[ContentEntryDetailPresenter.ARG_CONTAINER_UID] = containerUid.toString()
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
             }else{

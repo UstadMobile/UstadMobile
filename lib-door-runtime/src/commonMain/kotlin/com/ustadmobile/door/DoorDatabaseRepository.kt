@@ -16,5 +16,32 @@ interface DoorDatabaseRepository {
 
     val httpClient: HttpClient
 
+    suspend fun addMirror(mirrorEndpoint: String, initialPriority: Int): Int
 
+    suspend fun removeMirror(mirrorId: Int)
+
+    suspend fun updateMirrorPriorities(newPriorities: Map<Int, Int>)
+
+    suspend fun activeMirrors(): List<MirrorEndpoint>
+
+    /**
+     * Adds a weak reference to the given connectivity listener - useful for RepositoryLoadHelper
+     * so it can automatically retry requests when connectivity is restored or when a mirror
+     * becomes available.
+     */
+    fun addWeakConnectivityListener(listener: RepositoryConnectivityListener)
+
+    /**
+     *
+     */
+    fun removeWeakConnectivityListener(listener: RepositoryConnectivityListener)
+
+    var connectivityStatus: Int
+
+    companion object {
+
+        const val STATUS_CONNECTED = 1
+
+        const val STATUS_DISCONNECTED = 2
+    }
 }

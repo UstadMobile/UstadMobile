@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.db.JobStatus.COMPLETE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.db.entities.*
@@ -34,7 +35,7 @@ abstract class DownloadJobItemDao {
     }
 
     @Transaction
-    open fun updateDownloadJobItemsProgress(statusList: List<DownloadJobItemStatus>) {
+    open fun updateDownloadJobItemsProgressList(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateDownloadJobItemProgress(status.jobItemUid, status.bytesSoFar,
                     status.totalBytes)
@@ -58,42 +59,6 @@ abstract class DownloadJobItemDao {
     @Insert
     abstract fun insert(jobRunItem: DownloadJobItem): Long
 
-    @Query("DELETE FROM DownloadJobItem")
-    abstract suspend fun deleteAllAsync()
-
-    /**
-     * Update the main status fields for the given DownloadJobitem
-     *
-     * @param djiUid DownloadJobItemId to updateStateAsync (primary key)
-     * @param djiStatus status property to set
-     * @param downloadedSoFar downloadedSoFar property to set
-     * @param downloadLength downloadLength property to set
-     * @param currentSpeed currentSpeed property to set
-     */
-    @Query("Update DownloadJobItem SET " +
-            "djiStatus = :djiStatus, downloadedSoFar = :downloadedSoFar, " +
-            "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
-            " WHERE djiUid = :djiUid")
-    abstract fun updateDownloadJobItemStatusIm(djiUid: Long, djiStatus: Int,
-                                                         downloadedSoFar: Long, downloadLength: Long,
-                                                         currentSpeed: Long)
-
-    @Transaction
-    open fun updateDownloadJobItemStatus(djiUid: Long, djiStatus: Int,
-                                    downloadedSoFar: Long, downloadLength: Long,
-                                    currentSpeed: Long) {
-        println("updateDownloadJobItemStatus $djiUid -> $djiStatus")
-        updateDownloadJobItemStatusIm(djiUid, djiStatus, downloadedSoFar, downloadLength,
-                currentSpeed)
-    }
-
-    @Query("UPDATE DownloadJobItem SET downloadedSoFar = :downloadedSoFar, " +
-            "currentSpeed = :currentSpeed " +
-            "WHERE djiUid = :djiUid")
-    abstract fun updateDownloadJobItemProgress(djiUid: Long, downloadedSoFar: Long,
-                                               currentSpeed: Long)
-
-
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     abstract fun updateItemStatusInt(djiUid: Int, status: Int)
 
@@ -104,13 +69,16 @@ abstract class DownloadJobItemDao {
     }
 
 
-    @Query("UPDATE DownloadJobItem SET numAttempts = numAttempts + 1 WHERE djiUid = :djiUid")
-    abstract fun incrementNumAttempts(djiUid: Int)
-
     @Query("SELECT DownloadJobItem.* FROM " +
             "DownloadJobItem " +
             "WHERE DownloadJobItem.djiUid = :djiUid")
     abstract fun findByUid(djiUid: Int): DownloadJobItem?
+
+    @Query("""SELECT DownloadJobItem.* FROM
+        DownloadJobItem WHERE djiDjUid = :djUid AND
+        djiContentEntryUid = (SELECT djRootContentEntryUid FROM DownloadJob WHERE djUid = :djUid)""")
+    abstract fun findRootForDownloadJob(djUid: Int): DownloadJobItem?
+
 
     @Query("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
     abstract fun getLiveStatus(djiUid: Int): DoorLiveData<Int>
@@ -140,11 +108,27 @@ abstract class DownloadJobItemDao {
              AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
              AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
              AND (((SELECT connectivityState FROM ConnectivityStatus) =  ${ConnectivityStatus.STATE_UNMETERED} ) 
-             OR ((SELECT connectivityState FROM ConnectivityStatus) = ${ConnectivityStatus.STATE_METERED} ) 
-             AND DownloadJob.meteredNetworkAllowed) 
-            ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT 6""")
+             OR (((SELECT connectivityState FROM ConnectivityStatus) = ${ConnectivityStatus.STATE_METERED} ) 
+                AND DownloadJob.meteredNetworkAllowed) 
+             OR EXISTS(SELECT laContainerUid FROM LocallyAvailableContainer WHERE 
+                laContainerUid = DownloadJobItem.djiContainerUid)) 
+             ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT 6""")
     @QueryLiveTables(["DownloadJobItem", "ConnectivityStatus", "DownloadJob"])
     abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
+
+    @Query("""SELECT DownloadJobItem.* FROM DownloadJobItem 
+            LEFT JOIN DownloadJob ON DownloadJobItem.djiDjUid = DownloadJob.djUid 
+            WHERE 
+             DownloadJobItem.djiContainerUid != 0 
+             AND DownloadJobItem.djiStatus >= ${JobStatus.WAITING_MIN} 
+             AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
+             AND (:unmeteredNetworkAvailable OR DownloadJob.meteredNetworkAllowed 
+             OR EXISTS(SELECT laContainerUid FROM LocallyAvailableContainer WHERE 
+                laContainerUid = DownloadJobItem.djiContainerUid))
+            ORDER BY DownloadJob.timeRequested, DownloadJobItem.djiUid LIMIT :limit
+    """)
+    abstract fun findNextDownloadJobItems2(limit: Int, unmeteredNetworkAvailable: Boolean): List<DownloadJobItem>
+
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid " +
@@ -164,6 +148,13 @@ abstract class DownloadJobItemDao {
             "WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
     abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
+
+    @Query("""SELECT Container.containerUid, Container.mimeType from DownloadJobItem 
+        LEFT JOIN Container ON DownloadJobItem.djiContainerUid = Container.containerUid 
+        WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid AND DownloadJobItem.djiStatus = $COMPLETE
+        ORDER BY Container.cntLastModified DESC LIMIT 1
+    """)
+    abstract suspend fun findMostRecentContainerDownloaded(contentEntryUid: Long): ContainerUidAndMimetype?
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +
@@ -228,4 +219,30 @@ abstract class DownloadJobItemDao {
     @Query("SELECT * FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid")
     abstract fun findByDownloadJobUid(downloadJobUid: Int): List<DownloadJobItem>
 
+    @Query("""UPDATE DownloadJobItem SET djiStatus = :status, 
+        downloadedSoFar = :downloadedSoFar, 
+        downloadLength = :downloadLength
+        WHERE djiUid = :djiUid""")
+    abstract fun updateStatusAndProgress(djiUid: Int, status: Int, downloadedSoFar: Long, downloadLength: Long)
+
+    @Transaction
+    open fun updateStatusAndProgressList(downloadJobItems: List<DownloadJobItem>) {
+        downloadJobItems.forEach {
+            updateStatusAndProgress(it.djiUid, it.djiStatus, it.downloadedSoFar, it.downloadLength)
+        }
+    }
+
+    @Query("""SELECT djiUid, djiStatus FROM DownloadJobItem WHERE djiUid IN 
+        (SELECT djiChildDjiUid FROM DownloadJobItemParentChildJoin WHERE djiParentDjiUid = :parentDjiUid)""")
+    abstract fun getUidAndStatusByParentJobItem(parentDjiUid: Int): List<DownloadJobItemUidAndStatus>
+
+
+    /**
+     * Update the status of any waiting items.
+     */
+    @Query("""UPDATE DownloadJobItem SET djiStatus = :status 
+            WHERE djiDjUid = :downloadJobId
+            AND DownloadJobItem.djiStatus < ${JobStatus.RUNNING_MIN} 
+            AND DownloadJobItem.djiUid NOT IN (:excludedJobItemUids)""")
+    abstract fun updateWaitingItemStatus(downloadJobId: Int, status: Int, excludedJobItemUids: List<Int>)
 }

@@ -79,6 +79,10 @@ dependencies {
     // Paging
     implementation "androidx.paging:paging-runtime:$version_androidx_paging"
 
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+
     implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
 

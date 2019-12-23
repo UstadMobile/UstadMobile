@@ -37,6 +37,11 @@ allprojects {
         maven {
             url "https://devserver2.ustadmobile.com/repo-mvn"
         }
+
+        maven {
+            url  "https://dl.bintray.com/ustadmobile/maven"
+        }
+
         maven {
             url "https://kotlin.bintray.com/kotlinx"
         }
@@ -59,12 +64,12 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.2.12"
+version = "0.2.14"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 166
+    ustadVersionCode = 167
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"
@@ -114,8 +119,9 @@ ext {
     version_postgres_jdbc = "42.2.5"
     version_log4j = "2.8.2"
     version_exo_player = "2.8.4"
-    version_napier = "0.0.6"
+    version_napier = "1.1.0"
     version_tellh_recyclertreeview = "1.2.0"
+    version_logback = "1.0.13"
 
     version_android_buildtools = "29.0.0"
     version_android_compile_sdk = 29
@@ -136,7 +142,7 @@ ext {
     version_android_acra = "5.3.0-rc02"
     version_android_junit_runner = "1.1.0"
     version_android_mockito = "3.1.0"
-    version_android_roboelectric = "4.0-beta-1"
+    version_android_roboelectric = "4.3"
     version_android_uiautomator = "2.2.0"
     version_android_maven_publish = "3.6.2"
     version_android_firebase_auth = "16.0.4"

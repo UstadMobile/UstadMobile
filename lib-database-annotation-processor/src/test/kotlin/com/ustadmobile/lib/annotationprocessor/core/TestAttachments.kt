@@ -94,6 +94,7 @@ class TestAttachments {
 
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
                 "token", httpClient, clientTmpAtttachmentsDir.absolutePath)
+                .asConnectedRepository<ExampleDatabase2>()
         val clientEntity = clientRepo.exampleAttachmentDao().findByUid(exampleAttachmentEntity.eaUid)!!
         val clientFilename = clientRepo.exampleAttachmentDao().getAttachmentDataFileName(clientEntity)
 
@@ -107,6 +108,7 @@ class TestAttachments {
         runBlocking {
             val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
                     "token", httpClient, clientTmpAtttachmentsDir.absolutePath)
+                    .asConnectedRepository<ExampleDatabase2>()
             val exampleAttachmentEntity = ExampleAttachmentEntity()
             exampleAttachmentEntity.eaUid = clientRepo.exampleAttachmentDao().insert(exampleAttachmentEntity)
             clientRepo.exampleAttachmentDao().setAttachmentData(exampleAttachmentEntity,
