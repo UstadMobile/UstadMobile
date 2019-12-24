@@ -16,13 +16,8 @@ import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
-import io.ktor.util.Hash
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -30,11 +25,12 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.collections.HashMap
 
 class ContentEntryDetailPresenterTest {
 
+    private lateinit var relatedJoin: ContentEntryRelatedEntryJoinWithLanguage
+    private lateinit var translatedEntry: ContentEntry
     private lateinit var mockView: ContentEntryDetailView
     private lateinit var statusProvider: DownloadJobItemStatusProvider
 
@@ -93,6 +89,21 @@ class ContentEntryDetailPresenterTest {
         contentEntry = ContentEntry()
         contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
 
+        translatedEntry = ContentEntry()
+        translatedEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(translatedEntry)
+
+        val spanishEnglishJoin = ContentEntryRelatedEntryJoin()
+        spanishEnglishJoin.cerejContentEntryUid = contentEntry.contentEntryUid
+        spanishEnglishJoin.cerejRelatedEntryUid = translatedEntry.contentEntryUid
+        spanishEnglishJoin.cerejRelLanguageUid = 3
+        spanishEnglishJoin.relType = ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION
+        spanishEnglishJoin.cerejUid = umAppDatabase.contentEntryRelatedEntryJoinDao.insert(spanishEnglishJoin)
+
+        relatedJoin = ContentEntryRelatedEntryJoinWithLanguage()
+        relatedJoin.cerejContentEntryUid = contentEntry.contentEntryUid
+        relatedJoin.cerejRelatedEntryUid = translatedEntry.contentEntryUid
+
+
         var container = Container()
         container.containerContentEntryUid = contentEntry.contentEntryUid
         container.fileSize = 10
@@ -109,7 +120,6 @@ class ContentEntryDetailPresenterTest {
         runBlocking {
             whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(contentEntry.contentEntryUid)).thenReturn(downloadJobItemLiveData)
         }
-
 
         args[ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
     }
@@ -136,7 +146,7 @@ class ContentEntryDetailPresenterTest {
 
         verify(mockView, timeout(5000)).setMainButtonEnabled(eq(true))
         verify(mockView, timeout(5000)).setDownloadSize(eq(10))
-        verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf()))
+        verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf(relatedJoin)))
         verify(contentEntryLiveData).observe(any(), any())
 
     }
@@ -151,7 +161,11 @@ class ContentEntryDetailPresenterTest {
             presenter.onCreate(null)
 
             presenter.handleDownloadButtonClick()
-            verify(mockView, timeout(5000)).showDownloadOptionsDialog(any())
+            argumentCaptor<Map<String, String>>() {
+                verify(mockView, timeout(5000)).showDownloadOptionsDialog(capture())
+                Assert.assertEquals(firstValue["contentEntryUid"], contentEntry.contentEntryUid.toString())
+            }
+
         }
 
 
@@ -167,7 +181,9 @@ class ContentEntryDetailPresenterTest {
                 mock(), containerDownloadManager, null, systemImpl, counter)
         presenter.onCreate(null)
 
+        //Used to wait for the presenter to finish setting up
         verify(mockView, timeout(5000)).setDownloadJobItemStatus(any())
+
         presenter.handleDownloadButtonClick()
         goToEntryFnCountDownLatch.await()
         Assert.assertEquals("Go to ContentEntryFunc was called", 0, goToEntryFnCountDownLatch.count)
@@ -182,9 +198,11 @@ class ContentEntryDetailPresenterTest {
                 mock(), containerDownloadManager, null, systemImpl, counter)
         presenter.onCreate(null)
 
-        var args = mapOf(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID to 43L.toString())
+        verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf(relatedJoin)))
 
-        presenter.handleClickTranslatedEntry(43L)
+        var args = mapOf(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
+
+        presenter.handleClickTranslatedEntry(translatedEntry.contentEntryUid)
         verify(systemImpl).go(eq(ContentEntryDetailView.VIEW_NAME), eq(args), any())
 
     }
