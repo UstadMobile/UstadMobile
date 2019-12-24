@@ -17,12 +17,12 @@ import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.liveDataObserverDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -38,6 +38,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   private val localAvailabilityManager: LocalAvailabilityManager?,
                                   private val containerDownloadManager: ContainerDownloadManager?,
                                   private val activeAccount: UmAccount?,
+                                  private val impl: UstadMobileSystemImpl,
                                   private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract) {
 
@@ -49,8 +50,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     private var containerUid: Long? = 0L
 
     private val args = HashMap<String, String?>()
-
-    internal val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
     private lateinit var entryLiveData: DoorLiveData<ContentEntry?>
 
@@ -79,7 +78,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         if (containerDownloadManager != null) {
-            GlobalScope.launch(Dispatchers.Main) {
+            GlobalScope.launch(liveDataObserverDispatcher()) {
                 downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).also {
                     it.observe(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
                 }
@@ -120,7 +119,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                             val person = appRepo.personDao.findByUid(activeAccount.personUid)
                             if (person != null) {
                                 view.runOnUiThread(Runnable {
-                                    view.showEditButton(person.admin && showEditorControls && canShowEditBtn)
+                                    view.setEditButtonVisible(person.admin && showEditorControls && canShowEditBtn)
                                 })
                             }
                         }
@@ -207,7 +206,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     fun handleClickTranslatedEntry(uid: Long) {
         val args = HashMap<String, String>()
         args[ARG_CONTENT_ENTRY_UID] = uid.toString()
-        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
+        impl.go(ContentEntryDetailView.VIEW_NAME, args, context)
     }
 
 
