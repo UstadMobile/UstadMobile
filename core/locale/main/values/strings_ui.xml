@@ -322,6 +322,9 @@
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
+    <string name="invalid_register_code">Invalid Registration Code</string>
+    <string name="enter_register_code">Enter Registration Code</string>
+
     <string name="bar_chart" value="100">Bar Chart</string>
     <string name="line_graph" value="101">Line Graph</string>
 

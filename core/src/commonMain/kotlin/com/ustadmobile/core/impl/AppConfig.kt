@@ -37,4 +37,6 @@ object AppConfig {
 
     const val KEY_NO_IFRAME = "app.no_iframe_domans"
 
+    const val KEY_SHOW_REGISTER_CODE = "app.show_register_code"
+
 }
