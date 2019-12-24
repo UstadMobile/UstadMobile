@@ -136,6 +136,13 @@ task appRun(type: JavaExec) {
     args '-port', '8087'
 }
 
+task appRunDebug(type: JavaExec) {
+    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
+    main = 'io.ktor.server.netty.EngineMain'
+    args '-port', '8087'
+    jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
+}
+
 task appRunDevMode(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'

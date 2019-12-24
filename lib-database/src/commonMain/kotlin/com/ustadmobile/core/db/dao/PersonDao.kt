@@ -6,6 +6,7 @@ import androidx.room.Query
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
+import com.ustadmobile.door.util.KmpUuid
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -47,7 +48,7 @@ abstract class PersonDao : BaseDao<Person> {
                         person.passwordHash.substring(2))) {
             null
         } else {
-            onSuccessCreateAccessTokenAsync(person.personUid, username)
+            createAndInsertAccessToken(person.personUid, username)
         }
     }
 
@@ -64,7 +65,7 @@ abstract class PersonDao : BaseDao<Person> {
             val newPersonAuth = PersonAuth(newPerson.personUid,
                     ENCRYPTED_PASS_PREFIX + encryptPassword(password))
             insertPersonAuth(newPersonAuth)
-            return onSuccessCreateAccessTokenAsync(newPerson.personUid, newPerson.username!!)
+            return createAndInsertAccessToken(newPerson.personUid, newPerson.username!!)
         } else {
             throw IllegalArgumentException("Username already exists")
         }
@@ -76,9 +77,10 @@ abstract class PersonDao : BaseDao<Person> {
   /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
     protected abstract fun incrementPrimaryKey()*/
 
-    private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
+    private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
+        accessToken.token = KmpUuid.randomUUID().toString()
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)
     }
