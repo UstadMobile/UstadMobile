@@ -173,6 +173,8 @@ dependencies {
     implementation "io.ktor:ktor-gson:$version_ktor"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.jsoup:jsoup:$version_jsoup"
     implementation "com.google.code.gson:gson:$version_gson"
