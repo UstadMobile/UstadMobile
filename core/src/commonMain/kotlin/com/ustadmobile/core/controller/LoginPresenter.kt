@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -69,6 +70,10 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     account.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(account, context)
+
+                    //make sure the repository knows that it is online
+                    (UmAccountManager.getRepositoryForActiveAccount(context) as DoorDatabaseRepository)
+                            .connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
                     impl.go(mNextDest, context)
                 } else {
                     view.runOnUiThread(Runnable {
