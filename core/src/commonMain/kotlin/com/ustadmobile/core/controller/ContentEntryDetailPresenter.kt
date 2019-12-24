@@ -22,9 +22,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import kotlinx.coroutines.*
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -121,7 +119,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                             val person = appRepo.personDao.findByUid(activeAccount.personUid)
                             if (person != null) {
                                 view.runOnUiThread(Runnable {
-                                    view.showEditButton(person.admin && showEditorControls && canShowEditBtn)
+                                    view.setEditButtonVisible(person.admin && showEditorControls && canShowEditBtn)
                                 })
                             }
                         }
