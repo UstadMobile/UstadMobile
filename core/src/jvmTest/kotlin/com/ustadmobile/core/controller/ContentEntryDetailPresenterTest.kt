@@ -131,7 +131,7 @@ class ContentEntryDetailPresenterTest {
 
         var presenter = ContentEntryDetailPresenter(context, args, mockView,
                 true, repoSpy, umAppDatabase,
-                mock(), containerDownloadManager, systemImpl)
+                mock(), containerDownloadManager, null, systemImpl)
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000)).setMainButtonEnabled(eq(true))
@@ -147,7 +147,7 @@ class ContentEntryDetailPresenterTest {
         runBlocking {
             var presenter = ContentEntryDetailPresenter(context, args, mockView,
                     true, umAppRepository, umAppDatabase,
-                    mock(), containerDownloadManager, systemImpl, counter)
+                    mock(), containerDownloadManager, null, systemImpl, counter)
             presenter.onCreate(null)
 
             presenter.handleDownloadButtonClick()
@@ -164,7 +164,7 @@ class ContentEntryDetailPresenterTest {
 
         var presenter = ContentEntryDetailPresenter(context, args, mockView,
                 true, umAppRepository, umAppDatabase,
-                mock(), containerDownloadManager, systemImpl, counter)
+                mock(), containerDownloadManager, null, systemImpl, counter)
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000)).setDownloadJobItemStatus(any())
