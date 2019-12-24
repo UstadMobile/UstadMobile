@@ -182,21 +182,6 @@ class LoginPresenterTest {
         createPresenterClickRegisterAndEnterRegistrationCode("123")
 
         verify(impl, timeout(5000)).go(eq(Register2View.VIEW_NAME), any(), any())
-       /* doAnswer {
-            "123"
-        }.`when`(impl).getAppConfigString(eq(AppConfig.KEY_SHOW_REGISTER_CODE), any(), any())
-
-        doAnswer {
-            "Enter Registration Code"
-        }.`when`(impl).getString(eq(MessageID.enter_register_code), any())
-
-        doAnswer {
-            "Cancel"
-        }.`when`(impl).getString(eq(MessageID.cancel), any())
-
-        doAnswer {
-            "Ok"
-        }.`when`(impl).getString(eq(MessageID.ok), any())*/
 
     }
 
