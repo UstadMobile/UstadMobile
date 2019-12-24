@@ -70,7 +70,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryLiveData.observe(this, ::onEntryChanged)
 
         GlobalScope.launch {
-            val result = appDb.containerDao.getMostRecentContainerForContentEntryAsync(entryUuid)
+            val result = appRepo.containerDao.getMostRecentContainerForContentEntryAsync(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setMainButtonEnabled(result != null)
                 view.setDownloadSize(result?.fileSize ?: 0)
