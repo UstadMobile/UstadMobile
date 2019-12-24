@@ -108,7 +108,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         if (code == registerCode) {
             goToRegisterView()
         } else {
-            view.showSnackBarNotification(impl.getString(MessageID.invalid_register_code, context), {}, 0 )
+            view.showSnackBarNotification(impl.getString(MessageID.invalid_register_code, context), {}, 0)
         }
     }
 
