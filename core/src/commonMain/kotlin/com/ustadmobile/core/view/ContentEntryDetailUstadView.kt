@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import kotlin.js.JsName
 
-interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier, UstadViewWithProgress {
+interface ContentEntryDetailView : ContentWithOptionsView, UstadViewWithSnackBar, UstadViewWithProgress {
 
     @JsName("setContentEntry")
     fun setContentEntry(contentEntry: ContentEntry)

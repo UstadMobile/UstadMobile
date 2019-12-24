@@ -26,7 +26,7 @@ abstract class ShowErrorUmHttpResponseCallback(private val view: UstadViewWithSn
 
     override fun onFailure(call: UmHttpCall, exception: Exception) {
         view.runOnUiThread(Runnable {
-            view.showErrorNotification(UstadMobileSystemImpl.instance.getString(errorMessageId,
+            view.showSnackBarNotification(UstadMobileSystemImpl.instance.getString(errorMessageId,
                     view.viewContext),{}, 0)
             })
     }
