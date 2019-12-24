@@ -179,7 +179,7 @@ class ContentEntryDetailPresenterTest {
 
         var presenter = ContentEntryDetailPresenter(context, args, mockView,
                 true, umAppRepository, umAppDatabase,
-                mock(), containerDownloadManager, systemImpl, counter)
+                mock(), containerDownloadManager, null, systemImpl, counter)
         presenter.onCreate(null)
 
         var args = mapOf(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID to 43L.toString())
@@ -198,7 +198,7 @@ class ContentEntryDetailPresenterTest {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_FULL_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView, true, umAppDatabase, umAppRepository, mock(), mock(), UstadMobileSystemImpl.instance)
+                args, mockView!!,true, umAppDatabase, umAppRepository, mock(), mock(), null, UstadMobileSystemImpl.instance)
         presenter.onCreate(args)
 
         val argsresult = Hashtable<String, String>()
@@ -221,7 +221,7 @@ class ContentEntryDetailPresenterTest {
         args[UstadMobileSystemCommon.ARG_REFERRER] = REFERRER_NO_PATH
 
         val presenter = ContentEntryDetailPresenter(context,
-                args, mockView, true, umAppDatabase, umAppRepository, mock(), mock(), UstadMobileSystemImpl.instance)
+                args, mockView!!,true, umAppDatabase, umAppRepository, mock(), mock(), null, UstadMobileSystemImpl.instance)
         presenter.onCreate(args)
 
         args.remove(UstadMobileSystemCommon.ARG_REFERRER)

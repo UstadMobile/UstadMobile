@@ -91,16 +91,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
-                GlobalScope.launch{
-
-        }
-
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
                 umAppRepository, UmAppDatabase.getInstance(baseContext),
                 networkManagerBle.localAvailabilityManager,
                 networkManagerBle.containerDownloadManager,
+                UmAccountManager.getActiveAccount(viewContext),
                 UstadMobileSystemImpl.instance)
         presenter.handleShowEditControls(showControls)
         presenter.onCreate(bundleToMap(Bundle()))

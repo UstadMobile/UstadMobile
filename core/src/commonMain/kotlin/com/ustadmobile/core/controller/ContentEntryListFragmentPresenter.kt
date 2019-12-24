@@ -13,6 +13,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -21,7 +22,8 @@ import kotlin.js.JsName
 class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String?>,
                                         private val fragmentViewContract: ContentEntryListFragmentView,
                                         private val contentEntryDao: ContentEntryDao,
-                                        private val contentEntryDaoRepo: ContentEntryDao)
+                                        private val contentEntryDaoRepo: ContentEntryDao,
+                                        private val activeAccount: UmAccount?)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
 
     private var filterByLang: Long = 0
@@ -61,7 +63,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0)
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid ?: 0)
         fragmentViewContract.setContentEntryProvider(provider)
 
         try {
@@ -120,7 +122,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         fragmentViewContract.setContentEntryProvider(contentEntryDao.downloadedRootItems())
     }
 
-    private fun showRecycledEntries(){
+    private fun showRecycledEntries() {
         fragmentViewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
     }
 
@@ -141,13 +143,13 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid ?: 0))
     }
 
     @JsName("handleUpNavigation")

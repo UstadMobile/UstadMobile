@@ -50,7 +50,7 @@ data class ConcatenatedPartSource(val src: ()-> InputStream, val length: Long,
  * (sum of part data length) + (number parts x 24bytes) + 4 bytes
  *
  */
-class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>): InputStream() {
+class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>): KioInputStream() {
 
     private val parts: List<ConcatenatedPartSource>
 

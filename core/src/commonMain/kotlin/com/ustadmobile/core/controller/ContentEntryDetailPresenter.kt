@@ -23,6 +23,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITO
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import kotlinx.coroutines.*
+import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 
@@ -34,6 +39,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   private val appDb: UmAppDatabase,
                                   private val localAvailabilityManager: LocalAvailabilityManager?,
                                   private val containerDownloadManager: ContainerDownloadManager?,
+                                  private val activeAccount: UmAccount?,
                                   private val impl: UstadMobileSystemImpl,
                                   private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract) {
@@ -107,12 +113,19 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             if (currentContentEntry != entry) {
                 currentContentEntry = entry
                 view.setContentEntryLicense(licenseType)
-                with(entry) {
-                    val canShowEditBtn = (((this.contentFlags and FLAG_CONTENT_EDITOR) == FLAG_CONTENT_EDITOR)
-                            || (this.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED)
-                    view.runOnUiThread(Runnable {
-                        view.showEditButton(showEditorControls && canShowEditBtn)
-                    })
+                GlobalScope.launch {
+                    with(entry) {
+                        val canShowEditBtn = (((this.contentFlags and FLAG_CONTENT_EDITOR) == FLAG_CONTENT_EDITOR)
+                                || (this.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED)
+                        if (activeAccount != null) {
+                            val person = appRepo.personDao.findByUid(activeAccount.personUid)
+                            if (person != null) {
+                                view.runOnUiThread(Runnable {
+                                    view.showEditButton(person.admin && showEditorControls && canShowEditBtn)
+                                })
+                            }
+                        }
+                    }
                 }
                 view.setContentEntry(entry)
             }
