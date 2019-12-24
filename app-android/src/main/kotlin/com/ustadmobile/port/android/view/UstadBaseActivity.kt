@@ -38,7 +38,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.UstadViewWithProgress
-import com.ustadmobile.core.view.ViewWithErrorNotifier
+import com.ustadmobile.core.view.UstadViewWithSnackBar
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
@@ -56,7 +56,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener, UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadViewWithSnackBar, ShakeDetector.Listener, UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -244,7 +244,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param actionMessageId id of action name
      * @param action          action listener
      */
-    override fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBarNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
         val snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG)
         val impl = instance
         if (actionMessageId != 0) {

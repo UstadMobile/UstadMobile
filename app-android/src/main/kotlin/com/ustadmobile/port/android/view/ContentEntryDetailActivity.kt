@@ -270,7 +270,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String) {
-        showErrorNotification(message, {
+        showSnackBarNotification(message, {
             var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
@@ -284,7 +284,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun showFileOpenError(message: String) {
-        showErrorNotification(message, {}, 0)
+        showSnackBarNotification(message, {}, 0)
     }
 
 

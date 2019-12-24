@@ -72,8 +72,8 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
             container.orientation = LinearLayout.VERTICAL
             val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT)
-            val dp = UMAndroidUtil.convertPixelsToDp(100f)
-            lp.setMargins(dp, 0, dp, 0)
+            val pixels = UMAndroidUtil.convertDpToPixel(24)
+            lp.setMargins(pixels, 0, pixels, 0)
             val input = EditText(this)
             input.layoutParams = lp
             input.requestLayout()

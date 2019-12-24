@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
@@ -34,6 +35,10 @@ abstract class PersonDao : BaseDao<Person> {
 
         var personUid: Long = 0
     }
+
+    @JsName("insertOrReplace")
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertOrReplace(person: Person)
 
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
@@ -73,9 +78,6 @@ abstract class PersonDao : BaseDao<Person> {
 
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
-
-  /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun incrementPrimaryKey()*/
 
     private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
@@ -132,13 +134,6 @@ abstract class PersonDao : BaseDao<Person> {
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findByUid(uid: Long): Person?
-
-    @Query("SELECT Count(*) FROM Person")
-    abstract fun countAll(): Long
-
-    @JsName("getAllPerson")
-    @Query("SELECT * FROM Person")
-    abstract fun getAllPerson(): List<Person>
 
     companion object {
 
