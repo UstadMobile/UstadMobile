@@ -79,7 +79,7 @@ class LoginPresenterTest {
 
         presenter.onCreate(mapOf())
 
-        presenter.handleCreateAccount()
+        presenter.handleClickCreateAccount()
 
         verify(impl, times(1)).go(any(), any(), any())
 
@@ -143,6 +143,25 @@ class LoginPresenterTest {
         verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
         verify(impl, timeout(5000)).getString(MessageID.login_network_error, context)
     }
+
+    @Test
+    fun givenNoRegistrationCode_whenUserClicksRegister_thenGotToRegisterView(){
+
+    }
+
+
+    @Test
+    fun givenRegistrationCode_whenUserClicksRegister_thenShowDialogAndCheckCodeAndGoToRegisterViewifCorrect(){
+
+
+    }
+
+    @Test
+    fun givenRegistrationCode_whenUserClicksRegister_thenShowDialogAndCheckCode(){
+
+
+    }
+
 
 
     companion object {

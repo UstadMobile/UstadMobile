@@ -3,16 +3,16 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.port.android.impl.UserFeedbackException
+import org.acra.ACRA
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
@@ -61,7 +61,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         }
 
         registerNow.setOnClickListener {
-            mPresenter.handleCreateAccount()
+            mPresenter.handleClickCreateAccount()
         }
     }
 
@@ -97,6 +97,21 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun showRegisterCodeDialog(title: String, okButtonText: String, cancelButtonText: String) {
+
+        var editText = EditText(baseContext)
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+        builder.setPositiveButton(okButtonText){  dialogInterface , _ ->
+            mPresenter.handleRegisterCodeDialogEntered(editText.text.toString())
+        }
+        builder.setNegativeButton(cancelButtonText){ dialogInterface, _ ->
+            dialogInterface.cancel()
+        }
+
     }
 
     override fun setRegistrationLinkVisible(visible: Boolean) {

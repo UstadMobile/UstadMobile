@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import kotlin.js.JsName
 
-interface UstadViewWithProgress {
+interface UstadViewWithProgress : UstadView {
     @JsName("showBaseProgressBar")
     fun showBaseProgressBar(showProgress: Boolean)
 

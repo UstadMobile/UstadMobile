@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.view.ViewWithErrorNotifier
+import com.ustadmobile.core.view.UstadViewWithSnackBar
 
 /**
  * Utility callback that will automatically call the showErrorNotification on a view if the
@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.ViewWithErrorNotifier
  *
  * @param <T> Callback type
 </T> */
-abstract class ShowErrorUmCallback<T>(private val view: ViewWithErrorNotifier, private val errorMessage: Int) : UmCallback<T> {
+abstract class ShowErrorUmCallback<T>(private val view: UstadViewWithSnackBar, private val errorMessage: Int) : UmCallback<T> {
 
     override fun onFailure(exception: Throwable?) {
         view.showErrorNotification(UstadMobileSystemImpl.instance.getString(
