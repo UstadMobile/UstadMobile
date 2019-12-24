@@ -161,6 +161,7 @@ task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
 }
 
 appRun.dependsOn(shadowJar)
+appRunDebug.dependsOn(shadowJar)
 appRunDevMode.dependsOn(shadowJar)
 
 prepareResources.dependsOn(addWelcomeFileToWebXml,":app-angular:buildProd")
