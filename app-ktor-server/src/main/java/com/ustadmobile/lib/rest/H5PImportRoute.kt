@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.H5PImportData
+import io.github.bonigarcia.wdm.WebDriverManager
 import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -32,6 +33,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.logging.LogEntry
 import org.openqa.selenium.logging.LogType
 import org.openqa.selenium.logging.LoggingPreferences
@@ -198,7 +200,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
     try {
         runBlocking {
 
-            System.setProperty("chromedriver", findSystemCommand("chromedriver", "chromedriver"))
+            WebDriverManager.chromedriver().setup()
             val driver = setupLogIndexChromeDriver()
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
@@ -422,12 +424,12 @@ fun getNameFromUrl(url: URL): String {
  * @return Chrome Driver with Log enabled
  */
 fun setupLogIndexChromeDriver(): ChromeDriver {
-    val desiredCapabilities = DesiredCapabilities.chrome()
     val logPrefs = LoggingPreferences()
     logPrefs.enable(LogType.PERFORMANCE, Level.ALL)
-    desiredCapabilities.setCapability("goog:loggingPrefs", logPrefs)
 
-    return ChromeDriver(desiredCapabilities)
+    val options = ChromeOptions()
+    options.setCapability("goog:loggingPrefs", logPrefs)
+    return ChromeDriver(options)
 }
 
 suspend fun waitForNewFiles(driver: ChromeDriver): List<LogEntry> {
