@@ -23,14 +23,15 @@ import kotlin.js.JsName
 class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView, val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
-    private var mNextDest: String
-    private var registerCode: String
+    private val mNextDest: String
+    private val registerCode: String
 
     init {
         mNextDest = arguments[ARG_NEXT] ?: impl.getAppConfigString(
                 AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
 
-        registerCode = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER_CODE, "", context) ?: ""
+        registerCode = (impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER_CODE, "", context) ?: "")
+                .trim()
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {

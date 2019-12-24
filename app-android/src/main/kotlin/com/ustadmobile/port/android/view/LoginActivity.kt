@@ -11,8 +11,9 @@ import com.ustadmobile.core.controller.LoginPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.port.android.impl.UserFeedbackException
-import org.acra.ACRA
+import android.widget.LinearLayout
+import com.ustadmobile.core.impl.UMAndroidUtil
+
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
@@ -101,16 +102,27 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
     override fun showRegisterCodeDialog(title: String, okButtonText: String, cancelButtonText: String) {
 
-        var editText = EditText(baseContext)
+        val container = LinearLayout(this)
+        container.orientation = LinearLayout.VERTICAL
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT)
+        val pixels = UMAndroidUtil.convertDpToPixel(24)
+        lp.setMargins(pixels, 0, pixels, 0)
+        val input = EditText(this)
+        input.layoutParams = lp
+        input.requestLayout()
+        container.addView(input, lp)
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
         builder.setPositiveButton(okButtonText){  dialogInterface , _ ->
-            mPresenter.handleRegisterCodeDialogEntered(editText.text.toString())
+            mPresenter.handleRegisterCodeDialogEntered(input.text.toString())
         }
         builder.setNegativeButton(cancelButtonText){ dialogInterface, _ ->
             dialogInterface.cancel()
         }
+        builder.setView(container)
+        builder.show()
 
     }
 

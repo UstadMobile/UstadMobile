@@ -155,11 +155,34 @@ class LoginPresenterTest {
 
     }
 
+    private fun createPresenterClickRegisterAndEnterRegistrationCode(registrationCodeEntered: String) {
+        whenever(impl.getAppConfigString(eq(AppConfig.KEY_SHOW_REGISTER_CODE), any(), any())).doReturn("123")
+        whenever(impl.getString(eq(MessageID.enter_register_code), any())).doReturn("Enter Registration Code")
+        whenever(impl.getString(eq(MessageID.ok), any())).doReturn("Ok")
+        whenever(impl.getString(eq(MessageID.cancel), any())).doReturn("Cancel")
+        whenever(impl.getString(eq(MessageID.invalid_register_code), any())).doReturn("Invalid Registration Code")
+
+        mockWebServer.shutdown()
+        val httpUrl = mockWebServer.url("/").toString()
+        val presenter = LoginPresenter(context,
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+
+        presenter.handleClickCreateAccount()
+
+        verify(view, timeout(1000)).showRegisterCodeDialog(eq("Enter Registration Code"), eq("Ok"), eq("Cancel"))
+
+        presenter.handleRegisterCodeDialogEntered(registrationCodeEntered)
+
+
+    }
 
     @Test
     fun givenRegistrationCode_whenUserClicksRegister_thenShowDialogAndCheckCodeAndGoToRegisterViewifCorrect(){
 
-        doAnswer {
+        createPresenterClickRegisterAndEnterRegistrationCode("123")
+
+        verify(impl, timeout(5000)).go(eq(Register2View.VIEW_NAME), any(), any())
+       /* doAnswer {
             "123"
         }.`when`(impl).getAppConfigString(eq(AppConfig.KEY_SHOW_REGISTER_CODE), any(), any())
 
@@ -173,58 +196,14 @@ class LoginPresenterTest {
 
         doAnswer {
             "Ok"
-        }.`when`(impl).getString(eq(MessageID.ok), any())
-
-        mockWebServer.shutdown()
-        val httpUrl = mockWebServer.url("/").toString()
-        val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
-
-
-
-        presenter.handleClickCreateAccount()
-
-        verify(view, timeout(1000)).showRegisterCodeDialog(eq("Enter Registration Code"), eq("Ok"), eq("Cancel"))
-
-        presenter.handleRegisterCodeDialogEntered("123")
-
-        verify(impl, timeout(5000)).go(eq(Register2View.VIEW_NAME), any(), any())
+        }.`when`(impl).getString(eq(MessageID.ok), any())*/
 
     }
 
     @Test
     fun givenRegistrationCode_whenUserClicksRegister_thenShowDialogAndCheckCodeAndDisplaySnackBarForIncorrectCode(){
 
-        doAnswer {
-            "123"
-        }.`when`(impl).getAppConfigString(eq(AppConfig.KEY_SHOW_REGISTER_CODE), any(), any())
-
-        doAnswer {
-            "Enter Registration Code"
-        }.`when`(impl).getString(eq(MessageID.enter_register_code), any())
-
-        doAnswer {
-            "Cancel"
-        }.`when`(impl).getString(eq(MessageID.cancel), any())
-
-        doAnswer {
-            "Ok"
-        }.`when`(impl).getString(eq(MessageID.ok), any())
-
-        doAnswer {
-            "Invalid Registration Code"
-        }.`when`(impl).getString(eq(MessageID.invalid_register_code), any())
-
-        mockWebServer.shutdown()
-        val httpUrl = mockWebServer.url("/").toString()
-        val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
-
-        presenter.handleClickCreateAccount()
-
-        verify(view, timeout(1000)).showRegisterCodeDialog(eq("Enter Registration Code"), eq("Ok"), eq("Cancel"))
-
-        presenter.handleRegisterCodeDialogEntered("111")
+        createPresenterClickRegisterAndEnterRegistrationCode("111")
 
         verify(view, timeout(5000)).showSnackBarNotification(eq("Invalid Registration Code"), any(), any())
 
