@@ -112,6 +112,7 @@ ext {
     version_apache_commons_pool2 = "2.6.0"
     version_jsoup = "1.11.3"
     version_selenium = "3.141.59"
+    version_chrome_manager = "3.7.1"
     version_nv_lang = "1.23"
     version_web_driver = "3.6.2"
     version_jersey = "2.27"
