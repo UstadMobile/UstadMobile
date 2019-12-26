@@ -205,6 +205,19 @@ abstract class DownloadJobItemDao {
         } while(childItems.isNotEmpty())
     }
 
+    /**
+     * Runs a given function block for each level of child download job items
+     */
+    suspend fun forAllChildDownloadJobItemsRecursiveAsync(parentDownloadJobUid: Int, block: suspend (batch: List<DownloadJobItem>) -> Unit) {
+        var lastParentUids = listOf(parentDownloadJobUid)
+        block.invoke(listOf(findByUid(parentDownloadJobUid)?: throw IllegalArgumentException("Please provide the parent content Entry")))
+        do {
+            val childItems = findByParentDownloadJobUids(lastParentUids)
+            block.invoke(childItems)
+            lastParentUids = childItems.filter { it.djiContainerUid == 0L }. map { it.djiUid }
+        } while(childItems.isNotEmpty())
+    }
+
 
     @Insert
     abstract fun insertDownloadJobItemParentChildJoin(dj: DownloadJobItemParentChildJoin)

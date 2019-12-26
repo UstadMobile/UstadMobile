@@ -106,34 +106,48 @@ class DownloadDialogPresenterTest {
 
     }
 
-    @Test
-    fun givenExistingDownloadJobNotStarted_whenViewCreated_shouldGetSizeFromDatabase() {
-        val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis())
-        existingDownloadJob.djUid = 1
-        val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L,
-                1L, 1000L).also {
-            it.djiStatus = JobStatus.NOT_QUEUED
-        }
-        val downloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-        val downloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(
-                existingDownloadJobItem)
 
-        val existingDownloadSizeInfo = DownloadJobSizeInfo(4, 1000L)
-        val downloadJobDaoSpy = spy(umAppDatabase.downloadJobDao) {
-            onBlocking { getDownloadSizeInfo(existingDownloadJob.djUid)}.doReturn(existingDownloadSizeInfo)
-        }
-        umAppDatabase = spy(umAppDatabase) {
-            on { downloadJobDao }.thenReturn(downloadJobDaoSpy)
-        }
+    private data class MockDownloadJob(var mockDownloadJob: DownloadJob, var mockDownloadJobItem: DownloadJobItem,
+                                       var existingDownloadSizeInfo: DownloadJobSizeInfo) {
+    }
 
-        runBlocking {
-            val existingSize = umAppDatabase.downloadJobDao.getDownloadSizeInfo(1)
-            println(existingSize)
+    private fun setupMockDownloadJob(djStatus: Int): MockDownloadJob {
+        return runBlocking {
+            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
+                it.djUid = 1
+                it.djStatus = djStatus
+            }
+
+            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L,
+                    1L, 1000L).also {
+                it.djiStatus = djStatus
+            }
+            val downloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
+            val downloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(
+                    existingDownloadJobItem)
+
+            val existingDownloadSizeInfo = DownloadJobSizeInfo(4, 1000L)
+            val downloadJobDaoSpy = spy(umAppDatabase.downloadJobDao) {
+                onBlocking { getDownloadSizeInfo(existingDownloadJob.djUid)}.doReturn(existingDownloadSizeInfo)
+            }
+            umAppDatabase = spy(umAppDatabase) {
+                on { downloadJobDao }.thenReturn(downloadJobDaoSpy)
+            }
+
             whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
                     .thenReturn(downloadJobItemLiveData)
             whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
                     .thenReturn(downloadJobLiveData)
 
+            MockDownloadJob(existingDownloadJob, existingDownloadJobItem, existingDownloadSizeInfo)
+        }
+    }
+
+    @Test
+    fun givenExistingDownloadJobNotStarted_whenViewCreated_shouldGetSizeFromDatabase() {
+        val mockExistingDownloadJob = setupMockDownloadJob(JobStatus.NOT_QUEUED)
+
+        runBlocking {
             val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
@@ -143,8 +157,54 @@ class DownloadDialogPresenterTest {
             presenter.onCreate(mapOf())
             presenter.onStart()
 
-            verify(mockedDialogView, timeout(5000 * 1000)).setStatusText(any(),
-                    eq(4), eq(UMFileUtil.formatFileSize(contentEntrySet.totalBytesToDownload)))
+            verify(mockedDialogView, timeout(5000)).setStatusText(any(),
+                    eq(mockExistingDownloadJob.existingDownloadSizeInfo.numEntries),
+                    eq(UMFileUtil.formatFileSize(mockExistingDownloadJob.existingDownloadSizeInfo.totalSize)))
+        }
+    }
+
+    @Test
+    fun givenExistingDownloadJobCancelled_whenViewCreated_shouldGetSizeFromDatabase() {
+        val mockExistingDownloadJob = setupMockDownloadJob(JobStatus.CANCELED)
+
+        runBlocking {
+            val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
+            presenter = DownloadDialogPresenter(context,
+                    mapOf(ARG_CONTENT_ENTRY_UID to "1"),
+                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    preparerFn)
+
+            presenter.onCreate(mapOf())
+            presenter.onStart()
+
+            verify(mockedDialogView, timeout(5000)).setStatusText(any(),
+                    eq(mockExistingDownloadJob.existingDownloadSizeInfo.numEntries),
+                    eq(UMFileUtil.formatFileSize(mockExistingDownloadJob.existingDownloadSizeInfo.totalSize)))
+        }
+    }
+
+    @Test
+    fun givenExistingDownloadJobPaused_whenViewCreated_thenShouldShowStackedOptions() {
+        val mockExistingDownloadJob = setupMockDownloadJob(JobStatus.PAUSED)
+
+        runBlocking {
+            val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
+            presenter = DownloadDialogPresenter(context,
+                    mapOf(ARG_CONTENT_ENTRY_UID to "1"),
+                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    preparerFn)
+
+            presenter.onCreate(mapOf())
+            presenter.onStart()
+
+            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
+            verify(mockedDialogView, timeout(5000)).setBottomButtonsVisible(false)
+
+            argumentCaptor<IntArray>() {
+                verify(mockedDialogView, timeout(5000)).setStackedOptions(capture(), any())
+                assertArrayEquals("Set expected stacked options", DownloadDialogPresenter.STACKED_OPTIONS,
+                        firstValue)
+            }
         }
     }
 

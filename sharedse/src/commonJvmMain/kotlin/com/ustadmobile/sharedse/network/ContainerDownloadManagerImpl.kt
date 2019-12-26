@@ -216,7 +216,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         return newHolder
     }
 
-    suspend fun commit() = withContext(singleThreadContext){
+    override suspend fun commit() = withContext(singleThreadContext){
         appDb.downloadJobItemDao.updateStatusAndProgressList(entriesToCommit.toList())
         entriesToCommit.clear()
     }
@@ -344,10 +344,12 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
     }
 
-    override suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem) = withContext(singleThreadContext){
+    override suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean) = withContext(singleThreadContext){
         val holder = loadDownloadJobItemHolder(downloadJobItem.djiUid)
         holder.postUpdate(downloadJobItem)
-        commit()
+        if(autoCommit)
+            commit()
+
         if(downloadJobItem != null
                 && (downloadJobItem.djiStatus >= JobStatus.COMPLETE_MIN
                         || downloadJobItem.djiStatus < JobStatus.RUNNING_MIN)) {

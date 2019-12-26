@@ -213,16 +213,15 @@ class DownloadNotificationService : Service() {
         }
     }
 
-    inner class DeleteNotificationHolder(val contentEntryUid: Long) : NotificationHolder2(impl.getString(MessageID.deleting, applicationContext), impl.getString(MessageID.deleting, applicationContext)) {
+    inner class DeleteNotificationHolder(val downloadJobUid: Int) : NotificationHolder2(impl.getString(MessageID.deleting, applicationContext), impl.getString(MessageID.deleting, applicationContext)) {
         init {
             builder.setContentTitle(contentTitle)
                     .setContentText(contentText)
 
             GlobalScope.launch {
-                val contentEntryTitle = umAppDatabase.contentEntryDao.findByUidAsync(contentEntryUid)!!.title
-                        ?: ""
-                builder.setContentTitle(contentEntryTitle)
-                contentTitle = contentEntryTitle
+                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid) ?: ""
+                builder.setContentTitle(downloadJobTitleInDb)
+                contentTitle = downloadJobTitleInDb
                 doNotify()
 
             }
@@ -321,9 +320,9 @@ class DownloadNotificationService : Service() {
             }
         }
 
+        val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
         when (intentAction) {
             ACTION_PREPARE_DOWNLOAD -> {
-                val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: 0
                 val downloadJobNotificationHolder = activeDownloadJobNotifications
                                 .firstOrNull {it.downloadJobUid == downloadJobUid }
                         ?: DownloadJobNotificationHolder(downloadJobUid).also {
@@ -351,7 +350,6 @@ class DownloadNotificationService : Service() {
             }
 
             ACTION_DOWNLOADJOBITEM_STARTED -> {
-                val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
                 var downloadJobNotificationHolder = activeDownloadJobNotifications
                         .firstOrNull { it.downloadJobUid == downloadJobUid }
                 if (downloadJobNotificationHolder == null) {
@@ -366,10 +364,21 @@ class DownloadNotificationService : Service() {
                     downloadJobNotificationHolder.doNotify()
                 }
             }
-            ACTION_DELETE_DOWNLOAD -> {
 
-                val contentEntryUid = intentExtras?.getLong(EXTRA_CONTENT_ENTRY_UID) ?: -1
-                var deleteNotificationHolder = DeleteNotificationHolder(contentEntryUid)
+            ACTION_PAUSE_DOWNLOAD -> {
+                GlobalScope.launch {
+                    networkManagerDeferred.await().containerDownloadManager.pause(downloadJobUid)
+                }
+            }
+
+            ACTION_CANCEL_DOWNLOAD -> {
+                GlobalScope.launch {
+                    networkManagerDeferred.await().containerDownloadManager.cancel(downloadJobUid)
+                }
+            }
+
+            ACTION_DELETE_DOWNLOAD -> {
+                var deleteNotificationHolder = DeleteNotificationHolder(downloadJobUid)
                 activeDeleteJobNotifications.add(deleteNotificationHolder)
 
                 if (!foregroundActive && foregroundNotificationHolder == null) {
@@ -379,7 +388,8 @@ class DownloadNotificationService : Service() {
                 }
 
                 GlobalScope.async {
-                    deleteDownloadJob(umAppDatabase, contentEntryUid) {
+                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
+                    deleteDownloadJob(umAppDatabase, downloadJobUid, containerDownloadManager) {
                         deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
                         deleteNotificationHolder.doNotify()
                     }

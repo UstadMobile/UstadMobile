@@ -38,6 +38,8 @@ fun DownloadJob?.isStatusCompletedSuccessfully() = this?.djStatus?.isStatusCompl
 
 fun DownloadJob?.isStatusCompleted() = this?.djStatus?.isStatusCompleted() ?: false
 
+fun DownloadJob?.isStatusPausedOrQueuedOrDownloading() = this?.djStatus?.isStatusPausedOrQueuedOrDownloading() ?: false
+
 /**
  * Make the root DownloadJobItem for the given DownloadJob
  */

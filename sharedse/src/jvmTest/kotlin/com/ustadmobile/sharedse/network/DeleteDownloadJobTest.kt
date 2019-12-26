@@ -1,7 +1,10 @@
 package com.ustadmobile.sharedse.network
 
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -29,10 +32,13 @@ class DeleteDownloadJobTest{
 
     private var zombieFilePath = "/com/ustadmobile/port/sharedse/container/testfile2.png"
 
-
-
-
     lateinit var db: UmAppDatabase
+
+    lateinit var containerDownloadManager: ContainerDownloadManager
+
+    lateinit var downloadJob: DownloadJob
+
+    lateinit var dwchildofparent: DownloadJobItem
 
     @Before
     fun setup(){
@@ -55,7 +61,7 @@ class DeleteDownloadJobTest{
         var statusDao = db.contentEntryStatusDao
         var dwDao = db.downloadJobDao
 
-        var downloadJob = DownloadJob()
+        downloadJob = DownloadJob()
         downloadJob.djUid = 1
         dwDao.insert(downloadJob)
 
@@ -121,7 +127,7 @@ class DeleteDownloadJobTest{
         rootParentJoin.djiPcjUid = 1
         dwJoinDao.insert(rootParentJoin)
 
-        var dwchildofparent = DownloadJobItem()
+        dwchildofparent = DownloadJobItem()
         dwchildofparent.djiUid = 5
         dwchildofparent.timeStarted = 54545
         dwchildofparent.djiContentEntryUid = 5
@@ -158,27 +164,42 @@ class DeleteDownloadJobTest{
         zombieFileContainerEntry = parentContainerManager.getEntry("testfile2.png")!!
 
 
+        containerDownloadManager = mock()
     }
 
     @Test
     fun givenRootEntry_whenDeleted_checkAllChildrenDeleted(){
-        deleteDownloadJob(db, rootContentEntry.contentEntryUid) {
-            println(it)
+        runBlocking {
+            val successful = deleteDownloadJob(db, downloadJob.djUid, containerDownloadManager) {
+                println(it)
+            }
+
+            verifyBlocking(containerDownloadManager, timeout(5000)) {
+                handleDownloadJobItemUpdated(argThat {
+                    djiUid == dwchildofparent.djiUid && djiStatus == JobStatus.DELETED
+                }, eq(false))
+            }
+
+            Assert.assertTrue("Delete job reports success", successful)
+            Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
+            Assert.assertFalse(File(zombieFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
         }
-
-        Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath).exists())
-        Assert.assertFalse(File(zombieFileContainerEntry.containerEntryFile!!.cefPath).exists())
-
     }
 
     @Test
     fun givenSingleEntry_whenDeleted_checkDeleted(){
-        deleteDownloadJob(db, standAloneEntry.contentEntryUid) {
-            println(it)
+        runBlocking {
+            val successful = deleteDownloadJob(db, downloadJob.djUid, containerDownloadManager) {
+                println(it)
+            }
+
+
+            Assert.assertTrue("Delete job reports success", successful)
+            Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
+            Assert.assertFalse(File(zombieFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
+
         }
 
-        Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath).exists())
-        Assert.assertTrue(File(zombieFileContainerEntry.containerEntryFile!!.cefPath).exists())
 
     }
 

@@ -10,6 +10,9 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
+import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
+import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
@@ -110,9 +113,8 @@ class DownloadDialogPresenter(context: Any,
     }
 
     override fun onChanged(t: DownloadJob?) {
-        val downloadStatus = t?.djStatus ?: -1
         when {
-            downloadStatus >= JobStatus.COMPLETE_MIN && downloadStatus < JobStatus.CANCELED -> {
+            t.isStatusCompletedSuccessfully() -> {
                 deleteFileOptions = true
                 view.setStackOptionsVisible(false)
                 view.setBottomButtonsVisible(true)
@@ -125,7 +127,7 @@ class DownloadDialogPresenter(context: Any,
                 view.setWifiOnlyOptionVisible(false)
             }
 
-            downloadStatus >= JobStatus.RUNNING_MIN && downloadStatus < JobStatus.COMPLETE_MIN -> {
+            t.isStatusPausedOrQueuedOrDownloading() -> {
                 deleteFileOptions = false
                 view.setStackOptionsVisible(true)
                 view.setBottomButtonsVisible(false)
@@ -152,7 +154,8 @@ class DownloadDialogPresenter(context: Any,
         }
 
         val currentJobSizeTotals = jobSizeTotals.value
-        if(currentJobSizeTotals == null && !jobSizeLoading.compareAndSet(true, true)) {
+        if(!t.isStatusPausedOrQueuedOrDownloading() && !t.isStatusCompletedSuccessfully()
+                && currentJobSizeTotals == null && !jobSizeLoading.compareAndSet(true, true)) {
             GlobalScope.launch {
                 try {
                     val sizeTotals = if(t != null) {
@@ -204,7 +207,7 @@ class DownloadDialogPresenter(context: Any,
         val currentDownloadJobItemVal = currentDownloadJobItem
         if(currentDownloadJobItemVal != null && currentDownloadJobItemVal.djiStatus >= JobStatus.COMPLETE_MIN) {
             //There is a completed download and the user wants to delete it
-            requestDelete(contentEntryUid, context)
+            requestDelete(currentDownloadJobItemVal.djiDjUid, containerDownloadManager, context)
         }else if(currentDownloadJobItemVal == null) {
             //there is no existing download job item - create it
             GlobalScope.launch {
