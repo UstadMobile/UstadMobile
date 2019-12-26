@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.google.common.collect.Lists
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
+import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
@@ -10,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.H5PImportData
+import io.github.bonigarcia.wdm.WebDriverManager
 import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -31,6 +33,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.logging.LogEntry
 import org.openqa.selenium.logging.LogType
 import org.openqa.selenium.logging.LoggingPreferences
@@ -112,7 +115,9 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
             val headers = response.headers
 
-            if (headers["Content-Type"]?.startsWith("video/") == true) {
+            val mimetype = headers["Content-Type"]
+
+            if (VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
 
                 if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
                     call.respond(HttpStatusCode.BadRequest, "File size too big")
@@ -160,6 +165,10 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                     fileName =  headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
                 }
 
+                if(FilenameUtils.getExtension(fileName).isNullOrEmpty()){
+                    fileName += VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
+                }
+
                 val videoFile = File(parentDir, fileName)
                 val input = http.get<InputStream>(urlString)
                 FileUtils.copyInputStreamToFile(input, videoFile)
@@ -191,7 +200,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
     try {
         runBlocking {
 
-            System.setProperty("chromedriver", findSystemCommand("chromedriver", "chromedriver"))
+            WebDriverManager.chromedriver().setup()
             val driver = setupLogIndexChromeDriver()
 
             val indexList = mutableListOf<LogIndex.IndexEntry>()
@@ -415,12 +424,12 @@ fun getNameFromUrl(url: URL): String {
  * @return Chrome Driver with Log enabled
  */
 fun setupLogIndexChromeDriver(): ChromeDriver {
-    val desiredCapabilities = DesiredCapabilities.chrome()
     val logPrefs = LoggingPreferences()
     logPrefs.enable(LogType.PERFORMANCE, Level.ALL)
-    desiredCapabilities.setCapability("goog:loggingPrefs", logPrefs)
 
-    return ChromeDriver(desiredCapabilities)
+    val options = ChromeOptions()
+    options.setCapability("goog:loggingPrefs", logPrefs)
+    return ChromeDriver(options)
 }
 
 suspend fun waitForNewFiles(driver: ChromeDriver): List<LogEntry> {

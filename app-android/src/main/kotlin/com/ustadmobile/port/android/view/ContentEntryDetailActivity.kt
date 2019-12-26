@@ -91,16 +91,14 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
-                GlobalScope.launch{
-
-        }
-
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
                 umAppRepository, UmAppDatabase.getInstance(baseContext),
                 networkManagerBle.localAvailabilityManager,
-                networkManagerBle.containerDownloadManager)
+                networkManagerBle.containerDownloadManager,
+                UmAccountManager.getActiveAccount(viewContext),
+                UstadMobileSystemImpl.instance)
         presenter.handleShowEditControls(showControls)
         presenter.onCreate(bundleToMap(Bundle()))
 
@@ -175,16 +173,17 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
 
     @SuppressLint("RestrictedApi")
-    override fun showEditButton(show: Boolean) {
+    override fun setEditButtonVisible(show: Boolean) {
        if(::editButton.isInitialized){
            editButton.visibility = if(show) View.VISIBLE else View.GONE
        }
     }
 
-    override fun showExportContentIcon(visible: Boolean) {
+    override fun setExportContentIconVisible(visible: Boolean){
         this.showExportIcon = visible
         invalidateOptionsMenu()
     }
+
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu!!.findItem(R.id.export_content).isVisible = showExportIcon
@@ -270,23 +269,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         downloadSize!!.text = UMFileUtil.formatFileSize(fileSize)
     }
 
-
-    override fun updateDownloadProgress(progressValue: Float) {
-        downloadProgress!!.progress = progressValue
-    }
-
-    override fun setDownloadButtonVisible(visible: Boolean) {
-        downloadButton.visibility = if (visible) View.VISIBLE else View.GONE
-
-    }
-
-
-    override fun setButtonTextLabel(textLabel: String) {
-        downloadButton.text = textLabel
-    }
-
     override fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String) {
-        showErrorNotification(message, {
+        showSnackBarNotification(message, {
             var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
@@ -300,7 +284,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun showFileOpenError(message: String) {
-        showErrorNotification(message, {}, 0)
+        showSnackBarNotification(message, {}, 0)
     }
 
 
@@ -314,19 +298,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun setLocalAvailabilityStatusViewVisible(visible: Boolean) {
         localAvailabilityStatusIcon!!.visibility = if (visible) View.VISIBLE else View.GONE
         localAvailabilityStatusText!!.visibility = if (visible) View.VISIBLE else View.GONE
-    }
-
-
-    override fun setDownloadProgressVisible(visible: Boolean) {
-        downloadProgress!!.visibility = if (visible) View.VISIBLE else View.GONE
-    }
-
-    override fun setDownloadProgressLabel(progressLabel: String) {
-        downloadProgress!!.statusText = progressLabel
-    }
-
-    override fun setDownloadButtonClickableListener(isDownloadComplete: Boolean) {
-
     }
 
     override fun showDownloadOptionsDialog(map: Map<String, String>) {

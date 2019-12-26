@@ -3,9 +3,11 @@ package com.ustadmobile.core.controller
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.UmAccount
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -79,7 +81,7 @@ class LoginPresenterTest {
 
         presenter.onCreate(mapOf())
 
-        presenter.handleCreateAccount()
+        presenter.handleClickCreateAccount()
 
         verify(impl, times(1)).go(any(), any(), any())
 
@@ -143,6 +145,55 @@ class LoginPresenterTest {
         verify<LoginView>(view, timeout(5000)).setErrorMessage(expectedErrorMsg)
         verify(impl, timeout(5000)).getString(MessageID.login_network_error, context)
     }
+
+    @Test
+    fun givenNoRegistrationCode_whenUserClicksRegister_thenGotToRegisterView(){
+
+        presenter.handleClickCreateAccount()
+
+        verify(impl, timeout(5000)).go(eq(Register2View.VIEW_NAME), any(), any())
+
+    }
+
+    private fun createPresenterClickRegisterAndEnterRegistrationCode(registrationCodeEntered: String) {
+        whenever(impl.getAppConfigString(eq(AppConfig.KEY_SHOW_REGISTER_CODE), any(), any())).doReturn("123")
+        whenever(impl.getString(eq(MessageID.enter_register_code), any())).doReturn("Enter Registration Code")
+        whenever(impl.getString(eq(MessageID.ok), any())).doReturn("Ok")
+        whenever(impl.getString(eq(MessageID.cancel), any())).doReturn("Cancel")
+        whenever(impl.getString(eq(MessageID.invalid_register_code), any())).doReturn("Invalid Registration Code")
+
+        mockWebServer.shutdown()
+        val httpUrl = mockWebServer.url("/").toString()
+        val presenter = LoginPresenter(context,
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+
+        presenter.handleClickCreateAccount()
+
+        verify(view, timeout(1000)).showRegisterCodeDialog(eq("Enter Registration Code"), eq("Ok"), eq("Cancel"))
+
+        presenter.handleRegisterCodeDialogEntered(registrationCodeEntered)
+
+
+    }
+
+    @Test
+    fun givenRegistrationCode_whenUserClicksRegister_thenShowDialogAndCheckCodeAndGoToRegisterViewifCorrect(){
+
+        createPresenterClickRegisterAndEnterRegistrationCode("123")
+
+        verify(impl, timeout(5000)).go(eq(Register2View.VIEW_NAME), any(), any())
+
+    }
+
+    @Test
+    fun givenRegistrationCode_whenUserClicksRegister_thenShowDialogAndCheckCodeAndDisplaySnackBarForIncorrectCode(){
+
+        createPresenterClickRegisterAndEnterRegistrationCode("111")
+
+        verify(view, timeout(5000)).showSnackBarNotification(eq("Invalid Registration Code"), any(), any())
+
+    }
+
 
 
     companion object {

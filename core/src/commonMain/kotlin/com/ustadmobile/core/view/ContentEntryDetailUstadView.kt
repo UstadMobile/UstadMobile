@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import kotlin.js.JsName
 
-interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier, UstadViewWithProgress {
+interface ContentEntryDetailView : ContentWithOptionsView, UstadViewWithSnackBar, UstadViewWithProgress {
 
     @JsName("setContentEntry")
     fun setContentEntry(contentEntry: ContentEntry)
@@ -25,20 +25,11 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("setAvailableTranslations")
     fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>)
 
-    @JsName("updateDownloadProgress")
-    fun updateDownloadProgress(progressValue: Float)
-
-    @JsName("setDownloadButtonVisible")
-    fun setDownloadButtonVisible(visible: Boolean)
-
-    @JsName("setButtonTextLabel")
-    fun setButtonTextLabel(textLabel: String)
-
     @JsName("showFileOpenWithMimeTypeError")
     fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String)
 
-    @JsName("showEditButton")
-    fun showEditButton(show: Boolean)
+    @JsName("setEditButtonVisible")
+    fun setEditButtonVisible(show: Boolean)
 
     @JsName("showFileOpenError")
     fun showFileOpenError(message: String)
@@ -49,20 +40,11 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("setLocalAvailabilityStatusViewVisible")
     fun setLocalAvailabilityStatusViewVisible(visible: Boolean)
 
-    @JsName("setDownloadProgressVisible")
-    fun setDownloadProgressVisible(visible: Boolean)
-
-    @JsName("setDownloadProgressLabel")
-    fun setDownloadProgressLabel(progressLabel: String)
-
-    @JsName("setDownloadButtonClickableListener")
-    fun setDownloadButtonClickableListener(isDownloadComplete: Boolean)
-
     @JsName("showDownloadOptionsDialog")
     fun showDownloadOptionsDialog(map: Map<String, String>)
 
-    @JsName("showExportContentIcon")
-    fun showExportContentIcon(visible: Boolean)
+    @JsName("setExportContentIconVisible")
+    fun setExportContentIconVisible(visible: Boolean)
 
     companion object {
 

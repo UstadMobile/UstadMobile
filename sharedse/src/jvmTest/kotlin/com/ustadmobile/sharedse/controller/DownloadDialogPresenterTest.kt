@@ -237,7 +237,7 @@ class DownloadDialogPresenterTest {
 
             presenter.handleClickPositive()
 
-            verify(containerDownloadManager).enqueue(existingDownloadJob.djUid)
+            verify(containerDownloadManager, timeout(5000)).enqueue(existingDownloadJob.djUid)
         }
 
     }

@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
@@ -13,15 +14,14 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View,
-                         private val personDao: PersonDao)
+                         private val personDao: PersonDao, private val personRepo: PersonDao)
     : UstadBaseController<Register2View>(context, arguments, view) {
 
     private var mNextDest: String? = null
 
     init {
-        if (arguments.containsKey(ARG_NEXT)) {
-            mNextDest = arguments[ARG_NEXT]
-        }
+        mNextDest = arguments[LoginPresenter.ARG_NEXT] ?: UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -50,10 +50,10 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
         GlobalScope.launch {
 
             try {
-                val result = personDao.registerAsync(person, password)
+                val result = personRepo.registerAsync(person, password)
                 if (result != null) {
                     person.personUid = result.personUid
-                    personDao.insertAsync(person)
+                    personDao.insertOrReplace(person)
                     result.endpointUrl = serverUrl
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(result, context)

@@ -3,13 +3,13 @@ package com.ustadmobile.core.view
 /**
  * Represents a view interface that has an error notification capability (e.g. Android Snackbar style)
  */
-interface ViewWithErrorNotifier : UstadView {
+interface UstadViewWithSnackBar : UstadView {
 
     /**
      * Show a snackbar style notification that an error has happened
      *
-     * @param errorMessage Error message to show
+     * @param snackBarMessage message to show
      */
-    fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int)
+    fun showSnackBarNotification(snackBarMessage: String, action: () -> Unit, actionMessageId: Int)
 
 }

@@ -191,14 +191,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         val emptyMessage: Int
         val resource = when {
             isLibrarySection -> {
-                emptyMessage = MessageID.empty_state_libraries
+                emptyMessage = R.string.empty_state_libraries
                 R.drawable.ic_file_download_black_24dp}
             isDownloadedSection -> {
-                emptyMessage = MessageID.empty_state_downloaded
+                emptyMessage = R.string.empty_state_downloaded
                 R.drawable.ic_folder_black_24dp
             }
             else -> {
-                emptyMessage = MessageID.empty_state_recycle
+                emptyMessage = R.string.empty_state_recycle
                 R.drawable.ic_delete_black_24dp
             }
         }
@@ -233,7 +233,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
             presenter = ContentEntryListFragmentPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
-                    umRepoDb.contentEntryDao).also {
+                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context)).also {
                 it.onCreate(bundleToMap(savedInstanceState))
             }
         }
