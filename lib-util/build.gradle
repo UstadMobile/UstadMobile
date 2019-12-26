@@ -12,11 +12,6 @@ apply plugin: 'maven-publish'
 group rootProject.group
 version rootProject.version
 
-ext {
-    version_serialization = "0.11.0"
-    version_napier = "0.0.6"
-}
-
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
@@ -76,7 +71,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
@@ -119,7 +114,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "com.github.aakira:napier-js:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"

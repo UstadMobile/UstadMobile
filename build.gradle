@@ -192,7 +192,7 @@ project.ext.dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"
                      "klock-js":"klock","":"kotlin-test","kotlinx-coroutines-core-js":"kotlinx-coroutines-core",
                      "kotlinx-serialization-runtime-js":"kotlinx-serialization-kotlinx-serialization-runtime",
                      "ktor-client-js":"ktor-ktor-client-js","ktor-client-serialization-js":"ktor-ktor-client-serialization",
-                     "napier-js":"napier","lib-room-annotations":"UstadMobile-lib-room-annotations"]
+                     "napier-js":"Napier-napier","lib-room-annotations":"UstadMobile-lib-room-annotations"]
 def prepareModuleTasks = []
 subprojects { project ->
     afterEvaluate{
