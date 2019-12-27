@@ -35,7 +35,7 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         console.log("DoorDbJs endpoint = $dbEndpoint")
         @Suppress("UNUSED_VARIABLE")
 
-        val newImpl: dynamic = jsImplClass::class.js.createInstance(dbEndpoint, dbName)
+        val newImpl: dynamic = jsImplClass.js.createInstance(dbEndpoint, dbName)
         return newImpl
     }
 

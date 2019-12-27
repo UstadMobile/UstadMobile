@@ -18,7 +18,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.google.gms:google-services:4.3.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -186,59 +186,3 @@ if(project.file("buildconfig.local.properties").exists()) {
 ext.localProperties = new Properties()
 ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 
-
-//Map dependencies with the actual packages inside build/js/node_modules
-project.ext.dependencyMap = ["kotlin-stdlib-js":"kotlin","kmpxmlpullparser-js":"kmpxmlpullparser",
-                     "klock-js":"klock","":"kotlin-test","kotlinx-coroutines-core-js":"kotlinx-coroutines-core",
-                     "kotlinx-serialization-runtime-js":"kotlinx-serialization-kotlinx-serialization-runtime",
-                     "ktor-client-js":"ktor-ktor-client-js","ktor-client-serialization-js":"ktor-ktor-client-serialization",
-                     "napier-js":"Napier-napier","lib-room-annotations":"UstadMobile-lib-room-annotations"]
-def prepareModuleTasks = []
-subprojects { project ->
-    afterEvaluate{
-        if(project.tasks.findByName("jsJar") != null){
-            def fixJsonTask = "fixPackageJsonTask"
-            def packageName = "${rootProject.name}-${project.name}"
-            def modulePath = "${rootProject.file("build/js/node_modules/${packageName}").path}"
-            //add dynamic task to each module except core to fix package.json
-            project.task(fixJsonTask){
-                def ktxSerializationVersion = "0.11.1"
-                try{
-                    new JsonSlurper().parseText(
-                            rootProject.file("build/js/node_modules/kotlinx-serialization-kotlinx-serialization-runtime/package.json").text).version
-                }catch(IOException e){
-                    e.printStackTrace()
-                }
-
-                doLast{
-                    if(!project.name.contains("core")){
-                        def jsonObj = new JSONObject()
-                        jsonObj.put("main","kotlin/${packageName}.js")
-                        jsonObj.put("devDependencies",new JSONObject())
-
-                        def dependencies = new JSONObject()
-                        project.configurations.each {
-                            if (it.name == "jsMainImplementation") {
-                                it.allDependencies.each{ dep ->
-                                    dependencies.put(project.dependencyMap[dep.name],dep.name == "kotlinx-serialization-runtime-js"
-                                            ? ktxSerializationVersion: dep.version)
-                                }
-                                jsonObj.put("dependencies",dependencies)
-                            }
-                        }
-                        jsonObj.put("name","${packageName}")
-                        jsonObj.put("version","${rootProject.version}")
-                        new File("${modulePath}/package.json").write(new JsonBuilder(jsonObj).toPrettyString())
-                    }
-                }
-            }
-            //Run fixJsonTask after running jsJar to each modules
-            project.tasks.findByName(fixJsonTask).shouldRunAfter(project.tasks.findByName("jsJar"))
-            project.tasks.findByName(fixJsonTask).dependsOn(":app-angular:fixRequiredImports")
-            //Add all dynamic tasks to the list
-            prepareModuleTasks.push("${project.path}:${fixJsonTask}")
-        }
-    }
-}
-
-tasks.findByPath(":app-angular:packPreparedModules").dependsOn(tasks.findByPath(":core:build"),prepareModuleTasks)

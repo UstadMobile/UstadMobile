@@ -125,4 +125,7 @@ abstract class ContainerDao : BaseDao<Container> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertWithReplace(container : Container)
+
 }

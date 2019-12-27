@@ -10,7 +10,7 @@ fun <T : Any> JsClass<T>.createInstance(vararg args: dynamic): dynamic {
     @Suppress("UNUSED_VARIABLE")
     val ctor = this
     @Suppress("UNUSED_VARIABLE")
-    val argsArray: dynamic = listOf(null) + args
+    val argsArray = (listOf(null) + args).toTypedArray()
 
     //language=JavaScript 1.6
     return js("new (Function.prototype.bind.apply(ctor, argsArray))")
