@@ -80,7 +80,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                         contentEntry.contentEntryUid = entryDao.insert(contentEntry)
                         parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                        parentChildJoinDao.insert(parentChildJoin)
+                        parentChildJoin.cepcjUid  = parentChildJoinDao.insert(parentChildJoin)
 
                     } else {
 
@@ -140,7 +140,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 if (contentEntryUid == null) {
                     contentEntry.contentEntryUid = entryDao.insert(contentEntry)
                     parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                    parentChildJoinDao.insert(parentChildJoin)
+                    parentChildJoin.cepcjUid = parentChildJoinDao.insert(parentChildJoin)
                 } else {
                     contentEntry.contentEntryUid = contentEntryUid
                     parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid

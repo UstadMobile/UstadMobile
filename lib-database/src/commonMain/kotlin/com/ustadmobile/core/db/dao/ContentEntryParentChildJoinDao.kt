@@ -63,4 +63,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntryParentChildJoin>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertWithReplace(parentChildJoinDao: ContentEntryParentChildJoin)
 }
