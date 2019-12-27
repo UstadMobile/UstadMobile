@@ -84,7 +84,9 @@ task generateAppConfigJsonFile{
         String line = scanner.nextLine()
         if(!line.startsWith("#") && !line.isEmpty()){
           def keyValue = line.split("=")
-          jsonObj.put(keyValue[0].replace(" ",""),keyValue[1].replace(" ",""))
+          if(keyValue.length > 1){
+            jsonObj.put(keyValue[0].replace(" ",""),keyValue[1].replace(" ",""))
+          }
         }
       }
       FileWriter jsonFile = new FileWriter(outFile.absolutePath)
@@ -273,7 +275,11 @@ task updateLibsVersion{
         def versionToUse = entry.getValue()
         if(libFile.exists()){
           def oldVersion = entry.getValue().substring(entry.getValue().lastIndexOf("-") + 1,entry.getValue().length() - 4)
-          versionToUse = entry.getValue().replace(oldVersion, libFile.listFiles()[0].name)
+          def newVersion = libFile.listFiles()[0].name
+          if(libFile.listFiles().length > 1){
+            newVersion = libFile.listFiles()[libFile.listFiles().length -1 ].name
+          }
+          versionToUse = entry.getValue().replace(oldVersion, newVersion)
         }
         dependenciesObj.put(entry.getKey(), versionToUse)
       }
@@ -386,6 +392,7 @@ ngTest.dependsOn(build)
 buildProd.dependsOn(build)
 build.dependsOn(installDependencies)
 fixRequiredImports.dependsOn(fixNodeForgeScript)
+packPreparedModules.dependsOn(":core:build")
 installDependencies.dependsOn(packPreparedModules, updateLibsVersion, deletePackageLockJsonFile)
 installDependencies.finalizedBy(generateLocaleFiles)
 generateLocaleFiles.dependsOn(generateMessageXlfTasks)

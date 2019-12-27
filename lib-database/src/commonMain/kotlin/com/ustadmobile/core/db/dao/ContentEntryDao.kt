@@ -145,6 +145,13 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
+    @Query("SELECT ContentEntry.* FROM ContentEntry "+
+            "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid" +
+            " WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
+    @JsName("getChildrenByAll")
+    abstract fun getChildrenByAll(parentUid: Long): List<ContentEntry>
+
+
     @JsName("findLiveContentEntry")
     @Query("SELECT * FROM ContentEntry where contentEntryUid = :parentUid LIMIT 1")
     abstract fun findLiveContentEntry(parentUid: Long): DoorLiveData<ContentEntry?>

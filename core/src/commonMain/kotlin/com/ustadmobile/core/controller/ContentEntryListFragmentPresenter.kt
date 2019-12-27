@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
