@@ -58,7 +58,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
      * a property, like the root content entry UID, then it might be required to explicitly
      * wait for the loadFromDb method to have finished
      */
-    internal suspend fun awaitLoaded() {
+    suspend fun awaitLoaded() {
         loadJob.await()
     }
 

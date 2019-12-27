@@ -35,10 +35,10 @@ abstract class NetworkManagerBleCommon(
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
-        internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context)) :
+        var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context)) :
         DownloadJobItemStatusProvider {
 
-    abstract internal val umAppDatabaseRepo: UmAppDatabase
+    abstract val umAppDatabaseRepo: UmAppDatabase
 
     private val knownNodesLock = Any()
 
@@ -77,9 +77,10 @@ abstract class NetworkManagerBleCommon(
 
     private lateinit var nextDownloadItemsLiveData: DoorLiveData<List<DownloadJobItem>>
 
-    internal class DownloadQueueLocalAvailabilityObserver(val localAvailabilityManager: LocalAvailabilityManager): DoorObserver<List<DownloadJobItem>> {
+    //Was previously internal: this does not compile since Kotlin 1.3.61
+    class DownloadQueueLocalAvailabilityObserver(val localAvailabilityManager: LocalAvailabilityManager): DoorObserver<List<DownloadJobItem>> {
 
-        internal var currentRequest: AvailabilityMonitorRequest? = null
+        var currentRequest: AvailabilityMonitorRequest? = null
 
         override fun onChanged(t: List<DownloadJobItem>) {
             val prevRequest = currentRequest
