@@ -39,9 +39,6 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("UPDATE ContainerEntryFile SET compression = :compression, ceCompressedSize = :ceCompressedSize WHERE cefUid = :cefUid")
     abstract fun updateCompressedFile(compression: Int, ceCompressedSize: Long, cefUid: Long)
 
-    @Query("SELECT Count(*) from ContainerEntryFile WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid FROM ContainerEntry WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid)")
-    abstract fun countZombieEntries(): Int
-
     @Query("SELECT ContainerEntryFile.* from ContainerEntryFile WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid FROM ContainerEntry WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) LIMIT 100")
     abstract fun findZombieEntries(): List<ContainerEntryFile>
 

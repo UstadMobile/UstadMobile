@@ -18,7 +18,7 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>)
 
-    abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem)
+    abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = false)
 
     abstract suspend fun enqueue(downloadJobId: Int)
 
@@ -29,6 +29,8 @@ abstract class ContainerDownloadManager {
     abstract suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean)
 
     abstract suspend fun handleConnectivityChanged(status: ConnectivityStatus)
+
+    abstract suspend fun commit()
 
     abstract val connectivityLiveData: DoorLiveData<ConnectivityStatus?>
 

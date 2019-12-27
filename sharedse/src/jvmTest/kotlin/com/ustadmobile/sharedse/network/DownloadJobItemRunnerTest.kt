@@ -360,7 +360,7 @@ class DownloadJobItemRunnerTest {
 
             argumentCaptor<DownloadJobItem>().apply {
                 verifyBlocking(containerDownloadManager, atLeastOnce()) {
-                    handleDownloadJobItemUpdated(capture())
+                    handleDownloadJobItemUpdated(capture(), any())
                 }
 
                 Assert.assertTrue("DownloadJobItemRunner send update for status change to running",
@@ -399,7 +399,7 @@ class DownloadJobItemRunnerTest {
 
             argumentCaptor<DownloadJobItem>().apply {
                 verifyBlocking(containerDownloadManager, atLeastOnce()) {
-                    handleDownloadJobItemUpdated(capture())
+                    handleDownloadJobItemUpdated(capture(), any())
                 }
                 Assert.assertEquals("Final status value is completed", JobStatus.COMPLETE,
                         lastValue.djiStatus)
@@ -430,7 +430,7 @@ class DownloadJobItemRunnerTest {
 
             argumentCaptor<DownloadJobItem>().apply {
                 verifyBlocking(containerDownloadManager, atLeastOnce()) {
-                    handleDownloadJobItemUpdated(capture())
+                    handleDownloadJobItemUpdated(capture(), any())
                 }
                 Assert.assertEquals("Final status value is completed", JobStatus.FAILED,
                         lastValue.djiStatus)
@@ -447,7 +447,7 @@ class DownloadJobItemRunnerTest {
             cloudMockDispatcher.throttleBytesPerPeriod = (64 * 1000)
             cloudMockDispatcher.throttlePeriod = 1000
             val queuedStatusLatch = CountDownLatch(1)
-            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any())).thenAnswer{
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).thenAnswer{
                 val argJobItem = it.arguments[0] as DownloadJobItem
                 if(argJobItem.djiStatus == JobStatus.QUEUED)
                     queuedStatusLatch.countDown()
@@ -468,7 +468,7 @@ class DownloadJobItemRunnerTest {
 
             queuedStatusLatch.await(5, TimeUnit.SECONDS)
             argumentCaptor<DownloadJobItem>() {
-                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture())
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
                 Assert.assertEquals("Final status update was jobstatus = queued", JobStatus.QUEUED,
                         lastValue.djiStatus)
             }
@@ -493,7 +493,7 @@ class DownloadJobItemRunnerTest {
                     connectivityStatusLiveData = connectivityStatusLiveData)
 
             val pauseCountdownLatch = CountDownLatch(1)
-            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any())).thenAnswer {
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).thenAnswer {
                 val downloadJobItemArg = it.arguments[0] as DownloadJobItem
                 if(downloadJobItemArg.djiStatus == JobStatus.PAUSED)
                     pauseCountdownLatch.countDown()
@@ -511,7 +511,7 @@ class DownloadJobItemRunnerTest {
 
             pauseCountdownLatch.await(5, TimeUnit.SECONDS)
             argumentCaptor<DownloadJobItem>().apply {
-                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture())
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
                 Assert.assertEquals("Last status update returns status_paused", JobStatus.PAUSED,
                         lastValue.djiStatus)
             }
@@ -537,7 +537,7 @@ class DownloadJobItemRunnerTest {
                     connectivityStatusLiveData = connectivityStatusLiveData)
 
             val queuedStatusDeferred = CompletableDeferred<Int>()
-            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any())).doAnswer {
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
                 if((it.arguments[0] as DownloadJobItem).djiStatus == JobStatus.QUEUED)
                     queuedStatusDeferred.complete(JobStatus.QUEUED)
 
@@ -565,7 +565,7 @@ class DownloadJobItemRunnerTest {
                     connectivityStatusLiveData = connectivityStatusLiveData)
 
             val completedStatusDeferred = CompletableDeferred<Int>()
-            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any())).doAnswer {
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
                 if((it.arguments[0] as DownloadJobItem).djiStatus == JobStatus.COMPLETE)
                     completedStatusDeferred.complete(JobStatus.COMPLETE)
                 Unit
@@ -615,7 +615,7 @@ class DownloadJobItemRunnerTest {
                     " Running DownloadJobItemRunner for " + item.djiUid)
             val runningCountdownLatch = CountDownLatch(1)
             val queuedCountdownLatch = CountDownLatch(1)
-            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any())).doAnswer {
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
                 when((it.arguments[0] as DownloadJobItem).djiStatus) {
                     JobStatus.RUNNING -> runningCountdownLatch.countDown()
                     JobStatus.QUEUED -> queuedCountdownLatch.countDown()
@@ -631,7 +631,7 @@ class DownloadJobItemRunnerTest {
 
             queuedCountdownLatch.await(5, TimeUnit.SECONDS)
             argumentCaptor<DownloadJobItem>().apply {
-                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture())
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
                 Assert.assertEquals("Last item status update was QUEUED", JobStatus.QUEUED,
                         lastValue.djiStatus)
             }
@@ -656,7 +656,7 @@ class DownloadJobItemRunnerTest {
 
             val runningCountdownLatch = CountDownLatch(1)
             val queuedCountdownLatch = CountDownLatch(1)
-            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any())).doAnswer {
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
                 when((it.arguments[0] as DownloadJobItem).djiStatus) {
                     JobStatus.RUNNING -> runningCountdownLatch.countDown()
                     JobStatus.QUEUED -> queuedCountdownLatch.countDown()
@@ -674,7 +674,7 @@ class DownloadJobItemRunnerTest {
 
             queuedCountdownLatch.await(5, TimeUnit.SECONDS)
             argumentCaptor<DownloadJobItem>().apply {
-                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture())
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
                 Assert.assertEquals("Final status is queued", JobStatus.QUEUED,
                         lastValue.djiStatus)
             }
@@ -714,7 +714,7 @@ class DownloadJobItemRunnerTest {
             verify(mockedNetworkManager).connectToWiFi(groupBle.ssid, groupBle.passphrase)
 
             argumentCaptor<DownloadJobItem>().apply {
-                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture())
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
                 Assert.assertEquals("Last status update was completed", JobStatus.COMPLETE,
                         lastValue.djiStatus)
             }
