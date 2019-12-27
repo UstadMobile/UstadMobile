@@ -848,6 +848,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
         when(dbType){
             DoorDbType.SQLITE -> {
+                //If the being updated was the entity with the largest chance sequence number,
+                //then we must consider it's previous value as the potential max of change sequence numbers
+                val mkMaxClause = fun(fieldName: String, clauseName: String): String = when {
+                    clauseName.equals("UPDATE", ignoreCase = true) -> {
+                        "MAX(MAX(${fieldName}), OLD.${fieldName})"
+                    }
+                    clauseName.equals("INSERT", ignoreCase = true) -> "MAX($fieldName)"
+                    else -> throw IllegalArgumentException("Clause must be update or insert")
+                }
+
                 listOf("UPDATE", "INSERT").forEach {op_name ->
                     codeBlock.add("$execSqlFn(%S)\n", """CREATE TRIGGER ${op_name.substring(0, 3)}_${syncableEntityInfo.tableId}
                         |AFTER $op_name ON ${entityClass.simpleName} FOR EACH ROW WHEN
@@ -872,7 +882,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         |BEGIN 
                         |UPDATE ${entityClass.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} = 
                         |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
-                        |ELSE (SELECT MAX(${syncableEntityInfo.entityLocalCsnField.name}) + 1 FROM ${entityClass.simpleName}) END),
+                        |ELSE (SELECT ${mkMaxClause(syncableEntityInfo.entityLocalCsnField.name, op_name)} + 1 FROM ${entityClass.simpleName}) END),
                         |${syncableEntityInfo.entityMasterCsnField.name} = 
                         |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
                         |(SELECT MAX(${syncableEntityInfo.entityMasterCsnField.name}) + 1 FROM ${entityClass.simpleName})
