@@ -286,10 +286,12 @@ class DownloadDialogPresenter(context: Any,
 
         const val STACKED_BUTTON_CONTINUE = 2
 
-        internal val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
+        //Previously internal: This does not compile since Kotlin 1.3.61
+        val STACKED_OPTIONS = intArrayOf(STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
                 STACKED_BUTTON_CONTINUE)
 
-        internal val STACKED_TEXT_MESSAGE_IDS = listOf(MessageID.pause_download,
+        //Previously internal: This does not compile since Kotlin 1.3.61
+        val STACKED_TEXT_MESSAGE_IDS = listOf(MessageID.pause_download,
                 MessageID.download_cancel_label, MessageID.download_continue_stacked_label)
     }
 }

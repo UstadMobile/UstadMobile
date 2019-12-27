@@ -35,10 +35,13 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     /**
      * Get NetworkNode instance
+     *
+     * Was previously internal set - this does not compile since Kotlin 1.3.61
+     *
      * @return Created NetworkNode
      */
     lateinit var networkNode: NetworkNode
-        internal set
+        set
 
     lateinit var context: Any
 
@@ -99,9 +102,12 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     /**
      * Set networkManagerBle for testing purpose.
+     *
+     * Was previously internal - this does not work since Kotlin 1.3.61
+     *
      * @param managerBle NetworkManagerBleCommon object
      */
-    internal fun setManagerBle(managerBle: NetworkManagerBleCommon) {
+    fun setManagerBle(managerBle: NetworkManagerBleCommon) {
         this.managerBle = managerBle
     }
 
