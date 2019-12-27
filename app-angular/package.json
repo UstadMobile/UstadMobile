@@ -16,7 +16,7 @@
         "build:fa": "ng build --prod --i18n-locale fa --i18n-format xlf --i18n-file src/assets/locale/messages.fa.xlf --output-path=dist/fa --baseHref /fa/",
         "start:ps": "ng serve --configuration=ps",
         "build:ps": "ng build --prod --i18n-locale ps --i18n-format xlf --i18n-file src/assets/locale/messages.ps.xlf --output-path=dist/ps --baseHref /ps/",
-        "build-prod": "npm run build:ps && npm run build:fa && npm run build:en && npm run build:ar"
+        "build-prod": "npm run build:en && npm run build:fa && npm run build:ps && npm run build:ar"
     },
     "private": true,
     "dependencies": {
