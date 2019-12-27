@@ -89,7 +89,7 @@ export class UmBaseService {
         const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl: UmAngularUtil.getItem("doordb.endpoint.url")} 
         core.com.ustadmobile.core.impl.UmAccountManager.setActiveAccountWithContext(account, this.component.context)
         const containerList = [{containerUid: 909090, fileSize: 90909000, mobileOptimized: true}]
-        this.database.containerDao.insertAsync(UmAngularUtil.jsArrayToKotlinList(containerList), this.continuation)
+        this.database.containerDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(containerList), this.continuation)
         console.log(this.database.containerDao)
         this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
 

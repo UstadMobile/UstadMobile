@@ -16,7 +16,7 @@
         "build:fa": "ng build --prod --i18n-locale fa --i18n-format xlf --i18n-file src/assets/locale/messages.fa.xlf --output-path=dist/fa --baseHref /fa/",
         "start:ps": "ng serve --configuration=ps",
         "build:ps": "ng build --prod --i18n-locale ps --i18n-format xlf --i18n-file src/assets/locale/messages.ps.xlf --output-path=dist/ps --baseHref /ps/",
-        "build-prod": "npm run build:en && npm run build:fa && npm run build:ps && npm run build:ar"
+        "build-prod": "npm run build:ps && npm run build:fa && npm run build:en && npm run build:ar"
     },
     "private": true,
     "dependencies": {
@@ -33,7 +33,6 @@
         "@angular/common": "^7.2.15",
         "ngx-infinite-scroll": "^8.0.1",
         "kotlin-test": "file:../build/js/packages_imported/kotlin-test/1.3.61/kotlin-test-1.3.61.tgz",
-        "kotlinx-serialization-runtime-js": "file:../build/js/packages_imported/kotlinx-serialization-runtime-js/0.11.0/kotlinx-serialization-runtime-js-0.11.0.tgz",
         "UstadMobile-lib-database": "file:../build/js/packages/UstadMobile-lib-database/UstadMobile-lib-database-0.2.14.tgz",
         "@angular/animations": "^8.2.13",
         "@angular/compiler": "~7.2.0",
@@ -64,9 +63,8 @@
         "kotlinx-io": "file:../build/js/packages_imported/kotlinx-io/0.1.12/kotlinx-io-0.1.12.tgz",
         "kotlin": "file:../build/js/packages_imported/kotlin/1.3.61/kotlin-1.3.61.tgz",
         "kotlin-test-js-runner": "file:../build/js/packages_imported/kotlin-test-js-runner/1.3.61/kotlin-test-js-runner-1.3.61.tgz",
-        "kotlinx-serialization-kotlinx-serialization-runtime": "file:../build/js/packages_imported/kotlinx-serialization-kotlinx-serialization-runtime/0.11.1/kotlinx-serialization-kotlinx-serialization-runtime-0.11.1.tgz",
+        "kotlinx-serialization-kotlinx-serialization-runtime": "file:../build/js/packages_imported/kotlinx-serialization-kotlinx-serialization-runtime/0.14.0/kotlinx-serialization-kotlinx-serialization-runtime-0.14.0.tgz",
         "angular-google-charts": "^0.1.6",
-        "UstadMobile-lib-test-common": "file:../build/js/packages/UstadMobile-lib-test-common/UstadMobile-lib-test-common-0.2.14.tgz",
         "ktor-ktor-client-json": "file:../build/js/packages_imported/ktor-ktor-client-json/1.2.3/ktor-ktor-client-json-1.2.3.tgz",
         "UstadMobile-lib-database-mpp": "file:../build/js/packages/UstadMobile-lib-database-mpp/UstadMobile-lib-database-mpp-0.2.14.tgz",
         "protractor": "^5.4.2",
