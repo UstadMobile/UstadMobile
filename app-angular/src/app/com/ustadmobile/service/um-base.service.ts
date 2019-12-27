@@ -49,6 +49,7 @@ export class UmBaseService {
         });
         mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
         this.database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(this.component.context)
+        console.log(this.database)
     });
   }
 

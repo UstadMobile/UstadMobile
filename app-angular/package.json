@@ -59,7 +59,7 @@
         "Napier-napier": "file:../build/js/node_modules/Napier-napier/Napier-napier-1.1.0.tgz",
         "UstadMobile-core": "file:../build/js/node_modules/UstadMobile-core/UstadMobile-core-0.2.14.tgz",
         "UstadMobile-lib-room-annotations-test": "file:../build/js/node_modules/UstadMobile-lib-room-annotations-test/UstadMobile-lib-room-annotations-test-0.2.14.tgz",
-        "core-js": "^2.5.4",
+        "core-js": "^2.6.11",
         "@angular/router": "~7.2.0",
         "@angular/core": "~7.2.0",
         "@angular/http": "^7.2.15",
