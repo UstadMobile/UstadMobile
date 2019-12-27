@@ -231,7 +231,8 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
             |WHERE  ${syncableEntityInfo.trackerDestField.name} = :$clientIdParamName 
             |AND ${syncableEntityInfo.trackerPkField.name} = 
             |${resultComponentClassName.simpleName}.${syncableEntityInfo.entityPkField.name} 
-            |AND ${syncableEntityInfo.trackerReceivedField.name}), 0))
+            |AND ${syncableEntityInfo.trackerReceivedField.name}), 0) 
+            |AND ${syncableEntityInfo.entityLastChangedByField.name} != :$clientIdParamName)
         """.trimMargin()
     }
     newSql += whereClauses.joinToString(prefix = "(", postfix = ")", separator = " OR ")
@@ -885,7 +886,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         |ELSE (SELECT ${mkMaxClause(syncableEntityInfo.entityLocalCsnField.name, op_name)} + 1 FROM ${entityClass.simpleName}) END),
                         |${syncableEntityInfo.entityMasterCsnField.name} = 
                         |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                        |(SELECT MAX(${syncableEntityInfo.entityMasterCsnField.name}) + 1 FROM ${entityClass.simpleName})
+                        |(SELECT ${mkMaxClause(syncableEntityInfo.entityMasterCsnField.name, op_name)} + 1 FROM ${entityClass.simpleName})
                         |ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
                         |WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name}
                         |; END
