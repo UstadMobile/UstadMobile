@@ -59,7 +59,11 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
     super.onCreate()
     this.pageIndex = 1
     this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
-      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().contentEntryDao);
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, 
+      this.umService.getDbInstance().contentEntryDao,
+      this.umService.getDbInstance().contentEntryDao,
+      core.com.ustadmobile.core.impl.UmAccountManager.getRepositoryForActiveAccount(this.context)
+      );
     this.presenter.onCreate(null);
     this.setToolbarTitle("...")
     this.label_language_options = this.getString(this.MessageID.also_available_in);

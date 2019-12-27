@@ -15,6 +15,10 @@ import kotlin.js.JsName
 @UmRepository
 abstract class ContainerDao : BaseDao<Container> {
 
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(containerList: List<Container>)
+
     @Insert
     abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
 
