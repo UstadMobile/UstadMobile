@@ -196,7 +196,7 @@ task executeEnd2EndTests{
   doLast{
     exec {
       workingDir appAngularPath
-      commandLine 'ng', 'e2e', '--port', portNumber ,'--no-webdriver-update'
+      commandLine 'ng', 'e2e', '--port', portNumber
     }
   }
 }
@@ -391,12 +391,12 @@ task ngTest{
 ngTest.dependsOn(build)
 buildProd.dependsOn(build)
 build.dependsOn(installDependencies)
-tasks.findByPath(":lib-database:jsJar").dependsOn(":lib-database:jvmJar")
-packPreparedModules.dependsOn(tasks.findByPath(":core:jsJar"),fixNodeForgeScript)
 installDependencies.dependsOn(packPreparedModules, updateLibsVersion, deletePackageLockJsonFile)
-installDependencies.finalizedBy(fixRequiredImports,generateLocaleFiles)
-generateLocaleFiles.dependsOn(generateMessageXlfTasks)
+packPreparedModules.dependsOn(":core:jsJar")
+installDependencies.finalizedBy(generateLocaleFiles)
+generateLocaleFiles.dependsOn(fixRequiredImports,generateMessageXlfTasks)
 generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,generateLocalizationScripts)
 executeEnd2EndTests.dependsOn(":app-ktor-server:testWebAppRunFork")
+
 
 clean.dependsOn(deleteTempDirs)
