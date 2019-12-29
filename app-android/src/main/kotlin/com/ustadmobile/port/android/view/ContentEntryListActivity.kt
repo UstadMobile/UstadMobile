@@ -14,17 +14,16 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_LINK
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_CONTENT
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 
 
 class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
-        ContentEntryListFragment.ContentEntryListHostActivity, ContentEntryListView,
+        ContentEntryListFragment.ContentEntryListHostActivity,
         AdapterView.OnItemSelectedListener, View.OnClickListener {
 
     private var showOptions = false
@@ -158,11 +157,6 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     }
 
-    override fun showCreateContentOption(showOption: Boolean) {
-        this.showOptions = showOption
-    }
-
-
     override fun onBackPressed() {
         if (contentCreationOptionBehaviour.state == BottomSheetBehavior.STATE_EXPANDED) {
             contentCreationOptionBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -179,14 +173,10 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         return super.onPrepareOptionsMenu(menu)
     }
 
-    override fun navigateBack() {
+    fun navigateBack() {
         val fragment = supportFragmentManager.findFragmentById(R.id.entry_content)
                 as ContentEntryListFragment?
         fragment!!.clickUpNavigation()
-    }
-
-    override fun showMessage(message: String) {
-        showBaseMessage(message)
     }
 
 
@@ -195,13 +185,13 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
                 as ContentEntryListFragment?
         when (view.id) {
             R.id.content_create_category ->
-                fragment?.handleButtonSheetClicked(CONTENT_CREATE_FOLDER, true)
+                fragment?.handleBottomSheetClicked(CONTENT_CREATE_FOLDER)
             R.id.content_import_file ->
-                fragment?.handleButtonSheetClicked(CONTENT_IMPORT_FILE, true)
+                fragment?.handleBottomSheetClicked(CONTENT_IMPORT_FILE)
             R.id.content_create_content ->
-                fragment?.handleButtonSheetClicked(CONTENT_CREATE_CONTENT, true)
+                fragment?.handleBottomSheetClicked(CONTENT_CREATE_CONTENT)
             R.id.content_import_link ->
-                fragment?.handleButtonSheetClicked(CONTENT_IMPORT_LINK, true)
+                fragment?.handleBottomSheetClicked(CONTENT_IMPORT_LINK)
         }
         contentCreationOptionBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
     }

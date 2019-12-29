@@ -14,9 +14,9 @@ import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_CONTENT
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED

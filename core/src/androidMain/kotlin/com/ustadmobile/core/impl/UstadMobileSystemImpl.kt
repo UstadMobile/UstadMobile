@@ -97,7 +97,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
             ContentEditorView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorActivity"),
             ContentEditorPageListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorPageListFragment"),
-            ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
             ContentEntryEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryEditFragment"),
             SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
             SelectMultipleEntriesTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleEntriesTreeDialogFragment"),

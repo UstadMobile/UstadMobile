@@ -267,8 +267,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
-                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
-                else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
+                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListFragmentView.CONTENT_IMPORT_FILE
+                else ContentEntryListFragmentView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
                     impl.go(ContentEntryEditView.VIEW_NAME, arguments, this)

@@ -132,7 +132,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         val entryUid = entry.contentEntryUid
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
         args[ARG_NO_IFRAMES] = noIframe.toString()
-        val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
+        val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListFragmentView.VIEW_NAME
         impl.go(destView, args, view.viewContext)
 
     }
@@ -164,7 +164,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
 
-    fun handleContentCreationClick(contentType: Int, newContent: Boolean) {
+    fun handleClickAddContent(contentType: Int) {
 
     }
 

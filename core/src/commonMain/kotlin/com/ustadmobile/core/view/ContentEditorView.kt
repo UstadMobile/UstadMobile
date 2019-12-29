@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEditorView : ContentWithOptionsView{
+interface ContentEditorView : UstadViewWithProgress{
 
     /**
      * Set bold formatting on selected/focused content

@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -23,6 +22,7 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Compani
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -33,20 +33,12 @@ import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
-import android.content.Intent.ACTION_SEND
-import android.widget.Toast
-import androidx.core.content.FileProvider
-import com.ustadmobile.core.db.UmAppDatabase
-import kotlinx.coroutines.Dispatchers
-import java.io.File
 
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {

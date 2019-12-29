@@ -331,7 +331,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         localAvailabilityPagedListCallback?.onDestroy()
     }
 
-    fun handleButtonSheetClicked(contentType: Int, newContent: Boolean) {
+    fun handleBottomSheetClicked(contentType: Int) {
 
     }
 
