@@ -31,9 +31,9 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_FOLDER
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_NEWFOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
@@ -123,16 +123,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
-            R.id.create_new_folder -> {
-                val args = HashMap<String,String?>()
-                args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
-                args[CONTENT_TYPE] = CONTENT_CREATE_FOLDER.toString()
-                args[CONTENT_ENTRY_LEAF] = false.toString()
-                args[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
-                args[ARG_CONTENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
-                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
-                        this)
-            }
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
         }

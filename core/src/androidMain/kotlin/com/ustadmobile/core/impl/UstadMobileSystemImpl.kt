@@ -45,7 +45,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
-import com.ustadmobile.core.BuildConfig
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -57,7 +56,6 @@ import java.util.concurrent.Executors
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import java.lang.IllegalArgumentException
 
 
 /**
@@ -113,7 +111,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
             ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
             UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
-            ContentEntryListFragmentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
+            ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
             ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
             ContentEntryExportView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryExportFragmentDialog"),
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"))

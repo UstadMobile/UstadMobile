@@ -6,9 +6,9 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_ADD_CONTENT
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_EDITOPTION
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -21,13 +21,13 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
-                                private val fragmentViewContract: ContentEntryListFragmentView,
+                                private val viewContract: ContentEntryListView,
                                 private val contentEntryDao: ContentEntryDao,
                                 private val contentEntryDaoRepo: ContentEntryDao,
                                 private val activeAccount: UmAccount?,
                                 private val systemImpl: UstadMobileSystemImpl,
                                 private val umRepo: UmAppDatabase)
-    : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
+    : UstadBaseController<ContentEntryListView>(context, arguments, viewContract) {
 
     private var filterByLang: Long = 0
 
@@ -66,7 +66,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private fun onContentEntryChanged(entry: ContentEntry?) {
         if (entry == null) {
-            fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
+            viewContract.runOnUiThread(Runnable { viewContract.showError() })
             return
         }
         val resultTitle = entry.title
@@ -76,7 +76,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         noIframe = domains.contains(entry.publisher)
         if (resultTitle != null)
-            fragmentViewContract.setToolbarTitle(resultTitle)
+            viewContract.setToolbarTitle(resultTitle)
     }
 
 
@@ -84,13 +84,13 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid
                 ?: 0)
-        fragmentViewContract.setContentEntryProvider(provider)
+        viewContract.setContentEntryProvider(provider)
 
         try {
             val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid!!)
             entryLiveData.observe(this, this::onContentEntryChanged)
         } catch (e: Exception) {
-            fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
+            viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
 
         GlobalScope.launch {
@@ -106,7 +106,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
                 allLang.langUid = 0
                 result.add(1, allLang)
 
-                fragmentViewContract.setLanguageOptions(result)
+                viewContract.setLanguageOptions(result)
             }
         }
 
@@ -134,16 +134,16 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
                 data.add(schema)
                 schemaMap[schema.contentCategorySchemaUid] = data
             }
-            fragmentViewContract.setCategorySchemaSpinner(schemaMap)
+            viewContract.setCategorySchemaSpinner(schemaMap)
         }
     }
 
     private fun showDownloadedContent() {
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.downloadedRootItems())
+        viewContract.setContentEntryProvider(contentEntryDao.downloadedRootItems())
     }
 
     private fun showRecycledEntries() {
-        fragmentViewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
+        viewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
     }
 
 
@@ -155,7 +155,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
         args[ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
-        val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListFragmentView.VIEW_NAME
+        val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
         systemImpl.go(destView, args, view.viewContext)
 
     }
@@ -163,14 +163,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
@@ -198,19 +198,19 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         view.runOnUiThread(Runnable {
             when (contentType) {
-                ContentEntryListFragmentView.CONTENT_CREATE_FOLDER -> {
+                ContentEntryListView.CONTENT_CREATE_FOLDER -> {
                     args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
                     systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
                 }
 
-                ContentEntryListFragmentView.CONTENT_IMPORT_FILE -> {
+                ContentEntryListView.CONTENT_IMPORT_FILE -> {
                     systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
                 }
 
-                ContentEntryListFragmentView.CONTENT_CREATE_CONTENT -> {
+                ContentEntryListView.CONTENT_CREATE_CONTENT -> {
                     systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
                 }
-                ContentEntryListFragmentView.CONTENT_IMPORT_LINK -> {
+                ContentEntryListView.CONTENT_IMPORT_LINK -> {
                     systemImpl.go(ContentEntryImportLinkView.VIEW_NAME, args, this.context)
                 }
             }
@@ -222,7 +222,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args.putAll(arguments)
         args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = parentUid.toString()
         args[ARG_CONTENT_ENTRY_UID] = parentUid.toString()
-        args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListFragmentView.CONTENT_CREATE_FOLDER.toString()
+        args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
         systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this)
     }

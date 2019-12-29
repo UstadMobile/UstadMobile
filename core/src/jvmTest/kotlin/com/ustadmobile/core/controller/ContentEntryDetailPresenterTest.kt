@@ -10,7 +10,7 @@ import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -226,8 +226,8 @@ class ContentEntryDetailPresenterTest {
         presenter.handleUpNavigation()
 
         val lastGoToDest = UstadMobileSystemImpl.instance.lastDestination
-        Assert.assertEquals("Last destination was ContentEntryListFragmentView",
-                ContentEntryListFragmentView.VIEW_NAME, lastGoToDest!!.viewName)
+        Assert.assertEquals("Last destination was ContentEntryListView",
+                ContentEntryListView.VIEW_NAME, lastGoToDest!!.viewName)
         Assert.assertEquals("Last destination had expect content entry uid arg",
                 "42", lastGoToDest.args[ARG_CONTENT_ENTRY_UID])
     }

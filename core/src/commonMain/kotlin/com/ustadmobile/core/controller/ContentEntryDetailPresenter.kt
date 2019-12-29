@@ -213,9 +213,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleUpNavigation")
     fun handleUpNavigation() {
-        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListFragmentView.VIEW_NAME, navigation!!)
+        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs != null) {
-            impl.go(ContentEntryListFragmentView.VIEW_NAME,
+            impl.go(ContentEntryListView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), context,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
@@ -268,8 +268,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args[UstadView.ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
-                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListFragmentView.CONTENT_IMPORT_FILE
-                else ContentEntryListFragmentView.CONTENT_CREATE_CONTENT).toString()
+                args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
+                else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
                     impl.go(ContentEntryEditView.VIEW_NAME, arguments, this)

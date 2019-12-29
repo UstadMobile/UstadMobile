@@ -6,7 +6,7 @@ import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import kotlin.js.JsName
 
-interface ContentEntryListFragmentView : UstadView {
+interface ContentEntryListView : UstadView {
 
     @JsName("setContentEntryProvider")
     fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>)

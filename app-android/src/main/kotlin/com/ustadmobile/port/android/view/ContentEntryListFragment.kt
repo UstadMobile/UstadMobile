@@ -22,10 +22,11 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_ADD_CONTENT
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_EDITOPTION
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_NEWFOLDER
+import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -52,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
+class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener{
 
 
@@ -189,17 +190,26 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         setHasOptionsMenu(true)
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?) {
-        menu?.findItem(R.id.create_new_folder)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_NEWFOLDER) == EDIT_BUTTONS_NEWFOLDER
-        menu?.findItem(R.id.edit_category_content)?.isVisible =  (buttonVisibilityFlags and EDIT_BUTTONS_EDITOPTION) == EDIT_BUTTONS_EDITOPTION
-        menu?.findItem(R.id.create_new_content)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_ADD_CONTENT) == EDIT_BUTTONS_ADD_CONTENT
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.findItem(R.id.create_new_folder)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_NEWFOLDER) == EDIT_BUTTONS_NEWFOLDER
+        menu.findItem(R.id.edit_category_content)?.isVisible =  (buttonVisibilityFlags and EDIT_BUTTONS_EDITOPTION) == EDIT_BUTTONS_EDITOPTION
+        menu.findItem(R.id.create_new_content)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_ADD_CONTENT) == EDIT_BUTTONS_ADD_CONTENT
         super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item?.itemId){
-            R.id.edit_category_content -> presenter?.handleClickEditButton()
+            R.id.edit_category_content -> {
+                presenter?.handleClickEditButton()
+                return true
+            }
+
+            R.id.create_new_folder -> {
+                presenter?.handleClickAddContent(CONTENT_CREATE_FOLDER)
+                return true
+            }
         }
+
         return super.onOptionsItemSelected(item)
     }
 

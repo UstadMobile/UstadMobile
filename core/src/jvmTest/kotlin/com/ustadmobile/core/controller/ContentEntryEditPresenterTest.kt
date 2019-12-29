@@ -7,8 +7,8 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
-import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -134,7 +134,7 @@ class ContentEntryEditPresenterTest {
 
             arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
             arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = "false"
-            arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListFragmentView.CONTENT_CREATE_FOLDER.toString()
+            arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
             presenter = ContentEntryEditPresenter(context, arguments,
                     mockView, umAppDatabase.contentEntryDao, umAppDatabase.contentEntryParentChildJoinDao,
                     umAppDatabase.contentEntryStatusDao, umAccount, impl) { dir: String, mimetype: String, entry: ContentEntry ->
@@ -169,7 +169,7 @@ class ContentEntryEditPresenterTest {
 
     @Test
     fun givenOptions_whenCreateContentOptionIsSelected_shouldHideFileImportViews() {
-        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListFragmentView.CONTENT_CREATE_CONTENT.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_CONTENT.toString()
         arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
         presenter = ContentEntryEditPresenter(context, arguments,
                 mockView, umAppDatabase.contentEntryDao, umAppDatabase.contentEntryParentChildJoinDao,

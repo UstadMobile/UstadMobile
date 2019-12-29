@@ -11,11 +11,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_CONTENT
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_FOLDER
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_FILE
-import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_LINK
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 
