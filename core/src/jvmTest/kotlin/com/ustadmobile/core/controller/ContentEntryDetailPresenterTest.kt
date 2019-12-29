@@ -156,7 +156,8 @@ class ContentEntryDetailPresenterTest {
     fun givenContentEntryNotDownloaded_whenMainButtonClicked_thenShouldShowDownloadDialog() {
 
         runBlocking {
-            var presenter = ContentEntryDetailPresenter(context, args, mockView,
+            downloadJobItemLiveData.sendValue(null)
+            val presenter = ContentEntryDetailPresenter(context, args, mockView,
                     true, umAppRepository, umAppDatabase,
                     mock(), containerDownloadManager, null, systemImpl, counter)
             presenter.onCreate(null)
@@ -164,7 +165,8 @@ class ContentEntryDetailPresenterTest {
             presenter.handleDownloadButtonClick()
             argumentCaptor<Map<String, String>>() {
                 verify(mockView, timeout(5000)).showDownloadOptionsDialog(capture())
-                Assert.assertEquals(firstValue["contentEntryUid"], contentEntry.contentEntryUid.toString())
+                Assert.assertEquals("Content entry uid passed to download dialog is correct",
+                        contentEntry.contentEntryUid.toString(), firstValue[ARG_CONTENT_ENTRY_UID])
             }
 
         }
