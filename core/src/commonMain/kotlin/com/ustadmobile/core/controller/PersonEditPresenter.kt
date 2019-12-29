@@ -78,7 +78,6 @@ class PersonEditPresenter
  val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     :UstadBaseController<PersonEditView>(context, arguments!!, view) {
 
-
     private var personLiveData: DoorLiveData<Person?>? = null
 
     //Headers and Fields
@@ -86,47 +85,49 @@ class PersonEditPresenter
 
     var personUid: Long = 0
 
-    private var mUpdatedPerson: Person? = null
-
-    //OG person before Done/Save/Discard clicked.
-    private var mOriginalValuePerson: Person? = null
+    private var updatedPerson: Person? = null
+    private var currentPerson: Person? = null
+    private var currentPersonAuth: PersonAuth? = null
 
     private var assignedClazzes: DataSource.Factory<Int, ClazzWithNumStudents>? = null
-
     private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
 
-    //The custom fields' values
-    private val customFieldWithFieldValueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>? = null
-
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
-
-    private val personDao = repository.personDao
-
-    private val personGroupDao = repository.personGroupDao
+    internal var database = UmAppDatabase.getInstance(context)
 
     private var newPersonString = ""
 
     private val customFieldsToUpdate: MutableList<PersonCustomFieldValue>
 
-    private val personCustomFieldValueDao = repository.personCustomFieldValueDao
-
     private var loggedInPersonUid: Long? = 0L
 
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 
-    private var customFieldDao: CustomFieldDao? = null
-    private var customFieldValueDao: CustomFieldValueDao? = null
-    private var optionDao: CustomFieldValueOptionDao? = null
-    private var personPictureDao : PersonPictureDao
+    private val personDao : PersonDao
+    private val personDaoDB : PersonDao
+    private val personGroupDao : PersonGroupDao
+    private val personGroupDaoDB : PersonGroupDao
+    private var customFieldDao: CustomFieldDao
+    private var customFieldValueDao: CustomFieldValueDao
+    private var customFieldDaoDB: CustomFieldDao
+    private var customFieldValueDaoDB: CustomFieldValueDao
+    private var optionDao: CustomFieldValueOptionDao
+    private var optionDaoDB: CustomFieldValueOptionDao
+    private var personPictureDaoRepo : PersonPictureDao
+    private val personAuthDao: PersonAuthDao
+    private val personPictureDaoDB : PersonPictureDao
+    private val personCustomFieldValueDao : PersonCustomFieldValueDao
+    private val personCustomFieldValueDaoDB : PersonCustomFieldValueDao
+    private val fieldsDaoRepo : PersonDetailPresenterFieldDao
+    private val fieldsDaoDB : PersonDetailPresenterFieldDao
+    private val feedEntryDao : FeedEntryDao
+    private val feedEntryDaoDB : FeedEntryDao
 
     private val customFieldDropDownOptions: HashMap<Long, List<String>>
 
     var passwordSet: String? = null
     var confirmPasswordSet: String? = null
-    private var currentPerson: Person? = null
-    private var currentPersonAuth: PersonAuth? = null
     var usernameSet: String? = null
-    private val personAuthDao: PersonAuthDao
 
     init {
 
@@ -139,13 +140,31 @@ class PersonEditPresenter
         }
 
         customFieldsToUpdate = ArrayList()
-
         viewIdToCustomFieldUid = HashMap()
-
         customFieldDropDownOptions = HashMap()
-        personPictureDao = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+
+        personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
+        customFieldDaoDB = database.customFieldDao
+        optionDaoDB = database.customFieldValueOptionDao
+        customFieldValueDaoDB = database.customFieldValueDao
+        fieldsDaoDB = database.personDetailPresenterFieldDao
+        personPictureDaoDB = database.personPictureDao
+        personDaoDB = database.personDao
+        personGroupDaoDB = database.personGroupDao
+        personCustomFieldValueDaoDB = database.personCustomFieldValueDao
+        feedEntryDaoDB = database.feedEntryDao
 
         personAuthDao = repository.personAuthDao
+        customFieldDao = repository.customFieldDao
+        customFieldValueDao = repository.customFieldValueDao
+        optionDao = repository.customFieldValueOptionDao
+        fieldsDaoRepo = repository.personDetailPresenterFieldDao
+        personDao = repository.personDao
+        personGroupDao = repository.personGroupDao
+        personCustomFieldValueDao = repository.personCustomFieldValueDao
+        feedEntryDao = repository.feedEntryDao
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
     }
 
@@ -308,22 +327,22 @@ class PersonEditPresenter
 
             var personPictureUid : Long = 0L
             var existingPP: PersonPicture ? = null
-            existingPP = personPictureDao.findByPersonUidAsync(personUid)
+            existingPP = personPictureDaoRepo.findByPersonUidAsync(personUid)
             if(existingPP == null){
                 existingPP = PersonPicture()
                 existingPP.personPicturePersonUid = personUid
                 existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-                personPictureUid = personPictureDao.insertAsync(existingPP)
+                personPictureUid = personPictureDaoRepo.insertAsync(existingPP)
                 existingPP.personPictureUid = personPictureUid
             }
 
-            personPictureDao.setAttachment(existingPP, imageFilePath)
+            personPictureDaoRepo.setAttachment(existingPP, imageFilePath)
             existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-            personPictureDao.update(existingPP)
+            personPictureDaoRepo.update(existingPP)
 
             //Update personWithpic
             personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)
-            generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
+            generateFeedsForPersonUpdate(repository, updatedPerson!!)
 
         }
     }
@@ -356,15 +375,29 @@ class PersonEditPresenter
         view.setRoleAssignmentListProvider(assignedRoleAssignments!!)
     }
 
-
     private fun updatePersonPic(thisPerson: Person) {
         GlobalScope.launch {
-            val personPicture = personPictureDao.findByPersonUidAsync(thisPerson.personUid)
-            if (personPicture != null) {
-                view.updateImageOnView(personPictureDao.getAttachmentPath(personPicture)!!)
+            //Load the local image first
+            val personPictureLocal = personPictureDaoDB.findByPersonUidAsync(
+                    thisPerson!!.personUid)
+            if(personPictureLocal != null) {
+                val imagePathLocal = personPictureDaoRepo.getAttachmentPath(personPictureLocal!!)!!;
+
+                if (imagePathLocal.isNotEmpty())
+                    view.updateImageOnView(imagePathLocal)
+            }
+
+            //Get the server image
+            val personPictureServer =
+                    personPictureDaoRepo.findByPersonUidAsync(thisPerson!!.personUid)
+            if(personPictureServer != null) {
+                val imagePathServer =
+                        personPictureDaoRepo.getAttachmentPath(personPictureServer!!)!!;
+
+                if (imagePathServer.isNotEmpty())
+                    view.updateImageOnView(imagePathServer)
             }
         }
-
     }
 
     /**
@@ -376,8 +409,7 @@ class PersonEditPresenter
      * @param valueMap  The Custom fields value map
      */
     private fun setFieldsOnView(thisPerson: Person, allFields: List<PersonDetailPresenterField>,
-                                thisView: PersonEditView,
-                                valueMap: Map<Long, PersonCustomFieldWithPersonCustomFieldValue>?) {
+                                thisView: PersonEditView) {
 
         //TODO: Locale on Kotlin Core
 //        val currnetLocale = Locale.getDefault()
@@ -560,34 +592,10 @@ class PersonEditPresenter
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
-            } else {//this is actually a custom field
+            } else {//unknown field
                 var messageLabel = 0
                 var iconName: String? = null
                 var fieldValue: String? = null
-                if (valueMap != null && valueMap.containsKey(field.fieldUid) ){
-
-                    if(valueMap!![field.fieldUid] != null) {
-                        if (valueMap[field.fieldUid]!!.labelMessageId != 0) {
-                            messageLabel = valueMap[field.fieldUid]!!.labelMessageId
-                        }
-                        if (valueMap[field.fieldUid]!!.fieldIcon != null) {
-                            iconName = valueMap[field.fieldUid]!!.fieldIcon
-                        }
-                        if (valueMap[field.fieldUid]!!.customFieldValue!!.fieldValue != null) {
-                            fieldValue = valueMap[field.fieldUid]!!
-                                    .customFieldValue!!.fieldValue
-                        }
-                    }
-                    thisView.setField(
-                            field.fieldIndex,
-                            field.fieldUid,
-                            PersonDetailViewField(
-                                    field.fieldType,
-                                    messageLabel,
-                                    iconName
-                            ), fieldValue
-                    )
-                }
             }
         }
     }
@@ -666,16 +674,12 @@ class PersonEditPresenter
      * @param person The person that needs to be displayed.
      */
     private fun handlePersonValueChanged(person: Person?) {
-        //set the og person value
-        if (mOriginalValuePerson == null)
-            mOriginalValuePerson = person
 
-        if (mUpdatedPerson == null || mUpdatedPerson != person) {
+        if (updatedPerson == null || updatedPerson != person) {
             //set fields on the view as they change and arrive.
             if (person != null) {
-                setFieldsOnView(person, headersAndFields!!, view,
-                        customFieldWithFieldValueMap)
-                mUpdatedPerson = person
+                setFieldsOnView(person, headersAndFields!!, view)
+                updatedPerson = person
             }
         }
     }
@@ -688,7 +692,7 @@ class PersonEditPresenter
      */
     fun handleFieldEdited(fieldCode: Long, value: Any) {
 
-        mUpdatedPerson = updateSansPersistPersonField(mUpdatedPerson, fieldCode, value)
+        updatedPerson = updateSansPersistPersonField(updatedPerson, fieldCode, value)
     }
 
     /**
@@ -761,23 +765,23 @@ class PersonEditPresenter
      *
      */
     fun handleClickDone() {
-        mUpdatedPerson!!.active = true
+        updatedPerson!!.active = true
 
         GlobalScope.launch {
-            personDao.updatePersonAsync(mUpdatedPerson!!, loggedInPersonUid!!)
+            personDao.updatePersonAsync(updatedPerson!!, loggedInPersonUid!!)
 
             //Update the custom fields
             personCustomFieldValueDao.updateListAsync(customFieldsToUpdate)
             //Start of feed generation
-            generateFeedsForPersonUpdate(repository, mUpdatedPerson!!)
+            generateFeedsForPersonUpdate(repository, updatedPerson!!)
 
             //Update password if necessary
             val updatePassword = updatePassword()
 
             //Update person's individual group to  set the right name of the group
-            val fullName = mUpdatedPerson!!.fullName()
+            val fullName = updatedPerson!!.fullName()
 
-            val personGroup = personGroupDao.findPersonIndividualGroup(mUpdatedPerson!!.personUid)
+            val personGroup = personGroupDao.findPersonIndividualGroup(updatedPerson!!.personUid)
             if(personGroup != null){
                 personGroup.groupName = fullName + "'s individual person group"
                 personGroupDao.updateAsync(personGroup)
@@ -810,7 +814,7 @@ class PersonEditPresenter
             currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
             GlobalScope.launch {
                 //Update locally
-                personDao.updateAsync(mUpdatedPerson!!)
+                personDao.updateAsync(updatedPerson!!)
 
                 //Update on server
                 try {
@@ -846,8 +850,6 @@ class PersonEditPresenter
             })
 
             return false
-
-
         }
         return true
     }

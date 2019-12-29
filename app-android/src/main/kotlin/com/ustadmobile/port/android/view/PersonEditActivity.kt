@@ -18,7 +18,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
@@ -44,13 +43,11 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.PersonDetailViewField
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_HEIGHT
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
 import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_QUALITY
-import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
@@ -68,7 +65,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * This activity is responsible for showing the edit page for a person. Used for editing a new
