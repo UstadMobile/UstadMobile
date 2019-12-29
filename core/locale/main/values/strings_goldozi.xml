@@ -232,6 +232,8 @@
     <string name="already_delivered">already delivered</string>
     <string name="remaining">remaining</string>
 
-
+    <string name="over_selected_delivery">Please select less than the remaining items from stock for product</string>
+    <string name="in_stock_selected">in stock for this sale</string>
+    <string name="delivered_here">delivered here</string>
 
 </resources>

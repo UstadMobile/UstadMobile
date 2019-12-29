@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import com.caverock.androidsvg.SVG
 import com.caverock.androidsvg.SVGParseException
@@ -13,6 +14,7 @@ import com.github.gcacace.signaturepad.views.SignaturePad
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleDeliveryDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SaleDeliveryDetailView
 import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.lib.db.entities.PersonWithInventory
@@ -30,8 +32,6 @@ class SaleDeliveryDetailActivity : UstadBaseActivity(), SaleDeliveryDetailView {
     private lateinit var signature : SignaturePad
     private lateinit var signatureWrapper: View
     private lateinit var deliveriesLL : LinearLayout
-
-
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -86,9 +86,48 @@ class SaleDeliveryDetailActivity : UstadBaseActivity(), SaleDeliveryDetailView {
                 mPresenter.updateSignatureSvg("")
             }
         })
-        acceptFAB.setOnClickListener{ mPresenter.handleClickAccept() }
+        acceptFAB.setOnClickListener{ handleClickAccept() }
         clearFAB.setOnClickListener{ clearSignature() }
 
+    }
+
+    private fun handleClickAccept(){
+
+        val weCountMap = mPresenter.getWeCountMap()
+        val impl = UstadMobileSystemImpl.instance
+        var allgood = true
+        for(saleItemUid in weCountMap.keys){
+
+            val saleItemListDetail = mPresenter!!.saleItemToSaleItemListDetail.get(saleItemUid)
+            val saleItemMap = weCountMap.get(saleItemUid)
+            var totalSaleItemSelected = 0
+            for(weUid in saleItemMap!!.keys){
+                val weCount = saleItemMap!!.get(weUid)
+                totalSaleItemSelected += weCount!!
+            }
+            val remaining = saleItemListDetail!!.saleItemQuantity - saleItemListDetail!!.deliveredCount
+            if(totalSaleItemSelected > remaining){
+                //Alert user that they have selected more than required.
+
+                val alertText = getText(R.string.over_selected_delivery).toString() + " " +
+                        saleItemListDetail.saleItemSaleProduct!!.getNameLocale(impl.getLocale(this))
+                sendMessage(alertText)
+                allgood = false
+            }
+
+        }
+        if(allgood) {
+            mPresenter.handleClickAccept()
+        }
+    }
+
+    private fun sendMessage(toast: String) {
+
+        Toast.makeText(
+                this,
+                toast,
+                Toast.LENGTH_SHORT
+        ).show()
 
     }
 

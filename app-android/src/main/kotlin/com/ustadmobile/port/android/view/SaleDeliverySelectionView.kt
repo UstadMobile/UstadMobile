@@ -35,6 +35,8 @@ class SaleDeliverySelectionView : ConstraintLayout {
     private var item: SaleItemListDetail? = null
     private val impl = UstadMobileSystemImpl.instance
 
+    var newDelivery = false
+
     constructor(context: Context) : super(context) {
         init()
     }
@@ -70,15 +72,16 @@ class SaleDeliverySelectionView : ConstraintLayout {
 
             updateSaleProductPictureOnView()
 
-            //Find producers.
-
         }
 
         if(producers != null) {
 
+            //Also limit selection to remaining
+            val remaining = item!!.saleItemQuantity - item!!.deliveredCount
+
             for (producer in producers!!) {
                 val personWithInventorySelection = PersonWithInventorySelectionView(context,
-                        producer, mPresenter!!)
+                        producer, mPresenter!!,item!!.saleItemUid, remaining)
                 producersLL.addView(personWithInventorySelection)
             }
         }

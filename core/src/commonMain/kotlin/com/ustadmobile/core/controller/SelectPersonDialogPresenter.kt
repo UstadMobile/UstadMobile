@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.CustomerDetailView
@@ -26,6 +27,7 @@ class SelectPersonDialogPresenter(context: Any, arguments: Map<String, String>?,
     var leUid : Long = 0L
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
+    internal var database = UmAppDatabase.getInstance(context)
 
     init {
 
@@ -40,7 +42,7 @@ class SelectPersonDialogPresenter(context: Any, arguments: Map<String, String>?,
 
         //Find the provider
         GlobalScope.launch {
-            val customerRole = repository.roleDao.findByName(Role.ROLE_NAME_CUSTOMER)
+            val customerRole = database.roleDao.findByName(Role.ROLE_NAME_CUSTOMER)
             if(customerRole!=null){
                 personUmProvider = repository.personDao.findAllPeopleByLEAndRoleUid(leUid,
                         customerRole.roleUid)

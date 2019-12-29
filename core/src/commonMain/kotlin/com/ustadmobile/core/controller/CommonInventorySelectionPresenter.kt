@@ -10,6 +10,9 @@ abstract class CommonInventorySelectionPresenter<V : UstadView> : UstadBaseContr
 
 
     var inventorySelection = false
+    var newDelivery = false
+    var deliveryMode = false
+    var saleItemPreOrder = false
 
     //The constructor will throw an uncast check warning. That is expected.
     constructor(context: Any, arguments: Map<String, String>?, view: UstadView)
@@ -21,4 +24,7 @@ abstract class CommonInventorySelectionPresenter<V : UstadView> : UstadBaseContr
      * @param arg   The argument to be passed to the presenter for secondary action pressed.
      */
     abstract fun updateWeCount(weUid: Long, count: Int, saleItemUid: Long)
+
+
+    abstract fun getWeCountMap(): HashMap<Long, HashMap<Long, Int>>
 }

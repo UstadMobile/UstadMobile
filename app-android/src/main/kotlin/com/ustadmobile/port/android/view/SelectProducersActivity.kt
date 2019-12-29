@@ -137,7 +137,7 @@ class SelectProducersActivity : UstadBaseActivity(), SelectProducersView {
 
         for(producer in producers){
 
-            val personWithInventorySelection = PersonWithInventorySelectionView(this, producer, mPresenter!!)
+            val personWithInventorySelection = PersonWithInventorySelectionView(this, producer, mPresenter!!, -1)
             mLinearLayout!!.addView(personWithInventorySelection)
 
         }

@@ -14,7 +14,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonInventorySelectionPresenter
-import com.ustadmobile.core.controller.SelectProducersPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.PersonWithInventory
@@ -32,12 +31,12 @@ class PersonWithInventorySelectionView : ConstraintLayout {
     private lateinit var stockTV : TextView
     private lateinit var seekBar : SeekBar
     private lateinit var seekBarET: EditText
-    private lateinit var inStockTV : TextView
     private lateinit var personPictureIV : ImageView
-    private var mPresenter : CommonInventorySelectionPresenter<*>? = null
+    private lateinit var mPresenter : CommonInventorySelectionPresenter<*>
 
     private var personWithInventory : PersonWithInventory? = null
     private var saleItemUid : Long = 0
+    private var remainingDelivery : Int = -1
 
     interface OnStockSelectedListener {
         fun onStockSelected(view: PersonWithInventorySelectionView)
@@ -48,9 +47,19 @@ class PersonWithInventorySelectionView : ConstraintLayout {
     }
 
     constructor(context: Context, personInventory: PersonWithInventory,
-                presenter: CommonInventorySelectionPresenter<*>) : super(context) {
+                presenter: CommonInventorySelectionPresenter<*>, remaining: Int) : super(context) {
         personWithInventory = personInventory
         mPresenter = presenter
+        remainingDelivery = remaining
+        init()
+    }
+
+    constructor(context: Context, personInventory: PersonWithInventory,
+                presenter: CommonInventorySelectionPresenter<*>, itemUid: Long, remaining: Int) : super(context) {
+        personWithInventory = personInventory
+        mPresenter = presenter
+        remainingDelivery = remaining
+        saleItemUid = itemUid
         init()
     }
 
@@ -77,11 +86,102 @@ class PersonWithInventorySelectionView : ConstraintLayout {
 
             seekBar.progress = 0
 
+            val inventoryCount = personWithInventory!!.inventoryCount
+            val selected = personWithInventory!!.inventorySelected
+            val deliveredCountTotal = personWithInventory!!.inventoryCountDeliveredTotal
+            val deliveryCountThis = personWithInventory!!.inventoryCountDelivered
+
+            //TODO: Also edittext max limit somehow
+
             if(mPresenter!!.inventorySelection) {
-                seekBar.max = personWithInventory!!.inventoryCount
+                if(remainingDelivery >= 0){
+                    seekBar.max = remainingDelivery
+                }else {
+                    seekBar.max = personWithInventory!!.inventoryCount
+                }
+
+                if(personWithInventory!!.inventorySelected > 0){
+
+                }
+                //Show stock
+                stockTV.visibility = View.VISIBLE
+
+                var sbct = ""
+                if(mPresenter!!.saleItemPreOrder){
+                    sbct = inventoryCount.toString() + " " +
+                        context.getText(R.string.in_stock)
+                } else if(selected > -1 && mPresenter!!.deliveryMode){
+                    sbct = selected.toString() + " " +
+                            context.getText(R.string.in_stock_selected) + ", " +
+                            deliveredCountTotal + " " + context.getText(R.string.already_delivered)
+
+                    if(!mPresenter!!.newDelivery){
+                        sbct += ", " + deliveryCountThis + " " + context.getText(R.string.delivered_here)
+                    }
+                }
+                stockTV.setText(sbct)
+
+
             }else{
-                seekBar.max = SEEKBAR_MAX
+                if(remainingDelivery >= 0){
+                    if(remainingDelivery > inventoryCount) {
+                        seekBar.max = remainingDelivery
+                    }
+                }else {
+                    seekBar.max = SEEKBAR_MAX
+                }
+                //Hide stock
+                stockTV.visibility = View.INVISIBLE
             }
+
+
+            if(mPresenter!!.deliveryMode){
+
+                if(mPresenter!!.newDelivery){
+                    if( selected > -1 && remainingDelivery < 0){
+                        seekBar.max = selected
+                        //Don't let people put the number
+                        seekBarET.isEnabled = false
+                    }
+
+                    if(selected < remainingDelivery){
+                        seekBar.max = selected
+                        //seekBarET.isEnabled = false
+                    }
+
+                    if(remainingDelivery > -1 && deliveredCountTotal > -1 ){
+                        var left = selected - deliveredCountTotal
+                        seekBar.max = left
+                    }
+
+                    if(mPresenter.saleItemPreOrder){
+                        seekBar.max = inventoryCount
+                    }
+
+                }
+
+                if(!mPresenter!!.newDelivery){
+                    if( selected > -1){
+                        //Freeze selection
+                        seekBarET.setText(selected.toString())
+                        seekBarET.isEnabled = false
+                        seekBar.progress = selected
+                        seekBar.max = selected +  personWithInventory!!.inventoryCount
+                        seekBar.setEnabled(false)
+                    }
+
+
+                    if(deliveryCountThis > -1){
+                        seekBar.max = selected
+                        seekBar.progress = deliveryCountThis
+                        seekBar.isEnabled = false
+
+                        seekBarET.setText(deliveryCountThis.toString())
+                        seekBarET.isEnabled = false
+                    }
+                }
+            }
+
 
             seekBarET.addTextChangedListener(object: TextWatcher {
                 override fun afterTextChanged(p0: Editable?) {
@@ -111,14 +211,7 @@ class PersonWithInventorySelectionView : ConstraintLayout {
                 }
             })
 
-            if(mPresenter!!.inventorySelection) {
-                stockTV.visibility = View.VISIBLE
-                val sbct = personWithInventory!!.inventoryCount.toString() + " " +
-                        context.getText(R.string.in_stock)
-                stockTV.setText(sbct)
-            }else{
-                stockTV.visibility = View.INVISIBLE
-            }
+
         }
 
 

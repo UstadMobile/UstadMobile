@@ -39,12 +39,14 @@ class SaleDetailPresenter(context: Any,
     private lateinit var pProvider: DataSource.Factory<Int,SalePayment>
     private lateinit var dProvider: DataSource.Factory<Int,SaleDelivery>
     internal var repository: UmAppDatabase
+    internal var database: UmAppDatabase
     private val saleItemDao: SaleItemDao
     private val saleDeliveryDao : SaleDeliveryDao
     private val saleDao: SaleDao
     private val saleVoiceNoteDao: SaleVoiceNoteDao
     private val salePaymentDao: SalePaymentDao
     private val inventoryTransactionDao : InventoryTransactionDao
+    private val inventoryTransactionDaoDB : InventoryTransactionDao
     private val personDao: PersonDao
     private val currentSaleItem: SaleItem? = null
     private var currentSale: Sale? = null
@@ -69,6 +71,7 @@ class SaleDetailPresenter(context: Any,
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        database = UmAppDatabase.getInstance(context)
 
         //Get provider Dao
         saleItemDao = repository.saleItemDao
@@ -79,6 +82,7 @@ class SaleDetailPresenter(context: Any,
         personDao = repository.personDao
         saleDeliveryDao = repository.saleDeliveryDao
         inventoryTransactionDao = repository.inventoryTransactionDao
+        inventoryTransactionDaoDB = database.inventoryTransactionDao
 
         positionToLocationUid = HashMap()
 
@@ -563,7 +567,7 @@ class SaleDetailPresenter(context: Any,
             //2. Update to false.
             //3. Update Delivery to false too
             GlobalScope.launch {
-                inventoryTransactionDao.deactivateAllTransactionsBySaleDeliveryAndSale(
+                inventoryTransactionDaoDB.deactivateAllTransactionsBySaleDeliveryAndSale(
                         saleDeliveryUid, currentSale!!.saleUid)
                 val saleDelivery = saleDeliveryDao.findByUidAsync(saleDeliveryUid)
                 saleDelivery!!.saleDeliveryActive = false

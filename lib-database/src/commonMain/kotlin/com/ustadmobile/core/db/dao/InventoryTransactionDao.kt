@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.InventoryTransaction
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 
@@ -64,6 +65,22 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
     """)
     abstract suspend fun activateAllTransactionsBySaleAndLe(saleUid: Long, leUid: Long): Int
 
+
+    //TODO: Case where leUid is admin and can see but not do anything on an le's behalf
+    @Query("""
+        select * from inventorytransaction 
+        left join inventoryitem on inventorytransaction.inventoryTransactionInventoryItemUid = inventoryitem.inventoryitemuid 
+        where inventoryitem.inventoryItemWeUid = :weUid and inventoryitem.inventoryItemLeUid = :leUid
+        and inventorytransaction.inventorytransactionsaleuid = :saleUid
+        and inventorytransaction.inventoryTransactionSaleItemUid = :saleItemUid
+        and inventorytransaction.inventoryTransactionSaleDeliveryUid = 0
+        and cast(inventoryitem.inventoryItemActive as integer) = 1
+        LIMIT :limit
+    """)
+    abstract suspend fun findUnDeliveredTransactionsByWeLeSaleUids(saleUid: Long, leUid: Long,
+                                                                   weUid: Long, saleItemUid: Long,
+                                                                   limit: Int)
+            :List<InventoryTransaction>
 
     @Query("""
         UPDATE InventoryTransaction SET InventoryTransactionActive = 0 

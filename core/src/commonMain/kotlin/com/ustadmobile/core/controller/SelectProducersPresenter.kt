@@ -35,8 +35,11 @@ class SelectProducersPresenter(context: Any,
 
 
     internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+    internal var database: UmAppDatabase = UmAppDatabase.Companion.getInstance(context)
     private val providerDao: InventoryItemDao
+    private val providerDaoDB: InventoryItemDao
     private val transactionDao: InventoryTransactionDao
+    private val transactionDaoDB: InventoryTransactionDao
     private var saleItemUid: Long = 0L
     private var saleUid: Long = 0L
     private var saleProductUid: Long = 0L
@@ -54,7 +57,9 @@ class SelectProducersPresenter(context: Any,
 
         //Get provider Dao
         providerDao = repository.inventoryItemDao
+        providerDaoDB = database.inventoryItemDao
         transactionDao = repository.inventoryTransactionDao
+        transactionDaoDB = database.inventoryTransactionDao
 
         if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)) {
             saleItemUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)!!.toLong())
@@ -88,6 +93,10 @@ class SelectProducersPresenter(context: Any,
 
     }
 
+    override fun getWeCountMap(): HashMap<Long, HashMap<Long, Int>> {
+        return HashMap()
+    }
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
@@ -99,35 +108,35 @@ class SelectProducersPresenter(context: Any,
         GlobalScope.launch {
             when (sortCode) {
                 SORT_ORDER_NAME_ASC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_NAME_DESC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_STOCK_ASC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_STOCK_DESC -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 else -> {
-                    val peopleWithInventory = providerDao.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
@@ -175,7 +184,7 @@ class SelectProducersPresenter(context: Any,
                 val newInventoryItem = InventoryItem(saleProductUid, loggedInPersonUid, weUid,
                         addedDateTime)
                 newInventoryItem.inventoryItemDayAdded = addedDate
-                providerDao.insertInventoryItem(newInventoryItem, count!!, loggedInPersonUid)
+                providerDaoDB.insertInventoryItem(newInventoryItem, count!!, loggedInPersonUid)
             }
             view.finish()
         }
@@ -219,7 +228,7 @@ class SelectProducersPresenter(context: Any,
                 val count = weToCount.get(weUid)!!
 
                 // Get count number of unique InventoryItems and build Transactions for them.
-                val availableItems = providerDao.findAvailableInventoryItemsByProductLimit(
+                val availableItems = providerDaoDB.findAvailableInventoryItemsByProductLimit(
                         saleProductUid, count, loggedInPersonUid, weUid)
                 if(availableItems.count() != count){
                     //ERROR: We are asking for more than we have.
@@ -232,7 +241,7 @@ class SelectProducersPresenter(context: Any,
                     newInventoryTransaction.inventoryTransactionActive = false
                     newInventoryTransaction.inventoryTransactionSaleItemUid = saleItemUid
 
-                    transactionDao.insertAsync(newInventoryTransaction)
+                    transactionDaoDB.insertAsync(newInventoryTransaction)
                 }
             }
 

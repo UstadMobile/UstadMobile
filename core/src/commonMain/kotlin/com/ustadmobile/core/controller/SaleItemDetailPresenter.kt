@@ -31,7 +31,9 @@ import kotlinx.coroutines.launch
 class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
     internal var repository: UmAppDatabase
+    internal var database: UmAppDatabase
     private var saleItemDao: SaleItemDao
+    private var saleItemDaoDB: SaleItemDao
     private var reminderDao: SaleItemReminderDao
 
     private var currentSaleItem: SaleItem? = null
@@ -54,8 +56,10 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             : super(context, arguments, view) {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        database = UmAppDatabase.getInstance(context)
 
         saleItemDao = repository.saleItemDao
+        saleItemDaoDB = database.saleItemDao
         reminderDao = repository.saleItemReminderDao
     }
 
@@ -66,9 +70,11 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             : super(context, arguments, view) {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        database = UmAppDatabase.getInstance(context)
 
         saleItemDao = repository.saleItemDao
         reminderDao = repository.saleItemReminderDao
+        saleItemDaoDB = database.saleItemDao
         refreshSaleItem = refresh
     }
 
@@ -126,9 +132,10 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             updatedSaleItem!!.saleItemSaleUid = saleUid
             if(preOrder){
                 updatedSaleItem!!.saleItemDueDate = UMCalendarUtil.getDateInMilliPlusDays(2)
+                updatedSaleItem!!.saleItemPreorder = true
             }
             GlobalScope.launch {
-                saleItemUid = saleItemDao.insertAsync(updatedSaleItem!!)
+                saleItemUid = saleItemDaoDB.insertAsync(updatedSaleItem!!)
                 updatedSaleItem!!.saleItemUid = saleItemUid
                 initFromSaleItem(saleItemUid)
             }

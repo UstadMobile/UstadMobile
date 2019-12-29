@@ -9,7 +9,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PersonWithInventory() : Person() {
 
-        var inventoryCount = 0
-        var inventorySelected = 0
+        //Total inventory count
+        var inventoryCount = -1
+
+        var inventoryCountDeliveredTotal = -1
+
+        var inventoryCountDelivered = -1
+
+        //Inventory selected
+        var inventorySelected = -1
+
 
 }
