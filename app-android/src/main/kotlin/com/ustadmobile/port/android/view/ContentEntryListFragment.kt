@@ -3,9 +3,7 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -25,6 +23,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_ADD_CONTENT
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_EDITOPTION
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -65,6 +66,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     }
 
+
+    private var buttonVisibilityFlags: Int = 0
 
     override val viewContext: Any
         get() = context!!
@@ -176,7 +179,29 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         })
     }
 
+    override fun setEditButtonsVisibility(buttonVisibilityFlags: Int) {
+        this.buttonVisibilityFlags = buttonVisibilityFlags
+        activity?.invalidateOptionsMenu()
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?) {
+        menu?.findItem(R.id.create_new_folder)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_NEWFOLDER) == EDIT_BUTTONS_NEWFOLDER
+        menu?.findItem(R.id.edit_category_content)?.isVisible =  (buttonVisibilityFlags and EDIT_BUTTONS_EDITOPTION) == EDIT_BUTTONS_EDITOPTION
+        menu?.findItem(R.id.create_new_content)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_ADD_CONTENT) == EDIT_BUTTONS_ADD_CONTENT
+        super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId){
+            R.id.edit_category_content -> presenter?.handleClickEditButton()
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -237,7 +262,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
             presenter = ContentEntryListFragmentPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
-                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context), UstadMobileSystemImpl.instance).also {
+                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context), UstadMobileSystemImpl.instance, umRepoDb).also {
                 it.onCreate(bundleToMap(savedInstanceState))
             }
         }
@@ -332,7 +357,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     fun handleBottomSheetClicked(contentType: Int) {
-
+        presenter?.handleClickAddContent(contentType)
     }
 
     companion object {

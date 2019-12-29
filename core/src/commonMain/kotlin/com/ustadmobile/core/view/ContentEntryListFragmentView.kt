@@ -23,7 +23,32 @@ interface ContentEntryListFragmentView : UstadView {
     @JsName("setLanguageOptions")
     fun setLanguageOptions(result: List<Language>)
 
+    /**
+     * Sets whether or not buttons that allow the user to edit content are visibile
+     *
+     * @param buttonVisibilityFlags - flags for buttons to be shown
+     *
+     */
+    fun setEditButtonsVisibility(buttonVisibilityFlags: Int)
+
     companion object {
+
+        /**
+         * show controls to allow adding content
+         */
+        const val EDIT_BUTTONS_ADD_CONTENT = 1
+
+        /**
+         * show an option for creating a new folder
+         */
+        const val EDIT_BUTTONS_NEWFOLDER = 2
+
+        /**
+         * show an option to allow the user to edit this contententry (e.g. the parent of the children in this list)
+         */
+        const val EDIT_BUTTONS_EDITOPTION = 4
+
+        const val ARG_EDIT_BUTTONS_CONTROL_FLAG = "EditControlFlag"
 
         const val VIEW_NAME = "ContentEntryList"
 

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase

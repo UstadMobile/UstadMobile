@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
@@ -13,6 +12,8 @@ import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
@@ -121,7 +122,7 @@ class ContentEntryDetailPresenterTest {
             whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(contentEntry.contentEntryUid)).thenReturn(downloadJobItemLiveData)
         }
 
-        args[ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
     }
 
 
@@ -200,7 +201,7 @@ class ContentEntryDetailPresenterTest {
 
         verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf(relatedJoin)))
 
-        var args = mapOf(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
+        var args = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
 
         presenter.handleClickTranslatedEntry(translatedEntry.contentEntryUid)
         verify(systemImpl).go(eq(ContentEntryDetailView.VIEW_NAME), eq(args), any())

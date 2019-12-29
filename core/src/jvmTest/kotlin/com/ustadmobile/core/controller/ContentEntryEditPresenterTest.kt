@@ -1,20 +1,18 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEntryEditView
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
+import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.checkJndiSetup
-import junit.framework.Assert
 import junit.framework.Assert.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -45,6 +43,7 @@ class ContentEntryEditPresenterTest {
 
     private val arguments = mutableMapOf(
             ContentEntryEditView.CONTENT_ENTRY_LEAF to "true",
+            CONTENT_ENTRY_PARENT_UID to entryUid.toString(),
             ARG_CONTENT_ENTRY_UID to entryUid.toString(),
             ContentEntryEditView.CONTENT_TYPE to CONTENT_IMPORT_FILE.toString())
 
@@ -133,8 +132,9 @@ class ContentEntryEditPresenterTest {
 
         runBlocking {
 
+            arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
             arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = "false"
-            arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
+            arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListFragmentView.CONTENT_CREATE_FOLDER.toString()
             presenter = ContentEntryEditPresenter(context, arguments,
                     mockView, umAppDatabase.contentEntryDao, umAppDatabase.contentEntryParentChildJoinDao,
                     umAppDatabase.contentEntryStatusDao, umAccount, impl) { dir: String, mimetype: String, entry: ContentEntry ->
@@ -156,9 +156,9 @@ class ContentEntryEditPresenterTest {
 
                 assertFalse("folder created with leaf false", contentEntry!!.leaf)
 
-                var parentChildJoin = umAppDatabase.contentEntryParentChildJoinDao.findParentByChildUuids(contentEntry!!.contentEntryUid)
+                var parentChildJoin = umAppDatabase.contentEntryParentChildJoinDao.findParentByChildUuids(contentEntry.contentEntryUid)
 
-                assertEquals("parent child join parent matches", arguments[ARG_CONTENT_ENTRY_UID]!!.toLong(), parentChildJoin!!.cepcjParentContentEntryUid)
+                assertEquals("parent child join parent matches", arguments[CONTENT_ENTRY_PARENT_UID]!!.toLong(), parentChildJoin!!.cepcjParentContentEntryUid)
                 assertEquals("parent child join child matches", contentEntry.contentEntryUid, parentChildJoin.cepcjChildContentEntryUid)
 
             }
@@ -169,7 +169,8 @@ class ContentEntryEditPresenterTest {
 
     @Test
     fun givenOptions_whenCreateContentOptionIsSelected_shouldHideFileImportViews() {
-        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_CONTENT.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListFragmentView.CONTENT_CREATE_CONTENT.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
         presenter = ContentEntryEditPresenter(context, arguments,
                 mockView, umAppDatabase.contentEntryDao, umAppDatabase.contentEntryParentChildJoinDao,
                 umAppDatabase.contentEntryStatusDao, umAccount, impl) { dir: String, mimetype: String, entry: ContentEntry ->

@@ -11,9 +11,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.CONTENT_IMPORT_FILE
@@ -26,8 +24,6 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         ContentEntryListFragment.ContentEntryListHostActivity,
         AdapterView.OnItemSelectedListener, View.OnClickListener {
 
-    private var showOptions = false
-
     private lateinit var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,9 +34,6 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
-
-        showOptions = UstadMobileSystemImpl.instance.getAppConfigString(
-                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
 
         contentCreationOptionBehaviour = BottomSheetBehavior
                 .from(findViewById(R.id.bottom_content_option_sheet))
@@ -79,10 +72,14 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> navigateBack()
-            R.id.create_new_content ->
-                contentCreationOptionBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED)
-            R.id.edit_category_content -> return false
+            android.R.id.home -> {
+                navigateBack()
+                return true
+            }
+            R.id.create_new_content -> {
+                contentCreationOptionBehaviour.state = BottomSheetBehavior.STATE_EXPANDED
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -148,10 +145,10 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
                     as ContentEntryListFragment?
             if (item is Language) {
                 // language
-                fragment!!.filterByLang(item.langUid)
+                fragment?.filterByLang(item.langUid)
 
             } else if (item is DistinctCategorySchema) {
-                fragment!!.filterBySchemaCategory(item.contentCategoryUid)
+                fragment?.filterBySchemaCategory(item.contentCategoryUid)
             }
         }
 
@@ -165,18 +162,10 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         }
     }
 
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        val account = UmAccountManager.getActiveAccount(this)
-        menu.findItem(R.id.create_new_content).isVisible = showOptions && account != null && account.personUid != 0L
-        menu.findItem(R.id.edit_category_content).isVisible = showOptions && account != null && account.personUid != 0L
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     fun navigateBack() {
         val fragment = supportFragmentManager.findFragmentById(R.id.entry_content)
                 as ContentEntryListFragment?
-        fragment!!.clickUpNavigation()
+        fragment?.clickUpNavigation()
     }
 
 

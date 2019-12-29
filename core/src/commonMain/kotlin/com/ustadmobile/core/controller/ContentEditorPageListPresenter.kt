@@ -1,12 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorPageListView
-import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
@@ -18,7 +17,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
                                      private val pageActionDelegate: ContentEditorPageActionDelegate)
     : UstadBaseController<ContentEditorPageListView>(context, arguments, view) {
 
-    private val entryUuid = arguments.getValue(ContentEditorView.CONTENT_ENTRY_UID).toLong()
+    private val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
 
     private var entryLiveData: DoorLiveData<ContentEntry?>? = null
 

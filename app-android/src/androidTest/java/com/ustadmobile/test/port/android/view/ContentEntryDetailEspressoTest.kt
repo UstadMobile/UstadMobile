@@ -21,12 +21,13 @@ import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -274,7 +275,7 @@ class ContentEntryDetailEspressoTest {
 
         intended(AllOf.allOf(
                 hasComponent(ContentEntryDetailActivity::class.java.canonicalName),
-                hasExtra(equalTo(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID),
+                hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
                         equalTo(10L.toString())
                 )))
 
@@ -375,9 +376,9 @@ class ContentEntryDetailEspressoTest {
 
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity::class.java.canonicalName),
-                hasExtra(equalTo(ContentEntryDetailPresenter.ARG_CONTAINER_UID),
+                hasExtra(equalTo(UstadView.ARG_CONTAINER_UID),
                         equalTo(18.toString())),
-                hasExtra(equalTo(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID),
+                hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
                 equalTo(14.toString()))))
 
     }

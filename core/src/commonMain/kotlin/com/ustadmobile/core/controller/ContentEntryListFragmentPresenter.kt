@@ -1,10 +1,15 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_ADD_CONTENT
+import com.ustadmobile.core.view.ContentEntryListFragmentView.Companion.EDIT_BUTTONS_EDITOPTION
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
@@ -20,14 +25,15 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                                         private val contentEntryDao: ContentEntryDao,
                                         private val contentEntryDaoRepo: ContentEntryDao,
                                         private val activeAccount: UmAccount?,
-                                        private val systemImpl: UstadMobileSystemImpl)
+                                        private val systemImpl: UstadMobileSystemImpl,
+                                        private val umRepo: UmAppDatabase)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
 
     private var filterByLang: Long = 0
 
     private var filterByCategory: Long = 0
 
-    private var parentUid: Long? = null
+    private var parentUid: Long = 0L
 
     private var noIframe: Boolean = false
 
@@ -37,6 +43,22 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
             arguments.containsKey(ARG_LIBRARIES_CONTENT) -> showContentByParent()
             arguments.containsKey(ARG_DOWNLOADED_CONTENT) -> showDownloadedContent()
             arguments.containsKey(ARG_RECYCLED_CONTENT) -> showRecycledEntries()
+        }
+
+        GlobalScope.launch {
+
+
+            if (activeAccount != null) {
+                val person = umRepo.personDao.findByUid(activeAccount.personUid)
+                if (person?.admin == true) {
+
+                    var contentEditFlags: Int = arguments[ARG_EDIT_BUTTONS_CONTROL_FLAG]?.toInt()
+                            ?: 0
+                    view.runOnUiThread(Runnable {
+                        view.setEditButtonsVisibility(contentEditFlags)
+                    })
+                }
+            }
         }
 
     }
@@ -49,7 +71,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         }
         val resultTitle = entry.title
 
-        val domains = UstadMobileSystemImpl.instance.getAppConfigString(
+        val domains = systemImpl.getAppConfigString(
                 AppConfig.KEY_NO_IFRAME, "", context)!!.split(",")
 
         noIframe = domains.contains(entry.publisher)
@@ -60,7 +82,8 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid ?: 0)
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid
+                ?: 0)
         fragmentViewContract.setContentEntryProvider(provider)
 
         try {
@@ -126,52 +149,85 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     @JsName("handleContentEntryClicked")
     fun handleContentEntryClicked(entry: ContentEntry) {
-        val impl = UstadMobileSystemImpl.instance
         val args = hashMapOf<String, String?>()
         args.putAll(arguments)
         val entryUid = entry.contentEntryUid
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
         args[ARG_NO_IFRAMES] = noIframe.toString()
+        args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListFragmentView.VIEW_NAME
-        impl.go(destView, args, view.viewContext)
+        systemImpl.go(destView, args, view.viewContext)
 
     }
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid ?: 0))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+                ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid ?: 0))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+                ?: 0))
     }
 
     @JsName("handleUpNavigation")
     fun handleUpNavigation() {
-        val impl = UstadMobileSystemImpl.instance
-        impl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
+        systemImpl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 
     }
 
     @JsName("handleDownloadStatusButtonClicked")
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
-        UstadMobileSystemImpl.instance.go("DownloadDialog",
+        systemImpl.go("DownloadDialog",
                 mapOf("contentEntryUid" to entry.contentEntryUid.toString()), context)
     }
 
 
     fun handleClickAddContent(contentType: Int) {
+        val args = HashMap<String, String?>()
+        args.putAll(arguments)
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = parentUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = 0.toString()
+        args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
+        args[ContentEntryEditView.CONTENT_TYPE] = contentType.toString()
 
+        view.runOnUiThread(Runnable {
+            when (contentType) {
+                ContentEntryListFragmentView.CONTENT_CREATE_FOLDER -> {
+                    args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+                }
+
+                ContentEntryListFragmentView.CONTENT_IMPORT_FILE -> {
+                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+                }
+
+                ContentEntryListFragmentView.CONTENT_CREATE_CONTENT -> {
+                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+                }
+                ContentEntryListFragmentView.CONTENT_IMPORT_LINK -> {
+                    systemImpl.go(ContentEntryImportLinkView.VIEW_NAME, args, this.context)
+                }
+            }
+        })
+    }
+
+    fun handleClickEditButton() {
+        val args = HashMap<String, String?>()
+        args.putAll(arguments)
+        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = parentUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = parentUid.toString()
+        args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListFragmentView.CONTENT_CREATE_FOLDER.toString()
+        args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+        systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this)
     }
 
     companion object {
-
-        @JsName("ARG_CONTENT_ENTRY_UID")
-        const val ARG_CONTENT_ENTRY_UID = "entryid"
 
         const val ARG_NO_IFRAMES = "noiframe"
 

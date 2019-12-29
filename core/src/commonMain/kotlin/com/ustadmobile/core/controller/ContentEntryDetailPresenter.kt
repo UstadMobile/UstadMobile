@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.liveDataObserverDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -264,7 +265,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args.putAll(arguments)
 
                 val imported = (entry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
-                args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
+                args[UstadView.ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
                 args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListFragmentView.CONTENT_IMPORT_FILE
@@ -297,10 +298,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     companion object {
-
-        const val ARG_CONTENT_ENTRY_UID = "entryid"
-
-        const val ARG_CONTAINER_UID = "containerUid"
 
         const val LOCALLY_AVAILABLE_ICON = 1
 

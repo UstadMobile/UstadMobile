@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.WebChunkView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -60,8 +61,8 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        var entryUuid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID)!!.toLong()
-        containerUid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTAINER_UID)!!.toLong()
+        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()
+        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID)!!.toLong()
 
         navigation = arguments[ARG_REFERRER] ?: ""
 

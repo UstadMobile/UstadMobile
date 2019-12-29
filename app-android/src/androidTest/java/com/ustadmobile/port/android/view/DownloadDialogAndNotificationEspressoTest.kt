@@ -26,9 +26,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
-import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions

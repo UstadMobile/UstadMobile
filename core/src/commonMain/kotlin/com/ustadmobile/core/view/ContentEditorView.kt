@@ -140,8 +140,6 @@ interface ContentEditorView : UstadViewWithProgress{
 
         const val VIEW_NAME = "ContentEditor"
 
-        const val CONTENT_ENTRY_UID = "entryid"
-
         const val CONTENT_STORAGE_OPTION = "content_storage_option"
 
         /**

@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
@@ -66,8 +67,8 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
         contentEntryDao = db.contentEntryDao
 
         navigation = arguments[ARG_REFERRER] ?: ""
-        val entryUuid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID)!!.toLong()
-        containerUid = arguments.getValue(ContentEntryDetailPresenter.ARG_CONTAINER_UID)!!.toLong()
+        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()
+        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID)!!.toLong()
 
         GlobalScope.launch {
             val contentEntry = contentEntryDao.getContentByUuidAsync(entryUuid)
