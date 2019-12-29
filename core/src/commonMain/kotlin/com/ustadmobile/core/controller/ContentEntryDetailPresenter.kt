@@ -175,7 +175,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             }
         } else if (isDownloadEnabled) {
             view.runOnUiThread(Runnable {
-                view.showDownloadOptionsDialog(mapOf("contentEntryUid" to this.entryUuid.toString()))
+                view.showDownloadOptionsDialog(mapOf(ARG_CONTENT_ENTRY_UID to this.entryUuid.toString()))
             })
         }
     }
