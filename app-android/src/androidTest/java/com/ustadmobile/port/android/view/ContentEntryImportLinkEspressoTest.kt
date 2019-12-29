@@ -255,7 +255,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         val intent = Intent()
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
-        intent.putExtra(UstadView.CONTENT_ENTRY_UID, (-102).toString())
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, (-102).toString())
         mActivityRule.launchActivity(intent)
 
         var activity = mActivityRule.activity
