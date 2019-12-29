@@ -3,9 +3,7 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -14,9 +12,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -24,7 +22,11 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
@@ -51,18 +53,31 @@ import java.util.concurrent.atomic.AtomicReference
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
+class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener{
 
+
+    interface ContentEntryListHostActivity {
+
+        fun setTitle(title: String)
+
+        fun setFilterSpinner(idToValuesMap: Map<Long, List<DistinctCategorySchema>>)
+
+        fun setLanguageFilterSpinner(result: List<Language>)
+
+    }
+
+
+    private var buttonVisibilityFlags: Int = 0
 
     override val viewContext: Any
         get() = context!!
 
-    private var presenter: ContentEntryListFragmentPresenter? = null
+    private var presenter: ContentEntryListPresenter? = null
 
     private lateinit var recyclerView: RecyclerView
 
-    private var contentEntryListener: ContentEntryListener? = null
+    private var contentEntryListHostActivity: ContentEntryListHostActivity? = null
 
     private lateinit var ustadBaseActivity: UstadBaseActivity
 
@@ -155,23 +170,47 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun setCategorySchemaSpinner(spinnerData: Map<Long, List<DistinctCategorySchema>>) {
         runOnUiThread(Runnable {
-            contentEntryListener?.setFilterSpinner(spinnerData)
+            contentEntryListHostActivity?.setFilterSpinner(spinnerData)
         })
     }
 
     override fun setLanguageOptions(result: List<Language>) {
         runOnUiThread(Runnable{
-            contentEntryListener?.setLanguageFilterSpinner(result)
+            contentEntryListHostActivity?.setLanguageFilterSpinner(result)
         })
     }
 
+    override fun setEditButtonsVisibility(buttonVisibilityFlags: Int) {
+        this.buttonVisibilityFlags = buttonVisibilityFlags
+        activity?.invalidateOptionsMenu()
+    }
 
-    interface ContentEntryListener {
-        fun setTitle(title: String)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
-        fun setFilterSpinner(idToValuesMap: Map<Long, List<DistinctCategorySchema>>)
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.findItem(R.id.create_new_folder)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_NEWFOLDER) == EDIT_BUTTONS_NEWFOLDER
+        menu.findItem(R.id.edit_category_content)?.isVisible =  (buttonVisibilityFlags and EDIT_BUTTONS_EDITOPTION) == EDIT_BUTTONS_EDITOPTION
+        menu.findItem(R.id.create_new_content)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_ADD_CONTENT) == EDIT_BUTTONS_ADD_CONTENT
+        super.onPrepareOptionsMenu(menu)
+    }
 
-        fun setLanguageFilterSpinner(result: List<Language>)
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId){
+            R.id.edit_category_content -> {
+                presenter?.handleClickEditButton()
+                return true
+            }
+
+            R.id.create_new_folder -> {
+                presenter?.handleClickAddContent(CONTENT_CREATE_FOLDER)
+                return true
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -231,9 +270,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
             val umDb = UmAppDatabase.getInstance(ustadBaseActivity)
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
-            presenter = ContentEntryListFragmentPresenter(context as Context,
+            presenter = ContentEntryListPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
-                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context)).also {
+                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context), UstadMobileSystemImpl.instance, umRepoDb).also {
                 it.onCreate(bundleToMap(savedInstanceState))
             }
         }
@@ -253,8 +292,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     override fun onAttach(context: Context?) {
-        if (context is ContentEntryListener) {
-            this.contentEntryListener = context
+        if (context is ContentEntryListHostActivity) {
+            this.contentEntryListHostActivity = context
         }
 
         if (context is UstadBaseActivity) {
@@ -273,7 +312,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun onDetach() {
         super.onDetach()
-        this.contentEntryListener = null
+        this.contentEntryListHostActivity = null
     }
 
 
@@ -293,7 +332,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun setToolbarTitle(title: String) {
         runOnUiThread(Runnable {
-            contentEntryListener?.setTitle(title)
+            contentEntryListHostActivity?.setTitle(title)
         })
     }
 
@@ -325,6 +364,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onDestroy() {
         super.onDestroy()
         localAvailabilityPagedListCallback?.onDestroy()
+    }
+
+    fun handleBottomSheetClicked(contentType: Int) {
+        presenter?.handleClickAddContent(contentType)
     }
 
     companion object {

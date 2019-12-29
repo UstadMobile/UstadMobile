@@ -1,8 +1,8 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -66,7 +66,7 @@ suspend fun goToContentEntry(contentEntryUid: Long,
         }
 
         val args = HashMap<String, String>()
-        args[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES] = noIframe.toString()
+        args[ContentEntryListPresenter.ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
         args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
         systemImpl.go(viewName, args, context)

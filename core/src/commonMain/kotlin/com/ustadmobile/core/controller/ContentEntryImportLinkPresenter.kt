@@ -8,7 +8,7 @@ import com.ustadmobile.core.networkmanager.PlatformHttpClient
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
-import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -49,7 +49,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         super.onCreate(savedState)
 
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
-        contentEntryUid = arguments[CONTENT_ENTRY_UID]?.toLong()
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong()
         if (contentEntryUid != null) {
             updateUIWithExistingContentEntry()
         }

@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryExportView
 import com.ustadmobile.core.view.ContentEntryExportView.Companion.ARG_CONTENT_ENTRY_TITLE
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -30,7 +31,7 @@ class ContentEntryExportPresenter(context: Any, arguments: Map<String, String?>,
 
     private var entryTile: String = arguments[ARG_CONTENT_ENTRY_TITLE] ?: ""
 
-    private var entryUid: Long = (arguments[ContentEntryExportView.ARG_CONTENT_ENTRY_UID] ?: "0").toLong()
+    private var entryUid: Long = (arguments[UstadView.ARG_CONTENT_ENTRY_UID] ?: "0").toLong()
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)

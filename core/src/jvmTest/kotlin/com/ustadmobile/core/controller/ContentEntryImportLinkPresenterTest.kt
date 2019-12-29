@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.server.engine.ApplicationEngine
@@ -299,7 +300,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
         val args = Hashtable<String, String>()
         args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
-        args[ContentEntryImportLinkView.CONTENT_ENTRY_UID] = (-102).toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = (-102).toString()
         presenter = ContentEntryImportLinkPresenter(context,
                 args, mockView, "http://localhost:8096", defaultDb, repo)
 
