@@ -145,11 +145,6 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                 contentEntryJoin.cepcjParentContentEntryUid =
                         arguments[ARG_CONTENT_ENTRY_UID]?.toLong()!!
                 contentEntryJoin.cepcjUid = contentEntryParentChildJoinDao.insert(contentEntryJoin)
-
-                val status =  ContentEntryStatus(contentEntry.contentEntryUid, true, 0)
-                status.downloadStatus = JobStatus.COMPLETE
-                status.cesLeaf = isLeaf
-                status.cesUid = contentEntryStatusDao.insert(status)
             }else{
                 contentEntry.contentEntryUid = contentEntry.contentEntryUid
                 contentEntryDao.update(contentEntry)

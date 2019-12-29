@@ -55,6 +55,17 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         ContentEntryListRecyclerViewAdapter.AdapterViewListener{
 
 
+    interface ContentEntryListHostActivity {
+
+        fun setTitle(title: String)
+
+        fun setFilterSpinner(idToValuesMap: Map<Long, List<DistinctCategorySchema>>)
+
+        fun setLanguageFilterSpinner(result: List<Language>)
+
+    }
+
+
     override val viewContext: Any
         get() = context!!
 
@@ -62,7 +73,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private lateinit var recyclerView: RecyclerView
 
-    private var contentEntryListener: ContentEntryListener? = null
+    private var contentEntryListHostActivity: ContentEntryListHostActivity? = null
 
     private lateinit var ustadBaseActivity: UstadBaseActivity
 
@@ -155,24 +166,17 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun setCategorySchemaSpinner(spinnerData: Map<Long, List<DistinctCategorySchema>>) {
         runOnUiThread(Runnable {
-            contentEntryListener?.setFilterSpinner(spinnerData)
+            contentEntryListHostActivity?.setFilterSpinner(spinnerData)
         })
     }
 
     override fun setLanguageOptions(result: List<Language>) {
         runOnUiThread(Runnable{
-            contentEntryListener?.setLanguageFilterSpinner(result)
+            contentEntryListHostActivity?.setLanguageFilterSpinner(result)
         })
     }
 
 
-    interface ContentEntryListener {
-        fun setTitle(title: String)
-
-        fun setFilterSpinner(idToValuesMap: Map<Long, List<DistinctCategorySchema>>)
-
-        fun setLanguageFilterSpinner(result: List<Language>)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -233,7 +237,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
             presenter = ContentEntryListFragmentPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
-                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context)).also {
+                    umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context), UstadMobileSystemImpl.instance).also {
                 it.onCreate(bundleToMap(savedInstanceState))
             }
         }
@@ -253,8 +257,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     override fun onAttach(context: Context?) {
-        if (context is ContentEntryListener) {
-            this.contentEntryListener = context
+        if (context is ContentEntryListHostActivity) {
+            this.contentEntryListHostActivity = context
         }
 
         if (context is UstadBaseActivity) {
@@ -273,7 +277,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun onDetach() {
         super.onDetach()
-        this.contentEntryListener = null
+        this.contentEntryListHostActivity = null
     }
 
 
@@ -293,7 +297,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun setToolbarTitle(title: String) {
         runOnUiThread(Runnable {
-            contentEntryListener?.setTitle(title)
+            contentEntryListHostActivity?.setTitle(title)
         })
     }
 
@@ -325,6 +329,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onDestroy() {
         super.onDestroy()
         localAvailabilityPagedListCallback?.onDestroy()
+    }
+
+    fun handleButtonSheetClicked(contentType: Int, newContent: Boolean) {
+
     }
 
     companion object {

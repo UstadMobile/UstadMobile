@@ -134,21 +134,6 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
         }
     }
 
-    override fun createNewFolder(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
-    }
-
-    override fun startFileBrowser(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
-    }
-
-    override fun createNewContent(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
-    }
-
-    override fun importContentFromLink(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryImportLinkView.VIEW_NAME, arguments, this)
-    }
 
     override fun showProgressDialog(show: Boolean) {
         if(show){

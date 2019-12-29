@@ -271,7 +271,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
-                    view.startFileBrowser(args)
+                    impl.go(ContentEntryEditView.VIEW_NAME, arguments, this)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }

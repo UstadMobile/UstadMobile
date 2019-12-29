@@ -11,9 +11,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryListView
@@ -23,29 +21,15 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import java.security.AccessController.getContext
 
 
 class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
-        ContentEntryListFragment.ContentEntryListener, ContentEntryListView,
+        ContentEntryListFragment.ContentEntryListHostActivity, ContentEntryListView,
         AdapterView.OnItemSelectedListener, View.OnClickListener {
 
     private var showOptions = false
 
-    private var presenter: ContentEntryListPresenter? = null
-
-    lateinit var managerBle: NetworkManagerBle
-
-    private var showControls = false
-
-
-    private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
-
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
-        super.onBleNetworkServiceBound(networkManagerBle)
-        managerBle = networkManagerBle
-    }
+    private lateinit var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,21 +40,15 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-        showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+        showOptions = UstadMobileSystemImpl.instance.getAppConfigString(
                 AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
-
-        presenter = ContentEntryListPresenter(getContext(),
-                UMAndroidUtil.bundleToMap(intent.extras), this)
-        presenter!!.handleShowContentEditorOptios(showControls)
-        presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
 
         contentCreationOptionBehaviour = BottomSheetBehavior
                 .from(findViewById(R.id.bottom_content_option_sheet))
 
         findViewById<View>(R.id.action_close_options).setOnClickListener {
-            val collapsed = contentCreationOptionBehaviour!!.state == BottomSheetBehavior.STATE_COLLAPSED
-            contentCreationOptionBehaviour!!.setState(if (collapsed)
+            val collapsed = contentCreationOptionBehaviour.state == BottomSheetBehavior.STATE_COLLAPSED
+            contentCreationOptionBehaviour.setState(if (collapsed)
                 BottomSheetBehavior.STATE_EXPANDED
             else
                 BottomSheetBehavior.STATE_COLLAPSED)
@@ -102,11 +80,10 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> presenter!!.handleBackNavigation()
+            android.R.id.home -> navigateBack()
             R.id.create_new_content ->
-                contentCreationOptionBehaviour!!.setState(BottomSheetBehavior.STATE_EXPANDED)
-            R.id.edit_category_content ->
-                presenter!!.handleContentCreation(CONTENT_CREATE_FOLDER, false)
+                contentCreationOptionBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED)
+            R.id.edit_category_content -> return false
         }
         return super.onOptionsItemSelected(item)
     }
@@ -187,8 +164,8 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onBackPressed() {
-        if (contentCreationOptionBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
-            contentCreationOptionBehaviour!!.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (contentCreationOptionBehaviour.state == BottomSheetBehavior.STATE_EXPANDED) {
+            contentCreationOptionBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
             super.onBackPressed()
         }
@@ -214,25 +191,22 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onClick(view: View) {
-        when {
-            view.id == R.id.content_create_category ->
-                presenter!!.handleContentCreation(CONTENT_CREATE_FOLDER, true)
-            view.id == R.id.content_import_file ->
-                presenter!!.handleContentCreation(CONTENT_IMPORT_FILE, true)
-            view.id == R.id.content_create_content ->
-                presenter!!.handleContentCreation(CONTENT_CREATE_CONTENT, true)
-            view.id == R.id.content_import_link ->
-                presenter!!.handleContentCreation(CONTENT_IMPORT_LINK, true)
+        val fragment = supportFragmentManager.findFragmentById(R.id.entry_content)
+                as ContentEntryListFragment?
+        when (view.id) {
+            R.id.content_create_category ->
+                fragment?.handleButtonSheetClicked(CONTENT_CREATE_FOLDER, true)
+            R.id.content_import_file ->
+                fragment?.handleButtonSheetClicked(CONTENT_IMPORT_FILE, true)
+            R.id.content_create_content ->
+                fragment?.handleButtonSheetClicked(CONTENT_CREATE_CONTENT, true)
+            R.id.content_import_link ->
+                fragment?.handleButtonSheetClicked(CONTENT_IMPORT_LINK, true)
         }
-        contentCreationOptionBehaviour!!.state = BottomSheetBehavior.STATE_COLLAPSED
+        contentCreationOptionBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
     }
 
     override fun onNothingSelected(adapterView: AdapterView<*>) {
 
-    }
-
-    override fun onDestroy() {
-        presenter!!.onDestroy()
-        super.onDestroy()
     }
 }

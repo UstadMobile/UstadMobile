@@ -4,10 +4,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
@@ -22,7 +19,8 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                                         private val fragmentViewContract: ContentEntryListFragmentView,
                                         private val contentEntryDao: ContentEntryDao,
                                         private val contentEntryDaoRepo: ContentEntryDao,
-                                        private val activeAccount: UmAccount?)
+                                        private val activeAccount: UmAccount?,
+                                        private val systemImpl: UstadMobileSystemImpl)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
 
     private var filterByLang: Long = 0
@@ -163,6 +161,11 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
         UstadMobileSystemImpl.instance.go("DownloadDialog",
                 mapOf("contentEntryUid" to entry.contentEntryUid.toString()), context)
+    }
+
+
+    fun handleContentCreationClick(contentType: Int, newContent: Boolean) {
+
     }
 
     companion object {
