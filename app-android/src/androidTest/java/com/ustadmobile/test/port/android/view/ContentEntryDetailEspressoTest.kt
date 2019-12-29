@@ -20,15 +20,12 @@ import androidx.test.rule.GrantPermissionRule
 import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity

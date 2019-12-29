@@ -186,7 +186,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 view.showBaseProgressBar(true)
                 goToEntryFn(entryUuid, appDb, context, impl, isDownloadEnabled,
                         false,
-                        arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES]
+                        arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]
                                 ?.toBoolean() ?: false)
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {

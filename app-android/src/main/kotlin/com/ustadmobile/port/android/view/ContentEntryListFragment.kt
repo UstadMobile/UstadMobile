@@ -12,9 +12,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -72,7 +72,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override val viewContext: Any
         get() = context!!
 
-    private var presenter: ContentEntryListFragmentPresenter? = null
+    private var presenter: ContentEntryListPresenter? = null
 
     private lateinit var recyclerView: RecyclerView
 
@@ -260,7 +260,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
             val umDb = UmAppDatabase.getInstance(ustadBaseActivity)
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
-            presenter = ContentEntryListFragmentPresenter(context as Context,
+            presenter = ContentEntryListPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
                     umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context), UstadMobileSystemImpl.instance, umRepoDb).also {
                 it.onCreate(bundleToMap(savedInstanceState))

@@ -20,13 +20,13 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String?>,
-                                        private val fragmentViewContract: ContentEntryListFragmentView,
-                                        private val contentEntryDao: ContentEntryDao,
-                                        private val contentEntryDaoRepo: ContentEntryDao,
-                                        private val activeAccount: UmAccount?,
-                                        private val systemImpl: UstadMobileSystemImpl,
-                                        private val umRepo: UmAppDatabase)
+class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
+                                private val fragmentViewContract: ContentEntryListFragmentView,
+                                private val contentEntryDao: ContentEntryDao,
+                                private val contentEntryDaoRepo: ContentEntryDao,
+                                private val activeAccount: UmAccount?,
+                                private val systemImpl: UstadMobileSystemImpl,
+                                private val umRepo: UmAppDatabase)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments, fragmentViewContract) {
 
     private var filterByLang: Long = 0

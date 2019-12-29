@@ -103,7 +103,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                             ?: throw IllegalArgumentException("No File found")
                     goToEntryFn(entry.contentEntryUid, umAppDb, context, impl, true,
                             true,
-                            arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES]?.toBoolean()!!)
+                            arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]?.toBoolean()!!)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
