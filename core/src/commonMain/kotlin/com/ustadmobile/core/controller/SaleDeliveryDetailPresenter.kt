@@ -250,12 +250,12 @@ class SaleDeliveryDetailPresenter(context: Any,
 
             if(allSaleItemDone){
                 sale!!.salePreOrder = false
-                saleDao.updateAsync(sale!!)
+                saleDaoDB.updateAsync(sale!!)
             }
 
             //3. Persist and close
             saleDelivery.saleDeliveryActive = true
-            saleDeliveryDao.updateAsync(saleDelivery!!)
+            saleDeliveryDB.updateAsync(saleDelivery!!)
             view.finish()
         }
     }

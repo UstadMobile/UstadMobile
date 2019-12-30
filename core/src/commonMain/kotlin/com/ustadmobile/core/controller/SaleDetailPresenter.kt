@@ -446,12 +446,17 @@ class SaleDetailPresenter(context: Any,
 
     fun handleClickAddDelivery(){
 
-        GlobalScope.launch {
-            val impl = UstadMobileSystemImpl.instance
-            val args = HashMap<String, String>()
+        if(updatedSale!!.saleActive == false){
+            val saveMessage = UstadMobileSystemImpl.instance.getString(MessageID.save_sale, context)
+            view.sendMessage(saveMessage)
+        }else {
+            GlobalScope.launch {
+                val impl = UstadMobileSystemImpl.instance
+                val args = HashMap<String, String>()
 
-            args.put(ARG_SALE_DELIVERY_SALE_UID, updatedSale!!.saleUid.toString())
-            impl.go(SaleDeliveryDetailView.VIEW_NAME, args, context)
+                args.put(ARG_SALE_DELIVERY_SALE_UID, updatedSale!!.saleUid.toString())
+                impl.go(SaleDeliveryDetailView.VIEW_NAME, args, context)
+            }
         }
 
     }

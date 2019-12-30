@@ -236,4 +236,6 @@
     <string name="in_stock_selected">in stock for this sale</string>
     <string name="delivered_here">delivered here</string>
 
+    <string name="save_sale">Please save the sale before adding a delivery</string>
+
 </resources>
