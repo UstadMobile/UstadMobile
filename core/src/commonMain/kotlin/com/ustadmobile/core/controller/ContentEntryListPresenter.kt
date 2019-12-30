@@ -82,19 +82,19 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, activeAccount?.personUid
                 ?: 0)
         viewContract.setContentEntryProvider(provider)
 
         try {
-            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid!!)
+            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid)
             entryLiveData.observe(this, this::onContentEntryChanged)
         } catch (e: Exception) {
             viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
 
         GlobalScope.launch {
-            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
+            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid).toMutableList()
             if (result.size > 1) {
                 val selectLang = Language()
                 selectLang.name = "Language"
@@ -111,7 +111,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         GlobalScope.launch {
-            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid!!)
+            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid)
             val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
             for (schema in result) {
                 var data: MutableList<DistinctCategorySchema>? =
@@ -163,14 +163,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
@@ -178,7 +178,6 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     fun handleUpNavigation() {
         systemImpl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
-
     }
 
     @JsName("handleDownloadStatusButtonClicked")
