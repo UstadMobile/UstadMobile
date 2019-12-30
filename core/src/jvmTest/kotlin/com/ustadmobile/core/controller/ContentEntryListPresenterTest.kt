@@ -4,24 +4,24 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
 class ContentEntryListPresenterTest {
 
-    private lateinit var libraryContent1: ContentEntry
+    private lateinit var adminAccount: UmAccount
     private lateinit var rootEntry: ContentEntry
     private lateinit var mockView: ContentEntryListView
 
@@ -41,7 +41,7 @@ class ContentEntryListPresenterTest {
 
     private lateinit var systemImpl: UstadMobileSystemImpl
 
-    private lateinit var activeAccount: UmAccount
+    private var mockAccount: UmAccount? = null
 
 
     @Before
@@ -62,64 +62,13 @@ class ContentEntryListPresenterTest {
         contentEntryDao = mock()
         contentEntryRepoDao = mock()
 
-        activeAccount = mock()
+        mockAccount = mock()
+        adminAccount = UmAccount(1, "test", "", "")
 
         systemImpl = mock()
 
         rootEntry = ContentEntry()
         rootEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(rootEntry)
-
-        var downloadedEntry = ContentEntry()
-        downloadedEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(downloadedEntry)
-
-        var recycledEntry = ContentEntry()
-        recycledEntry.ceInactive = true
-        recycledEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(recycledEntry)
-
-        libraryContent1 = ContentEntry()
-        libraryContent1.contentEntryUid = umAppDatabase.contentEntryDao.insert(libraryContent1)
-
-        var libraryContent2 = ContentEntry()
-        libraryContent2.contentEntryUid = umAppDatabase.contentEntryDao.insert(libraryContent2)
-
-        var rootdownloadJoin = ContentEntryParentChildJoin()
-        rootdownloadJoin.cepcjParentContentEntryUid = rootEntry.contentEntryUid
-        rootdownloadJoin.cepcjChildContentEntryUid = downloadedEntry.contentEntryUid
-        rootdownloadJoin.cepcjUid = umAppDatabase.contentEntryParentChildJoinDao.insert(rootdownloadJoin)
-
-        var rootrecycleJoin = ContentEntryParentChildJoin()
-        rootrecycleJoin.cepcjParentContentEntryUid = rootEntry.contentEntryUid
-        rootrecycleJoin.cepcjChildContentEntryUid = recycledEntry.contentEntryUid
-        rootrecycleJoin.cepcjUid = umAppDatabase.contentEntryParentChildJoinDao.insert(rootrecycleJoin)
-
-        var rootlib1Join = ContentEntryParentChildJoin()
-        rootlib1Join.cepcjParentContentEntryUid = rootEntry.contentEntryUid
-        rootlib1Join.cepcjChildContentEntryUid = libraryContent1.contentEntryUid
-        rootlib1Join.cepcjUid = umAppDatabase.contentEntryParentChildJoinDao.insert(rootlib1Join)
-
-        var rootlib2Join = ContentEntryParentChildJoin()
-        rootlib2Join.cepcjParentContentEntryUid = rootEntry.contentEntryUid
-        rootlib2Join.cepcjChildContentEntryUid = libraryContent2.contentEntryUid
-        rootlib2Join.cepcjUid = umAppDatabase.contentEntryParentChildJoinDao.insert(rootlib2Join)
-
-        var downloadJob = DownloadJob()
-        downloadJob.djRootContentEntryUid = downloadedEntry.contentEntryUid
-        downloadJob.djStatus = JobStatus.COMPLETE
-        downloadJob.djUid = umAppDatabase.downloadJobDao.insert(downloadJob).toInt()
-
-        var downloadEntryStatus = ContentEntryStatus()
-        downloadEntryStatus.cesUid = downloadedEntry.contentEntryUid
-        umAppDatabase.contentEntryStatusDao.insert(downloadEntryStatus)
-
-        var downloadContainer = Container()
-        downloadContainer.containerContentEntryUid = downloadedEntry.contentEntryUid
-        downloadContainer.cntLastModified = System.currentTimeMillis()
-        downloadContainer.containerUid = umAppDatabase.containerDao.insert(downloadContainer)
-
-        var recycledContainer = Container()
-        recycledContainer.containerContentEntryUid = recycledEntry.contentEntryUid
-        recycledContainer.cntLastModified = System.currentTimeMillis()
-        recycledContainer.containerUid = umAppDatabase.containerDao.insert(recycledContainer)
 
         args[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
     }
@@ -128,22 +77,26 @@ class ContentEntryListPresenterTest {
     @Test
     fun givenArgToViewDownloadedContent_whenOnCreateCalled_thenShouldSetListOfDownloadedContent() {
 
+        val contentEntryDaoSpy = spy(umAppDatabase.contentEntryDao)
+
         args[ARG_DOWNLOADED_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDaoSpy, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
         presenter.onCreate(null)
 
-        verify(contentEntryDao, timeout(5000)).downloadedRootItems()
+        verify(contentEntryDaoSpy, timeout(5000)).downloadedRootItems()
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
     }
 
     @Test
     fun givenArgToViewRecycledContent_whenOnCreateCalled_thenShouldSetListOfRecycledContent() {
 
+        val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
+
         args[ARG_RECYCLED_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
         presenter.onCreate(null)
 
-        verify(contentEntryRepoDao, timeout(5000)).recycledItems()
+        verify(repoContentEntryDaoSpy, timeout(5000)).recycledItems()
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
 
     }
@@ -157,7 +110,6 @@ class ContentEntryListPresenterTest {
             categoryTest.schemaName = "Test"
 
             val contentEntryLiveData = spy(DoorMutableLiveData(rootEntry as ContentEntry?))
-
 
             val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao) {
                 on { findLiveContentEntry(rootEntry.contentEntryUid) }.thenReturn(contentEntryLiveData)
@@ -197,7 +149,7 @@ class ContentEntryListPresenterTest {
 
 
             args[ARG_LIBRARIES_CONTENT] = ""
-            var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, activeAccount, systemImpl, repoSpy)
+            var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, repoSpy)
             presenter.onCreate(null)
 
             verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), eq(0), eq(0), eq(0))
@@ -208,8 +160,7 @@ class ContentEntryListPresenterTest {
             verify(mockView, timeout(5000)).setLanguageOptions(eq(listOf(selectLang, allLang, Language())))
 
             verify(repoContentEntryDaoSpy, timeout(5000)).findListOfCategoriesAsync(eq(rootEntry.contentEntryUid))
-            verify(mockView, timeout(5000)).setCategorySchemaSpinner(eq(mapOf(2323L to listOf(schemaTitle, allSchema, categoryTest))))
-
+            verify(mockView, timeout(5000)).setCategorySchemaSpinner(eq(mapOf(categoryTest.contentCategorySchemaUid to listOf(schemaTitle, allSchema, categoryTest))))
 
         }
 
@@ -219,53 +170,259 @@ class ContentEntryListPresenterTest {
     @Test
     fun givenListOfLanguages_whenUserSelectsEnglish_thenFilterAndShowListOfEnglishContent() {
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
-        presenter.onCreate(null)
+        val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+
+        presenter.handleClickFilterByLanguage(1L)
+        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(0L), eq(1L), eq(0), eq(0))
+        verify(mockView, timeout(5000)).setContentEntryProvider(any())
 
     }
 
     @Test
     fun givenListOfCategory_whenUserSelectsACategory_thenFilterAndShowListOfCategoryContent() {
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
-        presenter.onCreate(null)
+        val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+
+        presenter.handleClickFilterByCategory(1L)
+        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(0L), eq(0), eq(1L), eq(0))
+        verify(mockView, timeout(5000)).setContentEntryProvider(any())
     }
 
     @Test
     fun givenListOfContent_whenUserClicksOnDownloadIcon_thenShouldOpenDownloadDialog() {
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
-        presenter.onCreate(null)
 
+        args[ARG_LIBRARIES_CONTENT] = ""
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+
+        presenter.handleDownloadStatusButtonClicked(rootEntry)
+        verify(systemImpl, timeout(5000)).go(eq("DownloadDialog"), eq(mapOf(UstadView.ARG_CONTENT_ENTRY_UID to rootEntry.contentEntryUid.toString())), eq(context))
     }
 
     @Test
     fun givenListOfContent_whenUserClicksOnLeafContent_thenShouldOpenContentEntryDetail() {
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
-        presenter.onCreate(null)
+        args[ARG_LIBRARIES_CONTENT] = ""
 
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        arguments[ContentEntryListPresenter.ARG_NO_IFRAMES] = "false"
+        arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+
+        rootEntry.leaf = true
+        presenter.handleContentEntryClicked(rootEntry)
+
+        verify(systemImpl).go(eq(ContentEntryDetailView.VIEW_NAME), eq(arguments), eq(context))
     }
 
     @Test
     fun givenListOfContent_whenUserClicksOnEntryNotLeaf_thenShouldOpenContentEntryListActivity() {
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
-        presenter.onCreate(null)
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        arguments[ContentEntryListPresenter.ARG_NO_IFRAMES] = "false"
+        arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+
+        presenter.handleContentEntryClicked(rootEntry)
+
+        verify(systemImpl).go(eq(ContentEntryListView.VIEW_NAME), eq(arguments), any())
 
     }
 
     @Test
-    fun givenUserIsAdmin_whenClicksOnAddContentIcon_thenShouldOpenContentEntryEditActivity() {
+    fun givenUserIsAdmin_whenClicksOnAddContentIconAndSelectsCreateFolder_thenShouldOpenContentEntryEditActivity() {
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
+        var personDaoSpy = spy(umAppRepository.personDao)
+
+        var repo = spy(umAppRepository){
+            on { personDao }.thenReturn(personDaoSpy)
+        }
+
+        runBlocking {
+            var person = Person()
+            person.admin = true
+            whenever(personDaoSpy.findByUid(any())).thenReturn(person)
+
+        }
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        args[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
+        arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).setEditButtonsVisibility(eq(arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG]!!.toInt()))
+
+        presenter.handleClickAddContent(ContentEntryListView.CONTENT_CREATE_FOLDER)
+
+        verify(systemImpl, timeout(5000)).go(eq(ContentEntryEditView.VIEW_NAME), eq(arguments), eq(context))
+
     }
+
+    @Test
+    fun givenUserIsAdmin_whenClicksOnAddContentIconAndSelectsImportLink_thenShouldOpenContentEntryEditActivity() {
+
+
+        var personDaoSpy = spy(umAppRepository.personDao)
+
+        var repo = spy(umAppRepository){
+            on { personDao }.thenReturn(personDaoSpy)
+        }
+
+        runBlocking {
+            var person = Person()
+            person.admin = true
+            whenever(personDaoSpy.findByUid(any())).thenReturn(person)
+
+        }
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        args[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_IMPORT_LINK.toString()
+        arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).setEditButtonsVisibility(eq(arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG]!!.toInt()))
+
+        presenter.handleClickAddContent(ContentEntryListView.CONTENT_IMPORT_LINK)
+
+        verify(systemImpl, timeout(5000)).go(eq(ContentEntryImportLinkView.VIEW_NAME), eq(arguments), eq(context))
+    }
+
+    @Test
+    fun givenUserIsAdmin_whenClicksOnAddContentIconAndSelectsImportFile_thenShouldOpenContentEntryEditActivity() {
+
+        var personDaoSpy = spy(umAppRepository.personDao)
+
+        var repo = spy(umAppRepository){
+            on { personDao }.thenReturn(personDaoSpy)
+        }
+
+        runBlocking {
+            var person = Person()
+            person.admin = true
+            whenever(personDaoSpy.findByUid(any())).thenReturn(person)
+
+        }
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        args[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_IMPORT_FILE.toString()
+        arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
+
+        UmAccountManager.setActiveAccount(mockAccount!!, context)
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).setEditButtonsVisibility(eq(arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG]!!.toInt()))
+
+        presenter.handleClickAddContent(ContentEntryListView.CONTENT_IMPORT_FILE)
+
+        verify(systemImpl, timeout(5000)).go(eq(ContentEntryEditView.VIEW_NAME), eq(arguments), eq(context))
+    }
+
+
+    @Test
+    fun givenUserIsAdmin_whenClicksOnAddContentIconAndSelectsCreateContent_thenShouldOpenContentEntryEditActivity() {
+
+        var personDaoSpy = spy(umAppRepository.personDao)
+
+        var repo = spy(umAppRepository){
+            on { personDao }.thenReturn(personDaoSpy)
+        }
+
+        runBlocking {
+            var person = Person()
+            person.admin = true
+            whenever(personDaoSpy.findByUid(any())).thenReturn(person)
+
+        }
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        args[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_CONTENT.toString()
+        arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
+
+        UmAccountManager.setActiveAccount(mockAccount!!, context)
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).setEditButtonsVisibility(eq(arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG]!!.toInt()))
+
+        presenter.handleClickAddContent(ContentEntryListView.CONTENT_CREATE_CONTENT)
+
+        verify(systemImpl, timeout(5000)).go(eq(ContentEntryEditView.VIEW_NAME), eq(arguments), eq(context))
+    }
+
 
     @Test
     fun givenUserIsAdmin_whenClicksOnEditContent_thenShouldOpenContentEntryEditActivity() {
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, activeAccount, systemImpl, umAppRepository)
+        var personDaoSpy = spy(umAppRepository.personDao)
+
+        var repo = spy(umAppRepository){
+            on { personDao }.thenReturn(personDaoSpy)
+        }
+
+        runBlocking {
+            var person = Person()
+            person.admin = true
+            whenever(personDaoSpy.findByUid(any())).thenReturn(person)
+
+        }
+
+        args[ARG_LIBRARIES_CONTENT] = ""
+        args[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
+        var arguments = mutableMapOf<String, String>()
+        arguments.putAll(args)
+        arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
+        arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+
+
+        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
         presenter.onCreate(null)
 
-    }
+        verify(mockView, timeout(5000)).setEditButtonsVisibility(eq(arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG]!!.toInt()))
 
+        presenter.handleClickEditButton()
+
+        verify(systemImpl, timeout(5000)).go(eq(ContentEntryEditView.VIEW_NAME), eq(arguments), eq(context))
+
+    }
 
 }
