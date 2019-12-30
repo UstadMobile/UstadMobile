@@ -70,6 +70,15 @@ abstract class FileResponder {
          */
         val exists: Boolean
 
+        /**
+         * Optional: provide an explicit etag value (e.g. based on MD5).
+         *
+         * @return String to use for the etag. If null, a default etag will be made based on the
+         * last modified time and file length
+         */
+        val eTag: String?
+
+
     }
 
     class FileSource(private val src: File) : IFileSource {
@@ -88,6 +97,9 @@ abstract class FileResponder {
             get() = src.name
 
         override val exists: Boolean = src.exists()
+
+        override val eTag: String?
+            get() = null
     }
 
     class ZipEntrySource : IFileSource {
@@ -119,6 +131,9 @@ abstract class FileResponder {
 
         override val exists: Boolean
             get() =  entry != null//must exist if there is an entry here
+
+        override val eTag: String?
+            get() = null
 
         /**
          *
@@ -179,7 +194,7 @@ abstract class FileResponder {
 
 
                 //Check to see if the etag provided by the client matches: in which case we can send 302 not modified
-                val etag = Integer.toHexString((file.name + lastModifiedTime + "" +
+                val etag = file.eTag ?: Integer.toHexString((file.name + lastModifiedTime + "" +
                         totalLength).hashCode())
                 val extension = UMFileUtil.getExtension(fileName!!)
                 ifNoneMatchHeader = session.headers["if-none-match"]
@@ -207,7 +222,6 @@ abstract class FileResponder {
 
                     r.addHeader("ETag", etag)
                     range.responseHeaders.forEach { r.addHeader(it.key, it.value) }
-                    r.addHeader("Connection", "close")
                     return r
                 } else if(range?.statusCode == 416) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",

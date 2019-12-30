@@ -113,7 +113,7 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
         GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT)
             isCanEdit = result
             view.setFABVisibility(result)

@@ -100,7 +100,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      */
     fun checkPermissions() {
         GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT)
             setActivityEditable(result!!)
         }

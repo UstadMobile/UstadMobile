@@ -9,22 +9,17 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import com.ustadmobile.util.test.checkJndiSetup
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.stopServerOnCancellation
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.toUtf8Bytes
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
-import okio.Okio
-import org.bouncycastle.crypto.tls.ContentType
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.io.ByteArrayInputStream
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -55,7 +50,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         try {
             serverdb = UmAppDatabase.getInstance(context, "serverdb")
             defaultDb = UmAppDatabase.getInstance(context)
-            repo = serverdb//.getRepository("http://localhost/dummy/", "")
+            repo = defaultDb//.getRepository("http://localhost/dummy/", "")
             serverdb.clearAllTables()
             defaultDb.clearAllTables()
         } catch (e: Exception) {
@@ -71,7 +66,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val args = Hashtable<String, String>()
         args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
         presenter = ContentEntryImportLinkPresenter(context,
-                args, mockView, "http://localhost:8096")
+                args, mockView, "http://localhost:8096",defaultDb, repo)
         presenter.onCreate(args)
 
     }
@@ -305,9 +300,9 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
         val args = Hashtable<String, String>()
         args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
-        args[ContentEntryImportLinkView.CONTENT_ENTRY_UID] = (-102).toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = (-102).toString()
         presenter = ContentEntryImportLinkPresenter(context,
-                args, mockView, "http://localhost:8096")
+                args, mockView, "http://localhost:8096", defaultDb, repo)
 
         runBlocking {
             presenter.onCreate(args)
@@ -334,7 +329,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val args = Hashtable<String, String>()
         args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = (-101).toString()
         presenter = ContentEntryImportLinkPresenter(context,
-                args, mockView, mockWebServer.url("").toString())
+                args, mockView, mockWebServer.url("").toString(),defaultDb, repo)
         presenter.onCreate(args)
 
         val url = mockWebServer.url("/somehp5here").toString()

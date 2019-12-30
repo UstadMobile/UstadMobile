@@ -32,7 +32,7 @@ android {
     packagingOptions {
         // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
         // use kotlin reflection, which we don't.
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata"]
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
     }
 
     compileOptions {
@@ -91,23 +91,6 @@ android {
             testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
-            packagingOptions { //Required: otherwise we get complaints on assembling
-                merge "META-INF/INDEX.LIST"
-                exclude "META-INF/ktor-http.kotlin_module"
-                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
-                exclude 'META-INF/kotlinx-io.kotlin_module'
-                exclude 'META-INF/atomicfu.kotlin_module'
-                exclude 'META-INF/ktor-utils.kotlin_module'
-                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
-                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
-                exclude 'META-INF/ktor-http-cio.kotlin_module'
-                exclude 'META-INF/ktor-*'
-                exclude "META-INF/DEPENDENCIES"
-
-
-
-
-            }
         }
 
         devMinApi21 {
@@ -117,19 +100,6 @@ android {
             testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
-            packagingOptions { //Required: otherwise we get complaints on assembling
-                merge "META-INF/INDEX.LIST"
-                exclude "META-INF/ktor-http.kotlin_module"
-                exclude 'META-INF/KMPXmlPullParser.kotlin_module'
-                exclude 'META-INF/kotlinx-io.kotlin_module'
-                exclude 'META-INF/atomicfu.kotlin_module'
-                exclude 'META-INF/ktor-utils.kotlin_module'
-                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
-                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
-                exclude 'META-INF/ktor-http-cio.kotlin_module'
-                exclude 'META-INF/ktor-*'
-
-            }
         }
     }
 

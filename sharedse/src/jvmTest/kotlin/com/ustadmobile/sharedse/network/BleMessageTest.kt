@@ -3,6 +3,7 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import junit.framework.TestCase.assertTrue
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.*
@@ -34,6 +35,19 @@ class BleMessageTest {
         assertTrue("Payload depacketized is the same", Arrays.equals(payload,
                 receivedMessage.payload))
         assertEquals("Same message id", sentMessage.messageId.toLong(), receivedMessage.messageId.toLong())
+    }
+
+    @Test
+    fun givenLargeBinaryPayload_whenPacketizedAndDepacketized_shouldBeEqual() {
+        val payload = javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/container/testfile2.png").readBytes()
+        val sentMessage = BleMessage(0.toByte(), 42.toByte(), payload)
+        val receivedMessage = BleMessage(sentMessage.getPackets(512))
+
+
+        Assert.assertEquals("Sent message length is correct", payload.size,
+                sentMessage.length)
+        Assert.assertArrayEquals("message is the same after beign received", payload,
+                receivedMessage.payload)
     }
 
     @Test

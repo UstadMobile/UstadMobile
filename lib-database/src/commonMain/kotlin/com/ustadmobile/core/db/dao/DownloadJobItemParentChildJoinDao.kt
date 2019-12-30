@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
 abstract class DownloadJobItemParentChildJoinDao {
 
     @Query("SELECT DownloadJobItemParentChildJoin.* FROM DownloadJobItemParentChildJoin " + "WHERE djiChildDjiUid = :childDjiUid ")
-    abstract fun findParentsByChildUid(childDjiUid: Long): List<DownloadJobItemParentChildJoin>
+    abstract fun findParentsByChildUid(childDjiUid: Int): List<DownloadJobItemParentChildJoin>
 
     @Query("SELECT DownloadJobItemParentChildJoin.* FROM DownloadJobItemParentChildJoin " +
             " LEFT JOIN DownloadJobItem ON DownloadJobItemParentChildJoin.djiParentDjiUid = DownloadJobItem.djiUid " +

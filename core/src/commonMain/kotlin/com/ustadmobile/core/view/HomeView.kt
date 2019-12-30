@@ -17,6 +17,7 @@ interface HomeView : LanguageOptionView {
     @JsName("showReportMenu")
     fun showReportMenu(show: Boolean)
 
+    fun showShareAppDialog()
 
     companion object {
 

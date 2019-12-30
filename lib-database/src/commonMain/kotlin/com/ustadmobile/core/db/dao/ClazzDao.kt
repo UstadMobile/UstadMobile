@@ -261,8 +261,8 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT EXISTS (SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" +
             ENTITY_LEVEL_PERMISSION_CONDITION1 +
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + "))")
-    abstract suspend fun personHasPermission(accountPersonUid: Long, clazzUid: Long,
-                                             permission: Long) : Boolean
+    abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
+                                                      permission: Long) : Boolean
 
     @QueryLiveTables(["Person", "PersonGroupMember"])
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "

@@ -9,7 +9,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -113,8 +115,8 @@ class VideoPlayerTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
         val b = Bundle()
-        b.putString(VideoPlayerView.ARG_CONTAINER_UID, containerUid.toString())
-        b.putString(VideoPlayerView.ARG_CONTENT_ENTRY_ID, 14L.toString())
+        b.putString(UstadView.ARG_CONTAINER_UID, containerUid.toString())
+        b.putString(UstadView.ARG_CONTENT_ENTRY_UID, 14L.toString())
         launchActivityIntent.putExtras(b)
         mActivityRule.launchActivity(launchActivityIntent)
 

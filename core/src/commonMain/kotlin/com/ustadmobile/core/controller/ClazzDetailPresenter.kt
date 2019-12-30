@@ -74,16 +74,16 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
                 previousPermissionClazz!!.isSelFeature = sf
             }
 
-            val result2 = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
+            val result2 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid!!, currentClazzUid,
                     Role.PERMISSION_CLAZZ_UPDATE)
             view.setSettingsVisibility(result2!!)
-            val result3 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result3 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
             view.setAttendanceVisibility(if (currentClazz!!.isAttendanceFeature) result3 else false)
 
-            val result4 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
+            val result4 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
             view.setSELVisibility(if (currentClazz!!.isSelFeature) result4 else false)
-            val result5 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result5 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT)
             view.setActivityVisibility(if (currentClazz!!.isActivityFeature) result5 else false)
 

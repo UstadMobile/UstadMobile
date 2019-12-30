@@ -55,7 +55,7 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
         GlobalScope.launch {
-            var result = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
+            var result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid!!, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
             if(result == null){
                 result = false

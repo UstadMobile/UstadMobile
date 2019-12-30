@@ -101,7 +101,7 @@ dependencies {
      * Since Gradle 5.4 using kapt project(":...") does not work.
      */
     kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
-            "../lib-door-runtime/build/libs/lib-door-runtime-jvm.jar")
+            "../lib-door-runtime/build/libs/lib-door-runtime-jvm-${rootProject.version}.jar")
     kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     kapt "com.squareup:kotlinpoet:1.2.0"
     kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
@@ -113,6 +113,8 @@ dependencies {
     kapt "io.ktor:ktor-client-okhttp:$version_ktor"
     kapt "io.ktor:ktor-client-gson:$version_ktor"
     kapt "io.ktor:ktor-client-okhttp:$version_ktor"
+    kapt "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    kapt "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 }
 
 compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

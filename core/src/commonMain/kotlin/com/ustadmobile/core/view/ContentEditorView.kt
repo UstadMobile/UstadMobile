@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEditorView : ContentWithOptionsView{
+interface ContentEditorView : UstadViewWithProgress{
 
     /**
      * Set bold formatting on selected/focused content
@@ -139,8 +139,6 @@ interface ContentEditorView : ContentWithOptionsView{
     companion object {
 
         const val VIEW_NAME = "ContentEditor"
-
-        const val CONTENT_ENTRY_UID = "entryid"
 
         const val CONTENT_STORAGE_OPTION = "content_storage_option"
 

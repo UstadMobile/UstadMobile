@@ -27,8 +27,6 @@ interface DownloadDialogView : UstadView {
 
     fun showStorageOptions(storageOptions: List<UMStorageDir>)
 
-    fun cancelOrPauseDownload(jobId: Long, cancel: Boolean)
-
     companion object {
 
         const val VIEW_NAME = "DownloadDialog"

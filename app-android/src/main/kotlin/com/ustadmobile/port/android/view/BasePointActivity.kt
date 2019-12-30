@@ -34,7 +34,6 @@ import com.google.android.material.appbar.AppBarLayout
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.BasePointPresenter
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
@@ -101,7 +100,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
     private val viewNameToFragment = mapOf<String, Class<*>>(
             FeedListView.VIEW_NAME to FeedListFragment::class.java,
             ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
-            ContentListView.VIEW_NAME to ContentListFragment::class.java,
+            ContentEntryListView.VIEW_NAME to ContentListFragment::class.java,
             ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
             PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
             BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java)
@@ -362,10 +361,8 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                     database.entryStatusResponseDao.deleteAllAsync()
                     database.downloadJobItemHistoryDao.deleteAllAsync()
                     database.downloadJobDao.deleteAllAsync()
-                    database.downloadJobItemDao.deleteAllAsync()
                     database.contentEntryStatusDao.deleteAllAsync()
                 }
-                networkManagerBle?.clearHistories()
 
             }
             R.id.menu_action_create_new_content -> {
@@ -373,10 +370,8 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                 args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
                 args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-                args[ContentEditorView.CONTENT_ENTRY_UID] = 0.toString()
-                args[ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID] = HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID.toString()
-                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
-                        this)
+//                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
+//                        this)
             }
             R.id.menu_action_send_feedback -> hearShake()
         }

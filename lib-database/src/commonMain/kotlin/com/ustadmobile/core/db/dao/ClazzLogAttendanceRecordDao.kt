@@ -93,8 +93,8 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
     abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float)
+                                                          toTime: Long, lowAttendanceThreshold: Float,
+                                                          midAttendanceThreshold: Float)
                                                 :List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
@@ -130,10 +130,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float,
-                                                  clazzes: List<Long>):
+    abstract suspend fun getAttendanceGroupedByThresholdsWithClazz(datetimeNow: Long, fromTime: Long,
+                                                                   toTime: Long, lowAttendanceThreshold: Float,
+                                                                   midAttendanceThreshold: Float,
+                                                                   clazzes: List<Long>):
             List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
@@ -180,10 +180,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " WHERE numSessionsTbl.locationUid = :locationUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float, clazzes: List<Long>,
-                                                  locationUid: Long)
+    abstract suspend fun getAttendanceGroupedByThresholdsWithClazzAndLocation(datetimeNow: Long, fromTime: Long,
+                                                                              toTime: Long, lowAttendanceThreshold: Float,
+                                                                              midAttendanceThreshold: Float, clazzes: List<Long>,
+                                                                              locationUid: Long)
             : List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
@@ -229,10 +229,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " WHERE numSessionsTbl.locationUid = :locationUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract suspend  fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float,
-                                                  locationUid: Long):
+    abstract suspend  fun getAttendanceGroupedByThresholdsWithLocation(datetimeNow: Long, fromTime: Long,
+                                                                       toTime: Long, lowAttendanceThreshold: Float,
+                                                                       midAttendanceThreshold: Float,
+                                                                       locationUid: Long):
     List<AttendanceResultGroupedByAgeAndThreshold>
 
     suspend fun getAttendanceGroupedByThresholdsAndClasses(datetimeNow: Long, fromTime: Long,
@@ -244,7 +244,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
                     lowAttendanceThreshold,
                     midAttendanceThreshold)
         } else {
-            return getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime,
+            return getAttendanceGroupedByThresholdsWithClazz(datetimeNow, fromTime, toTime,
                     lowAttendanceThreshold,
                     midAttendanceThreshold, clazzes)
         }
@@ -364,7 +364,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
-    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long,
+    abstract suspend fun findOverallDailyAttendanceNumbersByDate(fromDate: Long,
                                                                  toDate: Long):
     List<DailyAttendanceNumbers>
 
@@ -380,7 +380,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     List<Long>) : List<DailyAttendanceNumbers> {
         if (clazzes.isEmpty()) {
             if (locations.isEmpty()) {
-                return findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate)
+                return findOverallDailyAttendanceNumbersByDate(fromDate, toDate)
             } else {
                 return findOverallDailyAttendanceNumbersByDateAndLocation(fromDate, toDate,
                         locations)

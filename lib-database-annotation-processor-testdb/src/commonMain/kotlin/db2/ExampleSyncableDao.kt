@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.door.annotation.Repository
@@ -42,6 +43,9 @@ abstract class ExampleSyncableDao {
             "WHERE " +
             "esUid = :uid")
     abstract fun updateNumberByUid(uid: Long, newNumber: Long)
+
+    @Update
+    abstract suspend fun updateAsync(exampleSyncableEntity: ExampleSyncableEntity)
 
 
     open suspend fun findByUidAndAddOneThousand(@ParamName("uid") uid: Long): ExampleSyncableEntity? {

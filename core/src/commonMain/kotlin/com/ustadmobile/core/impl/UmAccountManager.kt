@@ -102,13 +102,13 @@ object UmAccountManager {
         return activeAccountRepository!!
     }
 
-    fun getActiveEndpoint(context: Any): String? {
-        val activeAccount = getActiveAccount(context)
-        return if (activeAccount != null) {
-            activeAccount.endpointUrl
+    fun getActiveEndpoint(context: Any): String {
+        val activeEndpoint = getActiveAccount(context)?.endpointUrl
+        return if (activeEndpoint != null) {
+            activeEndpoint
         } else {
             UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                    "http://localhost", context)
+                    "http://localhost", context) ?: "http://localhost"
         }
     }
 
