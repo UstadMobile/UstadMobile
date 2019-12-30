@@ -22,6 +22,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.SaleListView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleListDetail
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
@@ -207,16 +208,10 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
                                  paymentsDueTab: Boolean,
                                  preOrderTab: Boolean) {
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                .saleDaoBoundaryCallbacks.findAllActiveAsSaleListDetailProvider(factory)
-
         val recyclerAdapter = SaleListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 paymentsDueTab, preOrderTab,this, context!!)
 
-        val data =
-                LivePagedListBuilder(factory, 20)
-                        .setBoundaryCallback(boundaryCallback)
-                        .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleDao)
         data.observe(this,
                 Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
 

@@ -91,14 +91,15 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
     private var mProgressBar: ProgressBar? = null
 
-    var mOptionsMenu: Menu? = null
-
     override fun setGroupPresets(presets: Array<String>, position: Int) {
         val adapter = ArrayAdapter(applicationContext,
                 R.layout.item_simple_spinner, presets)
         weGroupSpinner!!.adapter = adapter
         weGroupSpinner!!.setSelection(position)
     }
+    private var enrollingToClass = false
+
+    var mOptionsMenu: Menu? = null
 
     override fun sendMessage(messageId: Int) {
         val impl = UstadMobileSystemImpl.instance
@@ -112,6 +113,9 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         }
     }
 
+    override fun setEnrollToClass(enroll: Boolean) {
+        enrollingToClass = enroll
+    }
 
     override fun setInProgress(inProgress: Boolean) {
         mProgressBar!!.visibility = if (inProgress) View.VISIBLE else View.GONE
@@ -219,11 +223,11 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     }
 
                     if(cc is AppCompatImageView){
-                        if(disable){
-                            cc.alpha = .133F
-                        }else{
-                            cc.alpha = 1F
-                        }
+                      if(disable){
+                          cc.alpha = .133F
+                      }else{
+                          cc.alpha = 1F
+                      }
                     }
                 }
             }
@@ -357,6 +361,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     header.textSize = HEADER_TEXT_SIZE.toFloat()
                     header.setPadding(DEFAULT_PADDING, DEFAULT_PADDING_HEADER_BOTTOM, 0, 0)
                     thisLinearLayout.addView(header)
+
 
                     weGroupSpinner = Spinner(this)
                     weGroupSpinner!!.setPadding(DEFAULT_PADDING*4, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
@@ -543,6 +548,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         mLinearLayout!!.addView(fieldHLayout)
 
     }
+
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item

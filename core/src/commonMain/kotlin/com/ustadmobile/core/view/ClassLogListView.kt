@@ -49,6 +49,8 @@ interface ClassLogListView : UstadView {
      */
     fun showMessage(messageID: Int)
 
+    fun showMessage(message: String)
+
     companion object {
 
         //View name

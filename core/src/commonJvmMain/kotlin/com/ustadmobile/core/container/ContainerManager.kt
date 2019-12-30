@@ -7,11 +7,9 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
@@ -28,7 +26,7 @@ import java.util.zip.ZipOutputStream
 import java.io.BufferedOutputStream
 import java.util.zip.ZipEntry
 import kotlin.io.copyTo
-import kotlinx.coroutines.runBlocking
+import com.ustadmobile.core.util.ext.*
 
 actual class ContainerManager actual constructor(container: Container,
                                                  db: UmAppDatabase,
@@ -46,79 +44,108 @@ actual class ContainerManager actual constructor(container: Container,
 
     val mutex = Mutex()
 
-    open class FileEntrySource(private val file: File, override val pathInContainer: String,
+    open class FileEntrySource(private val file: File, private val pathInContainer: String,
                                override val compression: Int = 0) : EntrySource {
         override val length: Long
             get() = file.length()
 
-        override val inputStream: InputStream
-            get() = FileInputStream(file)
+        override val inputStream: InputStream by lazy { FileInputStream(file) }
 
         override val filePath: String?
             get() = file.getAbsolutePath()
+
+        override val pathsInContainer: List<String>
+            get() = listOf(pathInContainer)
 
         override val md5Sum: ByteArray by lazy {
             val buffer = ByteArray(8 * 1024)
             var bytesRead = 0
 
-            val inStream = inputStream
             val md5Digest = MessageDigest.getInstance("MD5")
-            while (inStream.read(buffer).also { bytesRead = it } != -1) {
-                md5Digest.update(buffer, 0, bytesRead)
+            FileInputStream(file).use { inStream ->
+                while (inStream.read(buffer).also { bytesRead = it } != -1) {
+                    md5Digest.update(buffer, 0, bytesRead)
+                }
             }
 
             md5Digest.digest()
         }
+
+        override fun dispose() {
+            inputStream.close()
+        }
     }
 
 
-    @UseExperimental(ExperimentalUnsignedTypes::class)
-    actual override suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource) {
+    /**
+     * Adds a set of entries to this container. This is designed to work efficiently with
+     * ConcatenatedInputStream. It requires the list of entries and md5s to be inserted to known
+     * in advance, but can use a function to iterate over available entrysources in the order
+     * they are read.
+     *
+     * The paths that are going to be added must be known in advance.
+     * @param addOptions optional can be null.
+     * @param newPathsToMd5Map a map in the form of String -> Md5 byte array. This must be known
+     * in advance so that we can determine which entries are already available and which need
+     * added
+     * @param provider a function that provides an EntrySource. Once it has run out of EntrySources
+     * then it should return null
+     */
+    actual override suspend fun addEntries(addOptions: AddEntryOptions?,
+                                           newPathsToMd5Map: Map<String, ByteArray>,
+                                           provider: suspend () -> EntrySource?) {
         val addOpts = addOptions ?: AddEntryOptions()
         if (newFileDir == null)
             throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")
 
-        val entryMd5Sums = entries.map { Base64Coder.encodeToString(it.md5Sum) }
+        val entryMd5Sums = newPathsToMd5Map.values.map { it.encodeBase64() }
         mutex.withLock {
-
             val existingFiles = db.containerEntryFileDao.findEntriesByMd5Sums(entryMd5Sums)
                     .map { it.cefMd5!! to it }.toMap()
 
             val newContainerEntries = mutableListOf<ContainerEntryWithContainerEntryFile>()
 
-            val entriesParted = entries.partition { Base64Coder.encodeToString(it.md5Sum) in existingFiles.keys }
-
             //delete any ContainerEntry that is being overwritten
-            val newEntryPaths = entries.map { it.pathInContainer }
-            db.containerEntryDao.deleteList(
-                    pathToEntryMap.filter { it.key in newEntryPaths }.map { it.value })
+            val newEntryPaths = newPathsToMd5Map.keys
+            val overwrittenEntriesToDelete = pathToEntryMap.filter { it.key in newEntryPaths }
+                    .map { it.value }
+            db.containerEntryDao.deleteList(overwrittenEntriesToDelete)
 
-            //for all entries that we already have
-            newContainerEntries.addAll(entriesParted.first.map {
-                ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
-                        existingFiles[Base64Coder.encodeToString(it.md5Sum)]!!)
-            })
 
-            entriesParted.second.forEach {
-                val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16) }
-                val destFile = File(newFileDir, md5HexStr)
-                val currentFilePath = it.filePath
-                val isExcludedFromGzip = EXCLUDED_GZIP_TYPES.any { gzipIt -> it.pathInContainer.endsWith(gzipIt) }
-                val shouldGzipNow = if (it.compression == COMPRESSION_GZIP) false else !isExcludedFromGzip
-                val compressionSetting = if (isExcludedFromGzip) COMPRESSION_NONE else COMPRESSION_GZIP
-                //TODO: check for any paths that are being overwritten
-
-                if (addOpts.moveExistingFiles && currentFilePath != null) {
-                    if (!File(currentFilePath).renameTo(destFile)) {
-                        throw IOException("Could not rename input file : $currentFilePath")
+            var nextEntrySource: EntrySource? = null
+            while(provider.invoke().also { nextEntrySource = it} != null) {
+                val nextEntry = nextEntrySource!!
+                val md5StrBase64 = nextEntry.md5Sum.encodeBase64()
+                val existingFile = existingFiles[md5StrBase64]
+                if(existingFile != null) {
+                    newContainerEntries.addAll(
+                        nextEntry.pathsInContainer.map { path ->
+                            ContainerEntryWithContainerEntryFile(path, container, existingFile)
+                        }
+                    )
+                }else {
+                    val destFile = File(newFileDir, nextEntry.md5Sum.toHexString())
+                    val currentFilePath = nextEntry.filePath
+                    val isExcludedFromGzip = EXCLUDED_GZIP_TYPES.any { gzipIt -> nextEntry.pathsInContainer.any { it.endsWith(gzipIt) }}
+                    val shouldGzipNow = if (nextEntry.compression == COMPRESSION_GZIP) {
+                        false
+                    } else {
+                        !isExcludedFromGzip
                     }
-                } else {
-                    //copy it
-                    GlobalScope.async {
+
+                    val compressionSetting = if (isExcludedFromGzip) COMPRESSION_NONE else COMPRESSION_GZIP
+                    //TODO: check for any paths that are being overwritten
+
+                    if (addOpts.moveExistingFiles && currentFilePath != null) {
+                        if (!File(currentFilePath).renameTo(destFile)) {
+                            throw IOException("Could not rename input file : $currentFilePath")
+                        }
+                    } else {
+                        //copy it
                         var destOutStream = null as OutputStream?
                         var inStream = null as InputStream?
                         try {
-                            inStream = it.inputStream
+                            inStream = nextEntry.inputStream
                             destOutStream = FileOutputStream(destFile)
                             destOutStream = if (shouldGzipNow) GZIPOutputStream(destOutStream) else destOutStream
                             inStream.copyTo(destOutStream)
@@ -126,28 +153,53 @@ actual class ContainerManager actual constructor(container: Container,
                             throw e
                         } finally {
                             destOutStream?.close()
-                            inStream?.close()
+                            nextEntry.dispose()
                             destOutStream?.close()
                         }
-                    }.await()
-                }
+                    }
 
-                val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
-                        it.length, destFile.length(), compressionSetting, getSystemTimeInMillis())
-                containerEntryFile.cefPath = destFile.absolutePath
-                containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
-                newContainerEntries.add(ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
-                        containerEntryFile))
+                    val containerEntryFile = ContainerEntryFile(md5StrBase64,
+                            nextEntry.length, destFile.length(), compressionSetting, getSystemTimeInMillis())
+                    containerEntryFile.cefPath = destFile.absolutePath
+                    containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
+                    newContainerEntries.addAll(nextEntry.pathsInContainer.map { path ->
+                        ContainerEntryWithContainerEntryFile(path, container, containerEntryFile)
+                    })
+                }
             }
 
             db.containerEntryDao.insertAndSetIds(newContainerEntries)
 
             pathToEntryMap.putAll(newContainerEntries.map { it.cePath!! to it }.toMap())
 
+
             if (!addOpts.dontUpdateTotals) {
                 container.fileSize = pathToEntryMap.values.fold(0L, { count, next -> count + next.containerEntryFile!!.ceCompressedSize })
                 container.cntNumEntries = pathToEntryMap.size
                 dbRepo.containerDao.updateContainerSizeAndNumEntries(container.containerUid)
+            }
+        }
+    }
+
+
+
+
+    //TODO: modify this to use a function which would use a function that provides a next entry source
+    @UseExperimental(ExperimentalUnsignedTypes::class)
+    actual override suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource) {
+        val addOpts = addOptions ?: AddEntryOptions()
+        if (newFileDir == null)
+            throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")
+
+        var currentEntry = 0
+        val pathToMd5Map: Map<String, ByteArray> = entries.flatMap { entry ->
+            entry.pathsInContainer.map { path -> path to entry.md5Sum }
+        }.toMap()
+        addEntries(addOptions, pathToMd5Map) {
+            if(currentEntry < entries.size) {
+                entries[currentEntry++]
+            }else {
+                null
             }
         }
     }

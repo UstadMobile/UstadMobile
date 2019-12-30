@@ -281,20 +281,20 @@ class AddScheduleDialogPresenter
                     } else {
 
                         //Will be true if today is schedule day
-                        //TODO: Check this
-                        val today = UMCalendarUtil.getDayOfWeek(UMCalendarUtil.getToday000000())
+                        var today = UMCalendarUtil.getDayOfWeek(UMCalendarUtil.getToday000000())
+                        today = today + 1
                         incToday = today == schedule.scheduleDay
 
                         //Get the day of next occurence.
                         nextSchedule = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                                startT, schedule.scheduleDay, incToday)
+                                startT, schedule.scheduleDay - 1, incToday)
 
                         //Set the day's timezone to Clazz
                         //TODO: TimeZone
 //                        nextScheduleOccurence!!.setTimeZone(TimeZone.getTimeZone(timeZone))
 
                         nextSchedule = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                                startT, schedule.scheduleDay, incToday)
+                                startT, schedule.scheduleDay - 1, incToday)
 
                         //Set to 00:00
                         nextSchedule = UMCalendarUtil.zeroOutTimeForGivenLongDate(nextSchedule)

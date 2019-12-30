@@ -97,7 +97,7 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
                         " LEFT JOIN Location ON EntityRole.erEntityUid = Location.locationUid " +
                         " LEFT JOIN Person ON EntityRole.erEntityUid = Person.personUid " +
                         " LEFT JOIN Person as pg ON pg.personUid = PersonGroup.groupPersonUid " +
-                        " WHERE EntityRole.erGroupUid != 0 AND EntityRole.erActive = 1 "
+                        " WHERE EntityRole.erGroupUid != 0 AND CAST(EntityRole.erActive AS INTEGER) = 1 "
 
         const val ROLE_ASSIGNMENT_BY_PERSONGROUP_WHERE =
                 " AND groupPersonUid = :groupPersonUid "

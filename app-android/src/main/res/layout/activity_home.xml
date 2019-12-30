@@ -49,6 +49,7 @@
                         android:id="@+id/profile_image"
                         android:layout_width="@dimen/dimen_30dp"
                         android:layout_height="@dimen/dimen_30dp"
+                        android:visibility="gone"
                         app:civ_border_width="2dp"
                         app:civ_border_color="@color/primary_light"/>
 

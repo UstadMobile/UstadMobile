@@ -30,9 +30,6 @@
  */
 package com.ustadmobile.lib.util
 
-import kotlinx.io.ByteArrayOutputStream
-import kotlinx.serialization.json.json
-import kotlinx.serialization.stringFromUtf8Bytes
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -423,17 +420,6 @@ object UMUtil {
          */
         fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean
 
-    }
-
-
-    fun passXmlThroughToString(xpp: KMPXmlParser, endTagName: String, xs: KMPSerializerParser): String {
-        val bout = ByteArrayOutputStream()
-        xs.setOutput(bout, "UTF-8")
-        xs.startDocument("UTF-8", false)
-        passXmlThrough(xpp, xs, null, endTagName)
-        xs.endDocument()
-        bout.flush()
-        return stringFromUtf8Bytes(bout.toByteArray())
     }
 
     /**

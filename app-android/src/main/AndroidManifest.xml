@@ -23,8 +23,6 @@
     <!-- Location permissions required for BLE scanning and WiFi scanning -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- To show download progress indicator -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -37,7 +35,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"/>
+        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
@@ -68,7 +66,6 @@
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
@@ -208,8 +205,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
-            android:enabled="true"/>
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
+            android:enabled="true" />
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <!-- IRC -->

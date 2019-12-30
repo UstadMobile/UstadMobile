@@ -18,30 +18,35 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
 
             if (videoParams == null) {
 
-                container = containerDao.findByUidAsync(containerUid)!!
+                var container =  containerDao.findByUidAsync(containerUid)
+                if(container == null){
+                    view.showErrorWithAction(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), 0)
+                    return@launch
+                }
+
                 val result = containerEntryDao.findByContainerAsync(containerUid)
                 containerManager = ContainerManager(container, db, repo)
                 var defaultLangName = ""
                 for (entry in result) {
 
-                    val fileInContainer = entry.cePath
+                    val containerEntryPath = entry.cePath
                     val containerEntryFile = entry.containerEntryFile
 
-                    if (fileInContainer != null && containerEntryFile != null) {
-                        if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
+                    if (containerEntryPath != null && containerEntryFile != null) {
+                        if (VIDEO_EXT_LIST.contains(containerEntryPath)) {
                             videoPath = containerEntryFile.cefPath
-                        } else if (fileInContainer == "audio.c2") {
+                        } else if (containerEntryPath == "audio.c2") {
                             audioEntry = entry
                             audioInput = containerManager.getInputStream(entry)
-                        } else if (fileInContainer == "subtitle.srt" || fileInContainer.toLowerCase() == "subtitle-english.srt") {
+                        } else if (containerEntryPath == "subtitle.srt" || containerEntryPath.toLowerCase() == "subtitle-english.srt") {
 
-                            defaultLangName = if (fileInContainer.contains("-"))
-                                fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
+                            defaultLangName = if (containerEntryPath.contains("-"))
+                                containerEntryPath.substring(containerEntryPath.indexOf("-") + 1, containerEntryPath.lastIndexOf("."))
                             else "English"
-                            srtMap[defaultLangName] = fileInContainer
-                        } else {
-                            val name = fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
-                            srtMap[name] = fileInContainer
+                            srtMap[defaultLangName] = containerEntryPath
+                        } else if(containerEntryPath.endsWith(".srt") && containerEntryPath.contains("-") && containerEntryPath.contains(".")){
+                            val name = containerEntryPath.substring(containerEntryPath.indexOf("-") + 1, containerEntryPath.lastIndexOf("."))
+                            srtMap[name] = containerEntryPath
                             srtLangList.add(name)
                         }
                     }
@@ -54,10 +59,6 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
                         else -> 0
                     }
                 })
-
-                if (videoPath.isNullOrEmpty() && result.isNotEmpty()) {
-                    videoPath = result[0].containerEntryFile?.cefPath
-                }
 
                 srtLangList.add(0, UstadMobileSystemImpl.instance.getString(MessageID.no_subtitle, context))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)

@@ -15,11 +15,11 @@ interface VideoPlayerView : UstadView {
     @JsName("setVideoParamsJs")
     fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)
 
+    @JsName("showErrorWithAction")
+    fun showErrorWithAction(message: String, actionMessageId: Int)
+
+
     companion object {
-
-        const val ARG_CONTENT_ENTRY_ID = "entryid"
-
-        const val ARG_CONTAINER_UID = "containerUid"
 
         const val VIEW_NAME = "VideoPlayer"
     }

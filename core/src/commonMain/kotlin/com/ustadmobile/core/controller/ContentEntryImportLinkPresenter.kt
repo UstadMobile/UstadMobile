@@ -8,7 +8,7 @@ import com.ustadmobile.core.networkmanager.PlatformHttpClient
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
-import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -23,11 +23,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
+class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>,
+                                      view: ContentEntryImportLinkView,
+                                      var endpointUrl: String,
+                                      val db: UmAppDatabase,
+                                      val repoDb: UmAppDatabase) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
 
 
-    private lateinit var db: UmAppDatabase
     private var videoTitle: String? = null
 
     private var parentContentEntryUid: Long = 0
@@ -46,8 +49,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         super.onCreate(savedState)
 
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
-        contentEntryUid = arguments[CONTENT_ENTRY_UID]?.toLong()
-        db = UmAppDatabase.getInstance(context)
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong()
         if (contentEntryUid != null) {
             updateUIWithExistingContentEntry()
         }
@@ -55,7 +57,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     }
 
-    fun updateUIWithExistingContentEntry(): Job{
+    fun updateUIWithExistingContentEntry(): Job {
         jobCount++
         checkProgressBar()
         return GlobalScope.launch {
@@ -152,7 +154,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 hp5Url = url
                 view.showUrlStatus(true, "")
                 view.showHideVideoTitle(contentEntryUid == null)
-                if(contentEntryUid != null){
+                if (contentEntryUid != null) {
                     handleTitleChanged(videoTitle!!)
                 }
                 jobCount--
@@ -239,13 +241,11 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 val content = response.receive<H5PImportData>()
                 view.enableDisableEditText(true)
 
+                db.contentEntryDao.insertWithReplace(content.contentEntry)
                 if (contentEntryUid == null) {
-                    db.contentEntryDao.insert(content.contentEntry)
-                    db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
-                } else {
-                    db.contentEntryDao.update(content.contentEntry)
+                    db.contentEntryParentChildJoinDao.insertWithReplace(content.parentChildJoin)
                 }
-                db.containerDao.insert(content.container)
+                db.containerDao.insertWithReplace(content.container)
 
                 view.runOnUiThread(Runnable {
                     jobCount--

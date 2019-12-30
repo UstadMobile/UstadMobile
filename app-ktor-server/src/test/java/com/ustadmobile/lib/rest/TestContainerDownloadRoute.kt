@@ -3,6 +3,10 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.io.ConcatenatedInputStream
+import com.ustadmobile.core.io.ConcatenatedPart
+import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
@@ -22,6 +26,7 @@ import org.junit.Test
 import java.io.File
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.request.get
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.InputStream
@@ -32,6 +37,7 @@ import kotlinx.io.streams.asInput
 import kotlinx.io.streams.asOutput
 import org.junit.After
 import org.junit.Assert
+import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
@@ -129,6 +135,37 @@ class TestContainerDownloadRoute {
 
             Assert.assertArrayEquals("Bytes download = bytes from files",containerEntryBytes,
                     downloadedBytes)
+        }
+    }
+
+    @Test
+    fun givenContainerEntryFiles_whenConcatenatedVersionRequested_thenContentsShouldMatch() {
+        runBlocking {
+            val httpClient = HttpClient()
+
+            val containerEntriesToGet = containerManager.allEntries
+            val fileListStr = containerEntriesToGet.joinToString(separator = ";") { it.ceCefUid.toString() }
+
+            val url = "http://localhost:8097/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES}/$fileListStr"
+            val concatenatedBytes = httpClient.get<ByteArray>(url)
+            val concatenatedInputStream = ConcatenatedInputStream(ByteArrayInputStream(concatenatedBytes))
+
+            var numEntries = 0
+            var nextPart: ConcatenatedPart? = null
+            while(concatenatedInputStream.nextPart().also { nextPart = it} != null) {
+                numEntries++
+                val partBytes = concatenatedInputStream.readBytes()
+                val md5Str = nextPart!!.id.encodeBase64()
+                val entryInContainer = containerManager.allEntries.first { it.containerEntryFile?.cefMd5 == md5Str}
+                val entryFile = File(entryInContainer.containerEntryFile!!.cefPath!!)
+                Assert.assertArrayEquals("Files contents in ${entryInContainer.cePath} are the same",
+                        entryFile.readBytes(),
+                        partBytes)
+            }
+
+            Assert.assertEquals("Received correct number of entries",
+                    containerEntriesToGet.size, numEntries)
+
         }
     }
 

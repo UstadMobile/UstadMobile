@@ -105,10 +105,9 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
     override fun setPersonWithEnrollmentProvider(factory: DataSource.Factory<Int, PersonWithEnrollment>) {
 
         val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK2, context!!,
-                this, mPresenter, true, false)
+                this, mPresenter, true, false,
+                mPresenter.isCanAddTeachers, mPresenter.isCanAddStudents)
 
-        recyclerAdapter.setShowAddStudent(mPresenter.isCanAddStudents)
-        recyclerAdapter.setShowAddTeacher(mPresenter.isCanAddTeachers)
 
         //A warning is expected
 
@@ -412,7 +411,7 @@ class ClazzStudentListFragment : UstadBaseFragment(), ClazzStudentListView {
 
             override fun areContentsTheSame(oldItem: PersonWithEnrollment,
                                             newItem: PersonWithEnrollment): Boolean {
-                return oldItem.personUid == newItem.personUid
+                return oldItem == newItem
             }
         }
     }

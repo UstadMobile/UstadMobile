@@ -33,10 +33,12 @@ class AboutActivity : UstadBaseActivity(), AboutView {
         runOnUiThread { (findViewById<View>(R.id.about_version_text) as TextView).text = versionInfo }
     }
 
-    override fun setAboutHTML(aboutHTML: String) {
-        runOnUiThread {
-            (findViewById<View>(R.id.about_html) as WebView)
-                    .loadData(aboutHTML, "text/html", "UTF-8")
+    override fun setAboutHTML(aboutHTML: String?) {
+        if(aboutHTML != null) {
+            runOnUiThread {
+                (findViewById<View>(R.id.about_html) as WebView)
+                        .loadData(aboutHTML, "text/html", "UTF-8")
+            }
         }
     }
 

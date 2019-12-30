@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.LocationListView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -80,17 +81,13 @@ class LocationListActivity : UstadBaseActivity(), LocationListView {
 
     override fun setListProvider(factory : DataSource.Factory<Int, LocationWithSubLocationCount>) {
 
-        var boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                .locationDaoBoundaryCallbacks.findAllLocationsWithCount(factory)
 
         val recyclerAdapter = LocationListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).locationDao)
 
         //Observe the data:
         val thisP = this

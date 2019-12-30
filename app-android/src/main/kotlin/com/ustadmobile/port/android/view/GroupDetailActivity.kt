@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.GroupDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.GroupDetailView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
@@ -102,16 +103,13 @@ class GroupDetailActivity : UstadBaseActivity(), GroupDetailView {
 
     override fun setListProvider(factory: DataSource.Factory<Int, PersonWithEnrollment>) {
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                .personGroupMemberDaoBoundaryCallbacks.findAllPersonWithEnrollmentWithGroupUid(factory)
 
         val recyclerAdapter = GroupDetailRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
+
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).personGroupMemberDao)
         //Observe the data:
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {

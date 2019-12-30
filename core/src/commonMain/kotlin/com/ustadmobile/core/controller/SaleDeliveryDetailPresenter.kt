@@ -41,6 +41,8 @@ class SaleDeliveryDetailPresenter(context: Any,
     val saleDeliveryDB = database.saleDeliveryDao
     val saleItemDB = database.saleItemDao
     val saleDaoDB = database.saleDao
+    val saleDao = repository.saleDao
+    val saleDeliveryDao = repository.saleDeliveryDao
     var loggedInPersonUid : Long = 0
 
 
@@ -181,6 +183,7 @@ class SaleDeliveryDetailPresenter(context: Any,
         GlobalScope.launch {
             val dateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
             val date = UMCalendarUtil.getToday000000()
+            var allSaleItemDone = true
             for (saleItemUid in saleItemToWeCounter.keys) {
 
                 var ok = false
@@ -238,14 +241,21 @@ class SaleDeliveryDetailPresenter(context: Any,
                 if(ok) {
                     saleItem!!.saleItemPreorder = false
                     saleItemDB.updateAsync(saleItem)
+                }else{
+                    if(allSaleItemDone) {
+                        allSaleItemDone = false
+                    }
                 }
             }
 
-
+            if(allSaleItemDone){
+                sale!!.salePreOrder = false
+                saleDao.updateAsync(sale!!)
+            }
 
             //3. Persist and close
             saleDelivery.saleDeliveryActive = true
-            saleDeliveryDB.updateAsync(saleDelivery!!)
+            saleDeliveryDao.updateAsync(saleDelivery!!)
             view.finish()
         }
     }

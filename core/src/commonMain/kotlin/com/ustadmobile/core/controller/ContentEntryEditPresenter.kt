@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
@@ -10,17 +9,18 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorView
-import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -70,7 +70,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
         super.onCreate(savedState)
 
         GlobalScope.launch {
-            val entry = contentEntryDao.findByEntryId(arguments.getValue(CONTENT_ENTRY_UID)!!.toLong())
+            val entry = contentEntryDao.findByEntryId(arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong()?: 0)
             contentEntry = entry ?: ContentEntry()
             importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED || contentType == CONTENT_IMPORT_FILE
 
@@ -143,13 +143,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                 val contentEntryJoin = ContentEntryParentChildJoin()
                 contentEntryJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
                 contentEntryJoin.cepcjParentContentEntryUid =
-                        arguments[ARG_CONTENT_ENTRY_UID]?.toLong()!!
+                        arguments[CONTENT_ENTRY_PARENT_UID]?.toLong()!!
                 contentEntryJoin.cepcjUid = contentEntryParentChildJoinDao.insert(contentEntryJoin)
-
-                val status =  ContentEntryStatus(contentEntry.contentEntryUid, true, 0)
-                status.downloadStatus = JobStatus.COMPLETE
-                status.cesLeaf = isLeaf
-                status.cesUid = contentEntryStatusDao.insert(status)
             }else{
                 contentEntry.contentEntryUid = contentEntry.contentEntryUid
                 contentEntryDao.update(contentEntry)
@@ -180,7 +175,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                             false)})
                 CONTENT_CREATE_CONTENT -> {
                     view.runOnUiThread(Runnable { view.dismissDialog() })
-                    args[CONTENT_ENTRY_UID] =
+                    args[ARG_CONTENT_ENTRY_UID] =
                             contentEntry.contentEntryUid.toString()
                     args[CONTENT_STORAGE_OPTION] = selectedStorageOption
                     if(isNewContent)
@@ -244,8 +239,8 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
     fun handleUpdateLink() {
         val args = HashMap<String, String?>()
-        args[ContentEntryImportLinkView.CONTENT_ENTRY_UID]  =  contentEntry.contentEntryUid.toString()
-        args[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = contentEntryParentChildJoinDao.
+        args[ARG_CONTENT_ENTRY_UID]  =  contentEntry.contentEntryUid.toString()
+        args[CONTENT_ENTRY_PARENT_UID] = contentEntryParentChildJoinDao.
                 findParentByChildUuids(contentEntry.contentEntryUid)!!.cepcjParentContentEntryUid.toString()
         impl.go(ContentEntryImportLinkView.VIEW_NAME, args, context)
 

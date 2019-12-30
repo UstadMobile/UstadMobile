@@ -49,12 +49,13 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
     //The mapping of activity change uid to drop - down id on the view.
     private var changeToIdMap: HashMap<Long, Long>? = null
 
+
     //Daos needed - ClazzActivtyDao and ClazzActivityChangeDao
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     private val clazzActivityDao = repository.clazzActivityDao
     private val activityChangeDao = repository.clazzActivityChangeDao
-    private val clazzdao = repository.clazzDao
+    private val clazzDao = repository.clazzDao
 
     init {
 
@@ -99,7 +100,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      */
     fun checkPermissions() {
         GlobalScope.launch {
-            val result = clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT)
             setActivityEditable(result!!)
         }
@@ -141,12 +142,6 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      */
     private fun checkActivityCreateIfNotExist(result: ClazzActivity?) {
 
-        val clazzDao = repository.clazzDao
-
-
-        //Update Activity Change options
-        updateChangeOptions()
-
         //Update any toolbar title
         val currentClazz = clazzDao.findByUid(currentClazzUid)
         view.updateToolbarTitle(currentClazz!!.clazzName + " "
@@ -166,12 +161,25 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
 
             //set current clazz activity change
             currentClazzActivityChangeUid = currentClazzActivity!!.clazzActivityClazzActivityChangeUid
+
             currentLogDate = currentClazzActivity!!.clazzActivityLogDate
             handleChangeFeedback(currentClazzActivity!!.isClazzActivityGoodFeedback)
-            view.setNotes(currentClazzActivity!!.clazzActivityNotes!!)
-            view.setUOMText(currentClazzActivity!!.clazzActivityQuantity.toString())
-        }//Set up presenter and start filling the UI with its elements
+            if(currentClazzActivity!!.clazzActivityNotes != null){
+                view.setNotes(currentClazzActivity!!.clazzActivityNotes!!)
+            }else{
+                view.setNotes("")
+            }
 
+            if(currentClazzActivity!!.clazzActivityQuantity != null){
+                view.setUOMText(currentClazzActivity!!.clazzActivityQuantity.toString())
+            }else{
+                view.setUOMText("0")
+            }
+
+        }
+
+        //Update Activity Change options
+        updateChangeOptions()
 
         //Update date
         updateViewDateHeading()
@@ -229,6 +237,8 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
                     //Set the unit of measure for this ClazzActivityChange
                     view.setUnitOfMeasureType(result.clazzActivityUnitOfMeasure.toLong())
                     changeSelected = true
+                }else{
+                    view.setUnitOfMeasureType(0)
                 }
             }
         }//If add new activity selected
@@ -368,7 +378,6 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      */
     fun handleClickGoBackDate() {
         val newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, -1)
-        println("Go back: $newDate")
         reloadLogDetailForDate(newDate)
     }
 
@@ -408,7 +417,6 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
      * @param newDate The new date set
      */
     private fun reloadLogDetailForDate(newDate: Long) {
-        println("Reload for date: $newDate")
 
         //1. Set currentLogDate to newDate
         currentLogDate = newDate

@@ -22,6 +22,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 
 
@@ -129,17 +130,11 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun setRecentProvider(factory: DataSource.Factory<Int, SaleProduct>) {
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
-                .saleProductDaoBoundaryCallbacks.findActiveProductsProvider(factory)
-
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this,false, true, context!!)
 
-        // get the provider, set , observe, etc.
-        val data =
-                LivePagedListBuilder(factory, 20)
-                        .setBoundaryCallback(boundaryCallback)
-                        .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
+
         //Observe the data:
         data.observe(this,
                 Observer<PagedList<SaleProduct>>
@@ -151,17 +146,13 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     }
 
     override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleProduct>) {
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
-                .saleProductDaoBoundaryCallbacks.findActiveCategoriesProviderByNameAsc(factory)
 
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, true, true, context!!)
 
         // get the provider, set , observe, etc.
-        // A warning is expected
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
+
         //Observe the data:
         data.observe(this, Observer<PagedList<SaleProduct>>
         { recyclerAdapter!!.submitList(it) })
@@ -182,14 +173,11 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this,true, true, context!!)
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
-                .saleProductParentJoinDaoBoundaryCallbacks.findAllCategoriesInCollection(factory)
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductParentJoinDao)
+
         //Observe the data:
         data.observe(this, Observer<PagedList<SaleProduct>>
         { recyclerAdapter!!.submitList(it) })

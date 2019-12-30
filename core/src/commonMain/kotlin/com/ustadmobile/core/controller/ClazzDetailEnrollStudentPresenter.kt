@@ -110,30 +110,26 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
         val newPerson = Person()
         newPerson.active = false
         val personDao = repository.personDao
-        val personFieldDao = repository.personCustomFieldDao
-        val customFieldValueDao = repository.personCustomFieldValueDao
+
         GlobalScope.launch {
             var loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
             if(loggedInPersonUid != null){
                 loggedInPersonUid = 0
             }
-            val result = personDao.createPersonAsync(newPerson, loggedInPersonUid)
-            //Also create null Custom Field values so it shows up in the Edit screen.
+            val newPersonUid = personDao.createPersonAsync(newPerson, loggedInPersonUid)
 
-            val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
+            val pwe = PersonWithEnrollment()
+            pwe.personUid = newPerson.personUid
 
-            for (everyCustomField in allCustomFields) {
-                val cfv = PersonCustomFieldValue()
-                cfv.personCustomFieldValuePersonCustomFieldUid = everyCustomField.personCustomFieldUid
-                cfv.personCustomFieldValuePersonUid = result
-                cfv.personCustomFieldValueUid = customFieldValueDao.insert(cfv)
-            }
+            handleEnrollChanged(pwe, true)
+
 
             val args = HashMap<String, String>()
             args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
-            args.put(ARG_PERSON_UID, result.toString())
+            args.put(ARG_PERSON_UID, newPersonUid.toString())
             args.put(ARG_NEW_PERSON_TYPE, currentRole.toString())
             args.put(ARG_NEW_PERSON, "true")
+            view.finish()
             impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
 
         }
@@ -286,7 +282,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
 
                 if (isTeacher && personClazzTeacherAssignment != null) {
                     personClazzTeacherAssignment.erActive = true
-                    entityRoleDao.insert(personClazzTeacherAssignment)
+                    entityRoleDao.update(personClazzTeacherAssignment)
                 }
 
             } else {
@@ -299,7 +295,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
                 //TODOne: If role assignment exists then deactivate it.
                 if (isTeacher && personClazzTeacherAssignment != null) {
                     personClazzTeacherAssignment.erActive = false
-                    entityRoleDao.insert(personClazzTeacherAssignment)
+                    entityRoleDao.update(personClazzTeacherAssignment)
                 }
             }
         }

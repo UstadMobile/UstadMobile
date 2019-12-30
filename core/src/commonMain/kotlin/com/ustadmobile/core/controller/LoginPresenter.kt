@@ -10,9 +10,11 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.lib.db.entities.PersonAuth
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
-import com.ustadmobile.lib.db.entities.PersonAuth
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -30,18 +32,19 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                      val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
-    private var mNextDest: String? = null
+    private val mNextDest: String
+    private val registerCode: String
     private var personAuthdao: PersonAuthDao
 
     init {
-        mNextDest = if (arguments.containsKey(ARG_NEXT)) {
-            arguments[ARG_NEXT]
-        } else {
-            impl.getAppConfigString(
-                    AppConfig.KEY_FIRST_DEST, "BasePoint", context)
-        }
+        mNextDest = arguments[ARG_NEXT] ?: impl.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
+
+        registerCode = (impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER_CODE, "", context) ?: "")
+                .trim()
 
         personAuthdao = UmAppDatabase.getInstance(context!!).personAuthDao
+
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -56,8 +59,8 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
             view.setMessage(arguments.get(ARG_MESSAGE)!!)
         }
 
-        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER,
-                "false", context)!!.toBoolean()
+        val showRegisterLink = impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER, "false", context)?.toBoolean()
+                ?: false
 
         view.showToolbar(false)
 
@@ -134,7 +137,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     parameter("password", password)
                 }
 
-                if(loginResponse.status == HttpStatusCode.OK) {
+                if (loginResponse.status == HttpStatusCode.OK) {
                     val account = loginResponse.receive<UmAccount>()
                     account.endpointUrl = serverUrl
 
@@ -154,6 +157,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     }
 
                     UmAccountManager.setActiveAccount(account, context)
+
                     view.runOnUiThread(Runnable {
                         view.setInProgress(false)
                         view.forceSync()
@@ -161,8 +165,12 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                         view.setFinishAfficinityOnView()
                     })
 
+
+                    //make sure the repository knows that it is online
+                    (UmAccountManager.getRepositoryForActiveAccount(context) as DoorDatabaseRepository)
+                            .connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
                     impl.go(mNextDest, context)
-                }else {
+                } else {
                     view.runOnUiThread(Runnable {
                         view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
                                 context))
@@ -176,11 +184,29 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         }
     }
 
-    @JsName("handleCreateAccount")
-    fun handleCreateAccount(){
-        val args = HashMap(arguments)
-        args[ARG_NEXT] = ContentEntryDetailView.VIEW_NAME
-        impl.go(Register2View.VIEW_NAME,args,context)
+    @JsName("handleClickCreateAccount")
+    fun handleClickCreateAccount() {
+        if (registerCode.isEmpty()) {
+            goToRegisterView()
+        } else {
+            view.showRegisterCodeDialog(
+                    impl.getString(MessageID.enter_register_code, context),
+                    impl.getString(MessageID.ok, context),
+                    impl.getString(MessageID.cancel, context))
+        }
+    }
+
+    private fun goToRegisterView() {
+        impl.go(Register2View.VIEW_NAME, mapOf(ARG_NEXT to mNextDest), context)
+    }
+
+    @JsName("handleRegisterCodeDialogEntered")
+    fun handleRegisterCodeDialogEntered(code: String) {
+        if (code == registerCode) {
+            goToRegisterView()
+        } else {
+            view.showSnackBarNotification(impl.getString(MessageID.invalid_register_code, context), {}, 0)
+        }
     }
 
     companion object {

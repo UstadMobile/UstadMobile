@@ -22,7 +22,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract fun findAllGroupWherePersonIsInSync(personUid: Long): List<PersonGroupMember>
 
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid " +
-            " AND CAST(groupMemberActive  AS INTEGER) = 1")
+            " AND CAST(groupMemberActive AS INTEGER) = 1 ")
     abstract fun finAllMembersWithGroupId(groupUid: Long): DataSource.Factory<Int, PersonGroupMember>
 
     @Query("SELECT Person.*, Role.*, (0) AS clazzUid, " +
@@ -35,7 +35,7 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
             "  (0) AS enrolled from PersonGroupMember " +
             " LEFT JOIN Person ON PersonGroupMember.groupMemberPersonUid = Person.personUid " +
             " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
-            " WHERE groupMemberGroupUid = :groupUid AND CAST(groupMemberActive AS INTEGER) = 1")
+            " WHERE groupMemberGroupUid = :groupUid AND CAST(groupMemberActive AS INTEGER) = 1 ")
     abstract fun findAllPersonWithEnrollmentWithGroupUid(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("Select Person.* from PersonGroupMember " +

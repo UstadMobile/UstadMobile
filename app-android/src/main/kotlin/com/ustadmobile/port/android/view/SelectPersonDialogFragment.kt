@@ -27,6 +27,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectPersonDialogView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -131,13 +132,7 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
         val mAdapter = PersonSelectedRecyclerAdapter(DIFF_CALLBACK, context!!,
                 this, mPresenter!!)
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
-                .personDaoBoundaryCallbacks.findAllPeopleByLEAndRoleUid(factory)
-
-        //A warning is expected
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).personDao)
 
         //Observe the data:
         val thisP = this

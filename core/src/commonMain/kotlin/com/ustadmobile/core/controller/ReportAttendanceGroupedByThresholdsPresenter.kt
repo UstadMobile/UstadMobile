@@ -183,14 +183,14 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
                     val theLocationName = theLocation!!.title
 
                     if (!clazzList!!.isEmpty()) {
-                        val result = recordDao.getAttendanceGroupedByThresholds(currentTime,
+                        val result = recordDao.getAttendanceGroupedByThresholdsWithClazzAndLocation(currentTime,
                         fromDate, toDate,thresholdValues!!.low.toFloat() / 100,
     thresholdValues!!.med.toFloat() / 100,clazzList!!, locationUid)
                         index++
                         buildMapAndUpdateView(theLocationName, result)
 
                     } else {
-                        val result = recordDao.getAttendanceGroupedByThresholds(currentTime,
+                        val result = recordDao.getAttendanceGroupedByThresholdsWithLocation(currentTime,
                             fromDate, toDate,thresholdValues!!.low.toFloat() / 100,
         thresholdValues!!.med.toFloat() / 100,locationUid)
                         index++

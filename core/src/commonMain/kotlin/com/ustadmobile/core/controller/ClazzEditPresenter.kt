@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.TimeZoneUtil
 import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.ClazzEditView
 import com.ustadmobile.core.view.ClazzEditView.Companion.ARG_SCHEDULE_UID
@@ -18,7 +19,6 @@ import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
-import io.ktor.util.Hash
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -134,9 +134,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                                 options.toTypedArray<String>(),
                                 finalValueSelection)
                     })
-
                 }
-
             }
         }
     }
@@ -161,17 +159,31 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         } else if (arguments!!.containsKey(ClazzEditView.ARG_NEW)) {
             GlobalScope.launch {
                 var timeZoneString : String = ""
-                //TODO: KMP: TimeZone alternative
-//                timeZoneString = TimeZone.getDefault().getID()
+                //TODOne: KMP: TimeZone alternative
                 timeZoneString = ""
+
+                val tz = TimeZoneUtil()
+                var deviceTZString = tz.getDeviceTimezone()
+
+                // The issue this is fixing is, the result "GMT+04:00" is converted to "GMT+4:00"
+                if(
+                        (deviceTZString.startsWith("GMT+0") && !deviceTZString.startsWith("GMT+0:"))
+                        ||
+                        (deviceTZString.startsWith("GMT-0") && !deviceTZString.startsWith("GMT-0:")))
+
+                {
+                    deviceTZString = "GMT+" + deviceTZString.substring(5)
+                }
 
                 var tempLocation = Location("",
                         "Temp location", timeZoneString)
                 tempLocation.locationActive = false
+                tempLocation.timeZone = deviceTZString
 
                 val newLocationUid = locationDaoDB.insertAsync(tempLocation)
 
                 tempClazzLocationUid = newLocationUid!!
+
 
                 val clazzUid = clazzDaoDB.insertAsync(Clazz("", newLocationUid))
                 initFromClazz(clazzUid!!)
@@ -185,32 +197,11 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         this.currentClazzUid = clazzUid
 
         GlobalScope.launch {
-//            val clazzData = clazzDao.findByUidAsync(currentClazzUid)
             val clazzData = clazzDaoDB.findByUidAsync(currentClazzUid)
             handleClazzValueChanged(clazzData)
 
-            //Get location if set
-            if(clazzData!!.clazzLocationUid != 0L){
-                val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
-                val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
-                view.runOnUiThread(Runnable {
-                    val locationTimeZone = location!!.timeZone
-                    if(locationTimeZone != null && !locationTimeZone.isEmpty()){
-                        view.setTimeZonePosition(timeZoneToPositionId!!.get(locationTimeZone)!!)
-                    }
-                    view.updateLocationSetName(location!!.title!!)
-                })
-            }
-        }
-
-        GlobalScope.launch {
-
-
-            val result = clazzDaoDB.findByUidAsync(currentClazzUid)
-
-            mUpdatedClazz = result
+            mUpdatedClazz = clazzData
             currentClazzUid = mUpdatedClazz!!.clazzUid
-            view.runOnUiThread(Runnable{ view.updateClazzEditView(result!!) })
 
             //Holidays
             holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
@@ -221,16 +212,32 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
             //Timezones
             updateTimezonePreset()
 
+            //Get location if set
+            if(clazzData!!.clazzLocationUid != 0L){
+                val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
+                val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
+                view.runOnUiThread(Runnable {
+                    var locationTimeZone = location!!.timeZone
+                    if(locationTimeZone != null && !locationTimeZone.isEmpty()){
+                        if(!locationTimeZone.startsWith("GMT-") && !locationTimeZone.startsWith("GMT+")){
+                            locationTimeZone = "GMT+" + locationTimeZone.substring(3)
+                        }
+                        if(timeZoneToPositionId!!.containsKey(locationTimeZone)) {
+                            view.setTimeZonePosition(timeZoneToPositionId!!.get(locationTimeZone)!! - 1)
+                        }
+                    }
+                    view.updateLocationSetName(location!!.title!!)
+                })
+            }
+
             getAllClazzCustomFields()
 
+            //Set Schedule live data:
+            clazzScheduleLiveData = repository.scheduleDao.findAllSchedulesByClazzUid(currentClazzUid)
+            updateViewWithProvider()
+
         }
-
-        //Set Schedule live data:
-        clazzScheduleLiveData = repository.scheduleDao.findAllSchedulesByClazzUid(currentClazzUid)
-        updateViewWithProvider()
     }
-
-
 
     /**
      * Common method to convert Array List to String Array
@@ -246,8 +253,6 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         }
         return strArr
     }
-
-
 
     /**
      * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
@@ -305,73 +310,73 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         presetAL.add("GMT0:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT1:00")
+        presetAL.add("GMT+1:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
 
-        presetAL.add("GMT2:00")
+        presetAL.add("GMT+2:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT3:00")
+        presetAL.add("GMT+3:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT3:30")
+        presetAL.add("GMT+3:30")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT4:00")
+        presetAL.add("GMT+4:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT4:30")
+        presetAL.add("GMT+4:30")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT5:00")
+        presetAL.add("GMT+5:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT5:30")
+        presetAL.add("GMT+5:30")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT5.45")
+        presetAL.add("GMT+5.45")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT6:00")
+        presetAL.add("GMT+6:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT6:30")
+        presetAL.add("GMT+6:30")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT7:00")
+        presetAL.add("GMT+7:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT8:00")
+        presetAL.add("GMT+8:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT8.45")
+        presetAL.add("GMT+8.45")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT9:00")
+        presetAL.add("GMT+9:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT9:30")
+        presetAL.add("GMT+9:30")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT10:00")
+        presetAL.add("GMT+10:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT10:30")
+        presetAL.add("GMT+10:30")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT11:00")
+        presetAL.add("GMT+11:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT12:00")
+        presetAL.add("GMT+12:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT12.45")
+        presetAL.add("GMT+12.45")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT13:00")
+        presetAL.add("GMT+13:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
-        presetAL.add("GMT14:00")
+        presetAL.add("GMT+14:00")
         positionToTimeZoneUid!!.put(presetAL.size.toLong(), presetAL.get(presetAL.size-1))
         timeZoneToPositionId!!.put(presetAL.get(presetAL.size-1), presetAL.size)
 
@@ -430,46 +435,16 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     }
 
     /**
-     *
-     *
-     * @param locations The list of Locations available.
-     */
-    private fun handleAllLocationsChanged(locations: List<Location>?) {
-//        var selectedPosition = 0
-//
-//        locationUidToPosition = HashMap()
-//        positionToLocationUid = HashMap()
-//
-//        val locationList = ArrayList<String>()
-//        var pos = 0
-//        for (el in locations!!) {
-//            locationList.add(el.title!!)
-//            locationUidToPosition!![el.locationUid] = pos
-//            positionToLocationUid!![pos] = el.locationUid
-//            pos++
-//        }
-//        val locationPreset = locationList.toTypedArray<String>()
-//
-//        if (mOriginalClazz == null) {
-//            mOriginalClazz = Clazz()
-//            mOriginalClazz!!.isClazzActive = false
-//        }
-//
-//        if (mOriginalClazz!!.clazzLocationUid != 0L) {
-//            if (locationUidToPosition!!.containsKey(mOriginalClazz!!.clazzLocationUid))
-//                selectedPosition = locationUidToPosition!![mOriginalClazz!!.clazzLocationUid]!!
-//        }
-//
-//        view.setLocationPresets(locationPreset, selectedPosition)
-    }
-
-    /**
      * EVent method for when Features are updated.
      */
     fun updateFeatures(clazz: Clazz) {
         mUpdatedClazz!!.isAttendanceFeature = clazz.isAttendanceFeature
         mUpdatedClazz!!.isActivityFeature = clazz.isActivityFeature
         mUpdatedClazz!!.isSelFeature = clazz.isSelFeature
+
+        GlobalScope.launch {
+            clazzDao.updateAsync(mUpdatedClazz!!)
+        }
     }
 
     /**
@@ -513,7 +488,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
     fun updateTimezone(position: Int) {
         if (positionToTimeZoneUid != null && positionToTimeZoneUid!!.containsKey(position.toLong())) {
-            timezoneSelected = positionToTimeZoneUid!![position.toLong()]!!
+            timezoneSelected = positionToTimeZoneUid!![position.toLong() + 1]!!
 
         }
     }
@@ -624,9 +599,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
                     clazzLocation.locationActive = (true)
                     locationDao.update(clazzLocation)
                     selectedLocation = clazzLocation
+                }else{
+                    selectedLocation = clazzLocation
                 }
-
-
             }
 
             if(selectedLocation != null && timezoneSelected != null && !timezoneSelected!!.isEmpty()){

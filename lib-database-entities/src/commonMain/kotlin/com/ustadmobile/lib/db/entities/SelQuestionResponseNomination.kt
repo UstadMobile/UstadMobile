@@ -18,26 +18,26 @@ import kotlinx.serialization.Serializable
 class SelQuestionResponseNomination {
 
     @PrimaryKey(autoGenerate = true)
-    var selQuestionResponseNominationUid: Long = 0
+    var selqrnUid: Long = 0
 
-    var selQuestionResponseNominationClazzMemberUid: Long = 0
+    var selqrnClazzMemberUid: Long = 0
 
     //<-> SelQuestionResponse entity.
-    var selQuestionResponseNominationSelQuestionResponseUId: Long = 0
+    var selqrnSelQuestionResponseUId: Long = 0
 
     //Added 31012019 sel
     var nominationActive: Boolean = false
 
     //Renamed:
     @MasterChangeSeqNum
-    var selQuestionResponseNominationMasterChangeSeqNum: Long = 0
+    var selqrnMCSN: Long = 0
     //private long scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
 
     //Renamed:
     @LocalChangeSeqNum
-    var selQuestionResponseNominationLocalChangeSeqNum: Long = 0
+    var selqrnMCSNLCSN: Long = 0
     //private long scheduleNominationQuestionResponseNominationLocalChangeSeqNum;
 
     @LastChangedBy
-    var selQuestionResponseNominationLastChangedBy: Int = 0
+    var selqrnMCSNLCB: Int = 0
 }

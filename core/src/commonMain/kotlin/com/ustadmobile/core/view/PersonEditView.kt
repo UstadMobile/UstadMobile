@@ -37,6 +37,8 @@ interface PersonEditView : UstadView {
      */
     fun finish()
 
+    fun setEnrollToClass(enroll:Boolean)
+
     /**
      * This will update the toolbar's title
      *

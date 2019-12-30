@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -51,6 +52,8 @@ class ClazzStudentListPresenter(context: Any,
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
+    val clazzDao = repository.clazzDao
+
     init {
 
         //Get Clazz Uid from argument and set it here to the Presenter
@@ -79,18 +82,6 @@ class ClazzStudentListPresenter(context: Any,
         //Initialise sort spinner data:
         idToOrderInteger = HashMap<Long, Int>()
         updateSortSpinnerPreset()
-
-        checkPermissions()
-    }
-
-    fun checkPermissions() {
-        val clazzDao = repository.clazzDao
-        GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPerson, Role
-                    .PERMISSION_PERSON_INSERT)
-            isCanAddStudents = result!!
-            isCanAddTeachers = result
-        }
     }
 
     /**
@@ -207,7 +198,17 @@ class ClazzStudentListPresenter(context: Any,
     }
 
     private fun updateProviderToView() {
-        view.setPersonWithEnrollmentProvider(clazzPersonListProvider!!)
+        GlobalScope.launch {
+            val result = clazzDao.personHasPermission(loggedInPerson, Role
+                    .PERMISSION_PERSON_INSERT)
+            isCanAddStudents = result!!
+            isCanAddTeachers = result
+
+            view.runOnUiThread(Runnable {
+                view.setPersonWithEnrollmentProvider(clazzPersonListProvider!!)
+            })
+        }
+
     }
 
     /**

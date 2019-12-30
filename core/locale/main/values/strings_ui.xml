@@ -119,6 +119,7 @@
     <string name="success">Success</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
+    <string name="no_video_file_found">No video file found</string>
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -335,6 +336,8 @@
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
+    <string name="invalid_register_code">Invalid Registration Code</string>
+    <string name="enter_register_code">Enter Registration Code</string>
 
     <string name="bar_chart" value="100">Bar Chart</string>
     <string name="line_graph" value="101">Line Graph</string>
@@ -424,6 +427,12 @@
     <string name="enable">Enable</string>
     <string name="more_information">More information</string>
     <string name="less_information">Less information</string>
+    
+    <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
+    <string name="repo_loading_status_loading_mirror">Loading from peer </string>
+    <string name="repo_loading_status_loaded_empty">No content found</string>
+    <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
+    <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
     <string name="login_no_network_no_person">Person not found locally. Please get online for first login.</string>
     <string name="login_no_network_auth_fail">Person authentication failed offline.</string>

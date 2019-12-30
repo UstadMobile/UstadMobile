@@ -12,13 +12,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.controller.ContentEntryListPresenter
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.controller.ContentListPresenter
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentListView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 /**
@@ -124,13 +126,13 @@ class ContentListFragment : UstadBaseFragment(), ContentListView,
             return when (position) {
                 0 // Fragment # 0 - This will show FirstFragment
                 -> {
-                    bundle.putString(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID,
+                    bundle.putString(ARG_CONTENT_ENTRY_UID,
                             HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID.toString())
                     ContentEntryListFragment.newInstance(bundle)
                 }
                 1 // Fragment # 0 - This will show FirstFragment different title
                 -> {
-                    bundle.putString(ContentEntryListFragmentPresenter.ARG_DOWNLOADED_CONTENT, "")
+                    bundle.putString(ARG_DOWNLOADED_CONTENT, "")
                     ContentEntryListFragment.newInstance(bundle)
 
                 }

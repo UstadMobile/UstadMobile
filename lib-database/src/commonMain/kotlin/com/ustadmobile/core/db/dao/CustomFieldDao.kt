@@ -25,11 +25,11 @@ abstract class CustomFieldDao : BaseDao<CustomField> {
     abstract suspend fun updateAsync(entity: CustomField): Int
 
     @Query("SELECT * FROM CustomField WHERE customFieldEntityType = :tableId AND "
-            + " CAST(customFieldActive AS INTEGER) = 1 ")
+            + " CAST(customFieldActive AS INTEGER) = 1")
     abstract fun findAllCustomFieldsProviderForEntity(tableId: Int): DataSource.Factory<Int, CustomField>
 
     @Query("SELECT * FROM CustomField WHERE customFieldEntityType = :tableId AND "
-            + " CAST(customFieldActive AS INTEGER) = 1 ")
+            + " CAST(customFieldActive AS INTEGER) = 1")
     abstract suspend fun findAllCustomFieldsProviderForEntityAsync(tableId: Int) : List<CustomField>
 
     //TODO: Update to take Boolean argument

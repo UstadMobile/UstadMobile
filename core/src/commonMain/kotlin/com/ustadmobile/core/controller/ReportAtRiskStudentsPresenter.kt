@@ -20,6 +20,7 @@ import com.ustadmobile.core.xlsx.UmXLSX
 import com.ustadmobile.core.xlsx.ZipUtil
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.IOException
 
@@ -136,7 +137,9 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
      * Sets provider to the view
      */
     private fun updateProviderToView() {
-        view.setReportProvider(atRiskStudentsUmProvider!!)
+        view.runOnUiThread(Runnable {
+            view.setReportProvider(atRiskStudentsUmProvider!!)
+        })
     }
 
     override fun handleCommonPressed(arg: Any, arg2:Any) {

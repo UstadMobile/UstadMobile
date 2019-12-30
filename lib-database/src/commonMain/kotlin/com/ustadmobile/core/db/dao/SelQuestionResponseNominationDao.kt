@@ -20,8 +20,8 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
 
     @Query("SELECT * FROM SelQuestionResponseNomination " +
             "WHERE " +
-            "selQuestionResponseNominationClazzMemberUid = :clazzMemberUid " +
-            "AND selQuestionResponseNominationSelQuestionResponseUId = :questionResponseUid")
+            "selqrnClazzMemberUid = :clazzMemberUid " +
+            "AND selqrnSelQuestionResponseUId = :questionResponseUid")
     abstract suspend fun findExistingNomination(clazzMemberUid: Long, questionResponseUid: Long)
             : List<SelQuestionResponseNomination>
 
@@ -35,12 +35,12 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
     abstract suspend fun updateAsync(entity: SelQuestionResponseNomination) : Int
 
 
-    @Query("SELECT * FROM SelQuestionResponseNomination " + "WHERE selQuestionResponseNominationUid = :uid")
+    @Query("SELECT * FROM SelQuestionResponseNomination " + "WHERE selqrnUid = :uid")
     abstract fun findByUid(uid: Long): SelQuestionResponseNomination?
 
     @Query(SEL_REPORT_SELECT +
             " WHERE " +
-            "   selQuestionResponseNominationSelQuestionResponseUid != 0 " +
+            "   selqrnSelQuestionResponseUid != 0 " +
             "   AND nominationActive = 1 " +
             "   AND SelQuestionSetResponse.selQuestionSetResponseStartTime > :fromTime " +
             "   AND SelQuestionSetResponse.selQuestionSetResponseFinishTime < :toTime " +
@@ -51,7 +51,7 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
 
     @Query(SEL_REPORT_SELECT +
             " WHERE " +
-            "   selQuestionResponseNominationSelQuestionResponseUid != 0 " +
+            "   selqrnSelQuestionResponseUid != 0 " +
             "   AND nominationActive = 1 " +
             "   AND SelQuestionSetResponse.selQuestionSetResponseStartTime > :fromTime " +
             "   AND SelQuestionSetResponse.selQuestionSetResponseFinishTime < :toTime " +
@@ -86,7 +86,7 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
 
                 " LEFT JOIN SelQuestionResponse ON " +
                 "   SelQuestionResponse.selQuestionResponseUid = " +
-                "   selQuestionResponseNominationSelQuestionResponseUid " +
+                "   selqrnSelQuestionResponseUid " +
 
                 " LEFT JOIN SelQuestion ON " +
                 "   SelQuestion.selQuestionUid = " +
@@ -112,7 +112,7 @@ abstract class SelQuestionResponseNominationDao : BaseDao<SelQuestionResponseNom
 
                 " LEFT JOIN ClazzMember as ClazzMemberNominated ON " +
                 "   ClazzMemberNominated.clazzMemberUid = " +
-                "   SelQuestionResponseNomination.selQuestionResponseNominationClazzMemberUid " +
+                "   SelQuestionResponseNomination.selqrnClazzMemberUid " +
 
                 " LEFT JOIN Person as PersonNominated ON " +
                 "   PersonNominated.personUid = ClazzMemberNominated.clazzMemberPersonUid "

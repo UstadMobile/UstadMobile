@@ -17,6 +17,7 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
+import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
@@ -71,6 +72,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         }
     }
 
+    install(CallLogging)
 
     install(ContentNegotiation) {
         gson {

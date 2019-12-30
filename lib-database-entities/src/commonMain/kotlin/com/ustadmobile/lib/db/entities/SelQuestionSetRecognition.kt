@@ -25,7 +25,7 @@ class SelQuestionSetRecognition {
     var selQuestionSetRecognitionUid: Long = 0
 
     // -> SelQuestionSetResponse - The question set response (which has recognition percentages)
-    var selQuestionSetRecognitionSelQuestionSetResponseUid: Long = 0
+    var selqsrSelQuestionSetResponseUid: Long = 0
 
     // The Clazz Member - The Student To BE recognized.
     var selQuestionSetRecognitionClazzMemberUid: Long = 0

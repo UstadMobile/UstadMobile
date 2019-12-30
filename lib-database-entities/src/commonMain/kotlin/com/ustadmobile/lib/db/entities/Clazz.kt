@@ -79,6 +79,21 @@ open class Clazz() {
         this.isClazzActive = false
     }
 
+
+    fun hasPermissionsChanged(previousClazz: Clazz):Boolean{
+
+        if(previousClazz.isActivityFeature != isActivityFeature){
+            return true
+        }
+        if(previousClazz.isAttendanceFeature != isAttendanceFeature){
+            return true
+        }
+        if(previousClazz.isSelFeature != isSelFeature){
+            return true
+        }
+        return false
+    }
+
     companion object {
 
         const val TABLE_ID = 6

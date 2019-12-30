@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.Observer
@@ -22,6 +23,7 @@ import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
+import com.google.android.material.snackbar.Snackbar
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzLogListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -66,6 +68,9 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
 
     internal var fab: FloatingTextButton? = null
 
+    internal var cl : View ? = null
+
+    private var attendanceMessage: Snackbar? = null
     /**
      * Hides elements of MPAndroid Chart that we do not need as part of the Bar Chart in the
      * Attendance Log list fragment. Hides things as per UI intended (axis, labels, etc)
@@ -357,21 +362,23 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         }
     }
 
+    override fun showMessage(message: String) {
+
+        attendanceMessage = Snackbar
+                .make(getActivity()!!.findViewById<View>(android.R.id.content), message, Snackbar.LENGTH_INDEFINITE)
+                .setAction(getText(R.string.dismiss).toString()) {
+                    attendanceMessage!!.dismiss()
+                }
+        attendanceMessage!!.show()
+    }
     override fun showMessage(messageId: Int) {
         val impl = UstadMobileSystemImpl.instance
         val message = impl.getString(messageId, context!!)
-
-        runOnUiThread (Runnable {
-            Toast.makeText(
-                    context,
-                    message,
-                    Toast.LENGTH_SHORT
-            ).show()
-        })
-
+        showMessage(message)
     }
 
-    override fun setClazzLogListProvider(factory : DataSource.Factory<Int, ClazzLogWithScheduleStartEndTimes>) {
+    override fun setClazzLogListProvider(factory : DataSource.Factory<Int,
+            ClazzLogWithScheduleStartEndTimes>) {
 
         //Create a recycler adapter to set on the Recycler View.
         val recyclerAdapter = ClazzLogListRecyclerAdapter(DIFF_CALLBACK, context!!, this,
@@ -383,11 +390,10 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
-                    Observer<PagedList<ClazzLogWithScheduleStartEndTimes>> { recyclerAdapter.submitList(it) })
+                    Observer<PagedList<ClazzLogWithScheduleStartEndTimes>> {
+                        recyclerAdapter.submitList(it) })
             mRecyclerView!!.setAdapter(recyclerAdapter)
         }
-
-
     }
 
     companion object {
@@ -432,7 +438,7 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
 
             override fun areContentsTheSame(oldItem: ClazzLogWithScheduleStartEndTimes,
                                             newItem: ClazzLogWithScheduleStartEndTimes): Boolean {
-                return oldItem.clazzLogUid == newItem.clazzLogUid
+                return oldItem == newItem
             }
         }
     }

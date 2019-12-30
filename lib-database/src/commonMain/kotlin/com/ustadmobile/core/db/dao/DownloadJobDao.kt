@@ -92,11 +92,6 @@ abstract class DownloadJobDao {
         ORDER BY timeStarted DESC LIMIT 1""")
     abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int
 
-
-    @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
-    abstract fun update(djUid: Int, djStatus: Int)
-
-
     @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid " +
             "AND djStatus BETWEEN :statusFrom AND :statusTo")
     abstract suspend fun updateAsync(djUid: Int, djStatus: Int, statusFrom: Int, statusTo: Int)
@@ -156,7 +151,7 @@ abstract class DownloadJobDao {
     @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
-    @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
+    @Query("SELECT COALESCE((SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid), 0)")
     abstract suspend fun getMeteredNetworkAllowed(djUid: Int): Boolean
 
     @Query("SELECT (SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) AS numEntries, " +

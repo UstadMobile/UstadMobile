@@ -13,29 +13,10 @@
         android:layout_height="match_parent"
         tools:listitem="@layout/list_item_content_entry" />
 
-    <RelativeLayout
+    <com.ustadmobile.port.android.view.RepoLoadingStatusView
         android:layout_centerInParent="true"
-        android:id="@+id/emptyView"
+        android:id="@+id/statusView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ImageView
-            android:layout_marginBottom="@dimen/dimen_16dp"
-            android:id="@+id/emptyViewImage"
-            android:layout_centerInParent="true"
-            android:tint="@color/divider"
-            android:alpha="0.4"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
-        <TextView
-            android:layout_centerHorizontal="true"
-            android:alpha="0.6"
-            android:textColor="@color/divider"
-            android:id="@+id/emptyViewText"
-            android:layout_marginTop="@dimen/dimen_16dp"
-            android:layout_below="@id/emptyViewImage"
-            android:textSize="15sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

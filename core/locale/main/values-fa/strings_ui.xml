@@ -341,6 +341,7 @@
     <string name="date_range">مدت تاریخ</string>
     <string name="done">Done</string>
     <string name="select_locations">Select Locations</string>
+
     <string name="xapi_options_general">General</string>
     <string name="xapi_options_report_title">Report Title</string>
     <string name="xapi_options_visual_type">Visualization Type</string>
@@ -372,5 +373,20 @@
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
+
+    <string name="select_entries">Select Entries</string>
+    <string name='new_tab'>Displaying on new Tab</string>
+    <string name="content_entry_export">Export</string>
+    <string name="content_entry_export_inprogress">Exporting</string>
+    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
+    <string name="error_not_found_status">404 !</string>
+    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
+
+    <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
+    <string name="repo_loading_status_loading_mirror">Loading from mirror</string>
+    <string name="repo_loading_status_loaded_empty">No content found</string>
+    <string name="repo_loading_status_failed_noconnection">No connection</string>
+    <string name="repo_loading_status_failed_connection_error">Connection error</string>
+
 </resources>
 

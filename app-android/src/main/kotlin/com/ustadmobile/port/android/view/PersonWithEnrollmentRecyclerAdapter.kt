@@ -61,7 +61,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     private var showAddTeacher = false
 
     private var currentTop = -1
-    private var teacherAdded = false
+    private var currentDown = -1
+    private var addTeacherAdded = false
 
     private var reportMode = false
 
@@ -71,10 +72,14 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
     private var headingCLId: Int = 0
 
-    private var addCMCLT: Int = 0
-    private var addCMCLS: Int = 0
+    private var addTeachersId: Int = 0
+    private var addStudentsId: Int = 0
 
     private var personPictureDaoRepo: PersonPictureDao?=null
+
+    var emptyAddStudents = false
+
+    var addStudentAdded = false
 
     @SuppressLint("UseSparseArrays")
     private val checkBoxHM = HashMap<Long, Boolean>()
@@ -93,7 +98,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                     theFragment!!.activity!!.packageName)
         }
 
-    class ClazzLogDetailViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
+    class ClazzLogDetailViewHolder(itemView: View, var imageLoadJob: Job? = null)
+        : RecyclerView.ViewHolder(itemView)
 
     internal constructor(
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
@@ -118,10 +124,24 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         showEnrollment = enrollment
     }
 
-    internal constructor(context: Context,
-            diffCallback: DiffUtil.ItemCallback<Person>,
+    internal constructor(
+            diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
             fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
-            enrollment: Boolean) : super(diffCallback as DiffUtil.ItemCallback<PersonWithEnrollment>) {
+            enrollment: Boolean, addTeacherButton:Boolean, addStudentButton: Boolean ) : super(diffCallback) {
+        theContext = context
+        theFragment = fragment
+        mPresenter = presenter
+        showAttendance = attendance
+        showEnrollment = enrollment
+        showAddTeacher = addTeacherButton
+        showAddStudent = addStudentButton
+    }
+
+    internal constructor(context: Context,
+            diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>,
+            fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
+            enrollment: Boolean)
+            : super(diffCallback as DiffUtil.ItemCallback<PersonWithEnrollment>) {
         theContext = context
         theFragment = fragment
         mPresenter = presenter
@@ -145,7 +165,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     internal constructor(
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
             activity: Activity, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
-            enrollment: Boolean, rmode: Boolean, classGrouped: Boolean, hideHeading: Boolean) : super(diffCallback) {
+            enrollment: Boolean, rmode: Boolean, classGrouped: Boolean, hideHeading: Boolean)
+            : super(diffCallback) {
         theContext = context
         theActivity = activity
         mPresenter = presenter
@@ -241,24 +262,33 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         //Get person with enrollment and other info
         val personWithEnrollment = getItem(position)!!
 
-        //Flag that says that complete recyclerview has only 1 item and its a teacher. Used to add
-        // "Add Students" as well before we finish onBindView for the teacher.
-        var onlyTeacherExists = false
+        val studentNameTextView =
+                holder.itemView.findViewById<TextView>(
+                        R.id.item_studentlist_student_simple_student_title)
+        val personPicture =
+                holder.itemView.findViewById<ImageView>(
+                        R.id.item_studentlist_student_simple_student_image)
+        val trafficLight =
+                holder.itemView
+                .findViewById<ImageView>(
+                        R.id.item_studentlist_student_simple_attendance_trafficlight)
+        val attendanceTextView =
+                holder.itemView.findViewById<TextView>(
+                        R.id.item_studentlist_student_simple_attendance_percentage)
+        val cl =
+                holder.itemView.findViewById<ConstraintLayout>(
+                        R.id.item_studentlist_student_cl)
 
-        val studentNameTextView = holder.itemView.findViewById<TextView>(R.id.item_studentlist_student_simple_student_title)
-        val personPicture = holder.itemView.findViewById<ImageView>(R.id.item_studentlist_student_simple_student_image)
-        val trafficLight = holder.itemView
-                .findViewById<ImageView>(R.id.item_studentlist_student_simple_attendance_trafficlight)
-        val attendanceTextView = holder.itemView.findViewById<TextView>(R.id.item_studentlist_student_simple_attendance_percentage)
-        val cl = holder.itemView.findViewById<ConstraintLayout>(R.id.item_studentlist_student_cl)
+        val checkBox = holder.itemView.findViewById<CheckBox>(
+                R.id.item_studentlist_student_simple_student_checkbox)
 
-        val checkBox = holder.itemView.findViewById<CheckBox>(R.id.item_studentlist_student_simple_student_checkbox)
         if (groupEnrollment) {
             checkBox.setText(R.string.enroll_group_member)
         } else {
             checkBox.setText(R.string.enroll_in_class)
         }
-        val callImageView = holder.itemView.findViewById<ImageView>(R.id.item_studentlist_student_simple_call_iv)
+        val callImageView = holder.itemView.findViewById<ImageView>(
+                R.id.item_studentlist_student_simple_call_iv)
 
         //Update person name :
         var firstName: String? = ""
@@ -276,9 +306,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         val personUid = personWithEnrollment.personUid
         studentNameTextView.setOnClickListener { mPresenter!!.handleCommonPressed(personUid) }
 
-        //HEADING:
         //Remove previous add clazz member views
-        if (addCMCLS != 0 || addCMCLT != 0) {
+        if (addStudentsId != 0 || addTeachersId != 0) {
             removeAllAddClazzMemberView(cl, holder)
         }
 
@@ -290,7 +319,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
-            personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+            personPictureDaoRepo =
+                    UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
             val personPictureDao = UmAppDatabase.getInstance(theContext).personPictureDao
 
             val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
@@ -335,7 +365,9 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             checkBox.isChecked = checkBoxHM[personWithEnrollment.personUid]!!
 
             //Add a change listener to the checkbox
-            checkBox.setOnCheckedChangeListener { buttonView, isChecked -> checkBox.isChecked = isChecked }
+            checkBox.setOnCheckedChangeListener {
+                buttonView, isChecked -> checkBox.isChecked = isChecked
+            }
 
             checkBox.setOnClickListener { v ->
                 val isChecked = checkBox.isChecked
@@ -403,58 +435,57 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             checkBox.visibility = View.GONE
 
             callImageView.visibility = View.VISIBLE
-            callImageView.setOnClickListener { v -> mPresenter!!.handleSecondaryPressed(personWithEnrollment) }
+            callImageView.setOnClickListener {
+                v -> mPresenter!!.handleSecondaryPressed(personWithEnrollment)
+            }
 
 
         } else {
             callImageView.visibility = View.GONE
         }
 
-        if (!showEnrollment && showAttendance) {
+        //Don't show enrollment and show Attendance - The Clazz Detail Students & Teachers page
+        if (!showEnrollment && showAttendance && !reportMode && !hideHeading) {
 
-            if (position == 0) {//First Entry. Add Teacher and Add Teacher item
-                if (!reportMode && !hideHeading) {
-                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher, holder)
-                } else {
-                    val x: Int
-                }
+            val currentRole = personWithEnrollment.clazzMemberRole
 
-                if (personWithEnrollment.clazzMemberRole == ClazzMember.ROLE_STUDENT) {
+            if (position == 0 ) {//First Entry. Add Teacher and Add Teacher item
 
-                    if (!reportMode && !hideHeading) {
+                addStudentAdded = false
+                //Add teacher heading first (always)
+                addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher, holder)
+
+                when {
+                    //First one is a student, add the student heading
+                    currentRole == ClazzMember.ROLE_STUDENT ->
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT,showAddStudent, holder)
+                    currentRole == ClazzMember.ROLE_TEACHER
+                            && position  == itemCount - 1 -> {
+                        emptyAddStudents = true
                         addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
-                    } else {
-                        val x: Int
-                    }
-
-                } else {
-                    val x: Int
-                }
-
-                //If first item is a teacher and there are no more items:
-                if (personWithEnrollment.clazzMemberRole == ClazzMember.ROLE_TEACHER && itemCount == 1) {
-                    onlyTeacherExists = true
-                } else {
-                    val x: Int
+                            }
+                    else -> {}
                 }
 
             } else {
+
                 val previousPerson = getItem(position - 1)!!
+                val previousRole = previousPerson.clazzMemberRole
 
-                if (previousPerson.clazzMemberRole == ClazzMember.ROLE_TEACHER && personWithEnrollment.clazzMemberRole == ClazzMember.ROLE_STUDENT) {
-
-                    //Add student
-                    if (!reportMode && !hideHeading) {
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
-                    } else {
-                        val x: Int
-                    }
-                } else {
-                    val x: Int
+                if ( previousRole == ClazzMember.ROLE_TEACHER &&
+                            currentRole == ClazzMember.ROLE_STUDENT)
+                {
+                    addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
                 }
-
+                //If its teacher still but the last item (ie: Only teachers here)
+                else if (currentRole == ClazzMember.ROLE_TEACHER &&
+                                        position  == itemCount - 1 )
+                {
+                    emptyAddStudents = true
+                    addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
+                }
+                else {}
             }
-
         }
 
         if (groupByClass) {
@@ -489,16 +520,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             val x: Int
         }
 
-        //If we reached the end of the rv and there is only one teacher in it,
-        // add the "show Student" as well.
-        if (onlyTeacherExists) {
-            addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder)
-        } else {
-            //Don't add anything.
-            val x: Int
-
-        }
-
     }
 
     override fun getItemId(position: Int): Long {
@@ -531,8 +552,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                                             holder: ClazzLogDetailViewHolder) {
 
         //Get Clazz Member layout for student and teacher
-        val addCMCLViewS = holder.itemView.findViewById<View>(addCMCLS)
-        val addCMCLViewT = holder.itemView.findViewById<View>(addCMCLT)
+        val addCMCLViewS = holder.itemView.findViewById<View>(addStudentsId)
+        val addCMCLViewT = holder.itemView.findViewById<View>(addTeachersId)
 
         //Remove the views
         cl.removeView(addCMCLViewS)
@@ -558,7 +579,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                                         holder: ClazzLogDetailViewHolder) {
 
         //Get Clazz Member layout for student and teacher
-        val addCMCLViewT = holder.itemView.findViewById<View>(addCMCLT)
+        val addCMCLViewT = holder.itemView.findViewById<View>(addTeachersId)
 
         //Remove the views
         cl.removeView(addCMCLViewT)
@@ -578,7 +599,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
                                      holder: ClazzLogDetailViewHolder) {
 
         //Get Clazz Member layout for student and teacher
-        val addCMCLViewS = holder.itemView.findViewById<View>(addCMCLS)
+        val addCMCLViewS = holder.itemView.findViewById<View>(addStudentsId)
 
         //Remove the views
         cl.removeView(addCMCLViewS)
@@ -675,225 +696,363 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     }
 
     /**
-     * Adds a heading depending on role given
-     * @param cl    The Constraint layout where the list will be in.
-     * @param role  The role (Teacher or Student) as per ClazzMember.ROLE_*
+     * Adds a heading depending on roleToAdd given
+     * @param personCL    The Constraint layout where the list will be in.
+     * @param roleToAdd  The roleToAdd (Teacher or Student) as per ClazzMember.ROLE_*
      */
-    private fun addHeadingAndNew(cl: ConstraintLayout, role: Int, showAdd: Boolean,
+    private fun addHeadingAndNew(personCL: ConstraintLayout, roleToAdd: Int, showAdd: Boolean,
                                  holder: ClazzLogDetailViewHolder) {
 
-        //Testing if improves:
-        if (role == ClazzMember.ROLE_TEACHER) {
-            removeAddStudentView(cl, holder)
+        //Remove any previous views
+        if (roleToAdd == ClazzMember.ROLE_TEACHER) {
+            removeAddTeacherAddView(personCL, holder)
         } else {
-            removeAddTeacherAddView(cl, holder)
+            removeAddStudentView(personCL, holder)
         }
 
-        val addCl = ConstraintLayout(theContext)
+        //Create the Constraint layout wrapper, the heading, icon and button
+        val addCL = ConstraintLayout(theContext)
         val defaultPadding = getDp(DEFAULT_PADDING)
         val defaultPaddingBy2 = getDp(DEFAULT_PADDING / 2)
 
-        val clazzMemberRoleHeadingTextView = TextView(theContext)
-        clazzMemberRoleHeadingTextView.setTextColor(Color.BLACK)
-        clazzMemberRoleHeadingTextView.textSize = 16f
-        clazzMemberRoleHeadingTextView.left = 8
+        //"Teachers/Students" heading
+        val headingTV = TextView(theContext)
+        headingTV.setTextColor(Color.BLACK)
+        headingTV.textSize = 16f
+        headingTV.left = 8
 
-        val addIconResId = addPersonIconRes
-        val addPersonImageView = AppCompatImageView(theContext)
-        addPersonImageView.setImageResource(addIconResId)
+        //Add person icon
+        val iconIV = AppCompatImageView(theContext)
+        iconIV.setImageResource(addPersonIconRes)
 
-        val addClazzMemberTextView = TextView(theContext)
-        addClazzMemberTextView.setTextColor(Color.BLACK)
-        addClazzMemberTextView.textSize = 16f
-        addClazzMemberTextView.left = 8
+        //"Add Student/Teacher"
+        val buttonTV = TextView(theContext)
+        buttonTV.setTextColor(Color.BLACK)
+        buttonTV.textSize = 16f
+        buttonTV.left = 8
 
         //Horizontal line
-        val horizontalLine = View(theContext)
-        horizontalLine.layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                getDp(1)
-        )
-        horizontalLine.setBackgroundColor(Color.parseColor("#EAEAEA"))
+        val hLine = View(theContext)
+        hLine.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                getDp(1))
+        hLine.setBackgroundColor(Color.parseColor("#EAEAEA"))
 
         //Get ids for all components.
         val headingId = View.generateViewId()
-        val headingImageId = View.generateViewId()
-        val addClazzMemberId = View.generateViewId()
+        val iconId = View.generateViewId()
+        val buttonId = View.generateViewId()
         val hLineId = View.generateViewId()
-        val addCMCL = View.generateViewId()
+        val addCLId = View.generateViewId()
+
+        //Set ids for all components.
+        headingTV.id = headingId
+        buttonTV.id = buttonId
+        hLine.id = hLineId
+        iconIV.setId(iconId)
+        addCL.setId(addCLId)
+
+        //Add these components to the new Constraint Layout
+        addCL.addView(headingTV)
+        if (roleToAdd == ClazzMember.ROLE_STUDENT && showAddStudent) {
+            addCL.addView(iconIV)
+            if (showAdd)
+                addCL.addView(buttonTV)
+            else {
+                val blankView = View(theContext)
+                blankView.visibility = View.GONE
+                addCL.addView(blankView)
+            }
+            addCL.addView(hLine)
+        }
+        if (roleToAdd == ClazzMember.ROLE_TEACHER && showAddTeacher) {
+            addCL.addView(iconIV)
+            if (showAdd)
+                addCL.addView(buttonTV)
+            else {
+                val blankView = View(theContext)
+                blankView.visibility = View.GONE
+                addCL.addView(blankView)
+            }
+            addCL.addView(hLine)
+        }
 
 
-        //Set strings and handler on the components based on role.
-        if (role == ClazzMember.ROLE_STUDENT) {
-            addClazzMemberTextView.text = getText(R.string.add_student)
-            clazzMemberRoleHeadingTextView.text = getText(R.string.students_literal)
-            addCl.setOnClickListener({ v -> mPresenter!!.handleCommonPressed(0L) })
+        //Create the constraint set for the headingCL View
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(addCL)
+
+        /**
+         * [Teachers / Students Heading] TOP to TOP of whichever the top
+         * (can be Parent or horizontal line of previous item)
+         * +----*-------------------+   <headingCL>
+         * | Teachers   <headingId> |
+         * |                        |
+         * |                        |
+         * +________________________+
+         */
+        constraintSet.connect(
+                headingId, ConstraintSet.TOP,
+                addCL.getId(), ConstraintSet.TOP,
+                defaultPaddingBy2)
+
+        /**
+         * [Teachers / Students Heading] START to START of PARENT (always)
+         * +------------------------+   <headingCL>
+         * |*Teachers   <headingId> |
+         * |                        |
+         * |                        |
+         * +________________________+
+         */
+        constraintSet.connect(
+                headingId, ConstraintSet.START,
+                addCL.getId(), ConstraintSet.START,
+                defaultPaddingBy2)
+
+        /**
+         * [Add teacher/student Icon] START to START of Parent (always)
+         * +------------------------+   <headingCL>
+         * | Teachers               |
+         * |*[+]        <iconId>    |
+         * |                        |
+         * +________________________+
+         */
+        constraintSet.connect(
+                iconId, ConstraintSet.START,
+                addCL.getId(), ConstraintSet.START, defaultPadding)
+
+        /**
+         * [Add teacher/student Icon] TOP to BOTTOM of Heading
+         * +------------------------+
+         * | Teachers   <headingId> |
+         * | *                      |
+         * |[+]        <iconId>     |
+         * |                        |
+         * +________________________+
+         */
+        constraintSet.connect(
+                iconId, ConstraintSet.TOP,
+                headingId, ConstraintSet.BOTTOM, defaultPaddingBy2)
+
+        /**
+         * [Add teacher/student Text]  START to Icon END (always)
+         * +----------------------------+
+         * | Teachers                   |
+         * |                            |
+         * | <iconId>                   |
+         * |[+]*Add Teacher <buttonId>  |
+         * |                            |
+         * +____________________________+
+         */
+        constraintSet.connect(
+                buttonId, ConstraintSet.START,
+                iconId, ConstraintSet.END, defaultPadding)
+
+        /**
+         * [Add teacher/student Text] TOP to [Teacher / Students Heading] Bottom (always)
+         * +----------------------------+
+         * | Teachers       <headingId> |
+         * |    *                       |
+         * |[+]Add Teacher   <buttonId> |
+         * |                            |
+         * |                            |
+         * +____________________________+
+         */
+        constraintSet.connect(
+                buttonId, ConstraintSet.TOP,
+                headingId, ConstraintSet.BOTTOM, defaultPaddingBy2)
+
+        /**
+         * [Add Teacher/Student HLine] TOP to [Teacher / Student Icon] BOTTOM (always)
+         * +----------------------------+
+         * | Teachers                   |
+         * |[+]Add Teacher <buttonId>   |
+         * | *                          |
+         * |____________________________| <hLineId>
+         * |____________________________+
+         */
+        constraintSet.connect(
+                hLineId, ConstraintSet.TOP,
+                iconId, ConstraintSet.BOTTOM, defaultPaddingBy2)
+
+        /**
+         * [Add Teacher/Student HLine] START to Parent (always)
+         * +----------------------------+
+         * | Teachers                   |
+         * |[+]Add Teacher <buttonId>   |
+         * |                            |
+         * |*___________________________| <hLineId>
+         * +____________________________+
+         */
+        constraintSet.connect(
+                hLineId, ConstraintSet.START,
+                addCL.getId(), ConstraintSet.START, 0)
+
+        constraintSet.applyTo(addCL)
+
+        if(addStudentAdded){
+            personCL.addView(addCL)
+        }else{
+            personCL.addView(addCL)
+        }
+
+        val personCS = ConstraintSet()
+        personCS.clone(personCL)
+
+        //Set strings and handler on the components based on roleToAdd.
+        if (roleToAdd == ClazzMember.ROLE_STUDENT) {
+            buttonTV.text = getText(R.string.add_student)
+            headingTV.text = getText(R.string.students_literal)
+            addCL.setOnClickListener({ v -> mPresenter!!.handleCommonPressed(0L) })
 
             //Storing in separate variables so we can remove them.
-            addCMCLS = addCMCL
+            addStudentsId = addCL.id
 
         } else {
 
-            teacherAdded = false
-
-            addClazzMemberTextView.text = getText(R.string.add_teacher)
-            clazzMemberRoleHeadingTextView.text = getText(R.string.teachers_literal)
-            addCl.setOnClickListener({ v -> mPresenter!!.handleSecondaryPressed(-1L) })
+            buttonTV.text = getText(R.string.add_teacher)
+            headingTV.text = getText(R.string.teachers_literal)
+            addCL.setOnClickListener({ v -> mPresenter!!.handleSecondaryPressed(-1L) })
 
             //Storing in separate variables so we can remove them.
-            addCMCLT = addCMCL
+            addTeachersId = addCL.id
 
             //For Teachers (which will always be the start of the recycler view: we keep the top as
             // the top of the whole inner constraint layout .
-            currentTop = addCMCL
-        }
-
-        //Set ids for all components.
-        clazzMemberRoleHeadingTextView.id = headingId
-        addClazzMemberTextView.id = addClazzMemberId
-        horizontalLine.id = hLineId
-        addPersonImageView.setId(headingImageId)
-        addCl.setId(addCMCL)
-
-        //Add these components to the new "add" Constraint Layout
-        addCl.addView(clazzMemberRoleHeadingTextView)
-        if (role == ClazzMember.ROLE_STUDENT && showAddStudent) {
-            addCl.addView(addPersonImageView)
-            if (showAdd)
-                addCl.addView(addClazzMemberTextView)
-            else {
-                val blankView = View(theContext)
-                blankView.visibility = View.GONE
-                addCl.addView(blankView)
-            }
-            addCl.addView(horizontalLine)
-        }
-        if (role == ClazzMember.ROLE_TEACHER && showAddTeacher) {
-            addCl.addView(addPersonImageView)
-            if (showAdd)
-                addCl.addView(addClazzMemberTextView)
-            else {
-                val blankView = View(theContext)
-                blankView.visibility = View.GONE
-                addCl.addView(blankView)
-
+            if(!emptyAddStudents){
+                currentTop = addCL.id
             }
 
-            addCl.addView(horizontalLine)
         }
 
+        if (addTeacherAdded) {
+            //"Add Students" bit goes On TOP of Teacher.
 
-        val constraintSetForHeader2 = ConstraintSet()
-        constraintSetForHeader2.clone(addCl)
-
-        //[Teachers / Students Heading] TOP to TOP of whichever the top
-        //  (can be Parent or horizontal line of previous item)
-        constraintSetForHeader2.connect(
-                headingId, ConstraintSet.TOP,
-                addCl.getId(), ConstraintSet.TOP,
-                defaultPaddingBy2)
-
-        //[Teachers / Students Heading] START to START of PARENT (always)
-        constraintSetForHeader2.connect(
-                headingId, ConstraintSet.START,
-                addCl.getId(), ConstraintSet.START,
-                defaultPaddingBy2)
-
-        //[Add teacher/student Icon] START to START of Parent (always)
-        constraintSetForHeader2.connect(
-                headingImageId, ConstraintSet.START,
-                addCl.getId(), ConstraintSet.START, defaultPadding)
-
-        //[Add teacher/student Icon] TOP to BOTTOM of Heading
-        constraintSetForHeader2.connect(
-                headingImageId, ConstraintSet.TOP,
-                headingId, ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-        //[Add teacher/student Text]  START to Icon END (always)
-        constraintSetForHeader2.connect(
-                addClazzMemberId, ConstraintSet.START,
-                headingImageId, ConstraintSet.END, defaultPadding)
-
-        //[Add teacher/student Text] TOP to [Teacher / Students Heading] Bottom (always)
-        constraintSetForHeader2.connect(
-                addClazzMemberId, ConstraintSet.TOP,
-                headingId, ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-        //[Add Teacher/Student HLine] TOP to [Teacher / Student Icon] BOTTOM (always)
-        constraintSetForHeader2.connect(
-                hLineId, ConstraintSet.TOP,
-                headingImageId, ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-        //[Add Teacher/Student HLine] START to Parent (always)
-        constraintSetForHeader2.connect(hLineId, ConstraintSet.START,
-                addCl.getId(), ConstraintSet.START, 0)
-
-        //Current Person image TOP to BOTTOM of horizontal line (always)
-        constraintSetForHeader2.connect(
-                R.id.item_studentlist_student_simple_student_image, ConstraintSet.TOP,
-                hLineId, ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-        //Current Person title TOP to BOTTOM of horizontal line (always)
-        constraintSetForHeader2.connect(
-                R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
-                hLineId, ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-        constraintSetForHeader2.applyTo(addCl)
-
-        cl.addView(addCl)
-
-        val constraintSetForHeader = ConstraintSet()
-        constraintSetForHeader.clone(cl)
-
-
-        if (teacherAdded) {
-
-            // [Add CL Student ] always on top to top parent.
-            constraintSetForHeader.connect(
-                    addCl.getId(), ConstraintSet.TOP,
+            /**
+             * [ Add CL [Students] ] TOP to BOTTOM of Current Top
+             *              *
+             * +----------------------------+ <headingCL>
+             * | Students                   |
+             * |[+]Add Student              |
+             * |----------------------------|
+             * |[o] Bob Ross                |
+             * +____________________________+
+             */
+            personCS.connect(
+                    addCL.id, ConstraintSet.TOP,
                     currentTop, ConstraintSet.BOTTOM, defaultPaddingBy2)
 
-            // [ Add CL [Teachers] ] always start to start parent.
-            constraintSetForHeader.connect(
-                    addCl.getId(), ConstraintSet.START,
-                    cl.getId(), ConstraintSet.START, defaultPaddingBy2)
+            /**
+             * [ Add CL [Students] ] always start to start parent (always)
+             * *
+             * +----------------------------+ <headingCL>
+             * | Students                   |
+             * |[+]Add Student              |
+             * |----------------------------|
+             * |[o] Bob Ross                |
+             * +____________________________+
+             */
+            personCS.connect(
+                    addCL.id, ConstraintSet.START,
+                    personCL.id, ConstraintSet.START, defaultPaddingBy2)
+
+
+            if(!emptyAddStudents) {
+
+                //Current Person image TOP to BOTTOM of [ Add CL ] (always)
+                personCS.connect(
+                        R.id.item_studentlist_student_simple_student_image, ConstraintSet.TOP,
+                        addCL.getId(), ConstraintSet.BOTTOM,
+                         defaultPaddingBy2)
+
+                //Current Person title TOP to BOTTOM of [ Add CL ] (always)
+                personCS.connect(
+                        R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
+                        addCL.getId(), ConstraintSet.BOTTOM,
+                         defaultPaddingBy2)
+
+            }else{
+
+                var top = addCL.id
+
+
+                //Current Person image TOP to BOTTOM of [ Add CL ] (always)
+                personCS.connect(top, ConstraintSet.TOP,
+                        R.id.item_studentlist_student_simple_student_title, ConstraintSet.BOTTOM,
+                        defaultPaddingBy2)
+
+                //Current Person image TOP to BOTTOM of [ Add CL ] (always)
+                personCS.connect(top, ConstraintSet.TOP,
+                        R.id.item_studentlist_student_simple_student_image, ConstraintSet.BOTTOM,
+                        defaultPaddingBy2)
+            }
+
+            personCS.applyTo(personCL)
+
+
+            //Update the top for the next
+            currentTop = addCL.getId()
 
         } else {
 
-            // [Add CL Teacher ] always on top to top parent.
-            constraintSetForHeader.connect(
-                    addCl.getId(), ConstraintSet.TOP,
-                    cl.getId(), ConstraintSet.TOP, defaultPaddingBy2)
+            /**
+             * [Add CL Teacher ] always on top to top parent.
+             *              *
+             * +----------------------------+ <headingCL>
+             * | Teachers                   |
+             * |[+]Add Teacher              |
+             * |----------------------------|
+             * |[o] Bob Dylan               |
+             * +____________________________+
+             */
+            personCS.connect(
+                    addCL.getId(), ConstraintSet.TOP,
+                    personCL.getId(), ConstraintSet.TOP, defaultPaddingBy2)
 
-            // [ Add CL [Teachers] ] always start to start parent.
-            constraintSetForHeader.connect(
-                    addCl.getId(), ConstraintSet.START,
-                    cl.getId(), ConstraintSet.START, defaultPaddingBy2)
+            /**
+             * [ Add CL [Teachers] ] always start to start parent (always)
+             * *
+             * +----------------------------+ <headingCL>
+             * | Teachers                   |
+             * |[+]Add Teacher              |
+             * |----------------------------|
+             * |[o] Bob Dylan               |
+             * +____________________________+
+             */
+            personCS.connect(
+                    addCL.getId(), ConstraintSet.START,
+                    personCL.getId(), ConstraintSet.START, defaultPaddingBy2)
+
+            //Current Person image TOP to BOTTOM of [ Add CL ] (always)
+            personCS.connect(
+                    R.id.item_studentlist_student_simple_student_image, ConstraintSet.TOP,
+                    addCL.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2)
+
+            //Current Person title TOP to BOTTOM of [ Add CL ] (always)
+            personCS.connect(
+                    R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
+                    addCL.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2)
+
+            personCS.applyTo(personCL)
+
+            //Update the top for the next
+            currentTop = addCL.id
+
+            currentDown = personCL.id
         }
 
-        //Current Person image TOP to BOTTOM of [ Add CL ] (always)
-        constraintSetForHeader.connect(
-                R.id.item_studentlist_student_simple_student_image, ConstraintSet.TOP,
-                addCl.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-        //Current Person title TOP to BOTTOM of [ Add CL ] (always)
-        constraintSetForHeader.connect(
-                R.id.item_studentlist_student_simple_student_title, ConstraintSet.TOP,
-                addCl.getId(), ConstraintSet.BOTTOM, defaultPaddingBy2)
-
-
-        constraintSetForHeader.applyTo(cl)
-
-        //Update the top for the next
-        currentTop = addCl.getId()
-
-        if (role == ClazzMember.ROLE_TEACHER) {
-            teacherAdded = true
+        if (roleToAdd == ClazzMember.ROLE_TEACHER) {
+            addTeacherAdded = true
+            addStudentAdded = false
         } else {
-            teacherAdded = false
+            addTeacherAdded = false
+            addStudentAdded = true
         }
 
     }
+
+
+
+
 
     companion object {
 
@@ -901,7 +1060,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
 
         private fun dpToPxImagePerson(): Int {
-            return (PersonWithEnrollmentRecyclerAdapter.IMAGE_PERSON_THUMBNAIL_WIDTH * Resources.getSystem().displayMetrics.density).toInt()
+            return (PersonWithEnrollmentRecyclerAdapter.IMAGE_PERSON_THUMBNAIL_WIDTH *
+                    Resources.getSystem().displayMetrics.density).toInt()
         }
     }
 

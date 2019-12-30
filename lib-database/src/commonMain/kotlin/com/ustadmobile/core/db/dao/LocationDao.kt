@@ -32,7 +32,7 @@ abstract class LocationDao : BaseDao<Location> {
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
 
-    @Query("SELECT * FROM Location WHERE CAST(locationActive AS INTEGER) = 1 ")
+    @Query("SELECT * FROM Location WHERE CAST(locationActive AS INTEGER) = 1")
     abstract fun findAllActiveLocationsLive(): DoorLiveData<List<Location>>
 
     fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
@@ -65,30 +65,30 @@ abstract class LocationDao : BaseDao<Location> {
     abstract fun findTopLocationsLive(): DoorLiveData<List<Location>>
 
     @JsName("findTopLocationsAsync")
-    @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND CAST(locationActive AS INTEGER) = 1 ")
+    @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND CAST(locationActive AS INTEGER) = 1")
     abstract suspend fun findTopLocationsAsync(): List<Location>
 
     @JsName("findAllChildLocationsForUidAsync")
-    @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND CAST(locationActive AS INTEGER) = 1 ")
+    @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND CAST(locationActive AS INTEGER) = 1")
     abstract suspend fun findAllChildLocationsForUidAsync(uid: Long) : List<Location>
 
-    @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND CAST(locationActive AS INTEGER) = 1 " +
+    @Query("SELECT * FROM Location WHERE parentLocationUid = :uid AND CAST(locationActive AS INTEGER) = 1" +
             " AND Location.locationUid != :suid ")
     abstract suspend fun findAllChildLocationsForUidExceptSelectedUidAsync(uid: Long, suid: Long)
             : List<Location>
 
     @JsName("findByTitleAsync")
-    @Query("SELECT * FROM Location WHERE title = :name AND CAST(locationActive AS INTEGER) = 1 ")
+    @Query("SELECT * FROM Location WHERE title = :name AND CAST(locationActive AS INTEGER) = 1")
     abstract suspend fun findByTitleAsync(name: String):List<Location>
 
-    @Query("SELECT * FROM Location WHERE title LIKE :name AND locationActive = 1")
+    @Query("SELECT * FROM Location WHERE title LIKE :name AND CAST(locationActive AS INTEGER) = 1")
     abstract suspend fun findByTitleLikeAsync(name: String):List<Location>
 
-    @Query("SELECT * FROM Location WHERE title = :name AND CAST(locationActive AS INTEGER) = 1 ")
+    @Query("SELECT * FROM Location WHERE title = :name AND CAST(locationActive AS INTEGER) = 1")
     abstract fun findByTitle(name: String): List<Location>
 
     @Query("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0 " +
-            " AND CAST(locationActive AS INTEGER) = 1 ")
+            " AND CAST(locationActive AS INTEGER) = 1")
     abstract fun findAllTopLocationsWithCount(): DataSource.Factory<Int, LocationWithSubLocationCount>
 
     @Query("SELECT *, " +

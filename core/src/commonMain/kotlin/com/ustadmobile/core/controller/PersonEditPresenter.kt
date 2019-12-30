@@ -75,6 +75,9 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                            val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     :UstadBaseController<PersonEditView>(context, arguments!!, view) {
 
+
+    private var personLiveData: DoorLiveData<Person?>? = null
+
     //Headers and Fields
     private var headersAndFields: List<PersonDetailPresenterField>? = null
 
@@ -125,11 +128,11 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
     var confirmPasswordSet: String? = null
     var usernameSet: String? = null
 
+
     private var groupIdToPosition: HashMap<Long, Int>? = null
     private val groupPositionToId: HashMap<Int, Long>
     private var groupPresets: Array<String>? = null
     private var personWEGroupUid : Long = 0L
-
 
 
     init {
@@ -400,6 +403,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
             //Update personWithpic
             personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)
             generateFeedsForPersonUpdate(database, updatedPerson!!)
+
 
         }
     }
@@ -725,8 +729,6 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
 
     }
 
-
-
     /**
      * Handles every field Edit (focus changed).
      *
@@ -800,6 +802,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
 
         }
     }
+
 
     /**
      * Done click handler on the Edit / Enrollment page: Clicking done will persist and save it and
@@ -908,6 +911,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
             view.runOnUiThread(Runnable {
                 view.setInProgress(false)
             })
+
             return false
         }
         view.runOnUiThread(Runnable {

@@ -6,12 +6,12 @@ expect class UMURLEncoder {
        /**
         * Encode url string
         */
-       fun encodeUTF8(text: String?): String
+       fun encodeUTF8(text: String): String
 
        /**
         * Decode url string
         */
-       fun decodeUTF8(text: String?): String
+       fun decodeUTF8(text: String): String
    }
 
 }

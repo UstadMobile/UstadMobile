@@ -24,6 +24,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SaleProductCategoryListView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 import java.security.AccessController.getContext
 
@@ -142,24 +143,21 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
                 this, false, applicationContext)
 
         var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
+
         if(allMode){
-            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                    .saleProductDaoBoundaryCallbacks.findAllActiveSNWIProviderByNameAsc(factory)
+
+            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductDao)
+            //Observe the data:
+            data.observe(this,
+                    Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         }else{
-            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                    .saleProductParentJoinDaoBoundaryCallbacks.findAllItemsInACategoryByNameAsc(factory)
+            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
+            //Observe the data:
+            data.observe(this,
+                    Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         }
-
-        // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
-
-        //Observe the data:
-        data.observe(this,
-                Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         mRecyclerView!!.adapter = recyclerAdapter
@@ -167,26 +165,23 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
     override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleProduct>, allMode: Boolean) {
 
-
-        var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
-        if(allMode){
-            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                    .saleProductDaoBoundaryCallbacks.findActiveCategoriesProviderByNameAsc(factory)
-        }else{
-            boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-                    .saleProductParentJoinDaoBoundaryCallbacks.findAllCategoriesInACategoryByNameAsc(factory)
-
-        }
-
         val recyclerAdapter = SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this, false,
                 true, applicationContext)
 
-        // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
-        //Observe the data:
-        data.observe(this, Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
+        var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
+        if(allMode){
+            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductDao)
+            //Observe the data:
+            data.observe(this,
+                    Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
+
+        }else{
+            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
+            //Observe the data:
+            data.observe(this,
+                    Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
+
+        }
 
         //set the adapter
         cRecyclerView!!.adapter = recyclerAdapter

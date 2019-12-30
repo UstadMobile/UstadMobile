@@ -107,6 +107,8 @@ class PersonWithInventorySelectionView : ConstraintLayout {
                 stockTV.visibility = View.VISIBLE
 
                 var sbct = ""
+                sbct = inventoryCount.toString() + " " +
+                        context.getText(R.string.in_stock)
                 if(mPresenter!!.saleItemPreOrder){
                     sbct = inventoryCount.toString() + " " +
                         context.getText(R.string.in_stock)
@@ -155,7 +157,11 @@ class PersonWithInventorySelectionView : ConstraintLayout {
                     }
 
                     if(mPresenter.saleItemPreOrder){
-                        seekBar.max = inventoryCount
+                        if(remainingDelivery < inventoryCount){
+                            seekBar.max = remainingDelivery
+                        }else {
+                            seekBar.max = inventoryCount
+                        }
                     }
 
                 }

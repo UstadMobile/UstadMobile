@@ -9,7 +9,6 @@ import kotlinx.io.charsets.Charsets
 import kotlinx.io.core.toByteArray
 import kotlin.browser.localStorage
 import kotlin.browser.window
-import kotlin.js.json
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -170,7 +169,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?, callback: UmCallback<Any>) {
+    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

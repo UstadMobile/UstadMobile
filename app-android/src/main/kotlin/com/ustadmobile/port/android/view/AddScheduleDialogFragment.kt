@@ -142,7 +142,6 @@ class AddScheduleDialogFragment : UstadDialogFragment(), AddScheduleDialogView,
         dialog = builder.create()
         dialog.setOnShowListener(this)
 
-
         mPresenter = AddScheduleDialogPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(arguments))

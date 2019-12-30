@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
@@ -11,6 +12,7 @@ import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_C
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.util.KmpUuid
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -43,6 +45,28 @@ abstract class  PersonDao : BaseDao<Person> {
 
     inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
 
+    @JsName("insertOrReplace")
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertOrReplace(person: Person)
+
+    @UmRestAccessible
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    suspend fun loginAsync(username: String, password: String): UmAccount? {
+
+        val person = findUidAndPasswordHashAsync(username)
+        return if (person == null) {
+            null
+        } else if (person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) && person.passwordHash.substring(2) != password) {
+            null
+        } else if (person.passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) && !authenticateEncryptedPassword(password,
+                        person.passwordHash.substring(2))) {
+            null
+        } else {
+            createAndInsertAccessToken(person.personUid, username)
+        }
+    }
+
+
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {
@@ -56,7 +80,7 @@ abstract class  PersonDao : BaseDao<Person> {
             val newPersonAuth = PersonAuth(newPerson.personUid,
                     ENCRYPTED_PASS_PREFIX + encryptPassword(password))
             insertPersonAuth(newPersonAuth)
-            return onSuccessCreateAccessTokenAsync(newPerson.personUid, newPerson.username!!)
+            return createAndInsertAccessToken(newPerson.personUid, newPerson.username!!)
         } else {
             throw IllegalArgumentException("Username already exists")
         }
@@ -97,10 +121,12 @@ abstract class  PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-    private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
 
-        val accessToken = AccessToken(personUid, getSystemTimeInMillis() +
-                SESSION_LENGTH, getSystemTimeInMillis().toString())
+    private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
+        val accessToken = AccessToken(personUid,
+                getSystemTimeInMillis() + SESSION_LENGTH)
+        accessToken.token = KmpUuid.randomUUID().toString()
+
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)
     }
@@ -207,8 +233,7 @@ abstract class  PersonDao : BaseDao<Person> {
             " from Person WHERE personUid in (:uids)")
     abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
 
-
-    @Query("SELECT * FROM Person WHERE admin = 1")
+    @Query("SELECT * FROM Person WHERE CAST(admin AS INTEGER) = 1")
     abstract fun findAllAdminsAsList(): List<Person>
 
 
@@ -221,7 +246,8 @@ abstract class  PersonDao : BaseDao<Person> {
             " DESC LIMIT 1) AS personPictureUid, " +
             " CASE WHEN EXISTS " +
             " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND PersonGroupMember.groupMemberActive = 1) " +
+            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND " +
+            " CAST(PersonGroupMember.groupMemberActive AS INTEGER) = 1) " +
             "   THEN 1 " +
             "   ELSE 0 " +
             " END AS enrolled " +
@@ -259,6 +285,8 @@ abstract class  PersonDao : BaseDao<Person> {
 
 
     private suspend fun createPersonCommon(person: Person, loggedInPersonUid: Long): PersonWithGroup{
+
+        //TODO : Use insertOrReplace
         val personUid = insertAsync(person)
         person.personUid = personUid
 
@@ -333,27 +361,28 @@ abstract class  PersonDao : BaseDao<Person> {
 
     companion object {
 
-        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
-                "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
-                "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-                "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-                "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-                "WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-                " AND (" +
-                "(EntityRole.ertableId = " + Person.TABLE_ID +
-                " AND EntityRole.erEntityUid = Person.personUid) " +
-                "OR " +
-                "(EntityRole.ertableId = " + Clazz.TABLE_ID +
-                " AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
-                " ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
-                "OR" +
+
+        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
+                " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
+                " EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
+                " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+                " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+                " WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
+                "  AND (" +
+                " (EntityRole.ertableId = " + Person.TABLE_ID +
+                "  AND EntityRole.erEntityUid = Person.personUid) " +
+                " OR " +
+                " (EntityRole.ertableId = " + Clazz.TABLE_ID +
+                "  AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
+                "  ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
+                " OR" +
                 "(EntityRole.ertableId = " + Location.TABLE_ID +
                 " AND EntityRole.erEntityUid IN " +
-                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
+                " (SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
                 " WHERE locationAncestorChildLocationUid " +
-                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
-                " WHERE personLocationPersonUid = Person.personUid)))" +
-                ") AND (Role.rolePermissions & "
+                "  IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
+                "  WHERE personLocationPersonUid = Person.personUid)))" +
+                " ) AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 

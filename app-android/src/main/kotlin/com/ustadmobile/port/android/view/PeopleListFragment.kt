@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.PeopleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PeopleListView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
@@ -121,18 +122,12 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
 
     override fun setPeopleListProvider(factory : DataSource.Factory<Int, PersonWithEnrollment>) {
 
-        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(context!!, DIFF_CALLBACK_PERSON,
+        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(context!!, DIFF_CALLBACK,
                 this, mPresenter!!, false, false)
 
         //personDao.findAllPeopleWithEnrollmentBySearch
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(context!!)
-                .personDaoBoundaryCallbacks
-                .findAllPeopleWithEnrollment(factory)
-
-        //A warning is expected
-        val data = LivePagedListBuilder(factory, 20)
-                .setBoundaryCallback(boundaryCallback)
-                .build()
+        val data = factory.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(context!!).personDao)
 
         //Observe the data:
         val thisP = this
@@ -196,15 +191,16 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK_PERSON: DiffUtil.ItemCallback<Person> = object
-            : DiffUtil.ItemCallback<Person>() {
-            override fun areItemsTheSame(oldItem: Person,
-                                         newItem: Person): Boolean {
-                return oldItem.personUid == newItem.personUid
+
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithEnrollment> = object
+            : DiffUtil.ItemCallback<PersonWithEnrollment>() {
+            override fun areItemsTheSame(oldItem: PersonWithEnrollment,
+                                         newItem: PersonWithEnrollment): Boolean {
+                return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: Person,
-                                            newItem: Person): Boolean {
+            override fun areContentsTheSame(oldItem: PersonWithEnrollment,
+                                            newItem: PersonWithEnrollment): Boolean {
                 return oldItem == newItem
             }
         }

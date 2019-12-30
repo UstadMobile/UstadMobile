@@ -21,6 +21,7 @@ import com.ustadmobile.core.controller.InventoryListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.InventoryListView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleListDetail
 import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -113,17 +114,13 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductWithInventoryCount>) {
 
-        val boundaryCallback = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-                .inventoryItemDaoBoundaryCallbacks.findAllInventoryByProductNameAsc(factory)
 
         val recyclerAdapter = InventoryListRecyclerAdapter(
                 DIFF_SALEPRODUCTWITHINVENTORYCOUNT_CALLBACK, mPresenter!!,
                 activity!!, context!!)
 
-        val data =
-                LivePagedListBuilder(factory, 20)
-                        .setBoundaryCallback(boundaryCallback)
-                        .build()
+        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).inventoryItemDao)
+
         data.observe(this,
                 Observer<PagedList<SaleProductWithInventoryCount>> { recyclerAdapter.submitList(it) })
 

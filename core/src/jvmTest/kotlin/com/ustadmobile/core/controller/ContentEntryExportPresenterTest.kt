@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryExportView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.util.test.AbstractContentEntryExportTest
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -54,7 +55,7 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
             containerManager.addEntries(*fileSources.toTypedArray())
         }
 
-        arguments[ContentEntryExportView.ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
         arguments[ContentEntryExportView.ARG_CONTENT_ENTRY_TITLE] = "Sample title"
 
         mockView = mock{
