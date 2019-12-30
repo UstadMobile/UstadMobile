@@ -226,7 +226,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
             syncableEntityInfo.entityLocalCsnField
         }
 
-        """( ${entityCsnField.name} > COALESCE((SELECT 
+        """( :$clientIdParamName = 0 OR ${entityCsnField.name} > COALESCE((SELECT 
             |MAX(${syncableEntityInfo.trackerCsnField.name}) FROM ${syncableEntityInfo.tracker.simpleName}  
             |WHERE  ${syncableEntityInfo.trackerDestField.name} = :$clientIdParamName 
             |AND ${syncableEntityInfo.trackerPkField.name} = 
