@@ -16,19 +16,44 @@ buildscript {
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
 
+    packagingOptions {
+        // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
+        // use kotlin reflection, which we don't.
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
+    }
 
     sourceSets {
         main.java.srcDirs += ["build/generated/source/door"]
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+    }
+
+    flavorDimensions "config"
+
+    productFlavors {
+        vanilla {
+            dimension "config"
+        }
+
+        vanillamultidex {
+            dimension "config"
+            minSdkVersion 18
+            multiDexEnabled true
+        }
+
+        devMinApi21 {
+            dimension "config"
+            minSdkVersion 21
+        }
     }
 
     compileOptions {
@@ -44,6 +69,12 @@ android {
         }
     }
 
+}
+
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -87,6 +118,8 @@ dependencies {
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
 
     testImplementation "junit:junit:$version_junit"
+    androidTestImplementation "androidx.room:room-testing:$version_android_room"
+    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
     androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
     androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
 }

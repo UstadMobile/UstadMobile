@@ -95,8 +95,6 @@ class DownloadJobItemRunnerTest {
 
     private var context = Any()
 
-    private lateinit var entryStatusResponse: EntryStatusResponse
-
     private lateinit var mockedEntryStatusTask: BleEntryStatusTask
 
     private lateinit var networkNode: NetworkNode
@@ -264,12 +262,6 @@ class DownloadJobItemRunnerTest {
         connectivityStatus.connectivityState = ConnectivityStatus.STATE_UNMETERED
         connectivityStatus.csUid = 1
         connectivityStatusLiveData = DoorMutableLiveData(connectivityStatus)
-
-        entryStatusResponse = EntryStatusResponse()
-        entryStatusResponse.erContainerUid = container.containerUid
-        entryStatusResponse.erNodeId = networkNode.nodeId
-        entryStatusResponse.available = true
-        entryStatusResponse.responseTime = System.currentTimeMillis()
 
         cloudServer = EmbeddedHTTPD(0, context,
                 serverDb)

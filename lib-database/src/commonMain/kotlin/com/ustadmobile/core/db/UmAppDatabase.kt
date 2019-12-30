@@ -3,12 +3,13 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
-@Database(entities = [NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
+@Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
     Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
@@ -25,7 +26,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 27)
+], version = 29)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -35,9 +36,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
-
-    @JsName("entryStatusResponseDao")
-    abstract val entryStatusResponseDao: EntryStatusResponseDao
 
     @JsName("downloadJobDao")
     abstract val downloadJobDao: DownloadJobDao
@@ -237,6 +235,1238 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 namedInstances[dbName] = db
             }
             return db
+        }
+
+
+        val MIGRATION_27_28 = object : DoorMigration(27, 28) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("DROP TABLE EntryStatusResponse")
+            }
+        }
+
+        /**
+         * Fix SQLite update triggers
+         */
+        val MIGRATION_28_29 = object: DoorMigration(28, 29) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_9")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_9
+        |AFTER UPDATE ON Person FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personMasterChangeSeqNum = 0 
+        |OR OLD.personMasterChangeSeqNum = NEW.personMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.personLocalChangeSeqNum = 0  
+        |OR OLD.personLocalChangeSeqNum = NEW.personLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE Person SET personLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(personLocalChangeSeqNum), OLD.personLocalChangeSeqNum) + 1 FROM Person) END),
+        |personMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(personMasterChangeSeqNum), OLD.personMasterChangeSeqNum) + 1 FROM Person)
+        |ELSE NEW.personMasterChangeSeqNum END)
+        |WHERE personUid = NEW.personUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_9
+        |AFTER INSERT ON Person FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.personLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Person SET personLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personLocalChangeSeqNum 
+        |ELSE (SELECT MAX(personLocalChangeSeqNum) + 1 FROM Person) END),
+        |personMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(personMasterChangeSeqNum) + 1 FROM Person)
+        |ELSE NEW.personMasterChangeSeqNum END)
+        |WHERE personUid = NEW.personUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_6")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_6
+        |AFTER UPDATE ON Clazz FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzMasterChangeSeqNum = 0 
+        |OR OLD.clazzMasterChangeSeqNum = NEW.clazzMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.clazzLocalChangeSeqNum = 0  
+        |OR OLD.clazzLocalChangeSeqNum = NEW.clazzLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE Clazz SET clazzLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(clazzLocalChangeSeqNum), OLD.clazzLocalChangeSeqNum) + 1 FROM Clazz) END),
+        |clazzMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(clazzMasterChangeSeqNum), OLD.clazzMasterChangeSeqNum) + 1 FROM Clazz)
+        |ELSE NEW.clazzMasterChangeSeqNum END)
+        |WHERE clazzUid = NEW.clazzUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_6
+        |AFTER INSERT ON Clazz FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.clazzLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Clazz SET clazzLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLocalChangeSeqNum 
+        |ELSE (SELECT MAX(clazzLocalChangeSeqNum) + 1 FROM Clazz) END),
+        |clazzMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(clazzMasterChangeSeqNum) + 1 FROM Clazz)
+        |ELSE NEW.clazzMasterChangeSeqNum END)
+        |WHERE clazzUid = NEW.clazzUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_11")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_11
+        |AFTER UPDATE ON ClazzMember FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzMemberMasterChangeSeqNum = 0 
+        |OR OLD.clazzMemberMasterChangeSeqNum = NEW.clazzMemberMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.clazzMemberLocalChangeSeqNum = 0  
+        |OR OLD.clazzMemberLocalChangeSeqNum = NEW.clazzMemberLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzMemberLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(clazzMemberLocalChangeSeqNum), OLD.clazzMemberLocalChangeSeqNum) + 1 FROM ClazzMember) END),
+        |clazzMemberMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(clazzMemberMasterChangeSeqNum), OLD.clazzMemberMasterChangeSeqNum) + 1 FROM ClazzMember)
+        |ELSE NEW.clazzMemberMasterChangeSeqNum END)
+        |WHERE clazzMemberUid = NEW.clazzMemberUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_11
+        |AFTER INSERT ON ClazzMember FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzMemberMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.clazzMemberLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzMemberLocalChangeSeqNum 
+        |ELSE (SELECT MAX(clazzMemberLocalChangeSeqNum) + 1 FROM ClazzMember) END),
+        |clazzMemberMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(clazzMemberMasterChangeSeqNum) + 1 FROM ClazzMember)
+        |ELSE NEW.clazzMemberMasterChangeSeqNum END)
+        |WHERE clazzMemberUid = NEW.clazzMemberUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_42")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_42
+        |AFTER UPDATE ON ContentEntry FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.contentEntryMasterChangeSeqNum = 0 
+        |OR OLD.contentEntryMasterChangeSeqNum = NEW.contentEntryMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.contentEntryLocalChangeSeqNum = 0  
+        |OR OLD.contentEntryLocalChangeSeqNum = NEW.contentEntryLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntry SET contentEntryLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(contentEntryLocalChangeSeqNum), OLD.contentEntryLocalChangeSeqNum) + 1 FROM ContentEntry) END),
+        |contentEntryMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(contentEntryMasterChangeSeqNum), OLD.contentEntryMasterChangeSeqNum) + 1 FROM ContentEntry)
+        |ELSE NEW.contentEntryMasterChangeSeqNum END)
+        |WHERE contentEntryUid = NEW.contentEntryUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_42
+        |AFTER INSERT ON ContentEntry FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.contentEntryMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.contentEntryLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntry SET contentEntryLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryLocalChangeSeqNum 
+        |ELSE (SELECT MAX(contentEntryLocalChangeSeqNum) + 1 FROM ContentEntry) END),
+        |contentEntryMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(contentEntryMasterChangeSeqNum) + 1 FROM ContentEntry)
+        |ELSE NEW.contentEntryMasterChangeSeqNum END)
+        |WHERE contentEntryUid = NEW.contentEntryUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_3")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_3
+        |AFTER UPDATE ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.ceccjMasterChangeSeqNum = 0 
+        |OR OLD.ceccjMasterChangeSeqNum = NEW.ceccjMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.ceccjLocalChangeSeqNum = 0  
+        |OR OLD.ceccjLocalChangeSeqNum = NEW.ceccjLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntryContentCategoryJoin SET ceccjLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.ceccjLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(ceccjLocalChangeSeqNum), OLD.ceccjLocalChangeSeqNum) + 1 FROM ContentEntryContentCategoryJoin) END),
+        |ceccjMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(ceccjMasterChangeSeqNum), OLD.ceccjMasterChangeSeqNum) + 1 FROM ContentEntryContentCategoryJoin)
+        |ELSE NEW.ceccjMasterChangeSeqNum END)
+        |WHERE ceccjUid = NEW.ceccjUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_3
+        |AFTER INSERT ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.ceccjMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.ceccjLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntryContentCategoryJoin SET ceccjLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.ceccjLocalChangeSeqNum 
+        |ELSE (SELECT MAX(ceccjLocalChangeSeqNum) + 1 FROM ContentEntryContentCategoryJoin) END),
+        |ceccjMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(ceccjMasterChangeSeqNum) + 1 FROM ContentEntryContentCategoryJoin)
+        |ELSE NEW.ceccjMasterChangeSeqNum END)
+        |WHERE ceccjUid = NEW.ceccjUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_7")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_7
+        |AFTER UPDATE ON ContentEntryParentChildJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.cepcjMasterChangeSeqNum = 0 
+        |OR OLD.cepcjMasterChangeSeqNum = NEW.cepcjMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.cepcjLocalChangeSeqNum = 0  
+        |OR OLD.cepcjLocalChangeSeqNum = NEW.cepcjLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntryParentChildJoin SET cepcjLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cepcjLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(cepcjLocalChangeSeqNum), OLD.cepcjLocalChangeSeqNum) + 1 FROM ContentEntryParentChildJoin) END),
+        |cepcjMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(cepcjMasterChangeSeqNum), OLD.cepcjMasterChangeSeqNum) + 1 FROM ContentEntryParentChildJoin)
+        |ELSE NEW.cepcjMasterChangeSeqNum END)
+        |WHERE cepcjUid = NEW.cepcjUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_7
+        |AFTER INSERT ON ContentEntryParentChildJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.cepcjMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.cepcjLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntryParentChildJoin SET cepcjLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cepcjLocalChangeSeqNum 
+        |ELSE (SELECT MAX(cepcjLocalChangeSeqNum) + 1 FROM ContentEntryParentChildJoin) END),
+        |cepcjMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(cepcjMasterChangeSeqNum) + 1 FROM ContentEntryParentChildJoin)
+        |ELSE NEW.cepcjMasterChangeSeqNum END)
+        |WHERE cepcjUid = NEW.cepcjUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_8")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_8
+        |AFTER UPDATE ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.cerejMasterChangeSeqNum = 0 
+        |OR OLD.cerejMasterChangeSeqNum = NEW.cerejMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.cerejLocalChangeSeqNum = 0  
+        |OR OLD.cerejLocalChangeSeqNum = NEW.cerejLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntryRelatedEntryJoin SET cerejLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cerejLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(cerejLocalChangeSeqNum), OLD.cerejLocalChangeSeqNum) + 1 FROM ContentEntryRelatedEntryJoin) END),
+        |cerejMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(cerejMasterChangeSeqNum), OLD.cerejMasterChangeSeqNum) + 1 FROM ContentEntryRelatedEntryJoin)
+        |ELSE NEW.cerejMasterChangeSeqNum END)
+        |WHERE cerejUid = NEW.cerejUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_8
+        |AFTER INSERT ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.cerejMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.cerejLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContentEntryRelatedEntryJoin SET cerejLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cerejLocalChangeSeqNum 
+        |ELSE (SELECT MAX(cerejLocalChangeSeqNum) + 1 FROM ContentEntryRelatedEntryJoin) END),
+        |cerejMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(cerejMasterChangeSeqNum) + 1 FROM ContentEntryRelatedEntryJoin)
+        |ELSE NEW.cerejMasterChangeSeqNum END)
+        |WHERE cerejUid = NEW.cerejUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_2")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_2
+        |AFTER UPDATE ON ContentCategorySchema FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.contentCategorySchemaMasterChangeSeqNum = 0 
+        |OR OLD.contentCategorySchemaMasterChangeSeqNum = NEW.contentCategorySchemaMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.contentCategorySchemaLocalChangeSeqNum = 0  
+        |OR OLD.contentCategorySchemaLocalChangeSeqNum = NEW.contentCategorySchemaLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContentCategorySchema SET contentCategorySchemaLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentCategorySchemaLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(contentCategorySchemaLocalChangeSeqNum), OLD.contentCategorySchemaLocalChangeSeqNum) + 1 FROM ContentCategorySchema) END),
+        |contentCategorySchemaMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(contentCategorySchemaMasterChangeSeqNum), OLD.contentCategorySchemaMasterChangeSeqNum) + 1 FROM ContentCategorySchema)
+        |ELSE NEW.contentCategorySchemaMasterChangeSeqNum END)
+        |WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_2
+        |AFTER INSERT ON ContentCategorySchema FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.contentCategorySchemaMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.contentCategorySchemaLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContentCategorySchema SET contentCategorySchemaLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentCategorySchemaLocalChangeSeqNum 
+        |ELSE (SELECT MAX(contentCategorySchemaLocalChangeSeqNum) + 1 FROM ContentCategorySchema) END),
+        |contentCategorySchemaMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(contentCategorySchemaMasterChangeSeqNum) + 1 FROM ContentCategorySchema)
+        |ELSE NEW.contentCategorySchemaMasterChangeSeqNum END)
+        |WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_1")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_1
+        |AFTER UPDATE ON ContentCategory FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.contentCategoryMasterChangeSeqNum = 0 
+        |OR OLD.contentCategoryMasterChangeSeqNum = NEW.contentCategoryMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.contentCategoryLocalChangeSeqNum = 0  
+        |OR OLD.contentCategoryLocalChangeSeqNum = NEW.contentCategoryLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContentCategory SET contentCategoryLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentCategoryLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(contentCategoryLocalChangeSeqNum), OLD.contentCategoryLocalChangeSeqNum) + 1 FROM ContentCategory) END),
+        |contentCategoryMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(contentCategoryMasterChangeSeqNum), OLD.contentCategoryMasterChangeSeqNum) + 1 FROM ContentCategory)
+        |ELSE NEW.contentCategoryMasterChangeSeqNum END)
+        |WHERE contentCategoryUid = NEW.contentCategoryUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_1
+        |AFTER INSERT ON ContentCategory FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.contentCategoryMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.contentCategoryLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContentCategory SET contentCategoryLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentCategoryLocalChangeSeqNum 
+        |ELSE (SELECT MAX(contentCategoryLocalChangeSeqNum) + 1 FROM ContentCategory) END),
+        |contentCategoryMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(contentCategoryMasterChangeSeqNum) + 1 FROM ContentCategory)
+        |ELSE NEW.contentCategoryMasterChangeSeqNum END)
+        |WHERE contentCategoryUid = NEW.contentCategoryUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_13")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_13
+        |AFTER UPDATE ON Language FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.langMasterChangeSeqNum = 0 
+        |OR OLD.langMasterChangeSeqNum = NEW.langMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.langLocalChangeSeqNum = 0  
+        |OR OLD.langLocalChangeSeqNum = NEW.langLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE Language SET langLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.langLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(langLocalChangeSeqNum), OLD.langLocalChangeSeqNum) + 1 FROM Language) END),
+        |langMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(langMasterChangeSeqNum), OLD.langMasterChangeSeqNum) + 1 FROM Language)
+        |ELSE NEW.langMasterChangeSeqNum END)
+        |WHERE langUid = NEW.langUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_13
+        |AFTER INSERT ON Language FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.langMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.langLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Language SET langLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.langLocalChangeSeqNum 
+        |ELSE (SELECT MAX(langLocalChangeSeqNum) + 1 FROM Language) END),
+        |langMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(langMasterChangeSeqNum) + 1 FROM Language)
+        |ELSE NEW.langMasterChangeSeqNum END)
+        |WHERE langUid = NEW.langUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_10")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_10
+        |AFTER UPDATE ON LanguageVariant FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.langVariantMasterChangeSeqNum = 0 
+        |OR OLD.langVariantMasterChangeSeqNum = NEW.langVariantMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.langVariantLocalChangeSeqNum = 0  
+        |OR OLD.langVariantLocalChangeSeqNum = NEW.langVariantLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE LanguageVariant SET langVariantLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.langVariantLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(langVariantLocalChangeSeqNum), OLD.langVariantLocalChangeSeqNum) + 1 FROM LanguageVariant) END),
+        |langVariantMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(langVariantMasterChangeSeqNum), OLD.langVariantMasterChangeSeqNum) + 1 FROM LanguageVariant)
+        |ELSE NEW.langVariantMasterChangeSeqNum END)
+        |WHERE langVariantUid = NEW.langVariantUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_10
+        |AFTER INSERT ON LanguageVariant FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.langVariantMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.langVariantLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE LanguageVariant SET langVariantLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.langVariantLocalChangeSeqNum 
+        |ELSE (SELECT MAX(langVariantLocalChangeSeqNum) + 1 FROM LanguageVariant) END),
+        |langVariantMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(langVariantMasterChangeSeqNum) + 1 FROM LanguageVariant)
+        |ELSE NEW.langVariantMasterChangeSeqNum END)
+        |WHERE langVariantUid = NEW.langVariantUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_45")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_45
+        |AFTER UPDATE ON Role FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.roleMasterCsn = 0 
+        |OR OLD.roleMasterCsn = NEW.roleMasterCsn
+        |)
+        |ELSE
+        |(NEW.roleLocalCsn = 0  
+        |OR OLD.roleLocalCsn = NEW.roleLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE Role SET roleLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.roleLocalCsn 
+        |ELSE (SELECT MAX(MAX(roleLocalCsn), OLD.roleLocalCsn) + 1 FROM Role) END),
+        |roleMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(roleMasterCsn), OLD.roleMasterCsn) + 1 FROM Role)
+        |ELSE NEW.roleMasterCsn END)
+        |WHERE roleUid = NEW.roleUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_45
+        |AFTER INSERT ON Role FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.roleMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.roleLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Role SET roleLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.roleLocalCsn 
+        |ELSE (SELECT MAX(roleLocalCsn) + 1 FROM Role) END),
+        |roleMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(roleMasterCsn) + 1 FROM Role)
+        |ELSE NEW.roleMasterCsn END)
+        |WHERE roleUid = NEW.roleUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_47")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_47
+        |AFTER UPDATE ON EntityRole FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.erMasterCsn = 0 
+        |OR OLD.erMasterCsn = NEW.erMasterCsn
+        |)
+        |ELSE
+        |(NEW.erLocalCsn = 0  
+        |OR OLD.erLocalCsn = NEW.erLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE EntityRole SET erLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.erLocalCsn 
+        |ELSE (SELECT MAX(MAX(erLocalCsn), OLD.erLocalCsn) + 1 FROM EntityRole) END),
+        |erMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(erMasterCsn), OLD.erMasterCsn) + 1 FROM EntityRole)
+        |ELSE NEW.erMasterCsn END)
+        |WHERE erUid = NEW.erUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_47
+        |AFTER INSERT ON EntityRole FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.erMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.erLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE EntityRole SET erLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.erLocalCsn 
+        |ELSE (SELECT MAX(erLocalCsn) + 1 FROM EntityRole) END),
+        |erMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(erMasterCsn) + 1 FROM EntityRole)
+        |ELSE NEW.erMasterCsn END)
+        |WHERE erUid = NEW.erUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_43")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_43
+        |AFTER UPDATE ON PersonGroup FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.groupMasterCsn = 0 
+        |OR OLD.groupMasterCsn = NEW.groupMasterCsn
+        |)
+        |ELSE
+        |(NEW.groupLocalCsn = 0  
+        |OR OLD.groupLocalCsn = NEW.groupLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE PersonGroup SET groupLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+        |ELSE (SELECT MAX(MAX(groupLocalCsn), OLD.groupLocalCsn) + 1 FROM PersonGroup) END),
+        |groupMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(groupMasterCsn), OLD.groupMasterCsn) + 1 FROM PersonGroup)
+        |ELSE NEW.groupMasterCsn END)
+        |WHERE groupUid = NEW.groupUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_43
+        |AFTER INSERT ON PersonGroup FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.groupMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.groupLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE PersonGroup SET groupLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+        |ELSE (SELECT MAX(groupLocalCsn) + 1 FROM PersonGroup) END),
+        |groupMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(groupMasterCsn) + 1 FROM PersonGroup)
+        |ELSE NEW.groupMasterCsn END)
+        |WHERE groupUid = NEW.groupUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_44")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_44
+        |AFTER UPDATE ON PersonGroupMember FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.groupMemberMasterCsn = 0 
+        |OR OLD.groupMemberMasterCsn = NEW.groupMemberMasterCsn
+        |)
+        |ELSE
+        |(NEW.groupMemberLocalCsn = 0  
+        |OR OLD.groupMemberLocalCsn = NEW.groupMemberLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE PersonGroupMember SET groupMemberLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupMemberLocalCsn 
+        |ELSE (SELECT MAX(MAX(groupMemberLocalCsn), OLD.groupMemberLocalCsn) + 1 FROM PersonGroupMember) END),
+        |groupMemberMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(groupMemberMasterCsn), OLD.groupMemberMasterCsn) + 1 FROM PersonGroupMember)
+        |ELSE NEW.groupMemberMasterCsn END)
+        |WHERE groupMemberUid = NEW.groupMemberUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_44
+        |AFTER INSERT ON PersonGroupMember FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.groupMemberMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.groupMemberLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE PersonGroupMember SET groupMemberLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupMemberLocalCsn 
+        |ELSE (SELECT MAX(groupMemberLocalCsn) + 1 FROM PersonGroupMember) END),
+        |groupMemberMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(groupMemberMasterCsn) + 1 FROM PersonGroupMember)
+        |ELSE NEW.groupMemberMasterCsn END)
+        |WHERE groupMemberUid = NEW.groupMemberUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_29")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_29
+        |AFTER UPDATE ON Location FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.locationMasterChangeSeqNum = 0 
+        |OR OLD.locationMasterChangeSeqNum = NEW.locationMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.locationLocalChangeSeqNum = 0  
+        |OR OLD.locationLocalChangeSeqNum = NEW.locationLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE Location SET locationLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.locationLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(locationLocalChangeSeqNum), OLD.locationLocalChangeSeqNum) + 1 FROM Location) END),
+        |locationMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(locationMasterChangeSeqNum), OLD.locationMasterChangeSeqNum) + 1 FROM Location)
+        |ELSE NEW.locationMasterChangeSeqNum END)
+        |WHERE locationUid = NEW.locationUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_29
+        |AFTER INSERT ON Location FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.locationMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.locationLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Location SET locationLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.locationLocalChangeSeqNum 
+        |ELSE (SELECT MAX(locationLocalChangeSeqNum) + 1 FROM Location) END),
+        |locationMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(locationMasterChangeSeqNum) + 1 FROM Location)
+        |ELSE NEW.locationMasterChangeSeqNum END)
+        |WHERE locationUid = NEW.locationUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_48")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_48
+        |AFTER UPDATE ON PersonLocationJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.plMasterCsn = 0 
+        |OR OLD.plMasterCsn = NEW.plMasterCsn
+        |)
+        |ELSE
+        |(NEW.plLocalCsn = 0  
+        |OR OLD.plLocalCsn = NEW.plLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE PersonLocationJoin SET plLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.plLocalCsn 
+        |ELSE (SELECT MAX(MAX(plLocalCsn), OLD.plLocalCsn) + 1 FROM PersonLocationJoin) END),
+        |plMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(plMasterCsn), OLD.plMasterCsn) + 1 FROM PersonLocationJoin)
+        |ELSE NEW.plMasterCsn END)
+        |WHERE personLocationUid = NEW.personLocationUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_48
+        |AFTER INSERT ON PersonLocationJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.plMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.plLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE PersonLocationJoin SET plLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.plLocalCsn 
+        |ELSE (SELECT MAX(plLocalCsn) + 1 FROM PersonLocationJoin) END),
+        |plMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(plMasterCsn) + 1 FROM PersonLocationJoin)
+        |ELSE NEW.plMasterCsn END)
+        |WHERE personLocationUid = NEW.personLocationUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_50")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_50
+        |AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personPictureMasterCsn = 0 
+        |OR OLD.personPictureMasterCsn = NEW.personPictureMasterCsn
+        |)
+        |ELSE
+        |(NEW.personPictureLocalCsn = 0  
+        |OR OLD.personPictureLocalCsn = NEW.personPictureLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE PersonPicture SET personPictureLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personPictureLocalCsn 
+        |ELSE (SELECT MAX(MAX(personPictureLocalCsn), OLD.personPictureLocalCsn) + 1 FROM PersonPicture) END),
+        |personPictureMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(personPictureMasterCsn), OLD.personPictureMasterCsn) + 1 FROM PersonPicture)
+        |ELSE NEW.personPictureMasterCsn END)
+        |WHERE personPictureUid = NEW.personPictureUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_50
+        |AFTER INSERT ON PersonPicture FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personPictureMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.personPictureLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE PersonPicture SET personPictureLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personPictureLocalCsn 
+        |ELSE (SELECT MAX(personPictureLocalCsn) + 1 FROM PersonPicture) END),
+        |personPictureMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(personPictureMasterCsn) + 1 FROM PersonPicture)
+        |ELSE NEW.personPictureMasterCsn END)
+        |WHERE personPictureUid = NEW.personPictureUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_51")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_51
+        |AFTER UPDATE ON Container FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.cntMasterCsn = 0 
+        |OR OLD.cntMasterCsn = NEW.cntMasterCsn
+        |)
+        |ELSE
+        |(NEW.cntLocalCsn = 0  
+        |OR OLD.cntLocalCsn = NEW.cntLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE Container SET cntLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cntLocalCsn 
+        |ELSE (SELECT MAX(MAX(cntLocalCsn), OLD.cntLocalCsn) + 1 FROM Container) END),
+        |cntMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(cntMasterCsn), OLD.cntMasterCsn) + 1 FROM Container)
+        |ELSE NEW.cntMasterCsn END)
+        |WHERE containerUid = NEW.containerUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_51
+        |AFTER INSERT ON Container FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.cntMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.cntLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Container SET cntLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cntLocalCsn 
+        |ELSE (SELECT MAX(cntLocalCsn) + 1 FROM Container) END),
+        |cntMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(cntMasterCsn) + 1 FROM Container)
+        |ELSE NEW.cntMasterCsn END)
+        |WHERE containerUid = NEW.containerUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_62")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_62
+        |AFTER UPDATE ON VerbEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.verbMasterChangeSeqNum = 0 
+        |OR OLD.verbMasterChangeSeqNum = NEW.verbMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.verbLocalChangeSeqNum = 0  
+        |OR OLD.verbLocalChangeSeqNum = NEW.verbLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE VerbEntity SET verbLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(verbLocalChangeSeqNum), OLD.verbLocalChangeSeqNum) + 1 FROM VerbEntity) END),
+        |verbMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(verbMasterChangeSeqNum), OLD.verbMasterChangeSeqNum) + 1 FROM VerbEntity)
+        |ELSE NEW.verbMasterChangeSeqNum END)
+        |WHERE verbUid = NEW.verbUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_62
+        |AFTER INSERT ON VerbEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.verbMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.verbLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE VerbEntity SET verbLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+        |ELSE (SELECT MAX(verbLocalChangeSeqNum) + 1 FROM VerbEntity) END),
+        |verbMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(verbMasterChangeSeqNum) + 1 FROM VerbEntity)
+        |ELSE NEW.verbMasterChangeSeqNum END)
+        |WHERE verbUid = NEW.verbUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_64")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_64
+        |AFTER UPDATE ON XObjectEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.xObjectMasterChangeSeqNum = 0 
+        |OR OLD.xObjectMasterChangeSeqNum = NEW.xObjectMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.xObjectocalChangeSeqNum = 0  
+        |OR OLD.xObjectocalChangeSeqNum = NEW.xObjectocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE XObjectEntity SET xObjectocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.xObjectocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(xObjectocalChangeSeqNum), OLD.xObjectocalChangeSeqNum) + 1 FROM XObjectEntity) END),
+        |xObjectMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(xObjectMasterChangeSeqNum), OLD.xObjectMasterChangeSeqNum) + 1 FROM XObjectEntity)
+        |ELSE NEW.xObjectMasterChangeSeqNum END)
+        |WHERE xObjectUid = NEW.xObjectUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_64
+        |AFTER INSERT ON XObjectEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.xObjectMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.xObjectocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE XObjectEntity SET xObjectocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.xObjectocalChangeSeqNum 
+        |ELSE (SELECT MAX(xObjectocalChangeSeqNum) + 1 FROM XObjectEntity) END),
+        |xObjectMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(xObjectMasterChangeSeqNum) + 1 FROM XObjectEntity)
+        |ELSE NEW.xObjectMasterChangeSeqNum END)
+        |WHERE xObjectUid = NEW.xObjectUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_60")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_60
+        |AFTER UPDATE ON StatementEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.statementMasterChangeSeqNum = 0 
+        |OR OLD.statementMasterChangeSeqNum = NEW.statementMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.statementLocalChangeSeqNum = 0  
+        |OR OLD.statementLocalChangeSeqNum = NEW.statementLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE StatementEntity SET statementLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(statementLocalChangeSeqNum), OLD.statementLocalChangeSeqNum) + 1 FROM StatementEntity) END),
+        |statementMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(statementMasterChangeSeqNum), OLD.statementMasterChangeSeqNum) + 1 FROM StatementEntity)
+        |ELSE NEW.statementMasterChangeSeqNum END)
+        |WHERE statementUid = NEW.statementUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_60
+        |AFTER INSERT ON StatementEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.statementMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.statementLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE StatementEntity SET statementLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+        |ELSE (SELECT MAX(statementLocalChangeSeqNum) + 1 FROM StatementEntity) END),
+        |statementMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(statementMasterChangeSeqNum) + 1 FROM StatementEntity)
+        |ELSE NEW.statementMasterChangeSeqNum END)
+        |WHERE statementUid = NEW.statementUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_66")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_66
+        |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.verbMasterChangeSeqNum = 0 
+        |OR OLD.verbMasterChangeSeqNum = NEW.verbMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.verbLocalChangeSeqNum = 0  
+        |OR OLD.verbLocalChangeSeqNum = NEW.verbLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(verbLocalChangeSeqNum), OLD.verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+        |verbMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(verbMasterChangeSeqNum), OLD.verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+        |ELSE NEW.verbMasterChangeSeqNum END)
+        |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_66
+        |AFTER INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.verbMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.verbLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+        |ELSE (SELECT MAX(verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+        |verbMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+        |ELSE NEW.verbMasterChangeSeqNum END)
+        |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_68")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_68
+        |AFTER UPDATE ON AgentEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.statementMasterChangeSeqNum = 0 
+        |OR OLD.statementMasterChangeSeqNum = NEW.statementMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.statementLocalChangeSeqNum = 0  
+        |OR OLD.statementLocalChangeSeqNum = NEW.statementLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE AgentEntity SET statementLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(statementLocalChangeSeqNum), OLD.statementLocalChangeSeqNum) + 1 FROM AgentEntity) END),
+        |statementMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(statementMasterChangeSeqNum), OLD.statementMasterChangeSeqNum) + 1 FROM AgentEntity)
+        |ELSE NEW.statementMasterChangeSeqNum END)
+        |WHERE agentUid = NEW.agentUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_68
+        |AFTER INSERT ON AgentEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.statementMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.statementLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE AgentEntity SET statementLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+        |ELSE (SELECT MAX(statementLocalChangeSeqNum) + 1 FROM AgentEntity) END),
+        |statementMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(statementMasterChangeSeqNum) + 1 FROM AgentEntity)
+        |ELSE NEW.statementMasterChangeSeqNum END)
+        |WHERE agentUid = NEW.agentUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_70")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_70
+        |AFTER UPDATE ON StateEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.stateMasterChangeSeqNum = 0 
+        |OR OLD.stateMasterChangeSeqNum = NEW.stateMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.stateLocalChangeSeqNum = 0  
+        |OR OLD.stateLocalChangeSeqNum = NEW.stateLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE StateEntity SET stateLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.stateLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(stateLocalChangeSeqNum), OLD.stateLocalChangeSeqNum) + 1 FROM StateEntity) END),
+        |stateMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(stateMasterChangeSeqNum), OLD.stateMasterChangeSeqNum) + 1 FROM StateEntity)
+        |ELSE NEW.stateMasterChangeSeqNum END)
+        |WHERE stateUid = NEW.stateUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_70
+        |AFTER INSERT ON StateEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.stateMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.stateLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE StateEntity SET stateLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.stateLocalChangeSeqNum 
+        |ELSE (SELECT MAX(stateLocalChangeSeqNum) + 1 FROM StateEntity) END),
+        |stateMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(stateMasterChangeSeqNum) + 1 FROM StateEntity)
+        |ELSE NEW.stateMasterChangeSeqNum END)
+        |WHERE stateUid = NEW.stateUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_72")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_72
+        |AFTER UPDATE ON StateContentEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.stateContentMasterChangeSeqNum = 0 
+        |OR OLD.stateContentMasterChangeSeqNum = NEW.stateContentMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.stateContentLocalChangeSeqNum = 0  
+        |OR OLD.stateContentLocalChangeSeqNum = NEW.stateContentLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE StateContentEntity SET stateContentLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.stateContentLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(stateContentLocalChangeSeqNum), OLD.stateContentLocalChangeSeqNum) + 1 FROM StateContentEntity) END),
+        |stateContentMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(stateContentMasterChangeSeqNum), OLD.stateContentMasterChangeSeqNum) + 1 FROM StateContentEntity)
+        |ELSE NEW.stateContentMasterChangeSeqNum END)
+        |WHERE stateContentUid = NEW.stateContentUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_72
+        |AFTER INSERT ON StateContentEntity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.stateContentMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.stateContentLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE StateContentEntity SET stateContentLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.stateContentLocalChangeSeqNum 
+        |ELSE (SELECT MAX(stateContentLocalChangeSeqNum) + 1 FROM StateContentEntity) END),
+        |stateContentMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(stateContentMasterChangeSeqNum) + 1 FROM StateContentEntity)
+        |ELSE NEW.stateContentMasterChangeSeqNum END)
+        |WHERE stateContentUid = NEW.stateContentUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_74")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_74
+        |AFTER UPDATE ON XLangMapEntry FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.statementLangMapMasterCsn = 0 
+        |OR OLD.statementLangMapMasterCsn = NEW.statementLangMapMasterCsn
+        |)
+        |ELSE
+        |(NEW.statementLangMapLocalCsn = 0  
+        |OR OLD.statementLangMapLocalCsn = NEW.statementLangMapLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE XLangMapEntry SET statementLangMapLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLangMapLocalCsn 
+        |ELSE (SELECT MAX(MAX(statementLangMapLocalCsn), OLD.statementLangMapLocalCsn) + 1 FROM XLangMapEntry) END),
+        |statementLangMapMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(statementLangMapMasterCsn), OLD.statementLangMapMasterCsn) + 1 FROM XLangMapEntry)
+        |ELSE NEW.statementLangMapMasterCsn END)
+        |WHERE statementLangMapUid = NEW.statementLangMapUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_74
+        |AFTER INSERT ON XLangMapEntry FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.statementLangMapMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.statementLangMapLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE XLangMapEntry SET statementLangMapLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLangMapLocalCsn 
+        |ELSE (SELECT MAX(statementLangMapLocalCsn) + 1 FROM XLangMapEntry) END),
+        |statementLangMapMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(statementLangMapMasterCsn) + 1 FROM XLangMapEntry)
+        |ELSE NEW.statementLangMapMasterCsn END)
+        |WHERE statementLangMapUid = NEW.statementLangMapUid
+        |; END
+        """.trimMargin())
+                }
+            }
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
@@ -1301,552 +2531,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29)
 
             return builder
         }
-
-        /*  private fun addMigrations(
-                  builder: AbstractDoorwayDbBuilder<UmAppDatabase>): AbstractDoorwayDbBuilder<UmAppDatabase> {
-              builder.addMigration(object : UmDbMigration(1, 2) {
-                  fun migrate(db: DoorDbAdapter) {
-                      when (db.getDbType()) {
-                          UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                          UmDbType.TYPE_POSTGRES -> {
-                              //Must use new device bits, otherwise
-                              val deviceBits = Random().nextInt()
-
-                              db.execSql("ALTER TABLE SyncDeviceBits ADD COLUMN master BOOL")
-                              db.execSql("UPDATE SyncDeviceBits SET deviceBits = " + deviceBits +
-                                      ", master = TRUE")
-
-                              db.execSql("CREATE TABLE IF NOT EXISTS  " +
-                                      "ScrapeRun  ( scrapeRunUid  SERIAL PRIMARY KEY  NOT NULL ,  " +
-                                      "scrapeType  TEXT,  status  INTEGER)")
-                              db.execSql("CREATE TABLE IF NOT EXISTS  ScrapeQueueItem  " +
-                                      "( sqiUid  SERIAL PRIMARY KEY  NOT NULL ,  sqiContentEntryParentUid  BIGINT,  " +
-                                      "destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  time  TEXT, " +
-                                      " itemType  INTEGER,  contentType  TEXT)")
-
-
-                              db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT")
-                              db.execSql("ALTER TABLE SyncStatus DROP COLUMN masterchangeseqnum")
-                              db.execSql("ALTER TABLE SyncStatus DROP COLUMN localchangeseqnum ")
-                              db.execSql("DELETE FROM SyncStatus")
-
-                              db.execSql("DROP TRIGGER IF EXISTS  increment_csn_clazz_trigger ON clazz")
-                              db.execSql("DROP FUNCTION IF EXISTS  increment_csn_clazz_fn")
-
-                                db.execSql("DROP TRIGGER IF EXISTS  increment_csn_clazzmember_trigger ON clazzmember")
-                                db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazzmember_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_contentcategory_trigger ON contentcategory")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contentcategory_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS  increment_csn_contentcategoryschema_trigger ON contentcategoryschema")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contentcategoryschema_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententry_trigger ON contententry")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententry_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententrycontentcategoryjoin_trigger ON contententrycontentcategoryjoin")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententrycontentcategoryjoin_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS  increment_csn_contententrycontententryfilejoin_trigger ON contententrycontententryfilejoin")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententrycontententryfilejoin_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS  increment_csn_contententryfile_trigger ON contententryfile")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententryfile_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententryparentchildjoin_trigger ON contententryparentchildjoin")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententryparentchildjoin_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententryrelatedentryjoin_trigger ON contententryrelatedentryjoin")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententryrelatedentryjoin_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_entityrole_trigger ON entityrole")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_entityrole_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_language_trigger ON language")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_language_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_languagevariant_trigger ON languagevariant")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_languagevariant_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_entityrole_trigger ON entityrole")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_entityrole_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_location_trigger ON location")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_location_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_person_trigger ON person")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_person_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_personauth_trigger ON personauth")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_personauth_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_persongroup_trigger ON persongroup")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_persongroup_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_persongroupmember_trigger ON persongroupmember")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_persongroupmember_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_personlocationjoin_trigger ON personlocationjoin")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_personlocationjoin_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_personpicture_trigger ON personpicture")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_personpicture_fn")
-
-                              db.execSql("DROP TRIGGER IF EXISTS increment_csn_role_trigger ON role")
-                              db.execSql("DROP FUNCTION IF EXISTS increment_csn_role_fn")
-
-                              db.execSql("CREATE SEQUENCE spk_seq_42 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentEntry ALTER COLUMN contentEntryUid SET DEFAULT NEXTVAL('spk_seq_42')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (42, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_42_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntry SET contentEntryLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentEntryLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 42) END),contentEntryMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 42) ELSE NEW.contentEntryMasterChangeSeqNum END) WHERE contentEntryUid = NEW.contentEntryUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 42; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_42_trig AFTER UPDATE OR INSERT ON ContentEntry FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_42_fn()")
-
-                              db.execSql("CREATE SEQUENCE spk_seq_3 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentEntryContentCategoryJoin ALTER COLUMN ceccjUid SET DEFAULT NEXTVAL('spk_seq_3')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (3, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_3_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryContentCategoryJoin SET ceccjLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.ceccjLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 3) END),ceccjMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 3) ELSE NEW.ceccjMasterChangeSeqNum END) WHERE ceccjUid = NEW.ceccjUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 3; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_3_trig AFTER UPDATE OR INSERT ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_3_fn()")
-
-                              db.execSql("CREATE SEQUENCE spk_seq_4 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentEntryContentEntryFileJoin ALTER COLUMN cecefjUid SET DEFAULT NEXTVAL('spk_seq_4')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (4, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_4_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryContentEntryFileJoin SET cecefjLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cecefjLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 4) END),cecefjMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 4) ELSE NEW.cecefjMasterChangeSeqNum END) WHERE cecefjUid = NEW.cecefjUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 4; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_4_trig AFTER UPDATE OR INSERT ON ContentEntryContentEntryFileJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_4_fn()")
-                              //END Create ContentEntryContentEntryFileJoin (PostgreSQL)
-
-                              //BEGIN Create ContentEntryFile (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_5 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentEntryFile ALTER COLUMN contentEntryFileUid SET DEFAULT NEXTVAL('spk_seq_5')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (5, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_5_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryFile SET contentEntryFileLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentEntryFileLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 5) END),contentEntryFileMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 5) ELSE NEW.contentEntryFileMasterChangeSeqNum END) WHERE contentEntryFileUid = NEW.contentEntryFileUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 5; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_5_trig AFTER UPDATE OR INSERT ON ContentEntryFile FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_5_fn()")
-                              //END Create ContentEntryFile (PostgreSQL)
-
-                              //BEGIN Create ContentEntryParentChildJoin (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_7 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentEntryParentChildJoin ALTER COLUMN cepcjUid SET DEFAULT NEXTVAL('spk_seq_7')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (7, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_7_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryParentChildJoin SET cepcjLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cepcjLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 7) END),cepcjMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 7) ELSE NEW.cepcjMasterChangeSeqNum END) WHERE cepcjUid = NEW.cepcjUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 7; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_7_trig AFTER UPDATE OR INSERT ON ContentEntryParentChildJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_7_fn()")
-                              //END Create ContentEntryParentChildJoin (PostgreSQL)
-
-                              //BEGIN Create ContentEntryRelatedEntryJoin (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_8 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentEntryRelatedEntryJoin ALTER COLUMN cerejUid SET DEFAULT NEXTVAL('spk_seq_8')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (8, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_8_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryRelatedEntryJoin SET cerejLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cerejLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 8) END),cerejMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 8) ELSE NEW.cerejMasterChangeSeqNum END) WHERE cerejUid = NEW.cerejUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 8; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_8_trig AFTER UPDATE OR INSERT ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_8_fn()")
-                              //END Create ContentEntryRelatedEntryJoin (PostgreSQL)
-
-                              db.execSql("CREATE SEQUENCE spk_seq_2 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ContentCategorySchema ALTER COLUMN contentCategorySchemaUid SET DEFAULT NEXTVAL('spk_seq_2')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (2, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_2_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentCategorySchema SET contentCategorySchemaLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentCategorySchemaLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 2) END),contentCategorySchemaMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 2) ELSE NEW.contentCategorySchemaMasterChangeSeqNum END) WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 2; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_2_trig AFTER UPDATE OR INSERT ON ContentCategorySchema FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_2_fn()")
-                              //END Create ContentCategorySchema (PostgreSQL)
-
-                              //BEGIN Create ContentCategory (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_1 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE  ContentCategory ALTER COLUMN contentCategoryUid SET DEFAULT NEXTVAL('spk_seq_1')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (1, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_1_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentCategory SET contentCategoryLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentCategoryLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 1) END),contentCategoryMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 1) ELSE NEW.contentCategoryMasterChangeSeqNum END) WHERE contentCategoryUid = NEW.contentCategoryUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 1; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_1_trig AFTER UPDATE OR INSERT ON ContentCategory FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_1_fn()")
-                              //END Create ContentCategory (PostgreSQL)
-
-                              //BEGIN Create Language (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_13 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE Language ALTER COLUMN langUid SET DEFAULT NEXTVAL('spk_seq_13')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (13, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_13_fn() RETURNS trigger AS $$ BEGIN UPDATE Language SET langLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.langLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 13) END),langMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 13) ELSE NEW.langMasterChangeSeqNum END) WHERE langUid = NEW.langUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 13; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_13_trig AFTER UPDATE OR INSERT ON Language FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_13_fn()")
-                              //END Create Language (PostgreSQL)
-
-                              //BEGIN Create LanguageVariant (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_10 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE LanguageVariant  ALTER COLUMN langVariantUid  SET DEFAULT NEXTVAL('spk_seq_10')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (10, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_10_fn() RETURNS trigger AS $$ BEGIN UPDATE LanguageVariant SET langVariantLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.langVariantLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 10) END),langVariantMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 10) ELSE NEW.langVariantMasterChangeSeqNum END) WHERE langVariantUid = NEW.langVariantUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 10; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_10_trig AFTER UPDATE OR INSERT ON LanguageVariant FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_10_fn()")
-                              //END Create LanguageVariant (PostgreSQL)
-
-                              //BEGIN Create Person (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_9 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE  Person ALTER COLUMN personUid SET DEFAULT NEXTVAL('spk_seq_9')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (9, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_9_fn() RETURNS trigger AS $$ BEGIN UPDATE Person SET personLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 9) END),personMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 9) ELSE NEW.personMasterChangeSeqNum END) WHERE personUid = NEW.personUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 9; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_9_trig AFTER UPDATE OR INSERT ON Person FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_9_fn()")
-                              //END Create Person (PostgreSQL)
-
-                              //BEGIN Create Clazz (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_6 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE Clazz ALTER COLUMN clazzUid SET DEFAULT NEXTVAL('spk_seq_6')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (6, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_6_fn() RETURNS trigger AS $$ BEGIN UPDATE Clazz SET clazzLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) END),clazzMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) ELSE NEW.clazzMasterChangeSeqNum END) WHERE clazzUid = NEW.clazzUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 6; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_6_trig AFTER UPDATE OR INSERT ON Clazz FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_6_fn()")
-                              //END Create Clazz (PostgreSQL)
-
-                              //BEGIN Create ClazzMember (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_11 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE ClazzMember ALTER COLUMN clazzMemberUid SET DEFAULT NEXTVAL('spk_seq_11')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (11, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_11_fn() RETURNS trigger AS $$ BEGIN UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzMemberLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 11) END),clazzMemberMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 11) ELSE NEW.clazzMemberMasterChangeSeqNum END) WHERE clazzMemberUid = NEW.clazzMemberUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 11; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_11_trig AFTER UPDATE OR INSERT ON ClazzMember FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_11_fn()")
-                              //END Create ClazzMember (PostgreSQL)
-
-                              //BEGIN Create PersonAuth (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_30 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE PersonAuth  ALTER COLUMN personAuthUid SET DEFAULT NEXTVAL('spk_seq_30')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (30, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_30_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonAuth SET personAuthLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personAuthLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 30) END),personAuthMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 30) ELSE NEW.personAuthMasterChangeSeqNum END) WHERE personAuthUid = NEW.personAuthUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 30; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_30_trig AFTER UPDATE OR INSERT ON PersonAuth FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_30_fn()")
-                              //END Create PersonAuth (PostgreSQL)
-
-                              //BEGIN Create Role (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_45 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE Role ALTER COLUMN roleUid SET  DEFAULT NEXTVAL('spk_seq_45')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (45, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_45_fn() RETURNS trigger AS $$ BEGIN UPDATE Role SET roleLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.roleLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 45) END),roleMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 45) ELSE NEW.roleMasterCsn END) WHERE roleUid = NEW.roleUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 45; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_45_trig AFTER UPDATE OR INSERT ON Role FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_45_fn()")
-                              //END Create Role (PostgreSQL)
-
-                              //BEGIN Create EntityRole (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_47 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE EntityRole ALTER COLUMN erUid SET DEFAULT NEXTVAL('spk_seq_47')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (47, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_47_fn() RETURNS trigger AS $$ BEGIN UPDATE EntityRole SET erLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.erLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 47) END),erMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 47) ELSE NEW.erMasterCsn END) WHERE erUid = NEW.erUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 47; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_47_trig AFTER UPDATE OR INSERT ON EntityRole FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_47_fn()")
-                              //END Create EntityRole (PostgreSQL)
-
-                              //BEGIN Create PersonGroup (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_43 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE  PersonGroup ALTER COLUMN  groupUid SET DEFAULT NEXTVAL('spk_seq_43')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (43, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_43_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonGroup SET groupLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.groupLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 43) END),groupMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 43) ELSE NEW.groupMasterCsn END) WHERE groupUid = NEW.groupUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 43; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_43_trig AFTER UPDATE OR INSERT ON PersonGroup FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_43_fn()")
-                              //END Create PersonGroup (PostgreSQL)
-
-                              //BEGIN Create PersonGroupMember (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_44 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE  PersonGroupMember  ALTER COLUMN groupMemberUid SET DEFAULT NEXTVAL('spk_seq_44')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (44, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_44_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonGroupMember SET groupMemberLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.groupMemberLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 44) END),groupMemberMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 44) ELSE NEW.groupMemberMasterCsn END) WHERE groupMemberUid = NEW.groupMemberUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 44; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_44_trig AFTER UPDATE OR INSERT ON PersonGroupMember FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_44_fn()")
-                              //END Create PersonGroupMember (PostgreSQL)
-
-                              //BEGIN Create Location (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_29 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE  Location  ALTER COLUMN locationUid  SET DEFAULT NEXTVAL('spk_seq_29')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (29, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_29_fn() RETURNS trigger AS $$ BEGIN UPDATE Location SET locationLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.locationLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 29) END),locationMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 29) ELSE NEW.locationMasterChangeSeqNum END) WHERE locationUid = NEW.locationUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 29; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_29_trig AFTER UPDATE OR INSERT ON Location FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_29_fn()")
-                              //END Create Location (PostgreSQL)
-
-                              //BEGIN Create PersonLocationJoin (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_48 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE PersonLocationJoin  ALTER COLUMN  personLocationUid SET DEFAULT NEXTVAL('spk_seq_48')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (48, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_48_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonLocationJoin SET plLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.plLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 48) END),plMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 48) ELSE NEW.plMasterCsn END) WHERE personLocationUid = NEW.personLocationUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 48; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_48_trig AFTER UPDATE OR INSERT ON PersonLocationJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_48_fn()")
-                              //END Create PersonLocationJoin (PostgreSQL)
-
-                              //BEGIN Create PersonPicture (PostgreSQL)
-                              db.execSql("CREATE SEQUENCE spk_seq_50 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                              db.execSql("ALTER TABLE PersonPicture  ALTER COLUMN personPictureUid  SET DEFAULT NEXTVAL('spk_seq_50')")
-                              db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (50, 1, 0, 0)")
-                              db.execSql("CREATE OR REPLACE FUNCTION inc_csn_50_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonPicture SET personPictureLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personPictureLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) END),personPictureMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) ELSE NEW.personPictureMasterCsn END) WHERE personPictureUid = NEW.personPictureUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 50; RETURN null; END $\$LANGUAGE plpgsql")
-                              db.execSql("CREATE TRIGGER inc_csn_50_trig AFTER UPDATE OR INSERT ON PersonPicture FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_50_fn()")
-                          }
-                      }//END Create PersonPicture (PostgreSQL)
-                  }
-              })*/
-        /*  builder.addMigration(object : UmDbMigration(2, 4) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES ->
-                          //Must use new device bits, otherwise
-                          db.execSql("ALTER TABLE ScrapeQueueItem " +
-                                  "ADD COLUMN timeAdded BIGINT DEFAULT 0, " +
-                                  "ADD COLUMN timeStarted BIGINT DEFAULT 0, " +
-                                  "ADD COLUMN timeFinished BIGINT DEFAULT 0, " +
-                                  "DROP COLUMN time "
-                          )
-                  }
-              }
-          }) */
-
-        /*  builder.addMigration(object : UmDbMigration(4, 6) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES -> {
-                          //Must use new device bits, otherwise
-                          //BEGIN Create ContentEntryStatus (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryStatus  ( cesUid  BIGINT PRIMARY KEY  NOT NULL ,  totalSize  BIGINT,  bytesDownloadSoFar  BIGINT,  downloadStatus  INTEGER,  invalidated  BOOL,  cesLeaf  BOOL)")
-                          //END Create ContentEntryStatus (PostgreSQL)
-
-                          //BEGIN Create ConnectivityStatus (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  ConnectivityStatus  ( csUid  INTEGER PRIMARY KEY  NOT NULL ,  connectivityState  INTEGER,  wifiSsid  TEXT,  connectedOrConnecting  BOOL)")
-                          //END Create ConnectivityStatus (PostgreSQL)
-
-                          db.execSql("DROP TABLE  IF EXISTS DownloadJob")
-                          //BEGIN Create DownloadJob (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJob  ( djUid  SERIAL PRIMARY KEY  NOT NULL ,  djDsUid  INTEGER,  timeCreated  BIGINT,  timeRequested  BIGINT,  timeCompleted  BIGINT,  djStatus  INTEGER)")
-                          //END Create DownloadJob (PostgreSQL)
-
-                          db.execSql("DROP TABLE  IF EXISTS DownloadJobItem")
-                          //BEGIN Create DownloadJobItem (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItem  ( djiUid  SERIAL PRIMARY KEY  NOT NULL ,  djiDsiUid  INTEGER,  djiDjUid  INTEGER,  djiContentEntryFileUid  BIGINT,  downloadedSoFar  BIGINT,  downloadLength  BIGINT,  currentSpeed  BIGINT,  timeStarted  BIGINT,  timeFinished  BIGINT,  djiStatus  INTEGER,  destinationFile  TEXT,  numAttempts  INTEGER)")
-                          db.execSql("CREATE INDEX  index_DownloadJobItem_djiStatus  ON  DownloadJobItem  ( djiStatus  )")
-                          //END Create DownloadJobItem (PostgreSQL)
-
-                          db.execSql("DROP TABLE  IF EXISTS DownloadJobItemHistory")
-                          //BEGIN Create DownloadJobItemHistory (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItemHistory  ( id  SERIAL PRIMARY KEY  NOT NULL ,  url  TEXT,  networkNode  BIGINT,  downloadJobItemId  INTEGER,  mode  INTEGER,  numBytes  BIGINT,  successful  BOOL,  startTime  BIGINT,  endTime  BIGINT)")
-                          //END Create DownloadJobItemHistory (PostgreSQL)
-
-                          db.execSql("DROP TABLE  IF EXISTS DownloadSet")
-                          //BEGIN Create DownloadSet (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSet  ( dsUid  SERIAL PRIMARY KEY  NOT NULL ,  destinationDir  TEXT,  meteredNetworkAllowed  BOOL,  dsRootContentEntryUid  BIGINT)")
-                          //END Create DownloadSet (PostgreSQL)
-
-                          db.execSql("DROP TABLE  IF EXISTS DownloadSetItem")
-                          //BEGIN Create DownloadSetItem (PostgreSQL)
-                          db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSetItem  ( dsiUid  SERIAL PRIMARY KEY  NOT NULL ,  dsiDsUid  INTEGER,  dsiContentEntryUid  BIGINT)")
-                          db.execSql("CREATE INDEX  index_DownloadSetItem_dsiContentEntryUid  ON  DownloadSetItem  ( dsiContentEntryUid  )")
-                          db.execSql("CREATE INDEX  index_DownloadSetItem_dsiDsUid  ON  DownloadSetItem  ( dsiDsUid  )")
-                      }
-                  }//END Create DownloadSetItem (PostgreSQL)
-              }
-          })
-
-          builder.addMigration(object : UmDbMigration(6, 8) {
-              fun migrate(db: DoorDbAdapter) {
-                  db.execSql("DROP TABLE IF EXISTS CrawlJob")
-                  db.execSql("DROP TABLE IF EXISTS CrawlJobItem")
-                  db.execSql("DROP TABLE IF EXISTS OpdsEntry")
-                  db.execSql("DROP TABLE IF EXISTS OpdsEntryParentToChildJoin")
-                  db.execSql("DROP TABLE IF EXISTS OpdsEntryRelative")
-                  db.execSql("DROP TABLE IF EXISTS OpdsEntryStatusCache")
-                  db.execSql("DROP TABLE IF EXISTS OpdsEntryStatusCacheAncestor")
-                  db.execSql("DROP TABLE IF EXISTS OpdsLink")
-              }
-          })
-          builder.addMigration(object : UmDbMigration(8, 10) {
-              fun migrate(db: DoorDbAdapter) {
-
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES -> db.execSql("ALTER TABLE ContentEntry ADD COLUMN contentTypeFlag INTEGER DEFAULT 0")
-                  }
-              }
-          })
-
-          builder.addMigration(object : UmDbMigration(10, 12) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES -> {
-                          val deviceBits = Integer.parseInt(
-                                  db.selectSingleValue("SELECT deviceBits FROM SyncDeviceBits"))
-
-
-                          db.execSql("ALTER TABLE ContentEntryContentEntryFileJoin ADD COLUMN cecefjContainerUid BIGINT")
-                          db.execSql("CREATE INDEX  index_ContentEntryContentEntryFileJoin_cecefjContainerUid  ON  ContentEntryContentEntryFileJoin  ( cecefjContainerUid  )")
-
-
-                          // BEGIN Create Container
-                          db.execSql("CREATE SEQUENCE spk_seq_51 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits))
-                          db.execSql("CREATE TABLE IF NOT EXISTS  Container  ( containerUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_51') ,  cntLocalCsn  BIGINT,  cntMasterCsn  BIGINT,  cntLastModBy  INTEGER,  fileSize  BIGINT,  containerContentEntryUid  BIGINT,  cntLastModified  BIGINT,  mimeType  TEXT,  remarks  TEXT,  mobileOptimized  BOOL)")
-                          db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (51, 1, 0, 0)")
-                          db.execSql("CREATE OR REPLACE FUNCTION inc_csn_51_fn() RETURNS trigger AS $$ BEGIN UPDATE Container SET cntLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cntLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 51) END),cntMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 51) ELSE NEW.cntMasterCsn END) WHERE containerUid = NEW.containerUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 51; RETURN null; END $\$LANGUAGE plpgsql")
-                          db.execSql("CREATE TRIGGER inc_csn_51_trig AFTER UPDATE OR INSERT ON Container FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_51_fn()")
-                          db.execSql("CREATE INDEX  index_Container_lastModified  ON  Container  ( cntLastModified  )")
-                          //END Create Container (
-
-                          //BEGIN Create ContainerEntry
-                          db.execSql("CREATE TABLE IF NOT EXISTS  ContainerEntry  ( ceUid  SERIAL PRIMARY KEY  NOT NULL ,  cePath  TEXT,  ceCefUid  BIGINT)")
-                          //END Create ContainerEntry (PostgreSQL)
-
-                          //BEGIN Create ContainerEntryFile
-                          db.execSql("CREATE TABLE IF NOT EXISTS  ContainerEntryFile  ( cefUid  SERIAL PRIMARY KEY  NOT NULL ,  cefMd5  TEXT,  cefPath  TEXT,  ceTotalSize  BIGINT,  ceCompressedSize  BIGINT,  compression  INTEGER)")
-                      }
-                  }//END Create ContainerEntryFile
-              }
-          })
-
-          builder.addMigration(object : UmDbMigration(12, 14) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES -> {
-                          db.execSql("ALTER TABLE ContainerEntry ADD COLUMN ceContainerUid BIGINT")
-                          db.execSql("CREATE INDEX  index_ContainerEntry_ceContainerUid  ON  ContainerEntry  ( ceContainerUid  )")
-                      }
-                  }
-              }
-          })
-
-          builder.addMigration(object : UmDbMigration(14, 16) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES -> db.execSql("ALTER TABLE Container ADD COLUMN cntNumEntries INTEGER")
-                  }
-              }
-          })
-
-          builder.addMigration(object : UmDbMigration(16, 18) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                      UmDbType.TYPE_POSTGRES -> {
-                          db.execSql("DROP TABLE ContentEntryFile")
-                          db.execSql("DROP TABLE ContentEntryFileStatus")
-                          db.execSql("DROP TABLE ContentEntryContentEntryFileJoin")
-                      }
-                  }
-              }
-          })
-
-          builder.addMigration(object : UmDbMigration(18, 20) {
-              fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                      UmDbType.TYPE_SQLITE -> {
-                          db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid INTEGER NOT NULL")
-                          db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid INTEGER NOT NULL")
-                          db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN meteredNetworkAllowed INTEGER NOT NULL")
-                          db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djDestinationDir TEXT")
-                      }
-
-                      UmDbType.TYPE_POSTGRES -> {
-                          db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid BIGINT DEFAULT 0")
-                          db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid BIGINT DEFAULT 0")
-                          db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN meteredNetworkAllowed BOOL DEFAULT FALSE")
-                          db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djDestinationDir TEXT")
-                      }
-                  }
-              }
-          })
-
-            builder.addMigration(object : UmDbMigration(18, 20) {
-                  fun migrate(db: DoorDbAdapter) {
-                  when (db.getDbType()) {
-                   UmDbType.TYPE_SQLITE -> throw RuntimeException("Not supported on SQLite")
-
-                    UmDbType.TYPE_POSTGRES -> {
-                             db.execSql("ALTER TABLE ContainerEntryFile ADD COLUMN cntLastModified BIGINT");
-                      }
-                }
-
-               }
-
-               })
-
-
-        builder.addMigration(object : UmDbMigration(20, 22) {
-            fun migrate(db: DoorDbAdapter) {
-                db.execSql("DROP TABLE DownloadSet")
-                db.execSql("DROP TABLE DownloadSetItem")
-            }
-        })
-
-        builder.addMigration(new UmDbMigration(22, 24) {
-          @Override
-          public void migrate(DoorDbAdapter db) {
-              switch (db.getDbType()) {
-                  case UmDbType.TYPE_SQLITE:
-                      throw new RuntimeException("Not supported on SQLite");
-
-                   case UmDbType.TYPE_POSTGRES:
-
-                       int deviceBits = Integer.parseInt(
-                              db.selectSingleValue("SELECT deviceBits FROM SyncDeviceBits"));
-
-                       //BEGIN Create VerbEntity (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_62 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  VerbEntity  ( verbUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_62') ,  urlId  TEXT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (62, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_62_fn() RETURNS trigger AS $$ BEGIN UPDATE VerbEntity SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 62) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 62) ELSE NEW.verbMasterChangeSeqNum END) WHERE verbUid = NEW.verbUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 62; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_62_trig AFTER UPDATE OR INSERT ON VerbEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_62_fn()");
-                      //END Create VerbEntity (PostgreSQL)
-
-                       //BEGIN Create XObjectEntity (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_64 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  XObjectEntity  ( XObjectUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_64') ,  objectType  TEXT,  objectId  TEXT,  definitionType  TEXT,  interactionType  TEXT,  correctResponsePattern  TEXT,  XObjectMasterChangeSeqNum  BIGINT,  XObjectocalChangeSeqNum  BIGINT,  XObjectLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (64, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_64_fn() RETURNS trigger AS $$ BEGIN UPDATE XObjectEntity SET XObjectocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.XObjectocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 64) END),XObjectMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 64) ELSE NEW.XObjectMasterChangeSeqNum END) WHERE XObjectUid = NEW.XObjectUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 64; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_64_trig AFTER UPDATE OR INSERT ON XObjectEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_64_fn()");
-                      //END Create XObjectEntity (PostgreSQL)
-
-                       //BEGIN Create StatementEntity (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_60 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  StatementEntity  ( statementUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_60') ,  statementId  TEXT,  personUid  BIGINT,  verbUid  BIGINT,  XObjectUid  BIGINT,  subStatementActorUid  BIGINT,  substatementVerbUid  BIGINT,  subStatementObjectUid  BIGINT,  agentUid  BIGINT,  instructorUid  BIGINT,  authorityUid  BIGINT,  teamUid  BIGINT,  resultCompletion  BOOL,  resultSuccess  BOOL,  resultScoreScaled  BIGINT,  resultScoreRaw  BIGINT,  resultScoreMin  BIGINT,  resultScoreMax  BIGINT,  resultDuration  BIGINT,  resultResponse  TEXT,  timestamp  BIGINT,  stored  BIGINT,  contextRegistration  TEXT,  contextPlatform  TEXT,  contextStatementId  TEXT,  fullStatement  TEXT,  statementMasterChangeSeqNum  BIGINT,  statementLocalChangeSeqNum  BIGINT,  statementLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (60, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_60_fn() RETURNS trigger AS $$ BEGIN UPDATE StatementEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 60) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 60) ELSE NEW.statementMasterChangeSeqNum END) WHERE statementUid = NEW.statementUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 60; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_60_trig AFTER UPDATE OR INSERT ON StatementEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_60_fn()");
-                      //END Create StatementEntity (PostgreSQL)
-
-                       //BEGIN Create ContextXObjectStatementJoin (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_66 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  ContextXObjectStatementJoin  ( contextXObjectStatementJoinUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_66') ,  contextActivityFlag  INTEGER,  contextStatementUid  BIGINT,  contextXObjectUid  BIGINT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (66, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_66_fn() RETURNS trigger AS $$ BEGIN UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 66) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 66) ELSE NEW.verbMasterChangeSeqNum END) WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 66; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_66_trig AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_66_fn()");
-                      //END Create ContextXObjectStatementJoin (PostgreSQL)
-
-                       //BEGIN Create AgentEntity (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_68 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  AgentEntity  ( agentUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_68') ,  agentMbox  TEXT,  agentMbox_sha1sum  TEXT,  agentOpenid  TEXT,  agentAccountName  TEXT,  agentHomePage  TEXT,  agentPersonUid  BIGINT,  statementMasterChangeSeqNum  BIGINT,  statementLocalChangeSeqNum  BIGINT,  statementLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (68, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_68_fn() RETURNS trigger AS $$ BEGIN UPDATE AgentEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 68) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 68) ELSE NEW.statementMasterChangeSeqNum END) WHERE agentUid = NEW.agentUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 68; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_68_trig AFTER UPDATE OR INSERT ON AgentEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_68_fn()");
-                      //END Create AgentEntity (PostgreSQL)
-
-                       //BEGIN Create StateEntity (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_70 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  StateEntity  ( stateUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_70') ,  stateId  TEXT,  agentUid  BIGINT,  activityId  TEXT,  registration  TEXT,  isactive  BOOL,  timestamp  BIGINT,  stateMasterChangeSeqNum  BIGINT,  stateLocalChangeSeqNum  BIGINT,  stateLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (70, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_70_fn() RETURNS trigger AS $$ BEGIN UPDATE StateEntity SET stateLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.stateLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 70) END),stateMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 70) ELSE NEW.stateMasterChangeSeqNum END) WHERE stateUid = NEW.stateUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 70; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_70_trig AFTER UPDATE OR INSERT ON StateEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_70_fn()");
-                      //END Create StateEntity (PostgreSQL)
-
-                       //BEGIN Create StateContentEntity (PostgreSQL)
-                      db.execSql("CREATE SEQUENCE spk_seq_72 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                      db.execSql("CREATE TABLE IF NOT EXISTS  StateContentEntity  ( stateContentUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_72') ,  stateContentStateUid  BIGINT,  stateContentKey  TEXT,  stateContentValue  TEXT,  isactive  BOOL,  stateContentMasterChangeSeqNum  BIGINT,  stateContentLocalChangeSeqNum  BIGINT,  stateContentLastChangedBy  INTEGER)");
-                      db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (72, 1, 0, 0)");
-                      db.execSql("CREATE OR REPLACE FUNCTION inc_csn_72_fn() RETURNS trigger AS $$ BEGIN UPDATE StateContentEntity SET stateContentLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.stateContentLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 72) END),stateContentMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 72) ELSE NEW.stateContentMasterChangeSeqNum END) WHERE stateContentUid = NEW.stateContentUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 72; RETURN null; END $$LANGUAGE plpgsql");
-                      db.execSql("CREATE TRIGGER inc_csn_72_trig AFTER UPDATE OR INSERT ON StateContentEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_72_fn()");
-                      //END Create StateContentEntity (PostgreSQL)
-
-                       break;
-
-
-               }
-          }
-      });
-
-        return builder
     }
 
-    @Synchronized
-    private fun addCallbacks(
-            builder: AbstractDoorwayDbBuilder<UmAppDatabase>): AbstractDoorwayDbBuilder<UmAppDatabase> {
 
-        return builder
-    } */
-    }
 
 }
