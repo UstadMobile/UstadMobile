@@ -95,7 +95,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid).toMutableList()
-            if (result.size > 1) {
+            if (result.size > 0) {
                 val selectLang = Language()
                 selectLang.name = "Language"
                 selectLang.langUid = 0
@@ -223,7 +223,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ARG_CONTENT_ENTRY_UID] = parentUid.toString()
         args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-        systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this)
+        systemImpl.go(ContentEntryEditView.VIEW_NAME, args, context)
     }
 
     companion object {
