@@ -46,6 +46,12 @@ android {
 
 }
 
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -87,6 +93,8 @@ dependencies {
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
 
     testImplementation "junit:junit:$version_junit"
+    testImplementation "androidx.room:room-testing:$version_android_room"
+    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
     androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
     androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
 }
