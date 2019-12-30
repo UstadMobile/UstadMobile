@@ -122,7 +122,7 @@ class ContentEntryDetailPresenterTest {
             whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(contentEntry.contentEntryUid)).thenReturn(downloadJobItemLiveData)
         }
 
-        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
     }
 
 
@@ -203,7 +203,7 @@ class ContentEntryDetailPresenterTest {
 
         verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf(relatedJoin)))
 
-        var args = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
+        var args = mapOf(ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
 
         presenter.handleClickTranslatedEntry(translatedEntry.contentEntryUid)
         verify(systemImpl).go(eq(ContentEntryDetailView.VIEW_NAME), eq(args), any())
