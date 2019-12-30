@@ -101,7 +101,7 @@ class LoginPresenterTest {
 
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
 
-        verify<UstadMobileSystemImpl>(impl, timeout(5000 )).go("somewhere",
+        verify(impl, timeout(5000 )).go("somewhere",
                 context)
 
         val activeAccount = UmAccountManager.getActiveAccount(context)

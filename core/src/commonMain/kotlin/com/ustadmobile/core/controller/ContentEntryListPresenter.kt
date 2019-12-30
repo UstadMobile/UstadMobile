@@ -66,7 +66,6 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private fun onContentEntryChanged(entry: ContentEntry?) {
         if (entry == null) {
-            viewContract.runOnUiThread(Runnable { viewContract.showError() })
             return
         }
         val resultTitle = entry.title
@@ -81,21 +80,21 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
 
     private fun showContentByParent() {
-        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid
+        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong() ?: 0L
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, activeAccount?.personUid
                 ?: 0)
         viewContract.setContentEntryProvider(provider)
 
         try {
-            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid!!)
+            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid)
             entryLiveData.observe(this, this::onContentEntryChanged)
         } catch (e: Exception) {
             viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
 
         GlobalScope.launch {
-            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
-            if (result.size > 1) {
+            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid).toMutableList()
+            if (result.size > 0) {
                 val selectLang = Language()
                 selectLang.name = "Language"
                 selectLang.langUid = 0
@@ -111,7 +110,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         GlobalScope.launch {
-            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid!!)
+            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid)
             val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
             for (schema in result) {
                 var data: MutableList<DistinctCategorySchema>? =
@@ -156,21 +155,21 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
-        systemImpl.go(destView, args, view.viewContext)
+        systemImpl.go(destView, args, context)
 
     }
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
@@ -178,13 +177,12 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     fun handleUpNavigation() {
         systemImpl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
-
     }
 
     @JsName("handleDownloadStatusButtonClicked")
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
         systemImpl.go("DownloadDialog",
-                mapOf("contentEntryUid" to entry.contentEntryUid.toString()), context)
+                mapOf(ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()), context)
     }
 
 
@@ -196,25 +194,23 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
         args[ContentEntryEditView.CONTENT_TYPE] = contentType.toString()
 
-        view.runOnUiThread(Runnable {
-            when (contentType) {
-                ContentEntryListView.CONTENT_CREATE_FOLDER -> {
-                    args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
-                }
-
-                ContentEntryListView.CONTENT_IMPORT_FILE -> {
-                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
-                }
-
-                ContentEntryListView.CONTENT_CREATE_CONTENT -> {
-                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
-                }
-                ContentEntryListView.CONTENT_IMPORT_LINK -> {
-                    systemImpl.go(ContentEntryImportLinkView.VIEW_NAME, args, this.context)
-                }
+        when (contentType) {
+            ContentEntryListView.CONTENT_CREATE_FOLDER -> {
+                args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+                systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
             }
-        })
+
+            ContentEntryListView.CONTENT_IMPORT_FILE -> {
+                systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+            }
+
+            ContentEntryListView.CONTENT_CREATE_CONTENT -> {
+                systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+            }
+            ContentEntryListView.CONTENT_IMPORT_LINK -> {
+                systemImpl.go(ContentEntryImportLinkView.VIEW_NAME, args, this.context)
+            }
+        }
     }
 
     fun handleClickEditButton() {
