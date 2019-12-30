@@ -133,10 +133,12 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
 
 
     override fun showBaseProgressBar(showProgress: Boolean) {
-        if(showProgress){
-            importDialog.show()
-        }else{
-            importDialog.dismiss()
+        runOnUiThread{
+            if(showProgress){
+                importDialog.show()
+            }else{
+                importDialog.dismiss()
+            }
         }
     }
 

@@ -259,14 +259,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args.putAll(arguments)
 
                 val imported = (entry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
-                args[UstadView.ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
+                args[ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
                 args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
-                    impl.go(ContentEntryEditView.VIEW_NAME, arguments, context)
+                    impl.go(ContentEntryEditView.VIEW_NAME, args, context)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
