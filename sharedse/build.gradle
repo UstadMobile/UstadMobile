@@ -45,6 +45,7 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        missingDimensionStrategy 'config', 'vanilla'
     }
 
     compileOptions {

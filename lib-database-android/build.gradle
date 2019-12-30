@@ -37,6 +37,25 @@ android {
 
     }
 
+    flavorDimensions "config"
+
+    productFlavors {
+        vanilla {
+            dimension "config"
+        }
+
+        vanillamultidex {
+            dimension "config"
+            minSdkVersion 18
+            multiDexEnabled true
+        }
+
+        devMinApi21 {
+            dimension "config"
+            minSdkVersion 21
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
