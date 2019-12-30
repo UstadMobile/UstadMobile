@@ -18,8 +18,8 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
 
             if (videoParams == null) {
 
-                var container =  containerDao.findByUidAsync(containerUid)
-                if(container == null){
+                var container = containerDao.findByUidAsync(containerUid)
+                if (container == null) {
                     view.showErrorWithAction(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), 0)
                     return@launch
                 }
@@ -33,7 +33,7 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
                     val containerEntryFile = entry.containerEntryFile
 
                     if (containerEntryPath != null && containerEntryFile != null) {
-                        if (VIDEO_EXT_LIST.contains(containerEntryPath)) {
+                        if (VIDEO_EXT_LIST.any { containerEntryPath.toLowerCase().endsWith(it) }) {
                             videoPath = containerEntryFile.cefPath
                         } else if (containerEntryPath == "audio.c2") {
                             audioEntry = entry
@@ -44,7 +44,7 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
                                 containerEntryPath.substring(containerEntryPath.indexOf("-") + 1, containerEntryPath.lastIndexOf("."))
                             else "English"
                             srtMap[defaultLangName] = containerEntryPath
-                        } else if(containerEntryPath.endsWith(".srt") && containerEntryPath.contains("-") && containerEntryPath.contains(".")){
+                        } else if (containerEntryPath.endsWith(".srt") && containerEntryPath.contains("-") && containerEntryPath.contains(".")) {
                             val name = containerEntryPath.substring(containerEntryPath.indexOf("-") + 1, containerEntryPath.lastIndexOf("."))
                             srtMap[name] = containerEntryPath
                             srtLangList.add(name)
