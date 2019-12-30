@@ -1,8 +1,8 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -48,41 +48,37 @@ suspend fun goToContentEntry(contentEntryUid: Long,
         umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
     }
 
-    when {
-        containerToOpen != null -> {
+    if (containerToOpen != null) {
 
-            val viewName = mimeTypeToViewNameMap[containerToOpen.mimeType]
-            if (viewName == null) {
+        val viewName = mimeTypeToViewNameMap[containerToOpen.mimeType]
+        if (viewName == null) {
 
-                val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
-                require(container.isNotEmpty()) { "No file found" }
-                val containerEntryFilePath = container[0].containerEntryFile?.cefPath
-                if (containerEntryFilePath != null) {
-                    systemImpl.openFileInDefaultViewer(context, containerEntryFilePath,
-                            containerToOpen.mimeType)
-                } else {
-                    throw IllegalArgumentException("No file found")
-                }
-                return
+            val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
+            require(container.isNotEmpty()) { "No file found" }
+            val containerEntryFilePath = container[0].containerEntryFile?.cefPath
+            if (containerEntryFilePath != null) {
+                systemImpl.openFileInDefaultViewer(context, containerEntryFilePath,
+                        containerToOpen.mimeType)
+            } else {
+                throw IllegalArgumentException("No file found")
             }
-
-            val args = HashMap<String, String>()
-            args[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES] = noIframe.toString()
-            args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-            args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
-            systemImpl.go(viewName, args, context)
-
+            return
         }
-        goToContentEntryDetailViewIfNotDownloaded -> {
 
-            val args = HashMap<String, String>()
-            args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-            systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, context)
+        val args = HashMap<String, String>()
+        args[ContentEntryListPresenter.ARG_NO_IFRAMES] = noIframe.toString()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
+        systemImpl.go(viewName, args, context)
 
-        }
-        else -> {
-            throw IllegalArgumentException("No file found")
-        }
+    } else if (goToContentEntryDetailViewIfNotDownloaded) {
+
+        val args = HashMap<String, String>()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+        systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, context)
+
+    } else {
+        throw IllegalArgumentException("No file found")
     }
 
 }

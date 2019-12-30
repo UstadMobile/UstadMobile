@@ -7,6 +7,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -101,7 +102,7 @@ class XapiPackageContentPresenterTest {
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
-        args.put(ContentEntryDetailPresenter.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+        args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
 
         val xapiPresenter = XapiPackageContentPresenter(
                 context, args, mockXapiPackageContentView!!) {

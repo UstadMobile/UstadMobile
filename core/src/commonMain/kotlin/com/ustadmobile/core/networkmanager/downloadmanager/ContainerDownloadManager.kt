@@ -20,7 +20,7 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun addItemsToDownloadJob(newItems: List<DownloadJobItemWithParents>)
 
-    abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = false)
+    abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = true)
 
     abstract suspend fun enqueue(downloadJobId: Int)
 

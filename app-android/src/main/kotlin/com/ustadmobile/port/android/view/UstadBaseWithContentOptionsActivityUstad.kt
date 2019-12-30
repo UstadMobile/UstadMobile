@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
-import android.os.PersistableBundle
 import android.provider.OpenableColumns
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
@@ -18,9 +17,7 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.view.ContentEntryEditView
-import com.ustadmobile.core.view.ContentEntryImportLinkView
-import com.ustadmobile.core.view.ContentWithOptionsView
+import com.ustadmobile.core.view.UstadViewWithProgress
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -29,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 
 open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
-        ContentEntryEditFragment.EntryCreationActionListener, ContentWithOptionsView {
+        ContentEntryEditFragment.EntryCreationActionListener, UstadViewWithProgress {
 
 
     internal var coordinatorLayout: CoordinatorLayout? = null
@@ -134,24 +131,9 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
         }
     }
 
-    override fun createNewFolder(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
-    }
 
-    override fun startFileBrowser(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
-    }
-
-    override fun createNewContent(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
-    }
-
-    override fun importContentFromLink(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryImportLinkView.VIEW_NAME, arguments, this)
-    }
-
-    override fun showProgressDialog(show: Boolean) {
-        if(show){
+    override fun showBaseProgressBar(showProgress: Boolean) {
+        if(showProgress){
             importDialog.show()
         }else{
             importDialog.dismiss()

@@ -53,6 +53,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findByEntryId")
     abstract suspend fun findByEntryId(entryUuid: Long): ContentEntry?
 
+    @Query("SELECT * FROM ContentEntry WHERE title =:title")
+    @JsName("findByEntryTitle")
+    abstract suspend fun findByEntryTitle(title: String): ContentEntry?
+
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     @JsName("findBySourceUrl")
     abstract fun findBySourceUrl(sourceUrl: String): ContentEntry?

@@ -5,7 +5,7 @@
     <item
         android:visible="false"
         android:icon="@drawable/ic_create_new_folder_white_24dp"
-        android:id="@+id/create_new_content"
+        android:id="@+id/create_new_folder"
         android:title="@string/content_editor_create_new"
         app:showAsAction="always"/>
 

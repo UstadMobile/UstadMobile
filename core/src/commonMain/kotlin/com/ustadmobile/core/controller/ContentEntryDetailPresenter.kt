@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.liveDataObserverDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -174,7 +175,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             }
         } else if (isDownloadEnabled) {
             view.runOnUiThread(Runnable {
-                view.showDownloadOptionsDialog(mapOf("contentEntryUid" to this.entryUuid.toString()))
+                view.showDownloadOptionsDialog(mapOf(ARG_CONTENT_ENTRY_UID to this.entryUuid.toString()))
             })
         }
     }
@@ -185,7 +186,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 view.showBaseProgressBar(true)
                 goToEntryFn(entryUuid, appDb, context, impl, isDownloadEnabled,
                         false,
-                        arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES]
+                        arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]
                                 ?.toBoolean() ?: false)
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
@@ -212,9 +213,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleUpNavigation")
     fun handleUpNavigation() {
-        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListFragmentView.VIEW_NAME, navigation!!)
+        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs != null) {
-            impl.go(ContentEntryListFragmentView.VIEW_NAME,
+            impl.go(ContentEntryListView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), context,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
@@ -264,14 +265,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args.putAll(arguments)
 
                 val imported = (entry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
-                args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
+                args[UstadView.ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
                 args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
-                    view.startFileBrowser(args)
+                    impl.go(ContentEntryEditView.VIEW_NAME, arguments, this)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
@@ -297,10 +298,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     companion object {
-
-        const val ARG_CONTENT_ENTRY_UID = "entryid"
-
-        const val ARG_CONTAINER_UID = "containerUid"
 
         const val LOCALLY_AVAILABLE_ICON = 1
 

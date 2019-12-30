@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.EpubContentView.Companion.ARG_INITIAL_PAGE_HREF
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
@@ -176,7 +177,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        contentEntryUid = arguments.getOrElse(ContentEditorView.CONTENT_ENTRY_UID, {"0"})!!.toLong()
+        contentEntryUid = arguments.getOrElse(UstadView.ARG_CONTENT_ENTRY_UID, {"0"})!!.toLong()
 
         GlobalScope.launch {
             contentEntry = umDatabase.contentEntryDao.findByEntryId(contentEntryUid)
@@ -291,7 +292,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
             if(openPreview){
                 val args = HashMap<String, String?>()
                 args.putAll(arguments)
-                args[ContentEntryDetailPresenter.ARG_CONTAINER_UID] = containerUid.toString()
+                args[UstadView.ARG_CONTAINER_UID] = containerUid.toString()
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
             }else{

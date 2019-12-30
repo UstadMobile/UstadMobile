@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,36 +16,30 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
-import android.content.Intent.ACTION_SEND
-import android.widget.Toast
-import androidx.core.content.FileProvider
-import com.ustadmobile.core.db.UmAppDatabase
-import kotlinx.coroutines.Dispatchers
-import java.io.File
 
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
@@ -101,11 +94,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val account = UmAccountManager.getActiveAccount(this)
-        val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
         menuInflater.inflate(R.menu.menu_home_activity, menu)
-        menu.findItem(R.id.create_new_content).isVisible = showControls && account != null && account.personUid != 0L
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -134,16 +123,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
-            R.id.create_new_content -> {
-                val args = HashMap<String,String?>()
-                args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
-                args[CONTENT_TYPE] = CONTENT_CREATE_FOLDER.toString()
-                args[CONTENT_ENTRY_LEAF] = false.toString()
-                args[CONTENT_ENTRY_UID] = 0.toString()
-                args[ARG_CONTENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
-                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
-                        this)
-            }
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
         }
@@ -214,6 +193,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         override fun getItem(position: Int): Fragment? {
             val bundle = Bundle()
             bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
+            bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
             when (position) {
                 0 // Fragment # 0 - This will show FirstFragment
                 ->  bundle.putString(ARG_LIBRARIES_CONTENT, "")

@@ -12,7 +12,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
-import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
@@ -88,7 +88,7 @@ class DownloadDialogPresenter(context: Any,
         super.onCreate(savedState)
 
         impl = UstadMobileSystemImpl.instance
-        contentEntryUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
         UMLog.l(UMLog.INFO, 420, "Starting download presenter for " +
                 "content entry uid: " + contentEntryUid)
         view.setWifiOnlyOptionVisible(false)
@@ -277,8 +277,6 @@ class DownloadDialogPresenter(context: Any,
     }
 
     companion object {
-
-        const val ARG_CONTENT_ENTRY_UID = "contentEntryUid"
 
         const val STACKED_BUTTON_PAUSE = 0
 

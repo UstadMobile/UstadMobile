@@ -18,7 +18,7 @@ export class UmAngularUtil {
   constructor(){
   }
 
-  public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID.toString()
+  public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID.toString()
 
   private static storageEventHandler: any = {};
 

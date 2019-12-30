@@ -70,6 +70,7 @@ import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
@@ -190,7 +191,7 @@ class EpubContentPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val containerUid = (arguments[ContentEntryDetailPresenter.ARG_CONTAINER_UID]?.toLong() ?: 0)
+        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 0)
         view.setProgressBarProgress(-1)
         view.setProgressBarVisible(true)
         view.mountContainer(containerUid, mountedCallbackHandler)

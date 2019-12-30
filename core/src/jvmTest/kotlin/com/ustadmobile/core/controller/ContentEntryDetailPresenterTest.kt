@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
@@ -11,8 +10,10 @@ import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
@@ -121,7 +122,7 @@ class ContentEntryDetailPresenterTest {
             whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(contentEntry.contentEntryUid)).thenReturn(downloadJobItemLiveData)
         }
 
-        args[ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
     }
 
 
@@ -155,7 +156,8 @@ class ContentEntryDetailPresenterTest {
     fun givenContentEntryNotDownloaded_whenMainButtonClicked_thenShouldShowDownloadDialog() {
 
         runBlocking {
-            var presenter = ContentEntryDetailPresenter(context, args, mockView,
+            downloadJobItemLiveData.sendValue(null)
+            val presenter = ContentEntryDetailPresenter(context, args, mockView,
                     true, umAppRepository, umAppDatabase,
                     mock(), containerDownloadManager, null, systemImpl, counter)
             presenter.onCreate(null)
@@ -163,7 +165,8 @@ class ContentEntryDetailPresenterTest {
             presenter.handleDownloadButtonClick()
             argumentCaptor<Map<String, String>>() {
                 verify(mockView, timeout(5000)).showDownloadOptionsDialog(capture())
-                Assert.assertEquals(firstValue["contentEntryUid"], contentEntry.contentEntryUid.toString())
+                Assert.assertEquals("Content entry uid passed to download dialog is correct",
+                        contentEntry.contentEntryUid.toString(), firstValue[ARG_CONTENT_ENTRY_UID])
             }
 
         }
@@ -200,7 +203,7 @@ class ContentEntryDetailPresenterTest {
 
         verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf(relatedJoin)))
 
-        var args = mapOf(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
+        var args = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
 
         presenter.handleClickTranslatedEntry(translatedEntry.contentEntryUid)
         verify(systemImpl).go(eq(ContentEntryDetailView.VIEW_NAME), eq(args), any())
@@ -225,8 +228,8 @@ class ContentEntryDetailPresenterTest {
         presenter.handleUpNavigation()
 
         val lastGoToDest = UstadMobileSystemImpl.instance.lastDestination
-        Assert.assertEquals("Last destination was ContentEntryListFragmentView",
-                ContentEntryListFragmentView.VIEW_NAME, lastGoToDest!!.viewName)
+        Assert.assertEquals("Last destination was ContentEntryListView",
+                ContentEntryListView.VIEW_NAME, lastGoToDest!!.viewName)
         Assert.assertEquals("Last destination had expect content entry uid arg",
                 "42", lastGoToDest.args[ARG_CONTENT_ENTRY_UID])
     }
