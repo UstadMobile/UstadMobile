@@ -1,6 +1,6 @@
 import { UmAngularUtil } from './../../util/UmAngularUtil';
 import {Component, NgZone, OnDestroy} from '@angular/core';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd, NavigationStart } from '@angular/router';
 import core from 'UstadMobile-core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';

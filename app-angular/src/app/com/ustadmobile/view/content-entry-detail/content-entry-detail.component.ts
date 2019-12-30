@@ -92,7 +92,7 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
 
     showFileOpenWithMimeTypeError() {}
 
-    showBaseProgressBar() {}
+    showBaseProgressBar(show) {}
 
     showFileOpenError(message) {
       this.showError(message);
@@ -117,6 +117,10 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
     startMonitoringAvailability() {}
 
     stopMonitoringAvailability() {}
+
+    setMainButtonEnabled(enabled){
+
+    }
 
     ngOnDestroy() {
       super.ngOnDestroy()
