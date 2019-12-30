@@ -305,7 +305,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
-            builder.addMigrations(object: DoorMigration(28,29){
+            builder.addMigrations(object: DoorMigration(27,29){
 
                 override fun migrate(database: DoorSqlDatabase) {
                     //do nothing
