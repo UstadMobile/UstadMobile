@@ -97,12 +97,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 view.showBaseProgressBar(false)
             })
         }
-
-//        statusUmLiveData = appRepo.contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
-//
-//        statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
-
-        //statusProvider?.addDownloadChangeListener(this)
     }
 
     private fun onEntryChanged(entry: ContentEntry?) {
@@ -272,7 +266,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
-                    impl.go(ContentEntryEditView.VIEW_NAME, arguments, this)
+                    impl.go(ContentEntryEditView.VIEW_NAME, arguments, context)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
