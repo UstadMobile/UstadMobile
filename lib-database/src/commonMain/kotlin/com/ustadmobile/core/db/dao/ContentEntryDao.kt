@@ -115,7 +115,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid
         LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
         WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
-    @JsName("findUniqueLanguagesInListAsync")
+    @JsName("findUniqueLanguageWithParentUid")
     abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
 
     @Update
