@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class ContentEntryRelatedEntryJoin() {
+open class ContentEntryRelatedEntryJoin() {
 
 
     @PrimaryKey(autoGenerate = true)
