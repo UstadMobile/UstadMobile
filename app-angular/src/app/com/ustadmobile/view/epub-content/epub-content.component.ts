@@ -73,6 +73,7 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
     this.zone.run( ()=>{
       this.currentIndex = index
       this.urlToLoad = this.urlsToLoad[this.currentIndex]
+      console.log("Loading URL", this.urlToLoad)
     })
   }
 

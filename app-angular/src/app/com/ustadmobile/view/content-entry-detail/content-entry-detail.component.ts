@@ -42,8 +42,7 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
       super.onCreate()
       this.presenter = new core.com.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
         UmAngularUtil.getArgumentsFromQueryParams(), this,false, this.umService.getDbInstance(),this.umService.getDbInstance(),
-        this, this, this.getActiveAccount(),this.systemImpl, () => {
-        });
+        this, this, this.getActiveAccount(),this.systemImpl);
       this.presenter.onCreate(null);
     }
 
@@ -118,9 +117,9 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
 
     stopMonitoringAvailability() {}
 
-    setMainButtonEnabled(enabled){
+    setMainButtonEnabled(enabled){}
 
-    }
+    getDownloadJobItemByContentEntryUid(entryUuid){}
 
     ngOnDestroy() {
       super.ngOnDestroy()

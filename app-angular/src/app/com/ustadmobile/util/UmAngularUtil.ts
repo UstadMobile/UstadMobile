@@ -394,4 +394,8 @@ export class UmAngularUtil {
   static kotlinCategoryMapToJSArray(data: any): any[]{
     return util.com.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(data);
   }
+
+  static scrollToTop(){
+    window.scrollTo(0, 0);
+  }
 }

@@ -408,6 +408,13 @@ task prepareProductionZip {
   prepareProductionZip.finalizedBy(zipProdFiles)
   zipProdFiles.finalizedBy(deleteZipTmps)
 
+  ext.createIndexFile = { redirectionUrl, destination ->
+    //write redirection file
+    FileWriter jsonFile = new FileWriter(project.file(destination))
+    jsonFile.write('<meta http-equiv="refresh" content="1;url='+redirectionUrl+'">')
+    jsonFile.flush()
+  }
+
   doLast {
     destFile.mkdirs()
     copy {
@@ -419,13 +426,13 @@ task prepareProductionZip {
       into project.file("dist-tmp/")
     }
 
-    //write redirection file
-    if(!directory.isEmpty() && !defaultLocale.isEmpty()){
-      def redirectUrl = "${directory}/${defaultLocale}"
-      FileWriter jsonFile = new FileWriter(project.file("dist-tmp/index.html"))
-      jsonFile.write('<meta http-equiv="refresh" content="1;url='+redirectUrl+'">')
-      jsonFile.flush()
+    if(!defaultLocale.isEmpty()){
+      ext.createIndexFile("${directory}${directory.isEmpty() ? "":"/"}${defaultLocale}","dist-tmp/index.html")
+      if(!directory.isEmpty()){
+        ext.createIndexFile(defaultLocale,"dist-tmp/web/index.html")
+      }
     }
+
   }
 }
 

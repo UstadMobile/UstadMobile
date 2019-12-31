@@ -65,7 +65,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
       this.getActiveAccount(), this.systemImpl,this.umService.getDbInstance());
     this.presenter.onCreate(null);
     this.setToolbarTitle("...")
-    this.label_language_options = this.getString(this.MessageID.also_available_in);
+    this.label_language_options = this.getString(this.MessageID.language);
     this.label_reading_level = this.getString(this.MessageID.library_reading_level);
   }
 
@@ -107,6 +107,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
       if(!error){
         context.zone.run( ()=>{
           context.entryList = context.entryList.concat(UmAngularUtil.kotlinListToJsArray(entries))
+          UmAngularUtil.scrollToTop();
         })
       }else{
         console.error(error)

@@ -285,3 +285,15 @@ ul{
   
 }
 
+@media only screen and (min-width : 480px) and (max-width: 992px) { 
+  .brand-logo-ltr{
+    margin-top: 1% !important;
+    left: 43% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: -90% !important;  
+  }
+} 
+
