@@ -26,6 +26,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
     abstract fun findPrimaryByTranslation(contentEntryUid: Long): ContentEntryRelatedEntryJoin?
 
 
+    @Deprecated("use findAllTranslationsWithContentEntryUid")
     @Query("SELECT ContentEntryRelatedEntryJoin.cerejContentEntryUid, ContentEntryRelatedEntryJoin.cerejRelatedEntryUid," +
             " CASE ContentEntryRelatedEntryJoin.cerejRelatedEntryUid" +
             " WHEN :contentEntryUid THEN (SELECT name FROM Language WHERE langUid = (SELECT primaryLanguageUid FROM ContentEntry WHERE contentEntryUid = ContentEntryRelatedEntryJoin.cerejContentEntryUid))" +
@@ -40,6 +41,16 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
             " AND ContentEntryRelatedEntryJoin.relType = " + REL_TYPE_TRANSLATED_VERSION)
     @JsName("findAllTranslationsForContentEntryAsync")
     abstract suspend fun findAllTranslationsForContentEntryAsync(contentEntryUid: Long): List<ContentEntryRelatedEntryJoinWithLanguage>
+
+
+    @Query("""SELECT ContentEntryRelatedEntryJoin.*, Language.* FROM ContentEntryRelatedEntryJoin
+        LEFT JOIN Language ON ContentEntryRelatedEntryJoin.cerejRelLanguageUid = Language.langUid
+        WHERE (ContentEntryRelatedEntryJoin.cerejContentEntryUid = :contentEntryUid
+        OR ContentEntryRelatedEntryJoin.cerejContentEntryUid IN
+        (SELECT cerejContentEntryUid FROM ContentEntryRelatedEntryJoin WHERE cerejRelatedEntryUid = :contentEntryUid))
+        AND ContentEntryRelatedEntryJoin.relType = $REL_TYPE_TRANSLATED_VERSION""")
+    @JsName("findAllTranslationsWithContentEntryUid")
+    abstract suspend fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): List<ContentEntryRelatedEntryJoinWithLanguage>
 
     @Update
     abstract override fun update(entity: ContentEntryRelatedEntryJoin)

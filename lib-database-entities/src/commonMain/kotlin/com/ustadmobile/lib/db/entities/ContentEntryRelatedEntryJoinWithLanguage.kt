@@ -1,34 +1,29 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ContentEntryRelatedEntryJoinWithLanguage() {
+class ContentEntryRelatedEntryJoinWithLanguage : ContentEntryRelatedEntryJoin() {
 
-    var cerejContentEntryUid: Long = 0
-
-    var cerejRelatedEntryUid: Long = 0
-
-    var languageName: String? = null
-
+    @Embedded
+    var language: Language? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
+        if (!super.equals(other)) return false
 
         other as ContentEntryRelatedEntryJoinWithLanguage
 
-        if (cerejContentEntryUid != other.cerejContentEntryUid) return false
-        if (cerejRelatedEntryUid != other.cerejRelatedEntryUid) return false
-        if (languageName != other.languageName) return false
+        if (language != other.language) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = cerejContentEntryUid.hashCode()
-        result = 31 * result + cerejRelatedEntryUid.hashCode()
-        result = 31 * result + (languageName?.hashCode() ?: 0)
+        var result = super.hashCode()
+        result = 31 * result + (language?.hashCode() ?: 0)
         return result
     }
 
