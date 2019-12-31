@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.AppConfig
@@ -122,38 +123,42 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
                 if (remoteResult != localResult) {
                     updateViewFn(remoteResult)
                 }
-            }finally {
-                //do nothing - we couldn't talk to the web
+            }catch(e: Exception) {
+                Napier.e({"Exception loading language list"}, e)
             }
 
             contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid)
         }
 
         GlobalScope.launch {
-            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid)
-            val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
-            for (schema in result) {
-                var data: MutableList<DistinctCategorySchema>? =
-                        schemaMap[schema.contentCategorySchemaUid] as MutableList<DistinctCategorySchema>?
-                if (data == null) {
-                    data = ArrayList()
-                    val schemaTitle = DistinctCategorySchema()
-                    schemaTitle.categoryName = schema.schemaName
-                    schemaTitle.contentCategoryUid = 0
-                    schemaTitle.contentCategorySchemaUid = 0
-                    data.add(0, schemaTitle)
+            try {
+                val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid)
+                val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
+                for (schema in result) {
+                    var data: MutableList<DistinctCategorySchema>? =
+                            schemaMap[schema.contentCategorySchemaUid] as MutableList<DistinctCategorySchema>?
+                    if (data == null) {
+                        data = ArrayList()
+                        val schemaTitle = DistinctCategorySchema()
+                        schemaTitle.categoryName = schema.schemaName
+                        schemaTitle.contentCategoryUid = 0
+                        schemaTitle.contentCategorySchemaUid = 0
+                        data.add(0, schemaTitle)
 
-                    val allSchema = DistinctCategorySchema()
-                    allSchema.categoryName = "All"
-                    allSchema.contentCategoryUid = 0
-                    allSchema.contentCategorySchemaUid = 0
-                    data.add(1, allSchema)
+                        val allSchema = DistinctCategorySchema()
+                        allSchema.categoryName = "All"
+                        allSchema.contentCategoryUid = 0
+                        allSchema.contentCategorySchemaUid = 0
+                        data.add(1, allSchema)
 
+                    }
+                    data.add(schema)
+                    schemaMap[schema.contentCategorySchemaUid] = data
                 }
-                data.add(schema)
-                schemaMap[schema.contentCategorySchemaUid] = data
+                viewContract.setCategorySchemaSpinner(schemaMap)
+            }catch(e: Exception) {
+                Napier.e({"Exception loading list of categories"}, e)
             }
-            viewContract.setCategorySchemaSpinner(schemaMap)
         }
     }
 

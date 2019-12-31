@@ -117,6 +117,14 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
     override fun setLanguageFilterSpinner(result: List<LangUidAndName>) {
         runOnUiThread {
             val spinnerLayout = findViewById<LinearLayout>(R.id.content_entry_list_spinner_layout)
+
+            //remove any previous spinners
+            val existingSpinner = spinnerLayout.findViewWithTag<View?>(TAG_LANGUAGE_SPINNER)
+            if(existingSpinner != null) {
+                spinnerLayout.removeView(existingSpinner)
+            }
+
+
             spinnerLayout.visibility = View.VISIBLE
             val spinner = Spinner(this)
             val dataAdapter = ArrayAdapter(this,
@@ -126,6 +134,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
             spinner.background.setColorFilter(ContextCompat.getColor(
                     this, android.R.color.white),
                     PorterDuff.Mode.SRC_ATOP)
+            spinner.tag = TAG_LANGUAGE_SPINNER
 
             val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             spinnerLayout.addView(spinner, 0, params)
@@ -143,7 +152,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
             val fragment = supportFragmentManager.findFragmentById(R.id.entry_content)
                     as ContentEntryListFragment?
-            if (item is Language) {
+            if (item is LangUidAndName) {
                 // language
                 fragment?.filterByLang(item.langUid)
 
@@ -188,4 +197,9 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
     override fun onNothingSelected(adapterView: AdapterView<*>) {
 
     }
+
+    companion object {
+        const val TAG_LANGUAGE_SPINNER = 42
+    }
+
 }
