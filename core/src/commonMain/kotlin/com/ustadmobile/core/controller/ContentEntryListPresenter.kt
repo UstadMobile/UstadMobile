@@ -94,7 +94,8 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid).toMutableList()
-            if (result.size > 0) {
+            // if only English available, no need to show the spinner
+            if (result.size > 1) {
                 val selectLang = Language()
                 selectLang.name = "Language"
                 selectLang.langUid = 0

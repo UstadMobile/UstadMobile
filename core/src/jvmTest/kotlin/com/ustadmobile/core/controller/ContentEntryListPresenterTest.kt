@@ -109,6 +109,10 @@ class ContentEntryListPresenterTest {
             categoryTest.contentCategorySchemaUid = 2323L
             categoryTest.schemaName = "Test"
 
+            var englishLang = Language()
+
+            var spanishLang = Language()
+
             val contentEntryLiveData = spy(DoorMutableLiveData(rootEntry as ContentEntry?))
 
             val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao) {
@@ -117,7 +121,7 @@ class ContentEntryListPresenterTest {
                     runBlocking {
                         findUniqueLanguagesInListAsync(rootEntry.contentEntryUid)
                     }
-                }.thenReturn(listOf(Language()))
+                }.thenReturn(listOf(englishLang, spanishLang))
                 on {
                     runBlocking {
                         findListOfCategoriesAsync(rootEntry.contentEntryUid)
@@ -157,7 +161,7 @@ class ContentEntryListPresenterTest {
             verify(contentEntryLiveData).observe(any(), any())
 
             verify(repoContentEntryDaoSpy, timeout(5000)).findUniqueLanguagesInListAsync(eq(rootEntry.contentEntryUid))
-            verify(mockView, timeout(5000)).setLanguageOptions(eq(listOf(selectLang, allLang, Language())))
+            verify(mockView, timeout(5000)).setLanguageOptions(eq(listOf(selectLang, allLang, englishLang, spanishLang)))
 
             verify(repoContentEntryDaoSpy, timeout(5000)).findListOfCategoriesAsync(eq(rootEntry.contentEntryUid))
             verify(mockView, timeout(5000)).setCategorySchemaSpinner(eq(mapOf(categoryTest.contentCategorySchemaUid to listOf(schemaTitle, allSchema, categoryTest))))
