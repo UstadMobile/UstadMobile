@@ -109,9 +109,9 @@ class ContentEntryListPresenterTest {
             categoryTest.contentCategorySchemaUid = 2323L
             categoryTest.schemaName = "Test"
 
-            var englishLang = Language()
+            var englishLang = LangUidAndName()
 
-            var spanishLang = Language()
+            var spanishLang = LangUidAndName()
 
             val contentEntryLiveData = spy(DoorMutableLiveData(rootEntry as ContentEntry?))
 
@@ -119,7 +119,7 @@ class ContentEntryListPresenterTest {
                 on { findLiveContentEntry(rootEntry.contentEntryUid) }.thenReturn(contentEntryLiveData)
                 on {
                     runBlocking {
-                        findUniqueLanguagesInListAsync(rootEntry.contentEntryUid)
+                        findUniqueLanguageWithParentUid(rootEntry.contentEntryUid)
                     }
                 }.thenReturn(listOf(englishLang, spanishLang))
                 on {
@@ -133,12 +133,20 @@ class ContentEntryListPresenterTest {
                 on { contentEntryDao }.thenReturn(repoContentEntryDaoSpy)
             }
 
-            val selectLang = Language()
-            selectLang.name = "Language"
+            val dbContentEntryDaoSpy = spy(umAppDatabase.contentEntryDao) {
+                on {
+                    runBlocking {
+                        findUniqueLanguageWithParentUid(rootEntry.contentEntryUid)
+                    }
+                }.thenReturn(listOf(englishLang, spanishLang))
+            }
+
+            val selectLang = LangUidAndName()
+            selectLang.langName = "Language"
             selectLang.langUid = 0
 
-            val allLang = Language()
-            allLang.name = "All"
+            val allLang = LangUidAndName()
+            allLang.langName = "All"
             allLang.langUid = 0
 
             val schemaTitle = DistinctCategorySchema()
@@ -153,14 +161,14 @@ class ContentEntryListPresenterTest {
 
 
             args[ARG_LIBRARIES_CONTENT] = ""
-            var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, repoSpy)
+            var presenter = ContentEntryListPresenter(context, args, mockView, dbContentEntryDaoSpy, repoContentEntryDaoSpy, mockAccount, systemImpl, repoSpy)
             presenter.onCreate(null)
 
             verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), eq(0), eq(0), eq(0))
             verify(mockView, timeout(5000)).setContentEntryProvider(any())
             verify(contentEntryLiveData).observe(any(), any())
 
-            verify(repoContentEntryDaoSpy, timeout(5000)).findUniqueLanguagesInListAsync(eq(rootEntry.contentEntryUid))
+            verify(repoContentEntryDaoSpy, timeout(5000)).findUniqueLanguageWithParentUid(eq(rootEntry.contentEntryUid))
             verify(mockView, timeout(5000)).setLanguageOptions(eq(listOf(selectLang, allLang, englishLang, spanishLang)))
 
             verify(repoContentEntryDaoSpy, timeout(5000)).findListOfCategoriesAsync(eq(rootEntry.contentEntryUid))

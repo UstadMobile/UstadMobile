@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
+import com.ustadmobile.lib.db.entities.LangUidAndName
 import com.ustadmobile.lib.db.entities.Language
 
 
@@ -113,7 +114,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     }
 
-    override fun setLanguageFilterSpinner(result: List<Language>) {
+    override fun setLanguageFilterSpinner(result: List<LangUidAndName>) {
         runOnUiThread {
             val spinnerLayout = findViewById<LinearLayout>(R.id.content_entry_list_spinner_layout)
             spinnerLayout.visibility = View.VISIBLE

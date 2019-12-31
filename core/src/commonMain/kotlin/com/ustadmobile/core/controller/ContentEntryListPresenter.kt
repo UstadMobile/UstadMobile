@@ -11,10 +11,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.DistinctCategorySchema
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -69,13 +66,16 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
             return
         }
         val resultTitle = entry.title
+        viewContract.runOnUiThread(Runnable {
+            if (resultTitle != null)
+                viewContract.setToolbarTitle(resultTitle)
+        })
 
         val domains = systemImpl.getAppConfigString(
                 AppConfig.KEY_NO_IFRAME, "", context)!!.split(",")
 
         noIframe = domains.contains(entry.publisher)
-        if (resultTitle != null)
-            viewContract.setToolbarTitle(resultTitle)
+
     }
 
 
@@ -92,22 +92,41 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
             viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
 
-        GlobalScope.launch {
-            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid).toMutableList()
+
+        val updateViewFn: (langList: MutableList<LangUidAndName>) -> Unit = { langList ->
             // if only English available, no need to show the spinner
-            if (result.size > 1) {
-                val selectLang = Language()
-                selectLang.name = "Language"
+            if (langList.size > 1) {
+                val selectLang = LangUidAndName()
+                selectLang.langName = "Language"
                 selectLang.langUid = 0
-                result.add(0, selectLang)
+                langList.add(0, selectLang)
 
-                val allLang = Language()
-                allLang.name = "All"
+                val allLang = LangUidAndName()
+                allLang.langName = "All"
                 allLang.langUid = 0
-                result.add(1, allLang)
+                langList.add(1, allLang)
 
-                viewContract.setLanguageOptions(result)
+                viewContract.runOnUiThread(Runnable {
+                    viewContract.setLanguageOptions(langList)
+                })
+
             }
+        }
+
+        GlobalScope.launch {
+            val localResult = contentEntryDao.findUniqueLanguageWithParentUid(parentUid)
+            updateViewFn(localResult.toMutableList())
+
+            try {
+                val remoteResult = contentEntryDaoRepo.findUniqueLanguageWithParentUid(parentUid).toMutableList()
+                if (remoteResult != localResult) {
+                    updateViewFn(remoteResult)
+                }
+            }finally {
+                //do nothing - we couldn't talk to the web
+            }
+
+            contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid)
         }
 
         GlobalScope.launch {
