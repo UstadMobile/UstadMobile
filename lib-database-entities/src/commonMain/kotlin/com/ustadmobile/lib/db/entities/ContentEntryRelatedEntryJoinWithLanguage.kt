@@ -4,10 +4,19 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ContentEntryRelatedEntryJoinWithLanguage : ContentEntryRelatedEntryJoin() {
+class ContentEntryRelatedEntryJoinWithLanguage() : ContentEntryRelatedEntryJoin() {
 
     @Embedded
     var language: Language? = null
+
+    constructor(relatedEntryJoin: ContentEntryRelatedEntryJoin) : this() {
+        super.cerejUid = relatedEntryJoin.cerejUid
+        super.comment = relatedEntryJoin.comment
+        super.relType = relatedEntryJoin.relType
+        super.cerejRelLanguageUid = relatedEntryJoin.cerejRelLanguageUid
+        super.cerejContentEntryUid = relatedEntryJoin.cerejContentEntryUid
+        super.cerejRelatedEntryUid = relatedEntryJoin.cerejRelatedEntryUid
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
