@@ -17,7 +17,7 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.view.UstadViewWithProgress
+import com.ustadmobile.core.view.UstadViewWithProgressDialog
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 
 open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
-        ContentEntryEditFragment.EntryCreationActionListener, UstadViewWithProgress {
+        ContentEntryEditFragment.EntryCreationActionListener, UstadViewWithProgressDialog {
 
 
     internal var coordinatorLayout: CoordinatorLayout? = null
@@ -131,14 +131,11 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
         }
     }
 
-
-    override fun showBaseProgressBar(showProgress: Boolean) {
-        runOnUiThread{
-            if(showProgress){
-                importDialog.show()
-            }else{
-                importDialog.dismiss()
-            }
+    override fun showProgressDialog(show: Boolean) {
+        if(show){
+            importDialog.show()
+        }else{
+            importDialog.dismiss()
         }
     }
 

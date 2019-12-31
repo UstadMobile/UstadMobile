@@ -642,7 +642,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     }
 
     fun handleFileImportDialog(isShowing: Boolean){
-        view.runOnUiThread(Runnable { view.showBaseProgressBar(!isShowing)})
+        view.runOnUiThread(Runnable { view.showProgressDialog(!isShowing)})
     }
 
 
