@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLangName
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import kotlin.js.JsName
 
@@ -40,7 +41,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
             " (SELECT cerejContentEntryUid FROM ContentEntryRelatedEntryJoin WHERE cerejRelatedEntryUid = :contentEntryUid))" +
             " AND ContentEntryRelatedEntryJoin.relType = " + REL_TYPE_TRANSLATED_VERSION)
     @JsName("findAllTranslationsForContentEntryAsync")
-    abstract suspend fun findAllTranslationsForContentEntryAsync(contentEntryUid: Long): List<ContentEntryRelatedEntryJoinWithLanguage>
+    abstract suspend fun findAllTranslationsForContentEntryAsync(contentEntryUid: Long): List<ContentEntryRelatedEntryJoinWithLangName>
 
 
     @Query("""SELECT ContentEntryRelatedEntryJoin.*, Language.* FROM ContentEntryRelatedEntryJoin
