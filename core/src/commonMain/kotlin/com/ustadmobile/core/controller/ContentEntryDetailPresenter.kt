@@ -94,7 +94,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             view.showBaseProgressBar(true)
-            val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsForContentEntryAsync(entryUuid)
+            val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setAvailableTranslations(result)
                 view.showBaseProgressBar(false)

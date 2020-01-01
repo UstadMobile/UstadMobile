@@ -142,7 +142,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         downloadProgress!!.setOnStopDownloadListener(this)
 
         findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
-            if(showControls){
+            if(showControls && ::editButton.isInitialized && editButton.visibility == View.VISIBLE){
                 if (scrollY > oldScrollY) {
                     editButton.hide()
                 } else {
