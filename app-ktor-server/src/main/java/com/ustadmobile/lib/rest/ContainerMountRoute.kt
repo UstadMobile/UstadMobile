@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.application.call
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
 import io.ktor.request.header
@@ -23,8 +24,7 @@ import kotlinx.coroutines.io.ByteWriteChannel
 import kotlinx.coroutines.io.writeFully
 import java.io.File
 import java.io.InputStream
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 import javax.naming.InitialContext
 import kotlin.Comparator
@@ -110,43 +110,48 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
 
                 if(entryWithContainerEntryFile!= null){
 
+                    val isRangeRequest = call.request.headers.contains(HttpHeaders.Range)
+
+                    val httpStatusCode:HttpStatusCode = if(isRangeRequest)
+                        HttpStatusCode.PartialContent else HttpStatusCode.OK
+
                     val entryFile = entryWithContainerEntryFile.containerEntryFile!!
-                    val rangeHeader = if(call.request.headers.contains("Range"))
-                        call.request.header("Range")!! else "bytes=0-"
+                    val rangeHeader = if(isRangeRequest) call.request.header(HttpHeaders.Range)!! else "bytes=0-"
                     val actualFile = File(entryFile.cefPath!!)
 
-                    val simpleDateFormat = SimpleDateFormat("EEE, MM yyyy HH:mm:ss z", Locale.ENGLISH)
-                    val lastModified = simpleDateFormat.format(Date(File(entryFile.cefPath!!).lastModified()))
-
                     val rangeResponse = parseRangeRequestHeader(rangeHeader, entryFile.ceTotalSize)
+                    val contentRange = rangeResponse.responseHeaders[HttpHeaders.ContentRange] ?:"0-${actualFile.length()}"
 
-                    val etag = Integer.toHexString((actualFile.name + lastModified + "" +
-                            rangeResponse.actualContentLength).hashCode())
+                    call.response.header(HttpHeaders.AcceptRanges,rangeResponse.responseHeaders[HttpHeaders.AcceptRanges]?:"bytes")
+                    call.response.header(HttpHeaders.ETag, rangeResponse.responseHeaders[HttpHeaders.ETag]
+                            ?:Integer.toHexString(("${actualFile.name}${actualFile.lastModified()}${actualFile.length()}").hashCode()))
+                    call.response.header(HttpHeaders.ContentRange, contentRange)
+                    call.response.header(HttpHeaders.CacheControl, "cache; max-age=${TimeUnit.MINUTES.toSeconds(60)}")
 
-                    call.response.header("Accept-Ranges","bytes")
-                    call.response.header("Last-Modified", lastModified)
-                    call.response.header("Etag", etag)
-                    call.response.header("Content-Range", "bytes ${rangeResponse.fromByte}" +
-                            "-${rangeResponse.toByte}/${rangeResponse.actualContentLength}")
 
-                    val contentType = UMFileUtil.getContentType(pathInContainer)
+                    if(call.request.headers.contains(HttpHeaders.IfNoneMatch)){
+                        call.respond(HttpStatusCode.NotModified)
+                    }else{
 
-                    var inputStream: InputStream = if(contentType.contentSubtype.contains("video"))
-                        RangeInputStream(actualFile.inputStream(), rangeResponse.fromByte, rangeResponse.toByte)
-                    else actualFile.inputStream()
+                        val contentType = UMFileUtil.getContentType(pathInContainer)
 
-                    if(entryFile.compression == ContainerEntryFile.COMPRESSION_GZIP){
-                        inputStream = GZIPInputStream(inputStream)
-                    }
+                        var inputStream: InputStream = if(contentType.contentSubtype.contains("video"))
+                            RangeInputStream(actualFile.inputStream(), rangeResponse.fromByte, rangeResponse.toByte)
+                        else actualFile.inputStream()
 
-                    call.respond(object : OutgoingContent.WriteChannelContent() {
-                        override val contentType = contentType
-                        override val contentLength = rangeResponse.actualContentLength
-                        override val status = HttpStatusCode(rangeResponse.statusCode,"")
-                        override suspend fun writeTo(channel: ByteWriteChannel) {
-                            channel.writeFully(inputStream.readBytes())
+                        if(entryFile.compression == ContainerEntryFile.COMPRESSION_GZIP){
+                            inputStream = GZIPInputStream(inputStream)
                         }
-                    })
+
+                        call.respond(object : OutgoingContent.WriteChannelContent() {
+                            override val contentType = contentType
+                            override val contentLength = rangeResponse.actualContentLength
+                            override val status = httpStatusCode
+                            override suspend fun writeTo(channel: ByteWriteChannel) {
+                                channel.writeFully(inputStream.readBytes())
+                            }
+                        })
+                    }
 
                 }else{
                     call.respond(HttpStatusCode.NotFound, "No such file in specified in a container, path = $pathInContainer")
