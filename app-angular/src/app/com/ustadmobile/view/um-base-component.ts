@@ -67,6 +67,9 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     }
   }
 
+  /**
+   * Re-run the app when configurations changed
+   */
   restartUI(){
     window.open(UmAngularUtil.getRoutePathParam().origin + "/" + this.systemImpl.getLocale(this.context) + "/", "_self")
   }

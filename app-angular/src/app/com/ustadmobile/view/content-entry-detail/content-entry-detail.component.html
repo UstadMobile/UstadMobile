@@ -25,7 +25,7 @@
     </div>
     <div *ngIf="translations.length > 0" class="row default-padding-top">
       <mz-chip class="open-content" *ngFor="let translation of translations" (click)="handleClickTranslatedEntry(translation)">
-        {{translation.languageName}}
+        {{translation.language.name}}
       </mz-chip>
     </div>
   </div>

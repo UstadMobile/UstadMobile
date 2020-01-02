@@ -116,7 +116,7 @@ abstract class ContainerDao : BaseDao<Container> {
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
 
-    @Query("Select * FROM Container " +
+    @Query("Select Container.containerUid, Container.mimeType FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType?

@@ -69,9 +69,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         navigation = arguments[ARG_REFERRER]
         entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
 
-        if(::entryLiveData.isInitialized){
-            entryLiveData.observe(this, ::onEntryChanged)
-        }
+        entryLiveData.observe(this, ::onEntryChanged)
 
         GlobalScope.launch {
             val result = appRepo.containerDao.getMostRecentContainerForContentEntryAsync(entryUuid)

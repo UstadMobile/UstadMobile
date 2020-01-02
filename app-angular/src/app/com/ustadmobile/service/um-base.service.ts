@@ -132,6 +132,10 @@ export class UmBaseService {
     this.directionality = directionality;
   }
 
+  /**
+   * Get current system locale
+   * @param locale current system locale
+   */
   setSystemLocale(locale){
     this.systemLocale = locale
   }

@@ -72,7 +72,13 @@ core.com.ustadmobile.core.view.ContentEntryDetailView, OnDestroy,
     setDownloadSize() {}
 
     setAvailableTranslations(translations) {
-      this.translations = UmAngularUtil.kotlinListToJsArray(translations) 
+      const tempTranslations = []
+      UmAngularUtil.kotlinListToJsArray(translations).forEach(translation => {
+        if(translation.language){
+          tempTranslations.push(translation)
+        }
+      })
+      this.translations = tempTranslations;
     }
 
     findDownloadJobItemStatusByContentEntryUid() {}
