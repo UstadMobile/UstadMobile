@@ -3,7 +3,7 @@ import core from 'UstadMobile-core'
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 
@@ -19,9 +19,9 @@ export class XapiContentComponent extends UmBaseComponent implements OnDestroy,
 
   private presenter: core.com.ustadmobile.core.controller.XapiPackageContentPresenter
   private navigationSubscription: Subscription;
-  urlToLoad: string = ""
+  safeUrl: SafeResourceUrl = null
 
-  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) { 
+  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, private sanitizer: DomSanitizer, private zone:NgZone) { 
     super(umservice,router, route)
      //Listen for the navigation changes - changes on url
      this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
@@ -48,7 +48,7 @@ export class XapiContentComponent extends UmBaseComponent implements OnDestroy,
 
   loadUrl(url){
     this.zone.run(()=>{
-      this.urlToLoad = url
+      this.safeUrl = this.getSafeUrl(this.sanitizer,url) 
     })
   }
 

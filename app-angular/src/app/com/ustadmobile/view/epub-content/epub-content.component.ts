@@ -5,7 +5,7 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import core from 'UstadMobile-core';
 import { Subscription } from 'rxjs';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
-import {  DomSanitizer } from '@angular/platform-browser';
+import {  DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
  
 @Component({
   selector: 'app-epub-content',
@@ -17,12 +17,12 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
 
   private presenter: core.com.ustadmobile.core.controller.EpubContentPresenter;
   private navigationSubscription: Subscription;
-  urlsToLoad = []
-  urlToLoad = ""
+  sourceUrls = []
+  safeUrl: SafeResourceUrl = null
   currentIndex = 0;
   private inMemoryUrls = [] 
 
-  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) {
+  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute,private sanitizer: DomSanitizer, private zone:NgZone) {
     super(umservice,router, route)
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
@@ -33,14 +33,12 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
 
   onCreate(){
     super.onCreate()
-    console.log("Event caller - onCreate")
     this.presenter = new core.com.ustadmobile.core.controller.EpubContentPresenter(
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this)
     this.presenter.onCreate(null)
   }
 
   ngOnInit() {
-    console.log("Event caller - ngOnInit")
     super.ngOnInit()
     $(document).ready(function() {});
   }
@@ -62,7 +60,7 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
     let allUrls = []
     allUrls.push(url)
     if(this.showIframe == true){
-      this.urlsToLoad = allUrls.concat(this.inMemoryUrls)
+      this.sourceUrls = allUrls.concat(this.inMemoryUrls)
       this.loadPage(0)
     }else{
       this.inMemoryUrls.forEach(url =>{
@@ -74,8 +72,7 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
   private loadPage(index){
     this.zone.run( ()=>{
       this.currentIndex = index
-      this.urlToLoad = this.urlsToLoad[this.currentIndex]
-      console.log("Event caller - loadPage", this.urlToLoad)
+      this.safeUrl =  this.getSafeUrl(this.sanitizer,this.sourceUrls[this.currentIndex])
     })
   }
 
@@ -94,12 +91,14 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
   goToLinearSpinePosition(position){}
 
   goToNextPage(){
+    this.safeUrl = null;
     let nextIndex = this.currentIndex + 1
-    nextIndex = nextIndex >=  this.urlsToLoad.length ? nextIndex = this.urlsToLoad.length - 1: nextIndex
+    nextIndex = nextIndex >=  this.sourceUrls.length ? nextIndex = this.sourceUrls.length - 1: nextIndex
     this.loadPage(nextIndex)
   }
 
   goToPrevPage(){
+    this.safeUrl = null
     let prevIndex = this.currentIndex - 1
     prevIndex = prevIndex <= 0 ? 0: prevIndex
     this.loadPage(prevIndex)

@@ -3,7 +3,7 @@ import { UmBaseComponent } from '../um-base-component';
 import core from 'UstadMobile-core'
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 
@@ -17,9 +17,9 @@ export class VideoPlayerComponent extends UmBaseComponent implements OnDestroy,
 
   private presenter: core.com.ustadmobile.core.controller.VideoPlayerPresenter
   private navigationSubscription: Subscription;
-  urlToLoad: string = ""
+  safeUrl: SafeResourceUrl = null
 
-  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) { 
+  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, private sanitizer: DomSanitizer, private zone:NgZone) { 
     super(umservice,router, route)
 
     //Listen for the navigation changes - changes on url
@@ -49,7 +49,7 @@ export class VideoPlayerComponent extends UmBaseComponent implements OnDestroy,
   setVideoParamsJs(videoPath, audioPath, srtLangList, srtMap){
    this.zone.run(()=>{
      if(this.showIframe == true){
-      this.urlToLoad = videoPath
+      this.safeUrl = this.getSafeUrl(this.sanitizer, videoPath)
      }else{
        super.openOnNewtab(videoPath)
      }

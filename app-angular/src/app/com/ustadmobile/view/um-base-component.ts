@@ -5,6 +5,7 @@ import { OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import core from 'UstadMobile-core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
@@ -88,6 +89,10 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
       }
     }  
     return result;
+  }
+
+  getSafeUrl(sanitizer: DomSanitizer, srcUrl: any){
+    return sanitizer.bypassSecurityTrustResourceUrl(srcUrl);
   }
 
   ngOnDestroy(){}

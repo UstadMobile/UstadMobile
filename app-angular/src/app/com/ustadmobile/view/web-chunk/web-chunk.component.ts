@@ -4,7 +4,7 @@ import { UmBaseComponent } from '../um-base-component';
 import { Subscription } from 'rxjs';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 @Component({
   selector: 'app-web-chunk',
@@ -17,9 +17,9 @@ export class WebChunkComponent extends UmBaseComponent implements OnDestroy,
   
   private presenter: core.com.ustadmobile.core.controller.WebChunkPresenter;
   private navigationSubscription: Subscription;
-  urlToLoad: string
+  safeUrl: SafeResourceUrl = null
 
-  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) {
+  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, private sanitizer: DomSanitizer, private zone:NgZone) {
     super(umservice,router, route)
 
     //Listen for the navigation changes - changes on url
@@ -46,7 +46,7 @@ export class WebChunkComponent extends UmBaseComponent implements OnDestroy,
   loadUrl(url){
     this.zone.run(()=>{
       if(this.showIframe == true){
-        this.urlToLoad = url
+        this.safeUrl = this.getSafeUrl(this.sanitizer, url)
       }else{
         super.openOnNewtab(url)
       }
