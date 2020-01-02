@@ -9,13 +9,13 @@
         "lint": "ng lint",
         "e2e": "ng e2e --watch=false",
         "start:ar": "ng serve --configuration=ar",
-        "build:ar": "ng build --prod --i18n-locale ar --i18n-format xlf --i18n-file src/assets/locale/messages.ar.xlf --output-path=dist/ar --baseHref /web/ar/",
+        "build:ar": "ng build --prod --i18n-locale ar --i18n-format xlf --i18n-file src/assets/locale/messages.ar.xlf --output-path=dist/ar --baseHref /ar/",
         "start:en": "ng serve --configuration=en",
-        "build:en": "ng build --prod --i18n-locale en --i18n-format xlf --i18n-file src/assets/locale/messages.en.xlf --output-path=dist/en --baseHref /web/en/",
+        "build:en": "ng build --prod --i18n-locale en --i18n-format xlf --i18n-file src/assets/locale/messages.en.xlf --output-path=dist/en --baseHref /en/",
         "start:fa": "ng serve --configuration=fa",
-        "build:fa": "ng build --prod --i18n-locale fa --i18n-format xlf --i18n-file src/assets/locale/messages.fa.xlf --output-path=dist/fa --baseHref /web/fa/",
+        "build:fa": "ng build --prod --i18n-locale fa --i18n-format xlf --i18n-file src/assets/locale/messages.fa.xlf --output-path=dist/fa --baseHref /fa/",
         "start:ps": "ng serve --configuration=ps",
-        "build:ps": "ng build --prod --i18n-locale ps --i18n-format xlf --i18n-file src/assets/locale/messages.ps.xlf --output-path=dist/ps --baseHref /web/ps/",
+        "build:ps": "ng build --prod --i18n-locale ps --i18n-format xlf --i18n-file src/assets/locale/messages.ps.xlf --output-path=dist/ps --baseHref /ps/",
         "build-prod": "npm run build:ps && npm run build:fa && npm run build:en && npm run build:ar"
     },
     "private": true,
@@ -68,6 +68,7 @@
         "ktor-ktor-client-json": "file:../build/js/packages_imported/ktor-ktor-client-json/1.2.3/ktor-ktor-client-json-1.2.3.tgz",
         "UstadMobile-lib-database-mpp": "file:../build/js/packages/UstadMobile-lib-database-mpp/UstadMobile-lib-database-mpp-0.2.15.tgz",
         "protractor": "^5.4.2",
+        "axios": "^0.19.0",
         "rxjs-compat": "^6.5.2"
     },
     "devDependencies": {

@@ -71,46 +71,8 @@ export class UmBaseService {
    * @param fireWhenReady fire when true otherwise don't fire any event
    */
   preloadResources(fireWhenReady = true){
-
     UmAngularUtil.setItem(UmAngularUtil.CONTENT_URL_TAG, UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG)+"ContainerMount/")
-
-    if(UmAngularUtil.TEST_ENDPOINT == UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG)){
-      combineLatest([
-        this.http.get("http://localhost:8087/UmAppDatabase/clearAllTables", {responseType: 'text' }),
-        this.http.get<any>("assets/data_entries.json").pipe(map(res => res)),
-        this.http.get<any>("assets/data_entries_parent_join.json").pipe(map(res => res)),
-        this.http.get<any>("assets/data_languages.json").pipe(map(res => res)),
-        this.http.get<any>("assets/data_persons.json").pipe(map(res => res)),
-        this.http.get<any>("assets/data_statements.json").pipe(map(res => res)),
-        this.http.get<any>("assets/data_xlangmap.json").pipe(map(res => res)),
-        this.http.get<any>("assets/data_verbs.json").pipe(map(res => res)),
-      ]).subscribe(dataResponse => { 
-        const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl: UmAngularUtil.getItem("doordb.endpoint.url")} 
-        core.com.ustadmobile.core.impl.UmAccountManager.setActiveAccountWithContext(account, this.component.context)
-        
-        const containerList = [{containerUid: 909090, fileSize: 90909000, mobileOptimized: true}]
-        this.database.containerDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(containerList), this.continuation)
-
-        this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
-
-        this.database.contentEntryParentChildJoinDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[2]), this.continuation)
-
-        this.database.languageDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[3]), this.continuation)
-
-        this.database.personDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[4]), this.continuation)
-        
-        this.database.statementDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[5]), this.continuation)
-        
-        this.database.xLangMapEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[6]), this.continuation)
-
-        this.database.verbDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[7]), this.continuation)
-
-        return this.preloadSystemResources(fireWhenReady)
-      })
-    }else{
-      UmAngularUtil.removeItem("umaccount.personid")
-      return  this.preloadSystemResources(fireWhenReady)
-    }
+    this.preloadSystemResources(fireWhenReady)
   }
 
   private preloadSystemResources(fireWhenReady = true){

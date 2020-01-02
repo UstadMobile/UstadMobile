@@ -33,12 +33,14 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
 
   onCreate(){
     super.onCreate()
+    console.log("Event caller - onCreate")
     this.presenter = new core.com.ustadmobile.core.controller.EpubContentPresenter(
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this)
     this.presenter.onCreate(null)
   }
 
   ngOnInit() {
+    console.log("Event caller - ngOnInit")
     super.ngOnInit()
     $(document).ready(function() {});
   }
@@ -73,6 +75,7 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
     this.zone.run( ()=>{
       this.currentIndex = index
       this.urlToLoad = this.urlsToLoad[this.currentIndex]
+      console.log("Event caller - loadPage", this.urlToLoad)
     })
   }
 

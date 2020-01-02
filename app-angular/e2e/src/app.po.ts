@@ -1,11 +1,8 @@
 import { browser, element, by} from 'protractor';
-
 export const sleepTime = 500;
-
 export const rootUid = "-4103245208651563007"
 
 export class HomePage{
-
   menus = ['Libraries', 'Reports']
   title = 'Ustad Mobile'
   baseUrl = "http://localhost:";
@@ -17,6 +14,7 @@ export class HomePage{
   getPage() {
     return new ElementUtils().getPageElements().componentHome;
   }
+
 }
 
 export class EntryListPage{
