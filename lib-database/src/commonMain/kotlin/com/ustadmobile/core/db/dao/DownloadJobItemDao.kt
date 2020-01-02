@@ -132,7 +132,7 @@ abstract class DownloadJobItemDao {
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid " +
-            "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
+            "ORDER BY DownloadJobItem.djiUid DESC LIMIT 1")
     abstract fun findByContentEntryUid(contentEntryUid: Long): DownloadJobItem?
 
 
