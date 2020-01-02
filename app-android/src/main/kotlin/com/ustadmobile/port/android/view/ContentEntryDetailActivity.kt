@@ -30,6 +30,8 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
+import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -226,22 +228,21 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun setDownloadJobItemStatus(downloadJobItem: DownloadJobItem?) {
         if(currentDownloadJobItemStatus != downloadJobItem?.djiStatus) {
             when {
-                //TODO: change this to allow failed etc. probably best done using an extension method in core
-                downloadJobItem == null -> {
-                    entry_download_open_button.text = resources.getText(R.string.download)
-                    entry_download_open_button.visibility = View.VISIBLE
-                    entry_detail_progress.visibility = View.GONE
-                }
-
-                downloadJobItem.djiStatus == JobStatus.COMPLETE -> {
+                downloadJobItem.isStatusCompletedSuccessfully() -> {
                     entry_download_open_button.visibility = View.VISIBLE
                     entry_download_open_button.text = resources.getText(R.string.open)
                     entry_detail_progress.visibility = View.GONE
                 }
 
-                downloadJobItem.djiStatus < JobStatus.COMPLETE_MIN -> {
+                downloadJobItem.isStatusQueuedOrDownloading() -> {
                     entry_download_open_button.visibility = View.GONE
                     entry_detail_progress.visibility = View.VISIBLE
+                }
+
+                else -> {
+                    entry_download_open_button.text = resources.getText(R.string.download)
+                    entry_download_open_button.visibility = View.VISIBLE
+                    entry_detail_progress.visibility = View.GONE
                 }
             }
 
