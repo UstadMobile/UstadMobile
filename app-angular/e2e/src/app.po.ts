@@ -72,7 +72,7 @@ export class ReportDetails{
 
   views = {"dashboard":"ReportDashboard"}
   launch() {
-    browser.get(browser.baseUrl+'/#/Home/ReportPreview?entryid=0&options=%7B"chartType":100,"yAxis":200,"xAxis":300,"subGroup":302,"whoFilterList":%5B1%5D,"didFilterList":%5B201%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
+    browser.get(browser.baseUrl+'/#/Home/ReportPreview?ref=null&options=%7B"chartType":100,"yAxis":200,"xAxis":302,"subGroup":300,"whoFilterList":%5B1%5D,"didFilterList":%5B200%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
     return new ElementUtils().launchAsync()
   }
   getPage() {

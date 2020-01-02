@@ -30,6 +30,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -98,7 +99,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 networkManagerBle.localAvailabilityManager,
                 networkManagerBle.containerDownloadManager,
                 UmAccountManager.getActiveAccount(viewContext),
-                UstadMobileSystemImpl.instance)
+                UstadMobileSystemImpl.instance, ::goToContentEntry)
         presenter.handleShowEditControls(showControls)
         presenter.onCreate(bundleToMap(Bundle()))
 

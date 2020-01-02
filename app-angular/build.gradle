@@ -145,16 +145,15 @@ task generateLocaleFiles{}
 task deleteTempDirs{
   doLast{
     if(project.file("node_modules").exists()){
-      exec {
-        workingDir appAngularPath
-        commandLine 'rm', '-r',project.file("node_modules").path
-      }
+      delete(project.file("node_modules"))
     }
 
     if(rootProject.buildDir.exists()){
-      exec {
-        commandLine 'rm', '-r',rootProject.buildDir.path
-      }
+      delete(rootProject.buildDir)
+    }
+
+    if(project.file("dist").exists()){
+      delete(project.file("dist"))
     }
   }
 }
@@ -165,10 +164,7 @@ task deleteTempDirs{
 task deletePackageLockJsonFile{
   doLast{
     if(project.file("package-lock.json").exists()){
-      exec {
-        workingDir appAngularPath
-        commandLine 'rm',project.file("package-lock.json").path
-      }
+      delete(project.file("package-lock.json"))
     }
   }
 }
@@ -196,7 +192,7 @@ task executeEnd2EndTests{
   doLast{
     exec {
       workingDir appAngularPath
-      commandLine 'ng', 'e2e', '--port', portNumber ,'--no-webdriver-update'
+      commandLine 'ng', 'e2e', '--port', portNumber
     }
   }
 }
@@ -219,12 +215,12 @@ task executeModuleTest{
  */
 task fixRequiredImports{
   doLast{
-    rootProject.fileTree (dir: "build/js/node_modules",
+    rootProject.fileTree (dir: "app-angular/node_modules",
       includes: ['**/UstadMobile-lib*.js','**/kmpxmlpullparser*.js'], exclude: '**/*.meta.js')
       .each() { File file ->
         String fileContent = new String(Files.readAllBytes(Paths.get(file.path)), "UTF-8")
         if (fileContent.contains("kotlinx-serialization-runtime-js")) {
-          println("Updating ${file.name} ....")
+          println("Updating ${file.path} ....")
           fileContent = fileContent.replace("kotlinx-serialization-runtime-js", "kotlinx-serialization-kotlinx-serialization-runtime")
           FileWriter writer = new FileWriter(file.path)
           writer.write(fileContent)
@@ -301,8 +297,7 @@ task generateLocalizationScripts{
   doLast{
     def angularJson = project.file("angular.json")
     def packageJson = project.file("package.json")
-    def href = project.hasProperty("baseHref") ? baseHref + "/" : ""
-    println("Base href "+href)
+    def href = project.hasProperty("baseDir") ? baseDir + "/" : ""
 
     def packageJsonContent = new JsonSlurper().parseText(packageJson.text)
     def angularJsonContent = new JsonSlurper().parseText(angularJson.text)
@@ -367,6 +362,9 @@ task packPreparedModules{
 task buildProd{
   def directory = rootProject.file("app-angular").path
   def commandScript = project.hasProperty("locale") ?  "build:"+locale :"build-prod"
+  if(project.file("dist").exists()){
+    delete(project.file("dist"))
+  }
   doLast{
     exec {
       workingDir directory
@@ -375,6 +373,83 @@ task buildProd{
   }
 }
 
+/**
+ * Create a zip for distribution version
+ */
+task prepareProductionZip {
+  def directory = project.hasProperty("baseDir") ? baseDir:""
+  def defaultLocale = project.hasProperty("defLoc") ? defLoc:"en"
+  def destFile = project.file("dist-tmp/${directory}")
+
+  task "zipProdFiles"(type: Zip){
+    from project.file("dist-tmp/").path
+    archiveFileName = "webapp-${rootProject.version}.zip"
+    destinationDirectory = project.file("dist")
+  }
+
+  task deleteZipTmps{
+    doLast{
+      if(project.file("dist-tmp").exists()){
+        delete(project.file("dist-tmp"))
+      }
+    }
+  }
+  prepareProductionZip.finalizedBy(zipProdFiles)
+  zipProdFiles.finalizedBy(deleteZipTmps)
+
+  ext.createIndexFile = { redirectionUrl, destination ->
+    //write redirection file
+    FileWriter jsonFile = new FileWriter(project.file(destination))
+    jsonFile.write('<meta http-equiv="refresh" content="1;url='+redirectionUrl+'">')
+    jsonFile.flush()
+  }
+
+  doLast {
+    destFile.mkdirs()
+    copy {
+      from project.file('dist').path
+      into destFile.path
+    }
+    copy {
+      from project.file('src/assets/index.html').path
+      into project.file("dist-tmp/")
+    }
+
+    if(!defaultLocale.isEmpty()){
+      ext.createIndexFile("${directory}${directory.isEmpty() ? "":"/"}${defaultLocale}","dist-tmp/index.html")
+      if(!directory.isEmpty()){
+        ext.createIndexFile(defaultLocale,"dist-tmp/web/index.html")
+      }
+    }
+
+  }
+}
+
+/**
+ * Update database endpoint url for distribution app
+ */
+task updateDistroEndPointUrl{
+  doLast{
+    project.fileTree (dir: "dist", include:'**/appconfig.json').each(){ File appConfig ->
+      def appConfigContent = new JsonSlurper().parseText(appConfig.text)
+      Iterator iterator = appConfigContent.entrySet().iterator()
+      def appConfigObj = new JSONObject()
+      def apiUrl = ""
+      while (iterator.hasNext())  {
+        Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next()
+        if(entry.key == "apiUrl"){
+          apiUrl = entry.value
+        }
+        def isDestro = entry.key == "doordb.endpoint.url" && !apiUrl.isEmpty() && project.hasProperty("baseDir")
+        appConfigObj.put(entry.key, isDestro ? apiUrl : entry.value)
+      }
+
+      FileWriter angularJsonFileWriter = new FileWriter(appConfig.path)
+      angularJsonFileWriter.write(new JsonBuilder(appConfigObj).toPrettyString())
+      angularJsonFileWriter.flush()
+    }
+  }
+}
 
 /**
  * Start angular end to end test
@@ -391,12 +466,12 @@ task ngTest{
 ngTest.dependsOn(build)
 buildProd.dependsOn(build)
 build.dependsOn(installDependencies)
-fixRequiredImports.dependsOn(fixNodeForgeScript)
-packPreparedModules.dependsOn(":core:build")
 installDependencies.dependsOn(packPreparedModules, updateLibsVersion, deletePackageLockJsonFile)
+packPreparedModules.dependsOn(":core:jsJar")
 installDependencies.finalizedBy(generateLocaleFiles)
-generateLocaleFiles.dependsOn(generateMessageXlfTasks)
+generateLocaleFiles.dependsOn(fixRequiredImports,generateMessageXlfTasks)
 generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,generateLocalizationScripts)
+buildProd.finalizedBy(prepareProductionZip)
+prepareProductionZip.dependsOn(updateDistroEndPointUrl)
 executeEnd2EndTests.dependsOn(":app-ktor-server:testWebAppRunFork")
-
 clean.dependsOn(deleteTempDirs)

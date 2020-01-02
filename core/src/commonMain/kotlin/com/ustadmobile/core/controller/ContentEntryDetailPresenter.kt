@@ -68,6 +68,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
         entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
+
         entryLiveData.observe(this, ::onEntryChanged)
 
         GlobalScope.launch {
@@ -165,7 +166,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             if (loginFirst) {
                 impl.go(LoginView.VIEW_NAME, args, view.viewContext)
             } else {
-                goToContentEntry()
+                goToSelectedContentEntry()
             }
         } else if (isDownloadEnabled) {
             view.runOnUiThread(Runnable {
@@ -174,7 +175,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    private fun goToContentEntry() {
+    private fun goToSelectedContentEntry() {
         GlobalScope.launch {
             try {
                 view.showBaseProgressBar(true)

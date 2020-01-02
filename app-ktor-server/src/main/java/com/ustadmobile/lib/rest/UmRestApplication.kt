@@ -15,6 +15,7 @@ import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.features.AutoHeadResponse
 import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation

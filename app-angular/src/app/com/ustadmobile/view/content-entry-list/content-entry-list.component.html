@@ -21,7 +21,7 @@
         <mz-select-container>
           <select mz-select [formControl]="umFilterForm.controls['language']" id="language-select"
             [label]="[label_language_options]">
-            <option *ngFor="let language of languages" value="{{language.langUid}}">{{language.name}}</option>
+            <option *ngFor="let language of languages" value="{{language.langUid}}">{{language.langName}}</option>
           </select>
         </mz-select-container>
       </div>

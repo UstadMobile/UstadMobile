@@ -300,6 +300,7 @@ kotlin {
 
         jsMain {
             dependencies {
+                implementation project(":lib-database-mpp")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
