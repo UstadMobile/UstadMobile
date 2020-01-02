@@ -145,23 +145,15 @@ task generateLocaleFiles{}
 task deleteTempDirs{
   doLast{
     if(project.file("node_modules").exists()){
-      exec {
-        workingDir appAngularPath
-        commandLine 'rm', '-r',project.file("node_modules").path
-      }
+      delete(project.file("node_modules"))
     }
 
     if(rootProject.buildDir.exists()){
-      exec {
-        commandLine 'rm', '-r',rootProject.buildDir.path
-      }
+      delete(rootProject.buildDir)
     }
 
     if(project.file("dist").exists()){
-      exec {
-        workingDir appAngularPath
-        commandLine 'rm', '-r',project.file("dist").path
-      }
+      delete(project.file("dist"))
     }
   }
 }
@@ -172,10 +164,7 @@ task deleteTempDirs{
 task deletePackageLockJsonFile{
   doLast{
     if(project.file("package-lock.json").exists()){
-      exec {
-        workingDir appAngularPath
-        commandLine 'rm',project.file("package-lock.json").path
-      }
+      delete(project.file("package-lock.json"))
     }
   }
 }
