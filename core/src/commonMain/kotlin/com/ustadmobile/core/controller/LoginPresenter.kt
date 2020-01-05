@@ -72,8 +72,11 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     UmAccountManager.setActiveAccount(account, context)
 
                     //make sure the repository knows that it is online
-                    (UmAccountManager.getRepositoryForActiveAccount(context) as DoorDatabaseRepository)
-                            .connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+                    val activeRepository = UmAccountManager.getRepositoryForActiveAccount(context)
+                    if(activeRepository is DoorDatabaseRepository) {
+                        activeRepository.connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+                    }
+
                     impl.go(mNextDest, context)
                 } else {
                     view.runOnUiThread(Runnable {
