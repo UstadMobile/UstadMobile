@@ -151,7 +151,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))""")
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilter")
     abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
