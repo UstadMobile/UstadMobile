@@ -857,6 +857,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                         val entityClassName = entityClass.asClassName()
                         val syncableEntityInfo = SyncableEntityInfo(entityClassName, processingEnv)
                         codeBlock.add("database.execSQL(\"DROP TRIGGER IF EXISTS UPD_${syncableEntityInfo.tableId}\")\n")
+                            .add("database.execSQL(\"DROP TRIGGER IF EXISTS INS_${syncableEntityInfo.tableId}\")\n")
                                 .add(generateSyncTriggersCodeBlock(entityClassName, "database.execSQL",
                                         DoorDbType.SQLITE))
                     }

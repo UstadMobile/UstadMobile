@@ -586,7 +586,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 destOut?.close()
             }
         }
-        val uri = FileProvider.getUriForFile(ctx, context.packageName, file)
+        val uri = FileProvider.getUriForFile(ctx, "${context.packageName}.provider", file)
         if (mMimeType.isNullOrEmpty()) {
             mMimeType = "*/*"
         }
