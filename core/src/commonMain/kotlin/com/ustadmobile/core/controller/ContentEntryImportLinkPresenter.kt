@@ -35,7 +35,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     private var parentContentEntryUid: Long = 0
 
-    private var contentEntryUid: Long? = null
+    private var contentEntryUid = 0L
 
     private var hp5Url: String = ""
 
@@ -48,9 +48,9 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
-        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong()
-        if (contentEntryUid != null) {
+        parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)?.toLong() ?: 0L
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
+        if (contentEntryUid != 0L) {
             updateUIWithExistingContentEntry()
         }
 
@@ -62,7 +62,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         checkProgressBar()
         return GlobalScope.launch {
 
-            val contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid!!)
+            val contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid)
             videoTitle = contentEntry!!.title
             handleTitleChanged(videoTitle!!)
 
@@ -153,8 +153,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 contentType = VIDEO
                 hp5Url = url
                 view.showUrlStatus(true, "")
-                view.showHideVideoTitle(contentEntryUid == null)
-                if (contentEntryUid != null) {
+                view.showHideVideoTitle(contentEntryUid == 0L)
+                if (contentEntryUid != 0L) {
                     handleTitleChanged(videoTitle!!)
                 }
                 jobCount--
@@ -209,7 +209,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
-                            if (contentEntryUid != null) parameter("contentEntryUid", contentEntryUid)
+                            if (contentEntryUid != 0L) parameter("contentEntryUid", contentEntryUid)
                         }
 
                     }
@@ -226,7 +226,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
                             parameter("title", videoTitle)
-                            if (contentEntryUid != null) parameter("contentEntryUid", contentEntryUid)
+                            if (contentEntryUid != 0L) parameter("contentEntryUid", contentEntryUid)
                         }
                     }
                 }
@@ -242,7 +242,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 view.enableDisableEditText(true)
 
                 db.contentEntryDao.insertWithReplace(content.contentEntry)
-                if (contentEntryUid == null) {
+                if (contentEntryUid == 0L) {
                     db.contentEntryParentChildJoinDao.insertWithReplace(content.parentChildJoin)
                 }
                 db.containerDao.insertWithReplace(content.container)

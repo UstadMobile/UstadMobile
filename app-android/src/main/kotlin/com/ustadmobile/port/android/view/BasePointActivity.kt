@@ -358,7 +358,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                 GlobalScope.launch {
                     val database = UmAppDatabase.getInstance(this)
                     database.networkNodeDao.deleteAllAsync()
-                    database.entryStatusResponseDao.deleteAllAsync()
+                    //database.entryStatusResponseDao.deleteAllAsync()
                     database.downloadJobItemHistoryDao.deleteAllAsync()
                     database.downloadJobDao.deleteAllAsync()
                     database.contentEntryStatusDao.deleteAllAsync()

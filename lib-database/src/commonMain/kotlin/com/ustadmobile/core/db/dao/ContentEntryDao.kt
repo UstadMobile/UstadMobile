@@ -91,7 +91,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findAllLanguageRelatedEntriesAsync")
     abstract suspend fun findAllLanguageRelatedEntriesAsync(entryUuid: Long): List<ContentEntry>
 
-
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     @Query("SELECT DISTINCT ContentCategory.contentCategoryUid, ContentCategory.name AS categoryName, " +
             "ContentCategorySchema.contentCategorySchemaUid, ContentCategorySchema.schemaName FROM ContentEntry " +
             "LEFT JOIN ContentEntryContentCategoryJoin ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
@@ -103,13 +103,20 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findListOfCategoriesAsync")
     abstract suspend fun findListOfCategoriesAsync(parentUid: Long): List<DistinctCategorySchema>
 
-
     @Query("SELECT DISTINCT Language.* from Language " +
             "LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid " +
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
     @JsName("findUniqueLanguagesInListAsync")
     abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
+
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    @Query("""SELECT DISTINCT Language.langUid, Language.name AS langName from Language
+        LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid
+        LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+        WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name""")
+    @JsName("findUniqueLanguageWithParentUid")
+    abstract suspend fun findUniqueLanguageWithParentUid(parentUid: Long): List<LangUidAndName>
 
     @Update
     abstract override fun update(entity: ContentEntry)

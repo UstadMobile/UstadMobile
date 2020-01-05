@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.application.call
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
 import io.ktor.request.header
@@ -18,13 +19,15 @@ import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
+import io.ktor.routing.head
 import io.ktor.routing.route
+import io.ktor.util.cio.write
+import io.netty.handler.codec.http.HttpResponseStatus
 import kotlinx.coroutines.io.ByteWriteChannel
 import kotlinx.coroutines.io.writeFully
 import java.io.File
 import java.io.InputStream
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 import javax.naming.InitialContext
 import kotlin.Comparator
@@ -91,6 +94,44 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
 
         }
 
+        head("/{containerUid}/{paths...}"){
+            val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
+            val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
+
+            val iContext = InitialContext()
+            val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+            val containerDir = File(containerDirPath)
+            containerDir.mkdirs()
+
+            val container = db.containerDao.findByUid(containerUid)
+            if(container != null){
+                val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+                val entryWithContainerEntryFile  = containerManager.getEntry(pathInContainer)
+
+                if(entryWithContainerEntryFile!= null){
+                    val containerEntryFile = entryWithContainerEntryFile.containerEntryFile
+                    if(containerEntryFile != null){
+                        val actualFile = File(containerEntryFile.cefPath as String)
+                        val eTag = Integer.toHexString(("${actualFile.name}${actualFile.lastModified()}${actualFile.length()}").hashCode())
+                        call.response.header(HttpHeaders.CacheControl, "cache; max-age=${TimeUnit.MINUTES.toSeconds(60)}")
+                        call.response.header(HttpHeaders.ETag, eTag)
+                        val contentType = UMFileUtil.getContentType(pathInContainer)
+                        call.respond(object : OutgoingContent.NoContent(){
+                            override val contentType = contentType
+                            override val contentLength = actualFile.length()
+                            override val status = HttpStatusCode.OK
+                        })
+                    }else{
+                        call.respond(HttpStatusCode.NotFound, "No such file in specified in a container, path = $pathInContainer")
+                    }
+                }else{
+                    call.respond(HttpStatusCode.NotFound, "No such file in specified in a container, path = $pathInContainer")
+                }
+            }else{
+                call.respond(HttpStatusCode.NotFound, "No such container: $containerUid")
+            }
+        }
+
 
         get("/{containerUid}/{paths...}") {
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
@@ -110,43 +151,52 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
 
                 if(entryWithContainerEntryFile!= null){
 
-                    val entryFile = entryWithContainerEntryFile.containerEntryFile!!
-                    val rangeHeader = if(call.request.headers.contains("Range"))
-                        call.request.header("Range")!! else "bytes=0-"
-                    val actualFile = File(entryFile.cefPath!!)
+                    val isRangeRequest = call.request.headers.contains(HttpHeaders.Range)
 
-                    val simpleDateFormat = SimpleDateFormat("EEE, MM yyyy HH:mm:ss z", Locale.ENGLISH)
-                    val lastModified = simpleDateFormat.format(Date(File(entryFile.cefPath!!).lastModified()))
+                    val containerEntryFile = entryWithContainerEntryFile.containerEntryFile
+                    if(containerEntryFile != null){
+                        val actualFile = File(containerEntryFile.cefPath as String)
 
-                    val rangeResponse = parseRangeRequestHeader(rangeHeader, entryFile.ceTotalSize)
-
-                    val etag = Integer.toHexString((actualFile.name + lastModified + "" +
-                            rangeResponse.actualContentLength).hashCode())
-
-                    call.response.header("Accept-Ranges","bytes")
-                    call.response.header("Last-Modified", lastModified)
-                    call.response.header("Etag", etag)
-                    call.response.header("Content-Range", "bytes ${rangeResponse.fromByte}" +
-                            "-${rangeResponse.toByte}/${rangeResponse.actualContentLength}")
-
-                    val contentType = UMFileUtil.getContentType(pathInContainer)
-
-                    var inputStream: InputStream = if(contentType.contentSubtype.contains("video"))
-                        RangeInputStream(actualFile.inputStream(), rangeResponse.fromByte, rangeResponse.toByte)
-                    else actualFile.inputStream()
-
-                    if(entryFile.compression == ContainerEntryFile.COMPRESSION_GZIP){
-                        inputStream = GZIPInputStream(inputStream)
-                    }
-
-                    call.respond(object : OutgoingContent.WriteChannelContent() {
-                        override val contentType = contentType
-                        override val contentLength = rangeResponse.actualContentLength
-                        override val status = HttpStatusCode(rangeResponse.statusCode,"")
-                        override suspend fun writeTo(channel: ByteWriteChannel) {
-                            channel.writeFully(inputStream.readBytes())
+                        val rangeHeader = if(isRangeRequest) call.request.header(HttpHeaders.Range) as String else "bytes=0-"
+                        val rangeResponse = parseRangeRequestHeader(rangeHeader, containerEntryFile.ceTotalSize)
+                        rangeResponse.responseHeaders.forEach{
+                            if(it.key != HttpHeaders.ContentLength && it.key != HttpHeaders.AcceptRanges){
+                                call.response.header(it.key, it.value)
+                            }
                         }
-                    })
+
+                        val eTag = Integer.toHexString(("${actualFile.name}${actualFile.lastModified()}${actualFile.length()}").hashCode())
+                        call.response.header(HttpHeaders.ETag, eTag)
+                        call.response.header(HttpHeaders.CacheControl, "cache; max-age=${TimeUnit.MINUTES.toSeconds(60)}")
+                        val ifNonMatch = call.request.headers[HttpHeaders.IfNoneMatch]
+
+                        if(ifNonMatch != null && eTag == ifNonMatch){
+                            call.respond(HttpStatusCode.NotModified)
+                        }else{
+
+                            val contentType = UMFileUtil.getContentType(pathInContainer)
+                            var inputStream: InputStream = if(contentType.contentSubtype.contains("video"))
+                                RangeInputStream(actualFile.inputStream(), rangeResponse.fromByte, rangeResponse.toByte)
+                            else actualFile.inputStream()
+
+                            if(containerEntryFile.compression == ContainerEntryFile.COMPRESSION_GZIP){
+                                inputStream = GZIPInputStream(inputStream)
+                            }
+
+                            call.respond(object : OutgoingContent.WriteChannelContent() {
+                                override val contentType = contentType
+                                override val contentLength = rangeResponse.actualContentLength
+                                override val status = if(isRangeRequest)
+                                    HttpStatusCode.PartialContent else HttpStatusCode.OK
+                                override suspend fun writeTo(channel: ByteWriteChannel) {
+                                    channel.writeFully(inputStream.readBytes())
+                                }
+                            })
+                        }
+
+                    }else{
+                        call.respond(HttpStatusCode.NotFound, "No such file in specified in a container, path = $pathInContainer")
+                    }
 
                 }else{
                     call.respond(HttpStatusCode.NotFound, "No such file in specified in a container, path = $pathInContainer")

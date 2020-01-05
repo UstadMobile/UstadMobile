@@ -23,6 +23,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
+        missingDimensionStrategy 'config', 'vanilla'
     }
     compileOptions {
         sourceCompatibility = '1.8'
@@ -299,6 +300,7 @@ kotlin {
 
         jsMain {
             dependencies {
+                implementation project(":lib-database-mpp")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"

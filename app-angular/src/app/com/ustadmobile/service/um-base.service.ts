@@ -49,7 +49,6 @@ export class UmBaseService {
         });
         mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
         this.database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(this.component.context)
-        console.log(this.database)
     });
   }
 
@@ -88,9 +87,10 @@ export class UmBaseService {
       ]).subscribe(dataResponse => { 
         const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl: UmAngularUtil.getItem("doordb.endpoint.url")} 
         core.com.ustadmobile.core.impl.UmAccountManager.setActiveAccountWithContext(account, this.component.context)
+        
         const containerList = [{containerUid: 909090, fileSize: 90909000, mobileOptimized: true}]
-        this.database.containerDao.insertAsync(UmAngularUtil.jsArrayToKotlinList(containerList), this.continuation)
-        console.log(this.database.containerDao)
+        this.database.containerDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(containerList), this.continuation)
+
         this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
 
         this.database.contentEntryParentChildJoinDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[2]), this.continuation)
@@ -132,6 +132,10 @@ export class UmBaseService {
     this.directionality = directionality;
   }
 
+  /**
+   * Get current system locale
+   * @param locale current system locale
+   */
   setSystemLocale(locale){
     this.systemLocale = locale
   }

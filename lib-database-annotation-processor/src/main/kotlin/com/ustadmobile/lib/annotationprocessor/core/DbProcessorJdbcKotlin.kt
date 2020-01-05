@@ -743,7 +743,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
         }
 
-
+        writeMigrationTemplates(dbTypeElement)
         dbImplFile.addType(dbImplType.build())
 
         return dbImplFile.build()
@@ -844,6 +844,38 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .add("_con?.close()\n")
                 .endControlFlow()
         return createTablesFunSpec.addCode(codeBlock.build()).build()
+    }
+
+
+    fun writeMigrationTemplates(dbTypeElement: TypeElement) {
+        val fixSqliteUpdateTriggerDest = processingEnv.options[ARG_MIGRATION_TEMPLATE_SQLITE_UPDATE_TRIGGER]
+        if(fixSqliteUpdateTriggerDest != null) {
+            val codeBlock = CodeBlock.builder()
+            entityTypesOnDb(dbTypeElement, processingEnv)
+                    .filter { it.getAnnotation(SyncableEntity::class.java) != null }
+                    .forEach {entityClass ->
+                        val entityClassName = entityClass.asClassName()
+                        val syncableEntityInfo = SyncableEntityInfo(entityClassName, processingEnv)
+                        codeBlock.add("database.execSQL(\"DROP TRIGGER IF EXISTS UPD_${syncableEntityInfo.tableId}\")\n")
+                                .add(generateSyncTriggersCodeBlock(entityClassName, "database.execSQL",
+                                        DoorDbType.SQLITE))
+                    }
+
+            val destFile = File(fixSqliteUpdateTriggerDest)
+            if(!destFile.parentFile.exists()) {
+                destFile.parentFile.mkdirs()
+            }
+
+
+            FileSpec.builder(dbTypeElement.asClassName().packageName, "FixSqliteTrigger")
+                    .addType(TypeSpec.classBuilder("FixSqliteTrigger")
+                            .addFunction(FunSpec.builder("doFix")
+                                    .addCode(codeBlock.build())
+                                    .build())
+                            .build())
+                    .build().writeTo(File(fixSqliteUpdateTriggerDest))
+
+        }
     }
 
     fun generateClearAllTablesFun(dbTypeElement: TypeElement): FunSpec {
@@ -1158,6 +1190,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
     companion object {
 
         const val SUFFIX_JDBC_KT = "JdbcKt"
+
+        const val ARG_MIGRATION_TEMPLATE_SQLITE_UPDATE_TRIGGER = "doordb_template_fixupdatetrigger_sqlite"
 
     }
 }

@@ -12,7 +12,6 @@ import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -87,23 +86,31 @@ class ContentEntryDetailPresenterTest {
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppRepository = umAppDatabase //for this test there is no difference
 
+        var englishLang = Language()
+        englishLang.name = "English"
+        englishLang.langUid = umAppDatabase.languageDao.insert(englishLang)
+
+        var spanishLang = Language()
+        spanishLang.name = "Spanish"
+        spanishLang.langUid = umAppDatabase.languageDao.insert(spanishLang)
+
         contentEntry = ContentEntry()
+        contentEntry.primaryLanguageUid = englishLang.langUid
         contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
 
         translatedEntry = ContentEntry()
+        translatedEntry.primaryLanguageUid = spanishLang.langUid
         translatedEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(translatedEntry)
 
         val spanishEnglishJoin = ContentEntryRelatedEntryJoin()
         spanishEnglishJoin.cerejContentEntryUid = contentEntry.contentEntryUid
         spanishEnglishJoin.cerejRelatedEntryUid = translatedEntry.contentEntryUid
-        spanishEnglishJoin.cerejRelLanguageUid = 3
+        spanishEnglishJoin.cerejRelLanguageUid = translatedEntry.primaryLanguageUid
         spanishEnglishJoin.relType = ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION
         spanishEnglishJoin.cerejUid = umAppDatabase.contentEntryRelatedEntryJoinDao.insert(spanishEnglishJoin)
 
-        relatedJoin = ContentEntryRelatedEntryJoinWithLanguage()
-        relatedJoin.cerejContentEntryUid = contentEntry.contentEntryUid
-        relatedJoin.cerejRelatedEntryUid = translatedEntry.contentEntryUid
-
+        relatedJoin = ContentEntryRelatedEntryJoinWithLanguage(spanishEnglishJoin)
+        relatedJoin.language = spanishLang
 
         var container = Container()
         container.containerContentEntryUid = contentEntry.contentEntryUid
@@ -122,7 +129,7 @@ class ContentEntryDetailPresenterTest {
             whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(contentEntry.contentEntryUid)).thenReturn(downloadJobItemLiveData)
         }
 
-        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
     }
 
 
@@ -203,7 +210,7 @@ class ContentEntryDetailPresenterTest {
 
         verify(mockView, timeout(5000)).setAvailableTranslations(eq(listOf(relatedJoin)))
 
-        var args = mapOf(UstadView.ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
+        var args = mapOf(ARG_CONTENT_ENTRY_UID to translatedEntry.contentEntryUid.toString())
 
         presenter.handleClickTranslatedEntry(translatedEntry.contentEntryUid)
         verify(systemImpl).go(eq(ContentEntryDetailView.VIEW_NAME), eq(args), any())

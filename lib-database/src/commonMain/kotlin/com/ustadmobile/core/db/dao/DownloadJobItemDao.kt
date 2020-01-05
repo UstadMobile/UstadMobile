@@ -132,7 +132,7 @@ abstract class DownloadJobItemDao {
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid " +
-            "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
+            "ORDER BY DownloadJobItem.djiUid DESC LIMIT 1")
     abstract fun findByContentEntryUid(contentEntryUid: Long): DownloadJobItem?
 
 
@@ -149,12 +149,12 @@ abstract class DownloadJobItemDao {
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
     abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
 
-    @Query("""SELECT Container.containerUid, Container.mimeType from DownloadJobItem 
+    @Query("""SELECT Container.* from DownloadJobItem 
         LEFT JOIN Container ON DownloadJobItem.djiContainerUid = Container.containerUid 
         WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid AND DownloadJobItem.djiStatus = $COMPLETE
         ORDER BY Container.cntLastModified DESC LIMIT 1
     """)
-    abstract suspend fun findMostRecentContainerDownloaded(contentEntryUid: Long): ContainerUidAndMimetype?
+    abstract suspend fun findMostRecentContainerDownloaded(contentEntryUid: Long): ContainerUidAndMimeType?
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.AppConfig
@@ -11,10 +12,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.DistinctCategorySchema
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -66,75 +64,101 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private fun onContentEntryChanged(entry: ContentEntry?) {
         if (entry == null) {
-            viewContract.runOnUiThread(Runnable { viewContract.showError() })
             return
         }
         val resultTitle = entry.title
+        viewContract.runOnUiThread(Runnable {
+            if (resultTitle != null)
+                viewContract.setToolbarTitle(resultTitle)
+        })
 
         val domains = systemImpl.getAppConfigString(
                 AppConfig.KEY_NO_IFRAME, "", context)!!.split(",")
 
         noIframe = domains.contains(entry.publisher)
-        if (resultTitle != null)
-            viewContract.setToolbarTitle(resultTitle)
+
     }
 
 
     private fun showContentByParent() {
-        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0, activeAccount?.personUid
+        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong() ?: 0L
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, activeAccount?.personUid
                 ?: 0)
         viewContract.setContentEntryProvider(provider)
 
         try {
-            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid!!)
+            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid)
             entryLiveData.observe(this, this::onContentEntryChanged)
         } catch (e: Exception) {
             viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
 
-        GlobalScope.launch {
-            val result = contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
-            if (result.size > 1) {
-                val selectLang = Language()
-                selectLang.name = "Language"
+
+        val updateViewFn: (langList: MutableList<LangUidAndName>) -> Unit = { langList ->
+            // if only English available, no need to show the spinner
+            if (langList.size > 1) {
+                val selectLang = LangUidAndName()
+                selectLang.langName = "Language"
                 selectLang.langUid = 0
-                result.add(0, selectLang)
+                langList.add(0, selectLang)
 
-                val allLang = Language()
-                allLang.name = "All"
+                val allLang = LangUidAndName()
+                allLang.langName = "All"
                 allLang.langUid = 0
-                result.add(1, allLang)
+                langList.add(1, allLang)
 
-                viewContract.setLanguageOptions(result)
+                viewContract.runOnUiThread(Runnable {
+                    viewContract.setLanguageOptions(langList)
+                })
+
             }
         }
 
         GlobalScope.launch {
-            val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid!!)
-            val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
-            for (schema in result) {
-                var data: MutableList<DistinctCategorySchema>? =
-                        schemaMap[schema.contentCategorySchemaUid] as MutableList<DistinctCategorySchema>?
-                if (data == null) {
-                    data = ArrayList()
-                    val schemaTitle = DistinctCategorySchema()
-                    schemaTitle.categoryName = schema.schemaName
-                    schemaTitle.contentCategoryUid = 0
-                    schemaTitle.contentCategorySchemaUid = 0
-                    data.add(0, schemaTitle)
+            val localResult = contentEntryDao.findUniqueLanguageWithParentUid(parentUid)
+            updateViewFn(localResult.toMutableList())
 
-                    val allSchema = DistinctCategorySchema()
-                    allSchema.categoryName = "All"
-                    allSchema.contentCategoryUid = 0
-                    allSchema.contentCategorySchemaUid = 0
-                    data.add(1, allSchema)
-
+            try {
+                val remoteResult = contentEntryDaoRepo.findUniqueLanguageWithParentUid(parentUid).toMutableList()
+                if (remoteResult != localResult) {
+                    updateViewFn(remoteResult)
                 }
-                data.add(schema)
-                schemaMap[schema.contentCategorySchemaUid] = data
+            }catch(e: Exception) {
+                Napier.e({"Exception loading language list"}, e)
             }
-            viewContract.setCategorySchemaSpinner(schemaMap)
+
+            contentEntryDaoRepo.findUniqueLanguagesInListAsync(parentUid)
+        }
+
+        GlobalScope.launch {
+            try {
+                val result = contentEntryDaoRepo.findListOfCategoriesAsync(parentUid)
+                val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
+                for (schema in result) {
+                    var data: MutableList<DistinctCategorySchema>? =
+                            schemaMap[schema.contentCategorySchemaUid] as MutableList<DistinctCategorySchema>?
+                    if (data == null) {
+                        data = ArrayList()
+                        val schemaTitle = DistinctCategorySchema()
+                        schemaTitle.categoryName = schema.schemaName
+                        schemaTitle.contentCategoryUid = 0
+                        schemaTitle.contentCategorySchemaUid = 0
+                        data.add(0, schemaTitle)
+
+                        val allSchema = DistinctCategorySchema()
+                        allSchema.categoryName = "All"
+                        allSchema.contentCategoryUid = 0
+                        allSchema.contentCategorySchemaUid = 0
+                        data.add(1, allSchema)
+
+                    }
+                    data.add(schema)
+                    schemaMap[schema.contentCategorySchemaUid] = data
+                }
+                viewContract.setCategorySchemaSpinner(schemaMap)
+            }catch(e: Exception) {
+                Napier.e({"Exception loading list of categories"}, e)
+            }
         }
     }
 
@@ -156,21 +180,21 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
-        systemImpl.go(destView, args, view.viewContext)
+        systemImpl.go(destView, args, context)
 
     }
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory, activeAccount?.personUid
+        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
                 ?: 0))
     }
 
@@ -178,13 +202,12 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     fun handleUpNavigation() {
         systemImpl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
-
     }
 
     @JsName("handleDownloadStatusButtonClicked")
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
         systemImpl.go("DownloadDialog",
-                mapOf("contentEntryUid" to entry.contentEntryUid.toString()), context)
+                mapOf(ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()), context)
     }
 
 
@@ -196,25 +219,23 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
         args[ContentEntryEditView.CONTENT_TYPE] = contentType.toString()
 
-        view.runOnUiThread(Runnable {
-            when (contentType) {
-                ContentEntryListView.CONTENT_CREATE_FOLDER -> {
-                    args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
-                }
-
-                ContentEntryListView.CONTENT_IMPORT_FILE -> {
-                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
-                }
-
-                ContentEntryListView.CONTENT_CREATE_CONTENT -> {
-                    systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
-                }
-                ContentEntryListView.CONTENT_IMPORT_LINK -> {
-                    systemImpl.go(ContentEntryImportLinkView.VIEW_NAME, args, this.context)
-                }
+        when (contentType) {
+            ContentEntryListView.CONTENT_CREATE_FOLDER -> {
+                args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+                systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
             }
-        })
+
+            ContentEntryListView.CONTENT_IMPORT_FILE -> {
+                systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+            }
+
+            ContentEntryListView.CONTENT_CREATE_CONTENT -> {
+                systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this.context)
+            }
+            ContentEntryListView.CONTENT_IMPORT_LINK -> {
+                systemImpl.go(ContentEntryImportLinkView.VIEW_NAME, args, this.context)
+            }
+        }
     }
 
     fun handleClickEditButton() {
@@ -224,7 +245,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args[ARG_CONTENT_ENTRY_UID] = parentUid.toString()
         args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
         args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-        systemImpl.go(ContentEntryEditView.VIEW_NAME, args, this)
+        systemImpl.go(ContentEntryEditView.VIEW_NAME, args, context)
     }
 
     companion object {

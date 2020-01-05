@@ -1,6 +1,6 @@
 import { UmAngularUtil } from './../../util/UmAngularUtil';
 import {Component, NgZone, OnDestroy} from '@angular/core';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd, NavigationStart } from '@angular/router';
 import core from 'UstadMobile-core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
@@ -58,15 +58,14 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
   onCreate() {
     super.onCreate()
     this.pageIndex = 1
-    this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter(
+    this.presenter = new core.com.ustadmobile.core.controller.ContentEntryListPresenter(
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, 
       this.umService.getDbInstance().contentEntryDao,
-      this.umService.getDbInstance().contentEntryDao,
-      core.com.ustadmobile.core.impl.UmAccountManager.getRepositoryForActiveAccount(this.context)
-      );
+      this.umService.getDbInstance().contentEntryDao, 
+      this.getActiveAccount(), this.systemImpl,this.umService.getDbInstance());
     this.presenter.onCreate(null);
     this.setToolbarTitle("...")
-    this.label_language_options = this.getString(this.MessageID.also_available_in);
+    this.label_language_options = this.getString(this.MessageID.language);
     this.label_reading_level = this.getString(this.MessageID.library_reading_level);
   }
 
@@ -108,6 +107,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
       if(!error){
         context.zone.run( ()=>{
           context.entryList = context.entryList.concat(UmAngularUtil.kotlinListToJsArray(entries))
+          UmAngularUtil.scrollToTop();
         })
       }else{
         console.error(error)

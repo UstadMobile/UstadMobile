@@ -18,6 +18,7 @@ actual abstract class DoorDatabase {
     abstract val dbVersion: Int
 
     var jdbcDbType: Int = -1
+        protected set
 
     var arraySupported: Boolean = false
         private set
@@ -75,7 +76,7 @@ actual abstract class DoorDatabase {
         setupFromDataSource()
     }
 
-    internal val sqlDatabaseImpl = object: DoorSqlDatabase {
+    inner class DoorSqlDatabaseImpl : DoorSqlDatabase {
         override fun execSQL(sql: String) {
             var dbConnection = null as Connection?
             var stmt = null as Statement?
@@ -89,9 +90,14 @@ actual abstract class DoorDatabase {
                 stmt?.close()
                 dbConnection?.close()
             }
-
         }
+
+        val jdbcDbType: Int
+            get() = this@DoorDatabase.jdbcDbType
+
     }
+
+    internal val sqlDatabaseImpl = DoorSqlDatabaseImpl()
 
     protected fun setupFromDataSource() {
         var dbConnection = null as Connection?
