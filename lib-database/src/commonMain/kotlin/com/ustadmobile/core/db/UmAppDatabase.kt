@@ -302,7 +302,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         /**
          * Master changes and sel field renames
          */
-        val MIGRATION_27_101028 = object : DoorMigration(27, 100028) {
+        val MIGRATION_27_100028 = object : DoorMigration(27, 100028) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("DROP TABLE EntryStatusResponse")
 
@@ -393,7 +393,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
          * Inventory Migration
          *
          */
-        val MIGRATION_28_100029 = object : DoorMigration(100028, 100029) {
+        val MIGRATION_100028_100029 = object : DoorMigration(100028, 100029) {
             override fun migrate(database: DoorSqlDatabase) {
                 if (database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("""CREATE TABLE IF NOT EXISTS InventoryItem 
@@ -3377,60 +3377,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
-            builder.addMigrations(object: DoorMigration(27,29){
-
-                override fun migrate(database: DoorSqlDatabase) {
-                    //do nothing
-                    println("migration from 28 - 29")
-                    //Three new entities:
-                    //InventoryItem::class, InventoryTransaction::class, SaleDelivery::class
-                    database.execSQL("""
-                        CREATE TABLE InventoryItem 
-                            (inventoryItemUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                            inventoryItemSaleProductUid INTEGER NOT NULL, 
-                            inventoryItemLeUid INTEGER NOT NULL, 
-                            inventoryItemWeUid INTEGER NOT NULL, 
-                            inventoryItemDateAdded INTEGER NOT NULL, 
-                            inventoryItemDayAdded INTEGER NOT NULL, 
-                            inventoryItemActive INTEGER NOT NULL, 
-                            inventoryItemMCSN INTEGER NOT NULL, 
-                            inventoryItemLCSN INTEGER NOT NULL, 
-                            inventoryItemLCB INTEGER NOT NULL)
-                    """)
-                    database.execSQL("""
-                        CREATE TABLE InventoryTransaction 
-                            (inventoryTransactionUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                            inventoryTransactionInventoryItemUid INTEGER NOT NULL,
-                            inventoryTransactionFromLeUid INTEGER NOT NULL,
-                            inventoryTransactionSaleUid INTEGER NOT NULL,
-                            inventoryTransactionSaleItemUid INTEGER NOT NULL,
-                            inventoryTransactionToLeUid INTEGER NOT NULL,
-                            inventoryTransactionDate INTEGER NOT NULL,
-                            inventoryTransactionDay INTEGER NOT NULL,
-                            inventoryTransactionActive INTEGER NOT NULL,
-                            inventoryTransactionSaleDeliveryUid INTEGER NOT NULL,
-                            inventoryTransactionItemMCSN INTEGER NOT NULL, 
-                            inventoryTransactionItemLCSN INTEGER NOT NULL, 
-                            inventoryTransactionItemLCB INTEGER NOT NULL)
-                    """)
-                    database.execSQL(""" 
-                       CREATE TABLE SaleDelivery 
-                            (saleDeliveryUid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                            saleDeliverySaleUid INTEGER NOT NULL, 
-                            saleDeliverySignature TEXT NOT NULL, 
-                            saleDeliveryPersonUid INTEGER NOT NULL, 
-                            saleDeliveryDate INTEGER NOT NULL, 
-                            saleDeliveryActive INTEGER NOT NULL, 
-                            saleDeliveryMCSN INTEGER NOT NULL, 
-                            saleDeliveryLCSN INTEGER NOT NULL, 
-                            saleDeliveryLCB INTEGER NOT NULL) 
-                    """)
-
-                }
-            })
-
-
-
 
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {
@@ -4495,8 +4441,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
                 }
             })
-
-            //builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29)
+            
+            builder.addMigrations(MIGRATION_27_100028, MIGRATION_100028_100029, MIGRATION_100029_101029)
 
             return builder
         }
