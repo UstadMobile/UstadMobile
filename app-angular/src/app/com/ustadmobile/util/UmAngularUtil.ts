@@ -2,6 +2,9 @@ import core from 'UstadMobile-core';
 import {Observable} from 'rxjs';
 import util from 'UstadMobile-lib-util';
 
+/**
+ * All app routes
+ */
 export const appRountes = {
   "entryList":"ContentEntryList", "entryDetails":"ContentEntryDetail", "register":"RegisterAccount",
   "login":"Login", "epub":"EpubContent", "video":"VideoPlayer", "web":"webChunk", "reportDashboard":"ReportDashboard",
@@ -9,16 +12,22 @@ export const appRountes = {
   "reportPreview":"ReportPreview", "profile":"UserProfile", "home":"Home"
 }
 
+/**
+ * Custom event used for inter-components communication
+ */
 export interface UmEvent extends Event{
   key: string;
   value: string;
 }
 
+/**
+ * Util class contains all utility methods
+ */
 export class UmAngularUtil {
   constructor(){
   }
 
-  public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID.toString()
+  public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID.toString()
 
   private static storageEventHandler: any = {};
 
@@ -38,6 +47,9 @@ export class UmAngularUtil {
    */
   static DISPATCH_RESOURCE = "resouce_ready";
 
+  /**
+   * Key to be used to notify when there is data change
+   */
   static DISPATCH_DATA_CHANGE = "data_change"
 
 
@@ -168,6 +180,11 @@ export class UmAngularUtil {
     this.setItem(this.DISPATCH_DATA_CHANGE,data);
   }
 
+  /**
+   * Set preference item, extension function to localstorage setItem
+   * @param itemKey item key to be used
+   * @param itemValue item value to be set
+   */
   static setItem(itemKey, itemValue){
     const resourceKey = this.DISPATCH_RESOURCE;
     const titleKey = this.DISPATCH_TITLE;
@@ -182,10 +199,18 @@ export class UmAngularUtil {
       }
   }
 
+  /**
+   * Get item from localstorage
+   * @param itemKey item key to be used
+   */
   static getItem(itemKey): string{
     return localStorage.getItem(itemKey)
   }
 
+  /**
+   * Remove an item from the localstorage
+   * @param itemkey item key to be used
+   */
   static removeItem(itemkey){
     localStorage.removeItem(itemkey)
   }
@@ -266,6 +291,10 @@ export class UmAngularUtil {
     return [!reportActive, reportActive]
   }
 
+  /**
+   * Check current running platform enviroment 
+   * @param keyToCheck platform to be checked from
+   */
   static isSupportedEnvironment(keyToCheck = "android"){
     return navigator.appVersion.toLowerCase().includes(keyToCheck)
   }
@@ -299,6 +328,12 @@ export class UmAngularUtil {
     return foundPath;
   }
 
+  /**
+   * Get element from object
+   * @param object Object to be used
+   * @param key object key
+   * @param value value to be checked
+   */
   static getElementFromObject(object: any[], key: string, value: string){
     var foundElement = {}
     object.forEach(element => {
@@ -382,6 +417,10 @@ export class UmAngularUtil {
     return util.com.ustadmobile.lib.util.UMUtil.kotlinMapToJsArray(data);
   }
 
+  /**
+   * Construct path where containr will be mounted.
+   * @param containerUid conter id to be used
+   */
   static getMountPath(containerUid: any){
     const uid = containerUid.toString()
     return UmAngularUtil.getItem(this.CONTENT_URL_TAG) + uid +"/"
@@ -393,5 +432,13 @@ export class UmAngularUtil {
    */
   static kotlinCategoryMapToJSArray(data: any): any[]{
     return util.com.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(data);
+  }
+
+  /**
+   * Sometimes with larger number of list items, list tends to be pushed up like 4 items.
+   *  This will always scroll back the list to item 0
+   */
+  static scrollToTop(){
+    window.scrollTo(0, 0);
   }
 }

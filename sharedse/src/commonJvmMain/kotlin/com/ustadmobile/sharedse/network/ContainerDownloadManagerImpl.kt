@@ -142,6 +142,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         fun postUpdate(update: DownloadJob) {
             downloadJob = update
             liveData.sendValue(update)
+            jobsToCommit.add(update)
         }
 
         fun postUpdateInternal(deltaDownloadedSoFar: Long, deltaDownloadLength: Long,
@@ -152,6 +153,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                 downloadJobVal.totalBytesToDownload += deltaDownloadLength
                 downloadJobVal.djStatus = newStatus
                 liveData.sendValue(downloadJobVal)
+                jobsToCommit.add(downloadJobVal)
             }
         }
 
@@ -168,6 +170,8 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     private val downloadJobMap = HashMap<Int, WeakReference<DownloadJobHolder>>()
 
     private val entriesToCommit : MutableSet<DownloadJobItem> = HashSet()
+
+    private val jobsToCommit: MutableSet<DownloadJob> = HashSet()
 
     override val connectivityLiveData = DoorMutableLiveData<ConnectivityStatus?>(null)
 
@@ -218,7 +222,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     override suspend fun commit() = withContext(singleThreadContext){
         appDb.downloadJobItemDao.updateStatusAndProgressList(entriesToCommit.toList())
+        appDb.downloadJobDao.updateStatusAndProgressList(jobsToCommit.toList())
         entriesToCommit.clear()
+        jobsToCommit.clear()
     }
 
     override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> {

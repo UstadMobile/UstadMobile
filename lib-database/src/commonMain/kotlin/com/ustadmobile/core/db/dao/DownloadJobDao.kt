@@ -165,4 +165,19 @@ abstract class DownloadJobDao {
     @Query("UPDATE DownloadJob SET djStatus = :status WHERE djUid = :djiDjUid")
     abstract fun changeStatus(status: Int, djiDjUid: Int)
 
+    @Query("""UPDATE DownloadJob SET djStatus = :status, 
+            bytesDownloadedSoFar = :bytesDownloadedSoFar, 
+            totalBytesToDownload = :totalBytesToDownload
+            WHERE djUid = :djUid""")
+    abstract fun updateStatusAndProgress(djUid: Int, status: Int, bytesDownloadedSoFar: Long,
+                                         totalBytesToDownload: Long)
+
+    fun updateStatusAndProgressList(downloadJobs: Iterable<DownloadJob>) {
+        downloadJobs.forEach {
+            updateStatusAndProgress(it.djUid, it.djStatus, it.bytesDownloadedSoFar,
+                    it.totalBytesToDownload)
+        }
+    }
+
+
 }

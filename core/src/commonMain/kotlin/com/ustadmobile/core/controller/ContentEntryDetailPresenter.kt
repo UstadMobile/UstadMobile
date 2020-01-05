@@ -68,6 +68,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
         entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
+
         entryLiveData.observe(this, ::onEntryChanged)
 
         GlobalScope.launch {
@@ -91,18 +92,12 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
             view.showBaseProgressBar(true)
-            val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsForContentEntryAsync(entryUuid)
+            val result = appRepo.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entryUuid)
             view.runOnUiThread(Runnable {
                 view.setAvailableTranslations(result)
                 view.showBaseProgressBar(false)
             })
         }
-
-//        statusUmLiveData = appRepo.contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
-//
-//        statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
-
-        //statusProvider?.addDownloadChangeListener(this)
     }
 
     private fun onEntryChanged(entry: ContentEntry?) {
@@ -171,7 +166,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             if (loginFirst) {
                 impl.go(LoginView.VIEW_NAME, args, view.viewContext)
             } else {
-                goToContentEntry()
+                goToSelectedContentEntry()
             }
         } else if (isDownloadEnabled) {
             view.runOnUiThread(Runnable {
@@ -180,7 +175,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    private fun goToContentEntry() {
+    private fun goToSelectedContentEntry() {
         GlobalScope.launch {
             try {
                 view.showBaseProgressBar(true)
@@ -265,14 +260,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 args.putAll(arguments)
 
                 val imported = (entry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED
-                args[UstadView.ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
+                args[ARG_CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
                 args[ContentEntryEditView.CONTENT_TYPE] = (if (imported) ContentEntryListView.CONTENT_IMPORT_FILE
                 else ContentEntryListView.CONTENT_CREATE_CONTENT).toString()
 
                 if (imported)
-                    impl.go(ContentEntryEditView.VIEW_NAME, arguments, this)
+                    impl.go(ContentEntryEditView.VIEW_NAME, args, context)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }

@@ -23,7 +23,7 @@ class ContentEntryDetailLanguageAdapter(private val data: List<ContentEntryRelat
 
     override fun onBindViewHolder(holder: LangHolder, position: Int) {
         val entry = data[position]
-        holder.entryLang.text = entry.languageName
+        holder.entryLang.text = entry.language?.name ?: ""
         holder.entryLang.setOnClickListener { view -> listener.selectContentEntryOfLanguage(entry.cerejRelatedEntryUid) }
     }
 

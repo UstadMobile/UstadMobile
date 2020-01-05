@@ -27,10 +27,14 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.MessageID = core.com.ustadmobile.core.generated.locale.MessageID;
     this.viewContext = this.context = new UmContextWrapper(router) 
     this.context.setActiveRoute(this.route);
-    this.umService.init(this)   
+    this.umService.init(this)
     this.showIframe = this.route.snapshot.queryParams.noiframe == "false"
     this.floating_btn_class_right = this.umService.isLTRDirectionality() ? "fixed-action-btn-right" : "fixed-action-btn-left";
     this.floating_btn_class_left = this.umService.isLTRDirectionality() ? "fixed-action-btn-left":"fixed-action-btn-right"
+  }
+
+  getActiveAccount(){
+    return core.com.ustadmobile.core.impl.UmAccountManager.getRepositoryForActiveAccount(this.context);
   }
 
   setToolbarTitle(title){
@@ -63,6 +67,9 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     }
   }
 
+  /**
+   * Re-run the app when configurations changed
+   */
   restartUI(){
     window.open(UmAngularUtil.getRoutePathParam().origin + "/" + this.systemImpl.getLocale(this.context) + "/", "_self")
   }

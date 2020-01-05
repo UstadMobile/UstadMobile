@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.util
+package com.ustadmobile.util.test
 
 import okhttp3.*
 import okhttp3.mockwebserver.Dispatcher

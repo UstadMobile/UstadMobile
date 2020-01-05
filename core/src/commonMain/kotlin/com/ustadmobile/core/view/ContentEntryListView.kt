@@ -3,6 +3,7 @@ package com.ustadmobile.core.view
 import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
+import com.ustadmobile.lib.db.entities.LangUidAndName
 import com.ustadmobile.lib.db.entities.Language
 import kotlin.js.JsName
 
@@ -21,7 +22,7 @@ interface ContentEntryListView : UstadView {
     fun setCategorySchemaSpinner(spinnerData: Map<Long, List<DistinctCategorySchema>>)
 
     @JsName("setLanguageOptions")
-    fun setLanguageOptions(result: List<Language>)
+    fun setLanguageOptions(result: List<LangUidAndName>)
 
     /**
      * Sets whether or not buttons that allow the user to edit content are visibile

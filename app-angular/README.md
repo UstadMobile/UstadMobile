@@ -188,7 +188,8 @@ npm run build-prod
 or  
 ./gradlew app-angular:buildProd  
   
-//In case it will be deployed on a specific directory then add base href
+//In case it will be deployed on a specific directory then add base href and default locale
+./gradlew app-angular:buildProd -PbaseDir=<Directory name>  -PdefLoc=<Locale code>
 
-./gradlew app-angular:buildProd -PbaseHref=<Directory name>  
+//i.e ./gradlew app-angular:buildProd -PbaseDir=web  -PdefLoc=en
 ```

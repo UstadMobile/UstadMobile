@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
+import com.ustadmobile.core.util.ext.isStatusPaused
 import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -116,18 +117,20 @@ class DownloadDialogPresenter(context: Any,
         when {
             t.isStatusCompletedSuccessfully() -> {
                 deleteFileOptions = true
+                view.setCalculatingViewVisible(false)
                 view.setStackOptionsVisible(false)
                 view.setBottomButtonsVisible(true)
                 statusMessage = impl.getString(MessageID.download_state_downloaded,
                         context)
                 view.setBottomButtonPositiveText(impl.getString(
-                        MessageID.download_delete_btn_label, context))
+                        MessageID.delete, context))
                 view.setBottomButtonNegativeText(impl.getString(
-                        MessageID.download_cancel_label, context))
+                        MessageID.cancel, context))
                 view.setWifiOnlyOptionVisible(false)
             }
 
             t.isStatusPausedOrQueuedOrDownloading() -> {
+                view.setCalculatingViewVisible(false)
                 deleteFileOptions = false
                 view.setStackOptionsVisible(true)
                 view.setBottomButtonsVisible(false)
@@ -145,9 +148,9 @@ class DownloadDialogPresenter(context: Any,
                 view.setStackOptionsVisible(false)
                 view.setBottomButtonsVisible(true)
                 view.setBottomButtonPositiveText(impl.getString(
-                        MessageID.download_continue_btn_label, context))
+                        MessageID.download, context))
                 view.setBottomButtonNegativeText(impl.getString(
-                        MessageID.download_cancel_label, context))
+                        MessageID.cancel, context))
                 view.setWifiOnlyOptionVisible(true)
             }
 
@@ -180,6 +183,7 @@ class DownloadDialogPresenter(context: Any,
         val currentStatuMessage = statusMessage
         if(downloadTotals != null && currentStatuMessage != null){
             view.runOnUiThread(Runnable {
+                view.setCalculatingViewVisible(false)
                 view.setStatusText(currentStatuMessage,
                     downloadTotals.numEntries, UMFileUtil.formatFileSize(downloadTotals.totalSize))
                 view.setWifiOnlyOptionVisible(true)
@@ -205,18 +209,16 @@ class DownloadDialogPresenter(context: Any,
      */
     fun handleClickPositive() {
         val currentDownloadJobItemVal = currentDownloadJobItem
-        if(currentDownloadJobItemVal != null && currentDownloadJobItemVal.djiStatus >= JobStatus.COMPLETE_MIN) {
-            //There is a completed download and the user wants to delete it
-            requestDelete(currentDownloadJobItemVal.djiDjUid, containerDownloadManager, context)
-        }else if(currentDownloadJobItemVal == null) {
-            //there is no existing download job item - create it
-            GlobalScope.launch {
-                createDownloadJobAndRequestPreparation()
-            }
-        }else if(currentDownloadJobItemVal.djiStatus < JobStatus.QUEUED) {
-            //there is an existing downloadjobitem in the system - but it has not been queued. Queue it.
-            GlobalScope.launch {
+        when {
+            currentDownloadJobItem.isStatusCompletedSuccessfully() && currentDownloadJobItemVal != null ->
+                requestDelete(currentDownloadJobItemVal.djiDjUid, containerDownloadManager, context)
+
+            currentDownloadJobItem.isStatusPaused() && currentDownloadJobItemVal != null -> GlobalScope.launch {
                 containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
+            }
+
+            else -> GlobalScope.launch {
+                createDownloadJobAndRequestPreparation()
             }
         }
     }
