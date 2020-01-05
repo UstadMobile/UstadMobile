@@ -336,12 +336,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""ALTER TABLE SelQuestionResponseNomination 
                         |RENAME to SelQuestionResponseNomination_OLD""".trimMargin())
                     database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination 
-                        |(  selqrnClazzMemberUid  BIGINT , 
-                        |selqrnSelQuestionResponseUId  BIGINT , 
-                        |nominationActive  BOOL , 
-                        |selqrnMCSN  BIGINT , 
-                        |selqrnMCSNLCSN  BIGINT , 
-                        |selqrnMCSNLCB  INTEGER , 
+                        |(  selqrnClazzMemberUid  INTEGER NOT NULL, 
+                        |selqrnSelQuestionResponseUId  INTEGER NOT NULL, 
+                        |nominationActive  INTEGER NOT NULL, 
+                        |selqrnMCSN  INTEGER NOT NULL, 
+                        |selqrnMCSNLCSN  INTEGER NOT NULL, 
+                        |selqrnMCSNLCB  INTEGER NOT NULL, 
                         |selqrnUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
                         |)""".trimMargin())
                     database.execSQL("""INSERT INTO SelQuestionResponseNomination 
@@ -361,12 +361,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""ALTER TABLE SelQuestionSetRecognition 
                         |RENAME to SelQuestionSetRecognition_OLD""".trimMargin())
                     database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition 
-                        |(  selqsrSelQuestionSetResponseUid  BIGINT , 
-                        |selQuestionSetRecognitionClazzMemberUid  BIGINT , 
-                        |isSelQuestionSetRecognitionRecognized  BOOL , 
-                        |selQuestionSetRecognitionMasterChangeSeqNum  BIGINT , 
-                        |selQuestionSetRecognitionLocalChangeSeqNum  BIGINT , 
-                        |selQuestionSetRecognitionLastChangedBy  INTEGER , 
+                        |(  selqsrSelQuestionSetResponseUid  INTEGER NOT NULL, 
+                        |selQuestionSetRecognitionClazzMemberUid  INTEGER NOT NULL, 
+                        |isSelQuestionSetRecognitionRecognized  INTEGER NOT NULL, 
+                        |selQuestionSetRecognitionMasterChangeSeqNum  INTEGER NOT NULL, 
+                        |selQuestionSetRecognitionLocalChangeSeqNum  INTEGER NOT NULL, 
+                        |selQuestionSetRecognitionLastChangedBy  INTEGER NOT NULL, 
                         |selQuestionSetRecognitionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
                         |)""".trimMargin())
                     database.execSQL("""INSERT INTO SelQuestionSetRecognition 
