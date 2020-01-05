@@ -25,6 +25,12 @@ interface ContentEntryListView : UstadView {
     fun setLanguageOptions(result: List<LangUidAndName>)
 
     /**
+     * Set filter buttons if applicable (e.g. on Android to show all libraries / downloaded items)
+     */
+    @JsName("setFilterButtons")
+    fun setFilterButtons(buttonLabels: List<String>)
+
+    /**
      * Sets whether or not buttons that allow the user to edit content are visibile
      *
      * @param buttonVisibilityFlags - flags for buttons to be shown
@@ -33,6 +39,8 @@ interface ContentEntryListView : UstadView {
     fun setEditButtonsVisibility(buttonVisibilityFlags: Int)
 
     companion object {
+
+        const val ARG_FILTER_BUTTONS = "filterbuttons"
 
         /**
          * show controls to allow adding content

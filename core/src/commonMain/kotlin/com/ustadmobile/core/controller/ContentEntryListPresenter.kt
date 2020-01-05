@@ -170,6 +170,10 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         viewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
     }
 
+    @JsName("handleClickFilterButton")
+    fun handleClickFilterButton(buttonPos: Int){
+
+    }
 
     @JsName("handleContentEntryClicked")
     fun handleContentEntryClicked(entry: ContentEntry) {

@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -16,7 +17,7 @@ import kotlin.js.JsName
 
 class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
                     val personDao: PersonDao, impl: UstadMobileSystemImpl)
-    : LanguageOptionPresenter(context, arguments, view, impl) {
+    : LanguageOptionPresenter(context, arguments, view, impl), DoorObserver<UmAccount?> {
 
     private var account: UmAccount? = null
 
@@ -51,6 +52,12 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 homeView.loadProfileIcon(if(account == null) "" else "")
             })
         }
+    }
+
+    override fun onChanged(t: UmAccount?) {
+        //TODO here: check if the person is admin
+        // view.setOptions(listOf("ContentEntryView?$ARG_FILTER_BUTTONS=...))
+
     }
 
     fun handleShowDownloadButton(show: Boolean){
