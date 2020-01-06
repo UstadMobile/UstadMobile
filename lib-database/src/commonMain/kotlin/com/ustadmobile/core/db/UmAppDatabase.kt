@@ -1470,45 +1470,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
-
-            builder.addMigrations(object : DoorMigration(27,28){
-                override fun migrate(database: DoorSqlDatabase) {
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
-                    database.execSQL("""
-                    |CREATE OR REPLACE FUNCTION 
-                    | inccsn_66_fn() RETURNS trigger AS ${'$'}${'$'}
-                    | BEGIN  
-                    | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
-                    | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
-                    | verbMasterChangeSeqNum = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
-                    | ELSE NEW.verbMasterChangeSeqNum END)
-                    | WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid;
-                    | RETURN null;
-                    | END ${'$'}${'$'}
-                    | LANGUAGE plpgsql
-                    """.trimMargin())
-                    database.execSQL("""
-                    |CREATE TRIGGER inccsn_66_trig 
-                    |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
-                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                    |EXECUTE PROCEDURE inccsn_66_fn()
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-                    |CREATE 
-                    | INDEX index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
-                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
-                    //End: Create table ContextXObjectStatementJoin for PostgreSQL
-                }
-
-            })
+            
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN status, ADD COLUMN contentFlags INTEGER NOT NULL DEFAULT 0, ADD COLUMN ceInactive BOOL")
