@@ -33,6 +33,7 @@ export class EpubContentComponent extends UmBaseComponent implements OnDestroy,
 
   onCreate(){
     super.onCreate()
+    this.safeUrl = this.getSafeUrl(this.sanitizer, "https://app.ustadmobile.com/main/ContainerMount/-3831212382533592508/2.xhtml")
     this.presenter = new core.com.ustadmobile.core.controller.EpubContentPresenter(
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this)
     this.presenter.onCreate(null)

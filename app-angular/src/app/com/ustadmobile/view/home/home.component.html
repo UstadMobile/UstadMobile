@@ -22,7 +22,7 @@
     [stopPropagation]="true">
 
     <li><a (click)="handleSideMenuSelected(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
-    <li *ngIf="showReports"> <a (click)="handleSideMenuSelected(routes.reportDashboard)"> <span i18n="@@reports">Reports</span></a></li>
+    <li *ngIf="showReports"> <a (click)="handleSideMenuSelected(routes.reportOptions)"> <span i18n="@@reports">Reports</span></a></li>
     <li > <a (click)="handleClickPersonIcon()"> <span i18n="@@profile">Profile</span></a></li>
     <li > <a (click)="bottomSheetModal.openModal()"> <span i18n="@@language">Language</span></a></li>
   </mz-dropdown> 
@@ -56,7 +56,7 @@
     </mz-sidenav-link>
 
     <mz-sidenav-link *ngIf="showReports" [active]="activeState[1]">
-      <a class="collapsible-header" (click)="handleSideMenuSelected(routes.reportDashboard)"> <span i18n="@@reports">Reports</span>
+      <a class="collapsible-header" (click)="handleSideMenuSelected(routes.reportOptions)"> <span i18n="@@reports">Reports</span>
         <i class="material-icons {{class_icon_position}}">pie_chart</i>
       </a>
     </mz-sidenav-link>

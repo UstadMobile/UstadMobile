@@ -87,7 +87,7 @@ export class LoginComponent extends UmBaseComponent implements OnDestroy, core.c
   }
 
   createAccount(){
-    this.presenter.handleCreateAccount()
+    this.presenter.handleClickCreateAccount()
   }
 
   ngOnDestroy() {

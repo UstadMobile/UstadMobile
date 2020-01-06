@@ -146,9 +146,10 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
 
   handleSideMenuSelected(route) {
     const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context)
-    const isDashboard = route == "ReportDashboard"
-    const routeTo =  isDashboard && !activeAcount ? this.routes.login : route 
-    const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isDashboard ? 
+    const isReport = route == "ReportOptions"
+    const routeTo =  isReport && !activeAcount ? this.routes.login : route 
+    console.log("Route",routeTo)
+    const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isReport ? 
       "?" + UmAngularUtil.ARG_CONTENT_ENTRY_UID + "=" + this.umService.ROOT_UID: null, route: routeTo})
     this.systemImpl.go(route, args, this.context);
   }

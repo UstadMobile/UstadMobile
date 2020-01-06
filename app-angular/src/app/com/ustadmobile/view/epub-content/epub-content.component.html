@@ -2,7 +2,12 @@
     
   <div *ngIf="showIframe && safeUrl" class="row">
       <div class="resp-container">
-          <iframe allowTransparency="true" background="transparent" class="resp-iframe" [src]='safeUrl' allowfullscreen></iframe>
+          <iframe 
+              allowTransparency="true" 
+              background="transparent" 
+              class="resp-iframe" 
+              [src]='safeUrl' 
+              scrolling="false"></iframe>
         </div>
     
         <div class="row default-padding-top default-margin-right">
