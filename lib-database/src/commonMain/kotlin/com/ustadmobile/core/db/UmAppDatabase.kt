@@ -19,7 +19,7 @@ import kotlin.jvm.Volatile
     SelQuestionOption::class, ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
-    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
+    Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -328,6 +328,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""ALTER TABLE SelQuestionSetRecognition 
                         |RENAME COLUMN selQuestionSetRecognitionSelQuestionSetResponseUid 
                         |TO selqsrSelQuestionSetResponseUid""".trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
                 }
 
                 if (database.dbType() == DoorDbType.SQLITE) {
@@ -385,6 +387,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |selQuestionSetRecognitionLastChangedBy 
                         |FROM SelQuestionSetRecognition_OLD""".trimMargin())
                     database.execSQL("""DROP TABLE SelQuestionSetRecognition_OLD""")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
                 }
             }
         }
@@ -397,196 +401,219 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             override fun migrate(database: DoorSqlDatabase) {
                 if (database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("""CREATE TABLE IF NOT EXISTS InventoryItem 
-                        |(  inventoryItemSaleProductUid  BIGINT , 
-                        |inventoryItemLeUid  BIGINT , 
-                        |inventoryItemWeUid  BIGINT , 
-                        |inventoryItemDateAdded  BIGINT , 
-                        |inventoryItemDayAdded  BIGINT , 
-                        |inventoryItemActive  BOOL , 
-                        |inventoryItemMCSN  BIGINT , 
-                        |inventoryItemLCSN  BIGINT , 
-                        |inventoryItemLCB  INTEGER , 
+                        |(  inventoryItemSaleProductUid  INTEGER NOT NULL, 
+                        |inventoryItemLeUid  INTEGER NOT NULL, 
+                        |inventoryItemWeUid  INTEGER NOT NULL, 
+                        |inventoryItemDateAdded  INTEGER NOT NULL, 
+                        |inventoryItemDayAdded  INTEGER NOT NULL, 
+                        |inventoryItemActive  INTEGER NOT NULL, 
+                        |inventoryItemMCSN  INTEGER NOT NULL, 
+                        |inventoryItemLCSN  INTEGER NOT NULL, 
+                        |inventoryItemLCB  INTEGER NOT NULL, 
                         |inventoryItemUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
                         |)""".trimMargin())
 
                     database.execSQL("""
-                    |CREATE TRIGGER UPD_84
-                    |AFTER UPDATE ON InventoryItem FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.inventoryItemMCSN = 0 
-                    |OR OLD.inventoryItemMCSN = NEW.inventoryItemMCSN
-                    |)
-                    |ELSE
-                    |(NEW.inventoryItemLCSN = 0  
-                    |OR OLD.inventoryItemLCSN = NEW.inventoryItemLCSN
-                    |) END)
-                    |BEGIN 
-                    |UPDATE InventoryItem SET inventoryItemLCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryItemLCSN 
-                    |ELSE (SELECT MAX(MAX(inventoryItemLCSN), OLD.inventoryItemLCSN) + 1 FROM InventoryItem) END),
-                    |inventoryItemMCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(MAX(inventoryItemMCSN), OLD.inventoryItemMCSN) + 1 FROM InventoryItem)
-                    |ELSE NEW.inventoryItemMCSN END)
-                    |WHERE inventoryItemUid = NEW.inventoryItemUid
-                    |; END
-                    """.trimMargin())
+                        |CREATE TRIGGER UPD_84
+                        |AFTER UPDATE ON InventoryItem FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.inventoryItemMCSN = 0 
+                        |OR OLD.inventoryItemMCSN = NEW.inventoryItemMCSN
+                        |)
+                        |ELSE
+                        |(NEW.inventoryItemLCSN = 0  
+                        |OR OLD.inventoryItemLCSN = NEW.inventoryItemLCSN
+                        |) END)
+                        |BEGIN 
+                        |UPDATE InventoryItem SET inventoryItemLCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryItemLCSN 
+                        |ELSE (SELECT MAX(MAX(inventoryItemLCSN), OLD.inventoryItemLCSN) + 1 FROM InventoryItem) END),
+                        |inventoryItemMCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(MAX(inventoryItemMCSN), OLD.inventoryItemMCSN) + 1 FROM InventoryItem)
+                        |ELSE NEW.inventoryItemMCSN END)
+                        |WHERE inventoryItemUid = NEW.inventoryItemUid
+                        |; END
+                        """.trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER INS_84
-                    |AFTER INSERT ON InventoryItem FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.inventoryItemMCSN = 0 
-                    |
-                    |)
-                    |ELSE
-                    |(NEW.inventoryItemLCSN = 0  
-                    |
-                    |) END)
-                    |BEGIN 
-                    |UPDATE InventoryItem SET inventoryItemLCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryItemLCSN 
-                    |ELSE (SELECT MAX(inventoryItemLCSN) + 1 FROM InventoryItem) END),
-                    |inventoryItemMCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(inventoryItemMCSN) + 1 FROM InventoryItem)
-                    |ELSE NEW.inventoryItemMCSN END)
-                    |WHERE inventoryItemUid = NEW.inventoryItemUid
-                    |; END
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS InventoryItem_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                        |CREATE TRIGGER INS_84
+                        |AFTER INSERT ON InventoryItem FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.inventoryItemMCSN = 0 
+                        |
+                        |)
+                        |ELSE
+                        |(NEW.inventoryItemLCSN = 0  
+                        |
+                        |) END)
+                        |BEGIN 
+                        |UPDATE InventoryItem SET inventoryItemLCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryItemLCSN 
+                        |ELSE (SELECT MAX(inventoryItemLCSN) + 1 FROM InventoryItem) END),
+                        |inventoryItemMCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(inventoryItemMCSN) + 1 FROM InventoryItem)
+                        |ELSE NEW.inventoryItemMCSN END)
+                        |WHERE inventoryItemUid = NEW.inventoryItemUid
+                        |; END
+                        """.trimMargin())
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS InventoryItem_trk (
+                        |  epk  INTEGER NOT NULL , 
+                        |  clientId  INTEGER NOT NULL , 
+                        |  csn  INTEGER NOT NULL , 
+                        |  rx  INTEGER NOT NULL , 
+                        |  reqId  INTEGER NOT NULL , 
+                        |  ts  INTEGER NOT NULL , 
+                        |  pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        |  )""".trimMargin())
                     database.execSQL("""
-                    |CREATE 
-                    | INDEX index_InventoryItem_trk_clientId_epk_rx_csn 
-                    |ON InventoryItem_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
+                        |CREATE 
+                        | INDEX index_InventoryItem_trk_clientId_epk_rx_csn 
+                        |ON InventoryItem_trk (clientId, epk, rx, csn)
+                        """.trimMargin())
 
                     database.execSQL("""CREATE TABLE IF NOT EXISTS InventoryTransaction 
-                        |(  inventoryTransactionInventoryItemUid  BIGINT , 
-                        |inventoryTransactionFromLeUid  BIGINT , 
-                        |inventoryTransactionSaleUid  BIGINT , 
-                        |inventoryTransactionSaleItemUid  BIGINT , 
-                        |inventoryTransactionToLeUid  BIGINT , 
-                        |inventoryTransactionDate  BIGINT , 
-                        |inventoryTransactionDay  BIGINT , 
-                        |inventoryTransactionActive  BOOL , 
-                        |inventoryTransactionSaleDeliveryUid  BIGINT , 
-                        |inventoryTransactionItemMCSN  BIGINT , 
-                        |inventoryTransactionItemLCSN  BIGINT , 
-                        |inventoryTransactionItemLCB  INTEGER , 
+                        |(  inventoryTransactionInventoryItemUid  INTEGER NOT NULL , 
+                        |inventoryTransactionFromLeUid  INTEGER NOT NULL , 
+                        |inventoryTransactionSaleUid  INTEGER NOT NULL , 
+                        |inventoryTransactionSaleItemUid  INTEGER NOT NULL , 
+                        |inventoryTransactionToLeUid  INTEGER NOT NULL , 
+                        |inventoryTransactionDate  INTEGER NOT NULL , 
+                        |inventoryTransactionDay  INTEGER NOT NULL , 
+                        |inventoryTransactionActive  INTEGER NOT NULL , 
+                        |inventoryTransactionSaleDeliveryUid  INTEGER NOT NULL , 
+                        |inventoryTransactionItemMCSN  INTEGER NOT NULL , 
+                        |inventoryTransactionItemLCSN  INTEGER NOT NULL , 
+                        |inventoryTransactionItemLCB  INTEGER NOT NULL , 
                         |inventoryTransactionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
                         |)""".trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER UPD_85
-                    |AFTER UPDATE ON InventoryTransaction FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.inventoryTransactionItemMCSN = 0 
-                    |OR OLD.inventoryTransactionItemMCSN = NEW.inventoryTransactionItemMCSN
-                    |)
-                    |ELSE
-                    |(NEW.inventoryTransactionItemLCSN = 0  
-                    |OR OLD.inventoryTransactionItemLCSN = NEW.inventoryTransactionItemLCSN
-                    |) END)
-                    |BEGIN 
-                    |UPDATE InventoryTransaction SET inventoryTransactionItemLCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryTransactionItemLCSN 
-                    |ELSE (SELECT MAX(MAX(inventoryTransactionItemLCSN), OLD.inventoryTransactionItemLCSN) + 1 FROM InventoryTransaction) END),
-                    |inventoryTransactionItemMCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(MAX(inventoryTransactionItemMCSN), OLD.inventoryTransactionItemMCSN) + 1 FROM InventoryTransaction)
-                    |ELSE NEW.inventoryTransactionItemMCSN END)
-                    |WHERE inventoryTransactionUid = NEW.inventoryTransactionUid
-                    |; END
-                    """.trimMargin())
+                        |CREATE TRIGGER UPD_85
+                        |AFTER UPDATE ON InventoryTransaction FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.inventoryTransactionItemMCSN = 0 
+                        |OR OLD.inventoryTransactionItemMCSN = NEW.inventoryTransactionItemMCSN
+                        |)
+                        |ELSE
+                        |(NEW.inventoryTransactionItemLCSN = 0  
+                        |OR OLD.inventoryTransactionItemLCSN = NEW.inventoryTransactionItemLCSN
+                        |) END)
+                        |BEGIN 
+                        |UPDATE InventoryTransaction SET inventoryTransactionItemLCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryTransactionItemLCSN 
+                        |ELSE (SELECT MAX(MAX(inventoryTransactionItemLCSN), OLD.inventoryTransactionItemLCSN) + 1 FROM InventoryTransaction) END),
+                        |inventoryTransactionItemMCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(MAX(inventoryTransactionItemMCSN), OLD.inventoryTransactionItemMCSN) + 1 FROM InventoryTransaction)
+                        |ELSE NEW.inventoryTransactionItemMCSN END)
+                        |WHERE inventoryTransactionUid = NEW.inventoryTransactionUid
+                        |; END
+                        """.trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER INS_85
-                    |AFTER INSERT ON InventoryTransaction FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.inventoryTransactionItemMCSN = 0 
-                    |
-                    |)
-                    |ELSE
-                    |(NEW.inventoryTransactionItemLCSN = 0  
-                    |
-                    |) END)
-                    |BEGIN 
-                    |UPDATE InventoryTransaction SET inventoryTransactionItemLCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryTransactionItemLCSN 
-                    |ELSE (SELECT MAX(inventoryTransactionItemLCSN) + 1 FROM InventoryTransaction) END),
-                    |inventoryTransactionItemMCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(inventoryTransactionItemMCSN) + 1 FROM InventoryTransaction)
-                    |ELSE NEW.inventoryTransactionItemMCSN END)
-                    |WHERE inventoryTransactionUid = NEW.inventoryTransactionUid
-                    |; END
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS InventoryTransaction_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                        |CREATE TRIGGER INS_85
+                        |AFTER INSERT ON InventoryTransaction FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.inventoryTransactionItemMCSN = 0 
+                        |
+                        |)
+                        |ELSE
+                        |(NEW.inventoryTransactionItemLCSN = 0  
+                        |
+                        |) END)
+                        |BEGIN 
+                        |UPDATE InventoryTransaction SET inventoryTransactionItemLCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryTransactionItemLCSN 
+                        |ELSE (SELECT MAX(inventoryTransactionItemLCSN) + 1 FROM InventoryTransaction) END),
+                        |inventoryTransactionItemMCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(inventoryTransactionItemMCSN) + 1 FROM InventoryTransaction)
+                        |ELSE NEW.inventoryTransactionItemMCSN END)
+                        |WHERE inventoryTransactionUid = NEW.inventoryTransactionUid
+                        |; END
+                        """.trimMargin())
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS InventoryTransaction_trk 
+                        |(  epk  INTEGER NOT NULL , 
+                        |clientId  INTEGER NOT NULL , 
+                        |csn  INTEGER NOT NULL , 
+                        |rx  INTEGER NOT NULL , 
+                        |reqId  INTEGER NOT NULL , 
+                        |ts  INTEGER NOT NULL , 
+                        |pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        |)""".trimMargin())
                     database.execSQL("""
-                    |CREATE 
-                    | INDEX index_InventoryTransaction_trk_clientId_epk_rx_csn 
-                    |ON InventoryTransaction_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
+                        |CREATE 
+                        | INDEX index_InventoryTransaction_trk_clientId_epk_rx_csn 
+                        |ON InventoryTransaction_trk (clientId, epk, rx, csn)
+                        """.trimMargin())
 
                     database.execSQL("""CREATE TABLE IF NOT EXISTS SaleDelivery 
-                        |(  saleDeliverySaleUid  BIGINT , 
-                        |saleDeliverySignature  TEXT , 
-                        |saleDeliveryPersonUid  BIGINT , 
-                        |saleDeliveryDate  BIGINT , 
-                        |saleDeliveryActive  BOOL , 
-                        |saleDeliveryMCSN  BIGINT , 
-                        |saleDeliveryLCSN  BIGINT , 
-                        |saleDeliveryLCB  INTEGER , 
+                        |(  saleDeliverySaleUid  INTEGER NOT NULL , 
+                        |saleDeliverySignature  TEXT NOT NULL, 
+                        |saleDeliveryPersonUid  INTEGER NOT NULL , 
+                        |saleDeliveryDate  INTEGER NOT NULL , 
+                        |saleDeliveryActive  INTEGER NOT NULL , 
+                        |saleDeliveryMCSN  INTEGER NOT NULL , 
+                        |saleDeliveryLCSN  INTEGER NOT NULL , 
+                        |saleDeliveryLCB  INTEGER NOT NULL , 
                         |saleDeliveryUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
                         |)""".trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER UPD_86
-                    |AFTER UPDATE ON SaleDelivery FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.saleDeliveryMCSN = 0 
-                    |OR OLD.saleDeliveryMCSN = NEW.saleDeliveryMCSN
-                    |)
-                    |ELSE
-                    |(NEW.saleDeliveryLCSN = 0  
-                    |OR OLD.saleDeliveryLCSN = NEW.saleDeliveryLCSN
-                    |) END)
-                    |BEGIN 
-                    |UPDATE SaleDelivery SET saleDeliveryLCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.saleDeliveryLCSN 
-                    |ELSE (SELECT MAX(MAX(saleDeliveryLCSN), OLD.saleDeliveryLCSN) + 1 FROM SaleDelivery) END),
-                    |saleDeliveryMCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(MAX(saleDeliveryMCSN), OLD.saleDeliveryMCSN) + 1 FROM SaleDelivery)
-                    |ELSE NEW.saleDeliveryMCSN END)
-                    |WHERE saleDeliveryUid = NEW.saleDeliveryUid
-                    |; END
-                    """.trimMargin())
+                        |CREATE TRIGGER UPD_86
+                        |AFTER UPDATE ON SaleDelivery FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.saleDeliveryMCSN = 0 
+                        |OR OLD.saleDeliveryMCSN = NEW.saleDeliveryMCSN
+                        |)
+                        |ELSE
+                        |(NEW.saleDeliveryLCSN = 0  
+                        |OR OLD.saleDeliveryLCSN = NEW.saleDeliveryLCSN
+                        |) END)
+                        |BEGIN 
+                        |UPDATE SaleDelivery SET saleDeliveryLCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.saleDeliveryLCSN 
+                        |ELSE (SELECT MAX(MAX(saleDeliveryLCSN), OLD.saleDeliveryLCSN) + 1 FROM SaleDelivery) END),
+                        |saleDeliveryMCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(MAX(saleDeliveryMCSN), OLD.saleDeliveryMCSN) + 1 FROM SaleDelivery)
+                        |ELSE NEW.saleDeliveryMCSN END)
+                        |WHERE saleDeliveryUid = NEW.saleDeliveryUid
+                        |; END
+                        """.trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER INS_86
-                    |AFTER INSERT ON SaleDelivery FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.saleDeliveryMCSN = 0 
-                    |
-                    |)
-                    |ELSE
-                    |(NEW.saleDeliveryLCSN = 0  
-                    |
-                    |) END)
-                    |BEGIN 
-                    |UPDATE SaleDelivery SET saleDeliveryLCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.saleDeliveryLCSN 
-                    |ELSE (SELECT MAX(saleDeliveryLCSN) + 1 FROM SaleDelivery) END),
-                    |saleDeliveryMCSN = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(saleDeliveryMCSN) + 1 FROM SaleDelivery)
-                    |ELSE NEW.saleDeliveryMCSN END)
-                    |WHERE saleDeliveryUid = NEW.saleDeliveryUid
-                    |; END
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SaleDelivery_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                        |CREATE TRIGGER INS_86
+                        |AFTER INSERT ON SaleDelivery FOR EACH ROW WHEN
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(NEW.saleDeliveryMCSN = 0 
+                        |
+                        |)
+                        |ELSE
+                        |(NEW.saleDeliveryLCSN = 0  
+                        |
+                        |) END)
+                        |BEGIN 
+                        |UPDATE SaleDelivery SET saleDeliveryLCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.saleDeliveryLCSN 
+                        |ELSE (SELECT MAX(saleDeliveryLCSN) + 1 FROM SaleDelivery) END),
+                        |saleDeliveryMCSN = 
+                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                        |(SELECT MAX(saleDeliveryMCSN) + 1 FROM SaleDelivery)
+                        |ELSE NEW.saleDeliveryMCSN END)
+                        |WHERE saleDeliveryUid = NEW.saleDeliveryUid
+                        |; END
+                        """.trimMargin())
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SaleDelivery_trk (
+                        |  epk  INTEGER NOT NULL , 
+                        |  clientId  INTEGER NOT NULL , 
+                        |  csn  INTEGER NOT NULL , 
+                        |  rx  INTEGER NOT NULL , 
+                        |  reqId  INTEGER NOT NULL , 
+                        |  ts  INTEGER NOT NULL , 
+                        |  pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
                     database.execSQL("""
-                    |CREATE 
-                    | INDEX index_SaleDelivery_trk_clientId_epk_rx_csn 
-                    |ON SaleDelivery_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
+                        |CREATE 
+                        | INDEX index_SaleDelivery_trk_clientId_epk_rx_csn 
+                        |ON SaleDelivery_trk (clientId, epk, rx, csn)
+                        """.trimMargin())
 
                 }
                 if (database.dbType() == DoorDbType.POSTGRES) {
@@ -605,33 +632,33 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS InventoryItem_mcsn_seq")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS InventoryItem_lcsn_seq")
                     database.execSQL("""
-                    |CREATE OR REPLACE FUNCTION 
-                    | inccsn_84_fn() RETURNS trigger AS ${'$'}${'$'}
-                    | BEGIN  
-                    | UPDATE InventoryItem SET inventoryItemLCSN =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryItemLCSN 
-                    | ELSE NEXTVAL('InventoryItem_lcsn_seq') END),
-                    | inventoryItemMCSN = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('InventoryItem_mcsn_seq') 
-                    | ELSE NEW.inventoryItemMCSN END)
-                    | WHERE inventoryItemUid = NEW.inventoryItemUid;
-                    | RETURN null;
-                    | END ${'$'}${'$'}
-                    | LANGUAGE plpgsql
-                    """.trimMargin())
+                        |CREATE OR REPLACE FUNCTION 
+                        | inccsn_84_fn() RETURNS trigger AS ${'$'}${'$'}
+                        | BEGIN  
+                        | UPDATE InventoryItem SET inventoryItemLCSN =
+                        | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.inventoryItemLCSN 
+                        | ELSE NEXTVAL('InventoryItem_lcsn_seq') END),
+                        | inventoryItemMCSN = 
+                        | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                        | THEN NEXTVAL('InventoryItem_mcsn_seq') 
+                        | ELSE NEW.inventoryItemMCSN END)
+                        | WHERE inventoryItemUid = NEW.inventoryItemUid;
+                        | RETURN null;
+                        | END ${'$'}${'$'}
+                        | LANGUAGE plpgsql
+                        """.trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER inccsn_84_trig 
-                    |AFTER UPDATE OR INSERT ON InventoryItem 
-                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                    |EXECUTE PROCEDURE inccsn_84_fn()
-                    """.trimMargin())
+                        |CREATE TRIGGER inccsn_84_trig 
+                        |AFTER UPDATE OR INSERT ON InventoryItem 
+                        |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                        |EXECUTE PROCEDURE inccsn_84_fn()
+                        """.trimMargin())
                     database.execSQL("CREATE TABLE IF NOT EXISTS InventoryItem_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-                    |CREATE 
-                    | INDEX index_InventoryItem_trk_clientId_epk_rx_csn 
-                    |ON InventoryItem_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
+                        database.execSQL("""
+                        |CREATE 
+                        | INDEX index_InventoryItem_trk_clientId_epk_rx_csn 
+                        |ON InventoryItem_trk (clientId, epk, rx, csn)
+                        """.trimMargin())
 
                     database.execSQL("""CREATE TABLE IF NOT EXISTS InventoryTransaction 
                         |(  inventoryTransactionInventoryItemUid  BIGINT , 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 101029,
-    "identityHash": "9afbcf2af578e38ea54dda87341c45a5",
+    "identityHash": "36a18f84eeaa77fa81a196c66a3b214c",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2285,44 +2285,6 @@
             "createSql": "CREATE  INDEX `index_ClazzMember_clazzMemberClazzUid` ON `${TABLE_NAME}` (`clazzMemberClazzUid`)"
           }
         ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonCustomField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personCustomFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldName` TEXT, `labelMessageCode` INTEGER NOT NULL, `fieldIcon` TEXT)",
-        "fields": [
-          {
-            "fieldPath": "personCustomFieldUid",
-            "columnName": "personCustomFieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldName",
-            "columnName": "fieldName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "labelMessageCode",
-            "columnName": "labelMessageCode",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldIcon",
-            "columnName": "fieldIcon",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "personCustomFieldUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
         "foreignKeys": []
       },
       {
@@ -10103,7 +10065,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9afbcf2af578e38ea54dda87341c45a5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '36a18f84eeaa77fa81a196c66a3b214c')"
     ]
   }
 }
