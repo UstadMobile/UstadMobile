@@ -91,6 +91,8 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
 import kotlinx.coroutines.runBlocking
+import net.lightbody.bmp.BrowserMobProxyServer
+import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarNameValuePair
 import org.openqa.selenium.Cookie
 import org.openqa.selenium.Proxy
@@ -864,6 +866,10 @@ object ContentScraperUtil {
                     UTF_ENCODING)
         }
         return true
+    }
+
+    fun getDefaultSeleniumProxy(proxy: BrowserMobProxyServer): Proxy {
+        return ClientUtil.createSeleniumProxy(proxy)
     }
 
 

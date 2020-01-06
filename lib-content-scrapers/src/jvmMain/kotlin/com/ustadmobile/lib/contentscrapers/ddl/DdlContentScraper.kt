@@ -2,21 +2,26 @@ package com.ustadmobile.lib.contentscrapers.ddl
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.getDefaultSeleniumProxy
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
+import com.ustadmobile.lib.contentscrapers.harscraper.setupProxyWithSelenium
 import com.ustadmobile.lib.db.entities.ContentCategory
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.Language
+import net.lightbody.bmp.BrowserMobProxyServer
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
 import java.net.*
@@ -114,6 +119,12 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
         val resourceFolder = File(destinationDirectory, FilenameUtils.getBaseName(urlString))
         resourceFolder.mkdirs()
 
+        val proxy = BrowserMobProxyServer()
+        proxy.start()
+        var chromeDriver = setupProxyWithSelenium(proxy, getDefaultSeleniumProxy(proxy), DDL)
+
+
+
         doc = Jsoup.connect(urlString).get()
 
         val downloadList = doc!!.select("span.download-item a[href]")
@@ -153,7 +164,6 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
                 val decodedUrl = URL(decodedPath)
 
                 conn = decodedUrl.openConnection() as HttpURLConnection
-                conn.requestMethod = REQUEST_HEAD
                 val resourceFile = File(resourceFolder, FilenameUtils.getName(href))
                 val mimeType = Files.probeContentType(resourceFile.toPath())
 
@@ -165,7 +175,9 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
                     continue
                 }
 
-                FileUtils.copyURLToFile(decodedUrl, resourceFile)
+                conn.connect()
+
+                FileUtils.copyInputStreamToFile(conn.inputStream, resourceFile)
 
                 ContentScraperUtil.insertContainer(containerDao, contentEntries, true, mimeType,
                         resourceFile.lastModified(), resourceFile, db, repository, containerDir)
@@ -194,6 +206,13 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
     }
 
     companion object {
+
+        const val GMAIL = "scraper"
+        const val PASS = "reading123"
+        const val SIGN_IN_URL = "https://ddl.af/en/login"
+
+        const val XSRF_TOKEN = "XSRF-TOKEN"
+        const val LIB_SESION = "darakht_e_danesh_online_library_session"
 
 
         @JvmStatic
