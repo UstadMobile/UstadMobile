@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,13 +20,11 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
-import java.util.*
 
 /**
  * PeopleListFragment responsible for showing people list on the people bottom navigation

@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    tools:context="com.ustadmobile.port.android.view.SelectPersonDialogFragment"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -24,18 +25,28 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fragment_select_person_dialog_recyclerview"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_select_person_dialog_appbar">
+        app:layout_constraintTop_toTopOf="parent">
 
-    </androidx.recyclerview.widget.RecyclerView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fragment_select_person_dialog_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/dimen_50dp"
+            android:layout_marginBottom="82dp"
+            app:layout_constraintBottom_toTopOf="@+id/fragment_select_person_dialog_fab"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_select_person_dialog_appbar">
 
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </ScrollView>
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/fragment_select_person_dialog_fab"
@@ -43,15 +54,15 @@
         android:layout_height="wrap_content"
 
 
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
         app:floating_background_color="@color/accent"
         app:floating_left_icon="@drawable/ic_add_black_24dp"
         app:floating_title="@string/new_customer"
         app:floating_title_color="@color/icons"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_select_person_dialog_recyclerview" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

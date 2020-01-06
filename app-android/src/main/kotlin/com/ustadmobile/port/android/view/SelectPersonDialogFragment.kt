@@ -15,12 +15,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.clans.fab.FloatingActionButton
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectPersonDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -37,8 +35,8 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton
 /**
  * SelectPersonDialogFragment Android fragment extends UstadBaseFragment
  */
-class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
-        , DismissableDialog {
+class SelectPersonDialogFragment : UstadDialogFragment(),
+        SelectPersonDialogView, DismissableDialog {
 
 
     override val viewContext: Any
@@ -49,8 +47,6 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
 
     //RecyclerView
     private var mRecyclerView: RecyclerView? = null
-    private val mRecyclerLayoutManager: RecyclerView.LayoutManager? = null
-    private val mAdapter: RecyclerView.Adapter<*>? = null
     lateinit var fab: FloatingTextButton
 
     private var mPresenter: SelectPersonDialogPresenter? = null
@@ -89,7 +85,7 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
         upIcon = getTintedDrawable(upIcon, R.color.icons)
 
         toolbar.navigationIcon = upIcon
-        toolbar.setNavigationOnClickListener { v -> dialog.dismiss() }
+        toolbar.setNavigationOnClickListener { v -> finish() }
 
         mPresenter = SelectPersonDialogPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments), this)
@@ -132,7 +128,8 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
         val mAdapter = PersonSelectedRecyclerAdapter(DIFF_CALLBACK, context!!,
                 this, mPresenter!!)
 
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).personDao)
+        val data = factory.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(context!!).personDao)
 
         //Observe the data:
         val thisP = this
@@ -145,35 +142,7 @@ class SelectPersonDialogFragment : UstadDialogFragment(), SelectPersonDialogView
         mRecyclerView!!.adapter = mAdapter
     }
 
-    // This event is triggered soon after onCreateView().
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Setup any handles to view objects here
-
-    }
-
     companion object {
-
-        /**
-         * Generates a new Fragment for a page fragment
-         *
-         * @return A new instance of fragment SelectClazzesDialogFragment.
-         */
-        fun newInstance(): SelectPersonDialogFragment {
-            val fragment = SelectPersonDialogFragment()
-            val args = Bundle()
-            fragment.arguments = args
-            return fragment
-        }
-
-
-        fun getTintedDrawable(context: Context,
-                              @DrawableRes drawableRes: Int, @ColorRes colorRes: Int): Drawable {
-            var d = ContextCompat.getDrawable(context, drawableRes)
-            d = DrawableCompat.wrap(d!!)
-            DrawableCompat.setTint(d!!.mutate(), ContextCompat.getColor(context, colorRes))
-            return d
-        }
-
         /**
          * The DIFF CALLBACK
          */

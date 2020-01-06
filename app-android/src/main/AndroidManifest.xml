@@ -179,7 +179,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.SelectPersonDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/login" />
+            android:label="@string/select" />
         <activity
             android:name="com.ustadmobile.port.android.view.SelectProducersActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
