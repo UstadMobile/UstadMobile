@@ -125,13 +125,13 @@ class IndexDdlContent {
 
     @Throws(IOException::class)
     private fun browseList(lang: String, count: Int) {
-        var count = count
+        var counter = count
 
-        if (count > maxNumber) {
+        if (counter > maxNumber) {
             return
         }
-        UMLogUtil.logTrace("starting page: $count")
-        val document = Jsoup.connect("https://www.ddl.af/$lang/resources/list?page=$count")
+        UMLogUtil.logTrace("starting page: $counter")
+        val document = Jsoup.connect("https://www.ddl.af/$lang/resources/list?page=$counter")
                 .header("X-Requested-With", "XMLHttpRequest").get()
 
         val resourceList = document.select("article a[href]")
@@ -144,7 +144,7 @@ class IndexDdlContent {
                 val scraper = DdlContentScraper(url, destinationDirectory!!, containerDir!!, lang)
                 try {
                     scraper.scrapeContent()
-                    UMLogUtil.logTrace("scraped url: " + url)
+                    UMLogUtil.logTrace("scraped url: $url")
                     val subjectAreas = scraper.parentSubjectAreas
                     val contentEntry = scraper.contentEntries
                     val contentCategories = scraper.contentCategories
@@ -177,7 +177,7 @@ class IndexDdlContent {
 
         }
 
-        browseList(lang, ++count)
+        browseList(lang, ++counter)
 
     }
 

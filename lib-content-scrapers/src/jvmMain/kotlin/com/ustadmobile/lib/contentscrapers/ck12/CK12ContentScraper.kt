@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.lib.contentscrapers.*
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.getDefaultSeleniumProxy
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_ACTIVITIES
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_LESSONS
@@ -734,10 +735,6 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
 
         FileUtils.writeStringToFile(File(content, "index.json"), gson.toJson(logIndex), UTF_ENCODING)*/
 
-    }
-
-    private fun getDefaultSeleniumProxy(proxy: BrowserMobProxyServer): Proxy {
-        return ClientUtil.createSeleniumProxy(proxy)
     }
 
 

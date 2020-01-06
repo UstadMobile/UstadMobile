@@ -32,7 +32,7 @@ class TestPrathamContentScraper {
 
 
     @Before
-    fun setup(){
+    fun setup() {
         ContentScraperUtil.checkIfPathsToDriversExist()
     }
 
