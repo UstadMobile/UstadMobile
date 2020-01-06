@@ -105,8 +105,10 @@ android {
         buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
 
+        //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
         packagingOptions {
             pickFirst "META-INF/io.netty.versions.properties"
+            excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
         }
 
     }
@@ -133,10 +135,6 @@ android {
             dimension "config"
             minSdkVersion 18
             multiDexEnabled true
-            packagingOptions { //Required: otherwise we get complaints on assembling
-                merge "META-INF/INDEX.LIST"
-                exclude "META-INF/DEPENDENCIES"
-            }
         }
 
         /**
@@ -146,11 +144,6 @@ android {
             dimension "config"
             minSdkVersion 21
             multiDexEnabled true
-            packagingOptions { //Required: otherwise we get complaints on assembling
-                merge "META-INF/INDEX.LIST"
-                //see https://proandroiddev.com/current-issues-with-kotlin-multiplatform-and-how-to-fix-them-5ae62822a546
-                exclude 'META-INF/*.kotlin_module'
-            }
         }
     }
 

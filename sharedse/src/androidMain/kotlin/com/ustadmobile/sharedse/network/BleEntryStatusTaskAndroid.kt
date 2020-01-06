@@ -44,12 +44,7 @@ import java.io.IOException
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
-    /**
-     * Get BleMessageGattClientCallback instance
-     * @return Instance of a BleMessageGattClientCallback
-     */
-    var gattClientCallback: BleMessageGattClientCallback? = null
-        private set
+    private val gattClientCallbackManager: GattClientCallbackManager
 
     private var bluetoothManager: BluetoothManager? = null
 
@@ -63,8 +58,10 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    constructor(context: Context, managerAndroidBle: NetworkManagerBle,
-                entryUidsToCheck: List<Long>, peerToCheck: NetworkNode) : super(context, managerAndroidBle, entryUidsToCheck, peerToCheck) {
+    constructor(gattClientCallbackManager: GattClientCallbackManager, context: Context, managerAndroidBle: NetworkManagerBle,
+                entryUidsToCheck: List<Long>, peerToCheck: NetworkNode)
+            : super(context, managerAndroidBle, entryUidsToCheck, peerToCheck) {
+        this.gattClientCallbackManager = gattClientCallbackManager
         this.managerBle = managerAndroidBle
         this.context = context
         val messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck)
@@ -81,9 +78,13 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      * @param peerToSendMessageTo peer to send message to
      * @param responseListener Message response listener object
      */
-    constructor(context: Context, managerBle: NetworkManagerBle, message: BleMessage,
+    constructor(gattClientCallbackManager: GattClientCallbackManager,
+                context: Context, managerBle: NetworkManagerBle, message: BleMessage,
                 peerToSendMessageTo: NetworkNode,
-                responseListener: BleMessageResponseListener) : super(context, managerBle, message, peerToSendMessageTo, responseListener)
+                responseListener: BleMessageResponseListener)
+            : super(context, managerBle, message, peerToSendMessageTo, responseListener) {
+        this.gattClientCallbackManager = gattClientCallbackManager
+    }
 
 
     /**
@@ -101,51 +102,26 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      */
     override fun sendRequest() {
         try {
-            gattClientCallback = BleMessageGattClientCallback(message!!)
-            gattClientCallback!!.setOnResponseReceived(this)
-            val destinationPeer = bluetoothManager!!.adapter
-                    .getRemoteDevice(networkNode.bluetoothMacAddress)
-
-            //For device below lollipop they require autoConnect flag to be
-            // TRUE otherwise they will always throw error 133.
-            mGattClient = destinationPeer.connectGatt(
-                    context as Context, managerBle?.isVersionKitKatOrBelow?: false, gattClientCallback)
-
-            if (Build.VERSION.SDK_INT >= 21) {
-                mGattClient!!.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+            //TODO: this changes to get the clientcallback from a pool
+            val bluetoothAddr = networkNode.bluetoothMacAddress
+            if(bluetoothAddr == null) {
+                //Illegal Argument - should never get here
+                throw IllegalArgumentException("SendRequest called with null bluetooth destination")
             }
 
-            managerBle?.handleNodeConnectionHistory(destinationPeer.address,
-                    mGattClient != null)
-
-            if (mGattClient == null) {
-                UMLog.l(UMLog.ERROR, 698,
-                        "Failed to connect to " + destinationPeer.address)
-
-                GlobalScope.launch {
-                    UmAppDatabase.getInstance(context as Context).networkNodeDao
-                            .updateRetryCountAsync(networkNode.nodeId)
+            val gattClientCallback = gattClientCallbackManager.getGattClient(bluetoothAddr)
+            GlobalScope.launch {
+                try {
+                    val messageReceived = gattClientCallback.sendMessage(message)
+                    onResponseReceived(bluetoothAddr, messageReceived, null)
+                }catch(e: Exception) {
+                    onResponseReceived(bluetoothAddr, null, e)
                 }
-
-                onResponseReceived(networkNode.bluetoothMacAddress!!, null,
-                        IOException("BLE failed on connectGatt to " + networkNode.bluetoothMacAddress!!))
-            } else {
-                UMLog.l(UMLog.DEBUG, 698,
-                        "Connecting to " + destinationPeer.address)
             }
+
         } catch (e: IllegalArgumentException) {
             UMLog.l(UMLog.ERROR, 698,
                     "Wrong address format provided", e)
-        }
-
-    }
-
-    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-        try {
-            super.onResponseReceived(sourceDeviceAddress, response, error)
-        }finally {
-            //disconnect after finishing the task
-            mGattClient?.disconnect()
         }
 
     }

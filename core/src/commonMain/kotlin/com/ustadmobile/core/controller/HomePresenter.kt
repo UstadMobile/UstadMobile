@@ -20,9 +20,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     private var account: UmAccount? = null
 
-    private val homeView = view
-
     private var showDownloadAll = false
+
+    private val homeView: HomeView = view
+
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -71,6 +72,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         args.putAll(arguments)
         impl.go(if(account != null && account!!.personUid != 0L) UserProfileView.VIEW_NAME
         else LoginView.VIEW_NAME , args, context)
+    }
+
+    fun handleClickShareApp() {
+        homeView.showShareAppDialog()
     }
 
     override fun handleNavigation() {

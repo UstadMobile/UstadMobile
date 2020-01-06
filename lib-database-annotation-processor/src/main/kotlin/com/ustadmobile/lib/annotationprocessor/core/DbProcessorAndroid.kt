@@ -15,6 +15,8 @@ import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 import com.ustadmobile.door.DoorDatabaseCallback
 import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_LOCAL
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_MASTER
 import java.util.*
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.type.DeclaredType
@@ -59,29 +61,19 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                             .joinToString(prefix = ",") { "${it.simpleName}_trk::class" }
                     lineOut += "\n//End of generated section: add tracker entities to room database\n"
                 } else if(line.contains("//#DOORDB_SYNCDAO")) {
-                    lineOut += "//Generated section: add SyncDao getter and boundary callback getters\n"
-                    lineOut += "abstract fun _syncDao(): ${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}\n"
-                    //add boundary callbacks
+                    lineOut += "//Generated section: add SyncDao getter, boundary callback getters, and http (ktor) helper DAO getters\n"
+                    lineOut += "abstract fun _syncDao(): ${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}\n\n"
+                    //add boundary callbacks and http sync (KTOR) helper DAOs
                     methodsToImplement(dbTypeEl, dbTypeEl.asType() as DeclaredType, processingEnv).forEach {
                         val execEl = it as ExecutableElement
                         val returnTypeEl = processingEnv.typeUtils.asElement(execEl.returnType)
 
                         if(returnTypeEl != null && returnTypeEl is TypeElement
-                                && returnTypeEl.hasDataSourceFactory(daoMethodSyncableDataSourceFactoryFilter) ) {
-                            val returnTypeClass = returnTypeEl.asClassName()
-                            val boundaryCallbackQualifiedName = "${returnTypeClass.packageName}.${returnTypeClass.simpleName}${DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS}"
-                            if(it.simpleName.toString().startsWith("get")) {
-                                var varName = it.simpleName.toString()
-                                varName = varName.substring(3, 4).toLowerCase(Locale.ROOT) + varName.substring(4) + DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS
-                                lineOut += "open val ${varName}: $boundaryCallbackQualifiedName \n" +
-                                        "get() = " +
-                                        "throw IllegalAccessException(\"You must access boundary callbacks using the repository, not the database itself\")\n"
-                            }else {
-                                lineOut += "open fun ${it.simpleName}${DbProcessorRepository.SUFFIX_BOUNDARY_CALLBACKS}(): " +
-                                        "$boundaryCallbackQualifiedName = " +
-                                        "throw IllegalAccessException(\"You must access boundary callbacks using the repository, not the database itself\")\n"
-                            }
+                                && syncableEntitiesOnDao(returnTypeEl.asClassName(), processingEnv).isNotEmpty()) {
 
+                            listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL).forEach {suffix ->
+                                lineOut += "abstract fun _${returnTypeEl.simpleName}$suffix() : ${returnTypeEl.qualifiedName}$suffix\n\n"
+                            }
                         }
                     }
 

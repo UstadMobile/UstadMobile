@@ -11,7 +11,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
 import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -21,6 +20,10 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import org.junit.Before
 import org.junit.Rule
+import androidx.test.rule.ServiceTestRule
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import org.junit.Test
 
 // TODO tests are disabled until jenkins are create its own server
@@ -71,6 +74,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
         UmAccountManager.setActiveAccount(testAccount, context)
 
         val intent = Intent()
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, (-101).toString())
         intent.putExtra(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID, (3472).toString())
         intent.putExtra(ARG_LIBRARIES_CONTENT, "")
         mActivityRule.launchActivity(intent)

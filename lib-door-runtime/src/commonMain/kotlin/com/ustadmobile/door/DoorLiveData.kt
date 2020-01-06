@@ -10,4 +10,6 @@ expect abstract class DoorLiveData<T>() {
 
     open fun removeObserver(observer: DoorObserver<in T>)
 
+    open fun getValue(): T?
+
 }

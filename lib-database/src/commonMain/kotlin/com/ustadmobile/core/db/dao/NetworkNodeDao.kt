@@ -51,20 +51,6 @@ abstract class NetworkNodeDao {
     @Query("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp, numFailureCount = 0 " + "WHERE bluetoothMacAddress = :bluetoothAddress")
     abstract suspend fun updateLastSeenAsync(bluetoothAddress: String, lastUpdateTimeStamp: Long): Int
 
-    @Query("SELECT NetworkNode.* FROM NetworkNode " +
-            "LEFT JOIN EntryStatusResponse ON NetworkNode.nodeId = EntryStatusResponse.erNodeId " +
-            "WHERE EntryStatusResponse.erContainerUid = :containerUid " +
-            "AND EntryStatusResponse.available " +
-            "AND NetworkNode.lastUpdateTimeStamp > :minLastSeenTimestamp " +
-            "AND (Select COUNT(*) FROM DownloadJobItemHistory " +
-            "WHERE DownloadJobItemHistory.networkNode = NetworkNode.nodeId " +
-            "AND NOT successful AND startTime > :maxFailuresFromTimestamp) < :maxFailuresInPeriod " +
-            "LIMIT 1")
-    abstract suspend fun findLocalActiveNodeByContainerUid(containerUid: Long,
-                                                   minLastSeenTimestamp: Long,
-                                                   maxFailuresInPeriod: Int,
-                                                   maxFailuresFromTimestamp: Long): NetworkNode?
-
     @Query("DELETE FROM NetworkNode WHERE NetworkNode.lastUpdateTimeStamp < :minLastSeenTimestamp " + "OR NetworkNode.numFailureCount >= :maxFailuresInPeriod")
     abstract fun deleteOldAndBadNode(minLastSeenTimestamp: Long,
                                      maxFailuresInPeriod: Int)

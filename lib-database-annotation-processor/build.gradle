@@ -93,6 +93,11 @@ dependencies {
     implementation "io.ktor:ktor-client-okhttp:$version_ktor"
     implementation "io.ktor:ktor-client-gson:$version_ktor"
 
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+    implementation "ch.qos.logback:logback-classic:$version_logback"
+
     //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")
     kaptTest files("build/libs/lib-database-annotation-processor.jar")

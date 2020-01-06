@@ -6,13 +6,17 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 @Dao
 @UmRepository
 abstract class ContainerDao : BaseDao<Container> {
+
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(containerList: List<Container>)
 
     @Insert
     abstract fun insertListAndReturnIds(containerList: List<Container>): Array<Long>
@@ -112,7 +116,15 @@ abstract class ContainerDao : BaseDao<Container> {
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
 
+    @Query("Select Container.containerUid, Container.mimeType FROM Container " +
+            "WHERE Container.containerContentEntryUid = :contentEntry " +
+            "ORDER BY Container.cntLastModified DESC LIMIT 1")
+    abstract suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertWithReplace(container : Container)
 
 }

@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -109,7 +110,7 @@ class EpubContentPresenterTest {
     @Throws(IOException::class)
     fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() {
         val args = HashMap<String, String>()
-        args[EpubContentView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
 
         val hrefListReference = AtomicReference<Any>()
 
@@ -126,7 +127,7 @@ class EpubContentPresenterTest {
                 any<UmCallback<String>>())
         verify<EpubContentView>(mockEpubView, timeout(15000)).setContainerTitle(opf!!.title!!)
 
-        verify<EpubContentView>(mockEpubView, timeout(15000)).setSpineUrls(any(), eq(0))
+        verify<EpubContentView>(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
 
         val linearSpineUrls = hrefListReference.get() as Array<String>
         val client = HttpClient()

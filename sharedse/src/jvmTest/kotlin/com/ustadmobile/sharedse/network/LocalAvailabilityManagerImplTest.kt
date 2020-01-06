@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
@@ -13,6 +14,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -24,6 +26,16 @@ class LocalAvailabilityManagerImplTest  {
     val TEST_NODE1_ADDR = "aa:bb:cc:dd:ee:ff"
 
     val TEST_NODE2_ADDR = "00:12:12:13:aa:bb"
+
+    private lateinit var db: UmAppDatabase
+
+    private val context = Any()
+
+    @Before
+    fun setup() {
+        db = UmAppDatabase.getInstance(context)
+        db.clearAllTables()
+    }
 
     @Test
     fun givenEntryMonitorActiveWithNodeThatHasEntry_whenNodeDisocvered_shouldCreateAndSendBleEntryStatusTask() {
@@ -47,7 +59,8 @@ class LocalAvailabilityManagerImplTest  {
 
             val coroutineContext = newSingleThreadContext("LocalAvailabilityTest")
             val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
-                    coroutineDispatcher = coroutineContext)
+                    coroutineDispatcher = coroutineContext,
+                    locallyAvailableContainerDao = db.locallyAvailableContainerDao)
             val monitorRequest = AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1), {
                 if(it[TEST_ENTRY_UID1] ?: false)
                     countdownLatch.countDown()
@@ -89,7 +102,8 @@ class LocalAvailabilityManagerImplTest  {
                 task
             }
 
-            val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
+            val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
+                    locallyAvailableContainerDao = db.locallyAvailableContainerDao)
             managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
             managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
 
@@ -135,7 +149,8 @@ class LocalAvailabilityManagerImplTest  {
                     task
                 }
 
-                val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker)
+                val managerImpl = LocalAvailabilityManagerImpl(Any(), statusTaskMaker,
+                        locallyAvailableContainerDao = db.locallyAvailableContainerDao)
                 managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
                 managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
                 managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
