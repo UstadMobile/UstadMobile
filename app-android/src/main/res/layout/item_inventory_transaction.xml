@@ -34,13 +34,14 @@
 
     <TextView
         android:id="@+id/item_inventory_transaction_desc"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="8dp"
         android:text="Transaction description"
         android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toTopOf="@+id/item_inventory_transaction_due_date"
+        app:layout_constraintEnd_toStartOf="@+id/item_inventory_transaction_od"
         app:layout_constraintStart_toStartOf="@+id/item_inventory_transaction_mode"
         app:layout_constraintTop_toBottomOf="@+id/item_inventory_transaction_mode" />
 

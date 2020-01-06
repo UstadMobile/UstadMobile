@@ -58,8 +58,11 @@ open class Person() {
     //Added for simplicity for roles to a person directly for Goldozi. (mostly used for Customers)
     var personRoleUid : Long = 0L
 
-    //Added for customers to be linked to actual Locaiton for Goldozi.
+    //Added for customers to be linked to actual Locaiton for Goldozi (mostly intended to be used for Customers).
     var personLocationUid : Long = 0L
+
+    //Goldozi specific: The person adding this user (used for finding an LE's customer)
+    var personAddedByUid : Long = 0L
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

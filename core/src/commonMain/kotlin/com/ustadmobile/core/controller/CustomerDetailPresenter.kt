@@ -9,11 +9,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.CustomerDetailView
 import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CD_LE_UID
 import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CUSTOMER_UID
-import com.ustadmobile.core.view.SelectPersonDialogView
+import com.ustadmobile.core.view.SelectCustomerView
 import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.Sale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -147,6 +146,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
                 }
 
                 val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+                currentPerson!!.personAddedByUid = loggedInPersonUid
                 currentPerson!!.personUid = personDao.createPersonAsync(currentPerson!!,
                         loggedInPersonUid)
                 customerUid = currentPerson!!.personUid
@@ -209,8 +209,8 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
     fun selectCustomer(){
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
-        args.put(SelectPersonDialogView.ARG_SP_LE_UID, leUid.toString())
-        impl.go(SelectPersonDialogView.VIEW_NAME, args, context)
+        args.put(SelectCustomerView.ARG_SP_LE_UID, leUid.toString())
+        impl.go(SelectCustomerView.VIEW_NAME, args, context)
         view.finish()
     }
 

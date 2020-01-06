@@ -6,8 +6,6 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
@@ -20,11 +18,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.SelectPersonDialogPresenter
+import com.ustadmobile.core.controller.SelectCustomerPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.DismissableDialog
-import com.ustadmobile.core.view.SelectPersonDialogView
+import com.ustadmobile.core.view.SelectCustomerView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.Dispatchers
@@ -33,10 +31,10 @@ import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 /**
- * SelectPersonDialogFragment Android fragment extends UstadBaseFragment
+ * SelectCustomerDialogFragment Android fragment extends UstadBaseFragment
  */
-class SelectPersonDialogFragment : UstadDialogFragment(),
-        SelectPersonDialogView, DismissableDialog {
+class SelectCustomerDialogFragment : UstadDialogFragment(),
+        SelectCustomerView, DismissableDialog {
 
 
     override val viewContext: Any
@@ -49,7 +47,7 @@ class SelectPersonDialogFragment : UstadDialogFragment(),
     private var mRecyclerView: RecyclerView? = null
     lateinit var fab: FloatingTextButton
 
-    private var mPresenter: SelectPersonDialogPresenter? = null
+    private var mPresenter: SelectCustomerPresenter? = null
     //Context (Activity calling this)
     private var mAttachedContext: Context? = null
 
@@ -87,7 +85,7 @@ class SelectPersonDialogFragment : UstadDialogFragment(),
         toolbar.navigationIcon = upIcon
         toolbar.setNavigationOnClickListener { v -> finish() }
 
-        mPresenter = SelectPersonDialogPresenter(context!!,
+        mPresenter = SelectCustomerPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

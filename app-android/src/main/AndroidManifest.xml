@@ -177,7 +177,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login" />
         <activity
-            android:name="com.ustadmobile.port.android.view.SelectPersonDialogFragment"
+            android:name="com.ustadmobile.port.android.view.SelectCustomerDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/select" />
         <activity

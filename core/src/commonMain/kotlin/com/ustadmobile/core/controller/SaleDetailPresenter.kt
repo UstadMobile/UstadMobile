@@ -485,9 +485,9 @@ class SaleDetailPresenter(context: Any,
     fun handleClickCustomer(){
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
-        args.put(SelectPersonDialogView.ARG_SP_LE_UID,
+        args.put(SelectCustomerView.ARG_SP_LE_UID,
                 UmAccountManager.getActiveAccount(context)!!.personUid.toString())
-        impl.go(SelectPersonDialogView.VIEW_NAME, args, context)
+        impl.go(SelectCustomerView.VIEW_NAME, args, context)
     }
 
     fun handleClickAddSaleItem(){

@@ -42,7 +42,7 @@ import kotlin.jvm.Volatile
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
-    ], version = 101029)
+    ], version = 102029)
 
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -753,9 +753,60 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         /**
-         * fix SQL update triggers
+         * added personAddedByUid in Person
          *
          */
+        val MIGRATION_101029_102029 = object : DoorMigration(101029, 102029) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""ALTER TABLE Person RENAME to Person_OLD""")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Person (
+                        |username  TEXT , 
+                        |firstNames  TEXT , 
+                        |lastName  TEXT , 
+                        |emailAddr  TEXT , 
+                        |phoneNum  TEXT , 
+                        |gender  INTEGER NOT NULL , 
+                        |active  INTEGER NOT NULL , 
+                        |admin  INTEGER NOT NULL , 
+                        |personNotes  TEXT , 
+                        |personAddress  TEXT , 
+                        |mPersonGroupUid  INTEGER NOT NULL , 
+                        |fatherName  TEXT , 
+                        |fatherNumber  TEXT , 
+                        |motherName  TEXT , 
+                        |motherNum  TEXT , 
+                        |dateOfBirth  INTEGER NOT NULL , 
+                        |personRoleUid  INTEGER NOT NULL , 
+                        |personLocationUid  INTEGER NOT NULL , 
+                        |personAddedByUid INTEGER NOT NULL,
+                        |personMasterChangeSeqNum  INTEGER NOT NULL , 
+                        |personLocalChangeSeqNum  INTEGER NOT NULL , 
+                        |personLastChangedBy  INTEGER NOT NULL , 
+                        |personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        |)""".trimMargin())
+                    database.execSQL("""INSERT INTO Person (
+                        |personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, 
+                        |active, admin, personNotes, personAddress, mPersonGroupUid, fatherName, 
+                        |fatherNumber, motherName, motherNum, dateOfBirth, personRoleUid, 
+                        |personLocationUid, personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                        |personLastChangedBy, personAddedByUid) 
+                        |SELECT personUid, username, firstNames, lastName, emailAddr, phoneNum, 
+                        |gender, active, admin, personNotes, personAddress, mPersonGroupUid, 
+                        |fatherName, fatherNumber, motherName, motherNum, dateOfBirth, 
+                        |personRoleUid, personLocationUid, personMasterChangeSeqNum, 
+                        |personLocalChangeSeqNum, personLastChangedBy, 0 FROM Person_OLD""".trimMargin())
+                    database.execSQL("""DROP TABLE Person_OLD""")
+
+                }
+                if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""ALTER TABLE Person ADD COLUMN personAddedByUid BIGINT """)
+                }
+
+            }
+        }
+
         val MIGRATION_100029_101029 = object : DoorMigration(100029, 101029) {
             override fun migrate(database: DoorSqlDatabase) {
                 if (database.dbType() == DoorDbType.SQLITE) {
@@ -783,7 +834,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzLogUid = NEW.clazzLogUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_14
                     |AFTER INSERT ON ClazzLog FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -805,9 +856,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzLogUid = NEW.clazzLogUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_15")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_15")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_15")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_15")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_15
                     |AFTER UPDATE ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -829,7 +880,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_15
                     |AFTER INSERT ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -851,9 +902,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_121")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_121")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_121")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_121")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_121
                     |AFTER UPDATE ON FeedEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -875,7 +926,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE feedEntryUid = NEW.feedEntryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_121
                     |AFTER INSERT ON FeedEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -897,9 +948,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE feedEntryUid = NEW.feedEntryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_20")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_20")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_20")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_20")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_20
                     |AFTER UPDATE ON PersonField FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -921,7 +972,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personCustomFieldUid = NEW.personCustomFieldUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_20
                     |AFTER INSERT ON PersonField FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -943,9 +994,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personCustomFieldUid = NEW.personCustomFieldUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_19")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_19")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_19")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_19")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_19
                     |AFTER UPDATE ON PersonDetailPresenterField FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -967,7 +1018,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_19
                     |AFTER INSERT ON PersonDetailPresenterField FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -989,9 +1040,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_22")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_22")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_22")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_22")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_22
                     |AFTER UPDATE ON SelQuestion FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1013,7 +1064,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionUid = NEW.selQuestionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_22
                     |AFTER INSERT ON SelQuestion FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1035,9 +1086,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionUid = NEW.selQuestionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_23")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_23")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_23")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_23")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_23
                     |AFTER UPDATE ON SelQuestionResponse FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1059,7 +1110,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_23
                     |AFTER INSERT ON SelQuestionResponse FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1081,9 +1132,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_24")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_24")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_24")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_24")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_24
                     |AFTER UPDATE ON SelQuestionResponseNomination FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1105,7 +1156,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selqrnUid = NEW.selqrnUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_24
                     |AFTER INSERT ON SelQuestionResponseNomination FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1127,9 +1178,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selqrnUid = NEW.selqrnUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_25")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_25")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_25")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_25")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_25
                     |AFTER UPDATE ON SelQuestionSet FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1151,7 +1202,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetUid = NEW.selQuestionSetUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_25
                     |AFTER INSERT ON SelQuestionSet FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1173,9 +1224,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetUid = NEW.selQuestionSetUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_26")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_26")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_26")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_26")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_26
                     |AFTER UPDATE ON SelQuestionSetRecognition FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1197,7 +1248,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_26
                     |AFTER INSERT ON SelQuestionSetRecognition FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1219,9 +1270,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_27")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_27")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_27")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_27")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_27
                     |AFTER UPDATE ON SelQuestionSetResponse FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1243,7 +1294,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_27
                     |AFTER INSERT ON SelQuestionSetResponse FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1265,9 +1316,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_21")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_21")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_21")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_21")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_21
                     |AFTER UPDATE ON Schedule FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1289,7 +1340,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE scheduleUid = NEW.scheduleUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_21
                     |AFTER INSERT ON Schedule FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1311,9 +1362,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE scheduleUid = NEW.scheduleUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_17")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_17")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_17")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_17")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_17
                     |AFTER UPDATE ON DateRange FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1335,7 +1386,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dateRangeUid = NEW.dateRangeUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_17
                     |AFTER INSERT ON DateRange FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1357,9 +1408,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dateRangeUid = NEW.dateRangeUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_28")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_28")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_28")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_28")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_28
                     |AFTER UPDATE ON UMCalendar FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1381,7 +1432,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE umCalendarUid = NEW.umCalendarUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_28
                     |AFTER INSERT ON UMCalendar FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1403,9 +1454,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE umCalendarUid = NEW.umCalendarUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_11")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_11")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_11")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_11")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_11
                     |AFTER UPDATE ON ClazzActivity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1427,7 +1478,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzActivityUid = NEW.clazzActivityUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_11
                     |AFTER INSERT ON ClazzActivity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1449,9 +1500,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzActivityUid = NEW.clazzActivityUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_32")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_32")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_32")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_32")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_32
                     |AFTER UPDATE ON ClazzActivityChange FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1473,7 +1524,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_32
                     |AFTER INSERT ON ClazzActivityChange FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1495,9 +1546,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_52")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_52")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_52")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_52")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_52
                     |AFTER UPDATE ON SelQuestionOption FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1519,7 +1570,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_52
                     |AFTER INSERT ON SelQuestionOption FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1541,9 +1592,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_173")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_173")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_173")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_173")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_173
                     |AFTER UPDATE ON ScheduledCheck FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1565,7 +1616,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE scheduledCheckUid = NEW.scheduledCheckUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_173
                     |AFTER INSERT ON ScheduledCheck FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1587,9 +1638,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE scheduledCheckUid = NEW.scheduledCheckUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_53")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_53")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_53")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_53")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_53
                     |AFTER UPDATE ON AuditLog FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1611,7 +1662,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE auditLogUid = NEW.auditLogUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_53
                     |AFTER INSERT ON AuditLog FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1633,9 +1684,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE auditLogUid = NEW.auditLogUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_56")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_56")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_56")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_56")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_56
                     |AFTER UPDATE ON CustomField FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1657,7 +1708,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldUid = NEW.customFieldUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_56
                     |AFTER INSERT ON CustomField FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1679,9 +1730,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldUid = NEW.customFieldUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_57")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_57")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_57")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_57")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_57
                     |AFTER UPDATE ON CustomFieldValue FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1703,7 +1754,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldValueUid = NEW.customFieldValueUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_57
                     |AFTER INSERT ON CustomFieldValue FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1725,9 +1776,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldValueUid = NEW.customFieldValueUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_55")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_55")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_55")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_55")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_55
                     |AFTER UPDATE ON CustomFieldValueOption FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1749,7 +1800,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_55
                     |AFTER INSERT ON CustomFieldValueOption FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1771,9 +1822,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_9")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_9")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_9")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_9")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_9
                     |AFTER UPDATE ON Person FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1795,7 +1846,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personUid = NEW.personUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_9
                     |AFTER INSERT ON Person FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1817,9 +1868,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personUid = NEW.personUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_6")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_6")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_6")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_6")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_6
                     |AFTER UPDATE ON Clazz FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1841,7 +1892,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzUid = NEW.clazzUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_6
                     |AFTER INSERT ON Clazz FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1863,9 +1914,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzUid = NEW.clazzUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_65")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_65")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_65")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_65")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_65
                     |AFTER UPDATE ON ClazzMember FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1887,7 +1938,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzMemberUid = NEW.clazzMemberUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_65
                     |AFTER INSERT ON ClazzMember FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1909,9 +1960,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzMemberUid = NEW.clazzMemberUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_178")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_178")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_178")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_178")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_178
                     |AFTER UPDATE ON PersonCustomFieldValue FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1933,7 +1984,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_178
                     |AFTER INSERT ON PersonCustomFieldValue FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1955,9 +2006,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_42")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_42")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_42")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_42")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_42
                     |AFTER UPDATE ON ContentEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -1979,7 +2030,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contentEntryUid = NEW.contentEntryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_42
                     |AFTER INSERT ON ContentEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2001,9 +2052,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contentEntryUid = NEW.contentEntryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_3")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_3")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_3")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_3")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_3
                     |AFTER UPDATE ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2025,7 +2076,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE ceccjUid = NEW.ceccjUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_3
                     |AFTER INSERT ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2047,9 +2098,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE ceccjUid = NEW.ceccjUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_7")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_7")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_7")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_7")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_7
                     |AFTER UPDATE ON ContentEntryParentChildJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2071,7 +2122,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE cepcjUid = NEW.cepcjUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_7
                     |AFTER INSERT ON ContentEntryParentChildJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2093,9 +2144,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE cepcjUid = NEW.cepcjUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_8")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_8")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_8")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_8")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_8
                     |AFTER UPDATE ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2117,7 +2168,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE cerejUid = NEW.cerejUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_8
                     |AFTER INSERT ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2139,9 +2190,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE cerejUid = NEW.cerejUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_2")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_2")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_2")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_2")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_2
                     |AFTER UPDATE ON ContentCategorySchema FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2163,7 +2214,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_2
                     |AFTER INSERT ON ContentCategorySchema FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2185,9 +2236,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_1")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_1")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_1")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_1")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_1
                     |AFTER UPDATE ON ContentCategory FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2209,7 +2260,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contentCategoryUid = NEW.contentCategoryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_1
                     |AFTER INSERT ON ContentCategory FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2231,9 +2282,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contentCategoryUid = NEW.contentCategoryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_13")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_13")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_13")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_13")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_13
                     |AFTER UPDATE ON Language FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2255,7 +2306,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE langUid = NEW.langUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_13
                     |AFTER INSERT ON Language FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2277,9 +2328,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE langUid = NEW.langUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_10")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_10")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_10")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_10")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_10
                     |AFTER UPDATE ON LanguageVariant FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2301,7 +2352,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE langVariantUid = NEW.langVariantUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_10
                     |AFTER INSERT ON LanguageVariant FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2323,9 +2374,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE langVariantUid = NEW.langVariantUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_45")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_45")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_45")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_45")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_45
                     |AFTER UPDATE ON Role FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2347,7 +2398,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE roleUid = NEW.roleUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_45
                     |AFTER INSERT ON Role FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2369,9 +2420,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE roleUid = NEW.roleUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_47")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_47")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_47")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_47")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_47
                     |AFTER UPDATE ON EntityRole FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2393,7 +2444,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE erUid = NEW.erUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_47
                     |AFTER INSERT ON EntityRole FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2415,9 +2466,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE erUid = NEW.erUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_43")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_43")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_43")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_43")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_43
                     |AFTER UPDATE ON PersonGroup FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2439,7 +2490,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE groupUid = NEW.groupUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_43
                     |AFTER INSERT ON PersonGroup FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2461,9 +2512,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE groupUid = NEW.groupUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_44")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_44")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_44")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_44")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_44
                     |AFTER UPDATE ON PersonGroupMember FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2485,7 +2536,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE groupMemberUid = NEW.groupMemberUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_44
                     |AFTER INSERT ON PersonGroupMember FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2507,9 +2558,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE groupMemberUid = NEW.groupMemberUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_29")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_29")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_29")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_29")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_29
                     |AFTER UPDATE ON Location FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2531,7 +2582,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE locationUid = NEW.locationUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_29
                     |AFTER INSERT ON Location FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2553,9 +2604,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE locationUid = NEW.locationUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_48")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_48")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_48")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_48")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_48
                     |AFTER UPDATE ON PersonLocationJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2577,7 +2628,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personLocationUid = NEW.personLocationUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_48
                     |AFTER INSERT ON PersonLocationJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2599,9 +2650,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personLocationUid = NEW.personLocationUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_50")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_50")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_50")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_50")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_50
                     |AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2623,7 +2674,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personPictureUid = NEW.personPictureUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_50
                     |AFTER INSERT ON PersonPicture FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2645,9 +2696,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personPictureUid = NEW.personPictureUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_51")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_51")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_51")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_51")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_51
                     |AFTER UPDATE ON Container FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2669,7 +2720,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE containerUid = NEW.containerUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_51
                     |AFTER INSERT ON Container FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2691,9 +2742,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE containerUid = NEW.containerUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_62")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_62")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_62")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_62")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_62
                     |AFTER UPDATE ON VerbEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2715,7 +2766,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE verbUid = NEW.verbUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_62
                     |AFTER INSERT ON VerbEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2737,9 +2788,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE verbUid = NEW.verbUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_64")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_64")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_64")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_64")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_64
                     |AFTER UPDATE ON XObjectEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2761,7 +2812,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE xObjectUid = NEW.xObjectUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_64
                     |AFTER INSERT ON XObjectEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2783,9 +2834,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE xObjectUid = NEW.xObjectUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_60")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_60")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_60")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_60")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_60
                     |AFTER UPDATE ON StatementEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2807,7 +2858,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE statementUid = NEW.statementUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_60
                     |AFTER INSERT ON StatementEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2829,9 +2880,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE statementUid = NEW.statementUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_66")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_66")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_66")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_66")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_66
                     |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2853,7 +2904,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_66
                     |AFTER INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2875,9 +2926,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_68")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_68")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_68")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_68")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_68
                     |AFTER UPDATE ON AgentEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2899,7 +2950,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE agentUid = NEW.agentUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_68
                     |AFTER INSERT ON AgentEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2921,9 +2972,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE agentUid = NEW.agentUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_70")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_70")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_70")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_70")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_70
                     |AFTER UPDATE ON StateEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2945,7 +2996,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE stateUid = NEW.stateUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_70
                     |AFTER INSERT ON StateEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2967,9 +3018,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE stateUid = NEW.stateUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_72")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_72")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_72")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_72")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_72
                     |AFTER UPDATE ON StateContentEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -2991,7 +3042,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE stateContentUid = NEW.stateContentUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_72
                     |AFTER INSERT ON StateContentEntity FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3013,9 +3064,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE stateContentUid = NEW.stateContentUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_74")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_74")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_74")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_74")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_74
                     |AFTER UPDATE ON XLangMapEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3037,7 +3088,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE statementLangMapUid = NEW.statementLangMapUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_74
                     |AFTER INSERT ON XLangMapEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3059,9 +3110,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE statementLangMapUid = NEW.statementLangMapUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_61")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_61")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_61")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_61")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_61
                     |AFTER UPDATE ON Sale FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3083,7 +3134,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleUid = NEW.saleUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_61
                     |AFTER INSERT ON Sale FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3105,9 +3156,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleUid = NEW.saleUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_63")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_63")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_63")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_63")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_63
                     |AFTER UPDATE ON SaleItem FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3129,7 +3180,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleItemUid = NEW.saleItemUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_63
                     |AFTER INSERT ON SaleItem FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3151,9 +3202,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleItemUid = NEW.saleItemUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_76")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_76")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_76")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_76")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_76
                     |AFTER UPDATE ON SalePayment FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3175,7 +3226,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE salePaymentUid = NEW.salePaymentUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_76
                     |AFTER INSERT ON SalePayment FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3197,9 +3248,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE salePaymentUid = NEW.salePaymentUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_73")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_73")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_73")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_73")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_73
                     |AFTER UPDATE ON SaleProductPicture FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3221,7 +3272,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleProductPictureUid = NEW.saleProductPictureUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_73
                     |AFTER INSERT ON SaleProductPicture FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3243,9 +3294,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleProductPictureUid = NEW.saleProductPictureUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_67")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_67")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_67")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_67")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_67
                     |AFTER UPDATE ON SaleProduct FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3267,7 +3318,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleProductUid = NEW.saleProductUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_67
                     |AFTER INSERT ON SaleProduct FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3289,9 +3340,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleProductUid = NEW.saleProductUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_75")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_75")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_75")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_75")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_75
                     |AFTER UPDATE ON SaleVoiceNote FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3313,7 +3364,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleVoiceNoteUid = NEW.saleVoiceNoteUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_75
                     |AFTER INSERT ON SaleVoiceNote FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3335,9 +3386,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleVoiceNoteUid = NEW.saleVoiceNoteUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_77")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_77")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_77")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_77")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_77
                     |AFTER UPDATE ON SaleProductParentJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3359,7 +3410,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleProductParentJoinUid = NEW.saleProductParentJoinUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_77
                     |AFTER INSERT ON SaleProductParentJoin FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3381,9 +3432,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleProductParentJoinUid = NEW.saleProductParentJoinUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_79")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_79")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_79")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_79")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_79
                     |AFTER UPDATE ON SaleItemReminder FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3405,7 +3456,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleItemReminderUid = NEW.saleItemReminderUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_79
                     |AFTER INSERT ON SaleItemReminder FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3427,9 +3478,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleItemReminderUid = NEW.saleItemReminderUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_80")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_80")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_80")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_80")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_80
                     |AFTER UPDATE ON DashboardEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3451,7 +3502,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dashboardEntryUid = NEW.dashboardEntryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_80
                     |AFTER INSERT ON DashboardEntry FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3473,9 +3524,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dashboardEntryUid = NEW.dashboardEntryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_81")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_81")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_81")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_81")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_81
                     |AFTER UPDATE ON DashboardTag FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3497,7 +3548,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dashboardTagUid = NEW.dashboardTagUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_81
                     |AFTER INSERT ON DashboardTag FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3519,9 +3570,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dashboardTagUid = NEW.dashboardTagUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_83")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_83")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_83")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_83")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_83
                     |AFTER UPDATE ON DashboardEntryTag FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3543,7 +3594,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dashboardEntryTagUid = NEW.dashboardEntryTagUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_83
                     |AFTER INSERT ON DashboardEntryTag FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3565,9 +3616,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dashboardEntryTagUid = NEW.dashboardEntryTagUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_84")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_84")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_84")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_84")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_84
                     |AFTER UPDATE ON InventoryItem FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3589,7 +3640,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE inventoryItemUid = NEW.inventoryItemUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_84
                     |AFTER INSERT ON InventoryItem FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3611,9 +3662,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE inventoryItemUid = NEW.inventoryItemUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_85")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_85")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_85")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_85")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_85
                     |AFTER UPDATE ON InventoryTransaction FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3635,7 +3686,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE inventoryTransactionUid = NEW.inventoryTransactionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_85
                     |AFTER INSERT ON InventoryTransaction FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3657,9 +3708,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE inventoryTransactionUid = NEW.inventoryTransactionUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("DROP TRIGGER IF EXISTS UPD_86")
-                                database.execSQL("DROP TRIGGER IF EXISTS INS_86")
-                                database.execSQL("""
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_86")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_86")
+                    database.execSQL("""
                     |CREATE TRIGGER UPD_86
                     |AFTER UPDATE ON SaleDelivery FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -3681,7 +3732,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE saleDeliveryUid = NEW.saleDeliveryUid
                     |; END
                     """.trimMargin())
-                                database.execSQL("""
+                    database.execSQL("""
                     |CREATE TRIGGER INS_86
                     |AFTER INSERT ON SaleDelivery FOR EACH ROW WHEN
                     |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
@@ -4776,7 +4827,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
             
-            builder.addMigrations(MIGRATION_27_100028, MIGRATION_100028_100029, MIGRATION_100029_101029)
+            builder.addMigrations(MIGRATION_27_100028,
+                    MIGRATION_100028_100029, MIGRATION_100029_101029, MIGRATION_101029_102029)
 
             return builder
         }

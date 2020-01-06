@@ -437,7 +437,7 @@ abstract class SaleDao : BaseDao<Sale> {
                           ORDER BY stg.saleCreationDate ASC LIMIT 1 
                           )  
                           || 'x ' || 
-                          (SELECT CASE WHEN SaleProduct.saleProductNameDari NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END 
+                          (SELECT CASE WHEN SaleProduct.saleProductNameDari IS NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END 
                           FROM SaleItem sitg 
                           LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid 
                           WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
@@ -460,7 +460,7 @@ abstract class SaleDao : BaseDao<Sale> {
                           ORDER BY stg.saleCreationDate ASC LIMIT 1 
                           )  
                           || 'x ' || 
-                          (SELECT CASE WHEN SaleProduct.saleProductNamePashto NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END 
+                          (SELECT CASE WHEN SaleProduct.saleProductNamePashto IS NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END 
                           FROM SaleItem sitg 
                           LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid 
                           WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
@@ -479,10 +479,10 @@ abstract class SaleDao : BaseDao<Sale> {
                 (Select GROUP_CONCAT(SaleProduct.saleProductName)  FROM SaleItem 
                   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
                   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNames, 
-                (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNameDari NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END)  FROM SaleItem 
+                (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNameDari IS NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END)  FROM SaleItem 
                   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
                   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesDari, 
-                (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNamePashto NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END)  FROM SaleItem 
+                (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNamePashto IS NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END)  FROM SaleItem 
                   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
                   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesPashto, 
                 Location.title AS locationName, 

@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.Person
 /**
  * Core View. Screen is for SelectPersonDialog's View
  */
-interface SelectPersonDialogView : UstadView {
+interface SelectCustomerView : UstadView {
 
     /**
      * Method to finish the screen / view.

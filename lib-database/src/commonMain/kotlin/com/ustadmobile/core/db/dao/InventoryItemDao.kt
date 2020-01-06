@@ -29,7 +29,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 ) 
                 and inventorytransaction.inventoryTransactionSaleUid != 0
                 and cast(inventorytransaction.inventorytransactionactive as integer) = 1 
-                and item.inventoryItemLeUid = MLE.personUid ) 
+                and item.inventoryItemLeUid = :leUid ) 
     FROM InventoryItem
     LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
     LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
@@ -62,7 +62,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                 inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
                 AND InventoryItem.inventoryItemWeUid = :weUid ) 
                 and inventorytransaction.inventoryTransactionSaleUid != 0
-                and item.inventoryItemLeUid = MLE.personUid) AS inventoryCount
+                and item.inventoryItemLeUid = :leUid) AS inventoryCount
     FROM InventoryItem
     LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
     LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
@@ -141,10 +141,10 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
     @Query(QUERY_INVENTORY_LIST + QUERY_INVENTORY_LIST_SORTBY_STOCK_DESC)
     abstract fun findAllInventoryByProductStockDesc(leUid: Long, searchBit: String)
             : DataSource.Factory<Int, SaleProductWithInventoryCount>
-    @Query(QUERY_INVENTORY_LIST + QUERY_INVENTORY_LIST_SORTBY_MOST_RECENT)
+    @Query(QUERY_INVENTORY_LIST + QUERY_DATE_GROUP + QUERY_INVENTORY_LIST_SORTBY_MOST_RECENT)
     abstract fun findAllInventoryByProductMostRecent(leUid: Long, searchBit: String)
             : DataSource.Factory<Int, SaleProductWithInventoryCount>
-    @Query(QUERY_INVENTORY_LIST + QUERY_INVENTORY_LIST_SORTBY_LEAST_RECENT)
+    @Query(QUERY_INVENTORY_LIST + QUERY_DATE_GROUP + QUERY_INVENTORY_LIST_SORTBY_LEAST_RECENT)
     abstract fun findAllInventoryByProductLeastRecent(leUid: Long, searchBit: String)
             : DataSource.Factory<Int, SaleProductWithInventoryCount>
 
@@ -178,7 +178,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                             (	select inventoryitemuid from inventoryitem where 
                                 inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
                                 AND InventoryItem.inventoryItemWeUid = Person.personUid
-                                AND InventoryItem.inventoryItemLeUid = MLE.personUid
+                                AND InventoryItem.inventoryItemLeUid = :leUid
                                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                             ) 
                             and inventorytransaction.inventoryTransactionSaleUid != 0 
@@ -191,7 +191,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                     CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND
                     SaleProduct.saleProductUid = :saleProductUid 
                     AND InventoryItem.inventoryItemWeUid = Person.personUid
-                    AND InventoryItem.inventoryItemLeUid = MLE.personUid
+                    AND InventoryItem.inventoryItemLeUid = :leUid
                     AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
             ) as inventoryCount, 
             -1 as inventorySelected,
@@ -225,7 +225,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                                 (	select inventoryitemuid from inventoryitem where 
                                     inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
                                     AND InventoryItem.inventoryItemWeUid = Person.personUid
-                                    AND InventoryItem.inventoryItemLeUid = MLE.personUid
+                                    AND InventoryItem.inventoryItemLeUid = :leUid
                                     AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                                 ) 
                                 and inventorytransaction.inventoryTransactionSaleUid != 0 
@@ -238,7 +238,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                         CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND
                         SaleProduct.saleProductUid = :saleProductUid 
                         AND InventoryItem.inventoryItemWeUid = Person.personUid
-                        AND InventoryItem.inventoryItemLeUid = MLE.personUid
+                        AND InventoryItem.inventoryItemLeUid = :leUid
                         AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                 ) as inventoryCount, 
                 (
@@ -320,37 +320,38 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
 
         const val QUERY_INVENTORY_LIST = """
             SELECT SaleProduct.*, 
-            COUNT(*) - 
-                (select count(*) from inventorytransaction 
-                left join inventoryitem as item on item.inventoryitemuid = inventorytransaction.inventorytransactioninventoryitemuid
-                where 
-                inventorytransaction.inventoryTransactionInventoryItemUid in 
-                (select inventoryitemuid from inventoryitem where 
-                inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
-                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 ) 
-                and inventorytransaction.inventoryTransactionSaleUid != 0 
-                and cast(inventorytransaction.inventorytransactionactive as integer) = 1 
-                and item.inventoryItemLeUid = MLE.personUid)   
-            as stock 
-            FROM InventoryItem 
-            LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
-            LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
-            WHERE CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
-            AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-            AND saleProductName LIKE :searchBit
+                COUNT(*) - 
+                    (select count(*) from inventorytransaction 
+                    left join inventoryitem as item on item.inventoryitemuid = inventorytransaction.inventorytransactioninventoryitemuid
+                    where 
+                    inventorytransaction.inventoryTransactionInventoryItemUid in 
+                    (select inventoryitemuid from inventoryitem where 
+                    inventoryitem.inventoryitemsaleproductuid = SaleProduct.saleProductUid
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 ) 
+                    and inventorytransaction.inventoryTransactionSaleUid != 0 
+                    and cast(inventorytransaction.inventorytransactionactive as integer) = 1 
+                    and item.inventoryItemLeUid = :leUid)   
+                as stock 
+                FROM InventoryItem 
+                LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = InventoryItemSaleProductUid
+                LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
+                WHERE CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                AND saleProductName LIKE :searchBit
             
-            AND (InventoryItem.InventoryItemWeUid IN (
-            SELECT MEMBER.personUid FROM PersonGroupMember 
-            LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
-            LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
-             WHERE groupMemberGroupUid = LE.mPersonGroupUid 
-            AND CAST(groupMemberActive  AS INTEGER) = 1
-            ) OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 1 END )
-            AND (InventoryItem.inventoryItemLeUid = :leUid 
-            OR CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
-    
-            GROUP BY(SaleProduct.saleProductUid)
+                AND (InventoryItem.InventoryItemWeUid IN (
+                SELECT MEMBER.personUid FROM PersonGroupMember 
+                LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+                LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
+                 WHERE groupMemberGroupUid = LE.mPersonGroupUid 
+                AND CAST(groupMemberActive  AS INTEGER) = 1
+                ) OR CAST(CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END AS INTEGER) = 1 )
+                AND (InventoryItem.inventoryItemLeUid = :leUid OR CAST(CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END AS INTEGER) = 1 )
+            
+                GROUP BY SaleProduct.saleProductUid
         """
+
+        const val QUERY_DATE_GROUP = ", InventoryItem.inventoryItemDateAdded "
 
         const val QUERY_INVENTORY_LIST_SORTBY_NAME_ASC =
                 " ORDER BY SaleProduct.saleProductName ASC "

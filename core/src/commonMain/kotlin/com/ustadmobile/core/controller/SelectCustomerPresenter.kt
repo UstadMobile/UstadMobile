@@ -6,8 +6,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.CustomerDetailView
-import com.ustadmobile.core.view.SelectPersonDialogView
-import com.ustadmobile.core.view.SelectPersonDialogView.Companion.ARG_SP_LE_UID
+import com.ustadmobile.core.view.SelectCustomerView
+import com.ustadmobile.core.view.SelectCustomerView.Companion.ARG_SP_LE_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
@@ -16,11 +16,11 @@ import kotlinx.coroutines.launch
 
 
 /**
- * The SelectPersonDialogPresenter Presenter.
+ * The SelectCustomerPresenter Presenter.
  */
-class SelectPersonDialogPresenter(context: Any, arguments: Map<String, String>?,
-                                  view: SelectPersonDialogView) :
-        UstadBaseController<SelectPersonDialogView>(context, arguments!!, view) {
+class SelectCustomerPresenter(context: Any, arguments: Map<String, String>?,
+                              view: SelectCustomerView) :
+        UstadBaseController<SelectCustomerView>(context, arguments!!, view) {
 
     //Any arguments stored as variables here
     private var personUmProvider: DataSource.Factory<Int, Person>?=null
@@ -51,8 +51,6 @@ class SelectPersonDialogPresenter(context: Any, arguments: Map<String, String>?,
                 })
             }
         }
-
-
     }
 
     fun handleClickCustomer(selectedPersonUid:Long){

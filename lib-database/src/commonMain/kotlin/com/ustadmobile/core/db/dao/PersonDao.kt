@@ -209,8 +209,9 @@ abstract class  PersonDao : BaseDao<Person> {
             "ORDER BY firstNames ASC")
     abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person>
 
-    //TODO: Query is wrong, used while testing. Please fix this. (Varuna)
-    @Query("SELECT * FROM PERSON WHERE CAST(active AS INTEGER) = 1 AND Person.personRoleUid != :leUid " +
+    //TODOing: Query is wrong, used while testing. Please fix this. (Varuna)
+    @Query("SELECT * FROM PERSON WHERE CAST(active AS INTEGER) = 1 " +
+            " AND Person.personAddedByUid = :leUid " +
             " AND Person.personRoleUid = :roleUid  ORDER BY firstNames ASC")
     abstract fun findAllPeopleByLEAndRoleUid(leUid: Long, roleUid: Long): DataSource.Factory<Int, Person>
 

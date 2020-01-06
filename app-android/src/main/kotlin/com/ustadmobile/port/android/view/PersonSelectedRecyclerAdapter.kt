@@ -11,13 +11,13 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.SelectPersonDialogPresenter
+import com.ustadmobile.core.controller.SelectCustomerPresenter
 import com.ustadmobile.lib.db.entities.Person
 
 class PersonSelectedRecyclerAdapter internal constructor(
         diffCallback: DiffUtil.ItemCallback<Person>, internal var theContext: Context,
         private val theFragment: Fragment,
-        private val thePresenter: SelectPersonDialogPresenter)
+        private val thePresenter: SelectCustomerPresenter)
     : PagedListAdapter<Person, PersonSelectedRecyclerAdapter.PersonViewHolder>(diffCallback) {
     private var selectedPeople: List<Long>? = null
 
