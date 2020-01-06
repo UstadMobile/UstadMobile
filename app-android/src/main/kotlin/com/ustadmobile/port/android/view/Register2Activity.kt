@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Register2Presenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
@@ -77,6 +78,7 @@ class Register2Activity : UstadBaseActivity(), Register2View {
 
         presenter = Register2Presenter(this,
                 bundleToMap(intent.extras), this,
+                UmAppDatabase.getInstance(this).personDao,
                 UmAccountManager.getRepositoryForActiveAccount(this).personDao)
         presenter!!.onCreate(bundleToMap(savedInstanceState))
 

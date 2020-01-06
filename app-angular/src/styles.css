@@ -206,6 +206,7 @@ ul{
   }
 }
 
+
 /* 
   ##Device = Low Resolution Tablets, Mobiles (Landscape)
   ##Screen = B/w 481px to 767px
@@ -221,6 +222,7 @@ ul{
     margin-top: 1% !important;
     right: -90% !important;  
   }
+  
 }
 
 /* 
@@ -250,6 +252,15 @@ ul{
   .brand-logo-rtl{
     margin-top: 4% !important;
     right: -70% !important;
+  }
+
+  .fixed-action-btn-left{
+    position: fixed;
+    left: 2% !important;
+    bottom: 23px;
+    padding-top: 15px;
+    margin-bottom: 0;
+    z-index: 997;
   }
   
 }
@@ -282,6 +293,31 @@ ul{
     margin-top: 4% !important;
     right: -90% !important;
   }
+
+  .fixed-action-btn-left{
+    position: fixed;
+    left: 2% !important;
+    bottom: 23px;
+    padding-top: 15px;
+    margin-bottom: 0;
+    z-index: 997;
+  }
   
 }
+
+@media only screen and (min-width : 480px) and (max-width: 992px) { 
+  .brand-logo-ltr{
+    margin-top: 1% !important;
+    left: 43% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: -43% !important;  
+  }
+  .top-menu{
+    padding: 0% !important;
+    margin-bottom: 20% !important;
+  }
+} 
 

@@ -405,7 +405,7 @@ object UMFileUtil {
      * @return
      */
     @JsName("parseURLQueryString")
-    fun parseURLQueryString(urlQuery: String): Map<String, String?> {
+    fun parseURLQueryString(urlQuery: String): Map<String, String> {
         var retVal = urlQuery
         val queryPos = retVal.indexOf('?')
         if (queryPos != -1) {
@@ -413,15 +413,8 @@ object UMFileUtil {
         }
 
         val parsedParams = parseParams(retVal, '&')
-        val decodedParams = mutableMapOf<String, String?>()
-        val it = parsedParams.keys.iterator()
-        var key: String
-        while (it.hasNext()) {
-            key = it.next()
-            decodedParams[UMURLEncoder.decodeUTF8(key)] = UMURLEncoder.decodeUTF8(parsedParams[key])
-        }
 
-        return decodedParams
+        return parsedParams.map { UMURLEncoder.decodeUTF8(it.key) to UMURLEncoder.decodeUTF8(it.value) }.toMap()
     }
 
     /**

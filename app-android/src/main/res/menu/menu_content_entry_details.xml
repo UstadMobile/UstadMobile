@@ -4,9 +4,8 @@
 
     <item
         android:visible="false"
-        android:icon="@drawable/ic_import_export_black_24dp"
         android:id="@+id/export_content"
         android:title="@string/content_entry_export"
-        app:showAsAction="always"/>
+        app:showAsAction="never"/>
 
 </menu>

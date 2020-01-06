@@ -7,17 +7,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
-import androidx.paging.PagedListAdapter
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,24 +26,12 @@ import java.util.*
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
                                                                private val listener: AdapterViewListener,
-                                                               private val managerAndroidBle: NetworkManagerBle,
-                                                               var emptyStateListener: EmptyStateListener)
-    : PagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
-         OnDownloadJobItemChangeListener {
-
-    private val containerUidsToMonitor = HashSet<Long>()
+                                                               private val containerDownloadManager: ContainerDownloadManager)
+    : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK){
 
     private val boundViewHolders: MutableSet<ViewHolder> = HashSet()
 
     private var localAvailabilityMap: Map<Long, Boolean> = mapOf()
-
-    fun addListeners() {
-        managerAndroidBle.addDownloadChangeListener(this)
-    }
-
-    fun removeListeners() {
-        managerAndroidBle.removeDownloadChangeListener(this)
-    }
 
     @MainThread
     fun updateLocalAvailability(localAvailabilityMap: Map<Long, Boolean>) {
@@ -54,26 +42,10 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         }
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-        val holdersToNotify: List<ViewHolder>
-        synchronized(boundViewHolders) {
-            holdersToNotify = LinkedList(boundViewHolders)
-        }
-
-        for (viewHolder in holdersToNotify) {
-            viewHolder.onDownloadJobItemChange(status)
-        }
-    }
-
     interface AdapterViewListener {
         fun contentEntryClicked(entry: ContentEntry?)
 
-        fun downloadStatusClicked(entry: ContentEntry?)
-    }
-
-    interface EmptyStateListener {
-
-        fun onEntriesLoaded()
+        fun downloadStatusClicked(entry: ContentEntry)
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
@@ -94,12 +66,21 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val entry = getItem(position)
-
-        emptyStateListener.onEntriesLoaded()
+        super.onBindViewHolder(holder, position)
+        val entry = getItem(position).also {
+            holder.entry = it
+        }
 
         synchronized(boundViewHolders) {
             boundViewHolders.add(holder)
+        }
+
+        holder.downloadJobItemLiveData?.removeObserver(holder)
+        GlobalScope.launch(Dispatchers.Main.immediate) {
+            holder.downloadJobItemLiveData = containerDownloadManager
+                    .getDownloadJobItemByContentEntryUid(entry?.contentEntryUid ?: 0).also {
+                        it.observe(activity, holder)
+                    }
         }
 
         if (entry == null) {
@@ -131,32 +112,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
             var contentDescription: String? = null
             var showLocallyAvailabilityViews = true
-            if (entry.contentEntryStatus != null) {
-                val context = holder.view.context
-                val status = entry.contentEntryStatus
-                val dlStatus = status!!.downloadStatus
-
-                contentDescription = if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.totalSize > 0) {
-                    context.getString(R.string.downloading)
-                } else {
-                    context.getString(R.string.download_entry_state_queued)
-                }
-
-                if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
-                    holder.downloadView.setImageResource(R.drawable.ic_pause_black_24dp)
-                    contentDescription = context.getString(R.string.download_entry_state_paused)
-                } else if (dlStatus == JobStatus.COMPLETE) {
-                    showLocallyAvailabilityViews = false
-                    holder.downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
-                    contentDescription = context.getString(R.string.downloaded)
-                } else {
-                    holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
-                }
-            } else {
-                holder.downloadView.progress = 0
-                holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
-            }
-
 
             val iconView = holder.iconView
             val iconFlag = entry.contentTypeFlag
@@ -172,34 +127,17 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 iconView.visibility = View.VISIBLE
             }
 
-            val viewVisibility = if (showLocallyAvailabilityViews && entry.leaf)
-                View.VISIBLE
-            else
-                View.GONE
-            holder.availabilityIcon.visibility = viewVisibility
-            holder.availabilityStatus.visibility = viewVisibility
-
             holder.downloadView.imageResource!!.contentDescription = contentDescription
             holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             holder.updateLocallyAvailableStatus(
                     localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
-            GlobalScope.launch(Dispatchers.Main) {
-                val downloadJobItemStatus = managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(
-                    entry.contentEntryUid)
-                if(downloadJobItemStatus != null){
-                    holder.downloadView.progressVisibility = View.VISIBLE
-                    holder.onDownloadJobItemChange(downloadJobItemStatus)
-                }else {
-                    holder.downloadView.progressVisibility = View.INVISIBLE
-                }
-            }
-
         }
     }
 
-    inner class ViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view),
+        Observer<DownloadJobItem?> {
         internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
         internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
         private val entrySize: TextView = view.findViewById(R.id.content_entry_item_library_size)
@@ -212,6 +150,12 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         internal var containerUid: Long = 0
 
         var contentEntryUid: Long = 0
+
+        private var currentDownloadStatus = -1
+
+        internal var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
+
+        internal var entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer? = null
 
         internal fun updateLocallyAvailableStatus(available: Boolean) {
             val icon = if (available)
@@ -230,31 +174,55 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             return super.toString() + " '" + entryDescription.text + "'"
         }
 
-        internal fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
-            if (status != null && status.contentEntryUid == contentEntryUid) {
-                activity.runOnUiThread {
-                    downloadView.progress = if (status.totalBytes > 0)
-                        (status.bytesSoFar * 100 / status.totalBytes).toInt()
-                    else
-                        0
 
-                    if (status.totalBytes > 0) {
-                        if (status.bytesSoFar == status.totalBytes) {
-                            /*
-                             * ContentEntryStatus will be changed, and that will trigger showing
-                             * the offline downloaded pin. We can now hide the progress view.
-                             */
-                            downloadView.progressVisibility = View.INVISIBLE
-                        } else if (status.totalBytes > 0 && downloadView.progressVisibility != View.VISIBLE) {
-                            /*
-                             * The download just started. When this view was first shown, the download
-                             * was not in progress, so the progress view was made invisible. We need
-                             * to show it now that the download is underway.
-                             */
-                            downloadView.progressVisibility = View.VISIBLE
-                        }
-                    }
+        override fun onChanged(t: DownloadJobItem?) {
+            if(t?.djiStatus != currentDownloadStatus) {
+                currentDownloadStatus = t?.djiStatus ?: 0
+                val context = view.context
+
+//                var localAvailabilityVisible = true
+
+                var contentDescription = if (t.isStatusQueuedOrDownloading()) {
+                    context.getString(R.string.downloading)
+                } else {
+                    context.getString(R.string.download_entry_state_queued)
                 }
+
+                if (t.isStatusPaused()) {
+                    downloadView.setImageResource(R.drawable.ic_pause_black_24dp)
+                    contentDescription = context.getString(R.string.download_entry_state_paused)
+                } else if (t.isStatusCompletedSuccessfully()) {
+//                    localAvailabilityVisible = false
+                    downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
+                    contentDescription = context.getString(R.string.downloaded)
+                } else {
+                    downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
+                }
+
+                downloadView.progressVisibility = if(!t.isStatusCompleted()) {
+                    View.VISIBLE
+                }else {
+                    View.INVISIBLE
+                }
+            }
+
+            val entryVal = entry
+            val localAvailabilityVisibility = if(entryVal != null && entryVal.leaf
+                    && !t.isStatusCompletedSuccessfully())
+                View.VISIBLE
+            else
+                View.GONE
+
+            availabilityIcon.visibility = localAvailabilityVisibility
+            availabilityStatus.visibility = localAvailabilityVisibility
+
+            if(t != null && t.isStatusPausedOrQueuedOrDownloading()) {
+                downloadView.progress = if(t.downloadLength> 0)
+                    (t.downloadedSoFar* 100 / t.downloadLength).toInt()
+                else
+                    0
+            }else{
+                downloadView.progress = 0
             }
         }
     }
@@ -289,18 +257,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 if (if (oldItem.thumbnailUrl != null) oldItem.thumbnailUrl != newItem.thumbnailUrl else newItem.thumbnailUrl == null) {
                     return false
                 }
-                if (oldItem.contentEntryStatus != null && newItem.contentEntryStatus != null) {
 
-                    if (oldItem.contentEntryStatus!!.bytesDownloadSoFar != newItem.contentEntryStatus!!.bytesDownloadSoFar) {
-                        return false
-                    }
-
-                    return if (oldItem.contentEntryStatus!!.downloadStatus != newItem.contentEntryStatus!!.downloadStatus) {
-                        false
-                    } else oldItem.contentEntryStatus!!.totalSize == newItem.contentEntryStatus!!.totalSize
-
-                } else
-                    return newItem.contentEntryStatus == null && newItem.contentEntryStatus == null || newItem.contentEntryStatus == oldItem.contentEntryStatus
+                return true
             }
         }
     }

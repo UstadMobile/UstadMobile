@@ -87,6 +87,10 @@ export class UmBaseService {
       ]).subscribe(dataResponse => { 
         const account = {username: "UstadMobileUser", personUid: 1, auth:null,endpointUrl: UmAngularUtil.getItem("doordb.endpoint.url")} 
         core.com.ustadmobile.core.impl.UmAccountManager.setActiveAccountWithContext(account, this.component.context)
+        
+        const containerList = [{containerUid: 909090, fileSize: 90909000, mobileOptimized: true}]
+        this.database.containerDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(containerList), this.continuation)
+
         this.database.contentEntryDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[1]), this.continuation)
 
         this.database.contentEntryParentChildJoinDao.insertListAsync(UmAngularUtil.jsArrayToKotlinList(dataResponse[2]), this.continuation)
@@ -128,6 +132,10 @@ export class UmBaseService {
     this.directionality = directionality;
   }
 
+  /**
+   * Get current system locale
+   * @param locale current system locale
+   */
   setSystemLocale(locale){
     this.systemLocale = locale
   }

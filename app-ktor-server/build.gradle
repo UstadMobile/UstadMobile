@@ -136,6 +136,13 @@ task appRun(type: JavaExec) {
     args '-port', '8087'
 }
 
+task appRunDebug(type: JavaExec) {
+    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
+    main = 'io.ktor.server.netty.EngineMain'
+    args '-port', '8087'
+    jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
+}
+
 task appRunDevMode(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
@@ -154,6 +161,7 @@ task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
 }
 
 appRun.dependsOn(shadowJar)
+appRunDebug.dependsOn(shadowJar)
 appRunDevMode.dependsOn(shadowJar)
 
 prepareResources.dependsOn(addWelcomeFileToWebXml,":app-angular:buildProd")
@@ -173,10 +181,13 @@ dependencies {
     implementation "io.ktor:ktor-gson:$version_ktor"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
     implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+    implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.jsoup:jsoup:$version_jsoup"
     implementation "com.google.code.gson:gson:$version_gson"
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
+    implementation "ch.qos.logback:logback-classic:$version_logback"
 
     implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(":sharedse")

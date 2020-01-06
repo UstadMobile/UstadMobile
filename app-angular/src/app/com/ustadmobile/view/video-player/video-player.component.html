@@ -3,7 +3,7 @@
 
   <div class="row" *ngIf="showIframe">
     <div class="resp-container">
-      <iframe class="resp-iframe" [src]='sanitizer.bypassSecurityTrustResourceUrl(urlToLoad)' allowfullscreen></iframe>
+      <iframe allowTransparency="true" background="transparent" class="resp-iframe" [src]='sanitizer.bypassSecurityTrustResourceUrl(urlToLoad)' allowfullscreen></iframe>
     </div>
   </div>
 

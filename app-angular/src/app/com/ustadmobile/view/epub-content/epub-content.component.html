@@ -2,7 +2,7 @@
     
   <div *ngIf="showIframe" class="row">
       <div class="resp-container">
-          <iframe class="resp-iframe" [src]='sanitizer.bypassSecurityTrustResourceUrl(urlToLoad)' allowfullscreen></iframe>
+          <iframe allowTransparency="true" background="transparent" class="resp-iframe" [src]='sanitizer.bypassSecurityTrustResourceUrl(urlToLoad)' allowfullscreen></iframe>
         </div>
     
         <div class="row default-padding-top default-margin-right">

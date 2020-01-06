@@ -2,51 +2,50 @@ package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.sharedse.io.FileSe
 import kotlinx.coroutines.Runnable
 
-expect fun requestDelete(contentEntryUid: Long, context: Any)
+expect fun requestDelete(downloadJobUid: Int, containerDownloadManager: ContainerDownloadManager,
+                         context: Any)
 
-fun deleteDownloadJob(db: UmAppDatabase, rootContentEntryUid: Long, onprogress: (progress: Int) -> Unit) {
+suspend fun deleteDownloadJob(db: UmAppDatabase, downloadJobUid: Int,
+                      containerDownloadManager: ContainerDownloadManager,
+                      onprogress: (progress: Int) -> Unit): Boolean {
 
+    val downloadJob = db.downloadJobDao.findByUid(downloadJobUid)
+
+    if(downloadJob == null) {
+        return false
+    }
+
+    db.downloadJobItemDao.forAllChildDownloadJobItemsRecursiveAsync(downloadJobUid) { childItems ->
+        childItems.forEach {
+            db.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
+
+            containerDownloadManager.handleDownloadJobItemUpdated(DownloadJobItem(it).also {
+                it.djiStatus = JobStatus.DELETED
+            }, autoCommit = false)
+        }
+    }
+
+    containerDownloadManager.commit()
+
+    var numFailures = 0
     db.runInTransaction(Runnable {
-
-        var rootDownloadJobItem = db.downloadJobItemDao.findByContentEntryUid(rootContentEntryUid)
-
-        var downloadJob = db.downloadJobDao.findByUid(rootDownloadJobItem!!.djiDjUid)
-
-        if (downloadJob!!.djRootContentEntryUid == rootContentEntryUid) {
-            db.downloadJobDao.changeStatus(JobStatus.DELETED, rootDownloadJobItem.djiDjUid)
-        }
-
-        db.downloadJobItemDao.forAllChildDownloadJobItemsRecursive(rootDownloadJobItem.djiUid) { childItems ->
-            childItems.forEach {
-                db.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
-                db.contentEntryStatusDao.deleteByContentEntryUid(it.djiContentEntryUid)
-                db.downloadJobItemDao.updateStatus(JobStatus.DELETED, it.djiUid)
-            }
-        }
-
-        val count = db.containerEntryFileDao.countZombieEntries()
-        if (count == 0) {
-            onprogress.invoke(100)
-            return@Runnable
-        }
         var counter = 0
-        do {
-            var containerEntryFilesList = db.containerEntryFileDao.findZombieEntries()
-            containerEntryFilesList.forEach {
-                var file = FileSe(it.cefPath!!)
-                file.delete()
-                counter++
+        val zombieEntryFilesList = db.containerEntryFileDao.findZombieEntries()
+        zombieEntryFilesList.forEach {
+            val filePath = it.cefPath
+            if(filePath == null || !FileSe(filePath).delete()) {
+                numFailures++
             }
-            onprogress.invoke((counter * 100) / count)
+        }
+        onprogress.invoke(100)
 
-            db.containerEntryFileDao.deleteListOfEntryFiles(containerEntryFilesList)
-
-        } while (containerEntryFilesList.isNotEmpty())
-
-
+        db.containerEntryFileDao.deleteListOfEntryFiles(zombieEntryFilesList)
     })
 
+    return numFailures == 0
 }

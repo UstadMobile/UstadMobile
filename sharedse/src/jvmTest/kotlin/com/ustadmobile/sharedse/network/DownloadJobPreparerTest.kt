@@ -1,10 +1,12 @@
 package com.ustadmobile.sharedse.network
 
-import com.nhaarman.mockitokotlin2.doReturn
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.rest.umRestApplication
@@ -23,12 +25,14 @@ class DownloadJobPreparerTest {
 
     @Before
     fun setup(){
+        Napier.base(DebugAntilog())
         serverDb.clearAllTables()
         clientDb.clearAllTables()
 
-        mockedNetworkManager = spy { }
+        mockedNetworkManager = spy {
+
+        }
         mockedNetworkManager.umAppDatabase = clientDb
-        mockedNetworkManager.umAppDatabaseRepo = clientRepo
 
         mockedNetworkManager.onCreate()
     }
@@ -39,23 +43,22 @@ class DownloadJobPreparerTest {
         val contentEntrySet = insertTestContentEntries(serverDb, System.currentTimeMillis())
         val downloadJob = DownloadJob(contentEntrySet.rootEntry.contentEntryUid,
                 System.currentTimeMillis())
-        val itemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob)
-        itemManager.awaitLoaded()
-        val downloadJobPreparer = DownloadJobPreparer()
-        downloadJobPreparer.prepare(itemManager, clientDb, clientRepo)
+
+        val downloadManagerImpl = ContainerDownloadManagerImpl(appDb = clientDb) { job, manager -> mock() }
+        downloadManagerImpl.createDownloadJob(downloadJob)
+
+        val downloadJobPreparer = DownloadJobPreparer(downloadJobUid = downloadJob.djUid)
+        downloadJobPreparer.prepare(downloadManagerImpl, clientDb, clientRepo, {})
 
 
         assertEquals("Total bytes to be downloaded was updated",
                 contentEntrySet.totalBytesToDownload,
                 clientDb.downloadJobItemDao.findByContentEntryUid2(
                         contentEntrySet.rootEntry.contentEntryUid)!!.downloadLength)
-        val downloadJobInDb = clientDb.downloadJobDao.findByUid(itemManager.downloadJobUid)
+        val downloadJobInDb = clientDb.downloadJobDao.findByUid(downloadJob.djUid)
         assertNotNull("Download job in db is not null", downloadJobInDb)
-        assertEquals("DownloadJob status is QUEUED after preparation is finished",
-                JobStatus.QUEUED, downloadJobInDb!!.djStatus)
-        val downloadJobItems = clientDb.downloadJobItemDao.findByDownloadJobUid(downloadJobInDb.djUid)
-        assertTrue("All items status are now QUEUED:",
-                downloadJobItems.all { it.djiStatus == JobStatus.QUEUED })
+        assertEquals("4 Download jobs were created in the download",
+                4, clientDb.downloadJobItemDao.findByDownloadJobUid(downloadJob.djUid).size)
 
         Unit
     }
@@ -87,7 +90,9 @@ class DownloadJobPreparerTest {
             serverDb = UmAppDatabase.getInstance(Any())
             clientDb = UmAppDatabase.getInstance(Any(), "clientdb")
             clientRepo = clientDb.asRepository(Any(),"http://localhost:8087", "",
-                    defaultHttpClient()) as UmAppDatabase
+                    defaultHttpClient(), null) as UmAppDatabase
+            (clientRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+
             server = embeddedServer(Netty, 8087) {
                 umRestApplication(devMode = false, db = serverDb)
             }

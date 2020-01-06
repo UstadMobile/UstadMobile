@@ -16,8 +16,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
@@ -54,7 +53,7 @@ class ContentEntryListEspressoTest {
 
     fun launchActivity() {
         val launchActivityIntent = Intent()
-        launchActivityIntent.putExtra(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID,
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID,
                 ROOT_CONTENT_ENTRY_UID.toString())
         mActivityRule.launchActivity(launchActivityIntent)
     }

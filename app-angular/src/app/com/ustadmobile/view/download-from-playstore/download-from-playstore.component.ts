@@ -27,8 +27,9 @@ export class DownloadFromPlaystoreComponent extends MzBaseModal implements OnIni
   }
 
   ngOnInit() {
-    this.barge_img = window.location.origin + "/assets/images/get_from_playtore.jpg";
-    this.avatar_image = window.location.origin + "/assets/images/downloading_data.png";
+    const basePath = window.location.origin + window.location.pathname;
+    this.barge_img =  basePath + "assets/images/get_from_playtore.jpg";
+    this.avatar_image = basePath + "assets/images/downloading_data.png";
   }
 
   openPayStore(){

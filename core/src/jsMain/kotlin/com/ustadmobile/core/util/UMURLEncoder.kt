@@ -16,14 +16,14 @@ actual class UMURLEncoder {
         /**
          * Encode url string
          */
-        actual fun encodeUTF8(text: String?): String {
+        actual fun encodeUTF8(text: String): String {
             return encodeURI(text)
         }
 
         /**
          * Decode url string
          */
-        actual fun decodeUTF8(text: String?): String {
+        actual fun decodeUTF8(text: String): String {
             return decodeURI(text)
         }
 

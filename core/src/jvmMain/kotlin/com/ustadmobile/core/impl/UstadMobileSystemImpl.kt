@@ -55,6 +55,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
     private var appConfig: Properties? = null
 
+    private var tmpPrefs = mutableMapOf<String, String>()
+
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -187,7 +189,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String?{
-        TODO("not implemented")
+        return tmpPrefs[key]
     }
 
 
@@ -197,7 +199,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @param value value to be set
      */
     actual override fun setAppPref(key: String, value: String?, context: Any){
-
+        if(value != null) {
+            tmpPrefs[key] = value
+        }else {
+            tmpPrefs.remove(key)
+        }
     }
 
 
@@ -265,9 +271,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                         callback: UmCallback<Any>){
-        TODO("not implemented")
+    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?){
+
     }
 
     actual fun getSystemBaseDir(context: Any): String{

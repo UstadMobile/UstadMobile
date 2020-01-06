@@ -17,7 +17,7 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @JsName("insertListAsync")
     @Insert
-    abstract suspend fun insertListAsync(entityList: List<Language>)
+    abstract suspend fun insertListAsync(languageList: List<Language>)
 
     @Query("SELECT * FROM Language")
     abstract fun publicLanguages(): List<Language>

@@ -30,6 +30,8 @@ import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.ProgressIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions
@@ -115,7 +117,7 @@ class EpubContentActivityEspressoTest {
 
     fun launchActivity(): Activity {
         val launchIntent = Intent()
-        launchIntent.putExtra(EpubContentView.ARG_CONTAINER_UID,
+        launchIntent.putExtra(UstadView.ARG_CONTAINER_UID,
                 epubContainer!!.containerUid.toString())
         mActivityRule.launchActivity(launchIntent)
         return mActivityRule.activity

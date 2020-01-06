@@ -1,5 +1,5 @@
 import { Component, NgZone, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd, NavigationStart } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
@@ -59,6 +59,13 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     this.class_drawer_menu = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
     this.class_open_profile = this.umService.isLTRDirectionality() ? "right":"left"
 
+    this.router.events.subscribe((event: NavigationStart)  => {
+      if(event.url && event.url == "/"){
+        const initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID);
+        this.systemImpl.go(initialRoute.view, initialRoute.args, this.context, 0)
+      }
+    });
+    
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
