@@ -90,7 +90,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
         mPresenter = VideoPlayerPresenter(this,
                 Objects.requireNonNull(bundleToMap(intent.extras)), this,
-                UmAppDatabase.getInstance(this),
+                UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(this))
         mPresenter.onCreate(bundleToMap(savedInstanceState))
     }
@@ -214,7 +214,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                 C.SELECTION_FLAG_DEFAULT, null)
 
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-        val appDatabase = UmAppDatabase.getInstance(viewContext)
+        val appDatabase = UmAccountManager.getActiveDatabase(viewContext)
 
         GlobalScope.launch {
             try {

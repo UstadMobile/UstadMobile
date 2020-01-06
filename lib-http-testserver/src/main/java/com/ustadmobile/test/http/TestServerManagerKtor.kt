@@ -30,6 +30,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import com.ustadmobile.util.test.ReverseProxyDispatcher
+import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.server.engine.ApplicationEngineEnvironment
 import io.ktor.server.engine.commandLineEnvironment
 import java.net.InetAddress
@@ -93,24 +94,8 @@ fun Application.testServerManager() {
 
             val initialContext = InitialContext()
 
-            try {
-                val jdbcBind = initialContext.lookup("java:/comp/env/jdbc")
-            }catch(e: Exception) {
-                initialContext.createSubcontext("java:/comp/env/jdbc")
-            }
-
             val dbName = "testserver-$appPort"
-            val dbJndiName = "java:/comp/env/jdbc/$dbName"
-            try {
-                val dataSource = initialContext.lookup(dbJndiName)
-            }catch(e: Exception) {
-                val newDatasource = SQLiteDataSource(SQLiteConfig().apply{
-                    setJournalMode(SQLiteConfig.JournalMode.WAL)
-                })
-
-                newDatasource.url = "jdbc:sqlite:build/tmp-$dbName.sqlite"
-                initialContext.bind(dbJndiName, newDatasource)
-            }
+            initialContext.bindNewSqliteDataSourceIfNotExisting(dbName)
 
 
             val umDb = UmAppDatabase.getInstance(Any(), dbName)

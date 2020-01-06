@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import java.io.IOException
 
@@ -37,7 +38,7 @@ class EmbeddedHttpdService : Service() {
         httpd = EmbeddedHTTPD(0, applicationContext)
         httpd.addRoute("$ANDROID_ASSETS_PATH(.)+", AndroidAssetsHandler::class.java,
                 applicationContext)
-        httpd.UmAppDatabase_AddUriMapping(UmAppDatabase.getInstance(this),
+        httpd.UmAppDatabase_AddUriMapping(UmAccountManager.getActiveDatabase(this),
                 Gson(), "/test/", false, "/rest/UmAppDatabase")
         try {
             httpd.start()

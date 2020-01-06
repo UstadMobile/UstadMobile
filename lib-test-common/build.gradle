@@ -103,6 +103,7 @@ kotlin {
                 implementation "com.soywiz:klock-jvm:$version_klock"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
             }
         }
 

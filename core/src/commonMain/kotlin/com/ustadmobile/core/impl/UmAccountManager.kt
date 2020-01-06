@@ -4,6 +4,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -110,6 +111,14 @@ object UmAccountManager {
             UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
                     "http://localhost", context) ?: "http://localhost"
         }
+    }
+
+    /**
+     * Get the main database for the currently active endpoint
+     */
+    fun getActiveDatabase(context: Any): UmAppDatabase {
+        val activeEndpoint = getActiveEndpoint(context)
+        return UmAppDatabase.getInstance(context, sanitizeDbNameFromUrl(activeEndpoint))
     }
 
 }
