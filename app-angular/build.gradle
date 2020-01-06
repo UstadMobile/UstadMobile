@@ -467,7 +467,7 @@ task ngTest{
   }
 }
 
-task insertDummyData{
+task prepareDummyData{
   doLast{
     exec {
       workingDir rootProject.file("app-angular").path
@@ -487,5 +487,5 @@ generateLocaleFiles.finalizedBy(prepareMessageIDMaps,generateAppConfigJsonFile,g
 buildProd.finalizedBy(prepareProductionZip)
 prepareProductionZip.dependsOn(handleDistroEndPointUrlAndAssetsFiles)
 executeEnd2EndTests.dependsOn(":app-ktor-server:testWebAppRunFork")
-project.tasks.findByPath(":app-ktor-server:testWebAppRunFork").finalizedBy(insertDummyData)
+
 clean.dependsOn(deleteTempDirs)

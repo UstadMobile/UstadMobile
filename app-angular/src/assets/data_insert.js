@@ -1,9 +1,11 @@
 const axios = require('axios'),
-serverUrl = "http://localhost:8087/UmAppDatabase/"
+serverUrl = "http://localhost:8087/"
 
 function executeGetRequest(url){
     return new Promise((resolve, reject) => {
-      axios.get(serverUrl + url).then(function (response) {
+      const mUrl = serverUrl + url;
+      console.log("GET Request",mUrl)
+      axios.get(mUrl).then(function (response) {
         resolve(response.data)
       }).catch(function (error) {
         resolve(error)
@@ -16,7 +18,7 @@ function executeGetRequest(url){
       const fs = require('fs'), path = require('path'),
       filePath = path.join(__dirname, request.path),
       content = fs.readFileSync(filePath, {encoding: 'utf-8'});
-      axios.post(serverUrl + request.url, JSON.parse(content)).then(function (response) {
+      axios.post(serverUrl+ "UmAppDatabase/" + request.url, JSON.parse(content)).then(function (response) {
        resolve(response.data)
       }).catch(function (error) {
        resolve(error)
@@ -25,8 +27,15 @@ function executeGetRequest(url){
     })
   }
 
+  function clearDb(){
+    return executeGetRequest("UmAppDatabase/clearAllTables")
+  }
   function insertDummyData(){
-    const requestPromises = [executeGetRequest("clearAllTables")];
+    
+    const requestPromises = [
+      executeGetRequest("UmContainer/addContainer?type=epub&entryid=31228&resource=test.epub")
+    ];
+
     [
       {url:"ContentEntryDao/insertListAsync", path: "data_entries.json"},
       {url:"ContentEntryParentChildJoinDao/insertListAsync",path:"data_entries_parent_join.json"},
@@ -38,10 +47,13 @@ function executeGetRequest(url){
         requestPromises.push(executePostRequest(request))
       });
       Promise.all(requestPromises).then(responses => {
-        console.log("Data insert response", responses)
+        console.log("Data inserted", responses)
       })
   }
 
-  //insert data
-  insertDummyData();
+  //clear db and insert data
+  clearDb().then(response => {
+    console.log("Executed db clearing", response)
+    insertDummyData();
+  })
   

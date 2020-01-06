@@ -49,6 +49,7 @@ export class UmBaseService {
         });
         mpp.com.ustadmobile.core.db.UmAppDatabase_JsImpl.Companion.register() 
         this.database =  db.com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance(this.component.context)
+        this.preloadResourcess(true) 
     });
   }
 
@@ -70,8 +71,9 @@ export class UmBaseService {
    * Preload system string and database resources
    * @param fireWhenReady fire when true otherwise don't fire any event
    */
-  preloadResources(fireWhenReady = true){
-    UmAngularUtil.setItem(UmAngularUtil.CONTENT_URL_TAG, UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG)+"ContainerMount/")
+  preloadResourcess(fireWhenReady = true){
+    const endPointUrl = UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG);
+    UmAngularUtil.setItem(UmAngularUtil.CONTENT_URL_TAG, endPointUrl+"ContainerMount/")
     this.preloadSystemResources(fireWhenReady)
   }
 

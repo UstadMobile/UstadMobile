@@ -47,7 +47,6 @@ export class AppComponent extends UmBaseComponent {
   ngOnInit(): void {
     super.ngOnInit();
     UmAngularUtil.registerResourceReadyListener(this)
-    this.umService.preloadResources()
   }
 
   onCreate() {

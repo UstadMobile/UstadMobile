@@ -422,8 +422,9 @@ export class UmAngularUtil {
    * @param containerUid conter id to be used
    */
   static getMountPath(containerUid: any){
-    const uid = containerUid.toString()
-    return UmAngularUtil.getItem(this.CONTENT_URL_TAG) + uid +"/"
+    const path = UmAngularUtil.getItem(this.CONTENT_URL_TAG) + containerUid.toString() +"/" 
+    console.log("Mounted Path", path)
+    return path;
   }
 
   /**

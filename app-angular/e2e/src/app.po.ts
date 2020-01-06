@@ -1,53 +1,43 @@
 import { browser, element, by} from 'protractor';
-export const sleepTime = 500;
+export const sleepTime = 3000;
 export const rootUid = "-4103245208651563007"
+
+export function launchApp(){
+  browser.get(browser.baseUrl) as Promise<any>;
+  return browser.waitForAngularEnabled(true)
+}
 
 export class HomePage{
   menus = ['Libraries', 'Reports']
   title = 'Ustad Mobile'
   baseUrl = "http://localhost:";
   launch() {
-    browser.get(browser.baseUrl+"/#/Home/ContentEntryList?entryid="+rootUid) as Promise<any>;
-    return browser.waitForAngularEnabled(true)
-  }
-
-  getPage() {
-    return new ElementUtils().getPageElements().componentHome;
+    
   }
 
 }
 
-export class EntryListPage{
+export class Entries{
 
-  views = {details:"ContentEntryDetail", list: "ContentEntryList"}
+  views = {details:"ContentEntryDetail", list: "ContentEntryList", content: "EpubContent"}
   
   launch(){
-    const pageHome = new HomePage()
-    pageHome.launch()
-    browser.sleep(sleepTime * 8)
+    launchApp()
+    browser.sleep(sleepTime * 3)
   }
 
-  getPage() {
+  getList() {
     return new ElementUtils().getPageElements().entryList
   }
-}
 
-export class DashboardPage{
-
-  views = {"dashboard":"ReportDashboard", "options":"ReportOptions"};
-
-  launch() {
-    const pageHome = new HomePage()
-    pageHome.launch()
-    pageHome.getPage().menus.get(1).click()
-    browser.sleep(sleepTime);
-  }
-  getPage() {
-    return new ElementUtils().getPageElements().componentReportDashboard
+  getDetails(){
+    return new ElementUtils().getPageElements().content
   }
 }
 
-export class ReportOptions{
+
+
+/* export class ReportOptions{
   views = {"what":"EntriesTreeDialog", "done":"ReportPreview"}
   launch() {
     const pageDashboard = new DashboardPage()
@@ -76,7 +66,7 @@ export class ReportDetails{
   getPage() {
     return new ElementUtils().getPageElements().reportDetails
   }
-}
+} */
 
 export class ElementUtils{
    getPageElements() {
@@ -87,6 +77,11 @@ export class ElementUtils{
       },
       entryList: {
         entries: element.all(by.css('app-root app-content-entry-list > div ul li.open-content'))
+      },
+      content: {
+        details: element.all(by.css('app-content-entry-detail > div div.fixed-action-btn-right')),
+        controller: element.all(by.css('app-epub-content > div div button.orange')),
+        content: element.all(by.css('app-epub-content > div div iframe'))
       },
       componentReportDashboard: {
         newReport: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn-right')),

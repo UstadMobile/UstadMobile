@@ -185,8 +185,13 @@ ext.localProperties.load(new FileInputStream(project.file("local.properties")))
  * Make sure lib-database:jsJar depends on lib-database:jvmJar
  */
 subprojects { project -> afterEvaluate {
-   if(project.name == "lib-database" && project.tasks.findByName("jsJar") != null){
+    if(project.name == "lib-database" && project.tasks.findByName("jsJar") != null){
        project.tasks.findByName("jsJar").dependsOn(project.tasks.findByName("jvmJar"))
-   }
+    }
+
+    if(project.name == "app-ktor-server"){
+        project.tasks.findByName("testWebAppRunFork").finalizedBy(":app-angular:prepareDummyData")
+        project.tasks.findByName("appRunDevMode").finalizedBy(":app-angular:prepareDummyData")
+    }
 }}
 

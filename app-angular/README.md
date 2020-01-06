@@ -61,6 +61,10 @@ Make sure you build and run development server before executing above command, t
   
 ```./gradlew app-ktor-server:appRunDevMode```
 
+Also, make sure you preload dummy data to the application, use:-
+
+```./gradlew app-angular:prepareDummyData```
+
 ### Codding pattern  
 
 #### Adding new component

@@ -1,21 +1,27 @@
-import {ReportOptions, EntryListPage} from './app.po';
+import {Entries, sleepTime} from './app.po';
 import { browser } from 'protractor';
 
-describe('Content Entry', () => {
-  let pageEntryList: EntryListPage;
+describe('Content and Entry List', () => {
+  let entries: Entries;
   browser.ignoreSynchronization = true
   browser.waitForAngularEnabled(true)
   beforeAll(() => {
-    pageEntryList = new EntryListPage();
+    entries = new Entries();
   })
 
-  it('giveApplicationLaunched_whenLibraryMenuSelected_shouldBeAbleToBrowseContent', () => {
-    pageEntryList.launch();
-    expect(pageEntryList.getPage().entries.count()).toBeGreaterThanOrEqual(4)
-    pageEntryList.getPage().entries.count().then(count => {
-      pageEntryList.getPage().entries.get(1).click()
-      pageEntryList.getPage().entries.get(0).click()
-      expect(browser.getCurrentUrl()).toContain(pageEntryList.views.details);
+  it('giveApplicationLaunched_whenLibraryMenuSelected_shouldBeAbleToBrowseAndOpenContent', () => {
+    entries.launch();
+    expect(entries.getList().entries.count()).toBeGreaterThanOrEqual(4)
+    entries.getList().entries.count().then(count => {
+      entries.getList().entries.get(1).click()
+      entries.getList().entries.get(1).click()
+      entries.getDetails().details.get(0).click()
+      browser.sleep(sleepTime)
+      expect(browser.getCurrentUrl()).toContain(entries.views.content);
+      //next and previous navigation btn are shown
+      expect(entries.getDetails().controller.count()).toEqual(2)
+      //Content was loaded to the iframe
+      expect(entries.getDetails().content.getAttribute("src")).toBeTruthy()
     });
   });
 });
