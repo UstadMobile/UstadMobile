@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 android {
@@ -55,6 +56,9 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.soywiz:klock-metadata:$version_klock"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly project(":lib-door-runtime")
@@ -67,6 +71,9 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
                 implementation "com.soywiz:klock-js:$version_klock"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
             }
         }
         commonJvmMain {
@@ -74,6 +81,12 @@ kotlin {
                 implementation "io.ktor:ktor-server-servlet:$version_ktor"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"
+
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-cio:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+
                 compileOnly project(":app-ktor-server")
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
