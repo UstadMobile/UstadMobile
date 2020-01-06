@@ -19,10 +19,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URI
-import java.net.URL
+import java.net.*
 import java.nio.file.Files
 import java.util.*
 
@@ -152,9 +149,10 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
                 val fileUrl = URL(url, href)
 
                 // this was done to encode url that had empty spaces in the name or other illegal characters
-                val uri = URI(fileUrl.protocol, fileUrl.userInfo, fileUrl.host, fileUrl.port, fileUrl.path, fileUrl.query, fileUrl.ref)
+                val decodedPath = URLDecoder.decode(fileUrl.toString(), ScraperConstants.UTF_ENCODING)
+                val decodedUrl = URL(decodedPath)
 
-                conn = uri.toURL().openConnection() as HttpURLConnection
+                conn = decodedUrl.openConnection() as HttpURLConnection
                 conn.requestMethod = REQUEST_HEAD
                 val resourceFile = File(resourceFolder, FilenameUtils.getName(href))
                 val mimeType = Files.probeContentType(resourceFile.toPath())
@@ -167,7 +165,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
                     continue
                 }
 
-                FileUtils.copyURLToFile(uri.toURL(), resourceFile)
+                FileUtils.copyURLToFile(decodedUrl, resourceFile)
 
                 ContentScraperUtil.insertContainer(containerDao, contentEntries, true, mimeType,
                         resourceFile.lastModified(), resourceFile, db, repository, containerDir)
