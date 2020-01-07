@@ -832,7 +832,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     }
 
 
-    override fun addCustomFieldDropdown(label: CustomField, options: Array<String?>,
+    override fun addCustomFieldDropdown (label: CustomField, options: Array<String?>,
                                         selected:Int) {
         //Calculate the width of the screen.
         val displayMetrics = DisplayMetrics()

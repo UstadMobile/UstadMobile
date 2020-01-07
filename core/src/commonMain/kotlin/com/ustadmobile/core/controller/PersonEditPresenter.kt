@@ -227,11 +227,9 @@ class PersonEditPresenter
                     customFieldDropDownOptions[c.customFieldUid] = options
                     view.runOnUiThread(Runnable{
                         //view.addComponent(finalValueString, c.getCustomFieldName());
-                        val a = arrayOfNulls<String>(options.size)
-                        options.toTypedArray()
+                        var a = arrayOfNulls<String>(options.size)
+                        a = options.toTypedArray()
                         view.addCustomFieldDropdown(c, a, finalValueSelection)
-                        //view.addCustomFieldText(c, finalValueString);
-
                     })
                 }
             }
