@@ -5,11 +5,14 @@ import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.rest.umRestApplication
+import com.ustadmobile.sharedse.test.util.bindDbForActiveContext
+import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -87,8 +90,9 @@ class DownloadJobPreparerTest {
         @BeforeClass
         @JvmStatic
         fun setupClass() {
+            UmAccountManager.bindDbForActiveContext(Any())
             serverDb = UmAppDatabase.getInstance(Any())
-            clientDb = UmAppDatabase.getInstance(Any(), "clientdb")
+            clientDb = UmAccountManager.getActiveDatabase(Any())
             clientRepo = clientDb.asRepository(Any(),"http://localhost:8087", "",
                     defaultHttpClient(), null) as UmAppDatabase
             (clientRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED

@@ -37,7 +37,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         try {
             this.presenter = mPresenter
             val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-            val appDatabase = UmAppDatabase.getInstance(context)
+            val appDatabase = UmAccountManager.getActiveDatabase(context)
 
             containerManager = ContainerManager(pathToZip, appDatabase, repoAppDatabase)
 
