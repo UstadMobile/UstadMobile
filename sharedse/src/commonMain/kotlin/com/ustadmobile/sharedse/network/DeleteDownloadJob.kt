@@ -14,9 +14,7 @@ suspend fun deleteDownloadJob(db: UmAppDatabase, downloadJobUid: Int,
                       containerDownloadManager: ContainerDownloadManager,
                       onprogress: (progress: Int) -> Unit): Boolean {
 
-    val downloadJob = db.downloadJobDao.findByUid(downloadJobUid)
-
-    if(downloadJob == null) {
+    if(db.downloadJobDao.findByUid(downloadJobUid) == null) {
         return false
     }
 
@@ -34,7 +32,6 @@ suspend fun deleteDownloadJob(db: UmAppDatabase, downloadJobUid: Int,
 
     var numFailures = 0
     db.runInTransaction(Runnable {
-        var counter = 0
         val zombieEntryFilesList = db.containerEntryFileDao.findZombieEntries()
         zombieEntryFilesList.forEach {
             val filePath = it.cefPath
