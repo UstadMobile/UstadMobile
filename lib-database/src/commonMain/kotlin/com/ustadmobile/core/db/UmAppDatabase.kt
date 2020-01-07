@@ -265,7 +265,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
          */
         val MIGRATION_29_30 = object: DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
+
                 if(database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer ( " +
+                            " laContainerUid  INTEGER PRIMARY KEY  NOT NULL )")
+
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_14")
                     database.execSQL("DROP TRIGGER IF EXISTS INS_14")
                     database.execSQL("""
@@ -2567,18 +2572,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |; END
                     """.trimMargin())
                 }
+
             }
         }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
-//            builder.addMigrations(object: DoorMigration(28,29){
-//
-//                override fun migrate(database: DoorSqlDatabase) {
-//                    //do nothing
-//                    println("Blank migration from 28 - 29")
-//                }
-//            })
             builder.addMigrations(object : DoorMigration(27,28){
 
                 override fun migrate(database: DoorSqlDatabase) {
