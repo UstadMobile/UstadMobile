@@ -19,7 +19,7 @@ import kotlin.jvm.Volatile
     SelQuestionOption::class, ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
-    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
+    Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
