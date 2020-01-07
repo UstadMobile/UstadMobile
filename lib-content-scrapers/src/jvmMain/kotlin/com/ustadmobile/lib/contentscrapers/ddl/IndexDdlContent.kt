@@ -31,6 +31,7 @@ import java.io.IOException
  * Traverse all the pages until you hit Max number and then move to next language
  */
 class IndexDdlContent {
+    private lateinit var db: UmAppDatabase
     private var destinationDirectory: File? = null
 
     private var maxNumber: Int = 0
@@ -52,8 +53,8 @@ class IndexDdlContent {
         containerDir.mkdirs()
         this.containerDir = containerDir
 
-        val db = UmAppDatabase.getInstance(Any())
-        val repository = db //db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(Any())
+        val repository = db
         contentEntryDao = repository.contentEntryDao
         contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
         contentCategoryChildJoinDao = repository.contentEntryContentCategoryJoinDao
@@ -117,7 +118,7 @@ class IndexDdlContent {
             }
 
         }
-        UMLogUtil.logTrace("max number of pages: " + maxNumber)
+        UMLogUtil.logTrace("max number of pages: $maxNumber")
 
         browseList(lang, 1)
         langCount++
@@ -141,12 +142,15 @@ class IndexDdlContent {
             val url = resource.attr("href")
             if (url.contains("resource/")) {
 
-                val scraper = DdlContentScraper(url, destinationDirectory!!, containerDir!!, lang)
+                var contentEntry = ContentEntry()
+                contentEntry.sourceUrl = url
+                contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
+
+                val scraper = DdlContentScraper(destinationDirectory!!, containerDir!!, lang, db, contentEntry.contentEntryUid)
                 try {
-                    scraper.scrapeContent()
+                    scraper.scrapeUrl(url)
                     UMLogUtil.logTrace("scraped url: $url")
                     val subjectAreas = scraper.parentSubjectAreas
-                    val contentEntry = scraper.contentEntries
                     val contentCategories = scraper.contentCategories
                     var subjectAreaCount = 0
                     UMLogUtil.logTrace("found " + subjectAreas.size + " subjects in entry")

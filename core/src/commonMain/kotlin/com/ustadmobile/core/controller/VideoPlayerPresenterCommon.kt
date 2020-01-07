@@ -8,6 +8,10 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.MimeType.M4V
+import com.ustadmobile.core.util.MimeType.MKV
+import com.ustadmobile.core.util.MimeType.MP4
+import com.ustadmobile.core.util.MimeType.WEBM
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HomeView
@@ -103,6 +107,6 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
 
         val VIDEO_EXT_LIST = listOf(".mp4", ".mkv", ".webm", ".m4v")
 
-        var VIDEO_MIME_MAP = mapOf("video/mp4" to ".mp4", "video/x-matroska" to ".mkv", "video/webm" to ".webm", "video/x-m4v" to ".m4v")
+        var VIDEO_MIME_MAP = mapOf(MP4 to ".mp4", MKV to ".mkv", WEBM to ".webm", M4V to ".m4v")
     }
 }

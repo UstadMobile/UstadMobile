@@ -2,11 +2,11 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CHROME_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
+import io.github.bonigarcia.wdm.WebDriverManager
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -15,13 +15,12 @@ import net.lightbody.bmp.proxy.CaptureType
 import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.ExpectedCondition
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.io.File
-import org.openqa.selenium.chrome.ChromeOptions
 import java.io.StringWriter
-import java.lang.IllegalArgumentException
 import java.net.URL
 import java.net.URLDecoder
 
@@ -38,7 +37,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
 
     init {
-        System.setProperty("chromedriver", System.getProperty(CHROME_PATH_KEY))
+        WebDriverManager.chromedriver().setup()
         proxy.start()
         proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS,
                 CaptureType.RESPONSE_CONTENT,
@@ -55,6 +54,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null,
                        filters: List<ScrapeFilterFn> = listOf(),
                        regexes: List<Regex> = listOf(),
+                       addHarContent: Boolean = true,
                        block: (proxy: BrowserMobProxyServer) -> Boolean): ContainerManager? {
 
         clearAnyLogsInChrome()
@@ -77,7 +77,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         block.invoke(proxy)
 
-        return makeHarContainer(proxy, entries, filters, regexes)
+        return makeHarContainer(proxy, entries, filters, regexes, addHarContent)
     }
 
 
@@ -95,7 +95,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     }
 
 
-    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<Regex>): ContainerManager {
+    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<Regex>, addHarContent: Boolean): ContainerManager {
 
         var containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
 
@@ -114,6 +114,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 val decodedUrl = URL(decodedPath)
                 var containerPath = decodedUrl.toString().replace(regex, "_")
 
+                // to remove timestamps from queries
                 var regexedString = decodedUrl.toString()
                 regexes.forEach { itRegex ->
                     regexedString = regexedString.replace(itRegex, "")
@@ -123,8 +124,12 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                     filterFn.invoke(it)
                 }
 
+                if(it.response == null){
+                    return@forEach
+                }
+
                 runBlocking {
-                    containerManager.addEntries(HarEntrySource(it, containerPath))
+                    containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))
                 }
 
                 it.response.content.text = containerPath
@@ -140,9 +145,11 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         var writer = StringWriter()
         proxy.har.writeTo(writer)
 
-        runBlocking {
-            containerManager.addEntries(StringEntrySource(writer.toString(), "harcontent"))
-            containerManager.addEntries(StringEntrySource(regexes.joinToString(),"regexList"))
+        if(addHarContent){
+            runBlocking {
+                containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
+                containerManager.addEntries(StringEntrySource(regexes.joinToString(),listOf("regexList")))
+            }
         }
 
         return containerManager
@@ -154,7 +161,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
      * @param waitDriver driver used to wait for conditions on webpage
      * @return true once wait is complete
      */
-    private fun waitForJSandJQueryToLoad(waitDriver: WebDriverWait): Boolean {
+    fun waitForJSandJQueryToLoad(waitDriver: WebDriverWait): Boolean {
 
         // wait for jQuery to load
         val jQueryLoad = ExpectedCondition { driver ->

@@ -4,7 +4,7 @@ import com.ustadmobile.core.container.ContainerManagerCommon
 import org.apache.commons.codec.digest.DigestUtils
 import java.io.InputStream
 
-class StringEntrySource(private val value: String, override val pathInContainer: String) : ContainerManagerCommon.EntrySource {
+class StringEntrySource(private val value: String, override val pathsInContainer: List<String>) : ContainerManagerCommon.EntrySource {
 
     override val length: Long
         get() = value.length.toLong()
@@ -21,4 +21,8 @@ class StringEntrySource(private val value: String, override val pathInContainer:
     }
     override val compression: Int
         get() = 0
+
+    override fun dispose() {
+
+    }
 }

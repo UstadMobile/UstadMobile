@@ -6,7 +6,7 @@ import net.lightbody.bmp.core.har.HarEntry
 import org.apache.commons.codec.digest.DigestUtils
 import java.util.*
 
-class HarEntrySource(private val harEntry: HarEntry, override val pathInContainer: String) : ContainerManagerCommon.EntrySource {
+class HarEntrySource(private val harEntry: HarEntry, override val pathsInContainer: List<String>) : ContainerManagerCommon.EntrySource {
 
     override val length: Long
         get() = harEntry.response.content.size
@@ -30,4 +30,8 @@ class HarEntrySource(private val harEntry: HarEntry, override val pathInContaine
     }
     override val compression: Int
         get() = 0
+
+    override fun dispose() {
+
+    }
 }

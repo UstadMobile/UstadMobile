@@ -25,11 +25,12 @@ import org.mockito.Mockito
 import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
-import java.net.URL
 import java.nio.file.Files
 
 class TestPrathamContentScraper {
 
+
+    private lateinit var db: UmAppDatabase
 
     @Before
     fun setup() {
@@ -79,7 +80,7 @@ class TestPrathamContentScraper {
 
     @Before
     fun clearDb() {
-        val db = UmAppDatabase.getInstance(Any())
+        db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
     }
 
@@ -149,8 +150,8 @@ class TestPrathamContentScraper {
         mockWebServer.setDispatcher(dispatcher)
 
         val scraper = DdlContentScraper(
-                mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString(),
-                tmpDir, containerDir, "en")
+                tmpDir,
+                containerDir, "en", db, 0)
         scraper.scrapeContent()
         scraper.parentSubjectAreas
 

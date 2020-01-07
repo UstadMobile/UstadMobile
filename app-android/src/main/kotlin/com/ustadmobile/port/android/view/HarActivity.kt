@@ -10,12 +10,15 @@ import com.ustadmobile.core.controller.HarPresenter
 import com.ustadmobile.core.impl.HarWebViewClient
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.util.ContentEntryUtil
+import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.HarAndroidView
-import com.ustadmobile.core.view.ViewWithErrorNotifier
-import kotlinx.coroutines.*
+import com.ustadmobile.core.view.UstadViewWithSnackBar
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class HarActivity : UstadBaseActivity(), ViewWithErrorNotifier, HarAndroidView {
+class HarActivity : UstadBaseActivity(), UstadViewWithSnackBar, HarAndroidView {
 
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()
 
@@ -76,7 +79,7 @@ class HarActivity : UstadBaseActivity(), ViewWithErrorNotifier, HarAndroidView {
     }
 
     override fun showError(message: String) {
-        showErrorNotification(message, {}, 0)
+        showSnackBarNotification(message, {}, 0)
     }
 
     override fun setToolbarTitle(title: String) {
@@ -84,8 +87,8 @@ class HarActivity : UstadBaseActivity(), ViewWithErrorNotifier, HarAndroidView {
     }
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
-        showErrorNotification(message, {
-            var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
+        showSnackBarNotification(message, {
+            var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }
