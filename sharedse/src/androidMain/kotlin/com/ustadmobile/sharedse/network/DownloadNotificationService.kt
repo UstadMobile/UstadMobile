@@ -288,7 +288,7 @@ class DownloadNotificationService : Service() {
         mNotificationManager = NotificationManagerCompat.from(this)
         createChannel()
 
-        umAppDatabase = UmAppDatabase.getInstance(this)
+        umAppDatabase = UmAccountManager.getActiveDatabase(this)
         umAppDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(
                 this@DownloadNotificationService)
 

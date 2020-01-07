@@ -132,7 +132,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
                 container, false)
 
         val fragmentContext = context!!
-        umDatabase = UmAppDatabase.getInstance(fragmentContext)
+        umDatabase = UmAccountManager.getActiveDatabase(fragmentContext)
         umRepository = UmAccountManager.getRepositoryForActiveAccount(fragmentContext)
 
         toolbar = rootView.findViewById(R.id.toolbar)

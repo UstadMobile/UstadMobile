@@ -9,6 +9,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.Person
@@ -37,7 +38,8 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         presenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAppDatabase.getInstance(this).personDao,UstadMobileSystemImpl.instance)
+                this, UmAccountManager.getActiveDatabase(this).personDao,
+                UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         logout.setOnClickListener {
