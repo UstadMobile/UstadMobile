@@ -73,6 +73,9 @@ export class UmBaseService {
    */
   preloadResourcess(fireWhenReady = true){
     const endPointUrl = UmAngularUtil.getItem(UmAngularUtil.BASE_URL_TAG);
+    if(endPointUrl == UmAngularUtil.TEST_ENDPOINT){
+      UmAngularUtil.setItem(UmAngularUtil.API_URL_TAG, endPointUrl)
+    }
     UmAngularUtil.setItem(UmAngularUtil.CONTENT_URL_TAG, endPointUrl+"ContainerMount/")
     this.preloadSystemResources(fireWhenReady)
   }

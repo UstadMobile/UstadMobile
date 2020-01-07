@@ -101,8 +101,8 @@ class LoginPresenterTest {
 
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
 
-        verify(impl, timeout(5000 )).go("somewhere",
-                context)
+        verify(impl, timeout(5000 )).go(eq("somewhere"), any(),
+                any())
 
         val activeAccount = UmAccountManager.getActiveAccount(context)
         Assert.assertNotNull(activeAccount)

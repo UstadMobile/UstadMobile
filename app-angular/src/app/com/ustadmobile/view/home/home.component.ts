@@ -146,12 +146,12 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
 
   handleSideMenuSelected(route) {
     const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context)
-    const isReport = route == "ReportOptions"
-    const routeTo =  isReport && !activeAcount ? this.routes.login : route 
-    console.log("Route",routeTo)
+    
+    const isReport = route == "ReportOptions",
+    routeTo =  isReport && !activeAcount ? this.routes.login : route 
     const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isReport ? 
-      "?" + UmAngularUtil.ARG_CONTENT_ENTRY_UID + "=" + this.umService.ROOT_UID: null, route: routeTo})
-    this.systemImpl.go(route, args, this.context);
+      "?" + UmAngularUtil.ARG_CONTENT_ENTRY_UID + "=" + this.umService.ROOT_UID: (route != routeTo ? "?next="+route: null), route: routeTo})
+    this.systemImpl.go(routeTo, args, this.context);
   }
 
   setToolbarTitle(title) {

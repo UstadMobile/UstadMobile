@@ -77,7 +77,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                         activeRepository.connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
                     }
 
-                    impl.go(mNextDest, context)
+                    impl.go(mNextDest,arguments, context)
                 } else {
                     view.runOnUiThread(Runnable {
                         view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,

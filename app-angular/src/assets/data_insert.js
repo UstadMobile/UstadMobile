@@ -40,7 +40,7 @@ function executeGetRequest(url){
       {url:"ContentEntryDao/insertListAsync", path: "data_entries.json"},
       {url:"ContentEntryParentChildJoinDao/insertListAsync",path:"data_entries_parent_join.json"},
       {url:"LanguageDao/insertListAsync", path:"data_languages.json"}, 
-      /* {url:"PersonDao/insertListAsync", path:"data_persons.json"} */,
+      {url:"PersonDao/insertListAsync", path:"data_persons.json"},
       {url:"StatementDao/insertListAsync",path:"data_statements.json"}, 
       {url:"XLangMapEntryDao/insertListAsync", path: "data_xlangmap.json"},
       {url:"VerbDao/insertListAsync", path: "data_verbs.json"}].forEach( request =>{

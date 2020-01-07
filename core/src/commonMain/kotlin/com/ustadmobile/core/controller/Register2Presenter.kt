@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View,
-                         private val personDao: PersonDao, private val personRepo: PersonDao)
+                         private val personDao: PersonDao, private val personRepo: PersonDao,
+                         private val systemImpl: UstadMobileSystemImpl)
     : UstadBaseController<Register2View>(context, arguments, view) {
 
     private var mNextDest: String? = null
@@ -44,9 +45,6 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
     @JsName("handleClickRegister")
     fun handleClickRegister(person: Person, password: String, serverUrl: String) {
         view.runOnUiThread(Runnable { view.setInProgress(true) })
-
-        val systemImpl = UstadMobileSystemImpl.instance
-
         GlobalScope.launch {
 
             try {

@@ -52,7 +52,7 @@ export class LoginComponent extends UmBaseComponent implements OnDestroy, core.c
   onCreate() {
     UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.login))
     this.presenter = new core.com.ustadmobile.core.controller.LoginPresenter(
-      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.systemImpl);
+      this.context, UmAngularUtil.getArgumentsFromQueryParams({params:"?next="+this.routes.entryList,next: true, rootId: this.umService.ROOT_UID}), this, this.systemImpl); 
     this.presenter.onCreate(null);
   }
 

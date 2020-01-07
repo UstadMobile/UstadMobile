@@ -7,98 +7,61 @@ export function launchApp(){
   return browser.waitForAngularEnabled(true)
 }
 
-export class HomePage{
-  menus = ['Libraries', 'Reports']
-  title = 'Ustad Mobile'
-  baseUrl = "http://localhost:";
-  launch() {
-    
-  }
-
-}
-
 export class Entries{
 
   views = {details:"ContentEntryDetail", list: "ContentEntryList", content: "EpubContent"}
   
   launch(){
     launchApp()
-    browser.sleep(sleepTime * 3)
+    browser.sleep(sleepTime)
   }
 
-  getList() {
-    return new ElementUtils().getPageElements().entryList
-  }
-
-  getDetails(){
+  getPage() {
     return new ElementUtils().getPageElements().content
   }
 }
 
+export class Reports{
+  views = {list: "ContentEntryList", preview:"ReportPreview"}
 
+  launch(){
+    launchApp()
+    browser.sleep(sleepTime)
+  }
 
-/* export class ReportOptions{
-  views = {"what":"EntriesTreeDialog", "done":"ReportPreview"}
-  launch() {
-    const pageDashboard = new DashboardPage()
-    pageDashboard.launch()
-    pageDashboard.getPage().newReport.click()
+  getPage(){
+    return new ElementUtils().getPageElements().reports
   }
 
   selectDropDown(dropdownIndex, optionIndex){
-    this.getPage().selectViews.get(dropdownIndex).click()
-    browser.sleep(sleepTime * 2)
+    this.getPage().options.selectViews.get(dropdownIndex).click()
     return new ElementUtils().selectDropDown('app-xapi-report-options',dropdownIndex,optionIndex);
-  }
-
-  getPage() {
-    return new ElementUtils().getPageElements().componentReportOptions
   }
 }
 
-export class ReportDetails{
-
-  views = {"dashboard":"ReportDashboard"}
-  launch() {
-    browser.get(browser.baseUrl+'/#/Home/ReportPreview?ref=null&options=%7B"chartType":100,"yAxis":200,"xAxis":302,"subGroup":300,"whoFilterList":%5B1%5D,"didFilterList":%5B200%5D,"objectsList":%5B%5D,"entriesList":%5B%5D,"fromDate":0,"toDate":0,"locationsList":%5B%5D,"reportTitle":"null"%7D') as Promise<any>;
-    return new ElementUtils().launchAsync()
-  }
-  getPage() {
-    return new ElementUtils().getPageElements().reportDetails
-  }
-} */
 
 export class ElementUtils{
    getPageElements() {
     return {
-      componentHome:{
-        title: browser.getTitle() as Promise<any>,
-        menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span'))
+      reports:{
+        profile: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-header div i')),
+        menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span')),
+        loginInputs: element.all(by.css('app-login > div div form div mz-input-container input')),
+        loginBtn: element.all(by.css('app-login > div div form div div button')),
+        options: {
+          selectViews: element.all(by.css('app-xapi-report-options > div mz-select-container')),
+          selectViewsOption: element.all(by.css('app-xapi-report-options > div option')),
+          doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn-right')),
+          graph: element.all(by.css('app-xapi-report-details > div google-chart'))
+        }
       },
-      entryList: {
-        entries: element.all(by.css('app-root app-content-entry-list > div ul li.open-content'))
-      },
+
       content: {
+        entries: element.all(by.css('app-root app-content-entry-list > div ul li.open-content')),
         details: element.all(by.css('app-content-entry-detail > div div.fixed-action-btn-right')),
         controller: element.all(by.css('app-epub-content > div div button.orange')),
         content: element.all(by.css('app-epub-content > div div iframe'))
       },
-      componentReportDashboard: {
-        newReport: element.all(by.css('app-root app-report-dashboard > div div.fixed-action-btn-right')),
-      },
-      componentReportOptions:{
-        formFields: element.all(by.css('app-xapi-report-options > div div.input-field')),
-        selectViews: element.all(by.css('app-xapi-report-options > div mz-select-container')),
-        inputViews: element.all(by.css('app-xapi-report-options > div mz-input-container')),
-        selectViewsOption: element.all(by.css('app-xapi-report-options > div option')),
-        doneBtn: element.all(by.css('app-xapi-report-options > div div.fixed-action-btn-right')),
-        dialog: element.all(by.css('xapi-treeview-dialog mz-modal'))
-      },
-      reportDetails: {
-        graph: element.all(by.css('app-xapi-report-details > div google-chart')),
-        tableRows: element.all(by.css('app-xapi-report-details > div div table tbody tr')),
-        addBtn: element.all(by.css('app-xapi-report-details > div div.fixed-action-btn-right'))
-      }
     };
   }
 

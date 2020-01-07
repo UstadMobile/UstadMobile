@@ -79,7 +79,8 @@ class Register2Activity : UstadBaseActivity(), Register2View {
         presenter = Register2Presenter(this,
                 bundleToMap(intent.extras), this,
                 UmAppDatabase.getInstance(this).personDao,
-                UmAccountManager.getRepositoryForActiveAccount(this).personDao)
+                UmAccountManager.getRepositoryForActiveAccount(this).personDao,
+                systemImpl = UstadMobileSystemImpl.instance)
         presenter!!.onCreate(bundleToMap(savedInstanceState))
 
         for (fieldId in fieldToViewIdMap.values) {

@@ -49,8 +49,9 @@ export class RegisterComponent extends UmBaseComponent implements OnDestroy,
 
   onCreate() {
     this.presenter = new core.com.ustadmobile.core.controller.Register2Presenter(
-      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this);
-    this.presenter.onCreate(null);
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this,
+      this.umService.getDbInstance().personDao, this.systemImpl);
+    this.presenter.onCreate(null); 
 
     UmAngularUtil.fireTitleUpdate(this.getString(this.MessageID.create_new_account))
     this.label_wrong_email = this.getString(this.MessageID.register_incorrect_email);

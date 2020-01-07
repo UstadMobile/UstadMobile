@@ -94,15 +94,18 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT EXISTS(SELECT token FROM AccessToken WHERE token = :token and accessTokenPersonUid = :personUid)")
     abstract fun isValidToken(token: String, personUid: Long): Boolean
 
+    @JsName("insertAccessToken")
     @Insert
     abstract fun insertAccessToken(token: AccessToken)
 
 
+    @JsName("findUidAndPasswordHashAsync")
     @Query("SELECT Person.personUid, PersonAuth.passwordHash " +
             " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
             "WHERE Person.username = :username")
     abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
 
+    @JsName("insertPersonAuth")
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
