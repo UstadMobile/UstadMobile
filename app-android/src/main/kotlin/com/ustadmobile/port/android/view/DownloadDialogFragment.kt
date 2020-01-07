@@ -126,7 +126,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         for (umStorageDir in storageOptions) {
             val deviceStorageLabel = String.format(impl!!.getString(
                     MessageID.download_storage_option_device, context!!), umStorageDir.name,
-                    UMFileUtil.formatFileSize(File(umStorageDir.dirURI!!).usableSpace))
+                    UMFileUtil.formatFileSize(umStorageDir.usableSpace))
             options.add(deviceStorageLabel)
         }
 
@@ -207,11 +207,11 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     override fun onClick(stackedButton: View) {
         val viewId = stackedButton.id
         if (viewId != R.id.wifi_only_option_holder && viewId != R.id.use_sdcard_option_holder) {
-            mPresenter!!.handleClickStackedButton(viewId)
+            mPresenter?.handleClickStackedButton(viewId)
         } else if (viewId == R.id.wifi_only_option_holder) {
             val checkboxState = !wifiOnlyView!!.isChecked
-            wifiOnlyView!!.isChecked = checkboxState
-            mPresenter!!.handleClickWiFiOnlyOption(checkboxState)
+            wifiOnlyView?.isChecked = checkboxState
+            mPresenter?.handleClickWiFiOnlyOption(checkboxState)
         }
     }
 
@@ -231,10 +231,10 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        mPresenter!!.handleStorageOptionSelection(storageDirs[position].dirURI!!)
+        mPresenter?.handleStorageOptionSelection(storageDirs[position])
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
-        mPresenter!!.handleStorageOptionSelection(storageDirs[0].dirURI!!)
+        mPresenter?.handleStorageOptionSelection(storageDirs[0])
     }
 }

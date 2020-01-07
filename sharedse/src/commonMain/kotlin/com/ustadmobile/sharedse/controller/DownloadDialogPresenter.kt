@@ -36,6 +36,7 @@ class DownloadDialogPresenter(context: Any,
                               private var appDatabase: UmAppDatabase,
                               private val appDatabaseRepo: UmAppDatabase,
                               private val containerDownloadManager: ContainerDownloadManager,
+                              private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
                               private val downloadJobPreparationRequester: (Int, Any) -> Unit = ::requestDownloadPreparation)
     : UstadBaseController<DownloadDialogView>(context, arguments, view), DoorObserver<DownloadJob?> {
 
@@ -51,11 +52,9 @@ class DownloadDialogPresenter(context: Any,
     var currentJobId: Int = -1
         private set
 
-    private lateinit var impl: UstadMobileSystemImpl
-
     private var statusMessage: String? = null
 
-    private var destinationDir: String? = null
+    //private var destinationDir: String? = null
 
     private val jobSizeLoading = atomic(false)
 
@@ -68,6 +67,8 @@ class DownloadDialogPresenter(context: Any,
     private var currentDownloadJobItem: DownloadJobItem? = null
 
     private var downloadJobLiveData: DoorLiveData<DownloadJob?>? = null
+
+    private var selectedStorageDir: UMStorageDir? = null
 
     private val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
         override fun onChanged(t: DownloadJobItem?) {
@@ -88,7 +89,6 @@ class DownloadDialogPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        impl = UstadMobileSystemImpl.instance
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
         UMLog.l(UMLog.INFO, 420, "Starting download presenter for " +
                 "content entry uid: " + contentEntryUid)
@@ -101,16 +101,14 @@ class DownloadDialogPresenter(context: Any,
             view.setDownloadOverWifiOnly(isWifiOnly)
             downloadJobItemLiveData.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     downloadJobItemObserver)
-        }
 
-        impl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>>{
-            override fun onDone(result: List<UMStorageDir>?) {
-                destinationDir = result?.get(0)?.dirURI
-                view.runOnUiThread(Runnable{
-                    view.showStorageOptions(result!!)
-                })
-            }
-        })
+            val storageDirs = impl.getStorageDirsAsync(context)
+            view.runOnUiThread(Runnable {
+                selectedStorageDir = storageDirs.firstOrNull()
+                view.showStorageOptions(storageDirs)
+                updateWarningMessage()
+            })
+        }
     }
 
     override fun onChanged(t: DownloadJob?) {
@@ -183,6 +181,7 @@ class DownloadDialogPresenter(context: Any,
         val currentStatuMessage = statusMessage
         if(downloadTotals != null && currentStatuMessage != null){
             view.runOnUiThread(Runnable {
+                updateWarningMessage()
                 view.setCalculatingViewVisible(false)
                 view.setStatusText(currentStatuMessage,
                     downloadTotals.numEntries, UMFileUtil.formatFileSize(downloadTotals.totalSize))
@@ -191,9 +190,24 @@ class DownloadDialogPresenter(context: Any,
         }
     }
 
+    private fun updateWarningMessage() {
+        val jobSizeTotalsVal = jobSizeTotals.value
+        val selectedStorageDirVal = selectedStorageDir
+        if(jobSizeTotalsVal != null && selectedStorageDirVal != null) {
+            if(jobSizeTotalsVal.totalSize > selectedStorageDirVal.usableSpace) {
+                view.setWarningTextVisible(true)
+                view.setWarningText(impl.getString(MessageID.insufficient_space, context))
+                view.setBottomPositiveButtonEnabled(false)
+            }else {
+                view.setWarningTextVisible(false)
+                view.setBottomPositiveButtonEnabled(true)
+            }
+        }
+    }
+
     private suspend fun createDownloadJobAndRequestPreparation() : Boolean{
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
-        newDownloadJob.djDestinationDir = destinationDir
+        newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
         val isWifiOnlyChecked = wifiOnlyChecked.value
         newDownloadJob.meteredNetworkAllowed = !isWifiOnlyChecked
@@ -271,10 +285,12 @@ class DownloadDialogPresenter(context: Any,
         }
     }
 
-    fun handleStorageOptionSelection(selectedDir: String) {
+    fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
+        selectedStorageDir = selectedDir
+        updateWarningMessage()
         GlobalScope.launch {
             appDatabase.downloadJobDao.updateDestinationDirectoryAsync(
-                    currentJobId, selectedDir)
+                    currentJobId, selectedDir.dirURI)
         }
     }
 

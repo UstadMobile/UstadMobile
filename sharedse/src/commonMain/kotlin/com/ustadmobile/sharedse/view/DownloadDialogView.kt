@@ -13,7 +13,13 @@ interface DownloadDialogView : UstadView {
 
     fun setDownloadOverWifiOnly(wifiOnly: Boolean)
 
+    fun setBottomPositiveButtonEnabled(enabled: Boolean)
+
     fun setStatusText(statusText: String, totalItems: Int, sizeInfo: String)
+
+    fun setWarningText(text: String)
+
+    fun setWarningTextVisible(visible: Boolean)
 
     fun setStackedOptions(optionIds: IntArray, optionTexts: Array<String>)
 

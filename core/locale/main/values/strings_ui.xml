@@ -204,6 +204,7 @@
     <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
     <string name="download_locally_availability">Available nearby</string>
     <string name="download_cloud_availability">Available on cloud</string>
+    <string name="insufficient_space">Insufficient storage space available</string>
     <string name="clear_history">Clear History</string>
     <string name="download_entry_state_paused">Paused</string>
     <string name="download_entry_state_queued">Queued</string>
