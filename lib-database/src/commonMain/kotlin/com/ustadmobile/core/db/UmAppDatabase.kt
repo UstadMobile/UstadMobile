@@ -35,7 +35,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 29)
+], version = 30)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -263,7 +263,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         /**
          * Fix SQLite update triggers
          */
-        val MIGRATION_28_29 = object: DoorMigration(28, 29) {
+        val MIGRATION_29_30 = object: DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
                 if(database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_14")
@@ -3668,7 +3668,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_29_30)
 
             return builder
         }
