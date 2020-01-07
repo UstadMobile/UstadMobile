@@ -109,7 +109,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
             val networkManager = activity.networkManagerBle.await()
             mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
                     this@DownloadDialogFragment,
-                    UmAppDatabase.getInstance(context as Context),
+                    UmAccountManager.getActiveDatabase(context as Context),
                     UmAccountManager.getRepositoryForActiveAccount(context as Context),
                     networkManager.containerDownloadManager).also {
                 it.onCreate(null)

@@ -1,12 +1,14 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
+import com.ustadmobile.sharedse.test.util.bindDbForActiveContext
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -48,6 +50,9 @@ class BleGattServerCommonTest {
     @Before
     @Throws(IOException::class)
     fun setUp() {
+        UmAccountManager.bindDbForActiveContext(context)
+        umAppDatabase = UmAccountManager.getActiveDatabase(context)
+        umAppDatabase!!.clearAllTables()
         mockedNetworkManager = com.nhaarman.mockitokotlin2.spy {
 
         }
@@ -56,8 +61,7 @@ class BleGattServerCommonTest {
         httpd.start()
        //`when`(mockedNetworkManager!!.httpd).thenReturn(httpd)
 
-        umAppDatabase = UmAppDatabase.getInstance(context)
-        umAppDatabase!!.clearAllTables()
+
 
         gattServer = spy(BleGattServerCommon::class.java)
         gattServer!!.context = context

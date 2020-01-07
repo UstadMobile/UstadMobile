@@ -1175,8 +1175,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .add("_e.printStackTrace()\n")
                 .add("throw %T(_e)\n", RuntimeException::class)
                 .nextControlFlow("finally")
-                .add("_con?.close()\n")
                 .add("_stmt?.close()\n")
+                .add("_con?.close()\n")
                 .endControlFlow()
 
 
