@@ -1,26 +1,39 @@
+plugins {
+    id 'application'
+    id 'kotlin'
+    id 'com.github.psxpaul.execfork' version '0.1.11'
+    id 'com.github.johnrengelman.shadow'
+}
 
 
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
+mainClassName = 'io.ktor.server.netty.EngineMain'
+
+shadowJar {
+    manifest {
+        attributes 'Main-Class': mainClassName
     }
 }
 
-plugins {
-    id 'com.github.psxpaul.execfork' version '0.1.11'
-}
-
-apply plugin: 'java-library'
-
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":app-ktor-server")
+    implementation project(":lib-database")
+    implementation project(":lib-database-mpp")
+    implementation project(":lib-door-runtime")
+    implementation project(":lib-test-common")
+
     implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.json:json:$version_json"
     implementation "commons-cli:commons-cli:$version_apache_commons_cli"
+    implementation "io.ktor:ktor-server-netty:$version_ktor"
+    implementation "ch.qos.logback:logback-classic:$version_logback"
+    implementation "io.ktor:ktor-gson:$version_ktor"
+    implementation "com.google.code.gson:gson:$version_gson"
+    implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+    implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
     testImplementation "junit:junit:$version_junit"
 }
@@ -36,38 +49,19 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 
-task runHttpTestServer(type: JavaExec) {
-    //check if test server param was given
-    def umTestServer = ""
-    if(project.hasProperty('test_server')){
-        umTestServer = test_server
-    }else{
-        umTestServer = project.ext.buildConfigProperties["test.um_http_testserver"]
-    }
-    classpath sourceSets.main.runtimeClasspath
-    standardInput = System.in
-    main = "com.ustadmobile.test.http.UmTestServerManager"
-    args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", umTestServer
+task appRun(type: JavaExec) {
+    classpath = files("$buildDir/libs/lib-http-testserver-all.jar")
+    main = 'io.ktor.server.netty.EngineMain'
+    args   "-port=${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "-host=${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}"
+}
+
+task appRunDebug(type: JavaExec) {
+    classpath = files("$buildDir/libs/lib-http-testserver-all.jar")
+    main = 'io.ktor.server.netty.EngineMain'
+    args   "-port=${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "-host=${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}"
+    jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005'
 }
 
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
-
-    outputs.upToDateWhen { false }
-    //check if test server param was given
-    def umTestServer = ""
-    if(project.hasProperty('test_server')){
-        umTestServer = test_server
-    }else{
-        umTestServer = project.ext.buildConfigProperties["test.um_http_testserver"]
-    }
-
-    classpath = sourceSets.main.runtimeClasspath
-    main = "com.ustadmobile.test.http.UmTestServerManager"
-    args = ["--controlport", "8400", "--startport", "8500", "--endport", "8600", "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", umTestServer]
-    waitForPort = 8400
-    workingDir = "$projectDir/"
-    standardOutput = "$projectDir/build/tmp/daemon.log"
-    errorOutput = "$projectDir/build/tmp/daemon-error.log"
-    environment 'JAVA_HOME', System.properties.find { it.key == "java.home" }
-}
+appRun.dependsOn(shadowJar)
+appRunDebug.dependsOn(shadowJar)
