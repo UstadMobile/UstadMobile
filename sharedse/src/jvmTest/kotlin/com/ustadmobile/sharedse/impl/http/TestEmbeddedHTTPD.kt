@@ -1,6 +1,8 @@
 package com.ustadmobile.sharedse.impl.http
 
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import com.ustadmobile.sharedse.test.util.bindDbForActiveContext
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -50,6 +52,8 @@ class TestEmbeddedHTTPD {
     @Before
     @Throws(IOException::class)
     fun startServer() {
+        UmAccountManager.bindDbForActiveContext(context)
+        var db = UmAccountManager.getActiveAccount(context)
         httpd = EmbeddedHTTPD(0, context)
         httpd!!.start()
     }
