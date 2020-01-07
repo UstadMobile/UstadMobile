@@ -216,6 +216,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     SELECT * FROM ContentEntry_recursive""")
     abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
+    @Query("UPDATE ContentEntry SET ceInactive = :ceInactive WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("updateContentEntryInActive")
+    abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
+
+    @Query("UPDATE ContentEntry SET  contentTypeFlag = :contentFlag WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("updateContentEntryContentFlag")
+    abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntry>)
 

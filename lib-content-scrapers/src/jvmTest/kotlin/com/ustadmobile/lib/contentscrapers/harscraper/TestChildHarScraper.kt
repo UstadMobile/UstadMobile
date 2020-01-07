@@ -10,8 +10,8 @@ class TestChildHarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
        return true
     }
 
-    override fun scrapeUrl(url: String) {
-        startHarScrape(url, null){
+    override fun scrapeUrl(sourceUrl: String) {
+        startHarScrape(sourceUrl, null){
             isContentUpdated()
         }
     }
