@@ -13,6 +13,7 @@ import java.net.URISyntaxException
 import java.util.*
 import java.util.regex.Pattern
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -81,7 +82,7 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
             val containerUid = uriResource.uri.split("/")[CONTAINER_UID_INDEX].toLong()
             val context = uriResource.initParameter(0, Any::class.java)
-            val entryFile = UmAppDatabase.getInstance(context).containerEntryDao
+            val entryFile = UmAccountManager.getActiveDatabase(context).containerEntryDao
                     .findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
                             "text/plain", "Entry not found in container")

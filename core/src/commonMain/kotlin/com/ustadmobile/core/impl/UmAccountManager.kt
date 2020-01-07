@@ -89,15 +89,13 @@ object UmAccountManager {
                     "http://localhost", context) ?: "http://localhost"
         }
 
-        val db = UmAppDatabase.getInstance(context)
         if(activeAccountRepository == null) {
+            val db = getActiveDatabase(context)
             if (activeAccount == null) {
                 activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }else {
                 activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }
-
-
         }
 
         return activeAccountRepository!!

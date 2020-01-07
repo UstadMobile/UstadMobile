@@ -35,7 +35,10 @@ class EmbeddedHttpdService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        httpd = EmbeddedHTTPD(0, applicationContext)
+        val appDatabase = UmAccountManager.getActiveDatabase(applicationContext)
+        val appRepository = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+        httpd = EmbeddedHTTPD(0, applicationContext, appDatabase = appDatabase,
+                repository =  appRepository)
         httpd.addRoute("$ANDROID_ASSETS_PATH(.)+", AndroidAssetsHandler::class.java,
                 applicationContext)
         httpd.UmAppDatabase_AddUriMapping(UmAccountManager.getActiveDatabase(this),
