@@ -1,8 +1,3 @@
-  .user-view{
-    background: url('../../../../../assets/images/top_header_bg.jpg')
-  }
- 
-
   .icon-left-spacing{
     padding-left: 30px !important;
   }
@@ -31,3 +26,17 @@
   .language{
     margin: 4% !important;
   }
+
+  .open-profile{
+    cursor: pointer; 
+  }
+  .collection-item{
+    border: 0px solid white; 
+    cursor: pointer;
+  }
+
+  .margin-modal{
+    border: 0px solid white !important;
+    margin: 1px !important; 
+  }
+

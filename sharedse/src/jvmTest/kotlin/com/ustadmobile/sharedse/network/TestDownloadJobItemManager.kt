@@ -244,17 +244,18 @@ class TestDownloadJobItemManager {
         return statusMap
     }
 
-//    @Test
-//    fun given50000ObjectsCreated_whenMemoryCounted_memoryUsageShouldBeReasonable() {
-//        System.gc()
-//        val runtime = Runtime.getRuntime()
-//        val memoryBefore = runtime.totalMemory() - runtime.freeMemory()
-//        val statusMap = addItemsAndParents(50000)
-//        System.gc()
-//        val memoryUsed = runtime.totalMemory() - runtime.freeMemory() - memoryBefore
-//        println("Map size = " + statusMap.size)
-//        Assert.assertTrue(memoryUsed < 1000 * 1000 * 10)//10MB
-//    }
+    @Test
+    fun given50000ObjectsCreated_whenMemoryCounted_memoryUsageShouldBeReasonable() {
+        System.gc()
+        val runtime = Runtime.getRuntime()
+        val memoryBefore = runtime.totalMemory() - runtime.freeMemory()
+        val statusMap = addItemsAndParents(50000)
+        System.gc()
+        val memoryUsed = runtime.totalMemory() - runtime.freeMemory() - memoryBefore
+        println("Map size = " + statusMap.size)
+        Assert.assertTrue("Memory used should be less than 15MB. Is actually $memoryUsed",
+                memoryUsed < 1024 * 1024 * 15)//15MB
+    }
 
     private fun findInMapByContentEntryUid(contentEntryUid: Long,
                                            map: Map<Int, DownloadJobItemStatus>): DownloadJobItemStatus? {

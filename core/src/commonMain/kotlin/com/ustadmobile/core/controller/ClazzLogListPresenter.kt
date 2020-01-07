@@ -55,7 +55,7 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
         GlobalScope.launch {
-            var result = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
+            var result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid!!, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
             if(result == null){
                 result = false
@@ -111,11 +111,43 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     fun goToNewClazzLogDetailActivity() {
 
+
         GlobalScope.launch {
             val result = repository.clazzLogDao.findMostRecentByClazzUid(currentClazzUid)
 
             if (result == null) {
-                view.showMessage(MessageID.no_schedule_message)
+                //Check if no schedule
+                val clazzSchedules =
+                        repository.scheduleDao.findAllSchedulesByClazzUidAsync(currentClazzUid)
+                if(clazzSchedules.isEmpty()) {
+                    view.showMessage(MessageID.no_schedule_message)
+                }else{
+                    //TODO
+                    //Find next scheduled attendance
+//                    val today = UMCalendarUtil.getDayOfWeek(UMCalendarUtil.getDateInMilliPlusDays(0)) + 1
+//                    for(s in clazzSchedules){
+//                        val sday = s.scheduleDay
+//                        if(sday != 0){ //Weekly
+//
+//                            //TODO: Get number of days
+//                            val days = 42
+//                            val message = impl.getString(MessageID.next_attendance_message, view.viewContext) +
+//                                    " " + impl.getString(MessageID.it_will_start_in, view.viewContext) + " "  +
+//                                    days + " " + impl.getString(MessageID.days, view.viewContext)
+//                            view.showMessage(message)
+//
+//
+//                        }else{
+//
+//                            val message = impl.getString(MessageID.next_attendance_message, view.viewContext) +
+//                                    " " + impl.getString(MessageID.it_will_start_tomorrow, view.viewContext) + ""
+//                            view.showMessage(message)
+//                        }
+//                    }
+
+                    view.showMessage(MessageID.next_attendance_message)
+
+                }
             } else {
                 val args = HashMap<String, String>()
                 args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID,
@@ -140,7 +172,8 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
 
         val lineDataMap = LinkedHashMap<Float, Float>()
         val barDataMap = LinkedHashMap<Float, Float>()
-        val toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+//        val toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+        val toDate = UMCalendarUtil.getToday235959()
         var fromDate = toDate
 
         when (duration) {

@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -198,7 +199,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
         //Record attendance FAB
         fab = rootContainer.findViewById(R.id.fragment_clazz_log_record_attendance_fab)
-        fab.setOnClickListener { v -> mPresenter.goToNewClazzActivityEditActivity() }
+        fab.setOnClickListener { v -> mPresenter.goToNewClazzActivityEditActivity(FLAG_ACTIVITY_NEW_TASK) }
 
         //Buttons
         lastWeekButton = rootContainer.findViewById(
@@ -328,7 +329,7 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
 
             override fun areContentsTheSame(oldItem: ClazzActivityWithChangeTitle,
                                             newItem: ClazzActivityWithChangeTitle): Boolean {
-                return oldItem.clazzActivityUid == newItem.clazzActivityUid
+                return oldItem == newItem
             }
         }
     }

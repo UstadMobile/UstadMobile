@@ -93,8 +93,8 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
     abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float)
+                                                          toTime: Long, lowAttendanceThreshold: Float,
+                                                          midAttendanceThreshold: Float)
                                                 :List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
@@ -130,10 +130,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float,
-                                                  clazzes: List<Long>):
+    abstract suspend fun getAttendanceGroupedByThresholdsWithClazz(datetimeNow: Long, fromTime: Long,
+                                                                   toTime: Long, lowAttendanceThreshold: Float,
+                                                                   midAttendanceThreshold: Float,
+                                                                   clazzes: List<Long>):
             List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
@@ -180,10 +180,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " WHERE numSessionsTbl.locationUid = :locationUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract suspend fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float, clazzes: List<Long>,
-                                                  locationUid: Long)
+    abstract suspend fun getAttendanceGroupedByThresholdsWithClazzAndLocation(datetimeNow: Long, fromTime: Long,
+                                                                              toTime: Long, lowAttendanceThreshold: Float,
+                                                                              midAttendanceThreshold: Float, clazzes: List<Long>,
+                                                                              locationUid: Long)
             : List<AttendanceResultGroupedByAgeAndThreshold>
 
     @Query("select  " +
@@ -229,10 +229,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " WHERE numSessionsTbl.locationUid = :locationUid " +
             "GROUP BY Person.gender, age, thresholdGroup " +
             " ORDER BY age, thresholdGroup ")
-    abstract suspend  fun getAttendanceGroupedByThresholds(datetimeNow: Long, fromTime: Long,
-                                                  toTime: Long, lowAttendanceThreshold: Float,
-                                                  midAttendanceThreshold: Float,
-                                                  locationUid: Long):
+    abstract suspend  fun getAttendanceGroupedByThresholdsWithLocation(datetimeNow: Long, fromTime: Long,
+                                                                       toTime: Long, lowAttendanceThreshold: Float,
+                                                                       midAttendanceThreshold: Float,
+                                                                       locationUid: Long):
     List<AttendanceResultGroupedByAgeAndThreshold>
 
     suspend fun getAttendanceGroupedByThresholdsAndClasses(datetimeNow: Long, fromTime: Long,
@@ -244,7 +244,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
                     lowAttendanceThreshold,
                     midAttendanceThreshold)
         } else {
-            return getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime,
+            return getAttendanceGroupedByThresholdsWithClazz(datetimeNow, fromTime, toTime,
                     lowAttendanceThreshold,
                     midAttendanceThreshold, clazzes)
         }
@@ -257,12 +257,12 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +
-            "AND ClazzMember.clazzMemberRole = 1")
+            "AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT )
     abstract fun findAttendanceRecordsWithPersonByClassLogId(clazzLogUid: Long): DataSource.Factory<Int, ClazzLogAttendanceRecordWithPerson>
 
     @Query("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE " +
             " ClazzMember.clazzMemberClazzUid = :clazzId " +
-            " AND ClazzMember.clazzMemberActive = 1 " +
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
             " AND ClazzMember.clazzMemberClazzUid " +
             " EXCEPT " +
@@ -285,9 +285,9 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
             " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
             " ClazzLog.clazzLogClazzUid as clazzUid, " +
-            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " and Person.gender = " + Person.GENDER_FEMALE +
             " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
-            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " and Person.gender =  " + Person.GENDER_MALE +
             " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
             " ClazzLog.clazzLogUid as clazzLogUid " +
             " from ClazzLogAttendanceRecord " +
@@ -297,7 +297,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " LEFT JOIN ClazzMember ON " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLog.clazzLogDone = 1 " +
+            " WHERE CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
@@ -306,38 +306,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
                                                                  toDate: Long, clazzes: List<Long>)
             : List<DailyAttendanceNumbers>
 
-
-    @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
-            " ClazzLog.logDate, " +
-            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
-            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
-            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
-            " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
-            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
-            " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
-            " ClazzLog.clazzLogClazzUid as clazzUid, " +
-            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
-            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
-            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
-            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
-            " ClazzLog.clazzLogUid as clazzLogUid " +
-            " from ClazzLogAttendanceRecord " +
-            " LEFT JOIN ClazzLog ON " +
-            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-
-            " LEFT JOIN ClazzMember ON " +
-            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
-            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzLog.clazzLogDone = 1 " +
-            " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
-            " AND Clazz.clazzLocationUid IN (:locations)  " +
-            " AND ClazzLog.logDate > :fromDate " +
-            " AND ClazzLog.logDate < :toDate " +
-            "group by (ClazzLog.logDate)")
-    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate: Long,
-                                           toDate: Long, clazzes: List<Long>, locations: List<Long>)
-            : List<DailyAttendanceNumbers>
 
     @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
@@ -396,10 +364,9 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             "group by (ClazzLog.logDate)")
-    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long,
+    abstract suspend fun findOverallDailyAttendanceNumbersByDate(fromDate: Long,
                                                                  toDate: Long):
     List<DailyAttendanceNumbers>
-
 
     /**
      * @param fromDate  from date
@@ -413,7 +380,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     List<Long>) : List<DailyAttendanceNumbers> {
         if (clazzes.isEmpty()) {
             if (locations.isEmpty()) {
-                return findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate)
+                return findOverallDailyAttendanceNumbersByDate(fromDate, toDate)
             } else {
                 return findOverallDailyAttendanceNumbersByDateAndLocation(fromDate, toDate,
                         locations)
@@ -427,6 +394,39 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             }
         }
     }
+
+
+    @Query("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
+            " ClazzLog.logDate, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
+            " ClazzLog.clazzLogClazzUid as clazzUid, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
+            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
+            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
+            " ClazzLog.clazzLogUid as clazzLogUid " +
+            " from ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            " LEFT JOIN ClazzMember ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
+            " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
+            " AND Clazz.clazzLocationUid IN (:locations)  " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            "group by (ClazzLog.logDate)")
+    abstract suspend fun findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate: Long,
+                                                                                       toDate: Long, clazzes: List<Long>, locations: List<Long>)
+            : List<DailyAttendanceNumbers>
 
     /**
      * Checks for ClazzMembers not in a particular Clazz that are not part of the
@@ -471,7 +471,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " LEFT JOIN ClazzLog ON ClazzLog.clazzLogUid = clazzLogAttendanceRecordClazzLogUid " +
             " LEFT JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid " +
             " WHERE " +
-            " ClazzLog.clazzLogDone = 1 " +
+            " CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             " GROUP BY clazzMemberUid " +

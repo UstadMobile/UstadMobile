@@ -42,7 +42,7 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
     abstract suspend fun updateAsync(entity: ClazzActivity): Int
 
     @Query("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid AND "
-            + "clazzActivityDone = 1 ORDER BY clazzActivityLogDate DESC")
+            + " CAST(clazzActivityDone AS INTEGER)   = 1 ORDER BY clazzActivityLogDate DESC")
     abstract fun findByClazzUid(clazzUid: Long): DataSource.Factory<Int, ClazzActivity>
 
     @Query("SELECT ClazzActivityChange.clazzActivityChangeTitle AS changeTitle, ClazzActivity.* " +
@@ -50,7 +50,7 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
             "LEFT JOIN ClazzActivityChange " +
             "   ON ClazzActivity.clazzActivityClazzActivityChangeUid = ClazzActivityChange.clazzActivityChangeUid " +
             "WHERE clazzActivityClazzUid = :clazzUid " +
-            "AND clazzActivityDone = 1 " +
+            "AND CAST(clazzActivityDone AS INTEGER)  = 1 " +
             "ORDER BY clazzActivityLogDate DESC")
     abstract fun findWithChangeTitleByClazzUid(clazzUid: Long): DataSource.Factory<Int, ClazzActivityWithChangeTitle>
 

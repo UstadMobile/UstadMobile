@@ -11,14 +11,20 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.LoginPresenter
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
 import org.acra.util.ToastSender
 import java.util.concurrent.TimeUnit
+import android.widget.LinearLayout
+import com.ustadmobile.core.impl.UMAndroidUtil
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
@@ -53,6 +59,12 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
+        val showTB = UstadMobileSystemImpl.instance.getAppConfigBoolean(
+                AppConfig.LOGIN_TOOLBAR_VISIBILITY, this)
+        if(!showTB) {
+            umToolbar.visibility = View.GONE
+        }
+
         registerMessage = findViewById(R.id.activity_register_label)
         registerNow = findViewById(R.id.activity_register_now)
         mUsernameTextView = findViewById(R.id.activity_login_username)
@@ -74,7 +86,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         }
 
         registerNow.setOnClickListener {
-            mPresenter!!.handleCreateAccount()
+            mPresenter!!.handleClickCreateAccount()
         }
     }
 
@@ -129,6 +141,32 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun showRegisterCodeDialog(title: String, okButtonText: String, cancelButtonText: String) {
+
+        val container = LinearLayout(this)
+        container.orientation = LinearLayout.VERTICAL
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT)
+        val pixels = UMAndroidUtil.convertDpToPixel(24)
+        lp.setMargins(pixels, 0, pixels, 0)
+        val input = EditText(this)
+        input.layoutParams = lp
+        input.requestLayout()
+        container.addView(input, lp)
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+        builder.setPositiveButton(okButtonText){  dialogInterface , _ ->
+            mPresenter!!.handleRegisterCodeDialogEntered(input.text.toString())
+        }
+        builder.setNegativeButton(cancelButtonText){ dialogInterface, _ ->
+            dialogInterface.cancel()
+        }
+        builder.setView(container)
+        builder.show()
+
     }
 
     override fun setRegistrationLinkVisible(visible: Boolean) {

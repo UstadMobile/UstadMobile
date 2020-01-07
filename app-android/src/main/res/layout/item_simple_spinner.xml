@@ -8,4 +8,6 @@
     android:ellipsize="marquee"
     android:textAlignment="inherit"
     android:text="Testing"
+    android:padding="10dip"
+    android:textColor="@color/primary_text"
     android:textAppearance="@style/TextAppearance.AppCompat.Title" />

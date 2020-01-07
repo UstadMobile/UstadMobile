@@ -239,7 +239,9 @@ class CustomFieldDetailActivity : UstadBaseActivity(), CustomFieldDetailView {
     }
 
     override fun showOptions(show: Boolean) {
-        optionsCL!!.setVisibility(if (show) View.VISIBLE else View.GONE)
+        runOnUiThread(Runnable {
+            optionsCL!!.setVisibility(if (show) View.VISIBLE else View.GONE)
+        })
     }
 
     companion object {

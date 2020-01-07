@@ -22,24 +22,24 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     @Query("SELECT PersonGroup.*, " +
             " (SELECT COUNT(*) FROM PersonGroupMember " +
             "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
-            "  groupMemberActive = 1) AS memberCount " +
-            "FROM PersonGroup WHERE groupActive = 1 ORDER BY PersonGroup.groupName ASC")
+            "  CAST(groupMemberActive AS INTEGER) = 1) AS memberCount " +
+            "FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 ORDER BY PersonGroup.groupName ASC")
     abstract fun findAllActiveGroups(): DataSource.Factory<Int, GroupWithMemberCount>
 
     @Query("SELECT PersonGroup.*, " +
             " (SELECT COUNT(*) FROM PersonGroupMember " +
             "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
-            "  groupMemberActive = 1) AS memberCount " +
-            "FROM PersonGroup WHERE groupActive = 1 AND groupPersonUid = 0 ORDER BY PersonGroup.groupName ASC")
+            "  CAST(groupMemberActive AS INTEGER) = 1) AS memberCount " +
+            "FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid = 0 ORDER BY PersonGroup.groupName ASC")
     abstract fun findAllActiveGroupsWithoutIndividualGroup(): DataSource.Factory<Int, GroupWithMemberCount>
 
-    @Query("SELECT *, 0 AS memberCount FROM PersonGroup WHERE groupActive = 1")
+    @Query("SELECT *, 0 AS memberCount FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1")
     abstract fun findAllActiveGroupsLive(): DoorLiveData<List<GroupWithMemberCount>>
 
-    @Query("SELECT * FROM PersonGroup WHERE groupActive = 1")
+    @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1")
     abstract fun findAllActivePersonGroupsLive(): DoorLiveData<List<PersonGroup>>
 
-    @Query("SELECT * FROM PersonGroup WHERE groupActive = 1 AND groupPersonUid = 0")
+    @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid = 0")
     abstract fun findAllActiveGroupPersonGroupsLive(): DoorLiveData<List<PersonGroup>>
 
     @Query("SELECT PersonGroup.groupMasterCsn, PersonGroup.groupLocalCsn, " +
@@ -47,8 +47,8 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
             " PersonGroup.groupActive, PersonGroup.groupPersonUid, PersonGroup.groupUid, " +
             " Person.firstNames||' '||Person.lastName as groupName " +
             " FROM PersonGroup LEFT JOIN PERSON ON Person.personUid = PersonGroup.groupPersonUid " +
-            "  WHERE groupActive = 1 AND groupPersonUid != 0 " +
-            "  AND Person.active = 1")
+            "  WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid != 0 " +
+            "  AND CAST(Person.active AS INTEGER) = 1")
     abstract fun findAllActivePersonPersonGroupLive(): DoorLiveData<List<PersonGroup>>
 
     @Query("SELECT * FROM PersonGroup WHERE groupPersonUid = :personUid ")

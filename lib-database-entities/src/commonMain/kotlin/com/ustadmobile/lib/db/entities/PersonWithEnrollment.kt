@@ -30,6 +30,8 @@ class PersonWithEnrollment : Person() {
         if (clazzMemberRole != other.clazzMemberRole) return false
         if (clazzName != other.clazzName) return false
         if (personPictureUid != other.personPictureUid) return false
+        if (firstNames != other.firstNames) return false
+        if (lastName != other.lastName) return false
 
         return true
     }

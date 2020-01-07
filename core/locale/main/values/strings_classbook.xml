@@ -162,7 +162,6 @@
     <string name="enroll_in_class">Enroll in class</string>
     <string name="attendance_report">Attendance report</string>
     <string name="record_dropout">Record dropout</string>
-    <string name="profile">Profile</string>
     <string name="father">Father</string>
     <string name="mother">Mother</string>
     <string name="birthday">Birthday</string>
@@ -561,5 +560,10 @@
     <string name="confirm_password_unchanged">Confirm password (Unchanged)</string>
 
     <string name="select_a_timezone">Select a timezone</string>
+
+    <string name="dismiss">Dismiss</string>
+    <string name="next_attendance_message">Your next schedule has not started yet.</string>
+    <string name="it_will_start_tomorrow">It will start tomorrow</string>
+    <string name="it_will_start_in">It will start in</string>
 
 </resources>

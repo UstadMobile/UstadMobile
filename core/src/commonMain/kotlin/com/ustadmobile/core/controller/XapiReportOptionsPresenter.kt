@@ -1,9 +1,9 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.listOfGraphs
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.xAxisList
-import com.ustadmobile.core.controller.XapiReportOptions.Companion.yAxisList
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.listOfGraphs
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.xAxisList
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.yAxisList
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.db.dao.XObjectDao
@@ -15,12 +15,14 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
+import com.ustadmobile.lib.db.entities.XapiReportOptions
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlin.js.JsName
 
 class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                                  view: XapiReportOptionsView, private val personDao: PersonDao,
@@ -114,25 +116,29 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
 
     }
 
-    fun handleFromCalendarSelected(year: Int, month: Int, dayOfMonth: Int) {
+    @JsName("handleDialogFromCalendarSelected")
+    fun handleDialogFromCalendarSelected(year: Int, month: Int, dayOfMonth: Int) {
         fromDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
         handleFromCalendarSelected()
     }
 
+    @JsName("handleFromCalendarSelected")
     fun handleFromCalendarSelected() {
         view.runOnUiThread(Runnable { view.updateFromDialogText(fromDateTime.format("dd/MM/YYYY")) })
     }
 
-
-    fun handleToCalendarSelected(year: Int, month: Int, dayOfMonth: Int) {
+    @JsName("handleDialogToCalendarSelected")
+    fun handleDialogToCalendarSelected(year: Int, month: Int, dayOfMonth: Int) {
         toDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
         handleToCalendarSelected()
     }
 
+    @JsName("handleToCalendarSelected")
     fun handleToCalendarSelected() {
         view.runOnUiThread(Runnable { view.updateToDialogText(toDateTime.format("dd/MM/YYYY")) })
     }
 
+    @JsName("handleDateRangeSelected")
     fun handleDateRangeSelected() {
         fromDateTimemillis = fromDateTime.unixMillisLong
         toDateTimeMillis = toDateTime.unixMillisLong
@@ -142,14 +148,13 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         })
     }
 
+    @JsName("handleWhoDataTyped")
     fun handleWhoDataTyped(name: String, uidList: List<Long>) {
         activeJobCount += 1
         view.showBaseProgressBar(activeJobCount > 0)
         GlobalScope.launch {
             val personsNames = personDao.getAllPersons("%$name%", uidList)
-            println("calling who ui thread")
             view.runOnUiThread(Runnable {
-                println("on who ui thread")
                 view.updateWhoDataAdapter(personsNames)
                 activeJobCount -= 1
                 view.showBaseProgressBar(activeJobCount > 0)
@@ -157,14 +162,13 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         }
     }
 
+    @JsName("handleDidDataTyped")
     fun handleDidDataTyped(verb: String, uidList: List<Long>) {
         activeJobCount++
         view.showBaseProgressBar(activeJobCount > 0)
         GlobalScope.launch {
             val verbs = xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
-            println("calling who did thread")
             view.runOnUiThread(Runnable {
-                println("on who di thread")
                 view.updateDidDataAdapter(verbs)
                 activeJobCount--
                 view.showBaseProgressBar(activeJobCount > 0)
@@ -173,6 +177,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         }
     }
 
+    @JsName("handleWhereClicked")
     fun handleWhereClicked() {
         val args = mutableMapOf<String, String>()
         args[ARG_LOCATIONS_SET] = selectedLocations.joinToString { it.toString() }
@@ -180,12 +185,15 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     }
 
 
+    @JsName("handleWhatClicked")
     fun handleWhatClicked() {
-        val args = mutableMapOf<String, String>()
+        val args = mutableMapOf<String, String?>()
+        args.putAll(arguments)
         args[ARG_CONTENT_ENTRY_SET] = selectedEntries.joinToString { it.toString() }
         impl.go(SelectMultipleEntriesTreeDialogView.VIEW_NAME, args, context)
     }
 
+    @JsName("handleViewReportPreview")
     fun handleViewReportPreview(didOptionsList: List<Long>, whoOptionsList: List<Long>) {
         reportOptions = XapiReportOptions(
                 listOfGraphs[selectedChartType],
@@ -201,14 +209,17 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                 selectedLocations, reportOptions?.reportTitle.toString())
 
         var args = HashMap<String, String?>()
+        args.putAll(arguments)
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions!!)
         impl.go(XapiReportDetailView.VIEW_NAME, args, context)
     }
 
+    @JsName("handleLocationListSelected")
     fun handleLocationListSelected(locationList: List<Long>) {
         selectedLocations = locationList
     }
 
+    @JsName("handleEntriesListSelected")
     fun handleEntriesListSelected(entriesList: List<Long>) {
         selectedEntries = entriesList
         GlobalScope.launch {
@@ -216,18 +227,22 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         }
     }
 
+    @JsName("handleSelectedYAxis")
     fun handleSelectedYAxis(position: Int) {
         selectedYaxis = position
     }
 
+    @JsName("handleSelectedChartType")
     fun handleSelectedChartType(position: Int) {
         selectedChartType = position
     }
 
+    @JsName("handleSelectedXAxis")
     fun handleSelectedXAxis(position: Int) {
         selectedXAxis = position
     }
 
+    @JsName("handleSelectedSubGroup")
     fun handleSelectedSubGroup(position: Int) {
         selectedSubGroup = position
     }

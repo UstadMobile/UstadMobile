@@ -21,7 +21,7 @@ class PersonDetailEnrollClazzPresenter(context: Any,
 
     private var currentPersonUid = -1L
 
-    private var clazzWithEnrollmentUmProvider: DataSource.Factory<Int, ClazzWithEnrollment>? = null
+    private var enrollmentFactory: DataSource.Factory<Int, ClazzWithEnrollment>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -39,17 +39,17 @@ class PersonDetailEnrollClazzPresenter(context: Any,
         //Populate classes
         val clazzDao = repository.clazzDao
 
-        clazzWithEnrollmentUmProvider = clazzDao.findAllClazzesWithEnrollmentByPersonUid(currentPersonUid)
+        enrollmentFactory =
+                clazzDao.findAllClazzesWithEnrollmentByPersonUid(currentPersonUid)
 
         setClazzProviderToView()
-
     }
 
     /**
      * Sets the class list with enrollment provider set to this presenter on the View
      */
     private fun setClazzProviderToView() {
-        view.setClazzListProvider(clazzWithEnrollmentUmProvider!!)
+        view.setClazzListProvider(enrollmentFactory!!)
     }
 
     /**
@@ -89,9 +89,11 @@ class PersonDetailEnrollClazzPresenter(context: Any,
                     newClazzMember.clazzMemberPersonUid = personUid
                     newClazzMember.clazzMemberActive = true
                     clazzMemberDao.insert(newClazzMember)
+
+                    //TODO: Also create an EntityRole
+
                 }
                 //else Don't create. false anyway
-
             }
         }
     }

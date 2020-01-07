@@ -28,6 +28,7 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val clazzDao = repository.clazzDao
     private var currentClazz: Clazz? = null
+    private var previousPermissionClazz: Clazz? = null
     private val loggedInPersonUid: Long?
 
     init {
@@ -50,7 +51,7 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
         super.onCreate(savedState)
 
         //Update view and Permission check
-        checkPermissions()
+        //checkPermissions()
 
     }
 
@@ -60,22 +61,40 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
             val result = clazzDao.findByUidAsync(currentClazzUid)
             view.setToolbarTitle(result!!.clazzName!!)
 
+            var new = false
             currentClazz = result
+            if(previousPermissionClazz == null){
+                new = true
+                previousPermissionClazz = Clazz()
+                val af = currentClazz!!.isAttendanceFeature
+                previousPermissionClazz!!.isAttendanceFeature =af
+                val aaf = currentClazz!!.isActivityFeature
+                previousPermissionClazz!!.isActivityFeature = aaf
+                val sf = currentClazz!!.isSelFeature
+                previousPermissionClazz!!.isSelFeature = sf
+            }
 
-            val result2 = clazzDao.personHasPermission(loggedInPersonUid!!, currentClazzUid,
+            val result2 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid!!, currentClazzUid,
                     Role.PERMISSION_CLAZZ_UPDATE)
             view.setSettingsVisibility(result2!!)
-            val result3 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result3 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
             view.setAttendanceVisibility(if (currentClazz!!.isAttendanceFeature) result3 else false)
 
-            val result4 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
+            val result4 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
             view.setSELVisibility(if (currentClazz!!.isSelFeature) result4 else false)
-            val result5 = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result5 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT)
             view.setActivityVisibility(if (currentClazz!!.isActivityFeature) result5 else false)
-            //Setup view pager after all permissions
-            view.setupViewPager()
+
+            if(new){
+                view.setupViewPager()
+            }else if(currentClazz != null && previousPermissionClazz!=null &&
+                    currentClazz!!.hasPermissionsChanged(previousPermissionClazz!!)) {
+                previousPermissionClazz = currentClazz
+                //Setup view pager after all permissions
+                view.setupViewPager()
+            }
 
         }
 

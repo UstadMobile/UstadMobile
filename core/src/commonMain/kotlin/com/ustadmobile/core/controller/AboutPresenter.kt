@@ -22,7 +22,8 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        impl.getAsset(context, "com/ustadmobile/core/about.html", object : UmCallback<InputStream> {
+        impl.getAsset(context, "com/ustadmobile/core/about.html",
+                object : UmCallback<InputStream> {
             override fun onSuccess(result: InputStream?) {
                 if (result != null) {
                     try {
@@ -32,7 +33,6 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
                         dumpException(e)
                     }
                 }
-
             }
 
             override fun onFailure(exception: Throwable?) {
@@ -41,7 +41,6 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
                 }
             }
         })
-
 
         view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))

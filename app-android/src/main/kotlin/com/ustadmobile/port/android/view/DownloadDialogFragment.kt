@@ -20,6 +20,9 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -64,23 +67,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             activity = context
-            context.runAfterServiceConnection(Runnable{
-                context.runOnUiThread {
-                    managerBle = context.networkManagerBle!!
-                    checkReady()
-                }
-            })
         }
 
         super.onAttach(context)
-    }
-
-    private fun checkReady(){
-        if(::managerBle.isInitialized){
-            mPresenter = DownloadDialogPresenter(context as Context, managerBle,
-                    bundleToMap(arguments), this, UmAppDatabase.getInstance(context as Context),
-                    UmAccountManager.getRepositoryForActiveAccount(context as Context))
-        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -114,8 +103,17 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
-        if(mPresenter != null){
-            mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+
+
+        GlobalScope.launch(Dispatchers.Main) {
+            val networkManager = activity.networkManagerBle.await()
+            mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
+                    this@DownloadDialogFragment,
+                    UmAppDatabase.getInstance(context as Context),
+                    UmAccountManager.getRepositoryForActiveAccount(context as Context),
+                    networkManager.containerDownloadManager).also {
+                it.onCreate(null)
+            }
         }
 
         return mDialog as AlertDialog
@@ -238,9 +236,5 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     override fun onNothingSelected(parent: AdapterView<*>) {
         mPresenter!!.handleStorageOptionSelection(storageDirs[0].dirURI!!)
-    }
-
-    override fun cancelOrPauseDownload(jobId: Long, cancel: Boolean) {
-        //TODO: this should be handled using the downloadjobitemmanager, not sent back to the view
     }
 }

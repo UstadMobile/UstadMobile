@@ -113,7 +113,7 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
     fun checkPermissions() {
         val clazzDao = repository.clazzDao
         GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+            val result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
                     Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT)
             isCanEdit = result
             view.setFABVisibility(result)
@@ -142,21 +142,21 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
      * Handles going to Creating a new Activity. This is to be called when "Record Activity" FAB is
      * clicked.
      */
-    fun goToNewClazzActivityEditActivity() {
+    fun goToNewClazzActivityEditActivity(flag: Int) {
         val args = HashMap<String, String>()
         args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
         args.put(ARG_CLAZZACTIVITY_LOGDATE, UMCalendarUtil.getDateInMilliPlusDays(0).toString())
 
-        impl.go(ClazzActivityEditView.VIEW_NAME, args, context)
+        impl.go(ClazzActivityEditView.VIEW_NAME, args, context, flag)
 
     }
 
-    fun goToNewClazzActivityEditActivity(clazzActivityUid: Long) {
+    fun goToNewClazzActivityEditActivity(clazzActivityUid: Long, flag: Int) {
         val args = HashMap<String, String>()
         args.put(ARG_CLAZZACTIVITY_UID, clazzActivityUid.toString())
         args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
 
-        impl.go(ClazzActivityEditView.VIEW_NAME, args, context)
+        impl.go(ClazzActivityEditView.VIEW_NAME, args, context, flag)
 
     }
 

@@ -62,8 +62,7 @@ class DownloadProgressView : LinearLayout, View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        if (downloadStopListener != null)
-            downloadStopListener!!.onClickStopDownload(this)
+        downloadStopListener?.onClickStopDownload(this)
     }
 
     fun setOnStopDownloadListener(listener: OnStopDownloadListener) {

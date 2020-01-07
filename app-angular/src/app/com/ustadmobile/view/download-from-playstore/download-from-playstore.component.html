@@ -1,0 +1,14 @@
+<mz-modal [fixedFooter]="false" [options]="modalOptions">
+  <mz-modal-content>
+    <div class="row">
+        <img class="responsive-img img-margin-top" [src]="avatar_image" />
+      <p i18n="@@dialog_download_from_playstore_message" class="center-align">
+          Access &amp; Share Educational Content Offline 
+      </p>
+    </div>
+  </mz-modal-content>
+  <mz-modal-footer>
+      <button mz-button [flat]="true"  (click)="openPayStore()" mz-modal-close i18n="@@dialog_download_from_playstore_ok" class="btn-download">Download now (free)</button>
+    <button mz-button [flat]="true"  mz-modal-close i18n="@@dialog_download_from_playstore_cancel" class="btn-cancel">Stay on website</button>
+    </mz-modal-footer>
+</mz-modal>

@@ -70,6 +70,7 @@ import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
@@ -77,6 +78,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
+import kotlin.js.JsName
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -86,7 +88,7 @@ import org.kmp.io.KMPXmlParser
 class EpubContentPresenter(context: Any,
                            args: Map<String, String>?,
                            private val epubContentView: EpubContentView)
-    : UstadBaseController<EpubContentView>(context, args!!, epubContentView!!) {
+    : UstadBaseController<EpubContentView>(context, args!!, epubContentView) {
 
     private var ocf: OcfDocument? = null
 
@@ -189,18 +191,19 @@ class EpubContentPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val containerUid = (arguments[EpubContentView.ARG_CONTAINER_UID]?.toLong() ?: 0)
+        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 0)
         view.setProgressBarProgress(-1)
         view.setProgressBarVisible(true)
         view.mountContainer(containerUid, mountedCallbackHandler)
     }
 
+    @JsName("handleClickNavItem")
     fun handleClickNavItem(navItem: EpubNavItem) {
         if (opfBaseUrl != null && linearSpineUrls != null) {
             val navItemUrl = UMFileUtil.resolveLink(opfBaseUrl!!, navItem.href!!)
             val hrefIndex = listOf(*linearSpineUrls!!).indexOf(navItemUrl)
             if (hrefIndex != -1) {
-                epubContentView!!.goToLinearSpinePosition(hrefIndex)
+                epubContentView.goToLinearSpinePosition(hrefIndex)
             }
         }
     }

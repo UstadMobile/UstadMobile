@@ -16,37 +16,40 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
 import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
-        ViewPager.OnPageChangeListener {
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
 
     private lateinit var presenter: HomePresenter
 
     private lateinit var downloadAllBtn: FloatingTextButton
 
     private lateinit var profileImage: CircleImageView
+
+    private var shareAppDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +74,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
 
         viewPager.addOnPageChangeListener(this)
 
-        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),this)
+        presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UmAppDatabase.getInstance(this).personDao,
+                UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         profileImage.setOnClickListener {
@@ -88,14 +93,13 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val account = UmAccountManager.getActiveAccount(this)
-        val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
-                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
         menuInflater.inflate(R.menu.menu_home_activity, menu)
-        menu.findItem(R.id.create_new_content).isVisible = showControls && account != null && account.personUid != 0L
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun setLoggedPerson(person: Person) {}
+
+    override fun showReportMenu(show: Boolean) {}
 
     override fun onPageScrollStateChanged(state: Int) {}
 
@@ -105,34 +109,21 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
         presenter.handleShowDownloadButton(position == 0)
     }
 
+    override fun restartUI() {}
+
+    override fun showLanguageOptions() {}
+
+    override fun setCurrentLanguage(language: String?) {}
+
+    override fun setLanguageOption(languages: MutableList<String>) { }
+
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
-            R.id.action_clear_history -> {
-                GlobalScope.launch {
-                    val database = UmAppDatabase.getInstance(this)
-                    database.networkNodeDao.deleteAllAsync()
-                    database.entryStatusResponseDao.deleteAllAsync()
-                    database.downloadJobItemHistoryDao.deleteAllAsync()
-                    database.downloadJobDao.deleteAllAsync()
-                    database.downloadJobItemDao.deleteAllAsync()
-                    database.contentEntryStatusDao.deleteAllAsync()
-                }
-                networkManagerBle?.clearHistories()
-            }
-            R.id.create_new_content -> {
-                val args = HashMap<String,String?>()
-                args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
-                args[CONTENT_TYPE] = CONTENT_CREATE_FOLDER.toString()
-                args[CONTENT_ENTRY_LEAF] = false.toString()
-                args[CONTENT_ENTRY_UID] = 0.toString()
-                args[ARG_CONTENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
-                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
-                        this)
-            }
             R.id.action_send_feedback -> hearShake()
+            R.id.action_share_app -> presenter.handleClickShareApp()
         }
 
         return super.onOptionsItemSelected(item)
@@ -148,65 +139,69 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
         val afterPermissionGrantedRunnable = Runnable { networkManagerBle.checkP2PBleServices() }
 
         runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
-                dialogTitle, dialogMessage, {
-                    val alertDialog = AlertDialog.Builder(this@HomeActivity)
-                            .setTitle(R.string.location_permission_title)
-                            .setView(R.layout.view_locationpermission_dialogcontent)
-                            .setNegativeButton(getString(android.R.string.cancel)
-                            ) { dialog, _ -> dialog.dismiss() }
-                            .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                                runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
-                                        dialogTitle, dialogMessage)
-                            }
-                            .create()
-
-                    alertDialog.setOnShowListener {
-                        alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener {view ->
-                            val extraInfo = alertDialog.findViewById<TextView>(R.id.view_locationpermission_extra_details)!!
-                            val button = view as Button
-                            if(extraInfo.visibility == View.GONE) {
-                                extraInfo.visibility = View.VISIBLE
-                                button.text = resources.getText(R.string.less_information)
-                                button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-                                        R.drawable.ic_keyboard_arrow_up_black_24dp, 0)
-                            }else {
-                                extraInfo.visibility = View.GONE
-                                button.text = resources.getText(R.string.more_information)
-                                button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-                                        R.drawable.ic_keyboard_arrow_down_black_24dp, 0)
-                            }
-                        }
+                dialogTitle, dialogMessage) {
+            val alertDialog = AlertDialog.Builder(this@HomeActivity)
+                    .setTitle(R.string.location_permission_title)
+                    .setView(R.layout.view_locationpermission_dialogcontent)
+                    .setNegativeButton(getString(android.R.string.cancel)
+                    ) { dialog, _ -> dialog.dismiss() }
+                    .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
+                        runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
+                                dialogTitle, dialogMessage)
                     }
+                    .create()
 
-                    alertDialog
-                })
+            alertDialog.setOnShowListener {
+                alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener {view ->
+                    val extraInfo = alertDialog.findViewById<TextView>(R.id.view_locationpermission_extra_details)!!
+                    val button = view as Button
+                    if(extraInfo.visibility == View.GONE) {
+                        extraInfo.visibility = View.VISIBLE
+                        button.text = resources.getText(R.string.less_information)
+                        button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                R.drawable.ic_keyboard_arrow_up_black_24dp, 0)
+                    }else {
+                        extraInfo.visibility = View.GONE
+                        button.text = resources.getText(R.string.more_information)
+                        button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                R.drawable.ic_keyboard_arrow_down_black_24dp, 0)
+                    }
+                }
+            }
+
+            alertDialog
+        }
     }
+
+    override fun showShareAppDialog() {
+        val dialog = ShareAppOfflineDialogFragment()
+        dialog.show(supportFragmentManager, "SHARE_APP_DIALOG")
+    }
+
 
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
         private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
         // Returns total number of pages
         override fun getCount(): Int {
-            return NUM_ITEMS
+            val activeAccount = UmAccountManager.getActiveAccount(context)
+            return if( activeAccount != null && activeAccount.personUid != 0L) 3 else 2
         }
 
         // Returns the fragment to display for that page
         override fun getItem(position: Int): Fragment? {
             val bundle = Bundle()
-
-            return when (position) {
+            bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
+            bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
+            when (position) {
                 0 // Fragment # 0 - This will show FirstFragment
-                -> {
-                    bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
-                    ContentEntryListFragment.newInstance(bundle)
-                }
-                1 // Fragment # 0 - This will show FirstFragment different title
-                -> {
-                    bundle.putString(ARG_DOWNLOADED_CONTENT, "")
-                    ContentEntryListFragment.newInstance(bundle)
-                }
-                else -> null
+                ->  bundle.putString(ARG_LIBRARIES_CONTENT, "")
+                1 // Fragment # 1 - This will show FirstFragment different title
+                ->   bundle.putString(ARG_DOWNLOADED_CONTENT, "")
+                2 // Fragment # 2 - This will show FirstFragment different title
+                ->  bundle.putString(ARG_RECYCLED_CONTENT, "")
             }
+            return ContentEntryListFragment.newInstance(bundle)
         }
 
         // Returns the page title for the top indicator
@@ -215,15 +210,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView,
             when (position) {
                 0 -> return impl.getString(MessageID.libraries, context)
                 1 -> return impl.getString(MessageID.downloaded, context)
+                2 -> return impl.getString(MessageID.recycled, context)
             }
             return null
 
         }
-
-        companion object {
-            private const val NUM_ITEMS = 2
-        }
-
     }
 
 

@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.core.db.dao.FeedEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClassLogDetailView
@@ -133,7 +132,7 @@ class ClazzLogDetailPresenter(context: Any,
         val clazzDao = repository.clazzDao
 
         GlobalScope.launch {
-            val result = clazzDao.personHasPermission(loggedInPersonUid, currentClazzLog!!
+            val result = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzLog!!
                     .clazzLogClazzUid, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
             isHasEditPermissions = result
             view.showMarkAllButtons(result!!)

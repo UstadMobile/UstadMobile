@@ -66,6 +66,8 @@ class OpfDocument {
 
     var description: String? = null
 
+    var date: String? = null
+
     /*
      * the dc:identifier attribute as per
      * http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-opf-metadata-identifiers-uid
@@ -74,7 +76,7 @@ class OpfDocument {
 
     private var links: MutableList<LinkElement>? = null
 
-    internal var creators: MutableList<OpfCreator>? = null
+    internal var creators :MutableList<OpfCreator>? = null
 
     //As per the OPF spec a dc:language tag is required
     private val languages = mutableListOf<String>()
@@ -115,15 +117,15 @@ class OpfDocument {
 
         companion object {
 
-            internal val ATTR_REL = "rel"
+            internal const val ATTR_REL = "rel"
 
-            internal val ATTR_HREF = "href"
+            internal const val ATTR_HREF = "href"
 
-            internal val ATTR_MEDIA_TYPE = "media-type"
+            internal const val ATTR_MEDIA_TYPE = "media-type"
 
-            internal val ATTR_ID = "id"
+            internal const val ATTR_ID = "id"
 
-            internal val ATTR_REFINES = "refines"
+            internal const val ATTR_REFINES = "refines"
         }
     }
 
@@ -220,6 +222,8 @@ class OpfDocument {
                     if (inMetadata) {
                         if (xpp.getName() == "dc:title") {
                             title = xpp.nextText()
+                        }else if(xpp.getName() == "dc:date"){
+                            date = xpp.nextText()
                         } else if (xpp.getName() == "dc:identifier") {
                             val idAttr = xpp.getAttributeValue(null, "id")
                             if (idAttr != null && idAttr == uniqueIdentifier) {
@@ -287,13 +291,43 @@ class OpfDocument {
         xs.startTag(NAMESPACE_OPF, "metadata")
 
         xs.startTag(NAMESPACE_DC, "identifier")
-        xs.attribute(null, "id", uniqueIdentifier!!)
+        xs.attribute(null, LinkElement.ATTR_ID, uniqueIdentifier!!)
         xs.text(id!!)
         xs.endTag(NAMESPACE_DC, "identifier")
 
         xs.startTag(NAMESPACE_DC, "title")
         xs.text(title!!)
         xs.endTag(NAMESPACE_DC, "title")
+
+        if(date != null){
+            xs.startTag(NAMESPACE_DC, "date")
+            xs.text(date!!)
+            xs.endTag(NAMESPACE_DC, "date")
+        }
+
+        if(description != null){
+            xs.startTag(NAMESPACE_DC, "description")
+            xs.text(description!!)
+            xs.endTag(NAMESPACE_DC, "description")
+        }
+
+        languages.forEach {
+            xs.startTag(NAMESPACE_DC, "language")
+            xs.text(it)
+            xs.endTag(NAMESPACE_DC, "language")
+        }
+
+
+        if(creators != null){
+            creators!!.forEach {
+                if(it.creator != null){
+                    xs.startTag(NAMESPACE_DC, "creator")
+                    xs.attribute(null,LinkElement.ATTR_ID, it.id!!)
+                    xs.text(it.creator!!)
+                    xs.endTag(NAMESPACE_DC, "creator")
+                }
+            }
+        }
 
         xs.endTag(NAMESPACE_OPF, "metadata")
 

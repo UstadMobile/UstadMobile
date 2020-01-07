@@ -38,11 +38,14 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Schedule?
 
-    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
+    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
     abstract fun findAllSchedulesByClazzUid(clazzUid: Long): DataSource.Factory<Int, Schedule>
 
-    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND scheduleActive = 1")
+    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1")
     abstract fun findAllSchedulesByClazzUidAsList(clazzUid: Long): List<Schedule>
+
+    @Query("SELECT * FROM Schedule WHERE scheduleClazzUid = :clazzUid AND CAST(scheduleActive AS INTEGER) = 1 ")
+    abstract suspend fun findAllSchedulesByClazzUidAsync(clazzUid: Long): List<Schedule>
 
     suspend fun disableSchedule(scheduleUid: Long) {
         val result = findByUidAsync(scheduleUid)
@@ -85,33 +88,5 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Insert
     abstract fun insertScheduledCheck(check: ScheduledCheck)
 
-
-    /**
-     * Creates clazzLog for today since clazzlogs are generated for the next day
-     * automatically.
-     * Called when a new Schedule is created in AddScheduleDialogPresenter , AND
-     * Called by ClazzLogScheduleWorker work manager to be run everyday 00:00
-     *
-     * The method creates ClazzLog from the device's time zone.
-     * ie: today is device's 00:00 to device's 23:59.
-     */
-    fun createClazzLogsForToday(accountPersonUid: Long, db: UmAppDatabase) {
-
-        //TODO: KMP Fix
-//        //Note this calendar is created on the device's time zone.
-//        val dayCal = Calendar.getInstance()
-//        dayCal.set(Calendar.HOUR_OF_DAY, 0)
-//        dayCal.set(Calendar.MINUTE, 0)
-//        dayCal.set(Calendar.SECOND, 0)
-//        dayCal.set(Calendar.MILLISECOND, 0)
-//        val startTime = dayCal.getTimeInMillis()
-//
-//        dayCal.set(Calendar.HOUR_OF_DAY, 23)
-//        dayCal.set(Calendar.MINUTE, 59)
-//        dayCal.set(Calendar.SECOND, 59)
-//        dayCal.set(Calendar.MILLISECOND, 999)
-//        val endTime = dayCal.getTimeInMillis()
-//        createClazzLogs(startTime, endTime, accountPersonUid, db)
-    }
 
 }

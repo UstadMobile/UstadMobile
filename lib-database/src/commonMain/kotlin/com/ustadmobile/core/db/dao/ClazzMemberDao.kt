@@ -54,20 +54,23 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
-            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
-            "AND ClazzMember.clazzMemberRole = 1")
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid " +
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " AND ClazzMember.clazzMemberRole = 1")
     abstract fun findClazzMembersByClazzId(uid: Long): DataSource.Factory<Int, ClazzMemberWithPerson>
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
-            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
-            "AND ClazzMember.clazzMemberRole = :role")
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid " +
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " AND ClazzMember.clazzMemberRole = :role")
     abstract suspend fun findClazzMemberWithPersonByRoleForClazzUid(uid: Long, role: Int) :List<ClazzMemberWithPerson>
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
-            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
-            "AND ClazzMember.clazzMemberRole = :role")
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid " +
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " AND ClazzMember.clazzMemberRole = :role")
     abstract fun findClazzMemberWithPersonByRoleForClazzUidSync(uid: Long, role: Int): List<ClazzMemberWithPerson>
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
@@ -79,24 +82,25 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     @Query("Update ClazzMember SET clazzMemberAttendancePercentage " +
             " = (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
-            "LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = " +
-            "ClazzLog.clazzLogUid " +
-            "WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-            "AND ClazzLog.clazzLogDone = 1 " +
-            "AND ClazzLogAttendanceRecord.attendanceStatus = " +
+            " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = " +
+            " ClazzLog.clazzLogUid " +
+            " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
+            " AND ClazzLogAttendanceRecord.attendanceStatus = " +
             STATUS_ATTENDED + ") * 1.0 " +
             " / " +
             "MAX(1.0, (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = " +
             "ClazzLog.clazzLogUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-            " AND ClazzLog.clazzLogDone = 1) * 1.0) " +
-            "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1) * 1.0) " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
     abstract fun updateAttendancePercentages(clazzUid: Long)
 
     @Query("SELECT ClazzMember.* FROM ClazzMember " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
-            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid " +
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             "AND ClazzMember.clazzMemberRole = :role")
     abstract fun findByClazzUid(uid: Long, role: Int): List<ClazzMember>
 
@@ -121,20 +125,20 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLog.clazzLogClazzUid = :clazzUid " +
             " AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
-            " AND ClazzLog.clazzLogDone = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)   " +
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)   " +
             " AS high, " +
             " SUM(CASE WHEN attendancePercentage >  59 AND attendancePercentage < 80 THEN 1 ELSE 0 END) *100 / " +
             " (select COUNT(*) FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog on  " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLog.clazzLogClazzUid = :clazzUid  " +
             " AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  " +
-            " AND ClazzLog.clazzLogDone = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)    AS mid, " +
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)    AS mid, " +
             " SUM(CASE WHEN attendancePercentage >  0 AND attendancePercentage < 60 THEN 1 ELSE 0 END) *100 / " +
             " (select COUNT(*) FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog on  " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLog.clazzLogClazzUid = :clazzUid " +
             " AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
-            " AND ClazzLog.clazzLogDone = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)    AS low " +
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)    AS low " +
             "  FROM ( " +
             " SELECT ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid, " +
             "  SUM(CASE attendanceStatus WHEN :type THEN 1 ELSE 0 END) * 100 / " +
@@ -153,8 +157,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            "AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.clazzMemberRole = 1) AND Person.active = 1 ")
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " AND ClazzMember.clazzMemberRole = 1) AND CAST(Person.active AS INTEGER) = 1 ")
     abstract fun findAllActivePeopleInClassUid(clazzUid: Long): DataSource.Factory<Int, Person>
 
 
@@ -166,8 +170,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "  SELECT Person.personUid FROM ClazzMember  " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            "AND ClazzMember.clazzMemberActive = 1 " +
-            " AND ClazzMember.clazzMemberRole = 1) AND Person.active = 1 ")
+            "AND CAST(ClazzMember.clazzMemberActive AS INTEGER)= 1 " +
+            " AND ClazzMember.clazzMemberRole = 1) AND CAST(Person.active AS INTEGER) = 1 ")
     abstract fun findAllPeopleWithPersonPictureInClassUid(clazzUid: Long): DataSource.Factory<Int, PersonWithPersonPicture>
 
 
@@ -179,9 +183,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "  SELECT Person.personUid FROM ClazzMember  " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            "AND ClazzMember.clazzMemberActive = 1 " +
+            " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             " AND ClazzMember.clazzMemberRole = 1 AND ClazzMember.clazzMemberUid != :currentClazzMemberUid)" +
-            " AND Person.active = 1 ")
+            " AND CAST(Person.active AS INTEGER) = 1 ")
     abstract fun findAllPeopleWithPersonPictureInClassUid2(
             clazzUid: Long, currentClazzMemberUid: Long): DataSource.Factory<Int, PersonWithPersonPicture>
 
@@ -189,9 +193,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            "AND ClazzMember.clazzMemberActive = 1 " +
+            "AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             " AND ClazzMember.clazzMemberRole = 1 AND ClazzMember.clazzMemberUid NOT IN (:notIn)) " +
-            "AND Person.active = 1 ")
+            "AND CAST(Person.active AS INTEGER) = 1 ")
     abstract fun findAllPeopleInClassUidExcept(clazzUid: Long, notIn: List<Long>): DataSource.Factory<Int, Person>
 
 
@@ -199,7 +203,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberRole = 1) " +
-            "AND Person.active = 1 ")
+            " AND CAST(Person.active AS INTEGER) = 1 ")
     abstract fun findAllPeopleNotInClassUid(clazzUid: Long): DataSource.Factory<Int, Person>
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
@@ -215,7 +219,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " (SELECT clazzMemberActive FROM ClazzMember " +
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid AND ClazzMember.clazzMemberRole = "
-            + ClazzMember.ROLE_STUDENT + " ) AS enrolled FROM Person WHERE Person.active = 1 " +
+            + ClazzMember.ROLE_STUDENT + " ) AS enrolled FROM Person WHERE CAST(Person.active AS INTEGER) = 1 " +
             " ORDER BY Person.firstNames ASC")
     abstract fun findAllStudentsWithEnrollmentForClassUid(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
@@ -235,7 +239,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid) AS enrolled" +
             " FROM Person " +
-            " WHERE Person.active = 1 " +
+            " WHERE CAST(Person.active AS INTEGER) = 1 " +
             "  AND (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberPersonUid = " +
             "       Person.personUid AND ClazzMember.clazzMemberRole = 1) = 0 " +
             "ORDER BY Person.firstNames ASC")
@@ -263,9 +267,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "     ClazzMember.clazzMemberClazzUid = :clazzUid " +
             "     AND ClazzMember.clazzMemberAttendancePercentage >= :apl  AND " +
             "     ClazzMember.clazzMemberAttendancePercentage <= :aph" +
-            "     AND ClazzMember.clazzMemberActive = 1 " +
+            "     AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             "   ) " +
-            "   AND Person.active = 1 " +
+            "   AND CAST(Person.active AS INTEGER) = 1 " +
             "   AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery " +
             "ORDER BY clazzMemberRole ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(clazzUid: Long,
@@ -291,8 +295,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " ) AND Person.active = 1 ORDER BY clazzMemberRole ASC")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " ) AND CAST(Person.active AS INTEGER) = 1 ORDER BY clazzMemberRole ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUid(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
@@ -321,10 +325,10 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             "   LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             "   WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             "       AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT + " " +
-            "       AND ClazzMember.clazzMemberActive = 1 " +
+            "       AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
             "   )" +
             " AND attendancePercentage < :riskThreshold " +
-            " AND Person.active = 1 ORDER BY attendancePercentage DESC")
+            " AND CAST(Person.active AS INTEGER) = 1 ORDER BY attendancePercentage DESC")
     abstract suspend fun findAllStudentsAtRiskForClazzUidAsync(clazzUid: Long,
                                                                riskThreshold:Float)
             :List<PersonWithEnrollment>
@@ -356,8 +360,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, Person.firstNames ASC")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " ) AND CAST(Person.active AS INTEGER) = 1 ORDER BY clazzMemberRole DESC, Person.firstNames ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByNameAsc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
@@ -378,8 +382,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, attendancePercentage ASC")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " ) AND CAST(Person.active AS INTEGER) = 1 ORDER BY clazzMemberRole DESC, attendancePercentage ASC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceAsc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Query("SELECT Person.* , (:clazzUid) AS clazzUid, " +
@@ -400,8 +404,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, attendancePercentage DESC")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " ) AND CAST(Person.active AS INTEGER) = 1 ORDER BY clazzMemberRole DESC, attendancePercentage DESC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByAttendanceDesc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
@@ -422,8 +426,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberActive = 1 " +
-            " ) AND Person.active = 1 ORDER BY clazzMemberRole DESC, Person.firstNames DESC")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
+            " ) AND CAST(Person.active AS INTEGER) = 1 ORDER BY clazzMemberRole DESC, Person.firstNames DESC")
     abstract fun findAllPersonWithEnrollmentInClazzByClazzUidSortByNameDesc(clazzUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
 
@@ -439,7 +443,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-            " AND ClazzLog.clazzLogDone = 1 " +
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             " ) * 1.0 " +
@@ -447,7 +451,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " MAX(1.0, (SELECT COUNT(*)  FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-            " AND ClazzLog.clazzLogDone = 1" +
+            " AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1" +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             ") * 1.0) as attended_average " +
@@ -514,9 +518,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
                 "" +
                 " WHERE ClazzMember.clazzMemberClazzUid IN (:clazzes)" +
                 "   AND ClazzMember.clazzMemberRole =  " + ClazzMember.ROLE_STUDENT + " " +
-                "   AND ClazzMember.clazzMemberActive = 1 " +
+                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
                 "   " +
                 "   AND attendancePercentage < :riskThreshold " +
-                "   AND Person.active = 1 ORDER BY clazzUid, attendancePercentage DESC"
+                "   AND CAST(Person.active AS INTEGER) = 1 ORDER BY clazzUid, attendancePercentage DESC"
     }
 }

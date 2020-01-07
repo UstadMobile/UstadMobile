@@ -97,12 +97,12 @@
             android:layout_height="27dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
+            android:contentDescription="@string/attendance"
+            android:tint="@color/accent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_horizontal_divider"
-            android:tint="@color/accent"
             app:srcCompat="@drawable/ic_assignment_turned_in_black_24dp"
-            android:contentDescription="@string/attendance"
-            android:layout_marginLeft="8dp" />
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/item_clazzlist_attendance_record_attendance_button"
@@ -113,7 +113,8 @@
             android:text="@string/record_attendance"
             android:textColor="@color/accent"
             app:layout_constraintStart_toEndOf="@+id/item_clazzlist_attendance_record_attendance_icon"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_horizontal_divider" />
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzlist_horizontal_divider"
+            android:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

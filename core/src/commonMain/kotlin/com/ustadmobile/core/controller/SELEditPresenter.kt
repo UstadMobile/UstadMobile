@@ -250,9 +250,9 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
                 //Create a new one.
                 val responseNomination = SelQuestionResponseNomination()
                 responseNomination
-                        .selQuestionResponseNominationSelQuestionResponseUId = currentQuestionResponseUid
+                        .selqrnSelQuestionResponseUId = currentQuestionResponseUid
                 responseNomination
-                        .selQuestionResponseNominationClazzMemberUid = result.clazzMemberUid
+                        .selqrnClazzMemberUid = result.clazzMemberUid
                 responseNomination.nominationActive = true
 
                 questionResponseNominationDao.insert(responseNomination)

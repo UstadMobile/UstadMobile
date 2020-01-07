@@ -16,7 +16,7 @@ interface AboutView : UstadView {
      * Sets html plan text string given to it to into an html view component on the view.
      * @param aboutHTML The html plain text string.
      */
-    fun setAboutHTML(aboutHTML: String)
+    fun setAboutHTML(aboutHTML: String?)
 
     companion object {
 

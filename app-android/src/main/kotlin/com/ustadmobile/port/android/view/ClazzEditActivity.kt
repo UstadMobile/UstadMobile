@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.DisplayMetrics
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -71,16 +72,43 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     private lateinit var locationAutoCompleteView: AutoCompleteTextView
     private lateinit var locationDataAdapter: ArrayAdapter<Location>
 
-    private var selectedLocation : Location?=null
+    private var mProgressBar: ProgressBar? = null
 
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu_done, menu)
+        return true
+    }
+
+    /**
+     * Handles Action Bar menu button click.
+     * @param item  The MenuItem clicked.
+     * @return  Boolean if handled or not.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
         when (item.itemId) {
+
             android.R.id.home -> {
                 onBackPressed()
                 return true
             }
         }
-        return super.onOptionsItemSelected(item)
+        // Handle item selection
+        val i = item.itemId
+        //If this activity started from other activity
+        if (i == R.id.menu_done) {
+            handleClickDone()
+
+            return super.onOptionsItemSelected(item)
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
     }
 
     override fun updateLocationDataAdapter(locations: List<Location>) {
@@ -121,6 +149,22 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         }
     }
 
+    override fun setInProgress(inProgress: Boolean) {
+        mProgressBar!!.visibility = if (inProgress) View.VISIBLE else View.GONE
+        disableFields(inProgress)
+    }
+
+    private fun disableFields(inProgress: Boolean){
+        classNameTIP!!.editText!!.isEnabled=!inProgress
+        classDescTIP!!.editText!!.isEnabled=!inProgress
+        fromET!!.isEnabled=!inProgress
+        toET!!.isEnabled=!inProgress
+        locationAutoCompleteView.isEnabled=!inProgress
+        timezoneSpinner!!.isEnabled=!inProgress
+        holidaySpinner!!.isEnabled=!inProgress
+
+    }
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -129,9 +173,14 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_clazz_edit_toolbar)
-        setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
         toolbar!!.setTitle(R.string.class_setup)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        mProgressBar = findViewById(R.id.progressBar)
+        mProgressBar!!.isIndeterminate = true
+        mProgressBar!!.scaleY = 3f
+
 
         locationAutoCompleteView = findViewById(R.id.locationAutoCompleteTextView)
 
@@ -171,7 +220,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
         //Clazz Name
         classNameTIP = findViewById(R.id.activity_clazz_edit_name)
-        Objects.requireNonNull(classNameTIP!!.editText)!!.addTextChangedListener(object :
+        classNameTIP!!.editText!!.addTextChangedListener(object :
                 TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
@@ -184,7 +233,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
         //Clazz Desc
         classDescTIP = findViewById(R.id.activity_clazz_edit_description)
-        Objects.requireNonNull(classDescTIP!!.editText)!!.addTextChangedListener(object :
+        classDescTIP!!.editText!!.addTextChangedListener(object :
                 TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
@@ -194,10 +243,6 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
                 mPresenter!!.updateDesc(s.toString())
             }
         })
-
-        //FAB and its listener
-        val fab = findViewById<FloatingTextButton>(R.id.activity_clazz_edit_fab)
-        fab.setOnClickListener { v -> handleClickDone() }
 
         //Add schedule button listener
         addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule)
@@ -213,14 +258,6 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-//        locationSpinner = findViewById(R.id.activity_clazz_edit_location_spinner)
-//        locationSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-//                setLocationSelected(position)
-//            }
-//
-//            override fun onNothingSelected(parent: AdapterView<*>) {}
-//        }
 
         timezoneSpinner = findViewById(R.id.activity_clazz_edit_timezone_spinner)
         timezoneSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -294,6 +331,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
 
     private fun handleClickDone() {
 
+        setInProgress(true)
+
         val customCount = customFieldsLL!!.childCount
         for (i in 0 until customCount) {
             val field = customFieldsLL!!.getChildAt(i)
@@ -320,7 +359,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
     override fun updateToolbarTitle(titleName: String) {
         toolbar!!.title = titleName
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar!!.setTitle(R.string.class_setup)
     }
 
@@ -390,8 +429,8 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         val finalClazzName = clazzName
         val finalClazzDesc = clazzDesc
         runOnUiThread {
-            Objects.requireNonNull(classNameTIP!!.editText)!!.setText(finalClazzName)
-            Objects.requireNonNull(classDescTIP!!.editText)!!.setText(finalClazzDesc)
+            classNameTIP!!.editText!!.setText(finalClazzName)
+            classDescTIP!!.editText!!.setText(finalClazzDesc)
         }
 
         var startTimeLong: Long = 0

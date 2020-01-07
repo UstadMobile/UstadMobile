@@ -28,8 +28,10 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoPlayerPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -43,6 +45,7 @@ import java.util.*
 
 
 class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
+
     private lateinit var playerView: PlayerView
 
     private var player: SimpleExoPlayer? = null
@@ -142,6 +145,10 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun showErrorWithAction(message: String, actionMessageId: Int) {
+        showSnackBarNotification(message, {}, actionMessageId)
+    }
+
 
     private fun initializePlayer() {
         player = ExoPlayerFactory.newSimpleInstance(
@@ -211,7 +218,13 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
         GlobalScope.launch {
             try {
-                val containerManager = ContainerManager(mPresenter.container, appDatabase, repoAppDatabase)
+                val container = mPresenter.container
+                if(container == null){
+                    showErrorWithAction(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), 0)
+                    return@launch
+                }
+
+                val containerManager = ContainerManager(container, appDatabase, repoAppDatabase)
 
                 val byteArrayDataSource = ByteArrayDataSource(
                         UMIOUtils.readStreamToString(containerManager.getInputStream(containerManager.getEntry(subtitleData)!!)).toByteArray())
@@ -294,6 +307,10 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
                 (findViewById<View>(R.id.activity_video_player_description) as TextView).text = result.description
             }
         }
+    }
+
+    override fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {

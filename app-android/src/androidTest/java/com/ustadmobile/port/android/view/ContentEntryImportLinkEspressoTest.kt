@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
@@ -254,7 +255,7 @@ class ContentEntryImportLinkEspressoTest : AbstractImportLinkTest() {
 
         val intent = Intent()
         intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID, (-101).toString())
-        intent.putExtra(ContentEntryImportLinkView.CONTENT_ENTRY_UID, (-102).toString())
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, (-102).toString())
         mActivityRule.launchActivity(intent)
 
         var activity = mActivityRule.activity

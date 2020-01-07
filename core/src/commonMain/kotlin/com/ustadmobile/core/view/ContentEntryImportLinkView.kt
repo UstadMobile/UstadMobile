@@ -24,8 +24,6 @@ interface ContentEntryImportLinkView : UstadView, UstadViewWithProgress {
 
         const val CONTENT_ENTRY_PARENT_UID = "ContentEntryParentUid"
 
-        const val CONTENT_ENTRY_UID = "ContentEntryUid"
-
         const val VIEW_NAME = "ContentEntryImportLinkView"
 
         const val END_POINT_URL = "endpointUrl"

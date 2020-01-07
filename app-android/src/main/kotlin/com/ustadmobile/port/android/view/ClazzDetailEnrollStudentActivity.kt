@@ -118,8 +118,8 @@ class ClazzDetailEnrollStudentActivity : UstadBaseActivity(), ClazzDetailEnrollS
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Enroll new student
-        val newStudentButton = findViewById<Button>(R.id.activity_clazz_Detail_enroll_student_new)
-        newStudentButton.setOnClickListener { v -> mPresenter!!.handleClickEnrollNewPerson() }
+        val newClazzMemberButton = findViewById<Button>(R.id.activity_clazz_Detail_enroll_student_new)
+        newClazzMemberButton.setOnClickListener { v -> mPresenter!!.handleClickEnrollNewPerson() }
 
         //FAB
         val fab = findViewById<FloatingTextButton>(R.id.activity_clazz_detail_enroll_student_fab_done)

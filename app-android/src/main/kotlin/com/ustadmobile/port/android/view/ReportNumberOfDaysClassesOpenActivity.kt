@@ -136,7 +136,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
         val barDataEntries = ArrayList<BarEntry>()
         for (nextEntry in dataMap.entries) {
             hasSomething = true
-            mPresenter!!.barChartTimestamps!!.add((nextEntry.key * 1000) as Long)
+            mPresenter!!.barChartTimestamps!!.add((nextEntry.key * 1000).toLong())
             val anEntry = BarEntry(index as Float, nextEntry.value)
             barDataEntries.add(anEntry)
             index++
@@ -300,7 +300,7 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
 
         for (everyDate in dates) {
             val everyDateString = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                    everyDate as Long * 1000, currentLocale)
+                    (everyDate as Float).toLong()  * 1000, currentLocale)
 
             val everyDateRow = TableRow(applicationContext)
             everyDateRow.layoutParams = rowParams

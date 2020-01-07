@@ -21,8 +21,11 @@ import com.ustadmobile.lib.db.entities.ClazzWithEnrollment
  * The ClazzList Recycler Adapter used here.
  */
 class ClazzListEnrollPersonRecyclerAdapter internal constructor(
-        diffCallback: DiffUtil.ItemCallback<ClazzWithEnrollment>, internal var theContext: Context, private val theActivity: Activity,
-        private val thePresenter: PersonDetailEnrollClazzPresenter) : PagedListAdapter<ClazzWithEnrollment, ClazzListEnrollPersonRecyclerAdapter.ClazzViewHolder>(diffCallback) {
+        diffCallback: DiffUtil.ItemCallback<ClazzWithEnrollment>,
+        internal var theContext: Context, private val theActivity: Activity,
+        private val thePresenter: PersonDetailEnrollClazzPresenter)
+    : PagedListAdapter<ClazzWithEnrollment,
+        ClazzListEnrollPersonRecyclerAdapter.ClazzViewHolder>(diffCallback) {
 
     @SuppressLint("UseSparseArrays")
     private val checkBoxHM = HashMap<Long, Boolean?>()
@@ -47,10 +50,11 @@ class ClazzListEnrollPersonRecyclerAdapter internal constructor(
                 .getText(R.string.students_literal).toString()
         (holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_title) as TextView)
                 .setText(clazz!!.clazzName)
-        (holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_numstudents_text) as TextView)
-                .setText(numStudentsText)
+        (holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_numstudents_text)
+                as TextView).setText(numStudentsText)
 
-        val checkBox = holder.itemView.findViewById<CheckBox>(R.id.item_clazz_list_enroll_person_checkbox)
+        val checkBox =
+                holder.itemView.findViewById<CheckBox>(R.id.item_clazz_list_enroll_person_checkbox)
 
         //To preserve checkboxes, add this enrollment to the Map.
         checkBoxHM[clazz!!.clazzUid] = clazz!!.enrolled

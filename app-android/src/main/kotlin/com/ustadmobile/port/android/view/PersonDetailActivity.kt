@@ -88,6 +88,22 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         toolbar!!.title = name
     }
 
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
+     * the activity goes back when the back button is pressed.
+     *
+     * @param item The item selected
+     * @return true if accounted for
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

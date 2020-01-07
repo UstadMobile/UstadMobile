@@ -213,11 +213,15 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     }
 
     private fun handleFabLive(result:Boolean?){
-        view.showFAB(result!!)
+        if(result != null) {
+            view.showFAB(result!!)
+        }
     }
 
     private fun handleImageButtonLive(result:Boolean?){
-        view.showUpdateImageButton(result!!)
+        if(result != null) {
+            view.showUpdateImageButton(result!!)
+        }
     }
 
     private fun handleDropoutAndEnrollLive(result:Boolean?){

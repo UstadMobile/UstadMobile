@@ -56,7 +56,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
     private var presenter: ContentEditorPageListPresenter? = null
 
-    private val umDb: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(activity!!)
+    private lateinit var umDb: UmAppDatabase
 
     private var isScrollDirectionUp = false
 
@@ -167,6 +167,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
     fun setUmFileHelper(pageDelegate: ContentEditorPageActionDelegate) {
         adapter = PageListAdapter(this)
+        umDb = UmAccountManager.getRepositoryForActiveAccount(context!!)
         presenter = ContentEditorPageListPresenter(this,
                 UMAndroidUtil.bundleToMap(arguments), this,umDb.contentEntryDao, pageDelegate)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))

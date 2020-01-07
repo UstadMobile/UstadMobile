@@ -49,6 +49,7 @@ object UmAccountManager {
         return getActivePersonUid(context, UstadMobileSystemImpl.instance)
     }
 
+    @JsName("getActiveAccountWithContext")
     fun getActiveAccount(context: Any): UmAccount? {
         return getActiveAccount(context, UstadMobileSystemImpl.instance)
     }
@@ -71,6 +72,7 @@ object UmAccountManager {
         }
     }
 
+    @JsName("setActiveAccountWithContext")
     fun setActiveAccount(account: UmAccount?, context: Any) {
         setActiveAccount(account, context, UstadMobileSystemImpl.instance)
     }
@@ -100,13 +102,13 @@ object UmAccountManager {
         return activeAccountRepository!!
     }
 
-    fun getActiveEndpoint(context: Any): String? {
-        val activeAccount = getActiveAccount(context)
-        return if (activeAccount != null) {
-            activeAccount.endpointUrl
+    fun getActiveEndpoint(context: Any): String {
+        val activeEndpoint = getActiveAccount(context)?.endpointUrl
+        return if (activeEndpoint != null) {
+            activeEndpoint
         } else {
             UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                    "http://localhost", context)
+                    "http://localhost", context) ?: "http://localhost"
         }
     }
 

@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import kotlin.js.JsName
 
-interface LoginView : UstadView {
+interface LoginView : UstadViewWithSnackBar {
 
     @JsName("setInProgress")
     fun setInProgress(inProgress: Boolean)
@@ -13,11 +13,14 @@ interface LoginView : UstadView {
     @JsName("setServerUrl")
     fun setServerUrl(serverUrl: String)
 
-    @JsName("setUsername")
+    @JsName("setUserAccount")
     fun setUsername(username: String)
 
     @JsName("setPassword")
     fun setPassword(password: String)
+
+    @JsName("showRegisterCodeDialog")
+    fun showRegisterCodeDialog(title: String, okButtonText: String, cancelButtonText: String)
 
     @JsName("setRegistrationLinkVisible")
     fun setRegistrationLinkVisible(visible: Boolean)

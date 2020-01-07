@@ -29,7 +29,8 @@ kotlin {
         browser {
             testTask {
                 useKarma {
-                    useChrome()
+                    //Change this to useChrome() to use an actual browser for debugging
+                    useChromeHeadless()
                 }
             }
         }

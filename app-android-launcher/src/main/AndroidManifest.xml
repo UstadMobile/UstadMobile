@@ -11,6 +11,7 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.UstadTheme"
         android:supportsRtl="true"
+        tools:replace="android:allowBackup"
         tools:ignore="GoogleAppIndexingWarning">
 
         <!--

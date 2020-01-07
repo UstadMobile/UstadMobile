@@ -87,13 +87,10 @@ abstract class DownloadJobDao {
     @Query("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int
 
-    @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
+    @Query("""SELECT djiDjUid FROM DownloadJobItem 
+        WHERE djiContentEntryUid = :contentEntryUid AND djiStatus < ${JobStatus.CANCELED} 
+        ORDER BY timeStarted DESC LIMIT 1""")
     abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int
-
-
-    @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
-    abstract fun update(djUid: Int, djStatus: Int)
-
 
     @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :djUid " +
             "AND djStatus BETWEEN :statusFrom AND :statusTo")
@@ -154,12 +151,33 @@ abstract class DownloadJobDao {
     @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
-    @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
+    @Query("SELECT COALESCE((SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid), 0)")
     abstract suspend fun getMeteredNetworkAllowed(djUid: Int): Boolean
 
     @Query("SELECT (SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) AS numEntries, " +
             "(SELECT downloadLength FROM DownloadJobItem WHERE djiDjUid = :downloadJobId AND " +
             " djiContentEntryUid = (SELECT djRootContentEntryUid FROM DownloadJob WHERE djUid = :downloadJobId)) AS totalSize" )
     abstract suspend fun getDownloadSizeInfo(downloadJobId: Int): DownloadJobSizeInfo?
+
+    @Query("DELETE FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
+    abstract fun deleteByContentEntryUid(rootContentEntryUid: Long)
+
+    @Query("UPDATE DownloadJob SET djStatus = :status WHERE djUid = :djiDjUid")
+    abstract fun changeStatus(status: Int, djiDjUid: Int)
+
+    @Query("""UPDATE DownloadJob SET djStatus = :status, 
+            bytesDownloadedSoFar = :bytesDownloadedSoFar, 
+            totalBytesToDownload = :totalBytesToDownload
+            WHERE djUid = :djUid""")
+    abstract fun updateStatusAndProgress(djUid: Int, status: Int, bytesDownloadedSoFar: Long,
+                                         totalBytesToDownload: Long)
+
+    fun updateStatusAndProgressList(downloadJobs: Iterable<DownloadJob>) {
+        downloadJobs.forEach {
+            updateStatusAndProgress(it.djUid, it.djStatus, it.bytesDownloadedSoFar,
+                    it.totalBytesToDownload)
+        }
+    }
+
 
 }

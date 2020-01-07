@@ -71,6 +71,8 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xapi_report_options)
 
+        umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
+
         visualTypeSpinner = findViewById(R.id.type_spinner)
         yAxisSpinner = findViewById(R.id.yaxis_spinner)
         xAxisSpinner = findViewById(R.id.xaxis_spinner)
@@ -342,7 +344,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         //TO:
         //Date pickers's on click listener - sets text
         val toDateListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-            presenter.handleToCalendarSelected(year, month + 1, dayOfMonth)
+            presenter.handleDialogToCalendarSelected(year, month + 1, dayOfMonth)
         }
 
         //Default view: not focusable.
@@ -362,7 +364,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         //FROM:
         //Date pickers's on click listener - sets text
         val fromDateListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            presenter.handleFromCalendarSelected(year, month + 1, dayOfMonth)
+            presenter.handleDialogFromCalendarSelected(year, month + 1, dayOfMonth)
         }
 
         //Default view: not focusable.

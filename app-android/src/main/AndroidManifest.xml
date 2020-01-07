@@ -13,12 +13,9 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Required to use BLE scanning for peer devices -->
-
     <!-- Location permissions required for BLE scanning and WiFi scanning -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- To show download progress indicator -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -31,7 +28,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
@@ -60,10 +58,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
         <activity
@@ -103,8 +97,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
-            android:enabled="true"/>
-        <activity android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
+            android:enabled="true" />
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <!-- IRC -->
@@ -301,6 +297,18 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/people"
             android:theme="@style/Theme.UstadTheme"/>
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:label="@string/app_name"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
     </application>
 

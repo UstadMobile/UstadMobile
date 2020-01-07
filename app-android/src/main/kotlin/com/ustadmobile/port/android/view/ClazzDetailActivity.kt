@@ -17,6 +17,9 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import java.util.*
+import androidx.core.content.ContextCompat.getSystemService
+
+
 
 /**
  * The ClassDetail activity.
@@ -28,7 +31,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
     private lateinit var mPager: ViewPager
     private lateinit var mPagerAdapter: ClassDetailViewPagerAdapter
     private lateinit var toolbar: Toolbar
-    private lateinit var mTabLayout: TabLayout
+    private var mTabLayout: TabLayout?=null
     private lateinit var mPresenter: ClazzDetailPresenter
     internal var currentClazzUid: Long = 0
     private var attendanceVisibility: Boolean = false
@@ -36,6 +39,8 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
     private var selVisibility: Boolean = false
     private var settingsVisibility: Boolean = false
     internal var menu: Menu? = null
+
+    var previousPosition = -1
 
     private val fragPosMap = HashMap<Int, Class<*>>()
 
@@ -50,7 +55,6 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
             var fragCount = 0
             var bundle = Bundle()
             bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
-//            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(currentClazzUid))
             mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(bundle))
             fragPosMap[fragCount++] = ClazzStudentListFragment::class.java
 
@@ -71,9 +75,35 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
 
             mPager.setAdapter(mPagerAdapter)
 
+            if(mTabLayout!= null) {
+                mTabLayout!!.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                    override fun onTabSelected(tab: TabLayout.Tab?) {
+                        if(previousPosition < 1) {
+                            previousPosition = tab!!.position
+                        }
+                    }
+
+                    override fun onTabUnselected(tab: TabLayout.Tab?) {
+                    }
+
+                    override fun onTabReselected(tab: TabLayout.Tab?) {
+                    }
+                })
+            }
+
             mTabLayout = findViewById(R.id.activity_class_detail_tablayout)
-            mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL)
-            mTabLayout.setupWithViewPager(mPager)
+            mTabLayout!!.setTabGravity(TabLayout.GRAVITY_FILL)
+            mTabLayout!!.setupWithViewPager(mPager)
+
+
+
+
+            if(previousPosition != -1){
+                val tab = mTabLayout!!.getTabAt(previousPosition)
+                if(tab != null){
+                    //tab.select()
+                }
+            }
 
         }
 
@@ -110,6 +140,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
 
     public override fun onResume() {
         super.onResume()
+        mPresenter.checkPermissions()
 
     }
 

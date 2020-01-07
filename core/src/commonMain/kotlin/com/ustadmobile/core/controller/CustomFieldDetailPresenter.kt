@@ -175,7 +175,9 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
                 //Update the currently editing custom field object
                 updatedField = changedCustomField
 
-                view.setCustomFieldOnView(changedCustomField)
+                view.runOnUiThread(Runnable {
+                    view.setCustomFieldOnView(changedCustomField)
+                })
             }
         }
     }
@@ -183,7 +185,9 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
     private fun getSetOptionProvider() {
         GlobalScope.launch {
             optionProvider = optionDao.findAllOptionsForField(updatedField!!.customFieldUid)
-            view.setListProvider(optionProvider!!)
+            view.runOnUiThread(Runnable {
+                view.setListProvider(optionProvider!!)
+            })
         }
     }
 

@@ -1,11 +1,10 @@
-import {  DomSanitizer } from '@angular/platform-browser';
-import { Subscription } from 'rxjs';
-import { Component } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
+import core from 'UstadMobile-core'
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { UmDbMockService } from '../../core/db/um-db-mock.service';
-import core from 'UstadMobile-core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 
 @Component({
@@ -15,43 +14,56 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 })
 
 
-export class XapiContentComponent extends UmBaseComponent {
+export class XapiContentComponent extends UmBaseComponent implements OnDestroy,
+ core.com.ustadmobile.core.view.XapiPackageContentView {
 
-  private presenter: core.com.ustadmobile.core.controller.XapiPackageContentPresenter;
-  navigationSubscription: Subscription;
-  urlToLoad: string = "https://www.ustadmobile.com/files/s4s/2-coverletter/en/EPUB/main.html";
-  
-  
-  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
-    umDb: UmDbMockService, public sanitizer: DomSanitizer) {
-    super(umService, router, route, umDb);
+  private presenter: core.com.ustadmobile.core.controller.XapiPackageContentPresenter
+  private navigationSubscription: Subscription;
+  urlToLoad: string = ""
 
-    this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe(() => {
-      this.presenter = new core.com.ustadmobile.core.controller
-        .XapiPackageContentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
-        this.presenter.onCreate(null);
-    });
-
-    }
+  constructor(umservice: UmBaseService, router: Router, route: ActivatedRoute, public sanitizer: DomSanitizer, private zone:NgZone) { 
+    super(umservice,router, route)
+     //Listen for the navigation changes - changes on url
+     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+     .subscribe(_ => {
+       UmAngularUtil.registerResourceReadyListener(this)
+     });
+  }
 
   ngOnInit() {
-    super.ngOnInit();
+    super.ngOnInit()
   }
 
+  onCreate(){
+    super.onCreate()
+    this.presenter = new core.com.ustadmobile.core.controller.XapiPackageContentPresenter(
+      this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.containerMounter)
+    this.presenter.onCreate(null)
+  }
+
+  
+  containerMounter(containerUid: any){
+    return UmAngularUtil.getMountPath(containerUid)
+  }
+
+  loadUrl(url){
+    this.zone.run(()=>{
+      this.urlToLoad = url
+    })
+  }
 
   setTitle(title){
-    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
-      UmAngularUtil.DISPATCH_TITLE, title));
-  }
-  loadUrl(url){
-    this.urlToLoad = url;
+    super.setToolbarTitle(title)
   }
 
-  ngOnDestroy(){
+  ngOnDestroy(): void {
     super.ngOnDestroy();
-    this.presenter.onDestroy()
-    this.navigationSubscription.unsubscribe();
+    if (this.presenter) {
+      this.presenter.onDestroy();
+    }
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
+    }
   }
 
 }
