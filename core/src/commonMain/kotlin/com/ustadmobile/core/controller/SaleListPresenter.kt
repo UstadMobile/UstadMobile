@@ -122,7 +122,8 @@ class SaleListPresenter(context: Any,
         if(personUid != 0L){
             umProvider = saleDao.filterAndSortSaleByWeUid(loggedInPersonUid!!, sortCode, personUid)
         }else {
-            umProvider = saleDao.filterAndSortSaleByLeUid(loggedInPersonUid!!, filterSelected, sortCode)
+            umProvider = saleDao.filterAndSortSaleByLeUid(loggedInPersonUid!!, filterSelected,
+                    sortCode, impl.getLocale(context))
         }
         view.setListProvider(umProvider!!, false, false)
 

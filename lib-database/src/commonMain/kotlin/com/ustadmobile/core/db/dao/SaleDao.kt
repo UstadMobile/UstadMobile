@@ -56,6 +56,18 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(ALL_SALE_LIST + GROUP_BY + SORT_NAME_DEC)
     abstract fun findAllSaleFilterAllSortNameDescProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
+    @Query(ALL_SALE_LIST + GROUP_BY + SORT_NAME_ASC_DARI )
+    abstract fun findAllSaleFilterAllSortNameAscProviderDari(leUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST + GROUP_BY + SORT_NAME_DEC_DARI)
+    abstract fun findAllSaleFilterAllSortNameDescProviderDari(leUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST + GROUP_BY + SORT_NAME_ASC_PASHTO )
+    abstract fun findAllSaleFilterAllSortNameAscProviderPashto(leUid: Long): DataSource.Factory<Int,SaleListDetail>
+
+    @Query(ALL_SALE_LIST + GROUP_BY + SORT_NAME_DEC_PASHTO)
+    abstract fun findAllSaleFilterAllSortNameDescProviderPashto(leUid: Long): DataSource.Factory<Int,SaleListDetail>
+
     @Query(ALL_SALE_LIST + GROUP_BY+ SORT_TOTAL_AMOUNT_ASC)
     abstract fun findAllSaleFilterAllSortTotalAscProvider(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
@@ -117,12 +129,31 @@ abstract class SaleDao : BaseDao<Sale> {
         return findAllActiveAsSaleListDetailProvider(leUid)
     }
 
-    fun filterAndSortSaleByLeUid(leUid: Long, filter: Int, sort: Int): DataSource.Factory<Int,SaleListDetail> {
+    fun filterAndSortSaleByLeUid(leUid: Long, filter: Int, sort: Int, locale: String)
+            : DataSource.Factory<Int,SaleListDetail> {
 
         when (filter) {
             ALL_SELECTED -> when (sort) {
-                SORT_ORDER_NAME_ASC -> return findAllSaleFilterAllSortNameAscProvider(leUid)
-                SORT_ORDER_NAME_DESC -> return findAllSaleFilterAllSortNameDescProvider(leUid)
+                SORT_ORDER_NAME_ASC ->{
+                    if(locale.equals("ps")){
+                        return findAllSaleFilterAllSortNameAscProviderPashto(leUid)
+                    }else if(locale.equals("fa")){
+                        return findAllSaleFilterAllSortNameAscProviderDari(leUid)
+                    }else{
+                        return findAllSaleFilterAllSortNameAscProvider(leUid)
+                    }
+
+                }
+                SORT_ORDER_NAME_DESC -> {
+                    if(locale.equals("ps")){
+                        return findAllSaleFilterAllSortNameDescProviderPashto(leUid)
+                    }else if(locale.equals("fa")){
+                        return findAllSaleFilterAllSortNameDescProviderDari(leUid)
+                    }else{
+                        return findAllSaleFilterAllSortNameDescProvider(leUid)
+                    }
+
+                }
                 SORT_ORDER_AMOUNT_ASC -> return findAllSaleFilterAllSortTotalAscProvider(leUid)
                 SORT_ORDER_AMOUNT_DESC -> return findAllSaleFilterAllSortTotalDescProvider(leUid)
                 SORT_ORDER_DATE_CREATED_DESC -> return findAllSaleFilterAllSortDateAscProvider(leUid)
@@ -567,6 +598,10 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val SORT_NAME_ASC = " ORDER BY LOWER(saleProductNames) ASC "
         const val SORT_NAME_DEC = " ORDER BY LOWER(saleProductNames) DESC "
+        const val SORT_NAME_ASC_DARI = " ORDER BY LOWER(saleProductNamesDari) ASC "
+        const val SORT_NAME_DEC_DARI = " ORDER BY LOWER(saleProductNamesDari) DESC "
+        const val SORT_NAME_ASC_PASHTO = " ORDER BY LOWER(saleProductNamesPashto) ASC "
+        const val SORT_NAME_DEC_PASHTO = " ORDER BY LOWER(saleProductNamesPashto) DESC "
         const val SORT_TOTAL_AMOUNT_DESC = " ORDER BY saleAmount DESC "
         const val SORT_TOTAL_AMOUNT_ASC = " ORDER BY saleAmount ASC "
         const val SORT_ORDER_DATE_DESC = " ORDER BY sl.saleCreationDate DESC "
@@ -577,7 +612,9 @@ abstract class SaleDao : BaseDao<Sale> {
         const val SEARCH_BY_QUERY = " AND " +
                 " sl.saleLocationUid = :locationuid " +
                 " AND saleAmount > :amountl AND saleAmount < :amounth " +
-                " AND saleProductNames LIKE :title " +
+                " AND (saleProductNames LIKE :title " +
+                " OR saleProductNamesPashto LIKE :title " +
+                " OR saleProductNamesDari LIKE :title) " +
                 " OR (sl.saleCreationDate > :from AND sl.saleCreationDate < :to )"
         const private val FILTER_ORDER_BY_DATE_ASC = " ORDER BY sl.saleCreationDate ASC "
         const private val FILTER_ORDER_BY_PRICE_ASC = " ORDER BY saleAmount ASC "

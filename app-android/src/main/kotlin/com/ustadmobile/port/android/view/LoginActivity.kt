@@ -164,7 +164,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
     override fun updateUsername(username: String) {
         if (mUsernameTextView != null) {
             mUsernameTextView!!.setText(username)
-            mUsernameTextView!!.setFocusable(false)
+            //mUsernameTextView!!.setFocusable(false)
             mPasswordTextView!!.setFocusable(true)
 
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
