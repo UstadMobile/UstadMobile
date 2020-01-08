@@ -423,7 +423,8 @@ abstract class SaleDao : BaseDao<Sale> {
                   (select 
                       (case  
                       when  
-                      (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 
+                      (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid 
+                                and CAST(sid.saleItemActive AS INTEGER) = 1 ) > 1 
                       then '...'  
                       else '' 
                   end) 
@@ -446,7 +447,8 @@ abstract class SaleDao : BaseDao<Sale> {
                           (select 
                               (case  
                               when  
-                              (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 
+                              (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid 
+                                and CAST(sid.saleItemActive AS INTEGER) = 1 ) > 1 
                               then '...'  
                               else '' 
                           end) 
@@ -469,7 +471,8 @@ abstract class SaleDao : BaseDao<Sale> {
                           (select 
                               (case  
                               when  
-                              (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 
+                              (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid 
+                                and CAST(sid.saleItemActive AS INTEGER) = 1 ) > 1 
                               then '...'  
                               else '' 
                           end) 
@@ -478,13 +481,13 @@ abstract class SaleDao : BaseDao<Sale> {
                 
                 (Select GROUP_CONCAT(SaleProduct.saleProductName)  FROM SaleItem 
                   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
-                  WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNames, 
+                  WHERE SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 ) AS saleProductNames, 
                 (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNameDari IS NOT NULL AND SaleProduct.saleProductNameDari != '' THEN SaleProduct.saleProductNameDari ELSE SaleProduct.saleProductName END)  FROM SaleItem 
                   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
-                  WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesDari, 
+                  WHERE SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 ) AS saleProductNamesDari, 
                 (Select GROUP_CONCAT(CASE WHEN SaleProduct.saleProductNamePashto IS NOT NULL AND SaleProduct.saleProductNamePashto != '' THEN SaleProduct.saleProductNamePashto ELSE SaleProduct.saleProductName END)  FROM SaleItem 
                   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid 
-                  WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNamesPashto, 
+                  WHERE SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 ) AS saleProductNamesPashto, 
                 Location.title AS locationName, 
                 COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
                            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
@@ -562,8 +565,8 @@ abstract class SaleDao : BaseDao<Sale> {
         const val FILTER_PAYMENT_DUE = " AND saleAmountPaid < saleAmount "
 
 
-        const val SORT_NAME_ASC = " ORDER BY saleProductNames ASC "
-        const val SORT_NAME_DEC = " ORDER BY saleProductNames DESC "
+        const val SORT_NAME_ASC = " ORDER BY LOWER(saleProductNames) ASC "
+        const val SORT_NAME_DEC = " ORDER BY LOWER(saleProductNames) DESC "
         const val SORT_TOTAL_AMOUNT_DESC = " ORDER BY saleAmount DESC "
         const val SORT_TOTAL_AMOUNT_ASC = " ORDER BY saleAmount ASC "
         const val SORT_ORDER_DATE_DESC = " ORDER BY sl.saleCreationDate DESC "

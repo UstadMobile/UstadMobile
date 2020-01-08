@@ -297,11 +297,18 @@ class SaleDetailPresenter(context: Any,
     private fun handleCustomerChanged(changedCustomer: Person?){
         var firstNames = ""
         var lastName = ""
-        if(changedCustomer!= null && changedCustomer.firstNames != null){
-            firstNames = changedCustomer.firstNames!!
-        }
-        if(changedCustomer!= null && changedCustomer.lastName != null){
-            lastName = changedCustomer.lastName!!
+
+
+        if(changedCustomer != null){
+            if(changedCustomer.firstNames != null){
+                firstNames = changedCustomer.firstNames!!
+            }
+            if(changedCustomer.lastName != null){
+                lastName = changedCustomer.lastName!!
+            }
+            if(changedCustomer!!.personLocationUid != 0L) {
+                updatedSale!!.saleLocationUid = changedCustomer.personLocationUid
+            }
         }
 
         view.updateCustomerNameOnView(firstNames + " " + lastName)

@@ -407,8 +407,8 @@ abstract class  PersonDao : BaseDao<Person> {
         const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
             ":searchQuery "
 
-        const val QUERY_SORT_BY_NAME_DESC = " ORDER BY Person.lastName DESC "
-        const val QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC "
+        const val QUERY_SORT_BY_NAME_DESC = " ORDER BY LOWER(Person.firstNames||''||Person.lastName) DESC "
+        const val QUERY_SORT_BY_NAME_ASC = " ORDER BY LOWER(Person.firstNames||''||Person.lastName) ASC "
     }
 
     @Serializable
