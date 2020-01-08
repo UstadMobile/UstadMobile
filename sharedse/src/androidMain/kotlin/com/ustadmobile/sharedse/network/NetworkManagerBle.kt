@@ -144,7 +144,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         ContainerFetcherBuilder(this).build()
     }
 
-    override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase) { job, manager ->
+    override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase,
+            onQueueEmpty = { onDownloadQueueEmpty() }) { job, manager ->
         DownloadJobItemRunner(context, job, manager, this, umAppDatabase,
                 UmAccountManager.getActiveEndpoint(context),
                 connectivityStatus = manager.connectivityLiveData.getValue(),
@@ -797,31 +798,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                 UMLog.l(UMLog.INFO, 693,
                         "ConnectToWifi: Already connected to WiFi with ssid =$ssid")
                 break
-//            }
-//            else if(!networkSeenInScan) {
-//                val scanResults = wifiManager.scanResults
-//                if(ssid in scanResults.map { normalizeAndroidWifiSsid(it.SSID) }) {
-//                    networkSeenInScan = true
-//                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Saw $ssid in scan results")
-//                } else if(System.currentTimeMillis() - lastScanTime > 30000) {
-//                    val networkId = managerHelper.addNetwork()
-//                    UMLog.l(UMLog.DEBUG, 693, "ConnectToWifi: Didn't see $ssid in scan results, starting scan. Added network: id = $networkId")
-//                    lastScanTime = System.currentTimeMillis()
-//                    val waitReceiver = NetworkScanResultsReceiver(ssid)
-//                    SystemClock.sleep(1000)
-//                    try {
-//                        mContext.registerReceiver(waitReceiver,
-//                                IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
-//                        val submitted = wifiManager.startScan()
-//                        UMLog.l(UMLog.DEBUG, 693,
-//                                "ConnectToWifi: requested scan: submission OK = $submitted. " +
-//                                        "Waiting for network to be seen (30s timeout).")
-//                        networkSeenInScan = waitReceiver.waitForNetworkToBeSeen(30000)
-//                    }finally {
-//                        mContext.unregisterReceiver(waitReceiver)
-//                    }
-//                }
-//                networkSeenInScan = true
             }else if (!networkEnabled) {
                 networkEnabled = managerHelper.enableWifiNetwork()
                 UMLog.l(UMLog.INFO, 693,
@@ -893,6 +869,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         endAnyLocalSession()
         managerHelper.restoreWiFi()
     }
+
 
     /**
      * Send an http request to the server so it knows we are done

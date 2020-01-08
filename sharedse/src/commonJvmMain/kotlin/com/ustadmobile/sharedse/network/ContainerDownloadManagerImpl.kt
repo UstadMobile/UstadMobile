@@ -21,6 +21,7 @@ typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, down
 
 class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineContext = newSingleThreadContext("UstadDownloadManager"),
                                    private val appDb: UmAppDatabase,
+                                   private val onQueueEmpty: () -> Unit = {},
                                    private val containerDownloaderMaker: ContainerDownloaderMaker): ContainerDownloadManager() {
 
     /**
@@ -347,6 +348,8 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             GlobalScope.launch(Dispatchers.IO) {
                 containerDownloader.download()
             }
+        }else {
+            onQueueEmpty()
         }
     }
 

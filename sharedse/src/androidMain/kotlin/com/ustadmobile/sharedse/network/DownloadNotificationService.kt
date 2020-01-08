@@ -99,6 +99,7 @@ class DownloadNotificationService : Service() {
                     //TODO: set the color
                     //.setColor(ContextCompat.getColor(this, R.color.primary))
                     .setOngoing(true)
+                    .setOnlyAlertOnce(true)
                     .setAutoCancel(true)
                     .setContentIntent(mNotificationPendingIntent)
                     .setDefaults(Notification.DEFAULT_SOUND)
