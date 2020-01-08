@@ -366,6 +366,11 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
     }
 
+    override suspend fun handleDownloadJobUpdated(downloadJob: DownloadJob) = withContext(singleThreadContext){
+        val holder = loadDownloadJobHolder(downloadJob.djUid)
+        holder.postUpdate(downloadJob)
+    }
+
     override suspend fun enqueue(downloadJobId: Int) = withContext(singleThreadContext){
         updateWaitingAndActiveStatuses(downloadJobId, JobStatus.QUEUED, {})
         commit()
@@ -390,10 +395,21 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     override suspend fun setMeteredDataAllowed(downloadJobUid: Int, meteredDataAllowed: Boolean) = withContext(singleThreadContext) {
         appDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(downloadJobUid, meteredDataAllowed)
+        val downloadJobHolder = downloadJobMap[downloadJobUid]?.get()
+        val downloadJob = downloadJobHolder?.downloadJob
+        if(downloadJobHolder != null && downloadJob != null) {
+            downloadJob.meteredNetworkAllowed = meteredDataAllowed
+            downloadJobHolder.postUpdate(downloadJob)
+        }
+
         activeDownloads.values.filter { it.downloadJobItem.djiDjUid == downloadJobUid }
                 .forEach {
                     it.runner.meteredDataAllowed = meteredDataAllowed
                 }
+
+
+        if(meteredDataAllowed)
+            checkQueue()
     }
 
     override suspend fun handleConnectivityChanged(status: ConnectivityStatus) = withContext(singleThreadContext){

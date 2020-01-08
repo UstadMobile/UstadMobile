@@ -21,7 +21,9 @@
     <string name='ok'>OK</string>
     <string name="confirm">Confirm</string>
     <string name='cancel'>Cancel</string>
+    <string name='canceled'>Canceled</string>
     <string name='delete'>Delete</string>
+    <string name='deleted'>Deleted</string>
     <string name='new_tab'>Displaying on new Tab</string>
 
 
@@ -115,6 +117,7 @@
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
     <string name="success">Success</string>
+    <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>

@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.isStatusCompleted
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusPaused
 import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
@@ -106,7 +107,7 @@ class DownloadDialogPresenter(context: Any,
             view.runOnUiThread(Runnable {
                 selectedStorageDir = storageDirs.firstOrNull()
                 view.showStorageOptions(storageDirs)
-                updateWarningMessage()
+                updateWarningMessage(downloadJobItemLiveData.getValue())
             })
         }
     }
@@ -155,8 +156,9 @@ class DownloadDialogPresenter(context: Any,
         }
 
         val currentJobSizeTotals = jobSizeTotals.value
-        if(!t.isStatusPausedOrQueuedOrDownloading() && !t.isStatusCompletedSuccessfully()
-                && currentJobSizeTotals == null && !jobSizeLoading.compareAndSet(true, true)) {
+        if(!t.isStatusPausedOrQueuedOrDownloading() && currentJobSizeTotals == null
+                && !jobSizeLoading.compareAndSet(true, true)) {
+            view.setBottomPositiveButtonEnabled(false)
             GlobalScope.launch {
                 try {
                     val sizeTotals = if(t != null) {
@@ -167,7 +169,14 @@ class DownloadDialogPresenter(context: Any,
                     jobSizeTotals.value = sizeTotals
                     updateStatusMessage(sizeTotals)
                 }catch(e: Exception) {
-                    println(e)
+                    view.runOnUiThread(Runnable {
+                        view.setCalculatingViewVisible(false)
+                        view.setWarningTextVisible(true)
+                        view.setWifiOnlyOptionVisible(false)
+                        view.setWarningText(impl.getString(MessageID.repo_loading_status_failed_noconnection,
+                                context))
+                    })
+
                 }finally {
                     jobSizeLoading.value = false
                 }
@@ -181,19 +190,20 @@ class DownloadDialogPresenter(context: Any,
         val currentStatuMessage = statusMessage
         if(downloadTotals != null && currentStatuMessage != null){
             view.runOnUiThread(Runnable {
-                updateWarningMessage()
+                updateWarningMessage(downloadJobItemLiveData.getValue())
                 view.setCalculatingViewVisible(false)
                 view.setStatusText(currentStatuMessage,
                     downloadTotals.numEntries, UMFileUtil.formatFileSize(downloadTotals.totalSize))
-                view.setWifiOnlyOptionVisible(true)
             })
         }
     }
 
-    private fun updateWarningMessage() {
+    private fun updateWarningMessage(currentDownloadJobItem: DownloadJobItem?) {
         val jobSizeTotalsVal = jobSizeTotals.value
         val selectedStorageDirVal = selectedStorageDir
-        if(jobSizeTotalsVal != null && selectedStorageDirVal != null) {
+        val currentStatus = currentDownloadJobItem?.djiStatus ?: 0
+        if(currentStatus <= JobStatus.PAUSED && jobSizeTotalsVal != null
+                && selectedStorageDirVal != null) {
             if(jobSizeTotalsVal.totalSize > selectedStorageDirVal.usableSpace) {
                 view.setWarningTextVisible(true)
                 view.setWarningText(impl.getString(MessageID.insufficient_space, context))
@@ -202,6 +212,8 @@ class DownloadDialogPresenter(context: Any,
                 view.setWarningTextVisible(false)
                 view.setBottomPositiveButtonEnabled(true)
             }
+        }else {
+            view.setBottomPositiveButtonEnabled(true)
         }
     }
 
@@ -279,18 +291,24 @@ class DownloadDialogPresenter(context: Any,
         wifiOnlyChecked.value = wifiOnly
         if(currentJobId != 0) {
             GlobalScope.launch {
-                appDatabase.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId,
-                        !wifiOnly)
+                containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
             }
         }
     }
 
     fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
         selectedStorageDir = selectedDir
-        updateWarningMessage()
+        updateWarningMessage(downloadJobItemLiveData.getValue())
         GlobalScope.launch {
-            appDatabase.downloadJobDao.updateDestinationDirectoryAsync(
-                    currentJobId, selectedDir.dirURI)
+            val downloadJob = containerDownloadManager.getDownloadJob(currentJobId).getValue()
+            if(downloadJob != null){
+                containerDownloadManager.handleDownloadJobUpdated(downloadJob.also {
+                    it.djDestinationDir = selectedDir.dirURI
+                })
+            }
+
+            appDatabase.downloadJobDao.updateDestinationDirectoryAsync(currentJobId,
+                    selectedDir.dirURI)
         }
     }
 
