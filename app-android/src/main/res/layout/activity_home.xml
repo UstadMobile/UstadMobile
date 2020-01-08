@@ -100,5 +100,13 @@
         app:layout_anchorGravity="bottom|center"
         app:floating_title_color="@android:color/black" />
 
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+        app:layout_anchorGravity="bottom"
+        android:elevation="@dimen/dimen_4dp"
+        android:id="@+id/mBottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"/>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

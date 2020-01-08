@@ -29,6 +29,7 @@ object UmAccountManager {
 
     @Synchronized
     fun getActiveAccount(context: Any, impl: UstadMobileSystemImpl): UmAccount? {
+        activeAccountLiveData.sendValue(UmAccount(0,"","",""))
         if (activeAccount == null) {
             val personUid = impl.getAppPref(PREFKEY_PERSON_ID, "0", context).toLong()
             if (personUid == 0L)

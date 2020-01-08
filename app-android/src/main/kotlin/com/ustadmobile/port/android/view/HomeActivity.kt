@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,10 +11,13 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
@@ -21,24 +25,19 @@ import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_L
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.view.ContentEntryEditView
-import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
-import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 
@@ -50,7 +49,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     private lateinit var profileImage: CircleImageView
 
-    private var shareAppDialog: AlertDialog? = null
+    val impl = UstadMobileSystemImpl.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,6 +101,26 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun showReportMenu(show: Boolean) {}
 
+    override fun setOptions(options: List<Pair<Int, String>>) {
+        options.forEach {
+            val navigationItem = AHBottomNavigationItem(
+                    impl.getString(it.first, this), if(it.first == MessageID.reports)
+                R.drawable.ic_pie_chart_black_24dp else R.drawable.ic_local_library_black_24dp )
+            mBottomNavigation.addItem(navigationItem)
+        }
+
+        mBottomNavigation.defaultBackgroundColor = Color.parseColor("#FEFEFE")
+        mBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.primary)
+        mBottomNavigation.inactiveColor = ContextCompat.getColor(this, R.color.text_secondary)
+        mBottomNavigation.isBehaviorTranslationEnabled = false
+        mBottomNavigation.currentItem = 0
+        mBottomNavigation.titleState = AHBottomNavigation.TitleState.ALWAYS_SHOW
+        mBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
+            val params = options[position].second
+            true
+        }
+    }
+
     override fun onPageScrollStateChanged(state: Int) {}
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
@@ -132,7 +151,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        val impl = UstadMobileSystemImpl.instance
         val locationPermissionArr =arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION)
         val dialogTitle =impl.getString(MessageID.location_permission_title, this)

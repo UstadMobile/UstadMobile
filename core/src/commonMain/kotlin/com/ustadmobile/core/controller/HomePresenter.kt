@@ -1,14 +1,15 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -17,7 +18,7 @@ import kotlin.js.JsName
 
 class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
                     val personDao: PersonDao, impl: UstadMobileSystemImpl)
-    : LanguageOptionPresenter(context, arguments, view, impl), DoorObserver<UmAccount?> {
+    : LanguageOptionPresenter(context, arguments, view, impl){
 
     private var account: UmAccount? = null
 
@@ -32,29 +33,32 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         showDownloadAll = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
+        DoorMutableLiveData<UmAccount?>(null).observe(this, ::onChanged)
+        UmAccountManager.getActiveAccount(context)
 
-        account = UmAccountManager.getActiveAccount(context)
-
-        GlobalScope.launch {
-            var showReport = false; var person: Person? = null
-            if(account != null){
-                person = personDao.findByUid(account!!.personUid)
-                if(person != null){
-                   showReport = person.admin
-                }
-            }
-
-            view.runOnUiThread(Runnable {
-                homeView.showReportMenu(showReport)
-                if(person != null){
-                    homeView.setLoggedPerson(person)
-                }
-                homeView.loadProfileIcon(if(account == null) "" else "")
-            })
-        }
     }
 
-    override fun onChanged(t: UmAccount?) {
+    private fun onChanged(t: UmAccount?) {
+        GlobalScope.launch {
+            var options = listOf(Pair(MessageID.contents, "ContentEntryView?"),Pair(MessageID.reports, "ContentEntryView"))
+            if(t != null){
+                account = t
+                val person = personDao.findByUid(t.personUid)
+                if(person != null){
+
+                    if(person.admin){
+                        options = options.plus(Pair(MessageID.reports, "ContentEntryView"))
+                    }
+                    view.runOnUiThread(Runnable {
+                        homeView.setLoggedPerson(person)
+                    })
+                }
+            }
+            view.runOnUiThread(Runnable {
+                homeView.loadProfileIcon(if(account == null) "" else "")
+                homeView.setOptions(options)
+            })
+        }
         //TODO here: check if the person is admin
         // view.setOptions(listOf("ContentEntryView?$ARG_FILTER_BUTTONS=...))
 

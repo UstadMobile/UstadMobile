@@ -176,6 +176,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         contentEntryListHostActivity?.setLanguageFilterSpinner(result)
     }
 
+    override fun setFilterButtons(buttonLabels: List<String>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun setEditButtonsVisibility(buttonVisibilityFlags: Int) {
         this.buttonVisibilityFlags = buttonVisibilityFlags
         activity?.invalidateOptionsMenu()
