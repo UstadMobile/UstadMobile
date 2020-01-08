@@ -97,7 +97,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
-                umAppRepository, UmAppDatabase.getInstance(baseContext),
+                umAppRepository, UmAccountManager.getActiveDatabase(this),
                 networkManagerBle.localAvailabilityManager,
                 networkManagerBle.containerDownloadManager,
                 UmAccountManager.getActiveAccount(viewContext),

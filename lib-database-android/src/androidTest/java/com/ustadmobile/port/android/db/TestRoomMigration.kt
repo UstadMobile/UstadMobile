@@ -39,5 +39,16 @@ class TestRoomMigration {
         helper.runMigrationsAndValidate(TEST_DB, 29, true,
                 UmAppDatabase.MIGRATION_28_29)
     }
+    @Test
+
+    fun migrate29to30() {
+        helper.createDatabase(TEST_DB, 29).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 30, true,
+                UmAppDatabase.MIGRATION_29_30)
+    }
+
 
 }

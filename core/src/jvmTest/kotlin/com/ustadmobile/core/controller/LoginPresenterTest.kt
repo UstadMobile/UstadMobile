@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -95,14 +96,15 @@ class LoginPresenterTest {
 
         val httpUrl = mockWebServer.url("/").toString()
 
+        bindJndiForActiveEndpoint(httpUrl)
+
         val presenter = LoginPresenter(context,
                 mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl,
                         LoginPresenter.ARG_NEXT to "somewhere"), view, impl)
 
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
 
-        verify(impl, timeout(5000 )).go("somewhere",
-                context)
+        verify(impl, timeout(5000)).go("somewhere", context)
 
         val activeAccount = UmAccountManager.getActiveAccount(context)
         Assert.assertNotNull(activeAccount)

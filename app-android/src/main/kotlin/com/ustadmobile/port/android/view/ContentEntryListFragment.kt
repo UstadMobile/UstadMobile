@@ -265,7 +265,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
                 runOnUiThread(Runnable { recyclerAdapter?.updateLocalAvailability(availabilityMap) })
             }
 
-            val umDb = UmAppDatabase.getInstance(ustadBaseActivity)
+            val umDb = UmAccountManager.getActiveDatabase(ustadBaseActivity)
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
             presenter = ContentEntryListPresenter(context as Context,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
