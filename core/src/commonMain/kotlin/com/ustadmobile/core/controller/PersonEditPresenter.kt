@@ -791,8 +791,8 @@ class PersonEditPresenter
         GlobalScope.launch {
 
             //Check username
-            if (currentPerson != null && currentPerson!!.username != null &&
-                    !currentPerson!!.username.equals(usernameSet)) {
+            if((usernameSet!= null && currentPerson!!.username == null) || (currentPerson != null && currentPerson!!.username != null &&
+                    !currentPerson!!.username.equals(usernameSet))) {
                 //Update on server
                 try {
                     val serverUrl = UmAccountManager.getActiveEndpoint(context)
