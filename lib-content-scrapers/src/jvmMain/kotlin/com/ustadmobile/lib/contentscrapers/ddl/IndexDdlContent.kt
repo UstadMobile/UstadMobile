@@ -118,7 +118,7 @@ class IndexDdlContent {
             }
 
         }
-        UMLogUtil.logTrace("max number of pages: $maxNumber")
+        UMLogUtil.logTrace("$DDL max number of pages: $maxNumber")
 
         browseList(lang, 1)
         langCount++
@@ -131,12 +131,12 @@ class IndexDdlContent {
         if (counter > maxNumber) {
             return
         }
-        UMLogUtil.logTrace("starting page: $counter")
+        UMLogUtil.logTrace("$DDL starting page: $counter")
         val document = Jsoup.connect("https://www.ddl.af/$lang/resources/list?page=$counter")
                 .header("X-Requested-With", "XMLHttpRequest").get()
 
         val resourceList = document.select("article a[href]")
-        UMLogUtil.logTrace("found " + resourceList.size + " articles to download")
+        UMLogUtil.logTrace("$DDL found " + resourceList.size + " articles to download")
         for (resource in resourceList) {
 
             val url = resource.attr("href")
@@ -152,12 +152,12 @@ class IndexDdlContent {
                 val scraper = DdlContentScraper(containerDir, lang, db, contentEntry.contentEntryUid)
                 try {
                     scraper.scrapeUrl(url)
-                    UMLogUtil.logTrace("scraped url: $url")
+                    UMLogUtil.logTrace("$DDL scraped url: $url")
                     val subjectAreas = scraper.parentSubjectAreas
                     val contentCategories = scraper.contentCategories
                     var subjectAreaCount = 0
-                    UMLogUtil.logTrace("found " + subjectAreas.size + " subjects in entry")
-                    UMLogUtil.logTrace("found " + contentCategories.size + " categories in entry")
+                    UMLogUtil.logTrace("$DDL found " + subjectAreas.size + " subjects in entry")
+                    UMLogUtil.logTrace("$DDL found " + contentCategories.size + " categories in entry")
                     for (subjectArea in subjectAreas) {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!,
@@ -175,7 +175,7 @@ class IndexDdlContent {
 
 
                 } catch (e: Exception) {
-                    UMLogUtil.logError("Something went wrong here $url")
+                    UMLogUtil.logError("$DDL Exception - Something went wrong here $url")
                     UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 }
 
@@ -209,8 +209,9 @@ class IndexDdlContent {
             try {
                 IndexDdlContent().findContent(File(args[0]), File(args[1]))
             } catch (e: Exception) {
+                UMLogUtil.logFatal("$DDL Exception running findContent DDL Scraper")
                 UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
-                UMLogUtil.logFatal("Exception running findContent DDL Scraper")
+
             }
 
         }

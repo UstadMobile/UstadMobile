@@ -17,7 +17,6 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.openqa.selenium.By
-import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
@@ -161,14 +160,14 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
                 true
             }
         } catch (e: Exception) {
-            UMLogUtil.logError("Error downloading resource from url $sourceUrl/$href")
+            UMLogUtil.logError("$DDL Exception - Error downloading resource from url $sourceUrl/$href")
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
         }
 
         if (containerManager?.allEntries?.isEmpty() != false) {
 
             contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
-            UMLogUtil.logError("Did not find any content to download at url $sourceUrl")
+            UMLogUtil.logError("$DDL Debug - Did not find any content to download at url $sourceUrl")
             close()
             return
         }
@@ -201,7 +200,7 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
                 DdlContentScraper(File(args[1]), args[3], UmAppDatabase.Companion.getInstance(Any()), 0).scrapeUrl(args[0])
             } catch (e: IOException) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-                UMLogUtil.logError("Exception running scrapeContent ddl")
+                UMLogUtil.logError("$DDL Exception running scrapeContent ddl")
             }
 
         }
