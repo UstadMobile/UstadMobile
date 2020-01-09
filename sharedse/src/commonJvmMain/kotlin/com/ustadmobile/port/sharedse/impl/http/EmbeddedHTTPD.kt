@@ -164,7 +164,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         }
 
         addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
-                MountedContainerResponder::class.java, context, filters)
+                MountedContainerResponder::class.java, context, filters, appDatabase)
 
         return mountPath
     }

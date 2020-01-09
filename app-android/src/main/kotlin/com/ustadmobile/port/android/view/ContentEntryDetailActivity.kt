@@ -32,6 +32,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
+import com.ustadmobile.core.util.ext.toStatusString
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -249,8 +250,9 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
             currentDownloadJobItemStatus = downloadJobItem?.djiStatus ?: 0
         }
 
-        if(downloadJobItem != null && downloadJobItem.djiStatus > JobStatus.WAITING_MIN
-                && downloadJobItem.djiStatus <= JobStatus.COMPLETE_MIN) {
+        if(downloadJobItem != null && downloadJobItem.isStatusQueuedOrDownloading()) {
+            entry_detail_progress.statusText = downloadJobItem.toStatusString(
+                    UstadMobileSystemImpl.instance, this)
             entry_detail_progress.progress = if(downloadJobItem.downloadLength > 0) {
                 (downloadJobItem.downloadedSoFar.toFloat()) / (downloadJobItem.downloadLength.toFloat())
             }else {

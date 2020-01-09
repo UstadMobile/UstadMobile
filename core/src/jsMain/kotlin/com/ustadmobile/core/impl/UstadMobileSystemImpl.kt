@@ -226,7 +226,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

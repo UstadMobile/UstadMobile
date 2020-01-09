@@ -49,6 +49,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
@@ -293,6 +295,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param callback Storage dir list callback
      */
 
+    @Deprecated("Use getStorageDirsAsync instead")
     actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
         Thread {
             val dirList = ArrayList<UMStorageDir>()
@@ -319,7 +322,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
         val dirList = ArrayList<UMStorageDir>()
         val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
         val contentDirName = getContentDirName(context)
@@ -328,7 +331,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         if (!umDir.exists()) umDir.mkdirs()
         dirList.add(UMStorageDir(umDir.absolutePath,
                 getString(MessageID.phone_memory, context), true,
-                isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
+                isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath),
+                usableSpace = umDir.usableSpace))
 
         if (storageOptions.size > 1) {
             val sdCardStorage = storageOptions[sdCardStorageIndex]
@@ -336,9 +340,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.memory_card, context), true,
-                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
+                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath),
+                    usableSpace = umDir.usableSpace))
         }
-        return dirList
+        return@withContext dirList
     }
 
     /**
