@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -35,6 +36,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
     private var personWithEnrollmentUmProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
+    internal var database = UmAppDatabase.getInstance(context)
 
     private var loggedInPersonUid: Long? = 0L
 
@@ -164,13 +166,16 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         val newPerson = Person()
         val personDao = repository.personDao
         val personFieldDao = repository.personCustomFieldDao
+        val personFieldDaoDB = database.personCustomFieldDao
         val customFieldValueDao = repository.personCustomFieldValueDao
+        val customFieldValueDaoDB = database.personCustomFieldValueDao
 
         GlobalScope.launch {
             val result = personDao.createPersonAsync(newPerson, loggedInPersonUid!!)
-            //Also create null Custom Field values so it shows up in the Edit screen.
-            val allCustomFields = personFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID)
-            for (everyCustomField in allCustomFields!!) {
+
+            //val allCustomFields = personFieldDao.findAllCustomFields()
+            val allCustomFieldsLocal = personFieldDaoDB.findAllCustomFields()
+            for (everyCustomField in allCustomFieldsLocal!!) {
                 val cfv = PersonCustomFieldValue()
                 cfv.personCustomFieldValuePersonCustomFieldUid = (everyCustomField.personCustomFieldUid)
                 cfv.personCustomFieldValuePersonUid = (result)

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -65,6 +66,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     private var currentPerson: Person? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
+    internal var database = UmAppDatabase.getInstance(context)
 
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 
@@ -84,6 +86,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         viewIdToCustomFieldUid = HashMap()
 
         clazzMemberDao = repository.clazzMemberDao
+        customFieldDao = repository.customFieldDao
         customFieldDao = repository.customFieldDao
         customFieldValueDao = repository.customFieldValueDao
         optionDao = repository.customFieldValueOptionDao
@@ -254,7 +257,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
             //Update person and generate feeds for person
             val result = personDao.updatePersonAsync(currentPerson!!, loggedInPersonUid)
-            PersonEditPresenter.generateFeedsForPersonUpdate(repository, currentPerson!!)
+            PersonEditPresenter.generateFeedsForPersonUpdate(repository, database, currentPerson!!)
 
             view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
         }

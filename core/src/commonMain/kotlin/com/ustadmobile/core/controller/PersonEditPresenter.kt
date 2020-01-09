@@ -52,6 +52,7 @@ import com.ustadmobile.lib.util.encryptPassword
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
+import io.ktor.client.response.readText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.Dispatchers
@@ -115,6 +116,7 @@ class PersonEditPresenter
     private var optionDaoDB: CustomFieldValueOptionDao
     private var personPictureDaoRepo : PersonPictureDao
     private val personAuthDao: PersonAuthDao
+    private val personAuthDaoDB: PersonAuthDao
     private val personPictureDaoDB : PersonPictureDao
     private val personCustomFieldValueDao : PersonCustomFieldValueDao
     private val personCustomFieldValueDaoDB : PersonCustomFieldValueDao
@@ -153,6 +155,7 @@ class PersonEditPresenter
         personGroupDaoDB = database.personGroupDao
         personCustomFieldValueDaoDB = database.personCustomFieldValueDao
         feedEntryDaoDB = database.feedEntryDao
+        personAuthDaoDB = database.personAuthDao
 
         personAuthDao = repository.personAuthDao
         customFieldDao = repository.customFieldDao
@@ -181,10 +184,10 @@ class PersonEditPresenter
 
         GlobalScope.launch {
             //1. Get all custom fields
-            val result = customFieldDao!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
+            val result = customFieldDaoDB!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
             for (c in result) {
                 //Get value as well
-                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(
+                val result2 = customFieldValueDaoDB!!.findValueByCustomFieldUidAndEntityUid(
                         c.customFieldUid, personUid)
                 var valueString: String? = ""
                 var valueSelection = 0
@@ -198,7 +201,6 @@ class PersonEditPresenter
                     view.runOnUiThread(Runnable{
 
                         view.addCustomFieldText(c, finalValueString[0])
-                        //view.addComponent(finalValueString[0], c.getCustomFieldName());
                     })
 
                 } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
@@ -211,7 +213,7 @@ class PersonEditPresenter
 
                     }
                     val finalValueSelection = valueSelection
-                    val result3 = optionDao!!.findAllOptionsForFieldAsync(c.customFieldUid)
+                    val result3 = optionDaoDB!!.findAllOptionsForFieldAsync(c.customFieldUid)
                     val options = ArrayList<String>()
 
                     for (o in result3!!) {
@@ -226,7 +228,6 @@ class PersonEditPresenter
 
                     customFieldDropDownOptions[c.customFieldUid] = options
                     view.runOnUiThread(Runnable{
-                        //view.addComponent(finalValueString, c.getCustomFieldName());
                         var a = arrayOfNulls<String>(options.size)
                         a = options.toTypedArray()
                         view.addCustomFieldDropdown(c, a, finalValueSelection)
@@ -243,10 +244,6 @@ class PersonEditPresenter
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
-
-        customFieldDao = repository.customFieldDao
-        customFieldValueDao = repository.customFieldValueDao
-        optionDao = repository.customFieldValueOptionDao
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
@@ -277,11 +274,11 @@ class PersonEditPresenter
 
         if(personUid != 0L){
             GlobalScope.launch {
-                val result = personDao.findByUidAsync(personUid)
+                val result = personDaoDB.findByUidAsync(personUid)
                 currentPerson = result
                 usernameSet = currentPerson!!.username
 
-                val result2 = personAuthDao.findByUidAsync(personUid)
+                val result2 = personAuthDaoDB.findByUidAsync(personUid)
                 currentPersonAuth = result2
                 if (result2 == null) {
                     currentPersonAuth = PersonAuth()
@@ -340,7 +337,7 @@ class PersonEditPresenter
 
             //Update personWithpic
             personDao.updatePersonAsync(thisPerson!!, loggedInPersonUid!!)
-            generateFeedsForPersonUpdate(repository, updatedPerson!!)
+            generateFeedsForPersonUpdate(repository, database, updatedPerson!!)
 
         }
     }
@@ -637,7 +634,7 @@ class PersonEditPresenter
 
         } else if (fieldcode == PERSON_FIELD_UID_USERNAME.toLong() ){
             usernameSet = value as String
-            personToUpdate!!.username = usernameSet
+            //personToUpdate!!.username = usernameSet
         } else if (fieldcode == PERSON_FIELD_UID_PASSWORD.toLong() ){
             passwordSet = value as String
         } else if (fieldcode == PERSON_FIELD_UID_CONFIRM_PASSWORD.toLong() ){
@@ -727,8 +724,6 @@ class PersonEditPresenter
             } else if (type == CustomField.FIELD_TYPE_DROPDOWN) {
                 val spinnerSelection = value as Int
                 val options = customFieldDropDownOptions[customFieldUid]
-                //valueString = options.get(spinnerSelection);
-                //or:
                 valueString = spinnerSelection.toString()
             }
 
@@ -771,49 +766,33 @@ class PersonEditPresenter
             //Update the custom fields
             personCustomFieldValueDao.updateListAsync(customFieldsToUpdate)
             //Start of feed generation
-            generateFeedsForPersonUpdate(repository, updatedPerson!!)
-
-            //Update password if necessary
-            val updatePassword = updatePassword()
+            generateFeedsForPersonUpdate(repository, database, updatedPerson!!)
 
             //Update person's individual group to  set the right name of the group
             val fullName = updatedPerson!!.fullName()
-
-            val personGroup = personGroupDao.findPersonIndividualGroup(updatedPerson!!.personUid)
+            val personGroup = personGroupDaoDB.findPersonIndividualGroup(updatedPerson!!.personUid)
             if(personGroup != null){
                 personGroup.groupName = fullName + "'s individual person group"
                 personGroupDao.updateAsync(personGroup)
             }
 
-            //Close the activity.
-            if(updatePassword) {
-                view.finish()
-            }
-
+            //Update password if necessary
+            updateUsernameAndPassword()
         }
 
     }
 
-    private fun updatePassword() : Boolean {
-        if (passwordSet != null && !passwordSet!!.isEmpty() && usernameSet != null
-                && !usernameSet!!.isEmpty() && currentPersonAuth != null && currentPerson != null) {
-            if (passwordSet != confirmPasswordSet) {
-                view.sendMessage(MessageID.passwords_dont_match)
-                return false
-            }
+    private fun updateUsernameAndPassword() : Boolean {
 
-            view.runOnUiThread(Runnable {
-                view.setInProgress(true)
-            })
-            currentPerson!!.username = usernameSet
+        view.runOnUiThread(Runnable {
+            view.setInProgress(true)
+        })
 
-            currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX +
-                    encryptPassword(passwordSet!!)
-            currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
-            GlobalScope.launch {
-                //Update locally
-                personDao.updateAsync(updatedPerson!!)
+        GlobalScope.launch {
 
+            //Check username
+            if (currentPerson != null && currentPerson!!.username != null &&
+                    !currentPerson!!.username.equals(usernameSet)) {
                 //Update on server
                 try {
                     val serverUrl = UmAccountManager.getActiveEndpoint(context)
@@ -821,60 +800,161 @@ class PersonEditPresenter
                     {
                         url {
                             takeFrom(serverUrl!!)
-                            encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+                            encodedPath = "${encodedPath}UmAppDatabase/PersonDao/isUsernameAvailable"
                         }
-                        parameter("p0", personUid)
-                        parameter("p1", passwordSet)
-                        parameter("p2", loggedInPersonUid)
+                        parameter("p0", usernameSet)
                     }
 
-                    if(resetPasswordResponse.status == HttpStatusCode.OK) {
-                        //Update locally
-                        personAuthDao.updateAsync(currentPersonAuth!!)
-                        view.finish()
-                    }else {
-                        view.sendMessage(MessageID.unable_to_update_password)
-                        println("nope")
+                    if (resetPasswordResponse.status == HttpStatusCode.OK) {
+
+                        val result = resetPasswordResponse.readText()
+                        if (!result.toBoolean()) {
+                            view.sendMessage(MessageID.username_not_available)
+                            view.runOnUiThread(Runnable {
+                                view.setInProgress(false)
+                            })
+                            false
+                        } else {
+                            updatedPerson!!.username = usernameSet
+                            currentPerson!!.username = usernameSet
+                            personDaoDB.updateAsync(updatedPerson!!)
+                            updatePassword()
+                        }
+                    } else {
+                        view.sendMessage(MessageID.unable_to_update_username)
+                        view.runOnUiThread(Runnable {
+                            view.setInProgress(false)
+                        })
                         false
                     }
                 } catch (e: Exception) {
-                    view.sendMessage(MessageID.unable_to_update_password)
-                    print("oops")
+                    view.sendMessage(MessageID.unable_to_update_username_error)
+                    view.runOnUiThread(Runnable {
+                        view.setInProgress(false)
+                    })
                     false
                 }
+            }else{
+                updatePassword()
             }
-            view.runOnUiThread(Runnable {
-                view.setInProgress(false)
-            })
-
-            return false
+            false
         }
-        return true
+        return false
     }
+
+
+    private fun updatePassword(): Boolean{
+        view.runOnUiThread(Runnable {
+            view.setInProgress(true)
+        })
+        GlobalScope.launch {
+
+            if (passwordSet != null && !passwordSet!!.isEmpty() && usernameSet != null
+                    && !usernameSet!!.isEmpty() && currentPersonAuth != null
+                    && currentPerson != null) {
+
+                if (passwordSet != confirmPasswordSet) {
+                    view.runOnUiThread(Runnable {
+                        view.setInProgress(false)
+                        view.sendMessage(MessageID.passwords_dont_match)
+                    })
+                    false
+                }else {
+
+                    //Update locally
+                    personDao.updateAsync(updatedPerson!!)
+
+                    currentPersonAuth!!.passwordHash = PersonAuthDao.ENCRYPTED_PASS_PREFIX +
+                            encryptPassword(passwordSet!!)
+                    currentPersonAuth!!.personAuthStatus = (PersonAuth.STATUS_NOT_SENT)
+
+
+                    //Update on server
+                    try {
+                        val serverUrl = UmAccountManager.getActiveEndpoint(context)
+                        val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+                        {
+                            url {
+                                takeFrom(serverUrl!!)
+                                encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+                            }
+                            parameter("p0", personUid)
+                            parameter("p1", passwordSet)
+                            parameter("p2", loggedInPersonUid)
+                        }
+
+                        if (resetPasswordResponse.status == HttpStatusCode.OK) {
+                            //Update locally
+                            personAuthDao.updateAsync(currentPersonAuth!!)
+                            view.runOnUiThread(Runnable {
+                                view.finish()
+                            })
+                        } else {
+                            view.sendMessage(MessageID.unable_to_update_password)
+                            view.runOnUiThread(Runnable {
+                                view.setInProgress(false)
+                            })
+                            false
+                        }
+                    } catch (e: Exception) {
+                        view.sendMessage(MessageID.unable_to_update_password)
+                        view.runOnUiThread(Runnable {
+                            view.setInProgress(false)
+                        })
+                        false
+                    }
+                }
+            }else{
+                view.runOnUiThread(Runnable {
+                    view.finish()
+                })
+            }
+
+        }
+        return false
+    }
+
 
 
 
     companion object {
 
-        internal fun generateFeedsForPersonUpdate(repository: UmAppDatabase, mUpdatedPerson: Person) {
+        /**
+         *TODO: This is a tricky situation. We want to create the logs locally for every admin/mne/etc.
+         * The problem is that we shouldn't/don't have a list of all admins & mne's on students/teachers devices.
+         * This should be a job for the server. But at the same time we need the logs locally if the device is offline.
+         *
+         */
+
+        internal fun generateFeedsForPersonUpdate(repository: UmAppDatabase,
+                                                  database: UmAppDatabase, mUpdatedPerson: Person) {
+
+            val feedEntryDao = repository.feedEntryDao
+            val feedEntryDaoDB = database.feedEntryDao
+            val clazzDao = repository.clazzDao
+            val clazzDaoDB = database.clazzDao
+            val roleDao = repository.roleDao
+            val roleDaoDB = database.roleDao
+            val personDao = repository.personDao
+            val personDaoDB = database.personDao
+
             //All edits trigger a feed
-            val personClazzes = repository.clazzDao
-                    .findAllClazzesByPersonUidAsList(mUpdatedPerson.personUid)
+            val personClazzes = clazzDaoDB.findAllClazzesByPersonUidAsList(mUpdatedPerson.personUid)
 
             val newFeedEntries = ArrayList<FeedEntry>()
             val updateFeedEntries = ArrayList<FeedEntry>()
 
-            val feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
-                    PersonDetailView.ARG_PERSON_UID + "=" +
+            val feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" + ARG_PERSON_UID + "=" +
                     mUpdatedPerson.personUid
 
             for (everyClazz in personClazzes) {
-                val mneOfficerRole = repository.roleDao.findByNameSync(Role.ROLE_NAME_MNE)
-                val mneofficers = repository.clazzDao.findPeopleWithRoleAssignedToClazz(
+                //Find officers and admins
+                val mneOfficerRole = roleDaoDB.findByNameSync(Role.ROLE_NAME_MNE)
+                val mneofficers = clazzDaoDB.findPeopleWithRoleAssignedToClazz(
                         everyClazz.clazzUid, mneOfficerRole!!.roleUid)
+                val admins = personDaoDB.findAllAdminsAsList()
 
-                val admins = repository.personDao.findAllAdminsAsList()
-
+                //For every officer,create feed entry
                 for (mne in mneofficers) {
                     val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                             mne.personUid, everyClazz.clazzUid,
@@ -885,13 +965,10 @@ class PersonEditPresenter
                             feedEntryUid,
                             "Student details updated",
                             "Student " + mUpdatedPerson.firstNames
-                                    + " " + mUpdatedPerson.lastName
-                                    + " details updated",
-                            feedLinkViewPerson,
-                            everyClazz.clazzName!!,
-                            mne.personUid
+                                    + " " + mUpdatedPerson.lastName + " details updated",
+                            feedLinkViewPerson, everyClazz.clazzName!!, mne.personUid
                     )
-                    val existingEntry = repository.feedEntryDao.findByUid(feedEntryUid)
+                    val existingEntry = feedEntryDaoDB.findByUid(feedEntryUid)
 
                     if (existingEntry == null) {
                         newFeedEntries.add(thisEntry)
@@ -900,6 +977,7 @@ class PersonEditPresenter
                     }
                 }
 
+                //For every admin, create feed entry.
                 for (admin in admins) {
                     val feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                             admin.personUid, everyClazz.clazzUid,
@@ -910,14 +988,11 @@ class PersonEditPresenter
                             feedEntryUid,
                             "Student details updated",
                             "Student " + mUpdatedPerson.firstNames
-                                    + " " + mUpdatedPerson.lastName
-                                    + " details updated",
-                            feedLinkViewPerson,
-                            everyClazz.clazzName!!,
-                            admin.personUid
+                                    + " " + mUpdatedPerson.lastName + " details updated",
+                            feedLinkViewPerson, everyClazz.clazzName!!, admin.personUid
                     )
 
-                    val existingEntry = repository.feedEntryDao.findByUid(feedEntryUid)
+                    val existingEntry = feedEntryDaoDB.findByUid(feedEntryUid)
 
                     if (existingEntry == null) {
                         newFeedEntries.add(thisEntry)
@@ -927,8 +1002,8 @@ class PersonEditPresenter
                 }
             }
 
-            repository.feedEntryDao.insertList(newFeedEntries)
-            repository.feedEntryDao.updateList(updateFeedEntries)
+            feedEntryDao.insertList(newFeedEntries)
+            feedEntryDao.updateList(updateFeedEntries)
 
             //End of feed Generation
         }
