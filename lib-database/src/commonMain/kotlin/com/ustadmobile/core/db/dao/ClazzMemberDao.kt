@@ -101,7 +101,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
             " WHERE ClazzMember.clazzMemberClazzUid = :uid " +
             " AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 " +
-            "AND ClazzMember.clazzMemberRole = :role")
+            "AND ClazzMember.clazzMemberRole = :role " +
+            "AND CAST(Person.active AS INTEGER) = 1 ")
     abstract fun findByClazzUid(uid: Long, role: Int): List<ClazzMember>
 
     @Query("SELECT ClazzMember.clazzMemberUid, Clazz.clazzName, Person.firstNames, " +

@@ -257,7 +257,8 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             " ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person on ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +
-            "AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT )
+            " AND CAST(Person.active AS INTEGER) = 1 " +
+            " AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT )
     abstract fun findAttendanceRecordsWithPersonByClassLogId(clazzLogUid: Long): DataSource.Factory<Int, ClazzLogAttendanceRecordWithPerson>
 
     @Query("SELECT ClazzMember.clazzMemberUid FROM ClazzMember WHERE " +
