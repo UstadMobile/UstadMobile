@@ -1550,8 +1550,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     | END ${'$'}${'$'}
                     | LANGUAGE plpgsql
                     """.trimMargin())
+                    database.execSQL("""DROP TRIGGER IF EXISTS inccsn_66_trig ON ContextXObjectStatementJoin""".trimMargin())
                     database.execSQL("""
-                    |CREATE TRIGGER IF NOT EXISTS inccsn_66_trig 
+                    |CREATE TRIGGER inccsn_66_trig 
                     |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
                     |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                     |EXECUTE PROCEDURE inccsn_66_fn()
