@@ -29,6 +29,10 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     @JsName("updateDownloadStatus")
     abstract fun updateDownloadStatus(contentEntryUid: Long, downloadStatus: Int)
 
+    @Query("UPDATE ContentEntryStatus SET downloadStatus = :downloadStatus WHERE cesUid = :contentEntryUid")
+    @JsName("updateDownloadStatusAsync")
+    abstract suspend fun updateDownloadStatusAsync(contentEntryUid: Long, downloadStatus: Int)
+
     @Query("SELECT * FROM ContentEntryStatus WHERE invalidated")
     @JsName("findAllInvalidated")
     abstract fun findAllInvalidated(): List<ContentEntryStatus>
@@ -42,8 +46,8 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun insertOrAbort(statusList: List<ContentEntryStatus>)
 
     @Query("DELETE FROM ContentEntryStatus WHERE cesUid = :cesUid")
-    @JsName("deleteByFileUids")
-    abstract fun deleteByFileUids(cesUid: Long)
+    @JsName("deleteByContentEntryUid")
+    abstract fun deleteByContentEntryUid(cesUid: Long)
 
     @Transaction
     open fun updateDownloadStatusByList(statusList: List<DownloadJobItemStatus>) {

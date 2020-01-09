@@ -9,11 +9,15 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.exception.ZipException
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
+import com.ustadmobile.core.impl.UmAccountManager
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -26,7 +30,9 @@ import java.util.*
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any, private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(context), private val repository: UmAppDatabase = UmAppDatabase.getInstance(context)) : RouterNanoHTTPD(portNum) {
+open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any,
+                                                   private val appDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context),
+                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) {
 
     private val id: Int
 
@@ -74,6 +80,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder::class.java, appDatabase)
         addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
                 ContainerEntryListResponder::class.java, appDatabase)
+        addRoute("/$ENDPOINT_CONCATENATEDFILES/(.*)+", ConcatenatedContainerEntryFileResponder::class.java,
+                appDatabase)
         addRoute("/xapi/statements(.*)+", XapiStatementResponder::class.java, repository)
         addRoute("/xapi/activities/state(.*)+", XapiStateResponder::class.java, repository)
     }
@@ -156,7 +164,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         }
 
         addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
-                MountedContainerResponder::class.java, context, filters)
+                MountedContainerResponder::class.java, context, filters, appDatabase)
 
         return mountPath
     }
@@ -260,6 +268,9 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         mountName = mountZip(zipPath, mountName)
         return mountName
     }
+
+    fun newSession(inputStream: InputStream, outputStream: OutputStream): IHTTPSession =
+            HTTPSession(tempFileManagerFactory.create(), inputStream, outputStream)
 
     companion object {
 

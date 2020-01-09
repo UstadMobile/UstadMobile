@@ -10,6 +10,13 @@ class OpfCreator {
 
     var id: String? = null
 
+    constructor()
+
+    constructor(creator: String?, id: String?){
+        this.creator = creator
+        this.id = id
+    }
+
 
 
     override fun toString(): String {

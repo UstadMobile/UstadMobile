@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEditorView : ViewWithErrorNotifier {
-
+interface ContentEditorView: UstadViewWithProgressDialog {
 
     /**
      * Set bold formatting on selected/focused content
@@ -140,8 +139,6 @@ interface ContentEditorView : ViewWithErrorNotifier {
     companion object {
 
         const val VIEW_NAME = "ContentEditor"
-
-        const val CONTENT_ENTRY_UID = "content_entry__uid"
 
         const val CONTENT_STORAGE_OPTION = "content_storage_option"
 

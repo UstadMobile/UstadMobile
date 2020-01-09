@@ -120,6 +120,68 @@
                 android:layout_height="?attr/dropdownListPreferredItemHeight"
                 />
 
+            <RelativeLayout
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:id="@+id/entry_content_visibility_holder"
+                android:paddingTop="@dimen/dimen_12dp"
+                android:paddingBottom="@dimen/dimen_12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_toStartOf="@+id/entry_visibility_switch"
+                    android:id="@+id/entry_visibility_label"
+                    android:paddingStart="@dimen/dimen_8dp"
+                    android:paddingEnd="@dimen/dimen_8dp"
+                    android:textSize="@dimen/text_body"
+                    android:text="@string/content_entry_label_visibility"
+                    android:textColor="@color/text_primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:checked="true"
+                    android:theme="@style/Custom.SwitchCompat"
+                    android:layout_marginEnd="@dimen/dimen_10dp"
+                    android:layout_alignParentEnd="true"
+                    android:id="@+id/entry_visibility_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:id="@+id/entry_content_inactive_holder"
+                android:paddingTop="@dimen/dimen_12dp"
+                android:paddingBottom="@dimen/dimen_12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_toStartOf="@+id/entry_inactive_switch"
+                    android:id="@+id/entry_visibility_active_label"
+                    android:paddingStart="@dimen/dimen_8dp"
+                    android:paddingEnd="@dimen/dimen_8dp"
+                    android:textSize="@dimen/text_body"
+                    android:text="@string/content_entry_label_active"
+                    android:textColor="@color/text_primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:checked="true"
+                    android:theme="@style/Custom.SwitchCompat"
+                    android:layout_marginEnd="@dimen/dimen_10dp"
+                    android:layout_alignParentEnd="true"
+                    android:id="@+id/entry_inactive_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+
+
 
             <TextView
                 android:id="@+id/storage_option_label"

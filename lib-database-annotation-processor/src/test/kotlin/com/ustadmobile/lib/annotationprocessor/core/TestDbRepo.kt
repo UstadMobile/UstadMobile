@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import db2.ExampleDatabase2
 import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
@@ -11,9 +12,11 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorDatabaseRepository
 import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
 import db2.ExampleDatabase2_KtorRoute
+import db2.ExampleDatabase2_Repo
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -26,6 +29,12 @@ import com.ustadmobile.door.asRepository
 import org.junit.After
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import io.ktor.application.call
+import io.ktor.features.CallLogging
+import io.ktor.http.HttpStatusCode
+ import io.ktor.request.receiveOrNull
+import io.ktor.response.respond
+import io.ktor.routing.post
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
@@ -56,6 +65,8 @@ class TestDbRepo {
         install(Routing) {
             ExampleDatabase2_KtorRoute(db, gson, tmpAttachmentsDir!!.absolutePath)
         }
+
+        install(CallLogging)
     }
 
     fun setupClientAndServerDb() {
@@ -106,12 +117,12 @@ class TestDbRepo {
 
         val db = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         db.clearAllTables()
-        val dbSyncDao = ExampleDatabase2SyncDao_JdbcKt(db)
+        val dbRepo = db.asRepository<ExampleDatabase2>(Any(), mockServer.url("/").toString(),
+                "", httpClient, null)
+                .asConnectedRepository<ExampleDatabase2>()
 
-        val clientNodeId = 5
-        val repo = ExampleSyncableDao_Repo(db, db.exampleSyncableDao(), httpClient, clientNodeId,
-                mockServer.url("/").toString(), "ExampleDatabase2", "/dummy/attachmentdir",
-                dbSyncDao)
+        val clientNodeId = (dbRepo as DoorDatabaseSyncRepository).clientId
+        val repo = dbRepo.exampleSyncableDao()
         val repoResult = repo.findAll()
 
         val firstRequest = mockServer.takeRequest()
@@ -136,7 +147,8 @@ class TestDbRepo {
         exampleSyncableEntity.esUid = serverDb!!.exampleSyncableDao().insert(exampleSyncableEntity)
 
         val clientRepo = clientDb!!.asRepository<ExampleDatabase2>(Any(),
-                "http://localhost:8089/", "token", httpClient) as ExampleDatabase2
+                "http://localhost:8089/", "token", httpClient)
+                .asConnectedRepository<ExampleDatabase2>()
 
         val entityFromServer = clientRepo.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
         Assert.assertNotNull("Entity came back from server using repository", entityFromServer)
@@ -154,7 +166,9 @@ class TestDbRepo {
         exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
-                "token", httpClient) as ExampleDatabase2
+                "token", httpClient)
+                .asConnectedRepository<ExampleDatabase2>()
+
         val entityFromServerBeforeChange = clientRepo.exampleSyncableDao()
                 .findByUid(exampleSyncableEntity.esUid)
 
@@ -185,7 +199,8 @@ class TestDbRepo {
             exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
             val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
-                    "token", httpClient) as ExampleDatabase2
+                    "token", httpClient)
+                    .asConnectedRepository<ExampleDatabase2>()
 
             (clientRepo as DoorDatabaseSyncRepository).sync(null)
 
@@ -200,7 +215,7 @@ class TestDbRepo {
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
-                "token", httpClient) as ExampleDatabase2
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
@@ -213,12 +228,58 @@ class TestDbRepo {
     }
 
     @Test
+    fun givenEntityCreatedOnClientWithUtf8Chars_whenRepoSyncCalled_thenShouldBeCorrectOnServer() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        val entityName = "سلام"
+
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber =  50, esName = entityName)
+            exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+
+            val entityInServer = serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
+            val entityOnClient = clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
+            Assert.assertNotNull("Entity found on server", entityInServer)
+            Assert.assertEquals("Name was saved correctly on client",
+                    entityOnClient!!.esName, entityName)
+            Assert.assertEquals("Name matches", entityName, entityInServer!!.esName)
+        }
+    }
+
+    @Test
+    fun givenEntityCreatedOnServerWithUtf8Chars_whenRepoSyncCalled_thenShouldBeCorrectOnClient() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+
+        val entityName = "سلام"
+
+        runBlocking {
+            val exampleSyncableEntity = ExampleSyncableEntity(esNumber =  50, esName = entityName)
+            exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            val entityFromRepoClient = clientRepo.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
+            Assert.assertNotNull("Got entity on server via client repo", entityFromRepoClient)
+            Assert.assertEquals("Name is encoded correctly", entityName, entityFromRepoClient!!.esName)
+        }
+    }
+
+    @Test
     fun givenEntityCreatedOnClient_whenUpdatedOnServerAndSyncCalled_thenShouldBeUpdatedOnClient() {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
-                "token", httpClient) as ExampleDatabase2
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
@@ -248,21 +309,21 @@ class TestDbRepo {
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),
                 "http://localhost:8089/", "token",
-                httpClient) as ExampleDatabase2
+                httpClient).asConnectedRepository<ExampleDatabase2>()
         val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy", "token",
-                httpClient) as ExampleDatabase2
+                httpClient).asConnectedRepository<ExampleDatabase2>()
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity::class))
 
             val entityOnClientAfterSync = clientDb.exampleSyncableDao()
                     .findByUid(exampleSyncableEntity.esUid)
 
 
             clientRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 53)
+            (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity::class))
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
 
             Assert.assertNotNull("Entity was synced to client after being created on server",
                     entityOnClientAfterSync)
@@ -277,9 +338,9 @@ class TestDbRepo {
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/", "token",
-                httpClient) as ExampleDatabase2
+                httpClient).asConnectedRepository<ExampleDatabase2>()
         val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy", "token",
-                httpClient) as ExampleDatabase2
+                httpClient).asConnectedRepository<ExampleDatabase2>()
         val e1 = ExampleSyncableEntity(esNumber = 42)
         var e2 = ExampleSyncableEntity(esNumber = 43)
         e1.esUid = serverRepo.exampleSyncableDao().insert(e1)
@@ -292,6 +353,35 @@ class TestDbRepo {
         }
 
     }
+
+    @Test
+    fun givenBlankEntityInsertedAndSynced_whenLocallyUpdatedAndSynced_shouldUpdateServer() {
+        setupClientAndServerDb()
+        val serverDb = this.serverDb!!
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        runBlocking {
+            //1. Create a blank entity. Insert it.
+            val client1 = ExampleSyncableEntity()
+            client1.esUid = clientRepo.exampleSyncableDao().insert(client1)
+            //2. Lets sync happen  - Verify blank entity is on server
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            val server1 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
+            Assert.assertEquals("Server got the entity OK", client1.esUid, server1!!.esUid)
+            //3. Make changes and update entity.
+            client1.esName = "Hello"
+            client1.esNumber = 42
+            clientRepo.exampleSyncableDao().updateAsync(client1)
+            val client2 = clientDb.exampleSyncableDao().findByUid(client1.esUid)
+            Assert.assertEquals("Client updated locally OK", "Hello", client2!!.esName)
+            //4. Let sync happen - Verify update on server.
+            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            val server2 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
+            Assert.assertEquals("Name matches", "Hello", server2!!.esName)
+        }
+    }
+
 
 
 

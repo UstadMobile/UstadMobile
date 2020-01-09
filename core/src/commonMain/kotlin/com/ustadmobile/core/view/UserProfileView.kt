@@ -1,21 +1,19 @@
 package com.ustadmobile.core.view
 
-interface UserProfileView : UstadView {
+import com.ustadmobile.lib.db.entities.Person
+import kotlin.js.JsName
 
-    fun setUsername(username: String)
+interface UserProfileView : LanguageOptionView {
 
-    fun setCurrentLanguage(language: String?)
+    @JsName("loadProfileIcon")
+    fun loadProfileIcon(profile: String)
 
-    fun setLanguageOption(languages: MutableList<String>)
+    @JsName("setLoggedPerson")
+    fun setLoggedPerson(person: Person)
 
-    fun restartUI()
-
-    fun showLanguageOptions()
 
     companion object {
 
         const val VIEW_NAME = "UserProfile"
-
-        const val PERSON_UID = "person_uid"
     }
 }

@@ -69,7 +69,6 @@ import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
@@ -79,6 +78,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
+import kotlin.js.JsName
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -97,8 +97,6 @@ class EpubContentPresenter(context: Any,
     private var opfBaseUrl: String? = null
 
     private var linearSpineUrls: Array<String>? = null
-
-    private var entryUid: Long = 0
 
     /**
      * First HTTP callback: run this once the container has been mounted to an http directory
@@ -136,9 +134,8 @@ class EpubContentPresenter(context: Any,
                     linearSpineUrls = Array(linearSpineHrefsRelative.size) { "" }
 
                     for (i in linearSpineHrefsRelative.indices) {
-                        val launchUrl = UMTinCanUtil.makeLaunchUrl(UMFileUtil.joinPaths(opfBaseUrl!!,
-                                linearSpineHrefsRelative[i]), entryUid, epubContentView.viewContext)
-                        linearSpineUrls!![i] = launchUrl
+                        linearSpineUrls!![i] = UMFileUtil.joinPaths(opfBaseUrl!!,
+                                linearSpineHrefsRelative[i])
                     }
 
                     val opfCoverImageItem = opf.getCoverImage("")
@@ -152,7 +149,6 @@ class EpubContentPresenter(context: Any,
                                 arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)!!) else 0
 
                         epubContentView.setContainerTitle(opf.title!!)
-
                         epubContentView.setSpineUrls(linearSpineUrls!!, if(position >= 0) position else 0)
                         if (opfCoverImageItem != null) {
                             epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl!!,
@@ -164,7 +160,8 @@ class EpubContentPresenter(context: Any,
                         }
                     })
 
-                    requireNotNull(opf.navItem)
+                    if (opf.navItem == null)
+                        throw IllegalArgumentException()
 
                     val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
                             mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
@@ -194,13 +191,13 @@ class EpubContentPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val containerUid = (arguments[EpubContentView.ARG_CONTAINER_UID]?.toLong() ?: 0)
-        entryUid = (arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0)
+        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 0)
         view.setProgressBarProgress(-1)
         view.setProgressBarVisible(true)
         view.mountContainer(containerUid, mountedCallbackHandler)
     }
 
+    @JsName("handleClickNavItem")
     fun handleClickNavItem(navItem: EpubNavItem) {
         if (opfBaseUrl != null && linearSpineUrls != null) {
             val navItemUrl = UMFileUtil.resolveLink(opfBaseUrl!!, navItem.href!!)

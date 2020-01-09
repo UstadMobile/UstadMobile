@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -12,6 +13,9 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     //TODO: split this to handle very large queries
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
     abstract fun findEntriesByMd5Sums(md5Sums: List<String>): List<ContainerEntryFile>
+
+    @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefUid IN (:uidList)")
+    abstract fun findEntriesByUids(uidList: List<Long>): List<ContainerEntryFile>
 
     @Query("UPDATE ContainerEntryFile SET cefPath = :path WHERE cefUid = :cefUid")
     abstract fun updateFilePath(cefUid: Long, path: String)
@@ -34,5 +38,17 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     @Query("UPDATE ContainerEntryFile SET compression = :compression, ceCompressedSize = :ceCompressedSize WHERE cefUid = :cefUid")
     abstract fun updateCompressedFile(compression: Int, ceCompressedSize: Long, cefUid: Long)
+
+    @Query("SELECT ContainerEntryFile.* from ContainerEntryFile WHERE NOT EXISTS (SELECT ContainerEntry.ceCefUid FROM ContainerEntry WHERE ContainerEntryFile.cefUid = ContainerEntry.ceCefUid) LIMIT 100")
+    abstract fun findZombieEntries(): List<ContainerEntryFile>
+
+    @Delete
+    abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)
+
+    companion object {
+
+        const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"
+
+    }
 
 }

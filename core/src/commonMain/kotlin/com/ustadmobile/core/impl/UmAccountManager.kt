@@ -4,6 +4,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -49,6 +50,7 @@ object UmAccountManager {
         return getActivePersonUid(context, UstadMobileSystemImpl.instance)
     }
 
+    @JsName("getActiveAccountWithContext")
     fun getActiveAccount(context: Any): UmAccount? {
         return getActiveAccount(context, UstadMobileSystemImpl.instance)
     }
@@ -71,6 +73,7 @@ object UmAccountManager {
         }
     }
 
+    @JsName("setActiveAccountWithContext")
     fun setActiveAccount(account: UmAccount, context: Any) {
         setActiveAccount(account, context, UstadMobileSystemImpl.instance)
     }
@@ -86,28 +89,34 @@ object UmAccountManager {
                     "http://localhost", context) ?: "http://localhost"
         }
 
-        val db = UmAppDatabase.getInstance(context)
         if(activeAccountRepository == null) {
+            val db = getActiveDatabase(context)
             if (activeAccount == null) {
                 activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }else {
                 activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }
-
-
         }
 
         return activeAccountRepository!!
     }
 
-    fun getActiveEndpoint(context: Any): String? {
-        val activeAccount = getActiveAccount(context)
-        return if (activeAccount != null) {
-            activeAccount.endpointUrl
+    fun getActiveEndpoint(context: Any): String {
+        val activeEndpoint = getActiveAccount(context)?.endpointUrl
+        return if (activeEndpoint != null) {
+            activeEndpoint
         } else {
             UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                    "http://localhost", context)
+                    "http://localhost", context) ?: "http://localhost"
         }
+    }
+
+    /**
+     * Get the main database for the currently active endpoint
+     */
+    fun getActiveDatabase(context: Any): UmAppDatabase {
+        val activeEndpoint = getActiveEndpoint(context)
+        return UmAppDatabase.getInstance(context, sanitizeDbNameFromUrl(activeEndpoint))
     }
 
 }

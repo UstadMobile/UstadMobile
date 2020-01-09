@@ -1,4 +1,8 @@
-<div class="row not-found {{env.colorPrimary}}">
-  <p class="center-align"><span class="error-404">404 !</span>
-    <br/> <span class="tag-line">Sorry, the page that you are looking for can't be found.</span> </p>
+<div class="row not-found {{env.colorTextPrimary}}">
+  <p class="center">
+    <span class="error-404" i18n="@@error_not_found_status"> 404 !</span>
+    <br/> <span class="tag-line {{env.colorTextSecondary}}" i18n="@@error_not_found_tag"> Sorry, the page that you are looking for can't be found.</span>
+    <br/><br/> <span (click)="goBack()" class="tag-line-go-back"> 
+      <a class="waves-effect waves-light btn {{env.colorAcent}}" i18n="@@home">Home</a>
+    </span> </p> 
 </div>

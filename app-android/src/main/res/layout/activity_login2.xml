@@ -21,41 +21,61 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <EditText
-        android:id="@+id/activity_login_password"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/activity_login_password_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/dimen_16dp"
         android:layout_marginEnd="@dimen/dimen_16dp"
         android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textPassword"
         app:layout_constraintBottom_toTopOf="@+id/activity_login_errormessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_login_username" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_username_layout"
+        app:passwordToggleEnabled="true">
 
-    <EditText
-        android:id="@+id/activity_login_username"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/activity_login_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:ems="10"
+            android:inputType="textPassword"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/activity_login_username_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/dimen_16dp"
         android:layout_marginTop="28dp"
         android:layout_marginEnd="@dimen/dimen_16dp"
         android:layout_marginBottom="@dimen/dimen_16dp"
-        android:ems="10"
-        android:hint="@string/username"
         android:inputType="textPersonName"
         android:shadowColor="@color/primary"
-        app:layout_constraintBottom_toTopOf="@+id/activity_login_password"
+        app:layout_constraintBottom_toTopOf="@+id/activity_login_password_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_appbar"
         app:layout_constraintVertical_bias="0.120000005"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/activity_login_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/username"
+            android:ems="10"
+            android:inputType="text"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
 
     <Button
         android:id="@+id/activity_login_button_login"
@@ -107,7 +127,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_login_password" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_password_layout" />
 
     <TextView
         android:id="@+id/activity_register_label"

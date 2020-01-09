@@ -2,10 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
+import com.ustadmobile.door.util.KmpUuid
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -24,11 +26,19 @@ import kotlin.js.JsName
 @UmRepository
 abstract class PersonDao : BaseDao<Person> {
 
+    @JsName("insertListAsync")
+    @Insert
+    abstract suspend fun insertListAsync(entityList: List<Person>)
+
     class PersonUidAndPasswordHash {
         var passwordHash: String = ""
 
         var personUid: Long = 0
     }
+
+    @JsName("insertOrReplace")
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertOrReplace(person: Person)
 
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
@@ -43,7 +53,7 @@ abstract class PersonDao : BaseDao<Person> {
                         person.passwordHash.substring(2))) {
             null
         } else {
-            onSuccessCreateAccessTokenAsync(person.personUid, username)
+            createAndInsertAccessToken(person.personUid, username)
         }
     }
 
@@ -60,7 +70,7 @@ abstract class PersonDao : BaseDao<Person> {
             val newPersonAuth = PersonAuth(newPerson.personUid,
                     ENCRYPTED_PASS_PREFIX + encryptPassword(password))
             insertPersonAuth(newPersonAuth)
-            return onSuccessCreateAccessTokenAsync(newPerson.personUid, newPerson.username!!)
+            return createAndInsertAccessToken(newPerson.personUid, newPerson.username!!)
         } else {
             throw IllegalArgumentException("Username already exists")
         }
@@ -69,12 +79,10 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-  /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun incrementPrimaryKey()*/
-
-    private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
+    private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
+        accessToken.token = KmpUuid.randomUUID().toString()
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)
     }
@@ -123,17 +131,9 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
-    @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
-    abstract suspend fun findByUsernameAsync(username: String?): Person?
-
+    @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
-    abstract fun findByUid(uid: Long): Person?
-
-    @Query("SELECT Count(*) FROM Person")
-    abstract fun countAll(): Long
-
-    @Query("DELETE FROM Person WHERE personUid = :uid")
-    abstract suspend fun removePerson(uid: Long)
+    abstract suspend fun findByUid(uid: Long): Person?
 
     companion object {
 

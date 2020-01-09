@@ -154,8 +154,10 @@ open abstract class UstadMobileSystemCommon {
      *
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
+    @JsName("getLocale")
     open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
+    @JsName("setLocale")
     fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
 
 
@@ -224,7 +226,8 @@ open abstract class UstadMobileSystemCommon {
                 "",context)!!.split(",")
         val languageMap = HashMap<String,String>()
         for(language in languageList){
-            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?: error("English")
+            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?:
+                    UstadMobileConstants.LANGUAGE_NAMES["en"]!!
         }
         return languageMap
     }
@@ -444,6 +447,7 @@ open abstract class UstadMobileSystemCommon {
         /**
          * The preference key where we save a string for the user's locale preference
          */
+        @JsName("PREFKEY_LOCALE")
         const val PREFKEY_LOCALE = "locale"
 
 

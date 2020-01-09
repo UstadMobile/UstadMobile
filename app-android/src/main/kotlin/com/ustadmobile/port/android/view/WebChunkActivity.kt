@@ -7,16 +7,17 @@ import android.view.MenuItem
 import android.webkit.WebView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.WebChunkPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.util.ContentEntryUtil
-import com.ustadmobile.core.view.ViewWithErrorNotifier
+import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
+import com.ustadmobile.core.view.UstadViewWithSnackBar
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
 
-class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifier {
+class WebChunkActivity : UstadBaseActivity(), WebChunkView, UstadViewWithSnackBar {
 
     private var mPresenter: WebChunkPresenter? = null
 
@@ -41,13 +42,14 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this, repository)
+                bundleToMap(intent.extras), this, true, repository,
+                UmAccountManager.getActiveDatabase(viewContext))
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }
 
-    override fun mountChunk(container: Container, callback: UmCallback<String>) {
-        webClient = WebChunkWebViewClient(container, mPresenter!!, this)
+    override fun mountChunk(container: Container?, callback: UmCallback<String>) {
+        webClient = WebChunkWebViewClient(container!!, mPresenter!!, this)
         runOnUiThread {
             mWebView!!.webViewClient = webClient
             callback.onSuccess(webClient!!.url)
@@ -81,7 +83,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
     }
 
     override fun showError(message: String) {
-        showErrorNotification(message, {}, 0)
+        showSnackBarNotification(message, {}, 0)
     }
 
     override fun setToolbarTitle(title: String) {
@@ -89,8 +91,8 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
     }
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
-        showErrorNotification(message, {
-            var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
+        showSnackBarNotification(message, {
+            var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }

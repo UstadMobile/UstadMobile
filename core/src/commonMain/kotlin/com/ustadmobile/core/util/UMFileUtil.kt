@@ -31,6 +31,7 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import io.ktor.http.ContentType
 import kotlin.js.JsName
 import kotlin.jvm.JvmStatic
 import kotlin.math.round
@@ -404,7 +405,7 @@ object UMFileUtil {
      * @return
      */
     @JsName("parseURLQueryString")
-    fun parseURLQueryString(urlQuery: String): Map<String, String?> {
+    fun parseURLQueryString(urlQuery: String): Map<String, String> {
         var retVal = urlQuery
         val queryPos = retVal.indexOf('?')
         if (queryPos != -1) {
@@ -412,15 +413,8 @@ object UMFileUtil {
         }
 
         val parsedParams = parseParams(retVal, '&')
-        val decodedParams = mutableMapOf<String, String?>()
-        val it = parsedParams.keys.iterator()
-        var key: String
-        while (it.hasNext()) {
-            key = it.next()
-            decodedParams[UMURLEncoder.decodeUTF8(key)] = UMURLEncoder.decodeUTF8(parsedParams[key])
-        }
 
-        return decodedParams
+        return parsedParams.map { UMURLEncoder.decodeUTF8(it.key) to UMURLEncoder.decodeUTF8(it.value) }.toMap()
     }
 
     /**
@@ -433,7 +427,7 @@ object UMFileUtil {
     fun mapToQueryString(ht: Map<String, String?>): String {
         val sb = StringBuilder()
 
-        if (ht == null) {
+        if (ht.isEmpty()) {
             return ""
         }
 
@@ -768,6 +762,18 @@ object UMFileUtil {
         } else {
             "/" + viewname + "?" + mapToQueryString(args)
         }
+    }
+
+    fun getContentType(filePath: String): ContentType {
+        val extension = filePath.substring(filePath.lastIndexOf("."))
+        val extensionMap = mapOf(
+                ".html" to ContentType.Text.Html,".xml" to ContentType.Text.Xml,
+                ".css" to ContentType.Text.CSS, ".js" to ContentType.Text.JavaScript,
+                ".txt" to ContentType.Text.Html, ".xhtml" to ContentType.Text.Html,
+                ".jpg" to ContentType.Image.JPEG,".png" to ContentType.Image.PNG,
+                ".gif" to ContentType.Image.GIF, ".mp4" to ContentType.Video.MP4,
+                ".mpeg" to ContentType.Video.MPEG, ".json" to ContentType.Application.Json)
+        return extensionMap[extension] ?: ContentType.Any
     }
 
 }

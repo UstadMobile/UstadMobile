@@ -1,7 +1,7 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.port.sharedse.impl.http.StaticFileDirResponder
-import com.ustadmobile.sharedse.util.ReverseProxyDispatcher
+import com.ustadmobile.util.test.ReverseProxyDispatcher
 import fi.iki.elonen.router.RouterNanoHTTPD
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl

@@ -2,7 +2,9 @@
  * Context wrapper which will be used to wrap router as our application context
  */
 
-export class UmContextWrapper {
+
+export class UmContextWrapper{ 
+
     private activeRoute : any;
 
     constructor(private router: any){}
@@ -28,4 +30,8 @@ export class UmContextWrapper {
     getActiveRoute(): any {
         return this.activeRoute;
     }
+
+    removeLifecycleListener(){}
+
+    addLifecycleListener(){}
 }

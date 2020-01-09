@@ -15,6 +15,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import com.ustadmobile.lib.util.RunWhenReadyManager
+import com.ustadmobile.core.impl.UmAccountManager
 
 /**
  * Wrapper class for NetworkManagerBleCommon. A service is required as this encapsulates
@@ -38,7 +39,7 @@ class NetworkManagerBleAndroidService : Service() {
     @Volatile
     private var httpd: EmbeddedHTTPD? = null
 
-    private var umAppDatabase: UmAppDatabase? = null
+    private lateinit var umAppDatabase: UmAppDatabase
 
     private var mBadNodeExecutorService: ScheduledExecutorService? = null
 
@@ -59,7 +60,7 @@ class NetworkManagerBleAndroidService : Service() {
 
     private val badNodeDeletionTask = Runnable {
         val minLastSeen = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)
-        umAppDatabase!!.networkNodeDao.deleteOldAndBadNode(minLastSeen, 5)
+        umAppDatabase.networkNodeDao.deleteOldAndBadNode(minLastSeen, 5)
     }
 
 
@@ -70,7 +71,7 @@ class NetworkManagerBleAndroidService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        umAppDatabase = UmAppDatabase.getInstance(applicationContext)
+        umAppDatabase = UmAccountManager.getActiveDatabase(applicationContext)
 
         val serviceIntent = Intent(applicationContext, EmbeddedHttpdService::class.java)
         bindService(serviceIntent, mHttpdServiceConnection, Context.BIND_AUTO_CREATE)
@@ -85,7 +86,8 @@ class NetworkManagerBleAndroidService : Service() {
 
     private fun handleHttpdServiceBound(embeddedHTTPD: EmbeddedHTTPD) {
         val createdNetworkManager = NetworkManagerBle(this,
-                newSingleThreadContext("NetworkManager-SingleThread"), embeddedHTTPD)
+                newSingleThreadContext("NetworkManager-SingleThread"), embeddedHTTPD,
+                umAppDatabase)
         networkManagerBle = createdNetworkManager
         createdNetworkManager.onCreate()
         runWhenReadyManager.ready = true

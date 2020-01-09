@@ -1,7 +1,9 @@
 package com.ustadmobile.util.test
 
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import java.io.*
 import java.util.*
+import javax.naming.InitialContext
 
 actual fun checkJndiSetup() {
     if(System.getProperty("java.naming.factory.initial") == null) {

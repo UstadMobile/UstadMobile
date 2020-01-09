@@ -101,7 +101,7 @@
 //        val itemManagerList = DownloadJobItemManagerList(appDatabase)
 //        val itemManager = itemManagerList.createNewDownloadJobItemManager(downloadJob1!!)
 //        itemManager.insertDownloadJobItemsSync(listOf(downloadJobItem1!!))
-//        val mockListener = Mockito.mock(DownloadJobItemManager.OnDownloadJobItemChangeListener::class.java)
+//        val mockListener = Mockito.mock(ContainerDownloadManager.OnDownloadJobItemChangeListener::class.java)
 //        itemManagerList.addDownloadChangeListener(mockListener)
 //
 //        itemManager.updateProgress(downloadJobItem1!!.djiUid.toInt(), 50, 100)

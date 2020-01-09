@@ -2,36 +2,38 @@
 default-content-padding-right default-content-padding-left">
 
   <div class="col s12 l6 m6 push-l3 push-m3 push-s0 z-depth-1 white login-box default-padding-top">
-      <form (ngSubmit)="startLogin()" [formGroup]="umFormLogin">
-         <div class="row default-padding-top default-content-padding-bottom">
-            <div class="input-field col s12">
-                <mz-input-container>
-                  <input mz-input [validate]="true" [formControl]="umFormLogin.controls['username']" id="username"
-                  i18n-label="@@username" label="Username" type="text">
-                </mz-input-container>
-              </div>
-              <div class="input-field col s12">
-                <mz-input-container>
-                  <input mz-input [validate]="true" [formControl]="umFormLogin.controls['password']" id="password"
-                  i18n-label="@@password" label="Password" type="password">
-                </mz-input-container>
-              </div>
-    
-              <div class="col s12 l12 center default-padding-top" *ngIf="showProgress">
-                  <mz-spinner
-                  [color]="'blue'"
-                  [size]="'small'">
-                </mz-spinner>
-              </div>
-    
-              <div class="col s12 right default-padding-top {{btn_class}} ">
-                <button type="submit" mz-button class="orange darken-2" [disabled]="!formValidated" i18n="@@login">
-                  Login
-                </button>
-              </div>
-         </div>
+    <form (ngSubmit)="handleClickLogin()" [formGroup]="umFormLogin">
+      <div class="row default-padding-top default-content-padding-bottom">
+        <div class="input-field col s12">
+          <mz-input-container>
+            <input mz-input [validate]="true" [formControl]="umFormLogin.controls['username']" id="username"
+              i18n-label="@@username" label="Username" type="text">
+          </mz-input-container>
+        </div>
+        <div class="input-field col s12">
+          <mz-input-container>
+            <input mz-input [validate]="true" [formControl]="umFormLogin.controls['password']" id="password"
+              i18n-label="@@password" label="Password" type="password">
+          </mz-input-container>
+        </div>
 
-        </form>
+        <div class="col s12 l12 center default-padding-top" *ngIf="showProgress">
+          <mz-spinner [color]="'blue'" [size]="'small'">
+          </mz-spinner>
+        </div>
+
+        <div class="col s12 right default-padding-top {{class_login_button}} ">
+          <button type="submit" mz-button class="orange darken-2" [disabled]="!formValidated" i18n="@@login">
+            Login
+          </button>
+
+          <p *ngIf="showRegistration" class="center-align register-text"><span i18n="@@no_account">Don't have an
+              account?</span><span (click)="createAccount()" class="register-now" i18n="@@create_new_account">Register
+              Now</span></p>
+        </div>
+      </div>
+
+    </form>
 
   </div>
 </div>

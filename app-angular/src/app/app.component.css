@@ -7,3 +7,15 @@
   margin-left: -90px;
   margin-top: -45px;
 }
+
+@media (min-width: 320px) and (max-width: 480px) {
+  .center {
+    position: absolute;
+    width: 50% !important;
+    height: 40% !important;
+    top: 50%;
+    left: 47%;
+    margin-left: -90px;
+    margin-top: -45px;
+  }
+}

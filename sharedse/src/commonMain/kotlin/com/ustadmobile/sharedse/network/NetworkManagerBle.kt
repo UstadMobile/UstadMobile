@@ -1,11 +1,16 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 expect open class NetworkManagerBle(context: Any = Any(),
-                               singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default) : NetworkManagerBleCommon {
+                                    singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
+                                    umAppDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context))
+    : NetworkManagerBleCommon {
 
     override val isWiFiEnabled: Boolean
 
@@ -33,5 +38,4 @@ expect open class NetworkManagerBle(context: Any = Any(),
 
     override fun makeEntryStatusTask(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode, responseListener: BleMessageResponseListener): BleEntryStatusTask?
 
-    override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner
 }

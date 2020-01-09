@@ -8,7 +8,7 @@ import com.ustadmobile.core.networkmanager.PlatformHttpClient
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
-import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -23,16 +23,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryImportLinkView, var endpointUrl: String) :
+class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>,
+                                      view: ContentEntryImportLinkView,
+                                      var endpointUrl: String,
+                                      val db: UmAppDatabase,
+                                      val repoDb: UmAppDatabase) :
         UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
 
 
-    private lateinit var db: UmAppDatabase
     private var videoTitle: String? = null
 
     private var parentContentEntryUid: Long = 0
 
-    private var contentEntryUid: Long? = null
+    private var contentEntryUid = 0L
 
     private var hp5Url: String = ""
 
@@ -45,22 +48,21 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)!!.toLong()
-        contentEntryUid = arguments[CONTENT_ENTRY_UID]?.toLong()
-        db = UmAppDatabase.getInstance(context)
-        if (contentEntryUid != null) {
+        parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)?.toLong() ?: 0L
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
+        if (contentEntryUid != 0L) {
             updateUIWithExistingContentEntry()
         }
 
 
     }
 
-    fun updateUIWithExistingContentEntry(): Job{
+    fun updateUIWithExistingContentEntry(): Job {
         jobCount++
         checkProgressBar()
         return GlobalScope.launch {
 
-            val contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid!!)
+            val contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid)
             videoTitle = contentEntry!!.title
             handleTitleChanged(videoTitle!!)
 
@@ -108,8 +110,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 headResponse = client.headRequest(url)
 
                 if (headResponse.status == 302 && isGoogleDrive) {
-                    val googleDriveUrl = headResponse.headers["location"]?.get(0)!!
-                    var response = defaultHttpClient().get<HttpResponse>(googleDriveUrl)
+                    url = headResponse.headers["location"]?.get(0)!!
+                    var response = defaultHttpClient().get<HttpResponse>(url)
                     headResponse = HeadResponse(response.status.value, response.headers.toMap())
 
                     response.discardRemaining()
@@ -151,8 +153,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 contentType = VIDEO
                 hp5Url = url
                 view.showUrlStatus(true, "")
-                view.showHideVideoTitle(contentEntryUid == null)
-                if(contentEntryUid != null){
+                view.showHideVideoTitle(contentEntryUid == 0L)
+                if (contentEntryUid != 0L) {
                     handleTitleChanged(videoTitle!!)
                 }
                 jobCount--
@@ -207,7 +209,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                         response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
-                            if (contentEntryUid != null) parameter("contentEntryUid", contentEntryUid)
+                            if (contentEntryUid != 0L) parameter("contentEntryUid", contentEntryUid)
                         }
 
                     }
@@ -224,7 +226,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
                             parameter("title", videoTitle)
-                            if (contentEntryUid != null) parameter("contentEntryUid", contentEntryUid)
+                            if (contentEntryUid != 0L) parameter("contentEntryUid", contentEntryUid)
                         }
                     }
                 }
@@ -239,13 +241,11 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 val content = response.receive<H5PImportData>()
                 view.enableDisableEditText(true)
 
-                if (contentEntryUid == null) {
-                    db.contentEntryDao.insert(content.contentEntry)
-                    db.contentEntryParentChildJoinDao.insert(content.parentChildJoin)
-                } else {
-                    db.contentEntryDao.update(content.contentEntry)
+                db.contentEntryDao.insertWithReplace(content.contentEntry)
+                if (contentEntryUid == 0L) {
+                    db.contentEntryParentChildJoinDao.insertWithReplace(content.parentChildJoin)
                 }
-                db.containerDao.insert(content.container)
+                db.containerDao.insertWithReplace(content.container)
 
                 view.runOnUiThread(Runnable {
                     jobCount--
@@ -297,6 +297,7 @@ suspend fun checkIfH5PValidAndReturnItsContent(url: String): String? {
     try {
         urlLink = Url(url)
     } catch (exception: URLParserException) {
+        println("error :$exception.message")
         return null
     }
 

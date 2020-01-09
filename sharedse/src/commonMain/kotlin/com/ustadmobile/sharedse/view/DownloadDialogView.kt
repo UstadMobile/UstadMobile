@@ -13,7 +13,13 @@ interface DownloadDialogView : UstadView {
 
     fun setDownloadOverWifiOnly(wifiOnly: Boolean)
 
+    fun setBottomPositiveButtonEnabled(enabled: Boolean)
+
     fun setStatusText(statusText: String, totalItems: Int, sizeInfo: String)
+
+    fun setWarningText(text: String)
+
+    fun setWarningTextVisible(visible: Boolean)
 
     fun setStackedOptions(optionIds: IntArray, optionTexts: Array<String>)
 
@@ -26,8 +32,6 @@ interface DownloadDialogView : UstadView {
     fun setCalculatingViewVisible(visible: Boolean)
 
     fun showStorageOptions(storageOptions: List<UMStorageDir>)
-
-    fun cancelOrPauseDownload(jobId: Long, cancel: Boolean)
 
     companion object {
 

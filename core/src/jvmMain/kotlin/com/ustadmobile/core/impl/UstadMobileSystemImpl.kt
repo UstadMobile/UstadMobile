@@ -55,6 +55,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
     private var appConfig: Properties? = null
 
+    private var tmpPrefs = mutableMapOf<String, String>()
+
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -90,7 +92,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         val contentDirName = getContentDirName(context)
 
         dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
-                removableMedia = false, isAvailable = true, isUserSpecific = false))
+                removableMedia = false, isAvailable = true, isUserSpecific = false,
+                usableSpace = File(systemBaseDir).usableSpace))
 
         //Find external directories
         val externalDirs = findRemovableStorage()
@@ -101,6 +104,25 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         }
 
         callback.onDone(dirList)
+    }
+
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
+        val dirList = ArrayList<UMStorageDir>()
+        val systemBaseDir = getSystemBaseDir(context)
+        val contentDirName = getContentDirName(context)
+
+        dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
+                removableMedia = false, isAvailable = true, isUserSpecific = false,
+                usableSpace = File(systemBaseDir).usableSpace))
+
+        //Find external directories
+        val externalDirs = findRemovableStorage()
+        for (extDir in externalDirs) {
+            dirList.add(UMStorageDir(UMFileUtil.joinPaths(extDir!!, contentDirName!!),
+                    getString(MessageID.memory_card, context),
+                    true, true, false, false))
+        }
+        return dirList
     }
 
 
@@ -187,7 +209,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String?{
-        TODO("not implemented")
+        return tmpPrefs[key]
     }
 
 
@@ -197,7 +219,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @param value value to be set
      */
     actual override fun setAppPref(key: String, value: String?, context: Any){
-
+        if(value != null) {
+            tmpPrefs[key] = value
+        }else {
+            tmpPrefs.remove(key)
+        }
     }
 
 
@@ -265,9 +291,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                         callback: UmCallback<Any>){
-        TODO("not implemented")
+    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?){
+
     }
 
     actual fun getSystemBaseDir(context: Any): String{
@@ -348,9 +373,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         }
     }
 
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+
 
     /**
      * Get asset as an input stream asynchronously

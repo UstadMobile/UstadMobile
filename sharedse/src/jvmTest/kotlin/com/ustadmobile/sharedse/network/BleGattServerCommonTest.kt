@@ -1,12 +1,14 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
+import com.ustadmobile.sharedse.test.util.bindDbForActiveContext
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -42,10 +44,15 @@ class BleGattServerCommonTest {
 
     private var context: Any = Any()
 
+    private val clientBtAddr = "aa:bb:cc:dd:ee"
+
 
     @Before
     @Throws(IOException::class)
     fun setUp() {
+        UmAccountManager.bindDbForActiveContext(context)
+        umAppDatabase = UmAccountManager.getActiveDatabase(context)
+        umAppDatabase!!.clearAllTables()
         mockedNetworkManager = com.nhaarman.mockitokotlin2.spy {
 
         }
@@ -54,15 +61,14 @@ class BleGattServerCommonTest {
         httpd.start()
        //`when`(mockedNetworkManager!!.httpd).thenReturn(httpd)
 
-        umAppDatabase = UmAppDatabase.getInstance(context)
-        umAppDatabase!!.clearAllTables()
+
 
         gattServer = spy(BleGattServerCommon::class.java)
-        gattServer!!.setContext(context)
+        gattServer!!.context = context
         wiFiDirectGroupBle = WiFiDirectGroupBle("NetworkSsId", "@@@1234")
         wiFiDirectGroupBle!!.ipAddress = "127.0.0.1"
         wiFiDirectGroupBle!!.port = 0
-        gattServer!!.setNetworkManager(mockedNetworkManager!!)
+        gattServer!!.networkManager = mockedNetworkManager!!
 
 
 
@@ -81,7 +87,7 @@ class BleGattServerCommonTest {
         val messageToSend = BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(),
                 bleMessageLongToBytes(containerUids))
 
-        val responseMessage = gattServer!!.handleRequest(messageToSend)
+        val responseMessage = gattServer!!.handleRequest(messageToSend, clientBtAddr)
 
         assertEquals("Should return the right response request type",
                 ENTRY_STATUS_RESPONSE, responseMessage!!.requestType)
@@ -92,7 +98,7 @@ class BleGattServerCommonTest {
     fun givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNotReturnResponseMessage() {
         val messageToSend = BleMessage(0.toByte(), 42.toByte(), bleMessageLongToBytes(containerUids))
 
-        val responseMessage = gattServer!!.handleRequest(messageToSend)
+        val responseMessage = gattServer!!.handleRequest(messageToSend, clientBtAddr)
 
         assertNull("Response message should be null", responseMessage)
     }
@@ -108,7 +114,7 @@ class BleGattServerCommonTest {
 
         val messageToSend = BleMessage(WIFI_GROUP_REQUEST, 42.toByte(), bleMessageLongToBytes(containerUids))
 
-        val responseMessage = gattServer!!.handleRequest(messageToSend)
+        val responseMessage = gattServer!!.handleRequest(messageToSend, clientBtAddr)
 
         val groupBle = WiFiDirectGroupBle(responseMessage!!.payload!!)
 
@@ -127,7 +133,7 @@ class BleGattServerCommonTest {
         val messageToSend = BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(),
                 bleMessageLongToBytes(containerUids))
 
-        val responseMessage = gattServer!!.handleRequest(messageToSend)
+        val responseMessage = gattServer!!.handleRequest(messageToSend, clientBtAddr)
         val responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage!!.payload!!)
         var availabilityCounter = 0
         for (response in responseList) {
@@ -146,7 +152,7 @@ class BleGattServerCommonTest {
 
         val messageToSend = BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(), bleMessageLongToBytes(containerUids))
         umAppDatabase!!.clearAllTables()
-        val responseMessage = gattServer!!.handleRequest(messageToSend)
+        val responseMessage = gattServer!!.handleRequest(messageToSend, clientBtAddr)
         val responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage!!.payload!!)
         var availabilityCounter = 0
         for (response in responseList) {
@@ -158,6 +164,7 @@ class BleGattServerCommonTest {
         assertEquals("All requested entry uuids status are not available",
                 0, availabilityCounter.toLong())
     }
+
 
     companion object {
 

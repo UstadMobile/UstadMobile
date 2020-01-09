@@ -109,7 +109,7 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
         super.onDestroy()
     }
 
-    override fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBarNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
         mProgressBar!!.progress = 0
         mProgressBar!!.visibility = View.GONE
     }

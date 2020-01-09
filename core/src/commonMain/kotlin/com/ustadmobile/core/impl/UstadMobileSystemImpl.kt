@@ -71,7 +71,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
 
     override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
 
-    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
+    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir>
 
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
@@ -163,8 +163,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun getManifestPreference(key: String, context: Any): String?
 
 
-    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
-                                         callback: UmCallback<Any>)
+    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?)
 
     /**
      * Get an asset Synchronously

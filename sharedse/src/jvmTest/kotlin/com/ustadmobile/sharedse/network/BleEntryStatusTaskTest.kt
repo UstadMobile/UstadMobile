@@ -2,12 +2,13 @@ package com.ustadmobile.sharedse.network
 
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.EntryStatusResponseDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
+import com.ustadmobile.sharedse.test.util.bindDbForActiveContext
 import junit.framework.TestCase.*
 import org.junit.Assert
 import org.junit.Before
@@ -30,8 +31,6 @@ class BleEntryStatusTaskTest {
 
     private lateinit var mockedEntryStatusTask: BleEntryStatusTask
 
-    private var entryStatusResponseDao: EntryStatusResponseDao? = null
-
     private var managerBle: NetworkManagerBle? = null
 
     private var networkNodeDao: NetworkNodeDao? = null
@@ -42,7 +41,8 @@ class BleEntryStatusTaskTest {
 
     @Before
     fun setUp() {
-        val umAppDatabase = UmAppDatabase.getInstance(context)
+        UmAccountManager.bindDbForActiveContext(context)
+        val umAppDatabase = UmAccountManager.getActiveDatabase(context)
         umAppDatabase.clearAllTables()
 
         managerBle = com.nhaarman.mockitokotlin2.spy {
@@ -55,8 +55,6 @@ class BleEntryStatusTaskTest {
         networkNode.nodeId = 1
         networkNodeDao = umAppDatabase.networkNodeDao
         networkNodeDao!!.replace(networkNode)
-
-        entryStatusResponseDao = umAppDatabase.entryStatusResponseDao
 
         mockedEntryStatusTask = spy(BleEntryStatusTask::class.java)
         mockedEntryStatusTask.context = context

@@ -24,19 +24,24 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
     /**
      * Message object which carries list of entry Ids to be checked for availability.
      */
+
     /**
      * Get BleMessage instance
+     *
      * @return Created BleMessage
      */
-    var message: BleMessage? = null
+    lateinit var message: BleMessage
         protected set
 
     /**
      * Get NetworkNode instance
+     *
+     * Was previously internal set - this does not compile since Kotlin 1.3.61
+     *
      * @return Created NetworkNode
      */
     lateinit var networkNode: NetworkNode
-        internal set
+        set
 
     lateinit var context: Any
 
@@ -66,6 +71,7 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     /**
      * Constructor which will be used when creating new instance for WiFi direct group creation request
+     *
      * @param context Application context
      * @param message Message to be sent to the peer device (Carried WiFi group creation request)
      * @param peerToSendMessageTo Peer to send message to
@@ -96,9 +102,12 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     /**
      * Set networkManagerBle for testing purpose.
+     *
+     * Was previously internal - this does not work since Kotlin 1.3.61
+     *
      * @param managerBle NetworkManagerBleCommon object
      */
-    internal fun setManagerBle(managerBle: NetworkManagerBleCommon) {
+    fun setManagerBle(managerBle: NetworkManagerBleCommon) {
         this.managerBle = managerBle
     }
 

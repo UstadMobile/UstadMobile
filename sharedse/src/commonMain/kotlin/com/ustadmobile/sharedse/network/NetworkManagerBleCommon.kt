@@ -1,20 +1,20 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.db.JobStatus
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sharedMutableMapOf
-import com.ustadmobile.sharedse.util.EntryTaskExecutor
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import io.ktor.client.HttpClient
-import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlin.collections.set
@@ -26,7 +26,7 @@ import kotlin.jvm.Synchronized
  *
  * @property context system context to use
  * @property singleThreadDispatcher A single thread based dispatcher that is used for tracking download
- *                                  status. DownloadJobItemManager requires a single thread environment
+ *                                  status. ContainerDownloadManager requires a single thread environment
  *
  * @author kileha3
  */
@@ -35,9 +35,10 @@ abstract class NetworkManagerBleCommon(
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
-        internal var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context),
-        internal var umAppDatabaseRepo: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) :
+        var umAppDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context)) :
         DownloadJobItemStatusProvider {
+
+    abstract val umAppDatabaseRepo: UmAppDatabase
 
     private val knownNodesLock = Any()
 
@@ -56,14 +57,13 @@ abstract class NetworkManagerBleCommon(
     var localHttpClient: HttpClient? = null
         protected set
 
+
+
     /**
      * Holds all created entry status tasks
      */
     private val entryStatusTasks = mutableListOf<BleEntryStatusTask>()
 
-    private lateinit var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>
-
-    private val entryStatusResponses = mutableMapOf<Long, MutableList<EntryStatusResponse>>()
 
     private val locallyAvailableContainerUids = mutableSetOf<Long>()
 
@@ -75,13 +75,12 @@ abstract class NetworkManagerBleCommon(
 
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
-    private val entryStatusTaskExecutor = EntryTaskExecutor(5)
-
     private lateinit var nextDownloadItemsLiveData: DoorLiveData<List<DownloadJobItem>>
 
-    internal class DownloadQueueLocalAvailabilityObserver(val localAvailabilityManager: LocalAvailabilityManager): DoorObserver<List<DownloadJobItem>> {
+    //Was previously internal: this does not compile since Kotlin 1.3.61
+    class DownloadQueueLocalAvailabilityObserver(val localAvailabilityManager: LocalAvailabilityManager): DoorObserver<List<DownloadJobItem>> {
 
-        internal var currentRequest: AvailabilityMonitorRequest? = null
+        var currentRequest: AvailabilityMonitorRequest? = null
 
         override fun onChanged(t: List<DownloadJobItem>) {
             val prevRequest = currentRequest
@@ -138,9 +137,21 @@ abstract class NetworkManagerBleCommon(
 
 
     val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
-            this::makeEntryStatusTask, singleThreadDispatcher)
+            this::makeEntryStatusTask, singleThreadDispatcher,
+            this::onNewBleNodeDiscovered, this::onBleNodeLost,
+            this::onBleNodeReputationChanged,
+            umAppDatabase.locallyAvailableContainerDao)
 
     private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
+
+    private val bleMirrorIdMap = mutableMapOf<String, Int>()
+
+    abstract val localHttpPort: Int
+
+    abstract val containerFetcher: ContainerFetcher
+
+    abstract val containerDownloadManager: ContainerDownloadManager
+
 
     /**
      * Only for testing - allows the unit test to set this without running the main onCreate method
@@ -157,27 +168,36 @@ abstract class NetworkManagerBleCommon(
     open fun onCreate() {
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
         nextDownloadItemsLiveData = umAppDatabase.downloadJobItemDao.findNextDownloadJobItems()
-        downloadJobItemWorkQueue = LiveDataWorkQueue(nextDownloadItemsLiveData,
-                { item1, item2 -> item1.djiUid == item2.djiUid },
-                mainDispatcher = mainDispatcher,
-                onItemStarted = this::onDownloadJobItemStarted,
-                onQueueEmpty = this::onDownloadQueueEmpty) {
-            DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
-                    umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
-                    connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher,
-                    ioCoroutineDispatcher = ioDispatcher,
-                    localAvailabilityManager = localAvailabilityManager).download()
-        }
         nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
-
-        GlobalScope.launch { downloadJobItemWorkQueue.start() }
     }
+
+    protected suspend fun onNewBleNodeDiscovered(bluetoothAddress: String) {
+        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
+        val mirrorId = dbRepo.addMirror("http://127.0.0.1:${localHttpPort}/bleproxy/$bluetoothAddress/rest/",
+                100)
+        bleMirrorIdMap[bluetoothAddress] = mirrorId
+    }
+
+    protected suspend fun onBleNodeLost(bluetoothAddress: String) {
+        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
+        val mirrorId = bleMirrorIdMap[bluetoothAddress] ?: 0
+        dbRepo.removeMirror(mirrorId)
+        Napier.v({"Removed mirror $mirrorId for $bluetoothAddress"})
+    }
+
+    protected suspend fun onBleNodeReputationChanged(bluetoothAddress: String, reputation: Int) {
+        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
+        val mirrorId = bleMirrorIdMap[bluetoothAddress] ?: 0
+        dbRepo.updateMirrorPriorities(mapOf(mirrorId to reputation))
+        Napier.d({"Update mirror reputation for $mirrorId [$bluetoothAddress] to $reputation"})
+    }
+
 
     protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
 
     }
 
-    protected open fun onDownloadQueueEmpty(lastDownloadJobItem: DownloadJobItem) {
+    protected open fun onDownloadQueueEmpty() {
         val currentConnectivityStatus = connectivityStatusRef.value
         if(currentConnectivityStatus != null &&
                 currentConnectivityStatus.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
@@ -277,8 +297,6 @@ abstract class NetworkManagerBleCommon(
                                      peerToSendMessageTo: NetworkNode,
                                      responseListener: BleMessageResponseListener): BleEntryStatusTask?
 
-    abstract fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner
-
     /**
      * Send message to a specific device
      * @param context Platform specific context
@@ -291,25 +309,7 @@ abstract class NetworkManagerBleCommon(
         makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.sendRequest()
     }
 
-
-    /**
-     * Cancel all download set and set items
-     * @param downloadJobUid The download job uid that should be canceled and deleted
-     */
-    suspend fun cancelAndDeleteDownloadJob(downloadJobUid: Int) {
-        umAppDatabase.downloadJobDao.updateJobAndItems(downloadJobUid,
-                JobStatus.CANCELED, -1, JobStatus.CANCELED)
-        val taskArgs = HashMap<String, String>()
-        taskArgs[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] = downloadJobUid.toString()
-
-        makeDeleteJobTask(context, taskArgs).run()
-    }
-
-    //testing purpose only
-    fun clearHistories() {
-        locallyAvailableContainerUids.clear()
-        knownPeerNodes.clear()
-    }
+    abstract suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage?
 
     /**
      * Used for unit testing purposes only.
@@ -372,15 +372,6 @@ abstract class NetworkManagerBleCommon(
         return knownBadNodeTrackList[bluetoothAddress]
     }
 
-    fun isEntryLocallyAvailable(containerUid: Long): Boolean {
-        return locallyAvailableContainerUids.contains(containerUid)
-    }
-
-    fun getLocallyAvailableContainerUids(): Set<Long> {
-        return locallyAvailableContainerUids
-    }
-
-
     /**
      * Clean up the network manager for shutdown
      */
@@ -389,8 +380,6 @@ abstract class NetworkManagerBleCommon(
         val downloadQueueMonitorRequest = downloadQueueLocalAvailabilityObserver.currentRequest
         if(downloadQueueMonitorRequest != null)
             localAvailabilityManager.removeMonitoringRequest(downloadQueueMonitorRequest)
-
-        entryStatusTaskExecutor.stop()
     }
 
     /**
@@ -489,6 +478,10 @@ abstract class NetworkManagerBleCommon(
          * Bluetooth Low Energy service UUID for our app
          */
         const val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
+
+        val BLE_CHARACTERISTICS = listOf("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93d",
+                "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e", "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93f",
+                "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93b")
 
         /**
          * Peer WIFi direct group prefix

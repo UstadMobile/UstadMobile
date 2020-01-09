@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -43,8 +42,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
-        val containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()
-        val entryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]!!.toLong()
+        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID] ?: error("")).toLong()
         GlobalScope.launch {
             mountedPath = containerMounter(containerUid)
 
@@ -55,8 +53,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             xpp.setInput(StringReader(tincanContent))
             tinCanXml = TinCanXML.loadFromXML(xpp)
             launchHref = tinCanXml?.launchActivity?.launchUrl
-            launchUrl  = UMTinCanUtil.makeLaunchUrl(UMFileUtil.joinPaths(mountedPath!!, launchHref!!), entryUid,
-                    view.viewContext)
+            launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
             view.runOnUiThread(Runnable {
                 view.setTitle(tinCanXml!!.launchActivity?.name!!)
                 view.loadUrl(launchUrl!!)

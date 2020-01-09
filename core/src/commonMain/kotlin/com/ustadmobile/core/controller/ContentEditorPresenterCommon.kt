@@ -10,7 +10,9 @@ import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.EpubContentView.Companion.ARG_INITIAL_PAGE_HREF
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -66,6 +68,8 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     internal var mountedFileAccessibleUrl: String ? = null
 
+    private var contentEntry: ContentEntry? = null
+
     var currentPage: String = ""
 
     var containerUid : Long = 0
@@ -103,7 +107,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * @param title document title
      * @param description document description
      */
-    abstract suspend fun createDocument(title: String, description:String) : Boolean
+    abstract suspend fun createDocument(title: String, description:String, author: String) : Boolean
 
     /**
      * Prepare existing document so that can be loaded to the editor
@@ -130,7 +134,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * @param documentTitle new title to be set to the document
      * @param description new description to be set to the document
      */
-    abstract suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String?
+    abstract suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, author: String, isNewDocument: Boolean): String?
 
     /**
      * App page to the document
@@ -173,17 +177,17 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        contentEntryUid = arguments.getOrElse(ContentEditorView.CONTENT_ENTRY_UID, {"0"})!!.toLong()
+        contentEntryUid = arguments.getOrElse(UstadView.ARG_CONTENT_ENTRY_UID, {"0"})!!.toLong()
 
         GlobalScope.launch {
-            val contentEntry = umDatabase.contentEntryDao.findByEntryId(contentEntryUid)
+            contentEntry = umDatabase.contentEntryDao.findByEntryId(contentEntryUid)
             if(contentEntry != null){
-               val container = umDatabase.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
+               val container = umDatabase.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry!!.contentEntryUid)
 
                 val loadPage = if(container != null){
                     openExistingDocument(container)
                 }else{
-                    createDocument(contentEntry.title!!, contentEntry.description!!)
+                    createDocument(contentEntry!!.title!!, contentEntry!!.description!!, contentEntry!!.author!!)
                 }
 
                 if(loadPage){
@@ -213,7 +217,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     fun handleUpdateDocumentMetaInfo(title: String, description: String){
         GlobalScope.launch {
-            val result = updateDocumentMetaInfo(title, description, false)
+            val result = updateDocumentMetaInfo(title, description, contentEntry!!.author!!,false)
             if(result == null){
                 view.runOnUiThread(Runnable {
                     showErrorMessage(impl.getString(MessageID.error_message_update_document, context)) })
@@ -288,7 +292,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
             if(openPreview){
                 val args = HashMap<String, String?>()
                 args.putAll(arguments)
-                args[EpubContentView.ARG_CONTAINER_UID] = containerUid.toString()
+                args[UstadView.ARG_CONTAINER_UID] = containerUid.toString()
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
             }else{

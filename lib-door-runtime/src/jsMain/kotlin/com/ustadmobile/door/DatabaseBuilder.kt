@@ -35,7 +35,8 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         console.log("DoorDbJs endpoint = $dbEndpoint")
         @Suppress("UNUSED_VARIABLE")
 
-        return jsImplClass.js.createInstance(dbEndpoint, dbName).unsafeCast<T>()
+        val newImpl: dynamic = jsImplClass.js.createInstance(dbEndpoint, dbName)
+        return newImpl
     }
 
     actual fun addCallback(callback: DoorDatabaseCallback): DatabaseBuilder<T> {
