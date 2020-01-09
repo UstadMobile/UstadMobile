@@ -87,4 +87,8 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
     override fun onFirstItemLoaded() {
         this.visibility = View.GONE
     }
+
+    override fun onEmptyTopEntryList(status: Int) {
+        onLoadStatusChanged(status, null)
+    }
 }

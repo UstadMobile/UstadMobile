@@ -12,6 +12,11 @@
         <item name="android:dialogTheme">@style/CustomDialog</item>
     </style>
 
+    <style name="ChipTextStyleSelected">
+        <item name="android:textSize">@dimen/text_body_small</item>
+        <item name="android:textColor">@color/icons</item>
+    </style>
+
 
     <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
         <item name="android:windowNoTitle">false</item>

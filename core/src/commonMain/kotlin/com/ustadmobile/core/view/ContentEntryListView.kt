@@ -28,7 +28,7 @@ interface ContentEntryListView : UstadView {
      * Set filter buttons if applicable (e.g. on Android to show all libraries / downloaded items)
      */
     @JsName("setFilterButtons")
-    fun setFilterButtons(buttonLabels: List<String>)
+    fun setFilterButtons(buttonLabels: List<String>, activeIndex: Int)
 
     /**
      * Sets whether or not buttons that allow the user to edit content are visibile

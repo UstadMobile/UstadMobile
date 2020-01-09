@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:name="com.ustadmobile.port.android.view.ContentEntryViewerFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.ustadmobile.port.android.view.ContentEntryListFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/content_entry_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/list_item_content_entry" />
-
     <com.ustadmobile.port.android.view.RepoLoadingStatusView
         android:layout_centerInParent="true"
         android:id="@+id/statusView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/content_entry_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/list_item_content_entry" />
 
 </RelativeLayout>

@@ -1,15 +1,17 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_ACTIVE_INDEX
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -34,20 +36,22 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
         DoorMutableLiveData<UmAccount?>(null).observe(this, ::onChanged)
-        UmAccountManager.getActiveAccount(context)
 
     }
 
     private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
-            var options = listOf(Pair(MessageID.contents, "ContentEntryView?"),Pair(MessageID.reports, "ContentEntryView"))
+            var filterOptions = "${impl.getString(MessageID.libraries, context)},${impl.getString(MessageID.downloaded, context)}"
+            var options = listOf(Pair(MessageID.contents,
+                    "${ContentEntryListView.VIEW_NAME}?$ARG_FILTER_BUTTONS=$filterOptions&$ARG_LIBRARIES_CONTENT=''&$ARG_ACTIVE_INDEX=0"))
             if(t != null){
                 account = t
                 val person = personDao.findByUid(t.personUid)
                 if(person != null){
 
                     if(person.admin){
-                        options = options.plus(Pair(MessageID.reports, "ContentEntryView"))
+                        filterOptions = "$filterOptions, ${impl.getString(MessageID.libraries, context)}"
+                        options = options.plus(Pair(MessageID.reports, "${ContentEntryListView.VIEW_NAME}?$ARG_FILTER_BUTTONS=$filterOptions"))
                     }
                     view.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)
@@ -59,9 +63,6 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 homeView.setOptions(options)
             })
         }
-        //TODO here: check if the person is admin
-        // view.setOptions(listOf("ContentEntryView?$ARG_FILTER_BUTTONS=...))
-
     }
 
     fun handleShowDownloadButton(show: Boolean){
@@ -89,8 +90,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         homeView.showShareAppDialog()
     }
 
-    override fun handleNavigation() {
-    }
+    override fun handleNavigation() {}
 
 
     companion object {

@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -37,6 +38,11 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
+        view.runOnUiThread(Runnable {
+            view.setFilterButtons(arguments[ARG_FILTER_BUTTONS]?.split(",")?.toList()
+                    ?: listOf(),arguments[ARG_ACTIVE_INDEX]?.toInt()?:0)
+        })
+
         when {
             arguments.containsKey(ARG_LIBRARIES_CONTENT) -> showContentByParent()
             arguments.containsKey(ARG_DOWNLOADED_CONTENT) -> showDownloadedContent()
@@ -45,13 +51,11 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         GlobalScope.launch {
 
-
             if (activeAccount != null) {
                 val person = umRepo.personDao.findByUid(activeAccount.personUid)
                 if (person?.admin == true) {
 
-                    var contentEditFlags: Int = arguments[ARG_EDIT_BUTTONS_CONTROL_FLAG]?.toInt()
-                            ?: 0
+                    val contentEditFlags: Int = arguments[ARG_EDIT_BUTTONS_CONTROL_FLAG]?.toInt() ?: 0
                     view.runOnUiThread(Runnable {
                         view.setEditButtonsVisibility(contentEditFlags)
                     })
@@ -181,6 +185,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args.putAll(arguments)
         val entryUid = entry.contentEntryUid
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
+        args.remove(ARG_FILTER_BUTTONS)
         args[ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
@@ -261,5 +266,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         const val ARG_RECYCLED_CONTENT = "recycled"
 
         const val ARG_LIBRARIES_CONTENT = "libraries"
+
+        const val ARG_ACTIVE_INDEX = "activeIndex"
     }
 }

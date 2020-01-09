@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
@@ -15,7 +16,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
@@ -23,6 +24,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
@@ -36,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -50,6 +53,7 @@ import java.util.concurrent.atomic.AtomicReference
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
+
 class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener {
 
@@ -64,6 +68,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     }
 
+    interface ContentEntryFilterAction{
+        fun onFilterClicked(params: String)
+    }
+
 
     private var buttonVisibilityFlags: Int = 0
 
@@ -76,6 +84,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     private var contentEntryListHostActivity: ContentEntryListHostActivity? = null
 
+    private lateinit var contentEntryFilterAction: ContentEntryFilterAction
+
     private lateinit var ustadBaseActivity: UstadBaseActivity
 
     private lateinit var managerAndroidBle: NetworkManagerBle
@@ -87,6 +97,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     private lateinit var rootContainer: View
 
     private lateinit var repoLoadingStatusView: RepoLoadingStatusView
+
+    private lateinit var buttonFilterLabels: List<String>
 
     internal class LocalAvailabilityPagedListCallback(private val localAvailabilityManager: LocalAvailabilityManager,
                                                       var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
@@ -176,8 +188,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         contentEntryListHostActivity?.setLanguageFilterSpinner(result)
     }
 
-    override fun setFilterButtons(buttonLabels: List<String>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun setFilterButtons(buttonLabels: List<String>, activeIndex: Int) {
+        buttonFilterLabels = buttonLabels
+        recyclerAdapter?.isTopEntryList = buttonLabels.isNotEmpty()
+        recyclerAdapter?.filterButtons = buttonLabels
+        recyclerAdapter?.activeIndex = activeIndex
+        Handler().postDelayed(Runnable {
+            recyclerView.smoothScrollToPosition(0)
+        }, TimeUnit.MILLISECONDS.toMillis(200))
     }
 
     override fun setEditButtonsVisibility(buttonVisibilityFlags: Int) {
@@ -297,6 +315,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
             this.contentEntryListHostActivity = context
         }
 
+        if(context is ContentEntryFilterAction){
+            this.contentEntryFilterAction = context
+        }
+
         if (context is UstadBaseActivity) {
             this.ustadBaseActivity = context
         }
@@ -361,6 +383,19 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         }
     }
 
+    override fun contentFilterClicked(label: String, index: Int) {
+        if(::contentEntryFilterAction.isInitialized){
+            val filters = arguments!![ARG_FILTER_BUTTONS]?:""
+            var params = when (buttonFilterLabels.indexOf(label)) {
+                0 -> "$ARG_LIBRARIES_CONTENT=''"
+                1 -> "$ARG_DOWNLOADED_CONTENT=''"
+                else -> "$ARG_RECYCLED_CONTENT=''"
+            }
+            params = "${ContentEntryListView.VIEW_NAME}?$params&$ARG_FILTER_BUTTONS=$filters&$ARG_ACTIVE_INDEX=$index"
+            contentEntryFilterAction.onFilterClicked(params)
+        }
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -372,6 +407,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     }
 
     companion object {
+
+        const val ARG_ACTIVE_INDEX = "activeIndex"
 
         fun newInstance(args: Bundle): ContentEntryListFragment {
             val fragment = ContentEntryListFragment()
