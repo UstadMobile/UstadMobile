@@ -42,7 +42,7 @@ class IndexDdlContent {
     private var contentParentChildJoinDao: ContentEntryParentChildJoinDao? = null
     private var contentCategoryChildJoinDao: ContentEntryContentCategoryJoinDao? = null
     private lateinit var languageDao: LanguageDao
-    private var containerDir: File? = null
+    private lateinit var containerDir: File
 
 
     @Throws(IOException::class)
@@ -142,11 +142,14 @@ class IndexDdlContent {
             val url = resource.attr("href")
             if (url.contains("resource/")) {
 
-                var contentEntry = ContentEntry()
-                contentEntry.sourceUrl = url
-                contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
+                var contentEntry = db.contentEntryDao.findBySourceUrl(url)
+                if(contentEntry == null){
+                    contentEntry = ContentEntry()
+                    contentEntry.sourceUrl = url
+                    contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
+                }
 
-                val scraper = DdlContentScraper(destinationDirectory!!, containerDir!!, lang, db, contentEntry.contentEntryUid)
+                val scraper = DdlContentScraper(containerDir, lang, db, contentEntry.contentEntryUid)
                 try {
                     scraper.scrapeUrl(url)
                     UMLogUtil.logTrace("scraped url: $url")
@@ -171,8 +174,8 @@ class IndexDdlContent {
                     }
 
 
-                } catch (e: IOException) {
-                    UMLogUtil.logError("Error downloading resource at $url")
+                } catch (e: Exception) {
+                    UMLogUtil.logError("Something went wrong here $url")
                     UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 }
 

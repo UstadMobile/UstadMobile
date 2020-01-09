@@ -19,9 +19,4 @@ class CK12FlexScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Lo
 
     }
 
-    override fun isContentUpdated(): Boolean {
-        return true
-    }
-
-
 }

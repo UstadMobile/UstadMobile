@@ -11,6 +11,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
+import com.ustadmobile.lib.db.entities.ContentEntry
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -150,9 +151,8 @@ class TestPrathamContentScraper {
         mockWebServer.setDispatcher(dispatcher)
 
         val scraper = DdlContentScraper(
-                tmpDir,
                 containerDir, "en", db, 0)
-        scraper.scrapeContent()
+        scraper.scrapeUrl(mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString())
         scraper.parentSubjectAreas
 
         val contentFolder = File(tmpDir, "ddlcontent")

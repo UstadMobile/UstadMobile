@@ -62,7 +62,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
 
         try {
-            chromeDriver.get(url)
+            chromeDriver.navigate().to(url)
         } catch (e: InvalidArgumentException) {
             throw IllegalArgumentException(e)
         }

@@ -14,9 +14,7 @@ suspend fun deleteDownloadJob(db: UmAppDatabase, downloadJobUid: Int,
                       containerDownloadManager: ContainerDownloadManager,
                       onprogress: (progress: Int) -> Unit): Boolean {
 
-    if(db.downloadJobDao.findByUid(downloadJobUid) == null) {
-        return false
-    }
+    db.downloadJobDao.findByUid(downloadJobUid)?: return false
 
     db.downloadJobItemDao.forAllChildDownloadJobItemsRecursiveAsync(downloadJobUid) { childItems ->
         childItems.forEach {

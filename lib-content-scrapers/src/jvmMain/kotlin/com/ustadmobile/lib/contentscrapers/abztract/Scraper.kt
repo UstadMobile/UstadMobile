@@ -20,8 +20,6 @@ abstract class Scraper(val containerDir: File, var db: UmAppDatabase, var conten
             MimeType.EPUB to ContentEntry.EBOOK_TYPE
     )
 
-    abstract fun isContentUpdated(): Boolean
-
     abstract fun scrapeUrl(sourceUrl: String)
 
     abstract fun close()

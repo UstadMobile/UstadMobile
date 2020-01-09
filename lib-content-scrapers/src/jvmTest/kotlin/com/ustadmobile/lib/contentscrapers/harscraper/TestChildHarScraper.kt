@@ -6,13 +6,9 @@ import java.io.File
 
 class TestChildHarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid) {
 
-    override fun isContentUpdated(): Boolean {
-       return true
-    }
-
     override fun scrapeUrl(sourceUrl: String) {
         startHarScrape(sourceUrl, null){
-            isContentUpdated()
+           true
         }
     }
 
