@@ -12,6 +12,24 @@ Supported content formats:
 
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
 
+## Contributing
+
+Contributions are welcome! If you're unsure about anything, please create an issue and label it as
+a question.
+
+* __Localization__ - Localization is powered by our Weblate server at [https://weblate.ustadmobile.com](https://weblate.ustadmobile.com).
+ Please register on the weblate server [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) 
+ with the subject "Localization - language name" and let us know what language you would like to 
+ translate into. We can then give you permission to start translating!
+* __Feature requests__ - Let us know what features you would like to see. [Create an issue](https://github.com/UstadMobile/UstadMobile/issues/new)
+ and label it as a feature request.
+ * __Bug reports__ - this project is written primarily in Kotlin as a Kotlin Multiplatform. You can 
+ [create an issue](https://github.com/UstadMobile/UstadMobile/issues/new) or even send us a pull request.
+ * __Code contributions__ - we welcome pull requests. Please ensure your contribution is readable,
+ follows existing patterns and provides the required tests.
+
+You can join our Slack channel by [requesting an invite](https://docs.google.com/forms/d/e/1FAIpQLScTD0JuUwez4kZMTqIXMygiaeIx4e09bPDnaEPOZlCItxOk9g/viewform?usp=sf_link)
+
 ### Code structure
 
 This multi-module Gradle project built using Kotlin Multiplatform. It builds for:
