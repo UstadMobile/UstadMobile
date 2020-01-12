@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_TO_DATE
@@ -43,8 +44,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
             toDate = arguments!!.get(ARG_TO_DATE)!!.toLong()
         }
         if (arguments!!.containsKey(ARG_CLAZZ_LIST)) {
-            val clazzes = arguments!!.get(ARG_CLAZZ_LIST) as LongArray
-            clazzList = convertLongArray(clazzes)
+            clazzList = ArgumentUtil.convertCSVStringToLongList(arguments.get(ARG_CLAZZ_LIST)!!)
         }
 
     }
