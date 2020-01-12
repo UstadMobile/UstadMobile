@@ -35,7 +35,7 @@ abstract class NetworkManagerBleCommon(
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
-        var umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context)) :
+        var umAppDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context)) :
         DownloadJobItemStatusProvider {
 
     abstract val umAppDatabaseRepo: UmAppDatabase
@@ -197,7 +197,7 @@ abstract class NetworkManagerBleCommon(
 
     }
 
-    protected open fun onDownloadQueueEmpty(lastDownloadJobItem: DownloadJobItem) {
+    protected open fun onDownloadQueueEmpty() {
         val currentConnectivityStatus = connectivityStatusRef.value
         if(currentConnectivityStatus != null &&
                 currentConnectivityStatus.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {

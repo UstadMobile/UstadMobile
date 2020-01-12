@@ -18,7 +18,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.GroupDetailPresenter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.io.File
 
 class GroupDetailRecyclerAdapter(
@@ -27,6 +33,8 @@ class GroupDetailRecyclerAdapter(
         internal var theActivity: Activity,
         internal var theContext: Context)
     : PagedListAdapter<PersonWithEnrollment, GroupDetailRecyclerAdapter.GroupDetailViewHolder>(diffCallback) {
+
+    private var personPictureDaoRepo: PersonPictureDao?=null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupDetailViewHolder {
 
@@ -57,31 +65,43 @@ class GroupDetailRecyclerAdapter(
         if (personWithEnrollment == null) {
             return
         }
-        if (personWithEnrollment != null && personWithEnrollment!!.firstNames != null) {
-            firstName = personWithEnrollment!!.firstNames
+        if (personWithEnrollment.firstNames != null) {
+            firstName = personWithEnrollment.firstNames
         }
-        if (personWithEnrollment != null && personWithEnrollment!!.lastName != null) {
-            lastName = personWithEnrollment!!.lastName
+        if (personWithEnrollment.lastName != null) {
+            lastName = personWithEnrollment.lastName
         }
 
         val studentName = "$firstName $lastName"
         studentNameTextView.setText(studentName)
-        val personUid = personWithEnrollment!!.personUid
+        val personUid = personWithEnrollment.personUid
         studentNameTextView.setOnClickListener({ v -> mPresenter.handleClickStudent(personUid) })
 
-        //PICTURE : Add picture to person
-        var imagePath: String? = ""
-        val personPictureUid = personWithEnrollment!!.personPictureUid
-        if (personPictureUid != 0L) {
-            //TODO: KMP Person Picture attachment.
-//            imagePath = UmAppDatabase.getInstance(theContext).personPictureDao
-//                    .getAttachmentPath(personPictureUid)
-        }
+        var imgPath = ""
+        GlobalScope.async(Dispatchers.Main) {
 
-        if (imagePath != null && !imagePath.isEmpty())
-            setPictureOnView(imagePath, personPicture)
-        else
-            personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+            personPictureDaoRepo =
+                    UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
+            val personPictureDao = UmAccountManager.getActiveDatabase(theContext).personPictureDao
+
+            val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
+            imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureLocal!!)!!
+
+            if (!imgPath!!.isEmpty())
+                setPictureOnView(imgPath, personPicture!!)
+            else
+                personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+
+            val personPictureEntity = personPictureDaoRepo!!.findByPersonUidAsync(personUid)
+            imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureEntity!!)!!
+
+            if(personPictureLocal != personPictureEntity) {
+                if (!imgPath!!.isEmpty())
+                    setPictureOnView(imgPath, personPicture!!)
+                else
+                    personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
+            }
+        }
 
         //Last Seen
         //TODO:

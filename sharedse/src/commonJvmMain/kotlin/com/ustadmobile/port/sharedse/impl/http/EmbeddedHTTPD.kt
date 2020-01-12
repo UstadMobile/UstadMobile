@@ -17,6 +17,7 @@ import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
+import com.ustadmobile.core.impl.UmAccountManager
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -29,7 +30,9 @@ import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONC
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any, private val appDatabase: UmAppDatabase = UmAppDatabase.getInstance(context), private val repository: UmAppDatabase = UmAppDatabase.getInstance(context)) : RouterNanoHTTPD(portNum) {
+open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any,
+                                                   private val appDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context),
+                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) {
 
     private val id: Int
 
@@ -161,7 +164,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         }
 
         addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
-                MountedContainerResponder::class.java, context, filters)
+                MountedContainerResponder::class.java, context, filters, appDatabase)
 
         return mountPath
     }

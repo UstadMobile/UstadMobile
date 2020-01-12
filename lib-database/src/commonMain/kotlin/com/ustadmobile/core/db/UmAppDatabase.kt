@@ -260,10 +260,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+
         /**
-         * Fix SQLite update triggers
+         * Fix SQLite update triggers, add locallyavailablecontainer and move to 30
          */
-        val MIGRATION_29_30 = object: DoorMigration(29, 30) {
+        val MIGRATION_29_30_TRIGGERS = object: DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 if(database.dbType() == DoorDbType.SQLITE) {
@@ -2576,6 +2577,109 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_29_30 = object : DoorMigration(29, 30) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if(database.dbType() == DoorDbType.SQLITE){
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE TRIGGER IF NOT EXISTS UPD_66
+                    |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.verbMasterChangeSeqNum = 0 
+                    |OR OLD.verbMasterChangeSeqNum = NEW.verbMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.verbLocalChangeSeqNum = 0  
+                    |OR OLD.verbLocalChangeSeqNum = NEW.verbLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(verbLocalChangeSeqNum), OLD.verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+                    |verbMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(verbMasterChangeSeqNum), OLD.verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+                    |ELSE NEW.verbMasterChangeSeqNum END)
+                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER IF NOT EXISTS INS_66
+                    |AFTER INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.verbMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.verbLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+                    |verbMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+                    |ELSE NEW.verbMasterChangeSeqNum END)
+                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX  IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
+                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+
+
+                }else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_66_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
+                    | verbMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
+                    | ELSE NEW.verbMasterChangeSeqNum END)
+                    | WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""DROP TRIGGER IF EXISTS inccsn_66_trig ON ContextXObjectStatementJoin""".trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_66_trig 
+                    |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_66_fn()
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
+                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+
+                }
+
+
+            }
+
+        }
+
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(object : DoorMigration(27,28){
@@ -3667,7 +3771,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_29_30)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_29_30_TRIGGERS, MIGRATION_29_30)
 
             return builder
         }

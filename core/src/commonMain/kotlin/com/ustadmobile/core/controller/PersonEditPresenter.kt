@@ -94,7 +94,7 @@ class PersonEditPresenter
     private var assignedRoleAssignments: DataSource.Factory<Int, EntityRoleWithGroupName>?= null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
-    internal var database = UmAppDatabase.getInstance(context)
+    internal var database = UmAccountManager.getActiveDatabase(context)
 
     private var newPersonString = ""
 

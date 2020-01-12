@@ -30,6 +30,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
     private var feedEntryUmProvider: DataSource.Factory<Int, FeedEntry>? = null
 
     private var repository: UmAppDatabase? = null
+    private var database: UmAppDatabase? = null
 
     /**
      * Overridden onCreate in order:
@@ -42,7 +43,8 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
-        repository = UmAppDatabase.getInstance(view.viewContext)
+        repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        database = UmAccountManager.getActiveDatabase(context)
 
         updateFeedEntries()
 
@@ -78,9 +80,10 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
         val clazzDao = repository!!.clazzDao
         GlobalScope.launch {
             if(loggedInPersonUid != 0L) {
-                val result = clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_REPORTS_VIEW)
+                val result = clazzDao.personHasPermission(loggedInPersonUid,
+                        Role.PERMISSION_REPORTS_VIEW)
                 if (result != null) {
-                    view.showReportOptionsOnSummaryCard(result!!)
+                    view.showReportOptionsOnSummaryCard(result)
                 }
             }
         }

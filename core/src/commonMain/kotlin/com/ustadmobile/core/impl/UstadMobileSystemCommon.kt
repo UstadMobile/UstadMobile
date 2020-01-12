@@ -430,8 +430,8 @@ open abstract class UstadMobileSystemCommon {
     }
 
     fun scheduleChecks(context: Any) {
-        //UmAppDatabase.getInstance(context).scheduledCheckDao.createPendingScheduledChecks()
-        AddScheduleDialogPresenter.createPendingScheduledChecks(UmAppDatabase.getInstance(context).scheduledCheckDao)
+        AddScheduleDialogPresenter.createPendingScheduledChecks(
+                UmAccountManager.getActiveDatabase(context).scheduledCheckDao)
     }
 
 

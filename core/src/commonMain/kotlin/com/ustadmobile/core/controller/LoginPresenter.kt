@@ -34,6 +34,8 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
     private val registerCode: String
     private var personAuthdao: PersonAuthDao
 
+    private var repository = UmAccountManager.getRepositoryForActiveAccount(context)
+
     init {
         mNextDest = arguments[ARG_NEXT] ?: impl.getAppConfigString(
                 AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
@@ -41,7 +43,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         registerCode = (impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER_CODE, "", context) ?: "")
                 .trim()
 
-        personAuthdao = UmAppDatabase.getInstance(context!!).personAuthDao
+        personAuthdao = repository.personAuthDao
 
     }
 

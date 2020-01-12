@@ -75,7 +75,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         viewPager.addOnPageChangeListener(this)
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAppDatabase.getInstance(this).personDao,
+                this, UmAccountManager.getActiveDatabase(this).personDao,
                 UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

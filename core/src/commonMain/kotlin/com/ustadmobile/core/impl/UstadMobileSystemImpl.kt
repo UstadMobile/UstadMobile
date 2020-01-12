@@ -71,7 +71,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
 
     override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
 
-    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
+    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir>
 
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)

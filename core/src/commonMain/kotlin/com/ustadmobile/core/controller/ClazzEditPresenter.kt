@@ -51,12 +51,13 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
+    internal var database = UmAccountManager.getActiveDatabase(context)
     private val clazzDao = repository.clazzDao
-    private val clazzDaoDB = UmAppDatabase.getInstance(context).clazzDao
+    private val clazzDaoDB = database.clazzDao
     private val locationDao = repository.locationDao
-    private val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
+    private val locationDaoDB = database.locationDao
     private val customFieldDao: CustomFieldDao
-    private val customFieldDaoDB = UmAppDatabase.getInstance(context).customFieldDao
+    private val customFieldDaoDB = database.customFieldDao
     private val customFieldValueDao: CustomFieldValueDao
     private val customFieldValueOptionDao: CustomFieldValueOptionDao
 
@@ -83,9 +84,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     fun handleLocationTyped(locationName: String){
 
         val name = "%$locationName%"
-        val locationDaoDb = UmAppDatabase.getInstance(context).locationDao
+
         GlobalScope.launch {
-            val locations = locationDaoDb.findByTitleLikeAsync(name)
+            val locations = locationDaoDB.findByTitleLikeAsync(name)
             view.runOnUiThread(Runnable {
                 view.updateLocationDataAdapter(locations)
             })
@@ -214,7 +215,6 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
 
             //Get location if set
             if(clazzData!!.clazzLocationUid != 0L){
-                val locationDaoDB = UmAppDatabase.getInstance(context).locationDao
                 val location = locationDaoDB.findByUidAsync(clazzData!!.clazzLocationUid)
                 view.runOnUiThread(Runnable {
                     var locationTimeZone = location!!.timeZone

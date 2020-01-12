@@ -12,7 +12,10 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.MenuItem
-import android.widget.*
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
@@ -23,9 +26,9 @@ import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -35,8 +38,7 @@ import java.io.*
 
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
-
-    private lateinit var mPresenter: UserProfilePresenter
+    private lateinit var presenter: UserProfilePresenter
 
     private lateinit var logout: RelativeLayout
 
@@ -47,12 +49,12 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     private var toolbar: Toolbar? = null
 
     private var changePasswordLL: RelativeLayout? = null
-    internal lateinit var pictureEdit: ImageView
-    internal lateinit var personEditImage: ImageView
+    private lateinit var pictureEdit: ImageView
+    private lateinit var personEditImage: ImageView
 
-    internal var IMAGE_MAX_HEIGHT = 1024
-    internal var IMAGE_MAX_WIDTH = 1024
-    internal var IMAGE_QUALITY = 75
+    private var IMAGE_MAX_HEIGHT = 1024
+    private var IMAGE_MAX_WIDTH = 1024
+    private var IMAGE_QUALITY = 75
 
     private var imagePathFromCamera: String? = null
     private lateinit var lastSyncedTV : TextView
@@ -73,22 +75,20 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         toolbar!!.title = getText(R.string.app_name)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
-
-        mPresenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAppDatabase.getInstance(this).personDao,
+        presenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
+                this, UmAccountManager.getActiveDatabase(this).personDao,
                 UstadMobileSystemImpl.instance)
-        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         logout.setOnClickListener {
-            mPresenter.handleUserLogout()
+            presenter.handleUserLogout()
         }
 
         languageOption.setOnClickListener {
-            mPresenter.handleShowLanguageOptions()
+            presenter.handleShowLanguageOptions()
         }
 
-        changePasswordLL!!.setOnClickListener { v -> mPresenter!!.handleClickChangePassword() }
+        changePasswordLL!!.setOnClickListener { v -> presenter.handleClickChangePassword() }
         pictureEdit.setOnClickListener { v -> showGetImageAlertDialog() }
     }
 
@@ -123,7 +123,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
-            mPresenter.handleLanguageSelected(languages.indexOf(item!!.title))
+            presenter.handleLanguageSelected(languages.indexOf(item!!.title))
             true
         }
         popupMenu.show()
@@ -194,7 +194,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
                 //Click on image - open dialog to show bigger picture
                 personEditImage.setOnClickListener { view ->
-                    mPresenter!!.openPictureDialog(imagePath) }
+                    presenter!!.openPictureDialog(imagePath) }
             }
 
         }
@@ -244,7 +244,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     private fun startCameraIntent() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         val dir = filesDir
-        val output = File(dir, mPresenter!!.loggedInPersonUid.toString() + "_image.png")
+        val output = File(dir, presenter!!.loggedInPersonUid.toString() + "_image.png")
         imagePathFromCamera = output.absolutePath
 
         val cameraImage = FileProvider.getUriForFile(applicationContext,
@@ -351,7 +351,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    mPresenter!!.handleCompressedImage(imageFile.canonicalPath)
+                    presenter!!.handleCompressedImage(imageFile.canonicalPath)
                 }
 
                 GALLERY_REQUEST_CODE -> {
@@ -370,7 +370,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val galleryFile = File(imagePathFromCamera)
-                    mPresenter!!.handleCompressedImage(galleryFile.canonicalPath)
+                    presenter!!.handleCompressedImage(galleryFile.canonicalPath)
                 }
             }
         }

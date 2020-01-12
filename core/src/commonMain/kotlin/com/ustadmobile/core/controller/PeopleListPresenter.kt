@@ -36,7 +36,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
     private var personWithEnrollmentUmProvider: DataSource.Factory<Int, PersonWithEnrollment>? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
-    internal var database = UmAppDatabase.getInstance(context)
+    internal var database = UmAccountManager.getActiveDatabase(context)
 
     private var loggedInPersonUid: Long? = 0L
 

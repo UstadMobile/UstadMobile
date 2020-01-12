@@ -75,7 +75,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
 
         presenter = ContentEntryImportLinkPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this, endpoint, UmAppDatabase.getInstance(viewContext),
+                this, endpoint, UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(viewContext))
         presenter.onCreate(UMAndroidUtil.bundleToMap(saved))
 

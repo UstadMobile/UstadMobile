@@ -12,7 +12,7 @@ class ScheduledCheckWorker(context: Context, workerParams: WorkerParameters)
     : Worker(context, workerParams) {
 
     override fun doWork(): ListenableWorker.Result {
-        val db = UmAppDatabase.getInstance(applicationContext)
+        val db = UmAccountManager.getActiveDatabase(applicationContext)
         val repo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
         val check = db.scheduledCheckDao.findByUid(inputData.getLong(
                 ARG_SCHEDULE_CHECK_UID, 0))

@@ -66,7 +66,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     private var currentPerson: Person? = null
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
-    internal var database = UmAppDatabase.getInstance(context)
+    internal var database = UmAccountManager.getActiveDatabase(context)
 
     private val viewIdToCustomFieldUid: HashMap<Int, Long>
 

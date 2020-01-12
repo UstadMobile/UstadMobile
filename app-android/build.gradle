@@ -49,7 +49,8 @@ afterEvaluate {
 
 tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().endsWith("androidtest")) {
-        task.dependsOn(":lib-http-testserver:startDaemon")
+        //TODO: This needs to depend on the new lib-http-testserver for end-to-end tests
+        //task.dependsOn(":lib-http-testserver:startDaemon")
     }
 }
 
@@ -178,8 +179,6 @@ gradle.taskGraph.useFilter { task ->
 
     return true
 }
-
-//connectedCheck.dependsOn(":lib-http-testserver:startDaemon")
 
 task generateCoreStringToAndroidResMap {
     inputs.files("../core/locale/main/**/*.xml")

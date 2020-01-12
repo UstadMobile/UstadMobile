@@ -321,7 +321,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
             personPictureDaoRepo =
                     UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
-            val personPictureDao = UmAppDatabase.getInstance(theContext).personPictureDao
+            val personPictureDao = UmAccountManager.getActiveDatabase(theContext).personPictureDao
 
             val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
             imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureLocal!!)!!

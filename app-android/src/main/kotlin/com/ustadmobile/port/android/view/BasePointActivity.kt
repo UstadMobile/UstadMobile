@@ -356,9 +356,8 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             R.id.menu_action_sync -> forceSync()
             R.id.menu_action_clear_history -> {
                 GlobalScope.launch {
-                    val database = UmAppDatabase.getInstance(this)
+                    val database = UmAccountManager.getActiveDatabase(this)
                     database.networkNodeDao.deleteAllAsync()
-                    //database.entryStatusResponseDao.deleteAllAsync()
                     database.downloadJobItemHistoryDao.deleteAllAsync()
                     database.downloadJobDao.deleteAllAsync()
                     database.contentEntryStatusDao.deleteAllAsync()
@@ -370,6 +369,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                 args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
                 args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
+                //TODO: Check if we want this still
 //                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
 //                        this)
             }
