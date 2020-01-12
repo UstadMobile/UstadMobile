@@ -2,201 +2,9 @@
 <resources>
     <string name='app_name'>‫أستاد موبايل‬</string>
 
-    <string name='dir'>ltr</string>
-    <string name='login'>Login</string>
-    <string name='error'>Error</string>
-    <string name='err_registering_new_user'>Error registering new user:</string>
-    <string name='registering'>Registering</string>
-    <string name="register_empty_fields">Please fill out all required fields</string>
-    <string name="register_incorrect_email">Wrong email address</string>
 
-    <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
-    <string name='login_network_error'>Network error: please check you are online.</string>
-    <string name='authenticating'>Authenticating</string>
-    <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
-    <string name="download">Download</string>
-    <string name="downloaded" value="81">Downloaded</string>
-    <string name="recycled" >Recycled</string>
-    <string name="libraries">Libraries</string>
-    <string name="pause_download">Pause download</string>
-    <string name='ok'>OK</string>
-    <string name="confirm">Confirm</string>
-    <string name='cancel'>Cancel</string>
-    <string name='delete'>Delete</string>
-    <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
-    <string name='loading'>Loading</string>
-    <string name='error_opening_file'>Error opening file: </string>
-    <string name='download_in_progress'>Download in progress...</string>
-    <string name='save_to'>Save to...</string>
-    <string name='all_users'>All users</string>
-    <string name='only_me'>Only me</string>
-    <string name='mycourses'>My courses</string>
-    <string name='onthisdevice'>On this device</string>
-    <string name='logout'>Logout</string>
-    <string name='about'>About</string>
-    <string name='download_for'>Download for...</string>
-    <string name='refresh'>Refresh</string>
-    <string name='download_all'>Download all</string>
-    <string name='nothing_selected'>Nothing selected!</string>
-    <string name='next'>Next</string>
-    <string name='previous'>Previous</string>
-    <string name='back'>Back</string>
-    <string name='username'>Username</string>
-    <string name='password'>Password</string>
-    <string name="confirm_password">Confirm password</string>
-    <string name="last_name">Last name</string>
-    <string name="first_name">First name</string>
-    <string name="create_new_account">Register Now</string>
-    <string name="new_password">New password</string>
-    <string name='phone_memory'>Phone memory</string>
-    <string name='memory_card'>Memory card</string>
-    <string name='device'>Device</string>
-    <string name='register'>Register</string>
-    <string name='phone_number'>Phone number</string>
-    <string name='name'>Name</string>
-    <string name='male'>Male</string>
-    <string name='female'>Female</string>
-    <string name='could_not_open_file'>Sorry! Could not open file.</string>
-    <string name='settings'>Settings</string>
-    <string name='lang_sys'>System Language</string>
-    <string name='lang_en'>English</string>
-    <string name='lang_ar'>Arabic</string>
-    <string name='my_resources'>My Resources</string>
-    <string name='browse_feeds'>Browse Libraries</string>
-    <string name='choose_format'>Choose Format:</string>
-    <string name='language'>Language</string>
-    <string name='advanced'>Advanced</string>
-    <string name='server'>Server</string>
-    <string name='optional'>Optional</string>
-    <string name='email'>Email</string>
-    <string name='regcode'>Signup Code</string>
-    <string name='home'>Home</string>
-    <string name='add'>Add</string>
-    <string name='enter_phone_num'>Please enter phone number</string>
-    <string name="phone">Phone</string>
-    <string name="tablet">Tablet</string>
-    <string name='enter_name'>Please enter name</string>
-    <string name='attendance'>Attendance</string>
-    <string name='processing'>Processing</string>
-    <string name='classes'>Classes</string>
-    <string name='exams'>Exams</string>
-    <string name='reports'>Reports</string>
-    <string name='students'>Account</string>
-    <string name='forgot_password'>Forgot password</string>
-    <string name='connections'>Connection</string>
-    <string name='notifications'>Notifications</string>
-    <string name='connection'>General Connection</string>
-    <string name='data_usage_label'>Total mobile data usage</string>
-    <string name='account'>Account</string>
-    <string name='data_usage'>Data usage</string>
-    <string name='app_interface_language'>App interface language</string>
-    <string name="share_application">Share App</string>
-    <string name="share_via">Share via...</string>
-    <string name="share">Share</string>
-    <string name="receive">Receive</string>
-    <string name="sent">Sent</string>
-    <string name="sending">Sending</string>
-    <string name="send">Send</string>
-    <string name="size">Size</string>
-    <string name="see_also">See also</string>
-    <string name="download_in_another_language">Download in another language</string>
-    <string name="modify">Modify</string>
-    <string name='open'>فتح</string>
-    <string name="passed">Passed</string>
-    <string name="in_progress">In progress</string>
-    <string name="downloading">Downloading</string>
-    <string name="waiting">Waiting</string>
-    <string name="waiting_for_sender">Waiting for sender</string>
-    <string name="queued">Queued</string>
-    <string name="failed">Failed</string>
-    <string name="success">Success</string>
-
-
-    <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
-
-    <string name="share_offline_zip_checkbox_label">Send in zip file</string>
-    <string name="share_offline_dialog_message">You can share this app offline. On the device that you want to share with:
-        \n1. Open Settings > Bluetooth Settings.
-        \n2. Make sure that the device is visible.</string>
-    <string name="preparing">Preparing</string>
-
-
-    <string name="select_language">Select language</string>
-    <!-- For language selector where %s is replaced by the device type name -->
-    <string name="device_language">Use device language</string>
-    <string name="ok_got_it">OK, got it!</string>
-    <string name="dont_show_this_next_time">Don\'t show this next time</string>
-
-    <string name="login_successful">Login successful</string>
-    <string name="registration_successful">Registration successful</string>
-
-    <string name="send_course_instructions">1. On the other device, open the app, and select receive from the top right menu.
-        \n2. Select the other device from the list below:</string>
-
-    <string name="cancel_invite">Cancel invite</string>
-    <string name="inviting">Inviting</string>
-    <string name="try_again">Try again</string>
-
-
-    <!-- Registration dialog feedback -->
-    <string name="field_required_prompt">This field is required</string>
-    <string name="field_password_min">Minimum 5 characters</string>
-    <string name="field_password_error_min">Password should be at least 5 characters</string>
-    <string name="filed_password_no_match">Password doesn\'t match, try again</string>
-
-    <!-- Update student details action button -->
-    <string name="update">Update</string>
-    <string name="profile">Profile</string>
-    <string name="dialog_download_from_playstore_message">Access &amp; Share Educational Content Offline</string>
-    <string name="dialog_download_from_playstore_ok">Download now (free)</string>
-    <string name="dialog_download_from_playstore_cancel">Stay on website</string>
-
-    <string name="catalog">Catalog</string>
-    <string name="closed">Closed</string>
-
-    <string name="cannot_update">Cannot update</string>
-
-    <string name="error_unsupported_content_type">Error: unsupported content type</string>
-
-    <string name="accept">Accept</string>
-    <string name="decline">Decline</string>
-    <string name="send_in_zip_file">Send in zip file</string>
-
-    <string name="also_available_in">Also available in</string>
-
-    <string name="onboarding_get_started_label">Get Started</string>
-    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
-    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
-    <string name="onboarding_offline_sharing">Share offline</string>
-    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
     <string name='location_permission_title'>مطلوب اذن للحصول على الموقع</string>
 
-    <string name="download_delete_btn_label">Delete</string>
-    <string name="download_continue_stacked_label">Continue download</string>
-    <string name="download_continue_btn_label">Continue</string>
-    <string name="download_wifi_only">WiFi only</string>
-    <string name="download_calculating">Calculating...</string>
-    <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
-    <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
-    <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
-    <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
-    <string name="download_summary_title">%1$s active downloads</string>
-    <string name="download_cancel_all">CANCEL ALL</string>
-    <string name="download_cancel_label">Cancel download</string>
-    <string name="download_pause_all">PAUSE ALL</string>
-    <string name="download_pause_download">Pause</string>
-    <string name="download_locally_availability">Available nearby</string>
-    <string name="download_cloud_availability">Available on cloud</string>
-    <string name="clear_history">Clear History</string>
-    <string name="download_entry_state_paused">Paused</string>
-    <string name="download_entry_state_queued">Queued</string>
-    <string name="get_app">Get app</string>
-    <string name="no_app_found">"No app found to open file"</string>
-    <string name="entry_details_author">Author</string>
-    <string name="entry_details_license">License</string>
-    <string name="entry_details_description">Description</string>
-    <string name="library_reading_level">Reading Level</string>
-    <string name="file_not_found">File Not Found</string>
 
     <!--Content editor-->
     <string name="content_type_multimedia">وسائط متعددة (صوت و صورة)</string>
@@ -289,42 +97,14 @@
     <string name='content_creation_folder_update_message'>تم تحديث المستند بنجاح</string>
     <string name='empty_state_libraries'>لا يوجد مجلدات</string>
     <string name='empty_state_downloaded'>لا يوجد تنزيلات</string>
-    <string name="empty_state_recycle">No recycled items</string>
     <string name='error_message_load_page'>فشل تحميل الصفحة</string>
     <string name='error_message_update_document'>فشل تحديث المستند</string>
     <string name='content_update_massage'>تم التحديث بنجاح</string>
-    <string name="content_entry_export">Export</string>
-    <string name="content_entry_export_inprogress">Exporting</string>
-    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
-    <string name="content_entry_label_update_content">Update Content</string>
-    <string name="content_from_file">From file</string>
-    <string name="content_from_link">From link</string>
-    <string name="content_editor_create_new_import_link">Import from link</string>
     <string name='location_permission_message'>التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق ال Bluetooth للبحث عن الاجهزة القريبة</string>
     <string name='download_storage_permission_title'>مطلوب أذن للحصول على الملف</string>
     <string name='download_storage_permission_message'>التطبيق يلزم اذن لتحميل و حفظ المحتوى</string>
     <string name='download_storage_option_device'>التخزين على ذاكرة الهاتف %1$s جيجابيت متوفر
 التخزين على بطاقة ذاكرة %2$s جيجابيت متوفر</string>
-    <string name="content_entry_importing">Importing, please wait</string>
-    <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
-    <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="no_account">You do not have an account?</string>
 
-    <string name="xapi_clear" >Clear</string>
-    <string name="xapi_today" >Today</string>
-
-    <string name="done">Done</string>
-    <string name="select_locations">Select Locations</string>
-    <string name="select_entries">Select Entries</string>
-    <string name='new_tab'>Displaying on new Tab</string>
-    <string name="error_not_found_status">404 !</string>
-    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
-
-    <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
-    <string name="repo_loading_status_loading_mirror">Loading from mirror</string>
-    <string name="repo_loading_status_loaded_empty">No content found</string>
-    <string name="repo_loading_status_failed_noconnection">No connection</string>
-    <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
 </resources>

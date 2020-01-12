@@ -185,7 +185,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 var contentDescription = if (t.isStatusQueuedOrDownloading()) {
                     context.getString(R.string.downloading)
                 } else {
-                    context.getString(R.string.download_entry_state_queued)
+                    context.getString(R.string.queued)
                 }
 
                 if (t.isStatusPaused()) {

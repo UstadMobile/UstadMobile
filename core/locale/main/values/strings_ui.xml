@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ustad Mobile</string>
-    <string name='dir'>ltr</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
     <string name='err_registering_new_user'>Error registering new user:</string>
-    <string name='registering'>Registering</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
     <string name="register_incorrect_email">Wrong email address</string>
 
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>
-    <string name='authenticating'>Authenticating</string>
-    <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
     <string name="recycled" >Recycled</string>
@@ -25,24 +21,12 @@
     <string name='delete'>Delete</string>
     <string name='deleted'>Deleted</string>
     <string name='new_tab'>Displaying on new Tab</string>
-
-
-    <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
     <string name='loading'>Loading</string>
     <string name='deleting'>Deleting</string>
     <string name='error_opening_file'>Error opening file: </string>
-    <string name='download_in_progress'>Download in progress…</string>
-    <string name='save_to'>Save to…</string>
-    <string name='all_users'>All users</string>
-    <string name='only_me'>Only me</string>
-    <string name='mycourses'>My courses</string>
-    <string name='onthisdevice'>On this device</string>
     <string name='logout'>Logout</string>
     <string name='about'>About</string>
-    <string name='download_for'>Download for…</string>
-    <string name='refresh'>Refresh</string>
     <string name='download_all'>Download all</string>
-    <string name='nothing_selected'>Nothing selected!</string>
     <string name='next'>Next</string>
     <string name='previous'>Previous</string>
     <string name='back'>Back</string>
@@ -63,57 +47,30 @@
     <string name='female'>Female</string>
     <string name="other">Other</string>
     <string name="unset">Unset</string>
-    <string name='could_not_open_file'>Sorry! Could not open file.</string>
     <string name='settings'>Settings</string>
-    <string name='lang_sys'>System Language</string>
-    <string name='lang_en'>English</string>
-    <string name='lang_ar'>Arabic</string>
-    <string name='my_resources'>My Resources</string>
-    <string name='browse_feeds'>Browse Libraries</string>
-    <string name='choose_format'>Choose Format:</string>
     <string name='language'>Language</string>
     <string name='advanced'>Advanced</string>
-    <string name='server'>Server</string>
     <string name='optional'>Optional</string>
     <string name='email'>Email</string>
     <string name='regcode'>Signup Code</string>
     <string name='home'>Home</string>
-    <string name='add'>Add</string>
-    <string name='enter_phone_num'>Please enter phone number</string>
     <string name="phone">Phone</string>
     <string name="tablet">Tablet</string>
-    <string name='enter_name'>Please enter name</string>
     <string name='attendance'>Attendance</string>
-    <string name='processing'>Processing</string>
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
-    <string name='students'>Account</string>
     <string name='forgot_password'>Forgot password</string>
-    <string name='connections'>Connection</string>
     <string name='notifications'>Notifications</string>
-    <string name='connection'>General Connection</string>
-    <string name='data_usage_label'>Total mobile data usage</string>
     <string name='account'>Account</string>
-    <string name='data_usage'>Data usage</string>
-    <string name='app_interface_language'>App interface language</string>
     <string name="share_application">Share App</string>
-    <string name="share_via">Share via…</string>
     <string name="share">Share</string>
-    <string name="receive">Receive</string>
-    <string name="sent">Sent</string>
-    <string name="sending">Sending</string>
     <string name="send">Send</string>
-    <string name="size">Size</string>
-    <string name="see_also">See also</string>
-    <string name="download_in_another_language">Download in another language</string>
-    <string name="modify">Modify</string>
     <string name="open">Open</string>
     <string name="passed">Passed</string>
     <string name="in_progress">In progress</string>
     <string name="downloading">Downloading</string>
     <string name="waiting">Waiting</string>
-    <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
     <string name="success">Success</string>
@@ -130,21 +87,7 @@
         \n2. Make sure that the device is visible.</string>
     <string name="preparing">Preparing</string>
 
-    <string name="select_language">Select language</string>
-    <!-- For language selector where %s is replaced by the device type name -->
-    <string name="device_language">Use device language</string>
-    <string name="ok_got_it">OK, got it!</string>
-    <string name="dont_show_this_next_time">Don\'t show this next time</string>
 
-    <string name="login_successful">Login successful</string>
-    <string name="registration_successful">Registration successful</string>
-
-    <string name="send_course_instructions">1. On the other device, open the app, and select receive from the top right menu.
-        \n2. Select the other device from the list below:</string>
-
-    <string name="cancel_invite">Cancel invite</string>
-    <string name="inviting">Inviting</string>
-    <string name="try_again">Try again</string>
 
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
@@ -160,16 +103,7 @@
     <string name="dialog_download_from_playstore_ok">Download now (free)</string>
     <string name="dialog_download_from_playstore_cancel">Stay on website</string>
 
-    <string name="catalog">Catalog</string>
-    <string name="closed">Closed</string>
-
-    <string name="cannot_update">Cannot update</string>
-
-    <string name="error_unsupported_content_type">Error: unsupported content type</string>
-
     <string name="accept">Accept</string>
-    <string name="decline">Decline</string>
-    <string name="send_in_zip_file">Send in zip file</string>
 
     <string name="also_available_in">Also available in</string>
 
@@ -188,7 +122,6 @@
         This app is built from open source code which can be checked at
         github.com/UstadMobile/UstadMobile</string>
 
-    <string name="download_delete_btn_label">Delete</string>
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">WiFi only</string>
@@ -200,7 +133,6 @@
     <string name="download_summary_title">%1$s active downloads</string>
     <string name="download_cancel_all">CANCEL ALL</string>
     <string name="download_cancel_label">Cancel download</string>
-    <string name="download_pause_all">PAUSE ALL</string>
     <string name="download_pause_download">Pause</string>
     <string name="download_storage_option_device">Use %1$s - %2$s free</string>
     <string name="download_storage_permission_title">File permissions required</string>
@@ -210,7 +142,6 @@
     <string name="insufficient_space">Insufficient storage space available</string>
     <string name="clear_history">Clear History</string>
     <string name="download_entry_state_paused">Paused</string>
-    <string name="download_entry_state_queued">Queued</string>
     <string name="get_app">Get app</string>
     <string name="no_app_found">"No app found to open file"</string>
     <string name="entry_details_author">Author</string>
