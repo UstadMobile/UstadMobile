@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -45,6 +44,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private lateinit var profileImage: CircleImageView
 
     val impl = UstadMobileSystemImpl.instance
+
+    private val bottomLabelToIconMap = mapOf(
+            MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
+            MessageID.contents to R.drawable.ic_local_library_black_24dp
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,14 +98,17 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun setOptions(options: List<Pair<Int, String>>) {
         options.forEach {
-            val navigationItem = AHBottomNavigationItem(
-                    impl.getString(it.first, this), if(it.first == MessageID.reports)
-                R.drawable.ic_pie_chart_black_24dp else R.drawable.ic_local_library_black_24dp )
-            umBottomNavigation.addItem(navigationItem)
+            val navIcon = bottomLabelToIconMap[it.first];
+            if(navIcon != null){
+                val navigationItem = AHBottomNavigationItem(
+                        impl.getString(it.first, this), navIcon)
+                umBottomNavigation.addItem(navigationItem)
+            }
+
         }
         umBottomNavigation.visibility = if(options.size > 1) View.VISIBLE else View.GONE
 
-        umBottomNavigation.defaultBackgroundColor = Color.parseColor("#FEFEFE")
+        umBottomNavigation.defaultBackgroundColor = ContextCompat.getColor(this, R.color.icons)
         umBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.primary)
         umBottomNavigation.inactiveColor = ContextCompat.getColor(this, R.color.text_secondary)
         umBottomNavigation.isBehaviorTranslationEnabled = false
@@ -118,19 +125,19 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         val bundle = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(params))
         if(bundle != null){
 
-            val ustadBaseFragment = when {
+            val selectedFragment = when {
                 params.contains(ContentEntryListView.VIEW_NAME) -> {
                     bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
                     bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
                     ContentEntryListFragment.newInstance(bundle)
                 }
                 else -> {
-                    UstadBaseFragment()
+                    ReportDashboard()
                 }
             }
             val fragmentManager:FragmentManager = supportFragmentManager
             val fragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.um_host_fragment,ustadBaseFragment,ustadBaseFragment.tag)
+            fragmentTransaction.replace(R.id.um_host_fragment,selectedFragment,selectedFragment.tag)
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
         }
