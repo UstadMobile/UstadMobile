@@ -22,6 +22,11 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = true)
 
+    /**
+     * This is only for handling changes that have been made externally (e.g. change to save directory)
+     */
+    abstract suspend fun handleDownloadJobUpdated(downloadJob: DownloadJob)
+
     abstract suspend fun enqueue(downloadJobId: Int)
 
     abstract suspend fun pause(downloadJobId: Int)

@@ -61,7 +61,7 @@ class UMStorageDir
          *
          * @param dirURI new value of dirURI
          */
-        var dirURI: String?,
+        var dirURI: String,
         /**
          * The user friendly name e.g. SD-Card or Phone
          *
@@ -105,7 +105,13 @@ class UMStorageDir
          * Set whether or not the directory is writable
          * @param writable
          */
-        var isWritable: Boolean = true) {
+        var isWritable: Boolean = true,
+
+        /**
+         * The amount of space available for saving contents (in bytes)
+         */
+        var usableSpace: Long = -1L
+        ) {
 
     /**
      * Get the value of isRemovableMedia

@@ -197,7 +197,7 @@ abstract class NetworkManagerBleCommon(
 
     }
 
-    protected open fun onDownloadQueueEmpty(lastDownloadJobItem: DownloadJobItem) {
+    protected open fun onDownloadQueueEmpty() {
         val currentConnectivityStatus = connectivityStatusRef.value
         if(currentConnectivityStatus != null &&
                 currentConnectivityStatus.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
