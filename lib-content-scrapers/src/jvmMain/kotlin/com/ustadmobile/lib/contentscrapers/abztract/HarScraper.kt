@@ -48,6 +48,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         seleniumProxy.noProxy = "<-loopback>"
         val options = ChromeOptions()
         options.setCapability(CapabilityType.PROXY, seleniumProxy)
+        options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true)
         chromeDriver = ChromeDriver(options)
     }
 
