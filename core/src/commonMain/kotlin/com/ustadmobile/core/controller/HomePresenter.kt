@@ -52,7 +52,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                     if(person.admin){
                         //TODO: Make sure you change report view name when integrating other nav items
                         filterOptions = "$filterOptions, ${impl.getString(MessageID.libraries, context)}"
-                        options = options.plus(Pair(MessageID.reports, "${ContentEntryListView.VIEW_NAME}?$ARG_FILTER_BUTTONS=$filterOptions"))
+                        options = options.plus(Pair(MessageID.reports, "DashboardView?$ARG_FILTER_BUTTONS=$filterOptions"))
                     }
                     view.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)

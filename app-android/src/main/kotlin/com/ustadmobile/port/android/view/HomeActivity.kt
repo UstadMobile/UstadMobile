@@ -45,6 +45,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     val impl = UstadMobileSystemImpl.instance
 
+    /**
+     * In case we have addition bottom nav items, add icons here and map to their labels
+     */
     private val bottomLabelToIconMap = mapOf(
             MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
             MessageID.contents to R.drawable.ic_local_library_black_24dp
@@ -66,8 +69,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         downloadAllBtn.setOnClickListener {
             presenter.handleDownloadAllClicked()
         }
-
-        //viewPager.addOnPageChangeListener(this)
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
                 this, UmAccountManager.getActiveDatabase(this).personDao,
@@ -98,7 +99,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun setOptions(options: List<Pair<Int, String>>) {
         options.forEach {
-            val navIcon = bottomLabelToIconMap[it.first];
+            val navIcon = bottomLabelToIconMap[it.first]
             if(navIcon != null){
                 val navigationItem = AHBottomNavigationItem(
                         impl.getString(it.first, this), navIcon)
