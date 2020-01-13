@@ -7,6 +7,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
@@ -99,7 +100,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         try {
             val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid)
-            entryLiveData.observe(this, this::onContentEntryChanged)
+            entryLiveData.observeWithPresenter(this, this::onContentEntryChanged)
         } catch (e: Exception) {
             viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
