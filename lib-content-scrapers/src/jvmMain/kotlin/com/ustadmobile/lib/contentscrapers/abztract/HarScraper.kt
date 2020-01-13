@@ -36,6 +36,9 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
     val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
 
+    data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
+
+
     init {
         WebDriverManager.chromedriver().setup()
         proxy.start()
@@ -52,15 +55,23 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         chromeDriver = ChromeDriver(options)
     }
 
+
+    /**
+     * url - Starting url for chrome
+     * waitCondition - conditions to wait for so the page is fully loaded
+     * filters - filters every request and removes if not needed
+     * regexes - regexes to apply to the request (eq removing timestamp from query)
+     * addHarContent - option to save the har content after saving all the files in the container - default true
+     * block - check here if the content to download is updated or additional url links are required to load in the har before creating the container manager
+     */
     fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null,
                        filters: List<ScrapeFilterFn> = listOf(),
                        regexes: List<Regex> = listOf(),
                        addHarContent: Boolean = true,
-                       block: (proxy: BrowserMobProxyServer) -> Boolean): ContainerManager? {
+                       block: (proxy: BrowserMobProxyServer) -> Boolean): HarScraperResult {
 
         clearAnyLogsInChrome()
         proxy.newHar("Scraper")
-
 
         try {
             chromeDriver.navigate().to(url)
@@ -72,13 +83,17 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
 
-        var entries = proxy.har.log.entries
+        checkStartingUrlNot404(proxy.har.log.entries, url)
 
-        checkStartingUrlNot404(entries, url)
+        val isContentUpdated = block.invoke(proxy)
 
-        block.invoke(proxy)
+        val containerManager = if(isContentUpdated) {
+            makeHarContainer(proxy, proxy.har.log.entries, filters, regexes, addHarContent)
+        }else {
+            null
+        }
 
-        return makeHarContainer(proxy, entries, filters, regexes, addHarContent)
+        return HarScraperResult(isContentUpdated, containerManager)
     }
 
 

@@ -3,11 +3,16 @@ package com.ustadmobile.lib.contentscrapers.ddl
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
+import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
+import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentCategory
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
@@ -21,6 +26,8 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 import java.io.IOException
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -106,38 +113,39 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
 
     override fun scrapeUrl(sourceUrl: String) {
 
-        doc = Jsoup.connect(sourceUrl).get()
+        /* doc = Jsoup.connect(sourceUrl).get()
 
-        val thumbnail = doc!!.selectFirst("aside img")?.attr("src") ?: EMPTY_STRING
+         val thumbnail = doc!!.selectFirst("aside img")?.attr("src") ?: EMPTY_STRING
 
-        val description = doc!!.selectFirst("meta[name=description]")?.attr("content")
-        val authorTag = doc!!.selectFirst("article.resource-view-details h3:contains(Author) ~ p")
-        val farsiAuthorTag = doc!!.selectFirst("article.resource-view-details h3:contains(نویسنده) ~ p")
-        val pashtoAuthorTag = doc!!.selectFirst("article.resource-view-details h3:contains(لیکونکی) ~ p")
+         val description = doc!!.selectFirst("meta[name=description]")?.attr("content")
+         val authorTag = doc!!.selectFirst("article.resource-view-details h3:contains(Author) ~ p")
+         val farsiAuthorTag = doc!!.selectFirst("article.resource-view-details h3:contains(نویسنده) ~ p")
+         val pashtoAuthorTag = doc!!.selectFirst("article.resource-view-details h3:contains(لیکونکی) ~ p")
 
-        val author = when {
-            authorTag != null -> authorTag.text()
-            farsiAuthorTag != null -> farsiAuthorTag.text()
-            pashtoAuthorTag != null -> pashtoAuthorTag.text()
-            else -> EMPTY_STRING
-        }
-        val publisherTag = doc!!.selectFirst("article.resource-view-details a[href*=publisher]")
-        val publisher = publisherTag?.text() ?: DDL
+         val author = when {
+             authorTag != null -> authorTag.text()
+             farsiAuthorTag != null -> farsiAuthorTag.text()
+             pashtoAuthorTag != null -> pashtoAuthorTag.text()
+             else -> EMPTY_STRING
+         }
+         val publisherTag = doc!!.selectFirst("article.resource-view-details a[href*=publisher]")
+         val publisher = publisherTag?.text() ?: DDL
 
-        contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc!!.title(),
-                sourceUrl, publisher, LICENSE_TYPE_CC_BY, language.langUid, null, description, true, author,
-                thumbnail, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+         contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc!!.title(),
+                 sourceUrl, publisher, LICENSE_TYPE_CC_BY, language.langUid, null, description, true, author,
+                 thumbnail, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
-        val downloadList = doc!!.select("span.download-item a[href]")
+         val downloadList = doc!!.select("span.download-item a[href]")
 
-        var containerManager: ContainerManager? = null
+           val downloadItem = downloadList[0]
+         val href = downloadItem.attr("href") */
+        var fileUrl: URL? = null
+        var eTagValue: String? = null
+        var scraperResult: HarScraperResult? = null
 
-        val downloadItem = downloadList[0]
-        val href = downloadItem.attr("href")
         try {
-            val fileUrl = URL(URL(sourceUrl), href)
 
-            containerManager = startHarScrape(sourceUrl, {
+            scraperResult = startHarScrape(sourceUrl, {
 
                 it.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.se-pre-con")))
                 it.until<WebElement>(ExpectedConditions.elementToBeClickable(
@@ -157,12 +165,89 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
 
                 entry
             }) {
+
+                val entry = it.har.log.entries.find { harEntry ->
+                    harEntry.request.url == sourceUrl
+                }
+
+                if (entry == null) {
+                    throw IllegalStateException("no source url found in har entry")
+                }
+
+                val doc = Jsoup.parse(entry.response.content.text)
+
+                val thumbnail = doc!!.selectFirst("aside img")?.attr("src") ?: EMPTY_STRING
+
+                val description = doc.selectFirst("meta[name=description]")?.attr("content")
+                val authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p")
+                val farsiAuthorTag = doc.selectFirst("article.resource-view-details h3:contains(نویسنده) ~ p")
+                val pashtoAuthorTag = doc.selectFirst("article.resource-view-details h3:contains(لیکونکی) ~ p")
+
+                val author = when {
+                    authorTag != null -> authorTag.text()
+                    farsiAuthorTag != null -> farsiAuthorTag.text()
+                    pashtoAuthorTag != null -> pashtoAuthorTag.text()
+                    else -> EMPTY_STRING
+                }
+                val publisherTag = doc.selectFirst("article.resource-view-details a[href*=publisher]")
+                val publisher = publisherTag?.text() ?: DDL
+
+                contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc.title(),
+                        sourceUrl, publisher, LICENSE_TYPE_CC_BY, language.langUid, null, description, true, author,
+                        thumbnail, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+
+                val downloadList = doc.select("span.download-item a[href]")
+
+                if (downloadList.isEmpty()) {
+                    throw IllegalStateException("No link found to download in the source page")
+                }
+
+                val downloadItem = downloadList[0]
+                val href = downloadItem.attr("href")
+
+                fileUrl = URL(URL(sourceUrl), href)
+
+                val container = containerDao.getMostRecentContainerForContentEntry(contentEntry.contentEntryUid)
+                        ?: return@startHarScrape true
+
+                val fileEntry = it.har.log.entries.find { harEntry ->
+                    harEntry.request.url == fileUrl.toString()
+                }
+
+                if (fileEntry == null) {
+                    throw IllegalStateException("No File found for content in har entry")
+                }
+
+                val entryModified = fileEntry.request.headers.find { valuePair -> valuePair.name == LAST_MODIFIED }
+                val entryETag = fileEntry.request.headers.find { valuePair -> valuePair.name == ETAG }
+
+                if (entryModified != null) {
+                    val time = UMCalendarUtil.parse8601Timestamp(entryModified.value)
+                    return@startHarScrape time > container.cntLastModified
+                }
+
+                if (entryETag != null) {
+                    eTagValue = entryETag.value
+                    val eTag = containerDao.getEtagOfContainer(container.containerUid)
+                    return@startHarScrape eTagValue != eTag
+                }
+
                 true
             }
         } catch (e: Exception) {
-            UMLogUtil.logError("$DDL Exception - Error downloading resource from url $sourceUrl/$href")
+            UMLogUtil.logError("$DDL Exception - Error downloading resource from url $sourceUrl")
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+            close()
+            return
         }
+
+        if (!scraperResult.updated) {
+            close()
+            return
+        }
+
+        val containerManager = scraperResult.containerManager
 
         if (containerManager?.allEntries?.isEmpty() != false) {
 
@@ -178,6 +263,10 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
             val mimeType = Files.probeContentType(File(entry.cePath ?: "").toPath())
             val container = containerDao.findByUid(containerManager.containerUid)
             containerDao.updateMimeType(mimeType, container?.containerUid ?: 0)
+            if (!eTagValue.isNullOrEmpty()) {
+                val etagContainer = ContainerETag(container?.containerUid ?: 0, eTagValue!!)
+                containerDao.insertEtag(etagContainer)
+            }
 
         }
 
