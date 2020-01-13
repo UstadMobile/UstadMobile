@@ -20,6 +20,8 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.RepositoryLoadHelper
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
@@ -156,6 +158,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
             }
         }else{
+
             (holder as FilterViewHolder).createFilters(filterButtons)
         }
     }
@@ -180,6 +183,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         val isSelected = chip.id == umChipGroup.checkedChipId
                         chip.isCheckable = chip.id != umChipGroup.checkedChipId
                         if(isSelected){
+                            fistItemLoadedListener?.onEmptyTopEntryList(STATUS_LOADED_NODATA)
                             activeIndex = i
                             listener.contentFilterClicked(i)
                         }

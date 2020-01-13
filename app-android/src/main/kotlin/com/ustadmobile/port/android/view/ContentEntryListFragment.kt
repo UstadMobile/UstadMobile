@@ -22,14 +22,16 @@ import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.DistinctCategorySchema
+import com.ustadmobile.lib.db.entities.LangUidAndName
 import com.ustadmobile.port.android.view.ext.activeRange
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
@@ -67,11 +69,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     }
 
-    interface ContentEntryFilterAction{
-        fun onFilterClicked(params: String)
-    }
-
-
     private var buttonVisibilityFlags: Int = 0
 
     override val viewContext: Any
@@ -82,8 +79,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     private lateinit var recyclerView: RecyclerView
 
     private var contentEntryListHostActivity: ContentEntryListHostActivity? = null
-
-    private lateinit var contentEntryFilterAction: ContentEntryFilterAction
 
     private lateinit var ustadBaseActivity: UstadBaseActivity
 
@@ -187,14 +182,34 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         contentEntryListHostActivity?.setLanguageFilterSpinner(result)
     }
 
+    override fun setEmptyView(selectedFiler: String) {
+       val emptyMessage: Int
+        val resource = when(selectedFiler) {
+            ARG_LIBRARIES_CONTENT -> {
+                emptyMessage = R.string.empty_state_libraries
+                R.drawable.ic_file_download_black_24dp
+            }
+            ARG_DOWNLOADED_CONTENT -> {
+                emptyMessage = R.string.empty_state_downloaded
+                R.drawable.ic_folder_black_24dp
+            }
+            else -> {
+                emptyMessage = R.string.empty_state_recycle
+                R.drawable.ic_delete_black_24dp
+            }
+        }
+        repoLoadingStatusView.emptyStatusImage = resource
+        repoLoadingStatusView.emptyStatusText = emptyMessage
+        Handler().postDelayed(Runnable {
+            recyclerView.smoothScrollToPosition(0)
+        }, TimeUnit.MILLISECONDS.toMillis(200))
+    }
+
     override fun setFilterButtons(buttonLabels: List<String>, activeIndex: Int) {
         buttonFilterLabels = buttonLabels
         recyclerAdapter?.isTopEntryList = buttonLabels.isNotEmpty()
         recyclerAdapter?.filterButtons = buttonLabels
         recyclerAdapter?.activeIndex = activeIndex
-        Handler().postDelayed(Runnable {
-            recyclerView.smoothScrollToPosition(0)
-        }, TimeUnit.MILLISECONDS.toMillis(200))
     }
 
     override fun setEditButtonsVisibility(buttonVisibilityFlags: Int) {
@@ -241,28 +256,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         repoLoadingStatusView = rootContainer.findViewById(R.id.statusView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-
-        val isLibrarySection = bundleToMap(arguments).containsKey(ARG_LIBRARIES_CONTENT)
-        val isDownloadedSection = bundleToMap(arguments).containsKey(ARG_DOWNLOADED_CONTENT)
-        val emptyMessage: Int
-        val resource = when {
-            isLibrarySection -> {
-                emptyMessage = R.string.empty_state_libraries
-                R.drawable.ic_file_download_black_24dp
-            }
-            isDownloadedSection -> {
-                emptyMessage = R.string.empty_state_downloaded
-                R.drawable.ic_folder_black_24dp
-            }
-            else -> {
-                emptyMessage = R.string.empty_state_recycle
-                R.drawable.ic_delete_black_24dp
-            }
-        }
-
-
-        repoLoadingStatusView.emptyStatusImage = resource
-        repoLoadingStatusView.emptyStatusText = emptyMessage
 
         val dividerItemDecoration = DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL)
@@ -314,10 +307,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
             this.contentEntryListHostActivity = context
         }
 
-        if(context is ContentEntryFilterAction){
-            this.contentEntryFilterAction = context
-        }
-
         if (context is UstadBaseActivity) {
             this.ustadBaseActivity = context
         }
@@ -344,6 +333,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
                 repoLoadingStatusView)
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
+            recyclerAdapter!!.firstItemLoaded = false
             recyclerAdapter!!.submitList(it)
             localAvailabilityPagedListCallback!!.pagedList = it
             it.addWeakCallback(listSnapShot, localAvailabilityPagedListCallback!!)
@@ -397,8 +387,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     }
 
     companion object {
-
-        const val ARG_ACTIVE_INDEX = "activeIndex"
 
         fun newInstance(args: Bundle): ContentEntryListFragment {
             val fragment = ContentEntryListFragment()

@@ -35,7 +35,7 @@ import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 
-class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener, ContentEntryListFragment.ContentEntryFilterAction {
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener{
 
     private lateinit var presenter: HomePresenter
 
@@ -94,8 +94,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun setLoggedPerson(person: Person) {}
-
-    override fun showReportMenu(show: Boolean) {}
 
     override fun setOptions(options: List<Pair<Int, String>>) {
         options.forEach {
@@ -219,10 +217,5 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         val dialog = ShareAppOfflineDialogFragment()
         dialog.show(supportFragmentManager, "SHARE_APP_DIALOG")
     }
-
-    override fun onFilterClicked(params: String) {
-        handleFragmentTransaction(params)
-    }
-
 
 }

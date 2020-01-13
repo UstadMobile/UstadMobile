@@ -144,6 +144,11 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="UmTheme.Button.Colored" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="colorButtonNormal">@color/icons</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
 
     <style name="HintText" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@android:color/white</item>

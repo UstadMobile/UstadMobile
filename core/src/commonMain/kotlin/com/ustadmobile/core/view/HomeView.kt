@@ -14,10 +14,6 @@ interface HomeView : LanguageOptionView {
     @JsName("setLoggedPerson")
     fun setLoggedPerson(person: Person)
 
-    @Deprecated("Use setmenu")
-    @JsName("showReportMenu")
-    fun showReportMenu(show: Boolean)
-
     /**
      * @param options - a list of labels (given as the messageid) and the and the viewname / args.
      *

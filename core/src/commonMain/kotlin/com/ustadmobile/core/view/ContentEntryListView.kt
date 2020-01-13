@@ -24,6 +24,8 @@ interface ContentEntryListView : UstadView {
     @JsName("setLanguageOptions")
     fun setLanguageOptions(result: List<LangUidAndName>)
 
+    fun setEmptyView(selectedFiler: String)
+
     /**
      * Set filter buttons if applicable (e.g. on Android to show all libraries / downloaded items)
      */

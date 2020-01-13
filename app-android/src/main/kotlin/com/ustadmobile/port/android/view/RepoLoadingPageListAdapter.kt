@@ -14,7 +14,7 @@ interface FistItemLoadedListener{
 
 abstract class RepoLoadingPageListAdapter<T, VH : RecyclerView.ViewHolder>(itemCallback: DiffUtil.ItemCallback<T>): PagedListAdapter<T, VH>(itemCallback){
 
-    private var firstItemLoaded: Boolean = false
+    var firstItemLoaded: Boolean = false
 
     var fistItemLoadedListener: FistItemLoadedListener? = null
 
@@ -25,10 +25,6 @@ abstract class RepoLoadingPageListAdapter<T, VH : RecyclerView.ViewHolder>(itemC
         if(!firstItemLoaded && position > 1){
             firstItemLoaded = true
             fistItemLoadedListener?.onFirstItemLoaded()
-        }else{
-            if(isTopEntryList){
-                fistItemLoadedListener?.onEmptyTopEntryList(STATUS_LOADED_NODATA)
-            }
         }
     }
 }

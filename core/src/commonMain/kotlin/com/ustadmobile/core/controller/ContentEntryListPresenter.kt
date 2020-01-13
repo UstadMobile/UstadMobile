@@ -53,12 +53,8 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         view.setFilterButtons(filterButtons.map { systemImpl.getString(
             FILTERBUTTON_TO_MESSAGEIDMAP[it] ?: MessageID.error, context) }, 0)
-
-        when {
-            arguments.containsKey(ARG_LIBRARIES_CONTENT) -> showContentByParent()
-            arguments.containsKey(ARG_DOWNLOADED_CONTENT) -> showDownloadedContent()
-            arguments.containsKey(ARG_RECYCLED_CONTENT) -> showRecycledEntries()
-        }
+        view.setEmptyView(ARG_LIBRARIES_CONTENT)
+        showContentByParent()
 
         GlobalScope.launch {
 
@@ -187,7 +183,9 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleClickFilterButton")
     fun handleClickFilterButton(buttonPos: Int){
-        when(filterButtons[buttonPos]){
+        val filterButton = filterButtons[buttonPos]
+        view.setEmptyView(filterButton)
+        when(filterButton){
             ARG_LIBRARIES_CONTENT -> showContentByParent()
             ARG_DOWNLOADED_CONTENT -> showDownloadedContent()
             ARG_RECYCLED_CONTENT -> showRecycledEntries()
