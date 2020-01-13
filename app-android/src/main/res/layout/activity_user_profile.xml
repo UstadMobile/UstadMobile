@@ -34,14 +34,10 @@
 
     <ImageView
         android:id="@+id/activity_user_profile_user_image"
-        android:layout_width="match_parent"
+        android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/activity_user_profile_edit"
         app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_appbar"
         app:srcCompat="@drawable/ic_account_circle_white_24dp" />
 
