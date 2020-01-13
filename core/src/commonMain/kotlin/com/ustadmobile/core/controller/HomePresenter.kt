@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
@@ -38,7 +39,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         showDownloadAll = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
-        UmAccountManager.activeAccountLiveData.observe(this, ::onChanged)
+        UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
     }
 
     private fun onChanged(t: UmAccount?) {
