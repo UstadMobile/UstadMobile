@@ -141,6 +141,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("containerEntryFileDao")
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
+    @JsName("containerETagDao")
+    abstract val containerETagDao: ContainerETagDao
+
     @JsName("verbDao")
     abstract val verbDao: VerbDao
 

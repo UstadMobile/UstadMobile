@@ -45,6 +45,7 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
     private val contentEntryDao: ContentEntryDao
     private val categorySchemaDao: ContentCategorySchemaDao
     private val contentCategoryDao: ContentCategoryDao
+    private val containerEtagDao: ContainerETagDao
     private val languageDao: LanguageDao
     private val containerDao: ContainerDao
     private val repository: UmAppDatabase = db
@@ -60,6 +61,7 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
         contentCategoryDao = repository.contentCategoryDao
         languageDao = repository.languageDao
         containerDao = repository.containerDao
+        containerEtagDao = repository.containerETagDao
         language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang)
     }
 
@@ -228,7 +230,7 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
 
                 if (entryETag != null) {
                     eTagValue = entryETag.value
-                    val eTag = containerDao.getEtagOfContainer(container.containerUid)
+                    val eTag = containerEtagDao.getEtagOfContainer(container.containerUid)
                     return@startHarScrape eTagValue != eTag
                 }
 
@@ -265,7 +267,7 @@ class DdlContentScraper(containerDir: File, lang: String, db: UmAppDatabase, con
             containerDao.updateMimeType(mimeType, container?.containerUid ?: 0)
             if (!eTagValue.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container?.containerUid ?: 0, eTagValue!!)
-                containerDao.insertEtag(etagContainer)
+                containerEtagDao.insert(etagContainer)
             }
 
         }
