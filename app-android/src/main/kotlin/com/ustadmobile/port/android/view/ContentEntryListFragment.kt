@@ -14,9 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
@@ -24,7 +21,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
@@ -383,17 +382,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         }
     }
 
-    override fun contentFilterClicked(label: String, index: Int) {
-        if(::contentEntryFilterAction.isInitialized){
-            val filters = arguments!![ARG_FILTER_BUTTONS]?:""
-            var params = when (buttonFilterLabels.indexOf(label)) {
-                0 -> "$ARG_LIBRARIES_CONTENT=''"
-                1 -> "$ARG_DOWNLOADED_CONTENT=''"
-                else -> "$ARG_RECYCLED_CONTENT=''"
-            }
-            params = "${ContentEntryListView.VIEW_NAME}?$params&$ARG_FILTER_BUTTONS=$filters&$ARG_ACTIVE_INDEX=$index"
-            contentEntryFilterAction.onFilterClicked(params)
-        }
+    override fun contentFilterClicked(index: Int) {
+        presenter?.handleClickFilterButton(index)
     }
 
 

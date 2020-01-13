@@ -1,17 +1,19 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_ACTIVE_INDEX
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -35,32 +37,37 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         showDownloadAll = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
-        DoorMutableLiveData<UmAccount?>(null).observe(this, ::onChanged)
-
+        UmAccountManager.activeAccountLiveData.observe(this, ::onChanged)
     }
 
     private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
-            var filterOptions = "${impl.getString(MessageID.libraries, context)},${impl.getString(MessageID.downloaded, context)}"
-            var options = listOf(Pair(MessageID.contents,
-                    "${ContentEntryListView.VIEW_NAME}?$ARG_FILTER_BUTTONS=$filterOptions&$ARG_LIBRARIES_CONTENT=''&$ARG_ACTIVE_INDEX=0"))
+            val contentEntryListArgs = mutableMapOf(ARG_CONTENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                    ARG_FILTER_BUTTONS to "$ARG_LIBRARIES_CONTENT,$ARG_DOWNLOADED_CONTENT")
+
+            val options = mutableListOf<Pair<Int, String>>()
+
             if(t != null){
                 account = t
                 val person = personDao.findByUid(t.personUid)
                 if(person != null){
-
                     if(person.admin){
-                        //TODO: Make sure you change report view name when integrating other nav items
-                        filterOptions = "$filterOptions, ${impl.getString(MessageID.libraries, context)}"
-                        options = options.plus(Pair(MessageID.reports, "DashboardView?$ARG_FILTER_BUTTONS=$filterOptions"))
+                        //TODO: This is using a DummyView
+                        contentEntryListArgs[ARG_FILTER_BUTTONS] +=  ",$ARG_RECYCLED_CONTENT"
+                        options.add(Pair(MessageID.reports, "DashboardView"))
                     }
+
                     view.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)
                     })
                 }
             }
+
             view.runOnUiThread(Runnable {
                 homeView.loadProfileIcon(if(account == null) "" else "")
+                options.add(0, Pair(MessageID.contents,
+                        ContentEntryListView.VIEW_NAME + "?" +
+                                UMFileUtil.mapToQueryString(contentEntryListArgs)))
                 homeView.setOptions(options)
             })
         }

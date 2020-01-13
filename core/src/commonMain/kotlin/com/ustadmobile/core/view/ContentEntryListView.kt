@@ -42,6 +42,12 @@ interface ContentEntryListView : UstadView {
 
         const val ARG_FILTER_BUTTONS = "filterbuttons"
 
+        const val ARG_DOWNLOADED_CONTENT = "downloaded"
+
+        const val ARG_RECYCLED_CONTENT = "recycled"
+
+        const val ARG_LIBRARIES_CONTENT = "libraries"
+
         /**
          * show controls to allow adding content
          */

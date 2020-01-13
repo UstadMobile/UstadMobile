@@ -3,12 +3,16 @@ package com.ustadmobile.core.controller
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -36,12 +40,19 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private var noIframe: Boolean = false
 
+    /*
+     List of Strings - possible values are: ARG_DOWNLOADED_CONTENT, ARG_LIBRARIES_CONTENT,
+     ARG_RECYCLED_CONTENT
+     */
+    private var filterButtons = listOf<String>()
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        view.runOnUiThread(Runnable {
-            view.setFilterButtons(arguments[ARG_FILTER_BUTTONS]?.split(",")?.toList()
-                    ?: listOf(),arguments[ARG_ACTIVE_INDEX]?.toInt()?:0)
-        })
+
+        filterButtons = arguments[ARG_FILTER_BUTTONS]?.split(",") ?: listOf()
+
+        view.setFilterButtons(filterButtons.map { systemImpl.getString(
+            FILTERBUTTON_TO_MESSAGEIDMAP[it] ?: MessageID.error, context) }, 0)
 
         when {
             arguments.containsKey(ARG_LIBRARIES_CONTENT) -> showContentByParent()
@@ -176,7 +187,11 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleClickFilterButton")
     fun handleClickFilterButton(buttonPos: Int){
-
+        when(filterButtons[buttonPos]){
+            ARG_LIBRARIES_CONTENT -> showContentByParent()
+            ARG_DOWNLOADED_CONTENT -> showDownloadedContent()
+            ARG_RECYCLED_CONTENT -> showRecycledEntries()
+        }
     }
 
     @JsName("handleContentEntryClicked")
@@ -261,12 +276,9 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         const val ARG_NO_IFRAMES = "noiframe"
 
-        const val ARG_DOWNLOADED_CONTENT = "downloaded"
+        val FILTERBUTTON_TO_MESSAGEIDMAP = mapOf(ARG_DOWNLOADED_CONTENT to MessageID.downloaded,
+                ARG_LIBRARIES_CONTENT to MessageID.libraries,
+                ARG_RECYCLED_CONTENT to MessageID.recycled)
 
-        const val ARG_RECYCLED_CONTENT = "recycled"
-
-        const val ARG_LIBRARIES_CONTENT = "libraries"
-
-        const val ARG_ACTIVE_INDEX = "activeIndex"
     }
 }

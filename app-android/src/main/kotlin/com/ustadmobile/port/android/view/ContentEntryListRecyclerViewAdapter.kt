@@ -57,7 +57,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
         fun downloadStatusClicked(entry: ContentEntry)
 
-        fun contentFilterClicked(label: String, index : Int)
+        fun contentFilterClicked(index : Int)
     }
 
 
@@ -166,7 +166,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         fun createFilters( filters: List<String>){
             umChipGroup.removeAllViews()
             umChipGroup.isSingleSelection = true
-            filters.forEach {
+            filters.forEachIndexed {index, it ->
                 val filterChip = Chip(itemView.context)
                 val drawable = ChipDrawable.createFromAttributes(itemView.context, null, 0, R.style.Widget_MaterialComponents_Chip_Choice)
                 filterChip.setChipDrawable(drawable)
@@ -175,32 +175,30 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 filterChip.id = it.hashCode()
                 filterChip.isClickable = true
                 filterChip.setOnClickListener {
-                    var selectedChip: Chip? = null
                     for (i in 0 until umChipGroup.childCount) {
                         val chip = umChipGroup.getChildAt(i) as Chip
                         val isSelected = chip.id == umChipGroup.checkedChipId
                         chip.isCheckable = chip.id != umChipGroup.checkedChipId
                         if(isSelected){
-                            selectedChip = handleSelectedChip(chip)
+                            activeIndex = i
+                            listener.contentFilterClicked(i)
                         }
-                    }
-                    if(selectedChip != null){
-                        val label = selectedChip.tag as String
-                        listener.contentFilterClicked(label,filters.indexOf(label))
+                        updateChipAppearance(chip, isSelected)
                     }
                 }
                 umChipGroup.addView(filterChip)
-                if(umChipGroup.childCount > activeIndex){
-                    handleSelectedChip((umChipGroup.getChildAt(activeIndex) as Chip))
-                }
+                updateChipAppearance(filterChip, index == activeIndex)
             }
         }
 
-        private fun handleSelectedChip(chip: Chip): Chip{
-            chip.isSelected = true
-            chip.chipBackgroundColor = ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.primary))
-            chip.setTextAppearanceResource(R.style.ChipTextStyleSelected)
-            return  chip
+        private fun updateChipAppearance(chip: Chip, isSelected: Boolean) {
+            chip.isSelected = isSelected
+
+            if(isSelected) {
+                chip.chipBackgroundColor = ColorStateList.valueOf(ContextCompat.getColor(
+                        itemView.context, R.color.primary))
+                chip.setTextAppearanceResource(R.style.ChipTextStyleSelected)
+            }
         }
     }
 

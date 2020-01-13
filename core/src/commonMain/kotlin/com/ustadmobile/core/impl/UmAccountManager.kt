@@ -25,7 +25,7 @@ object UmAccountManager {
 
     private const val PREFKEY_ENDPOINT_URL = "umaccount.endpointurl"
 
-    private val activeAccountLiveData = DoorMutableLiveData<UmAccount?>(null)
+    val activeAccountLiveData = DoorMutableLiveData<UmAccount?>(null)
 
     @Synchronized
     fun getActiveAccount(context: Any, impl: UstadMobileSystemImpl): UmAccount? {
@@ -63,7 +63,6 @@ object UmAccountManager {
     fun setActiveAccount(account: UmAccount?, context: Any,
                          impl: UstadMobileSystemImpl) {
         activeAccount = account
-        activeAccountLiveData.sendValue(account)
         activeAccountRepository = null
         if (account != null) {
             impl.setAppPref(PREFKEY_PERSON_ID, account.personUid.toString(), context)
@@ -76,6 +75,8 @@ object UmAccountManager {
             impl.setAppPref(PREFKEY_ACCESS_TOKEN, null, context)
             impl.setAppPref(PREFKEY_ENDPOINT_URL, null, context)
         }
+
+        activeAccountLiveData.sendValue(account)
     }
 
     @JsName("setActiveAccountWithContext")
