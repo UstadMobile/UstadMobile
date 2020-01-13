@@ -56,7 +56,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SplashScreenView
 import java.util.concurrent.TimeUnit
-import com.ustadmobile.port.android.impl.ClazzLogScheduleWorker
+import com.ustadmobile.staging.port.android.impl.ClazzLogScheduleWorker
 
 
 //class SplashScreenActivity : SplashScreenView, UstadBaseActivity() {

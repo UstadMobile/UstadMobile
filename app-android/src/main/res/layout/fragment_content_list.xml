@@ -8,7 +8,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_content_list_swiperefreshlayout"
     android:paddingBottom="@dimen/bottom_navigation_height"
-    tools:context="com.ustadmobile.port.android.view.ContentListFragment">
+    tools:context="com.ustadmobile.staging.port.android.view.ContentListFragment">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"

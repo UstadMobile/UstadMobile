@@ -1,6 +1,6 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     android:id="@+id/fragment_people_list_swiperefreshlayout"
-    tools:context="com.ustadmobile.port.android.view.PeopleListFragment"
+    tools:context="com.ustadmobile.staging.port.android.view.PeopleListFragment"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

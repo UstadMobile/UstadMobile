@@ -14,7 +14,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/activity_catalog_entry_content_view"
-        tools:context="com.ustadmobile.port.android.view.BasePointActivity"
+        tools:context="com.ustadmobile.staging.port.android.view.BasePointActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >

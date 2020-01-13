@@ -9,10 +9,9 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.ChangePasswordView
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
+import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -121,10 +120,9 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     fun openPictureDialog(imagePath: String) {
         //Open Dialog
         val args = HashMap<String, String>()
-        //TODO If needed:
-        //        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
-        //        args.put(ARG_PERSON_UID, personUid);
-        //        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
+        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+        args.put(ARG_PERSON_UID, loggedInPersonUid.toString());
+        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
     fun handleCompressedImage(imageFilePath: String) {
@@ -136,7 +134,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
                 if(existingPP == null){
                     existingPP = PersonPicture()
                     existingPP.personPicturePersonUid = loggedInPersonUid
-                    existingPP.picTimestamp = DateTime.nowUnixLong() //Check this TODO
+                    existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
                     val personPictureUid = personPictureDao.insertAsync(existingPP)
                     existingPP.personPictureUid = personPictureUid
                 }

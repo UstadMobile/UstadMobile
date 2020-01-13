@@ -33,6 +33,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.staging.port.android.view.CircleTransform
 import id.zelory.compressor.Compressor
 import java.io.*
 

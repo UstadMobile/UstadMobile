@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/fragment_catalog_root"
-    tools:context="com.ustadmobile.port.android.view.FeedListFragment">
+    tools:context="com.ustadmobile.staging.port.android.view.FeedListFragment">
 
 
     <android.support.v4.view.ViewPager

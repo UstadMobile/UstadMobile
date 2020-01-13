@@ -83,7 +83,6 @@ class FeedEntry()  {
         this.feedEntryClazzName = feedEntryClazzName
         this.feedEntryPersonUid = personUid
         this.dateCreated = 0
-        //TODO: date created bit
     }
 
 }

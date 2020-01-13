@@ -277,7 +277,7 @@ abstract class PersonDao : BaseDao<Person> {
 
     private suspend fun createPersonCommon(person: Person, loggedInPersonUid: Long): PersonWithGroup{
 
-        //TODO : Use insertOrReplace
+        //Always will be a new person. No need to user insertOrReplace()
         val personUid = insertAsync(person)
         person.personUid = personUid
 

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_sel_select_student_cl"
-    tools:context="com.ustadmobile.port.android.view.SELSelectStudentActivity">
+    tools:context="com.ustadmobile.staging.port.android.view.SELSelectStudentActivity">
 
 
     <com.google.android.material.appbar.AppBarLayout

@@ -50,32 +50,6 @@ object UMCalendarUtil {
 
 
     /**
-     * Appends two digits for the integer i; if i < 10; prepend a leading 0
-     *
-     * @param i Numbe to append
-     * @param sb StringBuffer to append it two
-     * @return The stringbuffer
-     */
-    private fun appendTwoDigits(i: Int, sb: StringBuilder): StringBuilder {
-        if (i < 10) {
-            sb.append('0')
-        }
-        sb.append(i)
-
-        return sb
-    }
-
-    private fun checkYear(year: Int): Int {
-        return if (year < 30) {
-            2000 + year
-        } else if (year < 100) {
-            1900 + year
-        } else {
-            year
-        }
-    }
-
-    /**
      * Gets date in long plus/minus the days specified from today.
      *
      * @param days  The days (positive or negative) off from today
@@ -95,10 +69,7 @@ object UMCalendarUtil {
      * @param locale
      * @return
      */
-    fun getLongDateFromStringAndFormat(dateString: String,
-                                       format: String,
-                                       locale: Any?): Long {
-
+    fun getLongDateFromStringAndFormat(dateString: String, format: String, locale: Any?): Long {
         try{
             val formatted : DateFormat = DateFormat(format)
             val date = formatted.parse(dateString)
@@ -106,9 +77,7 @@ object UMCalendarUtil {
         }catch (e:DateException){
             return 0
         }
-
     }
-
 
     /**
      * Get date in long w.r.t plus/minus the days specified from a specified date
@@ -122,7 +91,6 @@ object UMCalendarUtil {
         val duration = days.days
         val then = givenCal + duration
         return then.unixMillisLong
-
     }
 
     fun getToday000000():Long{
@@ -250,7 +218,6 @@ object UMCalendarUtil {
         return cal.format(format)
     }
 
-
     /**
      * Gets simple day only (eg: Mon) from a long date specified.
      *
@@ -287,17 +254,9 @@ object UMCalendarUtil {
         return getPrettyDateSuperSimpleFromLong(thisDate)
     }
 
-    fun convertYYYYMMddToLong(date:String):Long {
-        val format = DateFormat("yyyy-MM-dd")
-        val date = format.parse(date)
-        return date.local.unixMillis.toLong()
-    }
-
     fun setDate(year: Int, month: Int, dayOfMonth: Int): DateTime {
         return DateTime(year, month, dayOfMonth)
-
     }
-
 
     /**
      * Advance a calendar to the next occurence of a particular day (e.g. Monday, Tuesday, etc).
@@ -321,11 +280,15 @@ object UMCalendarUtil {
         // Since theis method is called every midnight of the phone device, we need the time to be
         // the right day (ie phone device's timezone). For this purpose we will advance to the phone
         // timezone and can set its timezone to Clazz outside this method.
+        //
+        // A more clearer explaination. In order to avoid the scenario where when its midnight,
+        // the Clazz's timezone might not well be the next day,
+        // we set the next occurence to 9 am as per the phones timezone so the logs get created in the right day..
+        // Then we set the timezone after this method call
 
         val calendar = DateTime(dateTime)
         var comparisonCalendarLong = calendar.unixMillisLong
         var comparisonCalendar = DateTime(comparisonCalendarLong)
-        //TODO: Set timezone as well.
 
         val today = getDayOfWeek(dateTime)
 
@@ -342,13 +305,10 @@ object UMCalendarUtil {
                 return comparisonCalendar.unixMillisLong
             }
 
-            //shit
+            //shift
             comparisonCalendarLong = setDayOfWeek(comparisonCalendar.unixMillisLong, dayOfWeek)
             return comparisonCalendarLong
-
-
         }
-
 
         val deltaDays: Int
         if (dayOfWeek > today) {
