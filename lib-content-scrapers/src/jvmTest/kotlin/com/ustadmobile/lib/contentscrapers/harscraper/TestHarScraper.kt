@@ -66,7 +66,7 @@ class TestHarScraper {
         var writer = StringWriter()
 
         var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
-        var containerManager = scraper.startHarScrape(url.toString()){
+        val(isContentUpdated, containerManager) = scraper.startHarScrape(url.toString()){
             true
         }
 
@@ -138,7 +138,7 @@ class TestHarScraper {
         var regex = "[?&]ts=[0-9]+".toRegex()
 
         var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
-        var containerManager = scraper.startHarScrape(url.toString(), regexes = listOf(regex)){
+        val(isContentUpdated, containerManager)  = scraper.startHarScrape(url.toString(), regexes = listOf(regex)){
             true
         }
 
