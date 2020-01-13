@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContainerUidAndMimeType
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
 import kotlin.js.JsName
@@ -120,6 +121,12 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType?
+
+    @Query("SELECT cetag from ContainerEtag WHERE ceContainerUid = :containerUid")
+    abstract fun getEtagOfContainer(containerUid: Long): String?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertEtag(container: ContainerETag)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)
