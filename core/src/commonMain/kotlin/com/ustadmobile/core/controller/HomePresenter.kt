@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
-                    val personDao: PersonDao, impl: UstadMobileSystemImpl)
+                    val personDao: PersonDao, val impl: UstadMobileSystemImpl)
     : LanguageOptionPresenter(context, arguments, view, impl){
 
     private var account: UmAccount? = null
@@ -58,13 +58,13 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                         options.add(Pair(MessageID.reports, "DashboardView"))
                     }
 
-                    view.runOnUiThread(Runnable {
+                    homeView.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)
                     })
                 }
             }
 
-            view.runOnUiThread(Runnable {
+            homeView.runOnUiThread(Runnable {
                 homeView.loadProfileIcon(if(account == null) "" else "")
                 options.add(0, Pair(MessageID.contents,
                         ContentEntryListView.VIEW_NAME + "?" +
@@ -75,7 +75,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
     }
 
     fun handleShowDownloadButton(show: Boolean){
-        view.runOnUiThread(Runnable {
+        homeView.runOnUiThread(Runnable {
             homeView.showDownloadAllButton(show && showDownloadAll)
         })
     }

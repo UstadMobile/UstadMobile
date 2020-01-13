@@ -8,7 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 abstract class UserProfilePresenterCommon (context: Any, arguments: Map<String, String?>, view: UserProfileView,
-                                  private val personDao: PersonDao, impl: UstadMobileSystemImpl)
+                                  private val personDao: PersonDao, val impl: UstadMobileSystemImpl)
     : LanguageOptionPresenter(context, arguments, view, impl){
 
     private val profileView = view
