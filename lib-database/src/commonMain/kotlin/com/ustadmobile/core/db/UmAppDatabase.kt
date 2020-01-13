@@ -22,7 +22,7 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class
+    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class
 
     //#DOORDB_TRACKER_ENTITIES
 
