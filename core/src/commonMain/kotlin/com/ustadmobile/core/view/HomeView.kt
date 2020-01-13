@@ -14,8 +14,16 @@ interface HomeView : LanguageOptionView {
     @JsName("setLoggedPerson")
     fun setLoggedPerson(person: Person)
 
-    @JsName("showReportMenu")
-    fun showReportMenu(show: Boolean)
+    /**
+     * @param options - a list of labels (given as the messageid) and the and the viewname / args.
+     *
+     * On Android: displayed as bottomnavigation
+     * On Angular/web - a navigation shelf / menu
+     *
+     * e.g. MessageID.content, ContentEntryList?parentUid=...
+     */
+    @JsName("setMenu")
+    fun setOptions(options: List<Pair<Int, String>>)
 
     fun showShareAppDialog()
 

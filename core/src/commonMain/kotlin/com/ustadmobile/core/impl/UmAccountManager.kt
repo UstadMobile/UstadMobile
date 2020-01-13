@@ -3,6 +3,7 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlin.js.JsName
@@ -24,6 +25,8 @@ object UmAccountManager {
 
     private const val PREFKEY_ENDPOINT_URL = "umaccount.endpointurl"
 
+    val activeAccountLiveData = DoorMutableLiveData<UmAccount?>(null)
+
     @Synchronized
     fun getActiveAccount(context: Any, impl: UstadMobileSystemImpl): UmAccount? {
         if (activeAccount == null) {
@@ -34,6 +37,7 @@ object UmAccountManager {
             activeAccount = UmAccount(personUid, impl.getAppPref(PREFKEY_USERNAME, context),
                     impl.getAppPref(PREFKEY_ACCESS_TOKEN, context),
                     impl.getAppPref(PREFKEY_ENDPOINT_URL, context))
+            activeAccountLiveData.sendValue(activeAccount)
         }
 
         return activeAccount
@@ -71,6 +75,8 @@ object UmAccountManager {
             impl.setAppPref(PREFKEY_ACCESS_TOKEN, null, context)
             impl.setAppPref(PREFKEY_ENDPOINT_URL, null, context)
         }
+
+        activeAccountLiveData.sendValue(account)
     }
 
     @JsName("setActiveAccountWithContext")

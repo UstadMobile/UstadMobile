@@ -28,7 +28,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity"/>
         <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"

@@ -81,6 +81,7 @@
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
+    <string name='contents'>Contents</string>
     <string name='students'>Account</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='connections'>Connection</string>
