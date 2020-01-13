@@ -84,8 +84,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     private lateinit var managerAndroidBle: NetworkManagerBle
 
-    private var recyclerAdapter: ContentEntryListRecyclerViewAdapter? = null
-
     private var savedInstanceState: Bundle? = null
 
     private lateinit var rootContainer: View
@@ -93,6 +91,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     private lateinit var repoLoadingStatusView: RepoLoadingStatusView
 
     private lateinit var buttonFilterLabels: List<String>
+
+    private var activeFilterIndex = 0
+
+    private var lastRecyclerViewAdapter: ContentEntryListRecyclerViewAdapter? = null
 
     internal class LocalAvailabilityPagedListCallback(private val localAvailabilityManager: LocalAvailabilityManager,
                                                       var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
@@ -158,7 +160,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     private var listSnapShot: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer?> = listOf()
 
-    private var localAvailabilityPagedListCallback: LocalAvailabilityPagedListCallback? = null
+    private var lastLocalAvailabilityPagedListCallback: LocalAvailabilityPagedListCallback? = null
 
     fun filterByLang(langUid: Long) {
         presenter?.handleClickFilterByLanguage(langUid)
@@ -207,9 +209,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     override fun setFilterButtons(buttonLabels: List<String>, activeIndex: Int) {
         buttonFilterLabels = buttonLabels
-        recyclerAdapter?.isTopEntryList = buttonLabels.isNotEmpty()
-        recyclerAdapter?.filterButtons = buttonLabels
-        recyclerAdapter?.activeIndex = activeIndex
     }
 
     override fun setEditButtonsVisibility(buttonVisibilityFlags: Int) {
@@ -269,15 +268,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
             //create entry adapter here to make sure bleManager is not null
             val thisFrag = this@ContentEntryListFragment
-            recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, thisFrag,
-                    managerAndroidBle.containerDownloadManager)
-
-            recyclerAdapter?.fistItemLoadedListener = repoLoadingStatusView
-
-            localAvailabilityPagedListCallback = LocalAvailabilityPagedListCallback(
-                    managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
-                runOnUiThread(Runnable { recyclerAdapter?.updateLocalAvailability(availabilityMap) })
-            }
 
             val umDb = UmAccountManager.getActiveDatabase(ustadBaseActivity)
             val umRepoDb = UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity)
@@ -328,18 +318,38 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
+        lastLocalAvailabilityPagedListCallback?.onDestroy()
+        lastRecyclerViewAdapter?.firstItemLoadedListener = null
+
+        val recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, this,
+                managerAndroidBle.containerDownloadManager).apply {
+            isTopEntryList = buttonFilterLabels.isNotEmpty()
+            filterButtons = buttonFilterLabels
+            activeIndex = activeFilterIndex
+        }
+        recyclerAdapter.firstItemLoadedListener = repoLoadingStatusView
+
+
+        val localAvailabilityCallback = LocalAvailabilityPagedListCallback(
+                managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
+            runOnUiThread(Runnable {
+                recyclerAdapter.updateLocalAvailability(availabilityMap)
+            })
+        }
+
         val data = entryProvider.asRepositoryLiveData(
                 UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
                 repoLoadingStatusView)
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
-            recyclerAdapter!!.firstItemLoaded = false
-            recyclerAdapter!!.submitList(it)
-            localAvailabilityPagedListCallback!!.pagedList = it
-            it.addWeakCallback(listSnapShot, localAvailabilityPagedListCallback!!)
+            recyclerAdapter.submitList(it)
+            localAvailabilityCallback.pagedList = it
+            it.addWeakCallback(listSnapShot, localAvailabilityCallback)
         })
 
         recyclerView.adapter = recyclerAdapter
+        lastRecyclerViewAdapter = recyclerAdapter
+        lastLocalAvailabilityPagedListCallback = localAvailabilityCallback
     }
 
     override fun setToolbarTitle(title: String) {
@@ -373,13 +383,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     }
 
     override fun contentFilterClicked(index: Int) {
+        activeFilterIndex = index
         presenter?.handleClickFilterButton(index)
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        localAvailabilityPagedListCallback?.onDestroy()
+        lastLocalAvailabilityPagedListCallback?.onDestroy()
     }
 
     fun handleBottomSheetClicked(contentType: Int) {
