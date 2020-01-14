@@ -21,5 +21,7 @@ abstract class ScrapeRunDao : BaseDao<ScrapeRun> {
         const val SCRAPE_TYPE_GDL = "gdl"
 
         const val SCRAPE_TYPE_CK12 = "ck12"
+
+        const val SCRAPE_TYPE_DDL = "ddl"
     }
 }

@@ -64,7 +64,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
     override fun run() {
         System.gc()
-        queueDao!!.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis())
+        queueDao.setTimeStarted(scrapeQueueItemUid, System.currentTimeMillis())
         var successful = false
         if (ScraperConstants.KhanContentType.TOPICS.type == contentType) {
             try {
@@ -271,7 +271,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                     subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, description, false, EMPTY_STRING, URL(topicUrl, imageSrc).toString(),
                     EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry,
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry,
                     subjectEntry, hourOfCode++)
 
             ContentScraperUtil.createQueueItem(queueDao, subjectUrl, subjectEntry, topicFolder,
@@ -395,17 +395,17 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
-                    ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
+                    ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
                     EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
             val khanAcademyEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.khanacademy.org/", "Khan Academy",
                     "https://www.khanacademy.org/", KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
                     "You can learn anything.\n" + "For free. For everyone. Forever.", false, EMPTY_STRING,
                     "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, khanAcademyEntry, 6)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, khanAcademyEntry, 6)
 
             val englishFolder = File(destDir, "en")
             englishFolder.mkdirs()
@@ -453,7 +453,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                             containerDir, parent!!,
                             it.contentType!!, it.sqiUid, factory).run()
                 } catch (ignored: IOException) {
-                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it!!.scrapeUrl!!)
+                    throw RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" + it.scrapeUrl!!)
                 }
             }
             GlobalScope.launch {
