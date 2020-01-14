@@ -1,7 +1,6 @@
 import core from 'UstadMobile-core';
 import {Observable} from 'rxjs';
 import util from 'UstadMobile-lib-util';
-import { UmBaseService } from '../service/um-base.service';
 
 /**
  * All app routes
@@ -38,8 +37,6 @@ export class UmAngularUtil {
 
   public static TEST_ENDPOINT = "http://localhost:8087/"
 
-  public static API_URL_TAG = "apiUrl"
-
   /**
    * Key to be used when toolbar title value changes
    */
@@ -65,10 +62,8 @@ export class UmAngularUtil {
     const search = this.removeParam(this.isWithoutEntryUid(route) 
     ? this.ARG_CONTENT_ENTRY_UID:"", (params ? params : this.getRoutePathParam().search))
     let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null&libraries=null":"?ref=null"))) 
-    paramString = paramString + (args.next ? "&"+this.ARG_CONTENT_ENTRY_UID+"="+args.rootId:"")
-    paramString = route == appRountes.reportPreview ? paramString.replace("&libraries=null","")
-    .replace("&next=ContentEntryList",""): paramString
-    return core.com.ustadmobile.core.util.UMFileUtil.parseURLQueryString(paramString); 
+    return core.com.ustadmobile.core.util.UMFileUtil
+      .parseURLQueryString(paramString); 
   }
 
 
@@ -427,9 +422,8 @@ export class UmAngularUtil {
    * @param containerUid conter id to be used
    */
   static getMountPath(containerUid: any){
-    const path = UmAngularUtil.getItem(this.CONTENT_URL_TAG) + containerUid.toString() +"/" 
-    console.log("Mounted Path", path)
-    return path;
+    const uid = containerUid.toString()
+    return UmAngularUtil.getItem(this.CONTENT_URL_TAG) + uid +"/"
   }
 
   /**

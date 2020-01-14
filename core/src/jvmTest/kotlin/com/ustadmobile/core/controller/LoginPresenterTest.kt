@@ -87,7 +87,7 @@ class LoginPresenterTest {
 
     }
 
-    @Test
+    //@Test
     fun givenValidUsernameAndPassword_whenClicked_shouldCallSystemImplGo() {
         mockWebServer.enqueue(MockResponse()
                 .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", null)))

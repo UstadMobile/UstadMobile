@@ -64,6 +64,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
       this.umService.getDbInstance().contentEntryDao, 
       this.getActiveAccount(), this.systemImpl,this.umService.getDbInstance());
     this.presenter.onCreate(null);
+    this.presenter.handleClickFilterButton(0)
     this.setToolbarTitle("...")
     this.label_language_options = this.getString(this.MessageID.language);
     this.label_reading_level = this.getString(this.MessageID.library_reading_level);

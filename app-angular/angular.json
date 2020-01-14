@@ -90,6 +90,14 @@
                             "i18nFormat": "xlf",
                             "i18nLocale": "ar",
                             "i18nMissingTranslation": "error"
+                        },
+                        "ne": {
+                            "i18nFile": "src/assets/locale/messages.ne.xlf",
+                            "outputPath": "dist/ne/",
+                            "aot": true,
+                            "i18nFormat": "xlf",
+                            "i18nLocale": "ne",
+                            "i18nMissingTranslation": "error"
                         }
                     }
                 },
@@ -113,6 +121,9 @@
                         },
                         "ar": {
                             "browserTarget": "ustadmobile:build:ar"
+                        },
+                        "ne": {
+                            "browserTarget": "ustadmobile:build:ne"
                         }
                     }
                 },

@@ -121,6 +121,11 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     this.presenter.handleClickPersonIcon()
   }
 
+  setOptions(options){
+    const umMenuOptions = UmAngularUtil.kotlinListToJsArray(options)
+    console.log("Options", umMenuOptions)
+  }
+
   showReportMenu(show) {
     this.showReports = show
   }
