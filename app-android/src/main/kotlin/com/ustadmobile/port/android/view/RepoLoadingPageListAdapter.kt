@@ -7,18 +7,23 @@ import androidx.recyclerview.widget.RecyclerView
 interface FistItemLoadedListener{
 
     fun onFirstItemLoaded()
+
+    fun onEmptyTopEntryList(status: Int)
 }
 
 abstract class RepoLoadingPageListAdapter<T, VH : RecyclerView.ViewHolder>(itemCallback: DiffUtil.ItemCallback<T>): PagedListAdapter<T, VH>(itemCallback){
 
-    private var firstItemLoaded: Boolean = false
+    var firstItemLoaded: Boolean = false
 
-    var fistItemLoadedListener: FistItemLoadedListener? = null
+    var firstItemLoadedListener: FistItemLoadedListener? = null
+
+
+    var isTopEntryList: Boolean = true
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         if(!firstItemLoaded){
             firstItemLoaded = true
-            fistItemLoadedListener?.onFirstItemLoaded()
+            firstItemLoadedListener?.onFirstItemLoaded()
         }
     }
 }

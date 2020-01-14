@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Theme.UstadTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.UstadTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- colorPrimary is used for the default action bar background -->
         <!--<item name="colorPrimary">@color/material_blue_grey_800</item> -->
         <item name="colorPrimary">@color/primary</item>

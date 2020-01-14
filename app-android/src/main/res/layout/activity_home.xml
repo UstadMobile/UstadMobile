@@ -6,17 +6,20 @@
     android:id="@+id/coordinationLayout"
     android:layout_height="match_parent">
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/library_viewpager"
+    <FrameLayout
+        android:layout_below="@id/appBar"
+        android:paddingBottom="@dimen/dimen_40dp"
+        android:id="@+id/um_host_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tabs"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
+        android:id="@+id/appBar"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        android:elevation="@dimen/dimen_4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -75,21 +78,23 @@
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            style="@style/TabLayoutStyleHome"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabTextColor="@color/primary_light"
-            android:background="?attr/colorPrimary"/>
-
     </com.google.android.material.appbar.AppBarLayout>
 
+
+
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+        app:layout_anchorGravity="bottom"
+        android:elevation="6dp"
+        android:visibility="gone"
+        android:id="@+id/umBottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"/>
+
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:elevation="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_16dp"
-        app:layout_anchor="@id/library_viewpager"
+        android:elevation="8dp"
+        android:layout_marginBottom="@dimen/dimen_40dp"
+        app:layout_anchor="@id/um_host_fragment"
         android:id="@+id/download_all"
         android:layout_width="wrap_content"
         android:padding="@dimen/dimen_8dp"

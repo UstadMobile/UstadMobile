@@ -1,13 +1,21 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
+import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UserProfileView
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -15,8 +23,8 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
-                    val personDao: PersonDao, impl: UstadMobileSystemImpl)
-    : LanguageOptionPresenter(context, arguments, view, impl) {
+                    val personDao: PersonDao, val impl: UstadMobileSystemImpl)
+    : LanguageOptionPresenter(context, arguments, view, impl){
 
     private var account: UmAccount? = null
 
@@ -31,30 +39,44 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         showDownloadAll = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
+        UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
+    }
 
-        account = UmAccountManager.getActiveAccount(context)
-
+    private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
-            var showReport = false; var person: Person? = null
-            if(account != null){
-                person = personDao.findByUid(account!!.personUid)
+            val contentEntryListArgs = mutableMapOf(ARG_CONTENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                    ARG_FILTER_BUTTONS to "$ARG_LIBRARIES_CONTENT,$ARG_DOWNLOADED_CONTENT")
+
+            val options = mutableListOf<Pair<Int, String>>()
+
+            if(t != null){
+                account = t
+                val person = personDao.findByUid(t.personUid)
                 if(person != null){
-                   showReport = person.admin
+                    if(person.admin){
+                        //TODO: This is using a DummyView
+                        contentEntryListArgs[ARG_FILTER_BUTTONS] +=  ",$ARG_RECYCLED_CONTENT"
+                        options.add(Pair(MessageID.reports, "DashboardView"))
+                    }
+
+                    homeView.runOnUiThread(Runnable {
+                        homeView.setLoggedPerson(person)
+                    })
                 }
             }
 
-            view.runOnUiThread(Runnable {
-                homeView.showReportMenu(showReport)
-                if(person != null){
-                    homeView.setLoggedPerson(person)
-                }
+            homeView.runOnUiThread(Runnable {
                 homeView.loadProfileIcon(if(account == null) "" else "")
+                options.add(0, Pair(MessageID.contents,
+                        ContentEntryListView.VIEW_NAME + "?" +
+                                UMFileUtil.mapToQueryString(contentEntryListArgs)))
+                homeView.setOptions(options)
             })
         }
     }
 
     fun handleShowDownloadButton(show: Boolean){
-        view.runOnUiThread(Runnable {
+        homeView.runOnUiThread(Runnable {
             homeView.showDownloadAllButton(show && showDownloadAll)
         })
     }
@@ -78,8 +100,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         homeView.showShareAppDialog()
     }
 
-    override fun handleNavigation() {
-    }
+    override fun handleNavigation() {}
 
 
     companion object {

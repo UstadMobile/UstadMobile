@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HorizontalScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="none"
+    android:background="?android:selectableItemBackground"
+    android:padding="@dimen/dimen_16dp">
+
+    <com.google.android.material.chip.ChipGroup
+        style="@style/Widget.MaterialComponents.Chip.Filter"
+        android:layout_marginTop="@dimen/dimen_10dp"
+        android:layout_marginBottom="@dimen/dimen_10dp"
+        android:layout_width="wrap_content"
+        app:chipSpacing="@dimen/dimen_16dp"
+        android:id="@+id/chip_group"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        app:singleLine="true">
+
+    </com.google.android.material.chip.ChipGroup>
+
+</HorizontalScrollView>
