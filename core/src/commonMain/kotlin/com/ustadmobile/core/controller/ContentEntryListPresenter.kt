@@ -71,6 +71,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
             }
         }
 
+        when {
+            arguments.containsKey(ARG_LIBRARIES_CONTENT) && arguments.containsKey(ARG_CONTENT_ENTRY_UID) ->
+                showContentByParent()
+
+            arguments.containsKey(ARG_RECYCLED_CONTENT) -> showRecycledEntries()
+
+            arguments.containsKey(ARG_DOWNLOADED_CONTENT) -> showDownloadedContent()
+        }
     }
 
 

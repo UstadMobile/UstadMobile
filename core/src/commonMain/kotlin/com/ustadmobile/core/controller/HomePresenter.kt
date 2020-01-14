@@ -45,6 +45,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
     private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
             val contentEntryListArgs = mutableMapOf(ARG_CONTENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                    ARG_LIBRARIES_CONTENT to "",
                     ARG_FILTER_BUTTONS to "$ARG_LIBRARIES_CONTENT,$ARG_DOWNLOADED_CONTENT")
 
             val options = mutableListOf<Pair<Int, String>>()
