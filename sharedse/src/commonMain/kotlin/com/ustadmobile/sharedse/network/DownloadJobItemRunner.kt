@@ -187,7 +187,7 @@ class DownloadJobItemRunner
     suspend fun stop(newStatus: Int, cancel: Boolean = false) {
         Napier.d({"${mkLogPrefix()} stopping - waiting for lock"})
         downloadStatusLock.withLock {
-            if (!runnerStatus.compareAndSet(JobStatus.STOPPED, JobStatus.STOPPED)) {
+            if (runnerStatus.getAndSet(JobStatus.STOPPED) != JobStatus.STOPPED) {
                 Napier.d({"${mkLogPrefix()} stopping - checking cancel"})
                 if (cancel) {
                     startDownloadFnJob?.cancelAndJoin()
