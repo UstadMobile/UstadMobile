@@ -6,12 +6,14 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
+import com.ustadmobile.lib.db.entities.Container
 import io.github.bonigarcia.wdm.WebDriverManager
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
 import net.lightbody.bmp.proxy.CaptureType
+import org.apache.http.client.utils.DateUtils
 import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeDriver
@@ -37,6 +39,8 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
 
     data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
+    data class ETagResult(val updated: Boolean, val etag: String?)
+
 
 
     init {
@@ -87,9 +91,9 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         val isContentUpdated = block.invoke(proxy)
 
-        val containerManager = if(isContentUpdated) {
+        val containerManager = if (isContentUpdated) {
             makeHarContainer(proxy, proxy.har.log.entries, filters, regexes, addHarContent)
-        }else {
+        } else {
             null
         }
 
@@ -140,7 +144,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                     filterFn.invoke(it)
                 }
 
-                if(it.response == null){
+                if (it.response == null) {
                     return@forEach
                 }
 
@@ -161,14 +165,31 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         var writer = StringWriter()
         proxy.har.writeTo(writer)
 
-        if(addHarContent){
+        if (addHarContent) {
             runBlocking {
                 containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
-                containerManager.addEntries(StringEntrySource(regexes.joinToString(),listOf("regexList")))
+                containerManager.addEntries(StringEntrySource(regexes.joinToString(), listOf("regexList")))
             }
         }
 
         return containerManager
+    }
+
+    fun isContentUpdated(harEntry: HarEntry, container: Container): ETagResult {
+        val entryModified = harEntry.response.headers.find { valuePair -> valuePair.name == LAST_MODIFIED }
+        val entryETag = harEntry.response.headers.find { valuePair -> valuePair.name == ETAG }
+
+        if (entryModified != null) {
+            val time = DateUtils.parseDate(entryModified.value).time
+            return ETagResult(time > container.cntLastModified, null)
+        }
+
+        if (entryETag != null) {
+            val eTagValue = entryETag.value
+            val eTag = db.containerETagDao.getEtagOfContainer(container.containerUid)
+            return ETagResult(eTagValue != eTag, eTagValue)
+        }
+        return ETagResult(true, null)
     }
 
     /**
