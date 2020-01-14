@@ -1,9 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
@@ -84,7 +81,7 @@ class HomePresenterTest {
         UmAccountManager.setActiveAccount(umAccount, context)
         presenter.onCreate(null)
         argumentCaptor<List<Pair<Int, String>>>().apply {
-            verify(mockView).setOptions(capture())
+            verify(mockView, timeout(5000)).setOptions(capture())
             assertEquals("Two navs were displayed",2, firstValue.size)
             assertTrue("All filters were included",
                      firstValue[0].second.contains(ARG_LIBRARIES_CONTENT)
@@ -97,7 +94,7 @@ class HomePresenterTest {
     fun givenApplicationLaunched_WhenNoAdminLoggedIn_shouldShowOnlyContentsNavWithLibrariesAndDownloadedFilters(){
         presenter.onCreate(null)
         argumentCaptor<List<Pair<Int, String>>>().apply {
-            verify(mockView).setOptions(capture())
+            verify(mockView, timeout(5000)).setOptions(capture())
             assertEquals("One nav was displayed",1, firstValue.size)
             assertTrue("Both libraries and downloaded filters were included",
                     firstValue[0].second.contains(ARG_LIBRARIES_CONTENT)

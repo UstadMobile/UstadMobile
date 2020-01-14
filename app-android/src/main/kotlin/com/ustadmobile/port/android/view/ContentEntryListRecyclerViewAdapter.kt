@@ -20,7 +20,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
@@ -89,7 +88,9 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val dataIndex = position + if(isTopEntryList) -1 else 0
-        super.onBindViewHolder(holder, dataIndex)
+        if(dataIndex >= 0)
+            super.onBindViewHolder(holder, dataIndex)
+
         if(holder is EntryViewHolder){
             val entry = getItem(dataIndex).also {
                 holder.entry = it
@@ -183,7 +184,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         val isSelected = chip.id == umChipGroup.checkedChipId
                         chip.isCheckable = chip.id != umChipGroup.checkedChipId
                         if(isSelected){
-                            firstItemLoadedListener?.onEmptyTopEntryList(STATUS_LOADED_NODATA)
                             activeIndex = i
                             listener.contentFilterClicked(i)
                         }

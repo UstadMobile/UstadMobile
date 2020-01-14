@@ -27,7 +27,9 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.door.ext.isRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
@@ -184,9 +186,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         contentEntryListHostActivity?.setLanguageFilterSpinner(result)
     }
 
-    override fun setEmptyView(selectedFiler: String) {
+    override fun setEmptyView(selectedFilter: String) {
        val emptyMessage: Int
-        val resource = when(selectedFiler) {
+        val resource = when(selectedFilter) {
             ARG_LIBRARIES_CONTENT -> {
                 emptyMessage = R.string.empty_state_libraries
                 R.drawable.ic_file_download_black_24dp
@@ -320,6 +322,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
         lastLocalAvailabilityPagedListCallback?.onDestroy()
         lastRecyclerViewAdapter?.firstItemLoadedListener = null
+        repoLoadingStatusView.reset()
+
 
         val recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, this,
                 managerAndroidBle.containerDownloadManager).apply {
@@ -340,6 +344,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         val data = entryProvider.asRepositoryLiveData(
                 UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
                 repoLoadingStatusView)
+
+        //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
+        //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
+        //any items are loaded
+        if(!data.isRepositoryLiveData()) {
+            repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
+        }
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
             recyclerAdapter.submitList(it)
