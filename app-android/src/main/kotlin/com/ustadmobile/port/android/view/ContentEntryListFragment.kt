@@ -285,6 +285,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
                     bundleToMap(arguments), thisFrag, umDb.contentEntryDao,
                     umRepoDb.contentEntryDao, UmAccountManager.getActiveAccount(context), UstadMobileSystemImpl.instance, umRepoDb).also {
                 it.onCreate(bundleToMap(savedInstanceState))
+                it.handleClickFilterButton(0)
             }
         }
 
