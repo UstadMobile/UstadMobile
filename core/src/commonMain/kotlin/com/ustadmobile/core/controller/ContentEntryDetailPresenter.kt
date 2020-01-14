@@ -14,6 +14,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -69,7 +70,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         navigation = arguments[ARG_REFERRER]
         entryLiveData = appRepo.contentEntryDao.findLiveContentEntry(entryUuid)
 
-        entryLiveData.observe(this, ::onEntryChanged)
+        entryLiveData.observeWithPresenter(this, ::onEntryChanged)
 
         GlobalScope.launch {
             val result = appRepo.containerDao.getMostRecentContainerForContentEntryAsync(entryUuid)
@@ -82,7 +83,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (containerDownloadManager != null) {
             GlobalScope.launch(liveDataObserverDispatcher()) {
                 downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).also {
-                    it.observe(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
+                    it.observeWithPresenter(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
                 }
             }
         } else {

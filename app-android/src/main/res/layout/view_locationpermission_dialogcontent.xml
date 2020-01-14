@@ -3,9 +3,9 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:paddingLeft="24dp"
     android:paddingRight="24dp"
+    android:background="@android:color/white"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -43,10 +43,12 @@
 
         <Button
             android:id="@+id/view_locationpermission_showmore_button"
-            style="@style/Widget.AppCompat.Button.Borderless"
+            style="@style/UmTheme.Button.Colored"
             android:gravity="start"
             android:paddingStart="0dp"
             android:layout_width="0dp"
+            android:backgroundTint="@color/icons"
+            android:background="@android:color/transparent"
             android:layout_height="wrap_content"
             android:drawableEnd="@drawable/ic_keyboard_arrow_down_black_24dp"
             android:text="@string/more_information"
