@@ -144,7 +144,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         else
                             R.drawable.ic_book_black_24dp)
 
-                if (iconFlag == ContentEntry.TYPE_UNDEFINED) {
+                if (iconFlag == ContentEntry.UNDEFINED_TYPE) {
                     iconView.visibility = View.GONE
                 } else {
                     iconView.visibility = View.VISIBLE
