@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlin.js.JsName
 
 abstract class LanguageOptionPresenter(context: Any, arguments: Map<String, String?>, view: LanguageOptionView,
-                              val impl: UstadMobileSystemImpl):
+                              private val impl: UstadMobileSystemImpl):
         UstadBaseController<LanguageOptionView>(context, arguments, view){
 
     private val languageOptions = impl.getAllUiLanguage(context)

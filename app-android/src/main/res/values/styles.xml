@@ -12,6 +12,11 @@
         <item name="android:dialogTheme">@style/CustomDialog</item>
     </style>
 
+    <style name="ChipTextStyleSelected">
+        <item name="android:textSize">@dimen/text_body_small</item>
+        <item name="android:textColor">@color/icons</item>
+    </style>
+
 
     <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
         <item name="android:windowNoTitle">false</item>
@@ -137,6 +142,11 @@
         <item name="android:layout_marginTop">@dimen/dimen_10dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="UmTheme.Button.Colored" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="colorButtonNormal">@color/icons</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
 
