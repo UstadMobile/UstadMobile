@@ -31,9 +31,6 @@ abstract class SelQuestionSetDao : BaseDao<SelQuestionSet> {
     @Query("SELECT * FROM SelQuestionSet WHERE selQuestionSetUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : SelQuestionSet?
 
-    @Query("SELECT * FROM SelQuestionSet")
-    abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestionSet>
-
     @Query("SELECT " +
             " (SELECT COUNT(*) FROM SelQuestion " +
             "       WHERE selQuestionSelQuestionSetUid = " +

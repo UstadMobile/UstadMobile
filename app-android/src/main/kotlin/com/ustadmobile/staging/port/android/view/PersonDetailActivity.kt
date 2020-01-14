@@ -393,8 +393,6 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
                 if (messageLabel == MessageID.field_fullname) {
                     val name = findViewById<TextView>(R.id.activity_person_detail_student_name)
                     name.text = value.toString()
-                    //TODO: KMP Check this flow replaced break with else and block.
-                    //break
                 }else{
 
                     val hll = LinearLayout(this)

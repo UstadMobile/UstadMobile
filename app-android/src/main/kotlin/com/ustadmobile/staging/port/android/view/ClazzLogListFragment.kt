@@ -132,10 +132,10 @@ class ClazzLogListFragment : UstadBaseFragment(), ClassLogListView {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        //TODO:
-//        fun getColor(index: Int): Int {
-//            return mColors.get(index)
-//        }
+        //TODO: check
+        override fun getColor(index: Int): Int {
+            return mColors.get(index)
+        }
 
     }
 

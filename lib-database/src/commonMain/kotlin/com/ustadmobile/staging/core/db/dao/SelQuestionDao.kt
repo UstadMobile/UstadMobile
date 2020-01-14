@@ -21,9 +21,6 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     @Update
     abstract override fun update(entity: SelQuestion)
 
-    @Query("SELECT * FROM SelQuestion")
-    abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestion>
-
     @Update
     abstract suspend fun updateAsync(entity: SelQuestion):Int
 
@@ -44,12 +41,6 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
             " AND questionActive = 1")
     abstract suspend fun getMaxIndexByQuestionSetAsync(questionSetUid: Long): Int
 
-    @Query("SELECT * FROM SelQuestion where " + "selQuestionSelQuestionSetUid = :questionSetUid")
-    abstract suspend fun findAllByQuestionSetUidAsync(questionSetUid: Long) :SelQuestion?
-
-    @Query("SELECT * FROM SelQuestion WHERE " + "selQuestionSelQuestionSetUid = :questionUid")
-    abstract fun findAllQuestionsInSet(questionUid: Long): DataSource.Factory<Int, SelQuestion>
-
     @Query("SELECT * FROM SelQuestion WHERE " +
             "selQuestionSelQuestionSetUid = :questionUid AND " +
             "questionActive = 1")
@@ -61,19 +52,10 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     abstract suspend fun findNextQuestionByQuestionSetUidAsync(questionSetUid: Long,
                                                        previousIndex: Int) : SelQuestion?
 
-    @Query("SELECT MIN(questionIndex) FROM SelQuestion")
-    abstract suspend fun getMinIndexAsync() : Int
-
-    @Query("SELECT COUNT(*) FROM SelQuestion")
-    abstract fun findTotalNumberOfQuestions(): Int
-
     @Query("SELECT COUNT(*) FROM SelQuestion WHERE" +
             " selQuestionSelQuestionSetUid = :questionSetUid AND " +
             " questionActive = 1")
     abstract fun findTotalNumberOfActiveQuestionsInAQuestionSet(questionSetUid: Long): Int
-
-    @Query("SELECT * FROM SelQuestion WHERE questionText = :question")
-    abstract suspend fun findByQuestionStringAsync(question: String) : List<SelQuestion>
 
     companion object {
 

@@ -89,7 +89,6 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
     private lateinit var bottomNavigation: AHBottomNavigation
 
-    //TODO: Observe personPicture and update this
     private lateinit var profileImage: CircleImageView
 
     private lateinit var downloadAllBtn: FloatingTextButton
@@ -367,9 +366,8 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                 args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
                 args[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
-                //TODO: Check if we want this still
-//                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
-//                        this)
+                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
+                        this)
             }
             R.id.menu_action_send_feedback -> hearShake()
         }

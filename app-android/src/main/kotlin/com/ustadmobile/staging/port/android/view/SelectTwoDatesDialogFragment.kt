@@ -76,7 +76,6 @@ class SelectTwoDatesDialogFragment : UstadDialogFragment(), SelectTwoDatesDialog
             myCalendar.set(Calendar.MONTH, month)
             myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             toDate = myCalendar.timeInMillis
-            //TODO: KMP Add this method
             toET.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.timeInMillis,
                     currentLocale))
         }
@@ -96,7 +95,6 @@ class SelectTwoDatesDialogFragment : UstadDialogFragment(), SelectTwoDatesDialog
             myCalendar.set(Calendar.MONTH, month)
             myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             fromDate = myCalendar.timeInMillis
-            //TODO: KMP fix this
             fromET.setText(UMCalendarUtil.getPrettyDateFromLong(myCalendar.timeInMillis,
                     currentLocale))
 

@@ -23,9 +23,6 @@ abstract class ClazzActivityChangeDao : BaseDao<ClazzActivityChange> {
     abstract override fun update(entity: ClazzActivityChange)
 
     @Query("SELECT * FROM ClazzActivityChange")
-    abstract fun findAllClazzActivityChanges(): DataSource.Factory<Int, ClazzActivityChange>
-
-    @Query("SELECT * FROM ClazzActivityChange")
     abstract suspend fun findAllClazzActivityChangesAsync(): List<ClazzActivityChange>
 
     @Query("SELECT * FROM ClazzActivityChange")

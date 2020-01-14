@@ -78,26 +78,8 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate DESC LIMIT 1")
     abstract suspend fun findMostRecentByClazzUid(clazzUid: Long) : ClazzLog?
 
-    @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzid AND logDate = :date")
-    abstract fun findByClazzIdAndDate(clazzid: Long, date: Long): ClazzLog?
-
-    @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzid and logDate = :date")
-    abstract suspend fun findByClazzIdAndDateAsync(clazzid: Long, date: Long) : ClazzLog?
-
-    @Query("SELECT * FROM ClazzLog")
-    abstract fun findAll(): List<ClazzLog>
-
     @Query("UPDATE ClazzLog SET clazzLogDone = 1 where clazzLogUid = :clazzLogUid ")
     abstract suspend fun updateDoneForClazzLogAsync(clazzLogUid: Long) : Int
-
-    @Query("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
-    abstract fun findByClazzUid(clazzUid: Long): DataSource.Factory<Int, ClazzLog>
-
-    @Query("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
-    abstract fun findByClazzUidAsList(clazzUid: Long): List<ClazzLog>
-
-    @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT clazzLogCancelled")
-    abstract fun findByClazzUidNotCanceled(clazzUid: Long): DataSource.Factory<Int, ClazzLog>
 
     @Query("SELECT ClazzLog.*, Schedule.sceduleStartTime, Schedule.scheduleEndTime, " +
             "Schedule.scheduleFrequency FROM ClazzLog " +
@@ -111,7 +93,6 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
             "WHERE clazzLogUid = :clazzLogUid")
     abstract suspend fun updateClazzAttendanceNumbersAsync(clazzLogUid: Long, clazzLogNumPresent: Int,
                                                    numAbsent: Int, numPartial: Int) : Int
-
 
     @Query("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +

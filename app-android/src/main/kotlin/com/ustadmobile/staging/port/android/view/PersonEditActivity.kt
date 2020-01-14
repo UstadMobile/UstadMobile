@@ -474,7 +474,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                             this@PersonEditActivity,
                             R.style.CustomDatePickerDialogTheme,
                             date, cal.yearInt,
-                            cal.month0, cal.dayOfMonth) //TODO: Check cal.moth0
+                            cal.month0, cal.dayOfMonth)
                     dateFieldPicker.datePicker.maxDate = System.currentTimeMillis()
                     dateFieldPicker.datePicker.spinnersShown = true
                     dateFieldPicker.datePicker.calendarViewShown = false

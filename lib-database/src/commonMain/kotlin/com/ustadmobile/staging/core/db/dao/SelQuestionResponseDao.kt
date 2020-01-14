@@ -20,9 +20,6 @@ abstract class SelQuestionResponseDao : BaseDao<SelQuestionResponse> {
     @Update
     abstract override fun update(entity: SelQuestionResponse)
 
-    @Query("SELECT * FROM SelQuestionResponse")
-    abstract fun findAllQuestions(): DataSource.Factory<Int, SelQuestionResponse>
-
     @Update
     abstract suspend fun updateAsync(entity: SelQuestionResponse) : Int 
 

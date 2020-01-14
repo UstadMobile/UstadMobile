@@ -35,15 +35,8 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
     @Update
     abstract override fun update(entity: ClazzActivity)
 
-    @Query("SELECT * FROM ClazzActivity")
-    abstract fun findAllClazzActivityChanges(): DataSource.Factory<Int, ClazzActivity>
-
     @Update
     abstract suspend fun updateAsync(entity: ClazzActivity): Int
-
-    @Query("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid AND "
-            + " CAST(clazzActivityDone AS INTEGER)   = 1 ORDER BY clazzActivityLogDate DESC")
-    abstract fun findByClazzUid(clazzUid: Long): DataSource.Factory<Int, ClazzActivity>
 
     @Query("SELECT ClazzActivityChange.clazzActivityChangeTitle AS changeTitle, ClazzActivity.* " +
             "FROM ClazzActivity " +
@@ -62,25 +55,7 @@ abstract class ClazzActivityDao : BaseDao<ClazzActivity> {
 
     @Query("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND "
             + " clazzActivityLogDate = :logDate")
-    abstract fun findByClazzAndDate(clazzUid: Long, logDate: Long): ClazzActivity?
-
-    @Query("SELECT * FROM ClazzActivity WHERE clazzActivityClazzUid = :clazzUid AND "
-            + " clazzActivityLogDate = :logDate")
     abstract suspend fun findByClazzAndDateAsync(clazzUid: Long, logDate: Long): ClazzActivity?
-
-
-    @Query("SELECT  " +
-            " COUNT(CASE WHEN ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as good, " +
-            " COUNT(CASE WHEN NOT ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as bad, " +
-            " (:clazzUid) as clazzUid, " +
-            " ClazzActivity.clazzActivityLogDate as dayDate " +
-            " FROM ClazzActivity " +
-            " WHERE ClazzActivity.clazzActivityClazzUid = :clazzUid " +
-            " AND ClazzActivity.clazzActivityLogDate > :fromDate " +
-            " AND ClazzActivity.clazzActivityLogDate < :toDate " +
-            " GROUP BY ClazzActivity.clazzActivityLogDate ")
-    abstract suspend fun getDailyAggregateFeedback(clazzUid: Long, fromDate: Long, toDate: Long)
-                                                    : List<DailyActivityNumbers>
 
     @Query("SELECT  " +
             " COUNT(CASE WHEN ClazzActivity.isClazzActivityGoodFeedback THEN 1 END) as good, " +

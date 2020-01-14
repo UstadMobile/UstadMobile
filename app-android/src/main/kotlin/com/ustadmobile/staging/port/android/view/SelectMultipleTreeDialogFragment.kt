@@ -253,7 +253,6 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
         for (childNode in nodes) {
             val childLocationUid = (childNode.getContent() as LocationLayoutType).uid
             GlobalScope.launch {
-                //TODO: Test
                 val result = locationDao.findAllChildLocationsForUidAsync(childLocationUid)
                 val p = PopulateTreeNodeCallback(childNode)
                 p.onSuccess(result)
@@ -281,7 +280,6 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
                             // (via PopulateTreeNodeCallback class)
                             val childLocationUid = (childNode.getContent() as LocationLayoutType).uid
                             GlobalScope.launch {
-                                //TODO: Check this
                                 val result = locationDao.findAllChildLocationsForUidAsync(childLocationUid)
                                 val p = PopulateTreeNodeCallback(childNode)
                                 p.onSuccess(result)

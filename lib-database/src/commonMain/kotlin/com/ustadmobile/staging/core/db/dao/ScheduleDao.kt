@@ -23,12 +23,6 @@ abstract class ScheduleDao : BaseDao<Schedule> {
     @Insert
     abstract override fun insert(entity: Schedule): Long
 
-    @Query("SELECT * FROM Schedule")
-    abstract fun findAllSchedules(): DataSource.Factory<Int, Schedule>
-
-    @Query("SELECT * FROM SCHEDULE")
-    abstract fun findAllSchedulesAsList(): List<Schedule>
-
     @Update
     abstract suspend fun updateAsync(entity: Schedule) : Int
 
@@ -83,10 +77,5 @@ abstract class ScheduleDao : BaseDao<Schedule> {
 
         return false
     }
-
-
-    @Insert
-    abstract fun insertScheduledCheck(check: ScheduledCheck)
-
 
 }

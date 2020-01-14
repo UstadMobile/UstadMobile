@@ -285,11 +285,8 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
                 FILE_PERMISSION_REQUEST -> {
                     selectedPathUri = data!!.data
 
-                    //TODO: KMP Re did this. Check and test,etc.
                     val sourceFile = File(data!!.data!!.path)
 
-//                    val sourceFile = File(Objects.requireNonNull(
-//                            UmAndroidUriUtil.getPath(this, selectedUri)))
                     //Do something with your file
                     filePathFromFilePicker = sourceFile.getAbsolutePath()
                     val fileSelectedString = getText(R.string.file_selected).toString() + " " +

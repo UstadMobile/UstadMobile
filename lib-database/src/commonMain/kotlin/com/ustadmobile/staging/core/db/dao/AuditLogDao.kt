@@ -31,9 +31,6 @@ abstract class AuditLogDao : BaseDao<AuditLog> {
     @Query("SELECT * FROM AuditLog WHERE auditLogUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): AuditLog?
 
-    @Query("SELECT * FROM AuditLog")
-    abstract fun findAllAuditLogs(): DataSource.Factory<Int, AuditLog>
-
     @Query(FIND_ALL_NAME)
     abstract fun findAllAuditLogsWithName(): DataSource.Factory<Int, AuditLogWithNames>
 

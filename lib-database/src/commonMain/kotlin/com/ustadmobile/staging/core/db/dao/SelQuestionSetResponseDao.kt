@@ -21,9 +21,6 @@ abstract class SelQuestionSetResponseDao : BaseDao<SelQuestionSetResponse> {
     @Update
     abstract override fun update(entity: SelQuestionSetResponse)
 
-    @Query("SELECT * FROM SelQuestionSetResponse")
-    abstract fun findAllQuestionSetResponses(): DataSource.Factory<Int, SelQuestionSetResponse>
-
     @Update
     abstract suspend fun updateAsync(entity: SelQuestionSetResponse): Int
 
@@ -38,17 +35,6 @@ abstract class SelQuestionSetResponseDao : BaseDao<SelQuestionSetResponse> {
             "selQuestionSetResponseRecognitionPercentage > 0.8")
     abstract suspend fun findAllPassedRecognitionByPersonUid(uid: Long) :
             List<SelQuestionSetResponse>
-
-    @Query("SELECT Person.*   from " +
-            "ClazzMember INNER JOIN PERSON ON " +
-            "ClazzMember.clazzMemberPersonUid  = Person.personUid INNER join " +
-            "SelQuestionSetResponse ON  " +
-            "ClazzMember.clazzMemberUid = " +
-            "SelQuestionSetResponse.selQuestionSetResponseClazzMemberUid " +
-            "WHERE " +
-            "SelQuestionSetResponse.selQuestionSetResponseFinishTime > 0 " +
-            "AND SelQuestionSetResponse.selQuestionSetResponseSelQuestionSetUid != 0")
-    abstract fun findAllDoneSN(): DataSource.Factory<Int, Person>
 
     @Query("SELECT  " +
             "   Person.* " +

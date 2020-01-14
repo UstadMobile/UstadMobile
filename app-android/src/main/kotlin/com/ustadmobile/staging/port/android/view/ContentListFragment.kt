@@ -90,25 +90,6 @@ class ContentListFragment : UstadBaseFragment(), ContentListView,
     }
 
 
-//    //TODO: Testing reloading tabs
-//    private fun refreshTabs():Boolean{
-//        if(allowRefresh) {
-//            allowRefresh = false
-//
-//            getFragmentManager()!!.beginTransaction().detach(
-//                    this).attach(this).commit()
-//            setUpViewPager()
-//            return false
-//        }
-//        return true
-//    }
-//
-//    //TODO: Testing reloading tabs
-//    override fun onResume() {
-//        super.onResume()
-//        //allowRefresh = refreshTabs()
-//    }
-
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager,
                                                    private val context: Context)
         : FragmentPagerAdapter(fragmentManager) {

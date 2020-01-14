@@ -29,12 +29,6 @@ abstract class SelQuestionOptionDao : BaseDao<SelQuestionOption> {
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : SelQuestionOption?
 
-    @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionQuestionUid = :questionUid")
-    abstract suspend fun findAllOptionsByQuestionUid(questionUid: Long) : List<SelQuestionOption>
-
-    @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionQuestionUid = :questionUid")
-    abstract fun findAllOptionsByQuestionUidProvider(questionUid: Long): DataSource.Factory<Int, SelQuestionOption>
-
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionQuestionUid = :questionUid AND optionActive = 1")
     abstract fun findAllActiveOptionsByQuestionUidProvider(questionUid: Long): DataSource.Factory<Int, SelQuestionOption>
 }

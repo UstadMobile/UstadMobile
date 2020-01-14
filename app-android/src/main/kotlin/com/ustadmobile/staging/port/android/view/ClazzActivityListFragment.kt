@@ -83,23 +83,24 @@ class ClazzActivityListFragment : UstadBaseFragment(), ClazzActivityListView {
         return barChart
     }
 
-    internal inner class AttendanceBarDataSet(yVals: List<BarEntry>, label: String) : BarDataSet(yVals, label) {
+    internal inner class AttendanceBarDataSet(yVals: List<BarEntry>, label: String)
+        : BarDataSet(yVals, label) {
         override fun getEntryIndex(e: BarEntry?): Int {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         //TODO: Check this
-//        fun getColor(index: Int): Int {
-//            if (negativeValue != null) {
-//                if (negativeValue!!.containsKey(getEntryForIndex(index).getX())) {
-//                    if (negativeValue!![getEntryForIndex(index).getX()]!!) {
-//                        return mColors.get(2)
-//                    }
-//                }
-//            }
-//
-//            return mColors.get(0)
-//        }
+        override fun getColor(index: Int): Int {
+            if (negativeValue != null) {
+                if (negativeValue!!.containsKey(getEntryForIndex(index).getX())) {
+                    if (negativeValue!![getEntryForIndex(index).getX()]!!) {
+                        return mColors.get(2)
+                    }
+                }
+            }
+
+            return mColors.get(0)
+        }
     }
 
     override fun updateActivityBarChart(dataMap: LinkedHashMap<Float, Float>) {

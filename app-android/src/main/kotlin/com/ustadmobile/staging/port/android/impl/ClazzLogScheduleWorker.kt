@@ -88,7 +88,8 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
         //Loop over the classes
         for (clazz in clazzList) {
             //Skipp classes that have no time zone
-            //TODO: Timezone.
+            //TODOne: Timezone.: Solution: Almost every clazzz WILL have a timezone
+            // by default at least in the Clazz edit page.
 //            if (clazz.timeZone == null) {
 //                System.err.println("Warning: cannot create schedules for clazz" +
 //                        clazz.clazzName + ", uid:" +
@@ -100,7 +101,6 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
             if(timeZone == null){
                 timeZone = ""
             }
-
 
             //Get a list of schedules for the classes
             val clazzSchedules = db.scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)

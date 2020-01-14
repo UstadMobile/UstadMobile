@@ -40,7 +40,4 @@ abstract class CustomFieldDao : BaseDao<CustomField> {
     abstract suspend fun findByFieldNameAndEntityTypeAsync(fieldName: String, tableId: Int) :
             List<CustomField>
 
-    //For debugging
-    @Query("SELECT * FROM CustomField")
-    abstract fun findAll(): List<CustomField>
 }

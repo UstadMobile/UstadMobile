@@ -28,7 +28,6 @@ abstract class CustomFieldValueOptionDao : BaseDao<CustomFieldValueOption> {
             " customFieldValueOptionUid = :uid")
     abstract suspend fun deleteOption(uid: Long): Int
 
-
     @Update
     abstract suspend fun updateAsync(entity: CustomFieldValueOption) : Int
 

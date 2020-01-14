@@ -292,7 +292,6 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
             headingItems[i] = (headingRow.getChildAt(i) as TextView).text.toString()
         }
 
-        //TODO: Check this on KMP :/
         tableTextData!!.add(headingItems)
 
 
@@ -326,7 +325,6 @@ class ReportNumberOfDaysClassesOpenActivity : UstadBaseActivity(),
             for (i in 0 until everyDateRow.childCount) {
                 rowItems[i] = (everyDateRow.getChildAt(i) as TextView).text.toString()
             }
-            //TODO: KMP Check
             tableTextData!!.add(rowItems)
         }
 

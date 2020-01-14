@@ -24,10 +24,6 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
     @Update
     abstract override fun update(entity: UMCalendar)
 
-    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND " +
-            " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY)
-    abstract fun findAllHolidays(): DataSource.Factory<Int, UMCalendar>
-
     @Query("SELECT UMCalendar.* ," +
             " (SELECT COUNT(*) FROM DateRange " +
             "   WHERE dateRangeUMCalendarUid = UMCalendar.umCalendarUid " +
@@ -35,12 +31,6 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
             " FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND " +
             " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, UMCalendarWithNumEntries>
-
-    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1")
-    abstract fun findAllUMCalendars(): DataSource.Factory<Int, UMCalendar>
-
-    @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1")
-    abstract fun findAllUMCalendarsAsLiveDataList(): DoorLiveData<List<UMCalendar>>
 
     @Query("SELECT * FROM UMCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND umCalendarCategory = "
             + UMCalendar.CATEGORY_HOLIDAY)
@@ -51,9 +41,6 @@ abstract class UMCalendarDao : BaseDao<UMCalendar> {
 
     @Update
     abstract suspend fun updateAsync(entity: UMCalendar):Int
-
-    @Query("SELECT * FROM UMCalendar WHERE umCalendarName = :name")
-    abstract fun findByName(name: String): UMCalendar?
 
     @Query("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid")
     abstract fun findByUid(uid: Long): UMCalendar?

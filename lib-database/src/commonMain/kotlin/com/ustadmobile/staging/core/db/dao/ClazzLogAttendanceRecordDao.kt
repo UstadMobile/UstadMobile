@@ -29,9 +29,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     @Query("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord?
 
-    @Query("SELECT * from ClazzLogAttendanceRecord " + "WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid")
-    abstract fun findAttendanceLogsByClassLogId(clazzLogUid: Long): DataSource.Factory<Int, ClazzLogAttendanceRecord>
-
     class AttendanceByThresholdRow {
 
         var age: Int = 0
@@ -374,7 +371,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
      * @param toDate    to date
      * @param clazzes   list of classes
      * @param locations list of locations
-     * @param resultObject  the result
      */
     suspend fun findOverallDailyAttendanceNumbersByDateAndStuff(fromDate: Long, toDate: Long,
                                                         clazzes: List<Long>, locations:
@@ -435,11 +431,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
      *
      * @param clazzId
      * @param clazzLogUid
-     * @param callback
      */
     suspend fun insertAllAttendanceRecords(clazzId: Long, clazzLogUid: Long) : Array<Long>? {
         val result = findPersonUidsWithNoClazzAttendanceRecord(clazzId, clazzLogUid)
-        if (result!!.isEmpty()) {
+        if(result.isEmpty()) {
             return null
         } else {
             val toInsert = ArrayList<ClazzLogAttendanceRecord>()
@@ -450,8 +445,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
                 toInsert.add(record)
             }
 
-            val ret = insertListAsync(toInsert)
-            return ret
+            return insertListAsync(toInsert)
         }
 
     }
@@ -496,14 +490,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
             "AND attendanceStatus = :attendanceStatus")
     abstract fun getAttedanceStatusCount(clazzLogUid: Long, attendanceStatus: Int): Int
 
-
-    @Query("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :newValue " +
-            " WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +
-            " AND clazzLogAttendanceRecordClazzMemberUid = :clazzMemberUid")
-    abstract fun updateAttendanceStatusByClazzMemberAndClazzLog(clazzMemberUid: Long,
-                                                                clazzLogUid: Long,
-                                                                newValue: Int)
-
     companion object {
 
 
@@ -543,29 +529,6 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
                 "   AND ClazzLog.logDate < :toDate " +
                 "GROUP  BY ( clazzlog.logdate )  "
 
-
-        val QUERY_ATTNEDANCE_OLD = "select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, ClazzLog.logDate, " +
-                " sum(case when attendanceStatus = 1 then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
-                " sum(case when attendanceStatus = 2 then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
-                " sum(case when attendanceStatus = 4 then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
-                " (:clazzUid) as clazzUid, " +
-                " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
-                " then 1 else 0 end) *1.0/ COUNT(*) as femaleAttendance, " +
-                " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_MALE +
-                " then 1 else 0 end) *1.0/ COUNT(*) as maleAttendance, " +
-                " ClazzLog.clazzLogUid as clazzLogUid " +
-                " from ClazzLogAttendanceRecord " +
-                " LEFT JOIN ClazzLog ON " +
-                " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
-                " LEFT JOIN ClazzMember ON " +
-                "ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-                " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
-
-                " WHERE " +
-                " ClazzLog.logDate > :fromDate " +
-                " AND ClazzLog.logDate < :toDate " +
-                " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
-                " group by (ClazzLog.logDate)"
     }
 
 }

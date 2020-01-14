@@ -20,29 +20,12 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Query("SELECT * FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid = :uid")
     abstract fun findByUid(uid: Long): PersonDetailPresenterField?
 
-    @Query("SELECT * FROM PersonDetailPresenterField ORDER BY fieldIndex")
-    abstract suspend fun findAllPersonDetailPresenterFields() : List<PersonDetailPresenterField>
-
-    @Query("SELECT * FROM PersonDetailPresenterField WHERE CAST(viewModeVisible AS INTEGER) = 1 ORDER BY fieldIndex")
-    abstract suspend fun findAllPersonDetailPresenterFieldsViewMode() :
-            List<PersonDetailPresenterField>
-
     @Query("SELECT * FROM PersonDetailPresenterField WHERE CAST(viewModeVisible AS INTEGER) = 1 ORDER BY fieldIndex")
     abstract fun findAllPersonDetailPresenterFieldsViewModeLive() : DoorLiveData<List<PersonDetailPresenterField>>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE CAST(editModeVisible AS INTEGER) = 1 ORDER BY fieldIndex")
-    abstract suspend fun findAllPersonDetailPresenterFieldsEditMode() :
-            List<PersonDetailPresenterField>
-
-    @Query("SELECT * FROM PersonDetailPresenterField WHERE CAST(editModeVisible AS INTEGER) = 1 ORDER BY fieldIndex")
     abstract fun findAllPersonDetailPresenterFieldsEditModeLive() :
             DoorLiveData<List<PersonDetailPresenterField>>
-
-    @Query("SELECT * FROM PersonDetailPresenterField WHERE fieldUid = :uid")
-    abstract suspend fun findAllByFieldUid(uid: Long) : List<PersonDetailPresenterField>
-
-    @Query("SELECT * FROM PersonDetailPresenterField WHERE labelMessageId = :id")
-    abstract suspend fun findAllByLabelMessageId(id: Int) : List<PersonDetailPresenterField>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE fieldIndex = :id")
     abstract suspend fun findAllByFieldIndex(id: Int) : List<PersonDetailPresenterField>

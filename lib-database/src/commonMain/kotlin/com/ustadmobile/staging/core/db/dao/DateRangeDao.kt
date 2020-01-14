@@ -21,9 +21,6 @@ abstract class DateRangeDao : BaseDao<DateRange> {
     @Update
     abstract override fun update(entity: DateRange)
 
-    @Query("SELECT * FROM DateRange")
-    abstract fun findAllDateRanges(): DataSource.Factory<Int, DateRange>
-
     @Query("SELECT * FROM DateRange WHERE dateRangeUMCalendarUid = :calendarUid")
     abstract fun findAllDatesInCalendar(calendarUid: Long): DataSource.Factory<Int, DateRange>
 
@@ -33,18 +30,7 @@ abstract class DateRangeDao : BaseDao<DateRange> {
     @Query("SELECT * FROM DateRange WHERE dateRangeUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): DateRange?
 
-    @Query("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
-    abstract fun inactivateRange(uid: Long)
-
-    @Query("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
-    abstract suspend fun inactivateRangeAsync(uid: Long): Int
-
     @Update
     abstract suspend fun updateAsync(entity: DateRange): Int
-
-    @Query("SELECT DateRange.* FROM DateRange " +
-            " LEFT JOIN Clazz ON Clazz.clazzUid = :clazzUid " +
-            " WHERE DateRange.dateRangeUMCalendarUid = Clazz.clazzHolidayUMCalendarUid ")
-    abstract fun findAllHolidayDateRanges(clazzUid: Long): List<DateRange>
 
 }
