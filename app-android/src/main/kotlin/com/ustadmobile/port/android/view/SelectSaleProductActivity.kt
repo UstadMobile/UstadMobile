@@ -24,6 +24,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 
 class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
+    override fun showAddButton(show: Boolean) {
+
+    }
 
     private var toolbar: Toolbar? = null
     private var mPresenter: SelectSaleProductPresenter? = null

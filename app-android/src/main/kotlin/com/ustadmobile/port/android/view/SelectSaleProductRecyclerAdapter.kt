@@ -200,6 +200,12 @@ class SelectSaleProductRecyclerAdapter
             dots.visibility = View.GONE
         }
 
+        if(mPresenter.isLoggedInPersonAdmin()){
+            dots.visibility = View.VISIBLE
+        }else{
+            dots.visibility = View.GONE
+        }
+
         holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.saleProductUid,
                 listCategory) }
     }

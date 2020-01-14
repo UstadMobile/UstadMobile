@@ -66,7 +66,14 @@ abstract class  PersonDao : BaseDao<Person> {
         }
     }
 
+    @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
+    open suspend fun doesUsernameExists(username: String): Boolean {
+        val count = findByUsernameCount(username)
+        return count == 0
+    }
 
+    @Query("SELECT COUNT(*) FROM Person where Person.username = :username")
+    abstract suspend fun findByUsernameCount(username: String): Int
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     suspend fun registerAsync(newPerson: Person, password: String): UmAccount? {

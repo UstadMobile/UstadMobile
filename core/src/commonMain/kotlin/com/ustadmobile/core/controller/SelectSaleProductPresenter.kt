@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SaleProductDao
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -28,7 +29,9 @@ import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUC
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_UID
 import com.ustadmobile.core.view.SelectSaleProductView.Companion.ARG_INVENTORY_MODE
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SaleProduct
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -49,8 +52,10 @@ class SelectSaleProductPresenter(context: Any,
     private var collectionProvider: DataSource.Factory<Int, SaleProduct>? = null
 
     internal var repository: UmAppDatabase
+    internal var database: UmAppDatabase
 
     internal var saleProductDao: SaleProductDao
+    internal var personDao : PersonDao
     internal var productParentJoinDao: SaleProductParentJoinDao
     internal var impl: UstadMobileSystemImpl
 
@@ -61,9 +66,19 @@ class SelectSaleProductPresenter(context: Any,
     var searchQuery: String = "%%"
     var preOrder = false
 
+    var loggedInPersonUid : Long = 0
+    var loggedInPerson : Person? = null
 
     fun setQuerySearch(query:String){
         searchQuery = "%$query%"
+    }
+
+    fun isLoggedInPersonAdmin(): Boolean{
+        if(loggedInPerson == null){
+            return false
+        }else{
+            return loggedInPerson!!.admin
+        }
     }
 
     init {
@@ -71,9 +86,12 @@ class SelectSaleProductPresenter(context: Any,
         impl = UstadMobileSystemImpl.instance
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        database = UmAppDatabase.Companion.getInstance(context)
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
+        personDao = database.personDao
 
         if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
             producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())
@@ -100,7 +118,11 @@ class SelectSaleProductPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        updateProviders()
+        GlobalScope.launch(Dispatchers.Main) {
+            loggedInPerson = personDao.findByUidAsync(loggedInPersonUid)
+            view.showAddButton(loggedInPerson!!.admin)
+            updateProviders()
+        }
 
         if(inventoryMode){
             val selectTypeTitle = impl.getString(MessageID.select_type, context)
@@ -159,7 +181,7 @@ class SelectSaleProductPresenter(context: Any,
             if(preOrder) {
                 args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
                 args[ARG_SALE_ITEM_PRODUCT_UID] = productUid.toString()
-                args[ARG_PRODUCER_UID] = UmAccountManager.getActivePersonUid(context).toString()
+                args[ARG_PRODUCER_UID] = loggedInPersonUid.toString()
                 args[ARG_SALE_ITEM_DETAIL_PREORDER] = "true"
             }
 

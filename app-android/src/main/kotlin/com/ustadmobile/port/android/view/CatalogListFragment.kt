@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,6 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,10 +21,11 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SaleProduct
 
-
 class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView {
+
 
     override val viewContext: Any
         get() = context!!
@@ -58,6 +57,13 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         }
     }
 
+    override fun showAddButton(show: Boolean) {
+        if(show) {
+            floatingActionMenu!!.visibility = View.VISIBLE
+        }else{
+            floatingActionMenu!!.visibility = View.GONE
+        }
+    }
 
     @Nullable
     override fun onCreateView(inflater: LayoutInflater, @Nullable container: ViewGroup?,
@@ -88,13 +94,14 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         categoryMore = rootContainer!!.findViewById(R.id.activity_select_sale_product_category_more)
         collectionMore = rootContainer!!.findViewById(R.id.activity_select_sale_product_collections_more)
 
+        floatingActionMenu = rootContainer!!.findViewById(R.id.activity_select_sale_product_fab_menu)
+
         //Call the Presenter
         mPresenter = SelectSaleProductPresenter(context!!,
                 bundleToMap(arguments), this, true)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
         //Set listeners
-        floatingActionMenu = rootContainer!!.findViewById(R.id.activity_select_sale_product_fab_menu)
         rootContainer!!.findViewById<View>(R.id.activity_select_sale_product_fab_subcategory)
                 .setOnClickListener { v ->
                     floatingActionMenu!!.close(true)

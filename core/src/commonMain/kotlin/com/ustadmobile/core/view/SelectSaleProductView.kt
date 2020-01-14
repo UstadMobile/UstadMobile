@@ -17,7 +17,6 @@ interface SelectSaleProductView : UstadView {
      */
     fun finish()
 
-
     /**
      * Sets the given provider to the view's provider adapter.
      *
@@ -32,6 +31,8 @@ interface SelectSaleProductView : UstadView {
     fun showMessage(messageId: Int)
 
     fun updateToolbar(title: String)
+
+    fun showAddButton(show: Boolean)
 
     companion object {
 

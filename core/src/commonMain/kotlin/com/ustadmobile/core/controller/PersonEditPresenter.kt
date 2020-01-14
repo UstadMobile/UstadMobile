@@ -548,9 +548,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                         headerMessageId = MessageID.confirm_password_unchanged
                     }
                 }
-
                 FIELD_HEADING_ROLE_ASSIGNMENTS -> { headerMessageId = MessageID.role_assignments }
-
             }
 
             var thisValue: String? = ""
@@ -799,7 +797,6 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                     }
                 }
             }
-
         }
     }
 
@@ -845,9 +842,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                     view.setInProgress(false)
                 })
             }
-
         }
-
     }
 
     private fun updatePassword() : Boolean {
