@@ -3,6 +3,7 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -27,6 +28,7 @@ import kotlin.jvm.Volatile
     //#DOORDB_TRACKER_ENTITIES
 
 ], version = 31)
+@MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -168,8 +170,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
 
     //#DOORDB_SYNCDAO
-
-    //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
 
     companion object {
 

@@ -27,10 +27,12 @@ import fi.iki.elonen.router.RouterNanoHTTPD
 import java.util.*
 import javax.lang.model.element.ElementKind
 import com.ustadmobile.door.DoorConstants
+import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_KTOR_NO_CONTENT_RESPOND
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.NANOHTTPD_URIRESOURCE_FUNPARAMS
+import io.ktor.application.ApplicationCallPipeline
 import javax.annotation.processing.ProcessingEnvironment
 
 /**
@@ -449,6 +451,21 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
                 dbTypeClassName.simpleName)
+
+        val minSyncVersionAnnotation = dbTypeElement.getAnnotation(MinSyncVersion::class.java)
+        if(minSyncVersionAnnotation != null) {
+            codeBlock.beginControlFlow("this.intercept(%T.Features)", ApplicationCallPipeline::class)
+                    .add("val _clientVersion = this.context.request.headers[%T.HEADER_DBVERSION]?.toInt() ?: 0\n",
+                            DoorConstants::class)
+                    .beginControlFlow("if(_clientVersion < ${minSyncVersionAnnotation.value})")
+                    .add("context.request.call.%M[%T.BadRequest, %S)\n", HttpStatusCode::class,
+                            RESPOND_MEMBER,
+                            "Door DB Version does not meet minimum required: ${minSyncVersionAnnotation.value}")
+                    .add("return@intercept\n")
+                    .endControlFlow()
+                    .endControlFlow()
+        }
+
 
         if(isSyncableDb) {
             val syncDaoBaseName = "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"
