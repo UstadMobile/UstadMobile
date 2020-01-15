@@ -103,7 +103,7 @@ class GroupDetailRecyclerAdapter(
         }
 
         //Last Seen
-        //TODO:
+        //TODO: Get the last active value from the database.
         lastActiveTextView.setText("")
 
         //Options to Edit/Delete every schedule in the list
