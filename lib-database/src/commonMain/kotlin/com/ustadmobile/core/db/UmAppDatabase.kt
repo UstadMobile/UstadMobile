@@ -23,11 +23,12 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class
+    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
+    SyncResult::class
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 31)
+], version = 32)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 

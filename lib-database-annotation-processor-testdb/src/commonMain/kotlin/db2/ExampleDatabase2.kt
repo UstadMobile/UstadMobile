@@ -1,14 +1,12 @@
 package db2
 
 import androidx.room.Database
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorDatabaseSyncInfo
-import com.ustadmobile.door.SyncableDoorDatabase
-import com.ustadmobile.door.SyncNode
+import com.ustadmobile.door.*
 
 @Database(version = 1, entities = [ExampleEntity2::class, ExampleLinkEntity::class,
     ExampleEntityPkInt::class, DoorDatabaseSyncInfo::class,
     SyncNode::class,
+    SyncResult::class,
     ExampleSyncableEntity::class,
     OtherSyncableEntity::class,
     ExampleAttachmentEntity::class
