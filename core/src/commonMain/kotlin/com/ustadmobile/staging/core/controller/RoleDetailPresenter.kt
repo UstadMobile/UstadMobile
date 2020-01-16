@@ -4,6 +4,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.RoleDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.RoleDetailView
 import com.ustadmobile.core.view.RoleListView.Companion.ROLE_UID
 import com.ustadmobile.lib.db.entities.Role
@@ -73,7 +74,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
         val roleUmLiveData = roleDao.findByUidLive(currentRoleUid)
         //Observe the live data
         view.runOnUiThread(Runnable {
-            roleUmLiveData.observe(this, this::handleRoleChanged)
+            roleUmLiveData.observeWithPresenter(this, this::handleRoleChanged)
         })
 
         GlobalScope.launch {

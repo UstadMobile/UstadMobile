@@ -7,6 +7,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
@@ -115,7 +116,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             //Get all headers and fields and the person as well as attendance average
             val fieldsLive = personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewModeLive()
             GlobalScope.launch(Dispatchers.Main) {
-                fieldsLive.observe(thisP, thisP::handleFieldsLive)
+                fieldsLive.observeWithPresenter(thisP, thisP::handleFieldsLive)
             }
         }
     }
@@ -199,17 +200,17 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
             val result1 = clazzDao.personHasPermissionLive(loggedInPersonUid, Role.PERMISSION_PERSON_UPDATE)
             view.runOnUiThread(Runnable {
-                result1.observe(thisP, thisP::handleFabLive)
+                result1.observeWithPresenter(thisP, thisP::handleFabLive)
             })
 
             val result2 = personDao.personHasPermissionLive(loggedInPersonUid, personUid, Role.PERMISSION_PERSON_PICTURE_UPDATE)
             view.runOnUiThread(Runnable {
-                result2.observe(thisP, thisP::handleImageButtonLive)
+                result2.observeWithPresenter(thisP, thisP::handleImageButtonLive)
             })
 
             val result3 = clazzDao.personHasPermissionLive(loggedInPersonUid, Role.PERMISSION_PERSON_INSERT)
             view.runOnUiThread(Runnable {
-                result3.observe(thisP, thisP::handleDropoutAndEnrollLive)
+                result3.observeWithPresenter(thisP, thisP::handleDropoutAndEnrollLive)
             })
 
         }
@@ -576,14 +577,14 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         GlobalScope.launch {
             val averageLive = clazzMemberDao.getAverageAttendancePercentageByPersonUidLive(personUid)
             GlobalScope.launch(Dispatchers.Main) {
-                averageLive.observe(thisP, thisP::handleAverageLive)
+                averageLive.observeWithPresenter(thisP, thisP::handleAverageLive)
             }
         }
 
         personDao = repository.personDao
         val thisPerson = personDao.findByUidLive(personUid)
         GlobalScope.launch(Dispatchers.Main) {
-            thisPerson.observe(thisP, thisP::handlePersonDataChanged)
+            thisPerson.observeWithPresenter(thisP, thisP::handlePersonDataChanged)
         }
     }
 

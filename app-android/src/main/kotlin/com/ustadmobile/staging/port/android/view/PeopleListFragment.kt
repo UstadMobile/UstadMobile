@@ -42,7 +42,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
     internal var sortSpinner: Spinner? = null
     internal lateinit var sortSpinnerPresets: Array<String?>
 
-    private var pullToRefresh: SwipeRefreshLayout? = null
+    private lateinit var pullToRefresh: SwipeRefreshLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,18 +97,18 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
             }
         }
 
-        pullToRefresh!!.setOnRefreshListener{
+        pullToRefresh.setOnRefreshListener{
             try {
                 Thread.sleep(300)
                 if(activity is BasePointActivity) {
-                    (activity as BasePointActivity).forceSync()
+                    //TODO: Replace with repo random access sync when it is ready.
                 }
 
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
 
-            pullToRefresh!!.setRefreshing(false)
+            pullToRefresh.setRefreshing(false)
         }
 
         return rootContainer
@@ -165,6 +165,8 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
     }
 
     companion object {
+        val icon = R.drawable.ic_person_black_24dp
+        val title = R.string.bottomnav_people_title
 
         /**
          * Generates a new Fragment for a page fragment

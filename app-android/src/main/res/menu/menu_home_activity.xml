@@ -9,6 +9,21 @@
         android:title="@string/content_editor_create_new"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/menu_home_activity_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/done"
+        android:visible="false"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_action_search"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:title="@string/search"
+        android:visible="true"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+
     <item
         android:id="@+id/action_open_about"
         android:title="@string/about"

@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.AddActivityChangeDialogView
 import com.ustadmobile.core.view.ClazzActivityEditView
 import com.ustadmobile.core.view.ClazzActivityEditView.Companion.ARG_CLAZZACTIVITY_LOGDATE
@@ -307,7 +308,7 @@ class ClazzActivityEditPresenter (context: Any, arguments: Map<String, String>?,
         var thisP = this
         //Observing it
         GlobalScope.launch(Dispatchers.Main) {
-            activityChangeLiveData.observe(thisP, thisP::updateActivityChangesOnView)
+            activityChangeLiveData.observeWithPresenter(thisP, thisP::updateActivityChangesOnView)
         }
 
     }

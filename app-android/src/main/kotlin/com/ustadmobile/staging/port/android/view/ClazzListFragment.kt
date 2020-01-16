@@ -47,7 +47,7 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView {
 
     private var showAllClazzSettingsButton = false
 
-    private var pullToRefresh: SwipeRefreshLayout? = null
+    private lateinit var pullToRefresh: SwipeRefreshLayout
 
     fun searchClasses(searchValue: String) {
         mPresenter!!.updateProviderWithSearch(searchValue)
@@ -94,15 +94,15 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView {
             }
         }
 
-        pullToRefresh!!.setOnRefreshListener {
+        pullToRefresh.setOnRefreshListener {
             try {
                 Thread.sleep(300)
-                (Objects.requireNonNull(activity) as BasePointActivity).forceSync()
+                //TODO: Replace with repo random access sync when it is ready.
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
 
-            pullToRefresh!!.isRefreshing = false
+            pullToRefresh.isRefreshing = false
         }
 
         return rootContainer
@@ -202,6 +202,9 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView {
     }
 
     companion object {
+
+        val icon = R.drawable.ic_group_black_24dp
+        val title = R.string.bottomnav_classes_title
 
         /**
          * Generates a new Fragment for a page fragment

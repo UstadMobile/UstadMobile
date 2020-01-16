@@ -5,6 +5,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.FeedListView
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_REPORT_NAME
 import com.ustadmobile.core.view.ReportSelectionView
@@ -50,7 +51,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
 
         //All clazz's average live data
         val averageLiveData = repository!!.clazzDao.getClazzSummaryLiveData()
-        averageLiveData.observe(this, this::handleAveragesChanged)
+        averageLiveData.observeWithPresenter(this, this::handleAveragesChanged)
 
         //Check permissions
         checkPermissions()

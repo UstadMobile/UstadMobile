@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.PersonGroupDao
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.GroupDetailView
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
@@ -71,7 +72,7 @@ class GroupDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
         val groupUmLiveData = groupDao.findByUidLive(currentGroupUid)
         view.runOnUiThread(Runnable {
-            groupUmLiveData.observe(this, this::handleGroupChanged)
+            groupUmLiveData.observeWithPresenter(this, this::handleGroupChanged)
         })
 
         GlobalScope.launch {

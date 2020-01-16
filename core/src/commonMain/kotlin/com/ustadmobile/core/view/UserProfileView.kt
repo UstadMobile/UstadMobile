@@ -1,16 +1,15 @@
 package com.ustadmobile.core.view
 
-interface UserProfileView : UstadView {
+import com.ustadmobile.lib.db.entities.Person
+import kotlin.js.JsName
+
+interface UserProfileView : LanguageOptionView  {
 
     fun finish()
 
     fun updateToolbarTitle(personName: String)
 
     fun setUsername(username: String)
-
-    fun setCurrentLanguage(language: String?)
-
-    fun setLanguageOption(languages: MutableList<String>)
 
     fun updateImageOnView(imagePath: String, skipCached: Boolean)
 
@@ -20,11 +19,13 @@ interface UserProfileView : UstadView {
 
     fun sendMessage(messageId: Int)
 
-    fun restartUI()
-
     fun callFinishAffinity()
 
-    fun showLanguageOptions()
+    @JsName("loadProfileIcon")
+    fun loadProfileIcon(profile: String)
+
+    @JsName("setLoggedPerson")
+    fun setLoggedPerson(person: Person)
 
     companion object {
 

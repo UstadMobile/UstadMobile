@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.SelQuestionOptionDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.AddQuestionOptionDialogView
 import com.ustadmobile.core.view.SELQuestionDetail2View
 import com.ustadmobile.core.view.SELQuestionDetail2View.Companion.ARG_QUESTION_OPTION_UID
@@ -73,7 +74,7 @@ class SELQuestionDetail2Presenter(context: Any, arguments: Map<String, String>?,
         questionUmLiveData = questionDao.findByUidLive(currentQuestionUid)
 
         //Observe the live data :
-        questionUmLiveData.observe(this, this::handleSELQuestionValueChanged)
+        questionUmLiveData.observeWithPresenter(this, this::handleSELQuestionValueChanged)
 
         GlobalScope.launch {
             val selQuestion = questionDao.findByUidAsync(currentQuestionUid)

@@ -82,6 +82,17 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
                 arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
+        pullToRefresh.setOnRefreshListener {
+            try {
+                Thread.sleep(300)
+                //TODO: Replace with repo random access sync when it is ready.
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+
+            pullToRefresh.isRefreshing = false
+        }
+
 
         return rootContainer
     }
@@ -175,32 +186,19 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
 
     override fun onResume() {
         super.onResume()
-        updateTitle(getText(R.string.feed).toString())
+        //updateTitle(getText(R.string.feed).toString())
     }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        updateTitle(getText(R.string.feed).toString())
+        //updateTitle(getText(R.string.feed).toString())
     }
 
     // This event is triggered soon after onCreateView().
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // Setup any handles to view objects here
-        updateTitle(getText(R.string.feed).toString())
+        //updateTitle(getText(R.string.feed).toString())
 
-    }
-
-    /**
-     * Updates the title of the toolbar.
-     *
-     * @param title     The title of the toolbar that needs updating
-     */
-    fun updateTitle(title: String?) {
-        //Update the parent header toolbar
-        val toolbar = activity!!.findViewById<Toolbar>(R.id.base_point_2_toolbar)
-        if(title != null) {
-            toolbar.setTitle(title)
-        }
     }
 
     constructor()  {
@@ -231,6 +229,8 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
             }
         }
 
+        val icon = R.drawable.ic_today_black_48dp
+        val title = R.string.bottomnav_feed_title
 
         /**
          * Generates a new Fragment for a page fragment

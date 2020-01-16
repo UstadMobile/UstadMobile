@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
@@ -268,7 +269,7 @@ class PersonEditPresenter
                     personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditModeLive()
 
             GlobalScope.launch(Dispatchers.Main){
-                resultLive.observe(thisP, thisP::handleFieldsLive)
+                resultLive.observeWithPresenter(thisP, thisP::handleFieldsLive)
             }
         }
 
@@ -304,7 +305,7 @@ class PersonEditPresenter
         personLiveData = personDao.findByUidLive(personUid)
         //Observe the live data
         view.runOnUiThread(Runnable {
-            personLiveData!!.observe(this, this::handlePersonValueChanged)
+            personLiveData!!.observeWithPresenter(this, this::handlePersonValueChanged)
         })
     }
 

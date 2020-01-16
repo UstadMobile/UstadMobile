@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.NavigationItem
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.LoginView.Companion.ARG_STARTSYNCING
 import com.ustadmobile.lib.db.entities.Person
@@ -66,7 +67,7 @@ class BasePointPresenter
     fun getLoggedInPerson() {
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
         val personLive = personDao.findByUidLive(loggedInPersonUid)
-        personLive.observe(this, this::handlePersonValueChanged)
+        personLive.observeWithPresenter(this, this::handlePersonValueChanged)
     }
 
     /**

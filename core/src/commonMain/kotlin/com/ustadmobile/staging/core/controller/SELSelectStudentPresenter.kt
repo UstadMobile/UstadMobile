@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_CLAZZMEMBER_UID
@@ -79,7 +80,7 @@ class SELSelectStudentPresenter(context: Any, arguments: Map<String, String>?,
         //Get sel question set change list live data
         questionSetUmProvider = repository.selQuestionSetDao.findAllQuestionSetsLiveData()
 
-        questionSetUmProvider!!.observe(this, this::updateSELQuestionSetOnView)
+        questionSetUmProvider!!.observeWithPresenter(this, this::updateSELQuestionSetOnView)
     }
 
     private fun updateSELQuestionSetOnView(questionSets: List<SelQuestionSet>?) {

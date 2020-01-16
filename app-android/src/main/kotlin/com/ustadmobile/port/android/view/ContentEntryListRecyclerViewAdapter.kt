@@ -1,15 +1,20 @@
 package com.ustadmobile.port.android.view
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.MainThread
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipDrawable
+import com.google.android.material.chip.ChipGroup
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -27,11 +32,16 @@ import java.util.*
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
                                                                private val listener: AdapterViewListener,
                                                                private val containerDownloadManager: ContainerDownloadManager)
-    : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK){
+    : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, RecyclerView.ViewHolder>(DIFF_CALLBACK){
 
-    private val boundViewHolders: MutableSet<ViewHolder> = HashSet()
+    private val boundViewHolders: MutableSet<EntryViewHolder> = HashSet()
 
     private var localAvailabilityMap: Map<Long, Boolean> = mapOf()
+
+    var filterButtons: List<String> = listOf()
+
+    var activeIndex = 0
+
 
     @MainThread
     fun updateLocalAvailability(localAvailabilityMap: Map<Long, Boolean>) {
@@ -46,97 +56,157 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         fun contentEntryClicked(entry: ContentEntry?)
 
         fun downloadStatusClicked(entry: ContentEntry)
+
+        fun contentFilterClicked(index : Int)
     }
 
-    override fun onViewRecycled(holder: ViewHolder) {
-        synchronized(boundViewHolders) {
-            boundViewHolders.remove(holder)
-        }
 
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        if(holder is EntryViewHolder){
+            synchronized(boundViewHolders) {
+                boundViewHolders.remove(holder)
+            }
+        }
         super.onViewRecycled(holder)
+    }
 
+    override fun getItemViewType(position: Int): Int {
+        return if(position == 0 && isTopEntryList) VIEW_TYPE_FILTERS else VIEW_TYPE_ENTRIES
     }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_item_content_entry, parent, false)
-        return ViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(if(viewType == VIEW_TYPE_ENTRIES)
+            R.layout.list_item_content_entry else R.layout.list_item_content_filter, parent, false)
+        return if(viewType == VIEW_TYPE_ENTRIES) EntryViewHolder(view) else FilterViewHolder(view)
+    }
+
+    override fun getItemCount(): Int {
+        return super.getItemCount() + if(isTopEntryList) 1 else 0
     }
 
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        super.onBindViewHolder(holder, position)
-        val entry = getItem(position).also {
-            holder.entry = it
-        }
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val dataIndex = position + if(isTopEntryList) -1 else 0
+        if(dataIndex >= 0)
+            super.onBindViewHolder(holder, dataIndex)
 
-        synchronized(boundViewHolders) {
-            boundViewHolders.add(holder)
-        }
+        if(holder is EntryViewHolder){
+            val entry = getItem(dataIndex).also {
+                holder.entry = it
+            }
 
-        holder.downloadJobItemLiveData?.removeObserver(holder)
-        GlobalScope.launch(Dispatchers.Main.immediate) {
-            holder.downloadJobItemLiveData = containerDownloadManager
-                    .getDownloadJobItemByContentEntryUid(entry?.contentEntryUid ?: 0).also {
-                        it.observe(activity, holder)
-                    }
-        }
+            synchronized(boundViewHolders) {
+                boundViewHolders.add(holder)
+            }
 
-        if (entry == null) {
-            holder.containerUid = 0L
-            holder.contentEntryUid = 0L
-            holder.entryTitle.text = ""
-            holder.entryDescription.text = ""
-            holder.thumbnailView.setImageDrawable(null)
-            holder.downloadView.progress = 0
-            holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
-            holder.view.setOnClickListener(null)
-            holder.downloadView.setOnClickListener(null)
-            holder.availabilityStatus.text = ""
-            holder.availabilityIcon.setImageDrawable(null)
-        } else {
-            holder.containerUid = entry.mostRecentContainer?.containerUid ?: 0L
-            holder.contentEntryUid = entry.contentEntryUid
+            holder.downloadJobItemLiveData?.removeObserver(holder)
+            GlobalScope.launch(Dispatchers.Main.immediate) {
+                holder.downloadJobItemLiveData = containerDownloadManager
+                        .getDownloadJobItemByContentEntryUid(entry?.contentEntryUid ?: 0).also {
+                            it.observe(activity, holder)
+                        }
+            }
 
-            holder.view.tag = entry.contentEntryUid
-            holder.entryTitle.text = entry.title
-            holder.entryDescription.text = entry.description
-            if (entry.thumbnailUrl == null || entry.thumbnailUrl!!.isEmpty()) {
+            if (entry == null) {
+                holder.containerUid = 0L
+                holder.contentEntryUid = 0L
+                holder.entryTitle.text = ""
+                holder.entryDescription.text = ""
                 holder.thumbnailView.setImageDrawable(null)
+                holder.downloadView.progress = 0
+                holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
+                holder.view.setOnClickListener(null)
+                holder.downloadView.setOnClickListener(null)
+                holder.availabilityStatus.text = ""
+                holder.availabilityIcon.setImageDrawable(null)
             } else {
-                UMAndroidUtil.loadImage(entry.thumbnailUrl,R.drawable.img_placeholder,
-                        holder.thumbnailView)
+                holder.containerUid = entry.mostRecentContainer?.containerUid ?: 0L
+                holder.contentEntryUid = entry.contentEntryUid
+
+                holder.view.tag = entry.contentEntryUid
+                holder.entryTitle.text = entry.title
+                holder.entryDescription.text = entry.description
+                if (entry.thumbnailUrl == null || entry.thumbnailUrl!!.isEmpty()) {
+                    holder.thumbnailView.setImageDrawable(null)
+                } else {
+                    UMAndroidUtil.loadImage(entry.thumbnailUrl,R.drawable.img_placeholder,
+                            holder.thumbnailView)
+                }
+
+
+                val contentDescription: String? = null
+
+                val iconView = holder.iconView
+                val iconFlag = entry.contentTypeFlag
+                iconView.setImageResource(
+                        if (CONTENT_TYPE_TO_ICON_RES_MAP.containsKey(entry.contentTypeFlag))
+                            CONTENT_TYPE_TO_ICON_RES_MAP[entry.contentTypeFlag]!!
+                        else
+                            R.drawable.ic_book_black_24dp)
+
+                if (iconFlag == ContentEntry.TYPE_UNDEFINED) {
+                    iconView.visibility = View.GONE
+                } else {
+                    iconView.visibility = View.VISIBLE
+                }
+
+                holder.downloadView.imageResource!!.contentDescription = contentDescription
+                holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
+                holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
+                holder.downloadView.progress = 0
+                holder.updateLocallyAvailableStatus(
+                        localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
             }
+        }else{
 
-
-            var contentDescription: String? = null
-            var showLocallyAvailabilityViews = true
-
-            val iconView = holder.iconView
-            val iconFlag = entry.contentTypeFlag
-            iconView.setImageResource(
-                    if (CONTENT_TYPE_TO_ICON_RES_MAP.containsKey(entry.contentTypeFlag))
-                        CONTENT_TYPE_TO_ICON_RES_MAP[entry.contentTypeFlag]!!
-                    else
-                        R.drawable.ic_book_black_24dp)
-
-            if (iconFlag == ContentEntry.TYPE_UNDEFINED) {
-                iconView.visibility = View.GONE
-            } else {
-                iconView.visibility = View.VISIBLE
-            }
-
-            holder.downloadView.imageResource!!.contentDescription = contentDescription
-            holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
-            holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
-            holder.downloadView.progress = 0
-            holder.updateLocallyAvailableStatus(
-                    localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
+            (holder as FilterViewHolder).createFilters(filterButtons)
         }
     }
 
-    inner class ViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view),
+
+    inner class FilterViewHolder internal constructor(itemView: View): RecyclerView.ViewHolder(itemView) {
+        private val umChipGroup = itemView.findViewById<ChipGroup>(R.id.chip_group)
+        fun createFilters( filters: List<String>){
+            umChipGroup.removeAllViews()
+            umChipGroup.isSingleSelection = true
+            filters.forEachIndexed {index, it ->
+                val filterChip = Chip(itemView.context)
+                val drawable = ChipDrawable.createFromAttributes(itemView.context, null, 0, R.style.Widget_MaterialComponents_Chip_Choice)
+                filterChip.setChipDrawable(drawable)
+                filterChip.text = it
+                filterChip.tag = it
+                filterChip.id = it.hashCode()
+                filterChip.isClickable = true
+                filterChip.setOnClickListener {
+                    for (i in 0 until umChipGroup.childCount) {
+                        val chip = umChipGroup.getChildAt(i) as Chip
+                        val isSelected = chip.id == umChipGroup.checkedChipId
+                        chip.isCheckable = chip.id != umChipGroup.checkedChipId
+                        if(isSelected){
+                            activeIndex = i
+                            listener.contentFilterClicked(i)
+                        }
+                        updateChipAppearance(chip, isSelected)
+                    }
+                }
+                umChipGroup.addView(filterChip)
+                updateChipAppearance(filterChip, index == activeIndex)
+            }
+        }
+
+        private fun updateChipAppearance(chip: Chip, isSelected: Boolean) {
+            chip.isSelected = isSelected
+
+            if(isSelected) {
+                chip.chipBackgroundColor = ColorStateList.valueOf(ContextCompat.getColor(
+                        itemView.context, R.color.primary))
+                chip.setTextAppearanceResource(R.style.ChipTextStyleSelected)
+            }
+        }
+    }
+
+    inner class EntryViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view),
         Observer<DownloadJobItem?> {
         internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
         internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
@@ -188,15 +258,19 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                     context.getString(R.string.download_entry_state_queued)
                 }
 
-                if (t.isStatusPaused()) {
-                    downloadView.setImageResource(R.drawable.ic_pause_black_24dp)
-                    contentDescription = context.getString(R.string.download_entry_state_paused)
-                } else if (t.isStatusCompletedSuccessfully()) {
-//                    localAvailabilityVisible = false
-                    downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
-                    contentDescription = context.getString(R.string.downloaded)
-                } else {
-                    downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
+                when {
+                    t.isStatusPaused() -> {
+                        downloadView.setImageResource(R.drawable.ic_pause_black_24dp)
+                        contentDescription = context.getString(R.string.download_entry_state_paused)
+                    }
+                    t.isStatusCompletedSuccessfully() -> {
+        //                    localAvailabilityVisible = false
+                        downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
+                        contentDescription = context.getString(R.string.downloaded)
+                    }
+                    else -> {
+                        downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
+                    }
                 }
 
                 downloadView.progressVisibility = if(!t.isStatusCompleted()) {
@@ -230,6 +304,11 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     companion object {
 
         private val CONTENT_TYPE_TO_ICON_RES_MAP = HashMap<Int, Int>()
+
+
+        private const val VIEW_TYPE_FILTERS = 1
+
+        private const val VIEW_TYPE_ENTRIES = 2
 
         init {
             CONTENT_TYPE_TO_ICON_RES_MAP[ContentEntry.TYPE_EBOOK] = R.drawable.ic_book_black_24dp

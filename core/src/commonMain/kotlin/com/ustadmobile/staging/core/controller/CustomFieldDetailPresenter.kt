@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView.Companion.ARG_CUSTOM_FIELD_VALUE_OPTION_UID
 import com.ustadmobile.core.view.CustomFieldDetailView
@@ -60,7 +61,7 @@ class CustomFieldDetailPresenter(context: Any, arguments: Map<String, String>?,
     fun initFromCustomField(uid: Long) {
         val currentFieldLive = customFieldDao.findByUidLive(uid)
         view.runOnUiThread(Runnable {
-            currentFieldLive.observe(this, this::handleCustomFieldChanged)
+            currentFieldLive.observeWithPresenter(this, this::handleCustomFieldChanged)
         })
         GlobalScope.launch {
             val result = customFieldDao.findByUidAsync(uid)

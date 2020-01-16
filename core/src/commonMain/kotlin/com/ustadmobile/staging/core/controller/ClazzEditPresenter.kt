@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.staging.core.util.TimeZoneUtil
 import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.ClazzEditView
@@ -207,7 +208,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
             //Holidays
             holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
             view.runOnUiThread(Runnable {
-                holidaysLiveData!!.observe(thisP, thisP::handleAllHolidaysChanged)
+                holidaysLiveData!!.observeWithPresenter(thisP, thisP::handleAllHolidaysChanged)
             })
 
             //Timezones

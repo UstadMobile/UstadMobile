@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_ASC
@@ -123,7 +124,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
         val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
-        personLive.observe(this, this::handlePersonValueChanged)
+        personLive.observeWithPresenter(this, this::handlePersonValueChanged)
     }
 
     /**

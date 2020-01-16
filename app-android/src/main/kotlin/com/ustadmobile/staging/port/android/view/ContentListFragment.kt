@@ -12,12 +12,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.controller.ContentListPresenter
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.port.android.view.ContentEntryListFragment
@@ -164,5 +164,8 @@ class ContentListFragment : UstadBaseFragment(), ContentListView,
             fragment.arguments = args
             return fragment
         }
+
+        val icon = R.drawable.ic_collections_bookmark_black_24dp
+        val title = R.string.bottomnav_content_title
     }
 }

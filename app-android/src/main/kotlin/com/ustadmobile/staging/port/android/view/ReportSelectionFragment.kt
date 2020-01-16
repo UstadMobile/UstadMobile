@@ -102,6 +102,8 @@ class ReportSelectionFragment : UstadBaseFragment, BaseReportView {
 
     companion object {
 
+        val icon = R.drawable.ic_insert_chart_black_24dp
+        val title = R.string.bottomnav_reports_title
 
         fun newInstance(): ReportSelectionFragment {
             val fragment = ReportSelectionFragment()

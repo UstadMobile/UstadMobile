@@ -157,7 +157,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/dimen_16dp"
+
         android:paddingBottom="@dimen/dimen_16dp"
         android:clickable="true"
         android:foreground="?android:attr/selectableItemBackground"
@@ -175,6 +175,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/ic_exit_to_app_black_24dp"
             tools:layout_editor_absoluteY="243dp" />
+
+
 
         <TextView
             android:layout_toEndOf="@+id/activity_user_profile_logout_icon"

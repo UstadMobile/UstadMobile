@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.RoleAssignmentDetailView
 import com.ustadmobile.core.view.RoleAssignmentDetailView.Companion.ENTITYROLE_UID
 import com.ustadmobile.door.DoorLiveData
@@ -88,13 +89,13 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
             //Update group
             groupUmLiveData = groupDao.findAllActivePersonPersonGroupLive()
             view.runOnUiThread(Runnable {
-                groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+                groupUmLiveData!!.observeWithPresenter(this, this::handleAllGroupsChanged)
             })
         } else {
             //Update group
             groupUmLiveData = groupDao.findAllActiveGroupPersonGroupsLive()
             view.runOnUiThread(Runnable {
-                groupUmLiveData!!.observe(this, this::handleAllGroupsChanged)
+                groupUmLiveData!!.observeWithPresenter(this, this::handleAllGroupsChanged)
             })
         }
     }
@@ -121,15 +122,15 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         when (tableId) {
             Clazz.TABLE_ID -> {
                 clazzUmLiveData = clazzDao.findAllLive()
-                clazzUmLiveData!!.observe(this, this::handleAllClazzChanged)
+                clazzUmLiveData!!.observeWithPresenter(this, this::handleAllClazzChanged)
             }
             Location.TABLE_ID -> {
                 locationUmLiveData = locationDao.findAllActiveLocationsLive()
-                locationUmLiveData!!.observe(this, this::handleAllLocationsChanged)
+                locationUmLiveData!!.observeWithPresenter(this, this::handleAllLocationsChanged)
             }
             Person.TABLE_ID -> {
                 personUmLiveData = personDao.findAllActiveLive()
-                personUmLiveData!!.observe(this, this::handleAllPersonChanged)
+                personUmLiveData!!.observeWithPresenter(this, this::handleAllPersonChanged)
             }
         }
 
@@ -141,7 +142,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         val entityRoleLiveData = entityRoleDao.findByUidLive(currentEntityRoleUid)
         var thisP = this
         view.runOnUiThread(Runnable {
-            entityRoleLiveData.observe(this, this::handleEntityRoleChanged)
+            entityRoleLiveData.observeWithPresenter(this, this::handleEntityRoleChanged)
         })
 
         GlobalScope.launch {
@@ -152,7 +153,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
             roleUmLiveData = roleDao.findAllActiveRolesLive()
 
             view.runOnUiThread(Runnable {
-                roleUmLiveData!!.observe(thisP, thisP::handleAllRolesChanged)
+                roleUmLiveData!!.observeWithPresenter(thisP, thisP::handleAllRolesChanged)
             })
 
             val groupUid = updatedEntityRole!!.erGroupUid

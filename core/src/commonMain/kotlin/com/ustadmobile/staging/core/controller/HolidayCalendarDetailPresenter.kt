@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.DateRangeDao
 import com.ustadmobile.core.db.dao.UMCalendarDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.AddDateRangeDialogView
 import com.ustadmobile.core.view.AddDateRangeDialogView.Companion.DATERANGE_UID
 import com.ustadmobile.core.view.HolidayCalendarDetailView
@@ -77,7 +78,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
         val calendarLiveData = umCalendarDao.findByUidLive(currentCalendarUid)
         //Observe the live data
         view.runOnUiThread(Runnable {
-            calendarLiveData.observe(this, this::handleCalendarValueChanged)
+            calendarLiveData.observeWithPresenter(this, this::handleCalendarValueChanged)
         })
 
         GlobalScope.launch {

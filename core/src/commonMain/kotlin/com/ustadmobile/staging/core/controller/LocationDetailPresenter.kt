@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.LocationDetailView
 import com.ustadmobile.core.view.LocationDetailView.Companion.LOCATIONS_SET
 import com.ustadmobile.core.view.LocationDetailView.Companion.LOCATION_UID
@@ -81,7 +82,7 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
         val locationUmLiveData = locationDao.findByUidLive(currentLocationUid)
         view.runOnUiThread(Runnable {
-            locationUmLiveData.observe(this, this::handleLocationChanged)
+            locationUmLiveData.observeWithPresenter(this, this::handleLocationChanged)
         })
 
         GlobalScope.launch {
