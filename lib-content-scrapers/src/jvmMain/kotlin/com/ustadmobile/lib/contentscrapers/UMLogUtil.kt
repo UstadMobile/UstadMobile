@@ -33,14 +33,14 @@ object UMLogUtil {
     }
 
     fun setLevel(level: String) {
-        var logLevel = Level.ERROR
-        when (level.toUpperCase()) {
-            "TRACE" -> logLevel = Level.TRACE
-            "DEBUG" -> logLevel = Level.DEBUG
-            "INFO" -> logLevel = Level.INFO
-            "ERROR" -> logLevel = Level.ERROR
-            "WARN" -> logLevel = Level.WARN
-            "FATAL" -> logLevel = Level.FATAL
+        val logLevel = when (level.toUpperCase()) {
+            "TRACE" -> Level.TRACE
+            "DEBUG" -> Level.DEBUG
+            "INFO" -> Level.INFO
+            "ERROR" -> Level.ERROR
+            "WARN" -> Level.WARN
+            "FATAL" -> Level.FATAL
+            else -> Level.ERROR
         }
         Configurator.setRootLevel(logLevel)
     }

@@ -64,6 +64,7 @@ kotlin {
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                implementation "commons-cli:commons-cli:$version_apache_commons_cli"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
             }

@@ -93,6 +93,7 @@ ext {
     version_apache_commons_lang = "3.8.1"
     version_apache_commons_text = "1.6"
     version_apache_commons_dbcp2 = "2.5.0"
+    version_apache_commons_cli = "1.4"
     version_mpandroidchart = "v3.0.3"
 
     version_mockwebserver = "3.10.0"

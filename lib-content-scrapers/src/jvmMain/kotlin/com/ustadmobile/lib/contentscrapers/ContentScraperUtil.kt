@@ -1072,9 +1072,7 @@ object ContentScraperUtil {
             item.timeAdded = System.currentTimeMillis()
             queueDao.insert(item)
         }
-
-
-        return null
+        return item
     }
 
     /**
@@ -1417,6 +1415,14 @@ object ContentScraperUtil {
 
     fun returnListOfCookies(url: String, cookieList: Set<Cookie>): String {
         return cookieList.filter { it.domain in url }.joinToString(separator = "; ") { cookie -> "${cookie.name}=${cookie.value}" }
+    }
+
+    fun insertTempContentEntry(contentEntryDao: ContentEntryDao, url: String, primaryLanguageUid: Long): ContentEntry {
+        return contentEntryDao.findBySourceUrl(url) ?: ContentEntry().apply {
+            this.sourceUrl = url
+            this.primaryLanguageUid = primaryLanguageUid
+            this.contentEntryUid = contentEntryDao.insert(this)
+        }
     }
 
 

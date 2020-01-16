@@ -22,7 +22,6 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("SELECT * FROM Language")
     abstract fun publicLanguages(): List<Language>
 
-
     @Query("SELECT * FROM Language WHERE name = :name LIMIT 1")
     abstract fun findByName(name: String): Language?
 
@@ -37,4 +36,7 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Update
     abstract override fun update(entity: Language)
+
+    @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
+    abstract fun findByUid(primaryLanguageUid: Long): Language?
 }

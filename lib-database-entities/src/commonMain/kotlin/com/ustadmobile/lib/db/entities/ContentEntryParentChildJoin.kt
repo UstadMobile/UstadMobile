@@ -49,25 +49,29 @@ class ContentEntryParentChildJoin() {
         this.childIndex = childIndex
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-
-        val that = other as ContentEntryParentChildJoin?
-
-        if (cepcjUid != that!!.cepcjUid) return false
-        if (cepcjChildContentEntryUid != that.cepcjChildContentEntryUid) return false
-        return if (cepcjParentContentEntryUid != that.cepcjParentContentEntryUid) false else childIndex == that.childIndex
-    }
-
-    override fun hashCode(): Int {
-        var result = (cepcjUid xor cepcjUid.ushr(32)).toInt()
-        result = 31 * result + (cepcjChildContentEntryUid xor cepcjChildContentEntryUid.ushr(32)).toInt()
-        result = 31 * result + (cepcjParentContentEntryUid xor cepcjParentContentEntryUid.ushr(32)).toInt()
-        return result
-    }
 
     companion object {
 
         const val TABLE_ID = 7
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ContentEntryParentChildJoin
+
+        if (cepcjChildContentEntryUid != other.cepcjChildContentEntryUid) return false
+        if (cepcjParentContentEntryUid != other.cepcjParentContentEntryUid) return false
+        if (childIndex != other.childIndex) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = cepcjChildContentEntryUid.hashCode()
+        result = 31 * result + cepcjParentContentEntryUid.hashCode()
+        result = 31 * result + childIndex
+        return result
     }
 }

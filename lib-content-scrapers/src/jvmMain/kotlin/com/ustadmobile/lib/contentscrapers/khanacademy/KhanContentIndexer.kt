@@ -412,7 +412,6 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
             ContentScraperUtil.createQueueItem(queueDao, url, khanAcademyEntry, englishFolder, ScraperConstants.KhanContentType.TOPICS.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
-
             factory = GenericObjectPool(KhanDriverFactory())
             //start the indexing work queue
 

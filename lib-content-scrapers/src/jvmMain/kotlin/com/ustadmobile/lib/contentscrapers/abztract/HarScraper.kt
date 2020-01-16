@@ -39,8 +39,6 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
 
     data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
-    data class ETagResult(val updated: Boolean, val etag: String?)
-
 
 
     init {
@@ -51,7 +49,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 CaptureType.RESPONSE_HEADERS,
                 CaptureType.RESPONSE_BINARY_CONTENT)
 
-        var seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
+        val seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
         seleniumProxy.noProxy = "<-loopback>"
         val options = ChromeOptions()
         options.setCapability(CapabilityType.PROXY, seleniumProxy)
@@ -175,21 +173,21 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         return containerManager
     }
 
-    fun isContentUpdated(harEntry: HarEntry, container: Container): ETagResult {
+    fun isContentUpdated(harEntry: HarEntry, container: Container): Boolean {
         val entryModified = harEntry.response.headers.find { valuePair -> valuePair.name == LAST_MODIFIED }
         val entryETag = harEntry.response.headers.find { valuePair -> valuePair.name == ETAG }
 
         if (entryModified != null) {
             val time = DateUtils.parseDate(entryModified.value).time
-            return ETagResult(time > container.cntLastModified, null)
+            return time > container.cntLastModified
         }
 
         if (entryETag != null) {
             val eTagValue = entryETag.value
             val eTag = db.containerETagDao.getEtagOfContainer(container.containerUid)
-            return ETagResult(eTagValue != eTag, eTagValue)
+            return eTagValue != eTag
         }
-        return ETagResult(true, null)
+        return true
     }
 
     /**

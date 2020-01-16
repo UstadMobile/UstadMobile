@@ -11,7 +11,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -19,6 +19,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
 import okio.Okio
 import org.apache.commons.io.IOUtils
+import org.jsoup.Jsoup
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -151,9 +152,8 @@ class TestPrathamContentScraper {
         mockWebServer.setDispatcher(dispatcher)
 
         val scraper = DdlContentScraper(
-                containerDir, "en", db, 0)
+                containerDir, db, 0)
         scraper.scrapeUrl(mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString())
-        scraper.parentSubjectAreas
 
         val contentFolder = File(tmpDir, "ddlcontent")
         Assert.assertEquals(true, contentFolder.isDirectory)
@@ -162,6 +162,25 @@ class TestPrathamContentScraper {
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile))
 
         Assert.assertTrue("container has the file", containerDir.listFiles()!!.size > 0)
+    }
+
+    @Test
+    fun test() {
+        val containerDir = Files.createTempDirectory("container").toFile()
+
+        /*val entry = ContentEntry()
+        entry.sourceUrl = "https://ddl.af/resource/9350"
+        entry.contentEntryUid = db.contentEntryDao.insert(entry)
+
+        val scraper = DdlContentScraper(
+                containerDir, "en", db, entry.contentEntryUid)
+        scraper.scrapeUrl(entry.sourceUrl!!)*/
+
+        val document = Jsoup.connect("https://ddl.af/fa/resource/9398/")
+                .header("X-Requested-With", "XMLHttpRequest").get()
+
+        var sourceUrl = "https://ddl.af/fa/resource/9398/"
+
     }
 
 }

@@ -62,9 +62,9 @@ class IndexDdlContent {
 
         LanguageList().addAllLanguages()
 
-        val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
-        val farsiLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Persian")
-        val pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Pashto")
+        val englishLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "en")
+        val farsiLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "fa")
+        val pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ps")
 
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
@@ -142,6 +142,7 @@ class IndexDdlContent {
             val url = resource.attr("href")
             if (url.contains("resource/")) {
 
+
                 var contentEntry = db.contentEntryDao.findBySourceUrl(url)
                 if(contentEntry == null){
                     contentEntry = ContentEntry()
@@ -149,29 +150,10 @@ class IndexDdlContent {
                     contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
                 }
 
-                val scraper = DdlContentScraper(containerDir, lang, db, contentEntry.contentEntryUid)
+                val scraper = DdlContentScraper(containerDir, db, contentEntry.contentEntryUid)
                 try {
                     scraper.scrapeUrl(url)
                     UMLogUtil.logTrace("$DDL scraped url: $url")
-                    val subjectAreas = scraper.parentSubjectAreas
-                    val contentCategories = scraper.contentCategories
-                    var subjectAreaCount = 0
-                    UMLogUtil.logTrace("$DDL found " + subjectAreas.size + " subjects in entry")
-                    UMLogUtil.logTrace("$DDL found " + contentCategories.size + " categories in entry")
-                    for (subjectArea in subjectAreas) {
-
-                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!,
-                                langEntry!!, subjectArea, subjectAreaCount++)
-
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao!!,
-                                subjectArea, contentEntry, 0)
-                    }
-                    for (category in contentCategories) {
-
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(
-                                contentCategoryChildJoinDao!!, category, contentEntry)
-
-                    }
 
 
                 } catch (e: Exception) {

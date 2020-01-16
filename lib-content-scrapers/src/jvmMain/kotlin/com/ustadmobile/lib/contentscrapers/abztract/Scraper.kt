@@ -19,6 +19,10 @@ abstract class Scraper(val containerDir: File, var db: UmAppDatabase, var conten
             MimeType.EPUB to ContentEntry.EBOOK_TYPE
     )
 
+    val contentEntryParentChildJoinDao = db.contentEntryParentChildJoinDao
+    val contentEntryDao = db.contentEntryDao
+    val containerDao = db.containerDao
+
     abstract fun scrapeUrl(sourceUrl: String)
 
     abstract fun close()
@@ -30,11 +34,11 @@ abstract class Scraper(val containerDir: File, var db: UmAppDatabase, var conten
             mobileOptimized = true
             cntLastModified = System.currentTimeMillis()
         }
-        container.containerUid = db.containerDao.insert(container)
+        container.containerUid = containerDao.insert(container)
         return container
     }
 
-    companion object{
+    companion object {
 
         const val LAST_MODIFIED = "Last-Modified"
 
