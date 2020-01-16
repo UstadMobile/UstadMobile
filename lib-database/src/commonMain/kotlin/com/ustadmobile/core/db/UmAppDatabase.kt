@@ -255,6 +255,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_31_32 = object : DoorMigration(31, 32) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (  
+                        |tableId  INTEGER NOT NULL, status  INTEGER NOT NULL, localCsn  INTEGER NOT NULL, 
+                        |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
+                        |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
+                        |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
+                        |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
+                        |  remoteCsn  INTEGER , syncType  INTEGER , 
+                        |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
+                        |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
+                }
+            }
+        }
+
         /**
          * Fix SQLite update triggers
          */
@@ -2644,7 +2662,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32)
 
             return builder
         }
