@@ -3,6 +3,7 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -30,12 +31,14 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class
+    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
+    SyncResult::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 31)
+], version = 32)
+@MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -266,6 +269,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
                 } else if (database.dbType() == DoorDbType.POSTGRES){
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
+                }
+            }
+        }
+
+        val MIGRATION_31_32 = object : DoorMigration(31, 32) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (  
+                        |tableId  INTEGER NOT NULL, status  INTEGER NOT NULL, localCsn  INTEGER NOT NULL, 
+                        |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
+                        |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
+                        |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
+                        |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
+                        |  remoteCsn  INTEGER , syncType  INTEGER , 
+                        |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
+                        |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
                 }
             }
         }
@@ -3775,7 +3796,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_29_30_TRIGGERS, MIGRATION_29_30, MIGRATION_30_31)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_29_30_TRIGGERS, MIGRATION_29_30,
+                    MIGRATION_30_31, MIGRATION_31_32)
 
             return builder
         }

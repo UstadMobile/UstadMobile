@@ -93,7 +93,7 @@ fun entityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment): 
         if (annotationTypeEl.qualifiedName.toString() != "androidx.room.Database")
             continue
 
-        val annotationEntryMap = dbType.getAnnotationMirrors().get(0).getElementValues()
+        val annotationEntryMap = annotationMirror.getElementValues()
         for (entry in annotationEntryMap.entries) {
             val key = entry.key.getSimpleName().toString()
             val value = entry.value.getValue()

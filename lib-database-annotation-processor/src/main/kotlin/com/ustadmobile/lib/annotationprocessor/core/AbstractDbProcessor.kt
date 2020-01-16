@@ -333,7 +333,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    params: List<ParameterSpec>,
                                                    useKotlinxListSerialization: Boolean = false,
                                                    kotlinxSerializationJsonVarName: String = "",
-                                                   useMultipartPartsVarName: String? = null): CodeBlock {
+                                                   useMultipartPartsVarName: String? = null,
+                                                   addDbVersionParamName: String? = "_db"): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
             .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
@@ -344,6 +345,11 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
+
+
+
+    codeBlock.takeIf { addDbVersionParamName != null }?.add("%M($addDbVersionParamName)\n",
+            MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
 
     params.filter { isQueryParam(it.type) }.forEach {
         val paramType = it.type
