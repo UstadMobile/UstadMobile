@@ -42,7 +42,8 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
     }
 
-    private fun onChanged(t: UmAccount?) {
+    @JsName("onChanged")
+    fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
             val contentEntryListArgs = mutableMapOf(ARG_CONTENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                     ARG_LIBRARIES_CONTENT to "",
@@ -71,7 +72,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 options.add(0, Pair(MessageID.contents,
                         ContentEntryListView.VIEW_NAME + "?" +
                                 UMFileUtil.mapToQueryString(contentEntryListArgs)))
-                homeView.setOptions(options)
+                homeView.setNavigationOptions(options)
             })
         }
     }

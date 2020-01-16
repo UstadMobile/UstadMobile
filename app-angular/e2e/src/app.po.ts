@@ -44,6 +44,7 @@ export class ElementUtils{
    getPageElements() {
     return {
       reports:{
+        main: element.all(by.css('app-root app-home > header')),
         profile: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-header div i')),
         menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span')),
         loginInputs: element.all(by.css('app-login > div div form div mz-input-container input')),

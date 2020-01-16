@@ -76,8 +76,10 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     if(activeRepository is DoorDatabaseRepository) {
                         activeRepository.connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
                     }
-
-                    impl.go(mNextDest,arguments, context)
+                    val args = mutableMapOf<String, String?>()
+                    args.putAll(arguments)
+                    args.remove(ARG_NEXT)
+                    impl.go(mNextDest,args, context)
                 } else {
                     view.runOnUiThread(Runnable {
                         view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,

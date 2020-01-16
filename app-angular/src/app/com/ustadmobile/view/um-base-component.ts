@@ -21,7 +21,6 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   showIframe: boolean = true 
   changeColor: boolean = false 
   userProfile: string = "assets/images/guest_user_icon.png"
-  
 
   protected constructor(public umService: UmBaseService, protected router: Router, protected route: ActivatedRoute){
     this.systemImpl = core.com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
@@ -33,6 +32,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.floating_btn_class_right = this.umService.isLTRDirectionality() ? "fixed-action-btn-right" : "fixed-action-btn-left";
     this.floating_btn_class_left = this.umService.isLTRDirectionality() ? "fixed-action-btn-left":"fixed-action-btn-right"
   }
+  
 
   getActiveAccount(){
     return core.com.ustadmobile.core.impl.UmAccountManager.getRepositoryForActiveAccount(this.context);

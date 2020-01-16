@@ -81,7 +81,7 @@ class HomePresenterTest {
         UmAccountManager.setActiveAccount(umAccount, context)
         presenter.onCreate(null)
         argumentCaptor<List<Pair<Int, String>>>().apply {
-            verify(mockView, timeout(5000)).setOptions(capture())
+            verify(mockView, timeout(5000)).setNavigationOptions(capture())
             assertEquals("Two navs were displayed",2, firstValue.size)
             assertTrue("All filters were included",
                      firstValue[0].second.contains(ARG_LIBRARIES_CONTENT)
@@ -94,7 +94,7 @@ class HomePresenterTest {
     fun givenApplicationLaunched_WhenNoAdminLoggedIn_shouldShowOnlyContentsNavWithLibrariesAndDownloadedFilters(){
         presenter.onCreate(null)
         argumentCaptor<List<Pair<Int, String>>>().apply {
-            verify(mockView, timeout(5000)).setOptions(capture())
+            verify(mockView, timeout(5000)).setNavigationOptions(capture())
             assertEquals("One nav was displayed",1, firstValue.size)
             assertTrue("Both libraries and downloaded filters were included",
                     firstValue[0].second.contains(ARG_LIBRARIES_CONTENT)

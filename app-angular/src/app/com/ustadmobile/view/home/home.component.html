@@ -17,12 +17,11 @@
 
   <!-- side nav starts here-->
 
-  <mz-dropdown #dropwdown [id]="'dropdown-demo'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
+  <mz-dropdown #dropwdown [id]="'dropdown-menu'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
 
-    <li><a (click)="handleSideMenuSelected(routes.entryList)"><span i18n="@@libraries">Libraries</span></a></li>
-    <li *ngIf="showReports"> <a (click)="handleSideMenuSelected(routes.reportOptions)"> <span i18n="@@reports">Reports</span></a></li>
+    <li *ngFor="let navOption of navMenuOptions"><a (click)="handleSideMenuSelected(navMenuOptions.indexOf(navOption))"><span i18n="{{navOption.i18n}}">{{navOption.label}}</span></a></li>
     <li > <a (click)="handleClickPersonIcon()"> <span i18n="@@profile">Profile</span></a></li>
     <li > <a (click)="bottomSheetModal.openModal()"> <span i18n="@@language">Language</span></a></li>
   </mz-dropdown> 
@@ -43,21 +42,15 @@
       <div class="user-view" style="background: url('assets/images/top_header_bg.jpg')">
         <i class="material-icons white-text {{class_open_profile}} open-profile" (click)="handleClickPersonIcon()">open_in_new</i>
         <img class="circle avatar" [src]="userProfile">
-        <div class="white-text name">{{userName}}</div>
-        <div class="white-text email">{{userEmail}}</div>
+        <div class="white-text name">{{person.firstNames + ' '+ person.lastName}}</div>
+        <div class="white-text email">{{person.emailAddr}}</div>
       </div>
     </mz-sidenav-header>
 
-    <mz-sidenav-link [active]="activeState[0]">
-      <a class="collapsible-header" id="libs" (click)="handleSideMenuSelected(routes.entryList)"><span
-          i18n="@@libraries">Libraries</span>
-        <i class="material-icons {{class_icon_position}}">library_books</i>
-      </a>
-    </mz-sidenav-link>
-
-    <mz-sidenav-link *ngIf="showReports" [active]="activeState[1]">
-      <a class="collapsible-header" (click)="handleSideMenuSelected(routes.reportOptions)"> <span i18n="@@reports">Reports</span>
-        <i class="material-icons {{class_icon_position}}">pie_chart</i>
+    <mz-sidenav-link *ngFor="let navOption of navMenuOptions" [active]="activeState[navMenuOptions.indexOf(navOption)]">
+      <a class="collapsible-header" id="{{navOption.label}}" (click)="handleSideMenuSelected(navMenuOptions.indexOf(navOption))"><span
+          i18n="{{navOption.i18n}}">{{navOption.label}}</span>
+        <i class="material-icons {{class_icon_position}}">{{navOption.icon}}</i>
       </a>
     </mz-sidenav-link>
     <mz-sidenav-subheader></mz-sidenav-subheader>

@@ -1,5 +1,5 @@
 import {Entries, sleepTime, Reports} from './app.po';
-import { browser } from 'protractor';
+import { browser, element, by } from 'protractor';
 const fs = require('fs'), path = require('path')
 
 describe('Content and Entry List', () => {
@@ -43,6 +43,8 @@ describe('Xapi Reports', () => {
     reports.getPage().loginInputs.get(0).sendKeys("admin")
     reports.getPage().loginInputs.get(1).sendKeys(password)
     reports.getPage().loginBtn.click()
+    browser.sleep(sleepTime/2)
+    reports.getPage().main.get(0).click()
     browser.sleep(sleepTime/2)
     reports.getPage().menus.get(1).click()
     reports.selectDropDown(2,2).then(()=> {

@@ -24,6 +24,7 @@ interface ContentEntryListView : UstadView {
     @JsName("setLanguageOptions")
     fun setLanguageOptions(result: List<LangUidAndName>)
 
+    @JsName("setEmptyView")
     fun setEmptyView(selectedFilter: String)
 
     /**
@@ -40,6 +41,7 @@ interface ContentEntryListView : UstadView {
      * @param buttonVisibilityFlags - flags for buttons to be shown
      *
      */
+    @JsName("setEditButtonsVisibility")
     fun setEditButtonsVisibility(buttonVisibilityFlags: Int)
 
     companion object {

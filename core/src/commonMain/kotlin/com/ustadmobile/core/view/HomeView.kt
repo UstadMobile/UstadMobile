@@ -22,8 +22,8 @@ interface HomeView : LanguageOptionView {
      *
      * e.g. MessageID.content, ContentEntryList?parentUid=...
      */
-    @JsName("setMenu")
-    fun setOptions(options: List<Pair<Int, String>>)
+    @JsName("setNavigationOptions")
+    fun setNavigationOptions(options: List<Pair<Int, String>>)
 
     fun showShareAppDialog()
 

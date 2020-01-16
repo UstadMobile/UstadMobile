@@ -42,12 +42,13 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
   umFormLanguage: FormGroup;
   
   private navigationSubscription: Subscription;
-  showReports = false
-  userName: string = "Guest User"
-  userEmail: string = "guestmail"
+  person = {username: "gestUser", emailAddr: "", firstNames:"Guest", lastName: "User"}
   static toolBarTitle: string = ".."
   activeState = [true, false]
   private presenter: core.com.ustadmobile.core.controller.HomePresenter;
+  private navItemMaps = {}
+  navMenuOptions = []
+  doOpenEntries = false; 
 
   constructor(private location: Location, umService: UmBaseService, private elem: ElementRef,private renderer: Renderer2,
     router: Router, route: ActivatedRoute, private zone:NgZone, formBuilder: FormBuilder) {
@@ -58,12 +59,19 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     this.class_toolbar_title = this.umService.isLTRDirectionality() ? "brand-logo-ltr" : "brand-logo-rtl";
     this.class_drawer_menu = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
     this.class_open_profile = this.umService.isLTRDirectionality() ? "right":"left"
-
+    this.navItemMaps[core.com.ustadmobile.core.generated.locale.MessageID.reports] = {icon: "pie_chart",i18n: "@@libraries"}; 
+    this.navItemMaps[core.com.ustadmobile.core.generated.locale.MessageID.contents] = {icon:"local_library", i18n:"@@reports"}; 
     this.router.events.subscribe((event: NavigationStart)  => {
       if(event.url && event.url == "/"){
         const initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID);
         this.systemImpl.go(initialRoute.view, initialRoute.args, this.context, 0)
       }
+    });
+
+    this.route.queryParams.subscribe(params => {
+      const isFromNext = this.router.url.split("/")[2].split("?")[0] == this.routes.entryList && !params[UmAngularUtil.ARG_CONTENT_ENTRY_UID],
+      isTopEntry = !params[UmAngularUtil.ARG_FILTER_BUTTONS] && this.umService.ROOT_UID == params[UmAngularUtil.ARG_CONTENT_ENTRY_UID]
+      this.doOpenEntries =  isTopEntry || isFromNext
     });
     
     //Listen for the navigation changes - changes on url
@@ -115,26 +123,33 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().personDao, this.systemImpl)
     this.presenter.onCreate(null)
     this.presenter.handleShowLanguageOptions()
+    //TODO: make sure to remove this function manual calling when things getresolved
+    this.presenter.onChanged(core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context));
   }
 
   handleClickPersonIcon(){
     this.presenter.handleClickPersonIcon()
   }
 
-  setOptions(options){
-    const umMenuOptions = UmAngularUtil.kotlinListToJsArray(options)
-    console.log("Options", umMenuOptions)
-  }
+  setNavigationOptions(options){
+    const menuOptions = UmAngularUtil.kotlinListToJsArray(options);
+    this.navMenuOptions = []
+      menuOptions.forEach(option => {
+        const menuNav = this.navItemMaps[option.first]
+        menuNav['label'] = this.getString(option.first)
+        menuNav['params'] = option.second
+        this.navMenuOptions.push(menuNav)
+      }) 
 
-  showReportMenu(show) {
-    this.showReports = show
+      if(this.doOpenEntries){
+        this.handleSideMenuSelected(0)
+      }
   }
 
   showDownloadAllButton() {}
 
   setLoggedPerson(person) {
-    this.userEmail = person.emailAddr
-    this.userName = person.firstNames + " " + person.lastName
+    this.person = person
   }
 
   loadProfileIcon(profile) {
@@ -149,14 +164,16 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     }
   }
 
-  handleSideMenuSelected(route) {
-    const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context)
-    
-    const isReport = route == "ReportOptions",
-    routeTo =  isReport && !activeAcount ? this.routes.login : route 
-    const args = UmAngularUtil.getArgumentsFromQueryParams({params:!isReport ? 
-      "?" + UmAngularUtil.ARG_CONTENT_ENTRY_UID + "=" + this.umService.ROOT_UID: (route != routeTo ? "?next="+route: null), route: routeTo})
-    this.systemImpl.go(routeTo, args, this.context);
+  handleSideMenuSelected(index) {
+    //TODO: handle this well when dashboard is integrated
+    const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context),
+    route = this.navMenuOptions[index].params.split("?")[0], 
+    isReport = route.includes(this.routes.reportOptions), 
+    initQueryParams = this.navMenuOptions[index].params.split("?")[1] 
+    ? "?"+this.navMenuOptions[index].params.split("?")[1]:"",
+    routeView =  isReport && !activeAcount ? this.routes.login : route == "DashboardView" ? this.routes.reportOptions:route,
+    routeParams = {params:!isReport ? initQueryParams: (route != routeView ? "?next="+route: null), route: routeView};
+    this.systemImpl.go(routeView, UmAngularUtil.getArgumentsFromQueryParams(routeParams), this.context);
   }
 
   setToolbarTitle(title) {

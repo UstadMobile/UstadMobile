@@ -64,7 +64,6 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
       this.umService.getDbInstance().contentEntryDao, 
       this.getActiveAccount(), this.systemImpl,this.umService.getDbInstance());
     this.presenter.onCreate(null);
-    this.presenter.handleClickFilterButton(0)
     this.setToolbarTitle("...")
     this.label_language_options = this.getString(this.MessageID.language);
     this.label_reading_level = this.getString(this.MessageID.library_reading_level);
@@ -90,8 +89,15 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
     this.loadPaggedList()
   }
 
+  setEditButtonsVisibility(visibility){}
+
+  setEmptyView(filter){}
+
+  setFilterButtons(filterBtns){}
+
 
   setContentEntryProvider(provider: any) {
+    console.log("This called ")
     this.provider = provider.create()
     if(this.umFilterForm.value.language != -1 || this.umFilterForm.value.category != -1){
       this.entryList = []

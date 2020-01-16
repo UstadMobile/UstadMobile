@@ -28,12 +28,16 @@ export class UmAngularUtil {
   }
 
   public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID.toString()
+  
+  public static ARG_FILTER_BUTTONS  = core.com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 
   private static storageEventHandler: any = {};
 
   public static CONTENT_URL_TAG = "contentUrl"
 
   public static BASE_URL_TAG = "doordb.endpoint.url"
+
+  public static API_URL_TAG = "apiUrl"
 
   public static TEST_ENDPOINT = "http://localhost:8087/"
 
@@ -57,24 +61,23 @@ export class UmAngularUtil {
    * Convert query parameters to a kotlin map to be used on presenters
    */
   static getArgumentsFromQueryParams(args: any = {}) {
-    const route = args.route ? args.route : this.getRoutePathParam().path
-    const params = args.params ? args.params : null
-    const search = this.removeParam(this.isWithoutEntryUid(route) 
-    ? this.ARG_CONTENT_ENTRY_UID:"", (params ? params : this.getRoutePathParam().search))
-    let paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null&libraries=null":"?ref=null"))) 
-    return core.com.ustadmobile.core.util.UMFileUtil
-      .parseURLQueryString(paramString); 
+    const route = args.route ? args.route : this.getRoutePathParam().path,
+    params = args.params ? args.params : null
+    let search = this.removeParam(this.isWithoutEntryUid(route) 
+    ? [this.ARG_CONTENT_ENTRY_UID, this.ARG_FILTER_BUTTONS,'libraries']:[], (params ? params : this.getRoutePathParam().search)),
+    paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null")))
+    return core.com.ustadmobile.core.util.UMFileUtil.parseURLQueryString(paramString); 
   }
 
 
-  private static removeParam(key, sourceURL) {
+  private static removeParam(keys, sourceURL) {
     var rtn = "",param,params_arr = [],
-        queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
+    queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
     if (queryString !== "") {
         params_arr = queryString.split("&");
         for (var i = params_arr.length - 1; i >= 0; i -= 1) {
             param = params_arr[i].split("=")[0];
-            if (param === key) {
+            if (keys.indexOf(param) != -1) {
                 params_arr.splice(i, 1);
             }
         }
@@ -86,7 +89,7 @@ export class UmAngularUtil {
 
   private static isWithoutEntryUid(viewName: String): boolean{
     return  viewName.includes("Report") || viewName.includes("Register") ||
-            viewName.includes("Login") || viewName.includes("Profile")
+            viewName.includes("Login") || viewName.includes("User")
   }
 
   /**

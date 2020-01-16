@@ -95,7 +95,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun setLoggedPerson(person: Person) {}
 
-    override fun setOptions(options: List<Pair<Int, String>>) {
+    override fun setNavigationOptions(options: List<Pair<Int, String>>) {
         options.forEach {
             val navIcon = bottomLabelToIconMap[it.first]
             if(navIcon != null){
