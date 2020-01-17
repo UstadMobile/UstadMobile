@@ -1,14 +1,13 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import com.ustadmobile.door.DataSourceFactoryJs
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.*
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_JsImpl
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.promise
@@ -137,6 +136,23 @@ class BasicTest {
         e1.esUid = dbInstance.exampleSyncableDao().insertAsync(e1)
         val eAdded = dbInstance.exampleSyncableDao().findByUidAndAddOneThousand(e1.esUid)
         assertEquals(1050, eAdded?.esNumber, "Got value back from server's own fn")
+    }
+
+    @Test
+    fun givenMutableLiveDataWithInitialValue_whenObserved_thenShouldCallOnChanged() = GlobalScope.promise {
+        var mutableLiveData = DoorMutableLiveData<ExampleSyncableEntity?>(null)
+        val initialLoadCompletableDeferred = CompletableDeferred<ExampleSyncableEntity?>()
+        val lifecycleOwner = object: DoorLifecycleOwner {
+
+        }
+        mutableLiveData.observe(lifecycleOwner, object: DoorObserver<ExampleSyncableEntity?> {
+            override fun onChanged(t: ExampleSyncableEntity?) {
+                initialLoadCompletableDeferred.complete(t)
+            }
+        })
+
+        assertNull(initialLoadCompletableDeferred.await(), "Initial callback is called")
+
     }
 
 
