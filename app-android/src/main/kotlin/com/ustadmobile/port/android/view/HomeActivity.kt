@@ -22,6 +22,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -169,7 +170,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         //Bulk upload for ClassBook
         val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
         if(bulkUploadMenuItem != null){
-            bulkUploadMenuItem.isVisible = showSettings
+            val bulkUploadVisibility = impl.getAppConfigString(
+                    AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
+            if(bulkUploadVisibility){
+                bulkUploadMenuItem.isVisible = showSettings
+            }
         }
 
         return super.onCreateOptionsMenu(menu)
@@ -297,7 +302,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             //Bulk upload for ClassBook
             val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
             if(bulkUploadMenuItem != null){
-                bulkUploadMenuItem.isVisible = showSettings
+                val bulkUploadVisibility = impl.getAppConfigString(
+                        AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
+                if(bulkUploadVisibility){
+                    bulkUploadMenuItem.isVisible = showSettings
+                }
             }
         }
     }
