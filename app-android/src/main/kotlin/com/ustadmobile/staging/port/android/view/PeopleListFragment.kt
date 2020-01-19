@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.port.android.view.UstadBaseFragment
+import com.ustadmobile.staging.core.view.SearchableListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,7 +31,9 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton
 /**
  * PeopleListFragment responsible for showing people list on the people bottom navigation
  */
-class PeopleListFragment : UstadBaseFragment, PeopleListView {
+class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener {
+
+
     override val viewContext: Any
         get() = context!!
 
@@ -151,6 +154,14 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView {
                 R.layout.item_simple_spinner_gray, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter
+    }
+
+    override fun onSearchButtonClick() {
+        //Does nothing here
+    }
+
+    override fun onSearchQueryUpdated(query: String) {
+        searchPeople(query)
     }
 
     constructor()  {

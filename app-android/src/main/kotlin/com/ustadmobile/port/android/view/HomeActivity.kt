@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.app.SearchManager
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -8,8 +10,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
@@ -28,6 +32,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEW
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.staging.core.view.SearchableListener
 import com.ustadmobile.staging.port.android.view.*
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
@@ -56,6 +61,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private var showSettings = false
     //Show location permission dialog flag
     private var showLocationPermissionDialog = false
+    //The search view
+    private lateinit var searchView : SearchView
+
+    //A reference to current fragment so we can search for search
+    private var currentFragment: UstadBaseFragment? = null
 
     val impl = UstadMobileSystemImpl.instance
 
@@ -120,7 +130,56 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             settingsMenuItem.isVisible = showSettings
         }
 
+        //Search stuff
+        // Associate searchable configuration with the SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        searchView = menu.findItem(R.id.menu_home_activity_search).actionView as SearchView
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(componentName))
+        searchView.maxWidth = Integer.MAX_VALUE
+
+        //Set visibility based on current fragment
+        searchView.isVisible = currentFragment is SearchableListener
+        val searchViewMenuItem = menu.findItem(R.id.menu_home_activity_search)
+        if(searchViewMenuItem != null){
+            searchViewMenuItem.isVisible = currentFragment is SearchableListener
+        }
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                // filter recycler view when query submitted
+                searchLogic(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String): Boolean {
+                // filter recycler view when query changed
+                searchLogic(query)
+                return false
+            }
+        })
+
+        searchView.setOnCloseListener{
+            // filter recycler view when query submitted
+            searchLogic( "")
+            false
+        }
+
+        //Bulk upload for ClassBook
+        val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
+        if(bulkUploadMenuItem != null){
+            bulkUploadMenuItem.isVisible = showSettings
+        }
+
         return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun searchLogic(query: String){
+        val currentFragmentNN = currentFragment
+        if(currentFragmentNN != null && currentFragmentNN is SearchableListener){
+            (currentFragmentNN as SearchableListener).onSearchQueryUpdated(query)
+        }
     }
 
     override fun setLoggedPerson(person: Person) {}
@@ -216,6 +275,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                     ReportDashboard()
                 }
             }
+            currentFragment = selectedFragment
+
             val fragmentManager:FragmentManager = supportFragmentManager
             val fragmentTransaction = fragmentManager.beginTransaction()
             fragmentTransaction.replace(R.id.um_host_fragment,selectedFragment,selectedFragment.tag)
@@ -231,6 +292,12 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             val settingsMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_settings)
             if (settingsMenuItem != null) {
                 settingsMenuItem.isVisible = showSettings
+            }
+
+            //Bulk upload for ClassBook
+            val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
+            if(bulkUploadMenuItem != null){
+                bulkUploadMenuItem.isVisible = showSettings
             }
         }
     }
@@ -264,6 +331,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
             R.id.menu_home_activity_settings -> presenter.handleClickSettings()
+            //Bulk upload for ClassBook
+            R.id.menu_action_bulk_upload_master -> presenter.handleClickBulkUpload()
         }
 
         return super.onOptionsItemSelected(item)

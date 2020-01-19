@@ -22,16 +22,16 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzListView
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.UstadBaseFragment
+import com.ustadmobile.staging.core.view.SearchableListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
-import java.util.*
 
 /**
  * ClazzListFragment Android fragment extends UstadBaseFragment
  */
-class ClazzListFragment : UstadBaseFragment, ClazzListView {
+class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
     override val viewContext: Any
         get() = context!!
 
@@ -187,7 +187,14 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView {
                     Toast.LENGTH_SHORT
             ).show()
         })
+    }
 
+    override fun onSearchButtonClick() {
+        //Does nothing here
+    }
+
+    override fun onSearchQueryUpdated(query: String) {
+        searchClasses(query)
     }
 
     constructor()  {

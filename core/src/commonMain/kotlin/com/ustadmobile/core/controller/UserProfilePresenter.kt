@@ -97,6 +97,13 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         impl.go(LoginView.VIEW_NAME, args, context)
     }
 
+    /**
+     * Starts the sync process
+     */
+    fun handleClickLastSync(){
+        //TODO Start the sync process.
+    }
+
     fun handleShowLanguageOptions(){
         view.setLanguageOption(languageOptions.values.sorted().toMutableList())
     }

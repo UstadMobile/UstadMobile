@@ -570,4 +570,6 @@
     <string name="unable_to_update_username">Unable to check username. Please make sure you are online.</string>
     <string name="unable_to_update_username_error">Unable to check username. Please try again later.</string>
 
+    <string name="last_synced_at">Last synced</string>
+
 </resources>

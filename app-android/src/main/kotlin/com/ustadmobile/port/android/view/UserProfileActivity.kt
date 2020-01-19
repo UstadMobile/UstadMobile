@@ -44,6 +44,8 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     private lateinit var logout: RelativeLayout
 
+    private lateinit var lastSynced : RelativeLayout
+
     private lateinit var languageOption: RelativeLayout
 
     private lateinit var languageName: TextView
@@ -67,6 +69,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
         changePasswordLL = findViewById(R.id.activity_user_profile_change_password_ll)
         logout = findViewById(R.id.activity_user_profile_logout_ll)
+        lastSynced = findViewById(R.id.activity_user_profile_last_synced_ll)
         languageOption = findViewById(R.id.activity_user_profile_language_ll)
         languageName = findViewById(R.id.activity_user_profile_language_selection)
 
@@ -84,6 +87,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
         logout.setOnClickListener {
             presenter.handleUserLogout()
+        }
+
+        lastSynced.setOnClickListener{
+                presenter.handleClickLastSync()
         }
 
         languageOption.setOnClickListener {

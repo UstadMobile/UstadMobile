@@ -9,6 +9,14 @@
         android:title="@string/content_editor_create_new"
         app:showAsAction="always"/>
 
+    <!-- Bulk upload for ClassBook -->
+    <item android:id="@+id/menu_action_bulk_upload_master"
+        android:icon="@drawable/ic_file_upload_white_24dp"
+        android:title="@string/settings"
+        android:visible="false"
+        android:iconTint="@color/icons"
+        app:showAsAction="always"/>
+
     <item android:id="@+id/menu_home_activity_settings"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/done"
@@ -16,10 +24,10 @@
         android:iconTint="@color/icons"
         app:showAsAction="always"/>
 
-    <item android:id="@+id/menu_action_search"
+    <item android:id="@+id/menu_home_activity_search"
         android:icon="@drawable/ic_search_black_24dp"
         android:title="@string/search"
-        android:visible="true"
+        android:visible="false"
         android:iconTint="@color/icons"
         app:showAsAction="always"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>

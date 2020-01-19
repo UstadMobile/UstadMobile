@@ -127,6 +127,14 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         impl.go(SettingsView.VIEW_NAME, args, context)
     }
 
+    /**
+     * For ClassBook - Goes to Bulk upload screen.
+     */
+    fun handleClickBulkUpload(){
+        val args = HashMap<String, String>()
+        impl.go(BulkUploadMasterView.VIEW_NAME, args, context)
+    }
+
     override fun handleNavigation() {}
 
 
