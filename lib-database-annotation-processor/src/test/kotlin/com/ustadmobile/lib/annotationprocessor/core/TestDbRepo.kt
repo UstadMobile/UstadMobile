@@ -2,6 +2,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.ustadmobile.door.*
 import db2.ExampleDatabase2
 import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
@@ -11,8 +12,6 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.DoorDatabaseRepository
 import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
 import db2.ExampleDatabase2_KtorRoute
@@ -25,16 +24,18 @@ import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import com.ustadmobile.door.asRepository
 import org.junit.After
 import java.util.concurrent.TimeUnit
-import com.ustadmobile.door.DoorDatabaseSyncRepository
 import io.ktor.application.call
+import io.ktor.client.features.ClientRequestException
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.features.CallLogging
 import io.ktor.http.HttpStatusCode
  import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
 import io.ktor.routing.post
+import io.netty.handler.codec.http.HttpResponse
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
@@ -380,6 +381,23 @@ class TestDbRepo {
             val server2 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
             Assert.assertEquals("Name matches", "Hello", server2!!.esName)
         }
+    }
+
+    @Test
+    fun givenOldClient_whenRequestMade_thenShouldReceive400Forbidden() = runBlocking {
+        setupClientAndServerDb()
+        var httpStatusErr: HttpStatusCode? = null
+        try {
+            val response = httpClient.get<HttpResponse>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAllLive") {
+                header("X-nid", 1234)
+                header(DoorConstants.HEADER_DBVERSION, 0)
+            }
+        }catch(e: ClientRequestException) {
+            httpStatusErr = e.response.status
+        }
+
+
+        Assert.assertEquals(HttpStatusCode.BadRequest, httpStatusErr)
     }
 
 

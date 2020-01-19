@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import com.ustadmobile.door.DataSourceFactoryJs
+import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.door.*
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_JsImpl
@@ -32,7 +36,9 @@ class BasicTest {
         ExampleDatabase2_JsImpl.register()
         dbInstance = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class,
                 "ExampleDatabase2").build()
-        httpClient.get<Unit>("${testServerUrl}ExampleDatabase2/clearAllTables")
+        httpClient.get<Unit>("${testServerUrl}ExampleDatabase2/clearAllTables") {
+            dbVersionHeader(dbInstance)
+        }
     }
 
 

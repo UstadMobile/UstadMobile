@@ -399,6 +399,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .add("append(%T.ContentLength, _attachFile.length())\n", HttpHeaders::class)
                         .add("append(%T.ContentDisposition,·\"form-data;·name=\\\"\$_pkStr\\\";·filename=\\\"\$_pkStr\\\"\")\n",
                                 HttpHeaders::class)
+                        .add("%M(_db)\n",
+                                MemberName("com.ustadmobile.door.ext", "appendDbVersionHeader"))
+
                         .endControlFlow()
                         .add("append(_attachFile.name,·%T(_attachFile.length()){%T(_attachFile).%M()}, _mpHeaders)\n",
                                 InputProvider::class, FileInputStream::class,
