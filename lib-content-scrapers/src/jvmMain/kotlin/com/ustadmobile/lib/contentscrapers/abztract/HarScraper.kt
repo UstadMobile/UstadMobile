@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
@@ -72,7 +73,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                        addHarContent: Boolean = true,
                        block: (proxy: BrowserMobProxyServer) -> Boolean): HarScraperResult {
 
-        clearAnyLogsInChrome()
+        ContentScraperUtil.clearChromeConsoleLog(chromeDriver)
         proxy.newHar("Scraper")
 
         try {
@@ -96,12 +97,6 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         }
 
         return HarScraperResult(isContentUpdated, containerManager)
-    }
-
-
-    private fun clearAnyLogsInChrome() {
-        val js = chromeDriver as JavascriptExecutor
-        js.executeScript("console.clear()")
     }
 
     private fun checkStartingUrlNot404(entries: List<HarEntry>, url: String) {

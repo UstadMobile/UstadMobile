@@ -4,9 +4,10 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.config.Configurator
 
+
 object UMLogUtil {
 
-    private val LOG = LogManager.getRootLogger()
+    private val LOG = LogManager.getLogger("RollingFileLogger")
 
     fun logTrace(message: String) {
         LOG.log(Level.TRACE, message)

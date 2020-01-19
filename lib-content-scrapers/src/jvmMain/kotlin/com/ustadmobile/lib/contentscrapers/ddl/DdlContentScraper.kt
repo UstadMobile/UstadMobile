@@ -134,7 +134,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     val index = relatedHref.indexOf("af/")
                     val relatedUrl = StringBuilder(relatedHref).insert(index + 3, "$twoLangCode/").toString()
 
-                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry.primaryLanguageUid)
+                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry.primaryLanguageUid, element.text()?: "")
 
                     ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, relatedEntry, contentEntry, REL_TYPE_SEE_ALSO)
                 }
@@ -152,7 +152,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         val relatedTwoCode = element.attr("hreflang")
                         val relatedLink = element.attr("href")
 
-                        val translatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedLink, ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, relatedTwoCode).langUid)
+                        val translatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedLink, ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, relatedTwoCode).langUid, "")
                         ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, translatedEntry, contentEntry,
                                 REL_TYPE_TRANSLATED_VERSION)
 

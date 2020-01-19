@@ -4,7 +4,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeRunDao
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
@@ -14,6 +16,8 @@ import org.apache.commons.cli.*
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
 import java.lang.IllegalArgumentException
+import java.lang.System.exit
+import kotlin.system.exitProcess
 
 
 class ScraperRunner(private val containerPath: String, private val indexTotal: Int = 4, private val scraperTotal: Int = 1) {
@@ -65,7 +69,6 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             queueDao.setTimeStarted(it.sqiUid, startTime)
             var successful = false
 
-
             try {
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
                 val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java)
@@ -86,6 +89,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
         }
 
         GlobalScope.launch {
+            UMLogUtil.logDebug("start indexer")
             indexWorkQueue.start()
         }
 
@@ -103,8 +107,8 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             try {
 
                 val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
-                val cons = scraperClazz?.getConstructor(File::class.java, String::class.java, UmAppDatabase::class.java, Long::class.java)
-                val obj = cons?.newInstance(File(containerPath), "en", db, it.sqiContentEntryParentUid)
+                val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java)
+                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid)
                 obj?.scrapeUrl(it.scrapeUrl!!)
                 successful = true
 
@@ -121,9 +125,13 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
         }
         GlobalScope.launch {
+            UMLogUtil.logDebug("start scraper")
             scrapeWorkQueue.start()
         }
 
+        ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
+
+        UMLogUtil.logDebug("finished queue")
 
     }
 
@@ -193,7 +201,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                     .desc("set the total number of scrapers should be running together")
                     .build()
             options.addOption(scraperOption)
-            var cmd: CommandLine? = null
+            val cmd: CommandLine
             try {
 
                 val parser: CommandLineParser = DefaultParser()
@@ -201,6 +209,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
             } catch (e: ParseException) {
                 System.err.println("Parsing failed.  Reason: " + e.message)
+                exitProcess(1)
             }
 
             val indexTotal: Int = cmd?.getOptionValue(INDEXER_ARGS)?.toIntOrNull() ?: 4
@@ -210,7 +219,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             UMLogUtil.setLevel(logLevel)
 
 
-            val runner = ScraperRunner(cmd!!.getOptionValue(CONTAINER_ARGS), indexTotal, scraperTotal)
+            val runner = ScraperRunner(cmd.getOptionValue(CONTAINER_ARGS), indexTotal, scraperTotal)
             if (cmd.hasOption(RUN_ID_ARGS)) {
                 runner.resume(cmd.getOptionValue(RUN_ID_ARGS).toInt())
             } else {

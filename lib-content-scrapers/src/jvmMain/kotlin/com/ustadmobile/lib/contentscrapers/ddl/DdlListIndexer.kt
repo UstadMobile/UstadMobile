@@ -5,10 +5,8 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
-import java.io.File
 
 class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) : Indexer(contentEntryUid, runUid, db) {
 
@@ -35,7 +33,9 @@ class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) : In
 
                 val url = StringBuilder(href).insert(index + 3, "$langCode/").toString()
 
-                val entry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, url, contentEntry!!.primaryLanguageUid)
+                val title = resource.selectFirst("div.resource-title")?.text()?: ""
+
+                val entry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, url, contentEntry!!.primaryLanguageUid, title)
 
                 ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, contentEntry!!, entry, counter++)
 

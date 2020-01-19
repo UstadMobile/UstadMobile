@@ -32,7 +32,7 @@ class DdlFrontPageIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase)
 
     private fun createLangEntry(langName: String, langEntity: Language, parentDdl: ContentEntry) {
 
-        val url = "https://www.ddl.af/$${langEntity.iso_639_1_standard}/resources/list"
+        val url = "https://www.ddl.af/${langEntity.iso_639_1_standard}/resources/list"
 
         val langEntry = ContentScraperUtil.createOrUpdateContentEntry("${langEntity.iso_639_1_standard}/resources/list", langName,
                 url, IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, langEntity.langUid, null,

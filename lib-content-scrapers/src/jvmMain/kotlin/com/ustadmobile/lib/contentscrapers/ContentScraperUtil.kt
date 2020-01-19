@@ -1244,10 +1244,6 @@ object ContentScraperUtil {
     fun clearChromeConsoleLog(driver: ChromeDriver) {
         val js = driver as JavascriptExecutor
         js.executeScript("console.clear()")
-
-        /* while (driver.manage().logs().get(LogType.PERFORMANCE).all.size != 0) {
-             driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS)
-         }*/
     }
 
     fun loginKhanAcademy(): ChromeDriver {
@@ -1417,10 +1413,12 @@ object ContentScraperUtil {
         return cookieList.filter { it.domain in url }.joinToString(separator = "; ") { cookie -> "${cookie.name}=${cookie.value}" }
     }
 
-    fun insertTempContentEntry(contentEntryDao: ContentEntryDao, url: String, primaryLanguageUid: Long): ContentEntry {
+    fun insertTempContentEntry(contentEntryDao: ContentEntryDao, url: String, primaryLanguageUid: Long, title: String): ContentEntry {
         return contentEntryDao.findBySourceUrl(url) ?: ContentEntry().apply {
             this.sourceUrl = url
             this.primaryLanguageUid = primaryLanguageUid
+            this.title = title
+            leaf = true
             this.contentEntryUid = contentEntryDao.insert(this)
         }
     }
