@@ -25,6 +25,7 @@ import org.acra.util.ToastSender
 import java.util.concurrent.TimeUnit
 import android.widget.LinearLayout
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 
 class LoginActivity : UstadBaseActivity(), LoginView {
 
@@ -74,8 +75,9 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         mVersionTextView = findViewById(R.id.activity_login_version)
         mProgressBar = findViewById(R.id.progressBar)
 
+        val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
+                this, repository, UstadMobileSystemImpl.instance)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
         mProgressBar!!.isIndeterminate = true

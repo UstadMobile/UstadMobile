@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -25,14 +26,13 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+                     var repository : UmAppDatabase,
                      val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private val mNextDest: String
     private val registerCode: String
     private var personAuthdao: PersonAuthDao
-
-    private var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     init {
         mNextDest = arguments[ARG_NEXT] ?: impl.getAppConfigString(
