@@ -93,7 +93,7 @@ fun entityTypesOnDb(dbType: TypeElement, processingEnv: ProcessingEnvironment): 
         if (annotationTypeEl.qualifiedName.toString() != "androidx.room.Database")
             continue
 
-        val annotationEntryMap = dbType.getAnnotationMirrors().get(0).getElementValues()
+        val annotationEntryMap = annotationMirror.getElementValues()
         for (entry in annotationEntryMap.entries) {
             val key = entry.key.getSimpleName().toString()
             val value = entry.value.getValue()
@@ -694,12 +694,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .addCode("setupFromDataSource()\n")
         val dbImplType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
                 .superclass(dbTypeElement.asClassName())
-                .addProperty(PropertySpec.builder("dbVersion", INT)
-                        .addModifiers(KModifier.OVERRIDE)
-                        .getter(FunSpec.getterBuilder()
-                                .addCode("return ${dbTypeElement.getAnnotation(Database::class.java).version}")
-                                .build())
-                        .build())
+                .addDbVersionProperty(dbTypeElement)
 
         if(isSyncableDb(dbTypeElement, processingEnv)) {
             constructorFn.addParameter(ParameterSpec.builder("master", BOOLEAN)
