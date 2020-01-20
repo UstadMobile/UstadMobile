@@ -81,7 +81,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         presenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAccountManager.getActiveDatabase(this).personDao,
+                this, UmAccountManager.getActiveDatabase(this),
                 UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
