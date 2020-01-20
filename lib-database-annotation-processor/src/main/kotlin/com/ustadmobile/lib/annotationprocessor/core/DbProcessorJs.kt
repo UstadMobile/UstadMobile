@@ -12,16 +12,24 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorDatabase
 import io.ktor.client.features.json.JsonFeature
 import com.ustadmobile.door.DoorLiveData
 
-private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(addHttpClient: Boolean = true,
+private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(addDbProp: Boolean = false,
+                                                            addHttpClient: Boolean = true,
                                                             addJsonProp: Boolean = true): TypeSpec.Builder {
+
+    takeIf { addDbProp }?.addProperty(
+            PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
+
     addProperty(PropertySpec.builder("_endpoint", String::class)
             .initializer("_endpoint").build())
     addProperty(PropertySpec.builder("_dbPath", String::class)
             .initializer("_dbPath").build())
     val constructorSpec = FunSpec.constructorBuilder()
+
+    constructorSpec.takeIf { addDbProp }?.addParameter("_db", DoorDatabase::class)
 
     if(addHttpClient) {
         addProperty(PropertySpec.builder("_httpClient", HttpClient::class)
@@ -38,8 +46,6 @@ private fun TypeSpec.Builder.addDbJsImplPropsAndConstructor(addHttpClient: Boole
                 .build())
         constructorSpec.addParameter("_json", DbProcessorJs.KOTLINX_JSON_CLASSNAME)
     }
-
-
     primaryConstructor(constructorSpec.build())
 
     return this
@@ -77,6 +83,7 @@ class DbProcessorJs : AbstractDbProcessor(){
 
         val implTypeSpec = TypeSpec.classBuilder(implFileSpec.name)
                 .addDbJsImplPropsAndConstructor(addHttpClient = false, addJsonProp = false)
+                .addDbVersionProperty(dbTypeEl)
                 .superclass(dbTypeEl.asClassName())
                 .addFunction(FunSpec.builder("clearAllTables")
                         .addModifiers(KModifier.OVERRIDE)
@@ -131,7 +138,7 @@ class DbProcessorJs : AbstractDbProcessor(){
 
             implTypeSpec.addProperty(PropertySpec.builder("_${daoTypeClassName.simpleName}",
                     daoTypeClassName)
-                    .delegate("lazy { %T(_httpClient, _endpoint, _dbPath, _json) }", daoJsImplClassName)
+                    .delegate("lazy { %T(this, _httpClient, _endpoint, _dbPath, _json) }", daoJsImplClassName)
                     .build())
 
             implTypeSpec.addAccessorOverride(it, CodeBlock.of("return _${daoTypeClassName.simpleName}\n"))
@@ -148,7 +155,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                 "${daoTypeEl.simpleName}$SUFFIX_JS_IMPL")
 
         val daoTypeSpec = TypeSpec.classBuilder("${daoTypeClassName.simpleName}$SUFFIX_JS_IMPL")
-                .addDbJsImplPropsAndConstructor()
+                .addDbJsImplPropsAndConstructor(addDbProp = true)
                 .superclass(daoTypeEl.asClassName())
 
         methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv, includeImplementedMethods = true).forEach {daoSubEl ->

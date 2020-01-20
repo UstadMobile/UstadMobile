@@ -472,7 +472,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     .add("context.request.call.%M(%T.BadRequest, %S)\n", RESPOND_MEMBER,
                             HttpStatusCode::class,
                             "Door DB Version does not meet minimum required: ${minSyncVersionAnnotation.value}")
-                    .add("return@intercept\n")
+                    .add("return@intercept finish()\n")
                     .endControlFlow()
                     .endControlFlow()
         }

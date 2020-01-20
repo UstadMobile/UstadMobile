@@ -4,4 +4,4 @@ import com.ustadmobile.door.DoorDatabase
 
 actual fun DoorDatabase.dbType() = 0
 
-actual fun DoorDatabase.dbSchemaVersion() = 0
+actual fun DoorDatabase.dbSchemaVersion() = this.dbVersion
