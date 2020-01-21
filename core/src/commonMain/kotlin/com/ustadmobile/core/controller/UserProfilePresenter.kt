@@ -21,15 +21,15 @@ import kotlinx.coroutines.launch
 
 
 class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view: UserProfileView,
-                            val personDao: PersonDao, val impl: UstadMobileSystemImpl)
+                            val repository: UmAppDatabase, val impl: UstadMobileSystemImpl)
     : UstadBaseController<UserProfileView>(context, arguments, view){
 
-    internal var repository: UmAppDatabase =
-            UmAccountManager.getRepositoryForActiveAccount(context)
     private var loggedInPerson: Person? = null
     private var personPictureDao: PersonPictureDao
 
     var loggedInPersonUid = 0L
+
+    private val personDao = repository.personDao
 
     private val languageOptions = impl.getAllUiLanguage(context)
 
