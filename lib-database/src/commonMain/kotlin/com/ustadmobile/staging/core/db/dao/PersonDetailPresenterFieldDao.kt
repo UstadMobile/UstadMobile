@@ -17,6 +17,9 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Insert
     abstract override fun insert(entity: PersonDetailPresenterField): Long
 
+    @Query("SELECT * FROM PersonDetailPresenterField WHERE fieldUid = :uid")
+    abstract suspend fun findAllByFieldUid(uid: Long) : List<PersonDetailPresenterField>
+
     @Query("SELECT * FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid = :uid")
     abstract fun findByUid(uid: Long): PersonDetailPresenterField?
 
