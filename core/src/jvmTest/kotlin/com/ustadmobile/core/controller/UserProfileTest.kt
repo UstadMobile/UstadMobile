@@ -44,7 +44,7 @@ class UserProfileTest {
             }
         }
 
-        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context).personDao,impl)
+        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context),impl)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
                 "",""), context)

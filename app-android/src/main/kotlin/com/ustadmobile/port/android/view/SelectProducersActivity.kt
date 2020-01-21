@@ -25,8 +25,9 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.SelectProducersView
 import com.ustadmobile.lib.db.entities.PersonWithInventory
-import com.ustadmobile.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
-import com.ustadmobile.port.android.view.PersonEditActivity.Companion.dpToPx
+import com.ustadmobile.staging.port.android.view.PersonEditActivity
+import com.ustadmobile.staging.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
+import com.ustadmobile.staging.port.android.view.PersonEditActivity.Companion.dpToPx
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_class_student_list_cl"
-    tools:context="com.ustadmobile.port.android.view.ClazzStudentListFragment">
+    tools:context="com.ustadmobile.staging.port.android.view.ClazzStudentListFragment">
 
 
     <TextView

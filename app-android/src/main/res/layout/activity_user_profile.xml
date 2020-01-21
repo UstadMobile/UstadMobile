@@ -220,7 +220,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/dimen_16dp"
+
         android:paddingBottom="@dimen/dimen_16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -236,6 +236,8 @@
             app:srcCompat="@drawable/ic_exit_to_app_black_24dp"
             tools:layout_editor_absoluteY="243dp" />
 
+
+
         <TextView
             android:id="@+id/activity_user_profile_logout_textview"
             android:layout_width="wrap_content"
@@ -248,6 +250,46 @@
             tools:layout_editor_absoluteY="257dp" />
 
     </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/activity_user_profile_last_synced_ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/dimen_16dp"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_logout_ll">
+
+        <ImageView
+            android:id="@+id/imageView8"
+            android:layout_width="14dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="4dp"
+            app:srcCompat="@drawable/ic_done_all_black_24dp" />
+
+        <TextView
+            android:id="@+id/activity_user_prodile_last_synced"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="8dp"
+            android:layout_toEndOf="@+id/imageView8"
+            android:text="@string/last_synced_at"
+            android:textSize="12sp"
+
+            app:layout_constraintStart_toEndOf="@+id/imageView8" />
+
+
+    </RelativeLayout>
+
 
 
     <View

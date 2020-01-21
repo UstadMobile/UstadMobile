@@ -10,6 +10,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_ASSIGN_TO_CATEGORY_UID
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
@@ -164,7 +165,7 @@ class SaleProductDetailPresenter(context: Any,
         pictureLiveData = pictureDao.findByProductUidLive(currentSaleProduct!!.saleProductUid)
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            pictureLiveData.observe(thisP, thisP::handleProductPictureChanged)
+            pictureLiveData.observeWithPresenter(thisP, thisP::handleProductPictureChanged)
         }
 
     }

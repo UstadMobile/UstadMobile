@@ -9,6 +9,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.RepositoryLoadHelper
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -58,6 +59,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                                     "${encodedPath}${repo.dbPath}/ContentEntryDao/getAllEntriesRecursively"
                         }
                         header("X-nid", repo.clientId)
+                        dbVersionHeader(db)
                         parameter("contentEntryUid", contentEntryUid)
 
                         parameter("limit", fetchEntitiesLimit)
@@ -77,6 +79,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                                     "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContainer_trkReceived"
                         }
                         parameter("reqId", _requestId)
+                        dbVersionHeader(db)
                     }
                     db.contentEntryParentChildJoinDao.replaceList(_httpResult
                             .filter { it.contentEntryParentChildJoin != null }
@@ -89,6 +92,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                                     "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntryParentChildJoin_trkReceived"
                         }
                         parameter("reqId", _requestId)
+                        dbVersionHeader(db)
                     }
                     db.contentEntryDao.replaceList(_httpResult)
                     _httpClient.get<Unit> {
@@ -98,6 +102,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                                     "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntry_trkReceived"
                         }
                         parameter("reqId", _requestId)
+                        dbVersionHeader(db)
                     }
 
                     _httpResult

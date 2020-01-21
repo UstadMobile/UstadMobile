@@ -66,7 +66,6 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
         val loadingStatusInfo = statusToStatusInfoMap[status]
         if(loadingStatusInfo != null){
             GlobalScope.launch(Dispatchers.Main) {
-                statusViewProgress.
                 statusViewProgress.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
                 statusViewTextInner.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
                 statusViewText.visibility = if(!loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
@@ -86,5 +85,9 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
 
     override fun onFirstItemLoaded() {
         this.visibility = View.GONE
+    }
+
+    fun reset() {
+        this.visibility = View.VISIBLE
     }
 }

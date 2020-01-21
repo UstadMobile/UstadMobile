@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingBottom="@dimen/bottom_navigation_height"
-    tools:context="com.ustadmobile.port.android.view.ClazzListFragment">
+    tools:context="com.ustadmobile.staging.port.android.view.ClazzListFragment">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

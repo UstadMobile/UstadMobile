@@ -6,7 +6,7 @@
     android:id="@+id/activity_person_edit_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.view.PersonEditActivity">
+    tools:context="com.ustadmobile.staging.port.android.view.PersonEditActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/activity_person_edit_appbar"

@@ -59,14 +59,12 @@ subprojects {
 
 
 //Major.minor.database version
-
-version = "0.2.17"
+version = "0.9.32"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 188
-
+    ustadVersionCode = 189
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"
@@ -148,6 +146,8 @@ ext {
     version_android_seismic = "1.0.2"
     version_android_fab_extended = "0.0.4"
     version_android_rotatelayout = "3.0.0"
+    version_android_bottom_nav = "2.3.4"
+    version_play_core = "1.6.4"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

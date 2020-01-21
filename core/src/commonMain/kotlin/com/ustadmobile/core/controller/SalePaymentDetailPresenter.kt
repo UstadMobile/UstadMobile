@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SalePaymentDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.SalePaymentDetailView
 import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMENT_DEFAULT_VALUE
 import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMENT_UID
@@ -54,7 +55,7 @@ class SalePaymentDetailPresenter(context: Any,
         GlobalScope.launch {
             val resultLive = paymentDao.findByUidLive(uid)
             view.runOnUiThread(Runnable {
-                resultLive.observe(thisP, thisP::updatePaymentOnView)
+                resultLive.observeWithPresenter(thisP, thisP::updatePaymentOnView)
             })
         }
     }

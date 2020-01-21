@@ -42,7 +42,8 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, UstadViewWithSnackBa
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this, true, repository, UmAppDatabase.getInstance(viewContext))
+                bundleToMap(intent.extras), this, true, repository,
+                UmAccountManager.getActiveDatabase(viewContext))
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }

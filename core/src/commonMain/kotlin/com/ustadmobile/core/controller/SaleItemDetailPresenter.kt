@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.SaleItemReminderDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.AddReminderDialogView
 import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_DETAIL_FROM_INVENTORY
@@ -151,7 +152,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             val saleItemLiveData = saleItemDao.findByUidLive(saleItemUid)
 
             GlobalScope.launch(Dispatchers.Main) {
-                saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
+                saleItemLiveData.observeWithPresenter(thisP, thisP::handleSaleItemChanged)
             }
 
             //Observe product so we can update the toolbar
@@ -159,7 +160,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
                 val saleProductLive = repository.saleProductDao.findByUidLive(productUid)
                 GlobalScope.launch(Dispatchers.Main) {
-                    saleProductLive.observe(thisP, thisP::handleSaleProductLive)
+                    saleProductLive.observeWithPresenter(thisP, thisP::handleSaleProductLive)
                 }
             }
 
@@ -290,7 +291,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 val remindersLive =
                         reminderDao.findBySaleItemUidLive(updatedSaleItem!!.saleItemUid)
                 view.runOnUiThread(Runnable {
-                    remindersLive.observe(thisP, thisP::handleReminderLive)
+                    remindersLive.observeWithPresenter(thisP, thisP::handleReminderLive)
                 })
             }
             view.finish()

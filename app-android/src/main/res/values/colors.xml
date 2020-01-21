@@ -37,6 +37,7 @@
     <color name="icons">#000000</color>
 
     <color name="icons_light">#ABFFFFFF</color>
+
     <color name="divider">#BDBDBD</color>
     <color name="divider_faint">#50BDBDBD</color>
     <color name="divider_faint_blank">#50b4b4b4</color>

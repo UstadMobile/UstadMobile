@@ -49,7 +49,8 @@ afterEvaluate {
 
 tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().endsWith("androidtest")) {
-        task.dependsOn(":lib-http-testserver:startDaemon")
+        //TODO: This needs to depend on the new lib-http-testserver for end-to-end tests
+        //task.dependsOn(":lib-http-testserver:startDaemon")
     }
 }
 
@@ -178,8 +179,6 @@ gradle.taskGraph.useFilter { task ->
 
     return true
 }
-
-//connectedCheck.dependsOn(":lib-http-testserver:startDaemon")
 
 task generateCoreStringToAndroidResMap {
     inputs.files("../core/locale/main/**/*.xml")
@@ -450,6 +449,9 @@ dependencies {
     //extended fab
     implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
 
+    //bottom navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
+
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
@@ -458,6 +460,9 @@ dependencies {
 
     //Bottom Navigation
     implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
+
+    //Android play core for update support within the application
+    implementation "com.google.android.play:core:$version_play_core"
 
 }
 

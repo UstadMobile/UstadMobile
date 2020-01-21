@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.ReportOptions
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ReportTableListComponentView
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
 import com.ustadmobile.lib.db.entities.ReportTopLEs
@@ -59,7 +60,7 @@ class ReportTopLEsComponentPresenter(context: Any,
 
                 val resultLive = saleDao.getTopLEsLive()
                 GlobalScope.launch(Dispatchers.Main) {
-                    resultLive.observe(thisP, thisP::handleReportResultLive)
+                    resultLive.observeWithPresenter(thisP, thisP::handleReportResultLive)
                 }
 
             }

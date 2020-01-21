@@ -8,6 +8,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.SaleDeliveryDetailView.Companion.ARG_SALE_DELIVERY_SALE_UID
 import com.ustadmobile.core.view.SaleDeliveryDetailView.Companion.ARG_SALE_DELIVERY_UID
@@ -138,7 +139,7 @@ class SaleDetailPresenter(context: Any,
                 //Get the sale entity
                 val resultLive = saleDao.findByUidLive(saleUid)
                 view.runOnUiThread(Runnable {
-                    resultLive.observe(thisP, thisP::updateSaleOnView)
+                    resultLive.observeWithPresenter(thisP, thisP::updateSaleOnView)
                 })
 
                 //startObservingLocations()
@@ -201,12 +202,12 @@ class SaleDetailPresenter(context: Any,
             GlobalScope.launch {
                 val resultLive = saleItemDao.getSaleItemCountFromSaleLive(saleUid)
                 view.runOnUiThread(Runnable {
-                    resultLive.observe(thisP, thisP::updateSaleNumbers)
+                    resultLive.observeWithPresenter(thisP, thisP::updateSaleNumbers)
                 })
 
                 val resLive = saleItemDao.findTotalPaidBySaleLive(saleUid)
                 view.runOnUiThread(Runnable {
-                    resLive.observe(thisP, thisP::updateOrderTotal)
+                    resLive.observeWithPresenter(thisP, thisP::updateOrderTotal)
                 })
             }
         }
@@ -247,7 +248,7 @@ class SaleDetailPresenter(context: Any,
         GlobalScope.launch {
             val res = salePaymentDao.findTotalPaidBySaleLive(saleUid)
             view.runOnUiThread(Runnable {
-                res.observe(thisP, thisP::updatePaymentTotal)
+                res.observeWithPresenter(thisP, thisP::updatePaymentTotal)
             })
 
         }
@@ -279,7 +280,7 @@ class SaleDetailPresenter(context: Any,
         val locLive = locationDao.findAllActiveLocationsLive()
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            locLive.observe(thisP, thisP::handleLocationsChanged)
+            locLive.observeWithPresenter(thisP, thisP::handleLocationsChanged)
         }
     }
 
@@ -289,7 +290,7 @@ class SaleDetailPresenter(context: Any,
         if(updatedSale!!.saleCustomerUid != 0L){
             GlobalScope.launch(Dispatchers.Main){
                 val customerLive = personDao.findByUidLive(updatedSale!!.saleCustomerUid)
-                customerLive.observe(thisP, thisP::handleCustomerChanged)
+                customerLive.observeWithPresenter(thisP, thisP::handleCustomerChanged)
             }
         }
     }
@@ -408,7 +409,7 @@ class SaleDetailPresenter(context: Any,
                 GlobalScope.launch {
                     val resultLive = saleItemDao.getTitleForSaleUidLive(updatedSale!!.saleUid)
                     view.runOnUiThread(Runnable {
-                        resultLive.observe(thisP, thisP::handleUpdateSaleName)
+                        resultLive.observeWithPresenter(thisP, thisP::handleUpdateSaleName)
                     })
                 }
 

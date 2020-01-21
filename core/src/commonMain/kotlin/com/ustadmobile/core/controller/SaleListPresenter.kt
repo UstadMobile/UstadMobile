@@ -16,6 +16,7 @@ import com.ustadmobile.core.db.dao.SalePaymentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_GEN_NAME
@@ -151,8 +152,8 @@ class SaleListPresenter(context: Any,
         val preOrderLiveData = saleDao.getPreOrderSaleCountLive(loggedInPersonUid!!)
         val paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive(loggedInPersonUid!!)
 
-        preOrderLiveData.observe(this, this::handlePreOrderCountUpdate)
-        paymentsDueLiveData.observe(this, this::handlePaymentDueCountUpdate)
+        preOrderLiveData.observeWithPresenter(this, this::handlePreOrderCountUpdate)
+        paymentsDueLiveData.observeWithPresenter(this, this::handlePaymentDueCountUpdate)
 
     }
 

@@ -1,5 +1,8 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.lib.db.entities.Person
+import kotlin.js.JsName
+
 /**
  * Core View. Screen is for UserProfile's View
  */
@@ -32,6 +35,12 @@ interface UserProfileView : UstadView {
     fun restartUI()
 
     fun showLanguageOptions()
+
+    @JsName("loadProfileIcon")
+    fun loadProfileIcon(profile: String)
+
+    @JsName("setLoggedPerson")
+    fun setLoggedPerson(person: Person)
 
     companion object {
 

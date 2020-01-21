@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.DashboardEntryListView
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportOptionsDetailView
@@ -103,7 +104,7 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
             //Update location spinner
             tagLiveData = tagDao.findAllActiveLive()
             GlobalScope.launch(Dispatchers.Main){
-                tagLiveData.observe(thisP, thisP::handleTagsChanged)
+                tagLiveData.observeWithPresenter(thisP, thisP::handleTagsChanged)
             }
         }
     }

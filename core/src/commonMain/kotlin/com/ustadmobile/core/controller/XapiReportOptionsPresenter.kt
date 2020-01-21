@@ -1,9 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
-import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.listOfGraphs
-import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.xAxisList
-import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.yAxisList
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.db.dao.XObjectDao
@@ -16,7 +13,9 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
 import com.ustadmobile.lib.db.entities.XapiReportOptions
-import kotlinx.atomicfu.atomic
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.listOfGraphs
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.xAxisList
+import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.yAxisList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch

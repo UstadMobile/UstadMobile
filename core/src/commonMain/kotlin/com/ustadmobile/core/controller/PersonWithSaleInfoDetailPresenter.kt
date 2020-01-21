@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_UID
 import com.ustadmobile.lib.db.entities.Person
@@ -48,7 +49,7 @@ class PersonWithSaleInfoDetailPresenter(context: Any,
 
             val personLive = personDao.findByUidLive(personUid)
             view.runOnUiThread(Runnable {
-                personLive.observe(thisP, thisP::handlePersonLive)
+                personLive.observeWithPresenter(thisP, thisP::handlePersonLive)
             })
 
         }

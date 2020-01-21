@@ -8,7 +8,7 @@
     android:id="@+id/activity_person_detail_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.view.PersonDetailActivity">
+    tools:context="com.ustadmobile.staging.port.android.view.PersonDetailActivity">
 
 
     <ScrollView

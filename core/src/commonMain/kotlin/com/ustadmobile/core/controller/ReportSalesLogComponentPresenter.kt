@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.ReportOptions
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ReportTableListComponentView
 
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
@@ -60,7 +61,7 @@ class ReportSalesLogComponentPresenter(context: Any,
             val thisP = this
             val resultLive = saleDao.getSaleLogLive()
             view.runOnUiThread(Runnable {
-                resultLive.observe(thisP, thisP::handleSalesLogResultLive)
+                resultLive.observeWithPresenter(thisP, thisP::handleSalesLogResultLive)
             })
 
         }

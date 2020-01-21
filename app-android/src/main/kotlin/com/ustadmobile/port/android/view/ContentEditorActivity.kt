@@ -162,7 +162,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
 
         embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
         presenter = ContentEditorPresenter(this, args!!, this,
-                args!![CONTENT_STORAGE_OPTION], UmAppDatabase.getInstance(this),
+                args!![CONTENT_STORAGE_OPTION], UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(this)) {
 
             val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
@@ -685,7 +685,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             SCREEN_ORIENTATION_UNSPECIFIED
         }
 
-        umDb = UmAppDatabase.getInstance(applicationContext)
+        umDb = UmAccountManager.getActiveDatabase(this)
 
         umRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
 

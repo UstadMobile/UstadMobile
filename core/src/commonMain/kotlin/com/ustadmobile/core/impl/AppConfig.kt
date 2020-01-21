@@ -29,6 +29,8 @@ object AppConfig {
 
     const val KEY_SHOW_DOWNLOAD_ALL_BTN = "homescreen.show_download_all_button"
 
+    const val KEY_SHOW_LOCATION_PERMISSION_PROMPT = "homescreen.show_location_permission_prompt"
+
     const val KEY_PRELOAD_LIBRARIES = "app.preload_contents"
 
     const val KEY_SUPPORTED_LANGUAGES = "app.ui_languages"

@@ -29,6 +29,7 @@ import kotlin.js.JsName
 import kotlin.math.log
 
 class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+                     var repository : UmAppDatabase,
                      val impl: UstadMobileSystemImpl)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
@@ -43,7 +44,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
         registerCode = (impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER_CODE, "", context) ?: "")
                 .trim()
 
-        personAuthdao = UmAppDatabase.getInstance(context!!).personAuthDao
+        personAuthdao = repository.personAuthDao
 
     }
 

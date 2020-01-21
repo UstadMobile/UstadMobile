@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.Companion.ARG_PRODUCT_SELECTED_SET
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -53,7 +54,7 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
         GlobalScope.launch {
             val resultLive = parentJoinDao.findTopSaleProductsLive()
             GlobalScope.launch(Dispatchers.Main) {
-                resultLive.observe(thisP, thisP::handleProductTypes)
+                resultLive.observeWithPresenter(thisP, thisP::handleProductTypes)
             }
         }
     }

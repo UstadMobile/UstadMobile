@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_feed_list_swiperefreshlayout"
     android:paddingBottom="@dimen/bottom_navigation_height"
-    tools:context="com.ustadmobile.port.android.view.FeedListFragment">
+    tools:context="com.ustadmobile.staging.port.android.view.FeedListFragment">
 
 
 

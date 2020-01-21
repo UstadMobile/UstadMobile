@@ -49,7 +49,8 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
         WHERE (ContentEntryRelatedEntryJoin.cerejContentEntryUid = :contentEntryUid
         OR ContentEntryRelatedEntryJoin.cerejContentEntryUid IN
         (SELECT cerejContentEntryUid FROM ContentEntryRelatedEntryJoin WHERE cerejRelatedEntryUid = :contentEntryUid))
-        AND ContentEntryRelatedEntryJoin.relType = $REL_TYPE_TRANSLATED_VERSION""")
+        AND ContentEntryRelatedEntryJoin.relType = $REL_TYPE_TRANSLATED_VERSION
+        ORDER BY Language.name""")
     @JsName("findAllTranslationsWithContentEntryUid")
     abstract suspend fun findAllTranslationsWithContentEntryUid(contentEntryUid: Long): List<ContentEntryRelatedEntryJoinWithLanguage>
 

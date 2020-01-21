@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent" xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.ustadmobile.port.android.view.SELEditActivity">
+    tools:context="com.ustadmobile.staging.port.android.view.SELEditActivity">
 
 
     <com.google.android.material.appbar.AppBarLayout

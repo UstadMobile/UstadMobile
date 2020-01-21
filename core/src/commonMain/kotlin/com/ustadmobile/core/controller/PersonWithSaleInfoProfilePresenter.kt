@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoProfileView
 import com.ustadmobile.lib.db.entities.Person
@@ -49,7 +50,7 @@ class PersonWithSaleInfoProfilePresenter(context: Any,
             GlobalScope.launch {
                 val personLive = personDao.findByUidLive(personUid)
                 GlobalScope.launch(Dispatchers.Main){
-                    personLive.observe(thisP, thisP::handlePersonLive)
+                    personLive.observeWithPresenter(thisP, thisP::handlePersonLive)
                 }
             }
         }

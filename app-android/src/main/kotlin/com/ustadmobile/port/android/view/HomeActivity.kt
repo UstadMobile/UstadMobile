@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
@@ -9,39 +10,37 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.view.ContentEntryEditView
-import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
-import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
-import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.staging.core.view.SearchableListener
+import com.ustadmobile.staging.port.android.view.*
 import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener {
+
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener{
 
     private lateinit var presenter: HomePresenter
 
@@ -49,11 +48,47 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     private lateinit var profileImage: CircleImageView
 
-    private var shareAppDialog: AlertDialog? = null
+    //Position to Title map.
+    private var posToTitle:HashMap<Int, String> = HashMap()
+    //Total number of bottom Navigation items
+    private var bottomNavCount = 0
+    //The toolbar
+    private var toolbar: Toolbar? = null
+    //The toolbar title
+    private lateinit var toolbarTitle: TextView
+    //Menu options
+    private lateinit var mOptionsMenu: Menu
+    //Show settings flag
+    private var showSettings = false
+    //Show location permission dialog flag
+    private var showLocationPermissionDialog = false
+    //The search view
+    private lateinit var searchView : SearchView
+
+    //A reference to current fragment so we can search for search
+    private var currentFragment: UstadBaseFragment? = null
+
+    val impl = UstadMobileSystemImpl.instance
+
+    /**
+     * In case we have addition bottom nav items, add icons here and map to their labels
+     */
+    private val bottomLabelToIconMap = mapOf(
+            MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
+            MessageID.contents to R.drawable.ic_local_library_black_24dp,
+            MessageID.bottomnav_feed_title to FeedListFragment.icon,
+            MessageID.bottomnav_content_title to ContentListFragment.icon,
+            MessageID.bottomnav_classes_title to ClazzListFragment.icon,
+            MessageID.bottomnav_people_title to PeopleListFragment.icon,
+            MessageID.bottomnav_reports_title to ReportSelectionFragment.icon
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        toolbar = findViewById(R.id.entry_toolbar)
+        toolbarTitle = findViewById(R.id.toolBarTitle)
 
         downloadAllBtn = findViewById(R.id.download_all)
 
@@ -61,21 +96,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         coordinatorLayout = findViewById(R.id.coordinationLayout)
         profileImage = findViewById(R.id.profile_image)
         setSupportActionBar(toolbar)
-        findViewById<TextView>(R.id.toolBarTitle).setText(R.string.app_name)
+        toolbarTitle.setText(R.string.app_name)
 
-        val viewPager = findViewById<ViewPager>(R.id.library_viewpager)
-        viewPager.adapter = LibraryPagerAdapter(supportFragmentManager, this)
-        val tabLayout = findViewById<TabLayout>(R.id.tabs)
-        tabLayout.setupWithViewPager(viewPager)
 
         downloadAllBtn.setOnClickListener {
             presenter.handleDownloadAllClicked()
         }
 
-        viewPager.addOnPageChangeListener(this)
-
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAppDatabase.getInstance(this).personDao,
+                this, UmAccountManager.getActiveDatabase(this).personDao,
                 UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
@@ -94,12 +123,198 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_home_activity, menu)
+        mOptionsMenu = menu
+
+        val settingsMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_settings)
+
+        if (settingsMenuItem != null) {
+            settingsMenuItem.isVisible = showSettings
+        }
+
+        //Search stuff
+        // Associate searchable configuration with the SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        searchView = menu.findItem(R.id.menu_home_activity_search).actionView as SearchView
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(componentName))
+        searchView.maxWidth = Integer.MAX_VALUE
+
+        //Set visibility based on current fragment
+        searchView.isVisible = currentFragment is SearchableListener
+        val searchViewMenuItem = menu.findItem(R.id.menu_home_activity_search)
+        if(searchViewMenuItem != null){
+            searchViewMenuItem.isVisible = currentFragment is SearchableListener
+        }
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                // filter recycler view when query submitted
+                searchLogic(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String): Boolean {
+                // filter recycler view when query changed
+                searchLogic(query)
+                return false
+            }
+        })
+
+        searchView.setOnCloseListener{
+            // filter recycler view when query submitted
+            searchLogic( "")
+            false
+        }
+
+        //Bulk upload for ClassBook
+        val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
+        if(bulkUploadMenuItem != null){
+            val bulkUploadVisibility = impl.getAppConfigString(
+                    AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
+            if(bulkUploadVisibility){
+                bulkUploadMenuItem.isVisible = showSettings
+            }
+        }
+
         return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun searchLogic(query: String){
+        val currentFragmentNN = currentFragment
+        if(currentFragmentNN != null && currentFragmentNN is SearchableListener){
+            (currentFragmentNN as SearchableListener).onSearchQueryUpdated(query)
+        }
     }
 
     override fun setLoggedPerson(person: Person) {}
 
-    override fun showReportMenu(show: Boolean) {}
+    /**
+     * Updates the toolbar's title
+     * @param title The string of the title to be set to the toolbar
+     */
+    private fun updateTitle(title: String) {
+        toolbar!!.title = title
+        toolbarTitle.text = title
+    }
+
+    override fun setOptions(options: List<Pair<Int, String>>) {
+        //Remove all items before adding it.
+        umBottomNavigation.removeAllItems()
+
+        options.forEach {
+            val titleID = it.first
+            val titleString = impl.getString(titleID, this)
+            val viewName = it.second
+
+            val navIcon = bottomLabelToIconMap[it.first]
+            if(navIcon != null){
+                val navigationItem = AHBottomNavigationItem(
+                        impl.getString(it.first, this), navIcon)
+                umBottomNavigation.addItem(navigationItem)
+                //Assign title to the bottom nav position.
+                posToTitle[bottomNavCount] = titleString
+            }
+
+            bottomNavCount ++
+        }
+        umBottomNavigation.visibility = if(options.size > 1) View.VISIBLE else View.GONE
+
+        umBottomNavigation.defaultBackgroundColor = ContextCompat.getColor(this, R.color.primary)
+        umBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.icons)
+        umBottomNavigation.inactiveColor = ContextCompat.getColor(this, R.color.primary_dark)
+        umBottomNavigation.isBehaviorTranslationEnabled = false
+        umBottomNavigation.currentItem = 0
+        umBottomNavigation.titleState = AHBottomNavigation.TitleState.ALWAYS_SHOW
+        umBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
+            handleFragmentTransaction(options[position].second)
+            true
+        }
+
+        //Set title of bottom navigation selected
+        umBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
+            handleFragmentTransaction(options[position].second)
+            //Update title
+            when (position) {
+                position -> {
+                    val titleString = posToTitle[position]
+                    updateTitle(titleString!!)
+                }
+            }
+            true
+        }
+
+        handleFragmentTransaction(options[0].second)
+
+        //Set the title of current default selection
+        val titleString = posToTitle[0]
+        updateTitle(titleString!!)
+    }
+
+    private fun handleFragmentTransaction(params: String){
+        val bundle = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(params))
+        if(bundle != null){
+
+            val selectedFragment = when {
+                params.contains(ContentEntryListView.VIEW_NAME) -> {
+                    bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
+                    bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
+                    ContentEntryListFragment.newInstance(bundle)
+                }
+                params.contains(FeedListView.VIEW_NAME) -> {
+                    FeedListFragment.newInstance()
+                }
+                params.contains(ContentEntryListView.VIEW_NAME) -> {
+                    ContentListFragment.newInstance()
+                }
+                params.contains(ClazzListView.VIEW_NAME) -> {
+                    ClazzListFragment.newInstance()
+                }
+                params.contains(PeopleListView.VIEW_NAME) -> {
+                    PeopleListFragment.newInstance()
+                }
+                params.contains(BaseReportView.VIEW_NAME) -> {
+                    ReportSelectionFragment.newInstance()
+                }
+                else -> {
+                    ReportDashboard()
+                }
+            }
+            currentFragment = selectedFragment
+
+            val fragmentManager:FragmentManager = supportFragmentManager
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.replace(R.id.um_host_fragment,selectedFragment,selectedFragment.tag)
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }
+    }
+
+    override fun showSettings(show: Boolean) {
+
+        showSettings = show
+        if(::mOptionsMenu.isInitialized) {
+            val settingsMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_settings)
+            if (settingsMenuItem != null) {
+                settingsMenuItem.isVisible = showSettings
+            }
+
+            //Bulk upload for ClassBook
+            val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
+            if(bulkUploadMenuItem != null){
+                val bulkUploadVisibility = impl.getAppConfigString(
+                        AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
+                if(bulkUploadVisibility){
+                    bulkUploadMenuItem.isVisible = showSettings
+                }
+            }
+        }
+    }
+
+    override fun showLocationPermissionDialog(show: Boolean) {
+
+
+    }
 
     override fun onPageScrollStateChanged(state: Int) {}
 
@@ -124,6 +339,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
+            R.id.menu_home_activity_settings -> presenter.handleClickSettings()
+            //Bulk upload for ClassBook
+            R.id.menu_action_bulk_upload_master -> presenter.handleClickBulkUpload()
         }
 
         return super.onOptionsItemSelected(item)
@@ -131,7 +349,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        val impl = UstadMobileSystemImpl.instance
+        if(!showLocationPermissionDialog){
+            return
+        }
         val locationPermissionArr =arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION)
         val dialogTitle =impl.getString(MessageID.location_permission_title, this)
@@ -178,45 +398,5 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         val dialog = ShareAppOfflineDialogFragment()
         dialog.show(supportFragmentManager, "SHARE_APP_DIALOG")
     }
-
-
-    class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
-        private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
-
-        // Returns total number of pages
-        override fun getCount(): Int {
-            val activeAccount = UmAccountManager.getActiveAccount(context)
-            return if( activeAccount != null && activeAccount.personUid != 0L) 3 else 2
-        }
-
-        // Returns the fragment to display for that page
-        override fun getItem(position: Int): Fragment? {
-            val bundle = Bundle()
-            bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
-            bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
-            when (position) {
-                0 // Fragment # 0 - This will show FirstFragment
-                ->  bundle.putString(ARG_LIBRARIES_CONTENT, "")
-                1 // Fragment # 1 - This will show FirstFragment different title
-                ->   bundle.putString(ARG_DOWNLOADED_CONTENT, "")
-                2 // Fragment # 2 - This will show FirstFragment different title
-                ->  bundle.putString(ARG_RECYCLED_CONTENT, "")
-            }
-            return ContentEntryListFragment.newInstance(bundle)
-        }
-
-        // Returns the page title for the top indicator
-        override fun getPageTitle(position: Int): CharSequence? {
-
-            when (position) {
-                0 -> return impl.getString(MessageID.libraries, context)
-                1 -> return impl.getString(MessageID.downloaded, context)
-                2 -> return impl.getString(MessageID.recycled, context)
-            }
-            return null
-
-        }
-    }
-
 
 }

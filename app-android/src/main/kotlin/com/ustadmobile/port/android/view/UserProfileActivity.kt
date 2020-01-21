@@ -32,10 +32,18 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.staging.port.android.view.CircleTransform
 import id.zelory.compressor.Compressor
 import java.io.*
 
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
+
+    override fun setLoggedPerson(person: Person) {
+    }
+
+    override fun loadProfileIcon(profile: String) {
+    }
 
 
     private var toolbar: Toolbar? = null

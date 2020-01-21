@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.Companion.ARG_ADD_TO_CATEGORY_TYPE_CATEGORY
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.Companion.ARG_ADD_TO_CATEGORY_TYPE_ITEM
@@ -113,7 +114,7 @@ class SaleProductCategoryListPresenter(context: Any,
                 try{
                     val categoryLive = productDao.findByUidLive(arguments[ARG_SALEPRODUCT_UID]!!.toLong())
                     view.runOnUiThread(Runnable {
-                        categoryLive.observe(thisP, thisP::setCategoryLiveOnView)
+                        categoryLive.observeWithPresenter(thisP, thisP::setCategoryLiveOnView)
                     })
 
                 }catch(e:Exception){

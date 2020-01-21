@@ -59,7 +59,7 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
         if(context is UstadBaseActivity){
             presenter = ContentEntryExportPresenter(activity!!, UMAndroidUtil.bundleToMap(arguments),
                     this,UmAccountManager.getRepositoryForActiveAccount(activity!!),
-                    UmAppDatabase.getInstance(context),impl)
+                    UmAccountManager.getActiveDatabase(context),impl)
             baseActivity = context
         }
         super.onAttach(context)

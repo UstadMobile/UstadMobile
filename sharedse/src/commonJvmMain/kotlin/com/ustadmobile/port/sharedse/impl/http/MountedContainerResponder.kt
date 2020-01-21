@@ -80,13 +80,14 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
             val pathInContainer = requestUri.substring(
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
             val containerUid = uriResource.uri.split("/")[CONTAINER_UID_INDEX].toLong()
-            val context = uriResource.initParameter(0, Any::class.java)
-            val entryFile = UmAppDatabase.getInstance(context).containerEntryDao
+            val context = uriResource.initParameter(PARAM_CONTEXT_INDEX, Any::class.java)
+            val appDb = uriResource.initParameter(PARAM_DB_INDEX, UmAppDatabase::class.java)
+            val entryFile = appDb.containerEntryDao
                     .findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
                             "text/plain", "Entry not found in container")
 
-            val filterList = uriResource.initParameter(1, List::class.java)
+            val filterList = uriResource.initParameter(PARAM_FILTERS_INDEX, List::class.java)
                     as List<MountedContainerFilter>
             var response = newResponseFromFile(uriResource, session,
                     FileSource(File(entryFile.containerEntryFile!!.cefPath!!)))
@@ -132,6 +133,12 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
         const val CONTAINER_UID_INDEX = 1
 
         private val HTML_EXTENSIONS = ArrayList<String>()
+
+        const val PARAM_CONTEXT_INDEX = 0
+
+        const val PARAM_FILTERS_INDEX = 1
+
+        const val PARAM_DB_INDEX = 2
 
         init {
             HTML_EXTENSIONS.add("xhtml")

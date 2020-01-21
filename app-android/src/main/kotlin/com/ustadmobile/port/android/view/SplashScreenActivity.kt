@@ -54,10 +54,10 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashScreenView
-import com.ustadmobile.port.android.impl.ClazzLogScheduleWorker
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+import com.ustadmobile.staging.port.android.impl.ClazzLogScheduleWorker
 
 
 class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterface.OnClickListener{

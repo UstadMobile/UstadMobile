@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.lib.db.entities.SaleListDetail
 
 import com.ustadmobile.core.db.dao.SaleDao
+import com.ustadmobile.core.util.ext.observeWithPresenter
 
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleListSearchView.Companion.SORT_HIGHEST_PRICE
@@ -130,7 +131,7 @@ class SaleListSearchPresenter(context: Any,
         locationLiveData = locationDao.findAllActiveLocationsProvider()
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            locationLiveData!!.observe(thisP, thisP::handleLocationsChanged)
+            locationLiveData!!.observeWithPresenter(thisP, thisP::handleLocationsChanged)
         }
 
         idToOrderInteger = HashMap<Long, Int>()

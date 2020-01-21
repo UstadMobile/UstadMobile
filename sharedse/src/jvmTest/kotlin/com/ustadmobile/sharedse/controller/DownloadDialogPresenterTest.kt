@@ -3,6 +3,9 @@ package com.ustadmobile.sharedse.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
@@ -48,6 +51,10 @@ class DownloadDialogPresenterTest {
 
     private lateinit var containerDownloadManager: ContainerDownloadManager
 
+    private lateinit var systemImpl: UstadMobileSystemImpl
+
+    private lateinit var storageDirs: List<UMStorageDir>
+
     @Before
     @Throws(IOException::class)
     fun setUp() {
@@ -64,12 +71,25 @@ class DownloadDialogPresenterTest {
         umAppDatabaseRepo = umAppDatabase.asRepository(context,"http://localhost/dummy/", "",
                 defaultHttpClient(), null)
 
-        val httpd = EmbeddedHTTPD(0, context)
+        val httpd = EmbeddedHTTPD(0, context, umAppDatabase, umAppDatabaseRepo)
         httpd.start()
 
         containerDownloadManager = mock {}
 
         contentEntrySet = insertTestContentEntries(umAppDatabase, System.currentTimeMillis())
+        storageDirs = listOf(UMStorageDir("/", name="Phone", isAvailable = true,
+                isUserSpecific = false, removableMedia = false,
+                usableSpace = 10 * 1024 * 1024 * 1024L))
+
+        systemImpl = mock {
+            on { getString(any(), any())}.thenAnswer {
+                "${it.arguments[0]}"
+            }
+
+            onBlocking { getStorageDirsAsync(any()) }.thenAnswer {
+                storageDirs
+            }
+        }
     }
 
     @Test
@@ -89,21 +109,58 @@ class DownloadDialogPresenterTest {
 
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager)
+                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    impl = systemImpl)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
 
-            verifyBlocking(contentEntryDaoSpy, timeout(5000 * 1000)) { getRecursiveDownloadTotals(contentEntrySet.rootEntry.contentEntryUid) }
+            verifyBlocking(contentEntryDaoSpy, timeout(5000)) { getRecursiveDownloadTotals(contentEntrySet.rootEntry.contentEntryUid) }
 
             verify(mockedDialogView, timeout(5000)).setStatusText(any(),
                     eq(2), eq(UMFileUtil.formatFileSize(1000)))
+            verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningTextVisible(false)
 
             assertNull("No download job should be created if the user does not select to download",
                     umAppDatabase.downloadJobDao.findDownloadJobByRootContentEntryUid(
                             contentEntrySet.rootEntry.contentEntryUid))
         }
 
+    }
+
+    @Test
+    fun givenNoExistingDownload_whenDownloadSizeExceedsAvaiableSpace_shouldShowWarningMessageAndDisableButton() {
+        val contentEntryDaoSpy = spy(umAppDatabase.contentEntryDao) {
+            onBlocking {getRecursiveDownloadTotals(eq(contentEntrySet.rootEntry.contentEntryUid)) } doReturn DownloadJobSizeInfo(2, 1000)
+        }
+        umAppDatabaseRepo = spy(umAppDatabaseRepo) {
+            on { contentEntryDao } doReturn contentEntryDaoSpy
+        }
+
+        runBlocking {
+            val downloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(null)
+            val downloadJobLiveData = DoorMutableLiveData<DownloadJob?>(null)
+            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(any()))
+                    .thenReturn(downloadJobItemLiveData)
+            whenever(containerDownloadManager.getDownloadJob(any())).thenReturn(downloadJobLiveData)
+
+            storageDirs = listOf(UMStorageDir("/", name="Phone", isAvailable = true,
+                    isUserSpecific = false, removableMedia = false,
+                    usableSpace = 10L))
+
+            presenter = DownloadDialogPresenter(context,
+                    mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
+                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    impl = systemImpl)
+
+            presenter.onCreate(mapOf())
+            presenter.onStart()
+
+            verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningTextVisible(true)
+            verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningText(
+                    MessageID.insufficient_space.toString())
+            verify(mockedDialogView, timeout(5000).atLeastOnce()).setBottomPositiveButtonEnabled(false)
+        }
     }
 
 
@@ -152,7 +209,7 @@ class DownloadDialogPresenterTest {
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
                     mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
-                    preparerFn)
+                    systemImpl, preparerFn)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -172,7 +229,7 @@ class DownloadDialogPresenterTest {
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
                     mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
-                    preparerFn)
+                    systemImpl, preparerFn)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -192,7 +249,7 @@ class DownloadDialogPresenterTest {
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
                     mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
-                    preparerFn)
+                    systemImpl, preparerFn)
 
             presenter.onCreate(mapOf())
             presenter.onStart()
@@ -237,7 +294,7 @@ class DownloadDialogPresenterTest {
 
         presenter = DownloadDialogPresenter(context, args, mockedDialogView,
                 umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
-                downloadJobPreparerRequester)
+                systemImpl, downloadJobPreparerRequester)
         presenter.onCreate(mapOf())
         presenter.onStart()
         viewReadyLatch.await(5, TimeUnit.SECONDS)
@@ -325,7 +382,8 @@ class DownloadDialogPresenterTest {
 
             val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
             presenter = DownloadDialogPresenter(context, args, mockedDialogView,
-                    umAppDatabase, umAppDatabaseRepo, containerDownloadManager, { Int, Any -> Unit })
+                    umAppDatabase, umAppDatabaseRepo, containerDownloadManager, systemImpl,
+                    { Int, Any -> Unit })
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
@@ -359,7 +417,7 @@ class DownloadDialogPresenterTest {
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
                     mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
-                    {Int, Any -> Unit})
+                    systemImpl, {Int, Any -> Unit})
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
@@ -390,7 +448,8 @@ class DownloadDialogPresenterTest {
                     .thenReturn(existingDownloadJobItemLiveData)
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"), mockedDialogView,
-                    umAppDatabase, umAppDatabaseRepo, containerDownloadManager, { Int, Any -> Unit })
+                    umAppDatabase, umAppDatabaseRepo, containerDownloadManager, impl = systemImpl)
+                    { Int, Any -> Unit }
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 

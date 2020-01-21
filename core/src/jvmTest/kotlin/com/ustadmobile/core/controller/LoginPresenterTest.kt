@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
@@ -9,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -29,6 +31,8 @@ class LoginPresenterTest {
 
     private lateinit var mockWebServer: MockWebServer
 
+    private lateinit var umAppDatabase: UmAppDatabase
+
     @Before
     fun setUp(){
         view = mock {
@@ -38,7 +42,8 @@ class LoginPresenterTest {
             }
         }
         impl = mock ()
-        presenter = LoginPresenter(context, mapOf(), view, impl)
+        umAppDatabase = UmAppDatabase.getInstance(context)
+        presenter = LoginPresenter(context, mapOf(), view, umAppDatabase, impl)
         mockWebServer = MockWebServer()
         mockWebServer.start()
     }
@@ -95,14 +100,15 @@ class LoginPresenterTest {
 
         val httpUrl = mockWebServer.url("/").toString()
 
+        bindJndiForActiveEndpoint(httpUrl)
+
         val presenter = LoginPresenter(context,
                 mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl,
-                        LoginPresenter.ARG_NEXT to "somewhere"), view, impl)
+                        LoginPresenter.ARG_NEXT to "somewhere"), view, umAppDatabase, impl)
 
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
 
-        verify(impl, timeout(5000 )).go("somewhere",
-                context)
+        verify(impl, timeout(5000)).go("somewhere", context)
 
         val activeAccount = UmAccountManager.getActiveAccount(context)
         Assert.assertNotNull(activeAccount)
@@ -117,7 +123,7 @@ class LoginPresenterTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(403))
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, umAppDatabase, impl)
         presenter.handleClickLogin(VALID_USER, "wrongpassword", httpUrl)
 
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
@@ -138,7 +144,7 @@ class LoginPresenterTest {
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, umAppDatabase, impl)
         presenter.handleClickLogin(VALID_USER, VALID_PASS, httpUrl)
         val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
                 MessageID.login_network_error, Any())
@@ -165,7 +171,7 @@ class LoginPresenterTest {
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = LoginPresenter(context,
-                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, impl)
+                mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl), view, umAppDatabase, impl)
 
         presenter.handleClickCreateAccount()
 

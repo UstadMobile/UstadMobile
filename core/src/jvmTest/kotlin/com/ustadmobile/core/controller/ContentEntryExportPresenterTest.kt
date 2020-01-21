@@ -5,12 +5,11 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.bindDbForActiveContext
 import com.ustadmobile.core.view.ContentEntryExportView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.util.test.AbstractContentEntryExportTest
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -36,8 +35,9 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
 
     @Before
     fun setUp(){
+        UmAccountManager.bindDbForActiveContext(context)
         umAppRepository = UmAccountManager.getRepositoryForActiveAccount(context)
-        umAppDatabase = UmAppDatabase.getInstance(context)
+        umAppDatabase = UmAccountManager.getActiveDatabase(context)
         insertContainer(umAppDatabase, umAppRepository)
         val containerTmpDir = File.createTempFile("testcontainerdir", "tmp")
         containerTmpDir.delete()
@@ -67,6 +67,14 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
 
     }
 
+    @After
+    fun cleanUp(){
+        val exportedFile = File(presenter.destinationZipFile)
+        if(exportedFile.exists()){
+            exportedFile.delete()
+        }
+    }
+
 
 
     @Test
@@ -89,7 +97,6 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
             presenter.handleClickPositive()
 
             verify(mockView, timeout(TimeUnit.SECONDS.toMillis(3))).prepareProgressView(eq(true))
-            File(presenter.destinationZipFile).delete()
         }
     }
 
@@ -104,7 +111,6 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
             presenter.handleClickNegative()
 
             verify(mockView, timeout(TimeUnit.SECONDS.toMillis(2))).dismissDialog()
-            File(presenter.destinationZipFile).delete()
         }
     }
 

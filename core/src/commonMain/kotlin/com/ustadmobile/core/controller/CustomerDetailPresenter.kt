@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.RoleDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.CustomerDetailView
 import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CD_LE_UID
 import com.ustadmobile.core.view.CustomerDetailView.Companion.ARG_CUSTOMER_UID
@@ -66,7 +67,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
         val locLive = locationDao.findAllActiveLocationsLive()
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            locLive.observe(thisP, thisP::handleLocationsChanged)
+            locLive.observeWithPresenter(thisP, thisP::handleLocationsChanged)
         }
     }
 
@@ -163,7 +164,7 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
 
             val resultLive = personDao.findByUidLive(customerUid)
             view.runOnUiThread(Runnable {
-                resultLive.observe(thisP, thisP::updateCustomerOnView)
+                resultLive.observeWithPresenter(thisP, thisP::updateCustomerOnView)
             })
 
             startObservingLocations()

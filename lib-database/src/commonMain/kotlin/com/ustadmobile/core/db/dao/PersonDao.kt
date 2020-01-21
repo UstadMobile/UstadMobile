@@ -67,8 +67,9 @@ abstract class  PersonDao : BaseDao<Person> {
     }
 
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
-    open suspend fun doesUsernameExists(username: String): Boolean {
+    open suspend fun isUsernameAvailable(username: String): Boolean {
         val count = findByUsernameCount(username)
+        println("count: " + count)
         return count == 0
     }
 
@@ -294,7 +295,7 @@ abstract class  PersonDao : BaseDao<Person> {
 
     private suspend fun createPersonCommon(person: Person, loggedInPersonUid: Long): PersonWithGroup{
 
-        //TODO : Use insertOrReplace
+        //Always will be a new person. No need to user insertOrReplace()
         val personUid = insertAsync(person)
         person.personUid = personUid
 

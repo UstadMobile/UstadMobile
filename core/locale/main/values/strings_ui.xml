@@ -22,7 +22,9 @@
     <string name='ok'>OK</string>
     <string name="confirm">Confirm</string>
     <string name='cancel'>Cancel</string>
+    <string name='canceled'>Canceled</string>
     <string name='delete'>Delete</string>
+    <string name='deleted'>Deleted</string>
     <string name='new_tab'>Displaying on new Tab</string>
 
 
@@ -87,6 +89,7 @@
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
+    <string name='contents'>Contents</string>
     <string name='students'>Account</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='connections'>Connection</string>
@@ -117,6 +120,7 @@
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
     <string name="success">Success</string>
+    <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>
@@ -218,6 +222,7 @@
     <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
     <string name="download_locally_availability">Available nearby</string>
     <string name="download_cloud_availability">Available on cloud</string>
+    <string name="insufficient_space">Insufficient storage space available</string>
     <string name="clear_history">Clear History</string>
     <string name="download_entry_state_paused">Paused</string>
     <string name="download_entry_state_queued">Queued</string>

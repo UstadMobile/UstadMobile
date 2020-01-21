@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.impl.http
 
+import com.nhaarman.mockitokotlin2.whenever
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
@@ -84,6 +85,7 @@ class TestMountedContainerResponder {
         `when`(mockUriResource.initParameter(0, Any::class.java))
                 .thenReturn(context)
         `when`(mockUriResource.initParameter(1, MutableList::class.java)).thenReturn(mutableListOf<Any>())
+        whenever(mockUriResource.initParameter(2, UmAppDatabase::class.java)).thenReturn(db)
         `when`(mockUriResource.uri).thenReturn(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
 
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
@@ -112,6 +114,7 @@ class TestMountedContainerResponder {
         `when`(mockUriResource.initParameter(0, Any::class.java))
                 .thenReturn(context)
         `when`(mockUriResource.initParameter(1, MutableList::class.java)).thenReturn(mutableListOf<Any>())
+        whenever(mockUriResource.initParameter(2, UmAppDatabase::class.java)).thenReturn(db)
         `when`(mockUriResource.uri).thenReturn(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
 
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)

@@ -27,8 +27,8 @@ abstract class PersonCustomFieldDao : BaseDao<PersonField> {
     @Query("SELECT MAX(personCustomFieldUid) FROM PersonField")
     abstract fun findLatestUid(): Int
 
-    @Query("SELECT * FROM PersonField WHERE personCustomFieldUid > :minCustomFieldUid")
-    abstract suspend fun findAllCustomFields(minCustomFieldUid: Int) : List<PersonField>
+    @Query("SELECT * FROM PersonField ")
+    abstract suspend fun findAllCustomFields() : List<PersonField>
 
     @Query("SELECT * FROM PersonField WHERE fieldName = :name")
     abstract suspend fun findByFieldNameAsync(name: String) : List<PersonField>

@@ -3,7 +3,9 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -30,6 +32,7 @@ object UmAccountManager {
     private const val PREFKEY_PASSWORD_HASH_PERSONUID = "umaccount.passwordhashpersonuid"
     const val PREFKEY_PASSWORD_HASH_USERNAME = "umaccount.passwordhashusername"
     private const val PREFKEY_FINGERPRIT_ACCESS_TOKEN = "umaccount.fingerprintaccesstoken"
+    val activeAccountLiveData = DoorMutableLiveData<UmAccount?>(null)
 
     @Synchronized
     fun getActiveAccount(context: Any, impl: UstadMobileSystemImpl): UmAccount? {
@@ -41,6 +44,7 @@ object UmAccountManager {
             activeAccount = UmAccount(personUid, impl.getAppPref(PREFKEY_USERNAME, context),
                     impl.getAppPref(PREFKEY_ACCESS_TOKEN, context),
                     impl.getAppPref(PREFKEY_ENDPOINT_URL, context))
+            activeAccountLiveData.sendValue(activeAccount)
         }
 
         return activeAccount
@@ -82,6 +86,8 @@ object UmAccountManager {
             impl.setAppPref(PREFKEY_ACCESS_TOKEN, null, context)
             impl.setAppPref(PREFKEY_ENDPOINT_URL, null, context)
         }
+
+        activeAccountLiveData.sendValue(account)
     }
 
     @JsName("setActiveAccountWithContext")
@@ -100,15 +106,13 @@ object UmAccountManager {
                     "http://localhost", context) ?: "http://localhost"
         }
 
-        val db = UmAppDatabase.getInstance(context)
         if(activeAccountRepository == null) {
+            val db = getActiveDatabase(context)
             if (activeAccount == null) {
                 activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }else {
                 activeAccountRepository = db.asRepository(context, serverUrl, "", defaultHttpClient())!!
             }
-
-
         }
 
         return activeAccountRepository!!
@@ -167,6 +171,14 @@ object UmAccountManager {
     }
     fun getCachedPersonUid(context:Any, impl:UstadMobileSystemImpl):Long {
         return impl.getAppPref(PREFKEY_PASSWORD_HASH_PERSONUID, context)!!.toLong()
+    }
+
+    /**
+     * Get the main database for the currently active endpoint
+     */
+    fun getActiveDatabase(context: Any): UmAppDatabase {
+        val activeEndpoint = getActiveEndpoint(context)
+        return UmAppDatabase.getInstance(context, sanitizeDbNameFromUrl(activeEndpoint))
     }
 
 }

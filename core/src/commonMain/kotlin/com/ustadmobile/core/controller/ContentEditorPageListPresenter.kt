@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.UstadView
@@ -27,7 +28,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
         super.onCreate(savedState)
 
         entryLiveData  = contentEntryDao.findLiveContentEntry(entryUuid)
-        entryLiveData!!.observe(this, this::onEntryValueChanged)
+        entryLiveData!!.observeWithPresenter(this, this::onEntryValueChanged)
     }
 
 

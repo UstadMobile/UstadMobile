@@ -16,7 +16,6 @@
 
     <string name='previous'>Previous</string>
 
-
     <string name="login_network_error">خطای شبکه: لطفا چک کنید که آنلاین هستید</string>
     <string name="ok">درست</string>
     <string name="confirm">تائید </string>
@@ -86,6 +85,7 @@
     <string name="data_usage">استفاده از داده</string>
     <string name="enable_supernode">سوپرنود را فعال سازید</string>
 
+    <string name='contents'>Contents</string>
     <string name="modify">اصلاح</string>
     <string name="open">باز کردن</string>
 

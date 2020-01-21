@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.ReportOptions
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ReportBarChartComponentView
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
 import com.ustadmobile.lib.db.entities.ReportSalesPerformance
@@ -64,7 +65,7 @@ class ReportChartViewComponentPresenter(context: Any,
                         reportOptions.fromPrice, reportOptions.toPrice)
                 //view.runOnUiThread(Runnable {
                 GlobalScope.launch(Dispatchers.Main) {
-                    resultLive.observe(thisP, thisP::handleReportLive)
+                    resultLive.observeWithPresenter(thisP, thisP::handleReportLive)
                 }
 
             }

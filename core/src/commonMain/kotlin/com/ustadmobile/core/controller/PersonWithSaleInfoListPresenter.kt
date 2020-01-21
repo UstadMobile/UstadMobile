@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_UID
 import com.ustadmobile.lib.db.entities.Person
@@ -56,7 +57,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
         GlobalScope.launch {
             val personLive = personDao.findByUidLive(personUid)
             GlobalScope.launch(Main){
-                personLive.observe(thisP, thisP::observePerson)
+                personLive.observeWithPresenter(thisP, thisP::observePerson)
             }
         }
     }

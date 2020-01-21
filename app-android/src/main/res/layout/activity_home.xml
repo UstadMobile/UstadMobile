@@ -6,25 +6,27 @@
     android:id="@+id/coordinationLayout"
     android:layout_height="match_parent">
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/library_viewpager"
+    <FrameLayout
+        android:layout_below="@id/appBar"
+        android:paddingBottom="@dimen/bottom_navigation_height"
+        android:id="@+id/um_host_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tabs"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
+        android:id="@+id/appBar"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        android:theme="@style/ToolbarDark">
+        android:elevation="@dimen/dimen_4dp">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:contentScrim="?colorPrimary"
-            app:expandedTitleMarginStart="48dp"
+            app:expandedTitleMarginStart="0dp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:titleEnabled="false">
 
@@ -34,40 +36,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?attr/colorPrimary"
+                android:elevation="0dp"
                 android:minHeight="?attr/actionBarSize"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:theme="@style/ToolbarDark">
+                android:titleTextColor="@color/toolbar">
 
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:layout_centerVertical="true"
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
                         android:id="@+id/profile_image"
                         android:layout_width="@dimen/dimen_30dp"
                         android:layout_height="@dimen/dimen_30dp"
-                        android:visibility="gone"
-                        app:civ_border_width="2dp"
-                        app:civ_border_color="@color/primary_light"/>
+                        android:layout_centerVertical="true"
+                        android:visibility="visible"
+                        app:civ_border_color="@color/primary_light"
+                        app:civ_border_width="2dp" />
 
 
                     <TextView
                         android:id="@+id/toolBarTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="56dp"
+                        android:layout_marginStart="@dimen/dimen_16dp"
+                        android:layout_toEndOf="@+id/profile_image"
                         android:background="?attr/colorPrimary"
                         android:gravity="center_vertical|start"
                         android:minHeight="?attr/actionBarSize"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/primary_text"
                         android:textSize="@dimen/text_title"
-                        android:layout_toEndOf="@+id/profile_image"
-                        android:layout_marginStart="@dimen/dimen_16dp"
-                        android:textStyle="bold"
-                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                        app:theme="@style/ToolbarDark" />
+                        android:textStyle="bold" />
                 </RelativeLayout>
 
 
@@ -75,21 +74,22 @@
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            style="@style/TabLayoutStyleHome"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabTextColor="@color/primary_light"
-            android:background="?attr/colorPrimary"/>
-
     </com.google.android.material.appbar.AppBarLayout>
 
+
+
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+        app:layout_anchorGravity="bottom"
+        android:visibility="gone"
+        android:id="@+id/umBottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"/>
+
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:elevation="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_16dp"
-        app:layout_anchor="@id/library_viewpager"
+        android:elevation="8dp"
+        android:layout_marginBottom="@dimen/dimen_40dp"
+        app:layout_anchor="@id/um_host_fragment"
         android:id="@+id/download_all"
         android:layout_width="wrap_content"
         android:padding="@dimen/dimen_8dp"

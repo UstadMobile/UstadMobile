@@ -3,6 +3,7 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -30,7 +31,8 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class
+    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
+    SyncResult::class
 
     //Goldozi :
     ,Sale::class, SaleItem::class, SalePayment::class,
@@ -42,8 +44,9 @@ import kotlin.jvm.Volatile
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
-    ], version = 102029)
+    ], version = 102032)
 
+@MinSyncVersion(102032)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -389,6 +392,34 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""DROP TABLE SelQuestionSetRecognition_OLD""")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
+                }
+            }
+        }
+
+        val MIGRATION_102030_102031 = object : DoorMigration(102030, 102031) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
+                }
+            }
+        }
+
+        val MIGRATION_102031_102032 = object : DoorMigration(102031, 102032) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (  
+                        |tableId  INTEGER NOT NULL, status  INTEGER NOT NULL, localCsn  INTEGER NOT NULL, 
+                        |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
+                        |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
+                        |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
+                        |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
+                        |  remoteCsn  INTEGER , syncType  INTEGER , 
+                        |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
+                        |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
                 }
             }
         }
@@ -753,60 +784,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         /**
-         * added personAddedByUid in Person
-         *
+         * Triggers
          */
-        val MIGRATION_101029_102029 = object : DoorMigration(101029, 102029) {
-            override fun migrate(database: DoorSqlDatabase) {
-                if (database.dbType() == DoorDbType.SQLITE) {
-
-                    database.execSQL("""ALTER TABLE Person RENAME to Person_OLD""")
-                    database.execSQL("""CREATE TABLE IF NOT EXISTS Person (
-                        |username  TEXT , 
-                        |firstNames  TEXT , 
-                        |lastName  TEXT , 
-                        |emailAddr  TEXT , 
-                        |phoneNum  TEXT , 
-                        |gender  INTEGER NOT NULL , 
-                        |active  INTEGER NOT NULL , 
-                        |admin  INTEGER NOT NULL , 
-                        |personNotes  TEXT , 
-                        |personAddress  TEXT , 
-                        |mPersonGroupUid  INTEGER NOT NULL , 
-                        |fatherName  TEXT , 
-                        |fatherNumber  TEXT , 
-                        |motherName  TEXT , 
-                        |motherNum  TEXT , 
-                        |dateOfBirth  INTEGER NOT NULL , 
-                        |personRoleUid  INTEGER NOT NULL , 
-                        |personLocationUid  INTEGER NOT NULL , 
-                        |personAddedByUid INTEGER NOT NULL,
-                        |personMasterChangeSeqNum  INTEGER NOT NULL , 
-                        |personLocalChangeSeqNum  INTEGER NOT NULL , 
-                        |personLastChangedBy  INTEGER NOT NULL , 
-                        |personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
-                        |)""".trimMargin())
-                    database.execSQL("""INSERT INTO Person (
-                        |personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, 
-                        |active, admin, personNotes, personAddress, mPersonGroupUid, fatherName, 
-                        |fatherNumber, motherName, motherNum, dateOfBirth, personRoleUid, 
-                        |personLocationUid, personMasterChangeSeqNum, personLocalChangeSeqNum, 
-                        |personLastChangedBy, personAddedByUid) 
-                        |SELECT personUid, username, firstNames, lastName, emailAddr, phoneNum, 
-                        |gender, active, admin, personNotes, personAddress, mPersonGroupUid, 
-                        |fatherName, fatherNumber, motherName, motherNum, dateOfBirth, 
-                        |personRoleUid, personLocationUid, personMasterChangeSeqNum, 
-                        |personLocalChangeSeqNum, personLastChangedBy, 0 FROM Person_OLD""".trimMargin())
-                    database.execSQL("""DROP TABLE Person_OLD""")
-
-                }
-                if (database.dbType() == DoorDbType.POSTGRES){
-                    database.execSQL("""ALTER TABLE Person ADD COLUMN personAddedByUid BIGINT """)
-                }
-
-            }
-        }
-
         val MIGRATION_100029_101029 = object : DoorMigration(100029, 101029) {
             override fun migrate(database: DoorSqlDatabase) {
                 if (database.dbType() == DoorDbType.SQLITE) {
@@ -3759,9 +3738,161 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        /**
+         * added personAddedByUid in Person
+         *
+         */
+        val MIGRATION_101029_102029 = object : DoorMigration(101029, 102029) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""ALTER TABLE Person RENAME to Person_OLD""")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Person (
+                        |username  TEXT , 
+                        |firstNames  TEXT , 
+                        |lastName  TEXT , 
+                        |emailAddr  TEXT , 
+                        |phoneNum  TEXT , 
+                        |gender  INTEGER NOT NULL , 
+                        |active  INTEGER NOT NULL , 
+                        |admin  INTEGER NOT NULL , 
+                        |personNotes  TEXT , 
+                        |personAddress  TEXT , 
+                        |mPersonGroupUid  INTEGER NOT NULL , 
+                        |fatherName  TEXT , 
+                        |fatherNumber  TEXT , 
+                        |motherName  TEXT , 
+                        |motherNum  TEXT , 
+                        |dateOfBirth  INTEGER NOT NULL , 
+                        |personRoleUid  INTEGER NOT NULL , 
+                        |personLocationUid  INTEGER NOT NULL , 
+                        |personAddedByUid INTEGER NOT NULL,
+                        |personMasterChangeSeqNum  INTEGER NOT NULL , 
+                        |personLocalChangeSeqNum  INTEGER NOT NULL , 
+                        |personLastChangedBy  INTEGER NOT NULL , 
+                        |personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        |)""".trimMargin())
+                    database.execSQL("""INSERT INTO Person (
+                        |personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, 
+                        |active, admin, personNotes, personAddress, mPersonGroupUid, fatherName, 
+                        |fatherNumber, motherName, motherNum, dateOfBirth, personRoleUid, 
+                        |personLocationUid, personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                        |personLastChangedBy, personAddedByUid) 
+                        |SELECT personUid, username, firstNames, lastName, emailAddr, phoneNum, 
+                        |gender, active, admin, personNotes, personAddress, mPersonGroupUid, 
+                        |fatherName, fatherNumber, motherName, motherNum, dateOfBirth, 
+                        |personRoleUid, personLocationUid, personMasterChangeSeqNum, 
+                        |personLocalChangeSeqNum, personLastChangedBy, 0 FROM Person_OLD""".trimMargin())
+                    database.execSQL("""DROP TABLE Person_OLD""")
+
+                }
+                if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""ALTER TABLE Person ADD COLUMN personAddedByUid BIGINT """)
+                }
+
+            }
+        }
+
+        val MIGRATION_102029_102030 = object : DoorMigration(102029, 102030) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE TRIGGER IF NOT EXISTS UPD_66
+                    |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.verbMasterChangeSeqNum = 0 
+                    |OR OLD.verbMasterChangeSeqNum = NEW.verbMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.verbLocalChangeSeqNum = 0  
+                    |OR OLD.verbLocalChangeSeqNum = NEW.verbLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(verbLocalChangeSeqNum), OLD.verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+                    |verbMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(verbMasterChangeSeqNum), OLD.verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+                    |ELSE NEW.verbMasterChangeSeqNum END)
+                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER IF NOT EXISTS INS_66
+                    |AFTER INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.verbMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.verbLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+                    |verbMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+                    |ELSE NEW.verbMasterChangeSeqNum END)
+                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX  IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
+                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_66_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
+                    | verbMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
+                    | ELSE NEW.verbMasterChangeSeqNum END)
+                    | WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""DROP TRIGGER IF EXISTS inccsn_66_trig ON ContextXObjectStatementJoin""".trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_66_trig 
+                    |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_66_fn()
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
+                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+                }
+
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
-
 
             builder.addMigrations(object : DoorMigration(26,27){
                 override fun migrate(database: DoorSqlDatabase) {
@@ -3771,14 +3902,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             })
 
-            builder.addMigrations(object : DoorMigration(25,26){
+            builder.addMigrations(object : DoorMigration(25, 26) {
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 0")
                 }
 
             })
 
-            builder.addMigrations(object :DoorMigration(24, 25){
+            builder.addMigrations(object : DoorMigration(24, 25) {
                 override fun migrate(database: DoorSqlDatabase) {
                     try{
                         database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
@@ -4814,7 +4945,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             })
 
-            builder.addMigrations(object : DoorMigration(25,26){
+            builder.addMigrations(object : DoorMigration(25, 26) {
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
                 }
@@ -4826,14 +4957,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
                 }
             })
-            
+
             builder.addMigrations(MIGRATION_27_100028,
-                    MIGRATION_100028_100029, MIGRATION_100029_101029, MIGRATION_101029_102029)
+                    MIGRATION_100028_100029, MIGRATION_100029_101029, MIGRATION_101029_102029,
+                    MIGRATION_102029_102030, MIGRATION_102030_102031, MIGRATION_102031_102032)
 
             return builder
         }
     }
-
 
 
 }

@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.LangUidAndName
-import com.ustadmobile.lib.db.entities.Language
 
 
 class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),

@@ -70,11 +70,12 @@
 
         <Button
             android:id="@+id/item_feedlist_attendance_record_attendance_button"
-            style="@android:style/Widget.Material.Light.Button.Borderless.Small"
+            style="@android:style/Widget.DeviceDefault.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="36dp"
+            android:backgroundTint="@android:color/white"
             android:text="@string/record_attendance"
-            android:textColor="@color/primary"
+            android:textColor="@color/primary_dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageButton"
             app:layout_constraintTop_toBottomOf="@+id/item_feedlist_feed_card_subtitle" />

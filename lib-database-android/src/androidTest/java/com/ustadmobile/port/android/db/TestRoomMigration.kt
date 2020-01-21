@@ -36,8 +36,39 @@ class TestRoomMigration {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 29, true,
-                UmAppDatabase.MIGRATION_28_29)
+//        helper.runMigrationsAndValidate(TEST_DB, 29, true,
+//                UmAppDatabase.MIGRATION_28_29)
     }
+
+    @Test
+    fun migrate29to30() {
+        helper.createDatabase(TEST_DB, 29).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 30, true,
+                UmAppDatabase.MIGRATION_29_30)
+    }
+
+    @Test
+    fun migrate30to31() {
+        helper.createDatabase(TEST_DB, 30).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 31, true,
+                UmAppDatabase.MIGRATION_30_31)
+    }
+
+    @Test
+    fun migrate31to32() {
+        helper.createDatabase(TEST_DB, 31).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 32, true,
+                UmAppDatabase.MIGRATION_31_32)
+    }
+
 
 }

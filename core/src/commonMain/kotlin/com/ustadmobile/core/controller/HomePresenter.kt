@@ -1,13 +1,17 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.core.view.UserProfileView
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.core.util.ext.observeWithPresenter
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -15,12 +19,14 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
-                    val personDao: PersonDao, impl: UstadMobileSystemImpl)
-    : LanguageOptionPresenter(context, arguments, view, impl) {
+                    val personDao: PersonDao, val impl: UstadMobileSystemImpl)
+    : LanguageOptionPresenter(context, arguments, view, impl){
 
     private var account: UmAccount? = null
 
     private var showDownloadAll = false
+
+    private var showLocationPermission = false
 
     private val homeView: HomeView = view
 
@@ -32,31 +38,69 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
         handleShowDownloadButton(showDownloadAll)
 
-        account = UmAccountManager.getActiveAccount(context)
+        showLocationPermission = impl.getAppConfigString(
+                AppConfig.KEY_SHOW_LOCATION_PERMISSION_PROMPT, null, context)!!.toBoolean()
+        handleShowLocationPermissionPrompt(showLocationPermission)
 
+        UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
+    }
+
+    private fun onChanged(nAccount: UmAccount?) {
         GlobalScope.launch {
-            var showReport = false; var person: Person? = null
-            if(account != null){
-                person = personDao.findByUid(account!!.personUid)
+            val contentEntryListArgs = mutableMapOf(ARG_CONTENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                    ARG_LIBRARIES_CONTENT to "",
+                    ARG_FILTER_BUTTONS to "$ARG_LIBRARIES_CONTENT,$ARG_DOWNLOADED_CONTENT")
+
+            val options = mutableListOf<Pair<Int, String>>()
+
+            if(nAccount != null){
+                account = nAccount
+                val person = personDao.findByUid(nAccount.personUid)
                 if(person != null){
-                   showReport = person.admin
+                    if(person.admin){
+                        //TODO: This is using a DummyView
+                        contentEntryListArgs[ARG_FILTER_BUTTONS] +=  ",$ARG_RECYCLED_CONTENT"
+                        //options.add(Pair(MessageID.reports, "DashboardView"))
+                    }
+
+                    options.add(0,Pair(MessageID.bottomnav_feed_title,
+                            FeedListView.VIEW_NAME))
+                    options.add(1,Pair(MessageID.bottomnav_classes_title,
+                            ClazzListView.VIEW_NAME))
+                    options.add(2,Pair(MessageID.bottomnav_people_title,
+                            PeopleListView.VIEW_NAME))
+                    options.add(3,Pair(MessageID.bottomnav_reports_title,
+                            BaseReportView.VIEW_NAME))
+
+                    homeView.runOnUiThread(Runnable {
+                        homeView.setLoggedPerson(person)
+                        homeView.showSettings(person.admin)
+                    })
+
+
                 }
+
+
             }
 
-            view.runOnUiThread(Runnable {
-                homeView.showReportMenu(showReport)
-                if(person != null){
-                    homeView.setLoggedPerson(person)
-                }
+            homeView.runOnUiThread(Runnable {
                 homeView.loadProfileIcon(if(account == null) "" else "")
+//                options.add(0, Pair(MessageID.contents,
+//                        ContentEntryListView.VIEW_NAME + "?" +
+//                                UMFileUtil.mapToQueryString(contentEntryListArgs)))
+                homeView.setOptions(options)
             })
         }
     }
 
     fun handleShowDownloadButton(show: Boolean){
-        view.runOnUiThread(Runnable {
+        homeView.runOnUiThread(Runnable {
             homeView.showDownloadAllButton(show && showDownloadAll)
         })
+    }
+
+    fun handleShowLocationPermissionPrompt(show: Boolean){
+
     }
 
 
@@ -78,8 +122,20 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         homeView.showShareAppDialog()
     }
 
-    override fun handleNavigation() {
+    fun handleClickSettings(){
+        val args = HashMap<String, String>()
+        impl.go(SettingsView.VIEW_NAME, args, context)
     }
+
+    /**
+     * For ClassBook - Goes to Bulk upload screen.
+     */
+    fun handleClickBulkUpload(){
+        val args = HashMap<String, String>()
+        impl.go(BulkUploadMasterView.VIEW_NAME, args, context)
+    }
+
+    override fun handleNavigation() {}
 
 
     companion object {

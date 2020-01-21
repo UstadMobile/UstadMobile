@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.LocationDao
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.lib.db.entities.Location
@@ -52,7 +53,7 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
         GlobalScope.launch {
             val locationListLive = locationDao.findTopLocationsLive()
             view.runOnUiThread(Runnable {
-                locationListLive.observe(thisP, thisP::handleGetTopLocations)
+                locationListLive.observeWithPresenter(thisP, thisP::handleGetTopLocations)
             })
         }
     }

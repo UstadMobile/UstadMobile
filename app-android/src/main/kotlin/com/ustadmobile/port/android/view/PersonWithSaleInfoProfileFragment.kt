@@ -14,6 +14,7 @@ import com.ustadmobile.core.controller.PersonWithSaleInfoProfilePresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.PersonWithSaleInfoProfileView
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.staging.port.android.view.CircleTransform
 import java.io.File
 
 class PersonWithSaleInfoProfileFragment : UstadBaseFragment(), PersonWithSaleInfoProfileView {
