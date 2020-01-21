@@ -72,7 +72,7 @@ class SaleDetailPresenter(context: Any,
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAppDatabase.getInstance(context)
+        database = UmAccountManager.getActiveDatabase(context)
 
         //Get provider Dao
         saleItemDao = repository.saleItemDao

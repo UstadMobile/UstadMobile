@@ -817,8 +817,14 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
      *
      */
     fun handleClickDone() {
-        updatedPerson!!.active = true
 
+
+        updatedPerson!!.active = true
+        updatedPerson!!.active = true
+        updatedPerson!!.mPersonGroupUid = personWEGroupUid
+        GlobalScope.launch {
+
+        }
         GlobalScope.launch {
             personDao.updatePersonAsync(updatedPerson!!, loggedInPersonUid!!)
 

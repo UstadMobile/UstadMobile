@@ -108,7 +108,7 @@ class SaleDeliverySelectionView : ConstraintLayout {
         var imagePathServer = ""
         val productPictureDaoRepo  =
                 UmAccountManager.getRepositoryForActiveAccount(context).saleProductPictureDao
-        val productPictureDao = UmAppDatabase.getInstance(context).saleProductPictureDao
+        val productPictureDao = UmAccountManager.getActiveDatabase(context).saleProductPictureDao
         GlobalScope.async(Dispatchers.Main) {
 
             //Load the local image first

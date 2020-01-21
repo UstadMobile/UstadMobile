@@ -28,6 +28,7 @@ import com.ustadmobile.core.controller.UserProfilePresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -110,7 +111,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         //Call the Presenter
         mPresenter = UserProfilePresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this,
-                UmAppDatabase.getInstance(this).personDao, UstadMobileSystemImpl.instance)
+                UmAccountManager.getActiveDatabase(this).personDao, UstadMobileSystemImpl.instance)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         changePasswordLL!!.setOnClickListener { v -> mPresenter!!.handleClickChangePassword() }

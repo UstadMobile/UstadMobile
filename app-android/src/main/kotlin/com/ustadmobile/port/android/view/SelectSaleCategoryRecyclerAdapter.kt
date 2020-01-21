@@ -77,7 +77,7 @@ class SelectSaleCategoryRecyclerAdapter internal constructor(
 
         productPictureDaoRepo  =
                 UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
-        productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
+        productPictureDao = UmAccountManager.getActiveDatabase(theContext).saleProductPictureDao
 
         holder.imageLoadJob?.cancel()
 

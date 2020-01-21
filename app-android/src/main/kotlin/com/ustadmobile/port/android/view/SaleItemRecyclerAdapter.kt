@@ -81,17 +81,6 @@ class SaleItemRecyclerAdapter(
                 imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
         }
 
-//        if (pictureUid != 0L) {
-//            //TODO: Fix attachment stuff KMP
-//            //            imagePath = UmAppDatabase.Companion.getInstance(theContext).getSaleProductPictureDao()
-//            //                    .getAttachmentPath(pictureUid);
-//        }
-//
-//        if (imagePath != null && !imagePath.isEmpty())
-//            setPictureOnView(imagePath, imageView)
-//        else
-//            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
-
         val itemName = holder.itemView.findViewById<TextView>(R.id.item_sale_item_name)
         val itemQuantity = holder.itemView.findViewById<TextView>(R.id.item_sale_item_quantity)
         val itemPrice = holder.itemView.findViewById<TextView>(R.id.item_sale_item_price)

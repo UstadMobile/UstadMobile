@@ -9,15 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductCategoryListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -26,7 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-
 import java.io.File
 
 class SelectSaleProductWithDescRecyclerAdapter internal constructor(
@@ -75,7 +71,7 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
 
         productPictureDaoRepo  =
                 UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
-        productPictureDao = UmAppDatabase.getInstance(theContext).saleProductPictureDao
+        productPictureDao = UmAccountManager.getActiveDatabase(theContext).saleProductPictureDao
 
 
         holder.imageLoadJob?.cancel()

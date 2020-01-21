@@ -57,7 +57,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             : super(context, arguments, view) {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAppDatabase.getInstance(context)
+        database = UmAccountManager.getActiveDatabase(context)
 
         saleItemDao = repository.saleItemDao
         saleItemDaoDB = database.saleItemDao
@@ -71,7 +71,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             : super(context, arguments, view) {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAppDatabase.getInstance(context)
+        database = UmAccountManager.getActiveDatabase(context)
 
         saleItemDao = repository.saleItemDao
         reminderDao = repository.saleItemReminderDao

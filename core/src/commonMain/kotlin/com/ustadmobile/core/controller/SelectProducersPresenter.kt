@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SaleItemDetailView
@@ -35,7 +34,7 @@ class SelectProducersPresenter(context: Any,
 
 
     internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-    internal var database: UmAppDatabase = UmAppDatabase.Companion.getInstance(context)
+    internal var database: UmAppDatabase = UmAccountManager.getActiveDatabase(context)
     private val providerDao: InventoryItemDao
     private val providerDaoDB: InventoryItemDao
     private val transactionDao: InventoryTransactionDao

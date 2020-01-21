@@ -9,6 +9,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
+import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonWithSaleInfoListView.Companion.ARG_LE_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -61,7 +63,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
                         lastName = result!!.lastName!!
                     }
 
-                    val personName = firstNames + " " + lastName
+                    val personName = "$firstNames $lastName"
                     view.runOnUiThread(Runnable {
                         view.updateToolbarTitle(personName)
                     })
@@ -76,14 +78,18 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
             }
         }
 
-        //TODO: Get last time the device/account was synced.
         val lastSyncedText = impl.getString(MessageID.account_last_synced,
                 context)
-        val lastSyncedText2 = ""
-        val lastSynced = lastSyncedText + " " + lastSyncedText2
-        view.runOnUiThread(Runnable {
-            view.updateLastSyncedText(lastSynced)
-        })
+        GlobalScope.launch {
+
+            val latestTimeStamp =
+                    UmAccountManager.getActiveDatabase(context).syncresultDao.getLatestTimeStamp()
+            val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
+            val lastSynced = lastSyncedText + " " + lastSyncedText2
+            view.runOnUiThread(Runnable {
+                view.updateLastSyncedText(lastSynced)
+            })
+        }
     }
 
     fun handleClickChangePassword() {
@@ -98,8 +104,8 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     }
 
     fun handleClickLogout() {
-        val emptyAcccount = UmAccount(0, "", "", "")
-        UmAccountManager.setActiveAccount(emptyAcccount, context)
+        UmAccountManager.setActiveAccount(UmAccount(0,
+                null, null, null), context)
         UmAccountManager.updatePasswordHash(null, context, impl)
         impl.setAppPref(UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME, "", context)
         val args = HashMap<String, String>()
@@ -117,9 +123,9 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         //Open Dialog
         val args = HashMap<String, String>()
         //TODO If needed:
-        //        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
-        //        args.put(ARG_PERSON_UID, personUid);
-        //        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
+                args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+                args.put(ARG_PERSON_UID, loggedInPersonUid.toString());
+                impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
     fun handleCompressedImage(imageFilePath: String) {

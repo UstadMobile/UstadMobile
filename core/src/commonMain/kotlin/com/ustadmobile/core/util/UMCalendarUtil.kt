@@ -257,6 +257,12 @@ object UMCalendarUtil {
         return cal.format(format)
     }
 
+    fun getPrettyDateWithTimeFromLongSimple(thisDate: Long): String{
+        val format: DateFormat = DateFormat("HH:mm,  dd MMM yy")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
+
     /**
      * Gets simple day only (eg: Mon) from a long date specified.
      *

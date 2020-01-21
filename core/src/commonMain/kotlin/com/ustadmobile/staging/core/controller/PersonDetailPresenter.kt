@@ -96,7 +96,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         personDao = repository.personDao
         personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
         personPictureDaoRepo = UmAccountManager.getRepositoryForActiveAccount(context).personPictureDao
-        personPictureDaoDB = UmAppDatabase.getInstance(context).personPictureDao
+        personPictureDaoDB = UmAccountManager.getActiveDatabase(context).personPictureDao
         personGroupDao = repository.personGroupDao
     }
 

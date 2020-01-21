@@ -27,7 +27,7 @@ class SelectCustomerPresenter(context: Any, arguments: Map<String, String>?,
     var leUid : Long = 0L
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
-    internal var database = UmAppDatabase.getInstance(context)
+    internal var database = UmAccountManager.getActiveDatabase(context)
 
     init {
 

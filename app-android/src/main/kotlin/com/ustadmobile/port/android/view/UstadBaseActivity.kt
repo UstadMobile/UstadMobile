@@ -440,7 +440,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         val logoutTimeout = TIMEOUT_LOGOUT //TODO: Get and set from app pref
         if (timeoutExceeded > logoutTimeout)
         {
-            handleLogout()
+            //TODO: Fix it
+            //handleLogout()
             return true
         }else{
             return false

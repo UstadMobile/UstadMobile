@@ -14,7 +14,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonInventorySelectionPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.PersonWithInventory
 import kotlinx.coroutines.Dispatchers
@@ -230,7 +229,7 @@ class PersonWithInventorySelectionView : ConstraintLayout {
             val personPictureDaoRepo =
                     UmAccountManager.getRepositoryForActiveAccount(this).personPictureDao
             val personPictureDao =
-                    UmAppDatabase.getInstance(this).personPictureDao
+                    UmAccountManager.getActiveDatabase(this).personPictureDao
 
             val personPictureLocal = personPictureDao.findByPersonUidAsync(personWithInventory!!.personUid)
             imgPath = personPictureDaoRepo.getAttachmentPath(personPictureLocal!!)!!

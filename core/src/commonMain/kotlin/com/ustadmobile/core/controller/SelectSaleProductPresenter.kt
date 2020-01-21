@@ -86,12 +86,12 @@ class SelectSaleProductPresenter(context: Any,
         impl = UstadMobileSystemImpl.instance
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAppDatabase.Companion.getInstance(context)
+        database = UmAccountManager.getActiveDatabase(context)
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
-        personDao = database.personDao
+        personDao = repository.personDao
 
         if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
             producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())

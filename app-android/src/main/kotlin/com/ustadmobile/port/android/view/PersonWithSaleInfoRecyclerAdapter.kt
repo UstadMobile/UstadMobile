@@ -73,7 +73,10 @@ class PersonWithSaleInfoRecyclerAdapter : PagedListAdapter<PersonWithSaleInfo,
 
         val personName= entity!!.firstNames + " " + entity.lastName
         val totalSale = entity.totalSale
-        val topP = entity.topProducts
+        var topP = entity.topProducts
+        if(entity.topProducts == null){
+            topP = "-"
+        }
         personTitle.setText(personName)
         saleAmount.setText(totalSale.toString() + " " + theActivity!!.getText(R.string.currency_afs))
         val topProductsBit = UstadMobileSystemImpl.instance.getString(MessageID.top_products,

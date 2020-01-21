@@ -31,7 +31,7 @@ class SaleDeliveryDetailPresenter(context: Any,
     private var currentSignSvg: String? = null
     private var sale : Sale? = null
 
-    val database = UmAppDatabase.getInstance(context)
+    val database = UmAccountManager.getActiveDatabase(context)
     internal var saleItemToWeCounter: HashMap<Long, HashMap<Long, Int>>
     var saleItemToProducerSelection : HashMap<SaleItemListDetail, List<PersonWithInventory>>
     var saleItemToSaleItemListDetail : HashMap<Long, SaleItemListDetail>

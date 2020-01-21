@@ -35,6 +35,7 @@ class SaleProductDetailPresenter(context: Any,
     : UstadBaseController<SaleProductDetailView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
+    internal var database: UmAppDatabase
     private val saleProductDao: SaleProductDao
     private val productParentJoinDao: SaleProductParentJoinDao
     private val impl: UstadMobileSystemImpl
@@ -57,12 +58,13 @@ class SaleProductDetailPresenter(context: Any,
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
+        database = UmAccountManager.getActiveDatabase(context)
 
         //Get provider Dao
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
         pictureDao = UmAccountManager.getRepositoryForActiveAccount(context).saleProductPictureDao
-        pictureDaoDB = UmAppDatabase.getInstance(context).saleProductPictureDao
+        pictureDaoDB = database.saleProductPictureDao
 
         impl = UstadMobileSystemImpl.instance
 

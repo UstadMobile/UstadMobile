@@ -88,7 +88,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         mVersionTextView = findViewById(R.id.activity_login_version)
         mProgressBar = findViewById(R.id.progressBar)
 
-        val repository = UmAccountManager.getRepositoryForActiveAccount(this)
+        val repository = UmAccountManager.getActiveDatabase(this)
         mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
                 this, repository, UstadMobileSystemImpl.instance)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))

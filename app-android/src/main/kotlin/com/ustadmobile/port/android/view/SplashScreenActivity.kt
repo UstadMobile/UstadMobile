@@ -49,15 +49,12 @@ import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import androidx.work.WorkManager
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashScreenView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 import com.ustadmobile.staging.port.android.impl.ClazzLogScheduleWorker
+import java.util.concurrent.TimeUnit
 
 
 class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterface.OnClickListener{
@@ -162,14 +159,6 @@ class SplashScreenActivity : SplashScreenView, UstadBaseActivity(), DialogInterf
         constraintLayout = findViewById(R.id.constraint_layout)
 
         val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
-
-        //TODO: KMP Remove When DELEGATE WEB works
-        //Load Dummy data
-        val repo = UmAppDatabase.getInstance(viewContext)
-        val dd = DummyData(viewContext, repo)
-        GlobalScope.launch {
-            //dd.loadInitialData()
-        }
 
         val showSplash = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_SPASH_SCREEN, null, this)!!.toBoolean()

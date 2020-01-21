@@ -46,7 +46,7 @@ import kotlin.jvm.Volatile
     //#DOORDB_TRACKER_ENTITIES
     ], version = 102032)
 
-@MinSyncVersion(102032)
+
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -218,6 +218,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val saleDeliveryDao: SaleDeliveryDao
     //End of Goldozi
+
+    abstract val syncresultDao : SyncResultDao
 
     abstract val auditLogDao : AuditLogDao
     abstract val clazzActivityChangeDao : ClazzActivityChangeDao

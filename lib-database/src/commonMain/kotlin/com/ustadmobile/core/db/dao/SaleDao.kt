@@ -720,24 +720,18 @@ abstract class SaleDao : BaseDao<Sale> {
                         LEFT JOIN Person AS WE ON WE.personUid = PersonGroupMember.groupMemberPersonUid 
                         LEFT JOIN InventoryItem ON 
                             InventoryItem.InventoryItemWeUid = WE.personUid 
-                            AND InventoryItem.InventoryItemLeUid = LE.personUid 
+                            AND InventoryItem.InventoryItemLeUid = LE.personUid AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                         LEFT JOIN InventoryTransaction ON 
                             InventoryTransaction.InventoryTransactionInventoryItemUid = InventoryItem.InventoryItemUid 
-                            AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid 
+                            AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
                         LEFT JOIN SaleItem ON 
-                            SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid 
+                            SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
                         LEFT JOIN Sale ON 
-                            Sale.saleUid = SaleItem.saleItemSaleUid 
+                            Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
                         LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = WE.personUid 
-                        LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid
-                        
+                        LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1
                     WHERE PersonGroupMember.groupMemberGroupUid = LE.mPersonGroupUid 
-                    AND CAST(Sale.saleActive AS INTEGER) = 1  
-                    AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 
-                    AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
                     AND CAST(WE.active AS INTEGER) = 1  
-                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-                    
                     GROUP BY(WE.personUid)  
                 """
 

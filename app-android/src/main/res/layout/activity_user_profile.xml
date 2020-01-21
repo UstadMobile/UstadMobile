@@ -220,7 +220,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:orientation="horizontal"
-
+        android:paddingTop="@dimen/dimen_16dp"
         android:paddingBottom="@dimen/dimen_16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -287,9 +287,7 @@
 
             app:layout_constraintStart_toEndOf="@+id/imageView8" />
 
-
     </RelativeLayout>
-
 
 
     <View
@@ -301,28 +299,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_logout_ll" />
-
-
-    <ImageView
-        android:id="@+id/imageView8"
-        android:layout_width="14dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hLinePostLogout"
-        app:srcCompat="@drawable/ic_done_all_black_24dp" />
-
-    <TextView
-        android:id="@+id/activity_user_prodile_last_synced"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/account_last_synced"
-        android:textSize="12sp"
-        app:layout_constraintStart_toEndOf="@+id/imageView8"
-        app:layout_constraintTop_toBottomOf="@+id/hLinePostLogout" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -96,63 +96,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
         }
     }
 
-
-
-//    @JsName("handleClickLogin")
-//    fun handleClickLogin(username: String, password: String, serverUrl: String,
-//                         saveToFingerprint:Boolean) {
-//        view.setInProgress(true)
-//        view.setErrorMessage("")
-//        val loginRepoDb = UmAppDatabase.getInstance(context)//.getRepository(serverUrl, "")
-//        val systemImpl = UstadMobileSystemImpl.instance
-//        //Update password hash to impl
-//        val passwordHash:String = ENCRYPTED_PASS_PREFIX + encryptPassword(password)
-//        GlobalScope.launch {
-//            try {
-//                val result = loginRepoDb.personDao.loginAsync(username, password)
-//                if (result != null) {
-//                    if(saveToFingerprint) {
-//                        UmAccountManager.setFingerprintPersonId(result.personUid, context,
-//                                systemImpl)
-//                        UmAccountManager.setFingerprintUsername(result.username, context,
-//                                systemImpl)
-//                        UmAccountManager.setFringerprintAuth(result.auth, context,
-//                                systemImpl)
-//
-//                    }
-//                    UmAccountManager.updateCredCache(username, result.personUid,
-//                            passwordHash, context, systemImpl)
-//                    loginOK(result, serverUrl)
-//
-//                } else {
-//                    view.runOnUiThread(Runnable {
-//                        view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
-//                                context))
-//                        view.setPassword("")
-//                        view.setInProgress(false)
-//                    })
-//                }
-//
-//            } catch (e: Exception) {
-//                view.runOnUiThread(Runnable {
-//
-//
-//                    //Try local login:
-//                    if(UmAccountManager.checkCredCache(username, passwordHash, context, systemImpl)){
-//                        loginOKFromOtherSource(serverUrl,
-//                                UmAccountManager.getCachedPersonUid(context, systemImpl),
-//                                username, passwordHash)
-//                    }else {
-//                        view.setErrorMessage(systemImpl.getString(
-//                                MessageID.login_network_error, context ))
-//                        view.setInProgress(false)
-//                    }
-//
-//                })
-//            }
-//        }
-//    }
-
     fun loginOK(result: UmAccount, serverUrl:String){
         val systemImpl = UstadMobileSystemImpl.instance
 

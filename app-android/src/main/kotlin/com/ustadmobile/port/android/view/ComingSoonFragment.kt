@@ -36,8 +36,8 @@ class ComingSoonFragment : UstadBaseFragment, ComingSoonView {
     constructor()  {
         val args = Bundle()
         arguments = args
-        icon = R.drawable.ic_assignment_black_24dp
-        title = R.string.inventory
+        icon = R.drawable.ic_collections_bookmark_black_24dp
+        title = R.string.content
     }
 
     constructor(args:Bundle) : this() {
