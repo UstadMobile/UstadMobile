@@ -193,7 +193,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ComingSoonView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ComingSoonFragment"),
             SalePaymentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SalePaymentDetailActivity"),
             UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
-            ChangePasswordView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ChangePasswordActivity"),
             SelectLanguageDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectLanguageDialogFragment"),
             SaleProductDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductDetailActivity"),
             SaleProductCategoryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductCategoryListActivity"),
