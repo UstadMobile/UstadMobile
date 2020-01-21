@@ -51,7 +51,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         super.onCreate(savedState)
 
         filterButtons = arguments[ARG_FILTER_BUTTONS]?.split(",") ?: listOf()
-        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong() ?: 0L
+        parentUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
 
         view.setFilterButtons(filterButtons.map { systemImpl.getString(
             FILTERBUTTON_TO_MESSAGEIDMAP[it] ?: MessageID.error, context) }, 0)
