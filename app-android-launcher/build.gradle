@@ -151,6 +151,8 @@ dependencies {
 
     vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
 
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
+
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
     implementation "ch.acra:acra-dialog:$version_android_acra"
