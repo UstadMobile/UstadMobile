@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -132,7 +133,20 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             }
 
         }
-        umBottomNavigation.visibility = if(options.size > 1) View.VISIBLE else View.GONE
+
+        if(options.size > 1) {
+            umBottomNavigation.visibility = View.VISIBLE
+
+            mPager.apply {
+                setPadding(paddingLeft, paddingTop, paddingRight, TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics).toInt())
+            }
+        }else {
+            umBottomNavigation.visibility = View.INVISIBLE
+            mPager.apply {
+                setPadding(paddingLeft, paddingTop, paddingRight, 0)
+            }
+        }
 
         umBottomNavigation.defaultBackgroundColor = ContextCompat.getColor(this, R.color.icons)
         umBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.primary)
