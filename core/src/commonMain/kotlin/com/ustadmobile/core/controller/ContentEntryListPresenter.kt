@@ -216,16 +216,18 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
+        viewContract.takeIf { filterByLang != langUid }?.setContentEntryProvider(
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, langUid,
+                        filterByCategory, activeAccount?.personUid ?: 0))
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
-                ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
+        viewContract.takeIf{ contentCategoryUid != filterByCategory }?.setContentEntryProvider(
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang,
+                        contentCategoryUid, activeAccount?.personUid ?: 0))
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
-                ?: 0))
     }
 
     @JsName("handleUpNavigation")
