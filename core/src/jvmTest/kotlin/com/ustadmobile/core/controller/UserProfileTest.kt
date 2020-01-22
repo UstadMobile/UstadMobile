@@ -44,7 +44,8 @@ class UserProfileTest {
             }
         }
 
-        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context),impl)
+        val db = UmAppDatabase.getInstance(context)
+        presenter = UserProfilePresenter(context, mapOf(),view,db, db,impl)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
                 "",""), context)

@@ -111,6 +111,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         //Call the Presenter
         mPresenter = UserProfilePresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this,
+                UmAccountManager.getRepositoryForActiveAccount(this),
                 UmAccountManager.getActiveDatabase(this), UstadMobileSystemImpl.instance)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
