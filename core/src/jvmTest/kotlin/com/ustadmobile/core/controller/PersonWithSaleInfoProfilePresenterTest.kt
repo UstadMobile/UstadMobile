@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_UID
 import com.ustadmobile.core.view.PersonWithSaleInfoProfileView
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.util.test.AbstractSaleRelatedSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
@@ -36,8 +37,9 @@ class PersonWithSaleInfoProfilePresenterTest : AbstractSaleRelatedSetup() {
 
         }
 
+        val mockContext = mock<DoorLifecycleOwner> {}
         val presenter = PersonWithSaleInfoProfilePresenter(Any(),
-                presenterArgs, mockView)
+                presenterArgs, mockView, UmAppDatabase.getInstance(mockContext))
         return Pair(mockView, presenter)
     }
 
