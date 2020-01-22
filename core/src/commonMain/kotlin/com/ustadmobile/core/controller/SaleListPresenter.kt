@@ -32,11 +32,11 @@ import com.ustadmobile.lib.db.entities.SaleListDetail
 class SaleListPresenter(context: Any,
                         arguments: Map<String, String>?,
                         view: SaleListView,
+                        var repository: UmAppDatabase,
                         val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : CommonHandlerPresenter<SaleListView>(context, arguments!!, view) {
 
     private var umProvider: DataSource.Factory<Int, SaleListDetail>? = null
-    internal var repository: UmAppDatabase
     private val saleDao: SaleDao
     private val salePaymentDao: SalePaymentDao
 
@@ -52,7 +52,7 @@ class SaleListPresenter(context: Any,
 
     init {
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
+
 
         //Get provider Dao
         saleDao = repository.saleDao

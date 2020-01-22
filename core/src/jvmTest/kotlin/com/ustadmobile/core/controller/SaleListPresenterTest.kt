@@ -38,7 +38,7 @@ class SaleListPresenterTest : AbstractSaleRelatedSetup() {
 
         val mockContext = mock<DoorLifecycleOwner> {}
         val presenter = SaleListPresenter(mockContext,
-                presenterArgs, mockView, systemImplSpy)
+                presenterArgs, mockView, UmAppDatabase.getInstance(mockContext), systemImplSpy)
         return Pair(mockView, presenter)
     }
 

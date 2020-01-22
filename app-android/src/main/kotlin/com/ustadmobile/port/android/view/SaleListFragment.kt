@@ -81,7 +81,8 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
 
         //set up Presenter
         mPresenter = SaleListPresenter(context!!,
-                UMAndroidUtil.bundleToMap(arguments), this)
+                UMAndroidUtil.bundleToMap(arguments), this,
+                UmAccountManager.getRepositoryForActiveAccount(this))
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Button
