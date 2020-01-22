@@ -13,7 +13,7 @@ actual fun DoorDatabase.dbType(): Int = DoorDbType.SQLITE
 actual fun DoorDatabase.dbSchemaVersion(): Int {
     val javaClass = this::class.java
     var thisVersion = dbVersions[javaClass] ?: -1
-    if(thisVersion <= 0) {
+    if(thisVersion == -1) {
         val clazzName = javaClass.canonicalName!!.substringBefore('_') + "_DoorVersion"
         try {
             thisVersion = (Class.forName(clazzName).newInstance() as DoorDatabaseVersion).dbVersion
