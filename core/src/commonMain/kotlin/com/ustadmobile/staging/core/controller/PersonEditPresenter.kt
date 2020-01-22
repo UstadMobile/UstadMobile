@@ -13,6 +13,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ATTENDANCE
@@ -868,6 +869,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                             encodedPath = "${encodedPath}UmAppDatabase/PersonDao/isUsernameAvailable"
                         }
                         parameter("p0", usernameSet)
+                        dbVersionHeader(repository)
                     }
 
                     if (resetPasswordResponse.status == HttpStatusCode.OK) {
@@ -946,6 +948,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                             parameter("p0", personUid)
                             parameter("p1", passwordSet)
                             parameter("p2", loggedInPersonUid)
+                            dbVersionHeader(repository)
                         }
 
                         if (resetPasswordResponse.status == HttpStatusCode.OK) {

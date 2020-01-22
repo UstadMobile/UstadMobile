@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.PersonAuthDetailView
 import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.util.encryptPassword
@@ -106,6 +107,7 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
                         parameter("p0", currentPersonUid)
                         parameter("p1", passwordSet)
                         parameter("p2", loggedInPersonUid)
+                        dbVersionHeader(repository)
                     }
 
                     if(resetPasswordResponse.status == HttpStatusCode.OK) {

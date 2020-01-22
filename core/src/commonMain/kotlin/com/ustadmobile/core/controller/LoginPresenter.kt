@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
@@ -136,6 +137,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                     }
                     parameter("username", usernameTrim)
                     parameter("password", password)
+                    dbVersionHeader(repository)
                 }
 
                 if (loginResponse.status == HttpStatusCode.OK) {

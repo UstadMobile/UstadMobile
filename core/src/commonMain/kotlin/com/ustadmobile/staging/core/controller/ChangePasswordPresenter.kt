@@ -10,9 +10,13 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ChangePasswordView
+import com.ustadmobile.door.DoorConstants
+import com.ustadmobile.door.ext.dbSchemaVersion
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -78,21 +82,9 @@ class ChangePasswordPresenter(context: Any,
                 return
             }
 
-            //TODO: Fix local login and then enable this check.
-            //Update: Not sure if we want this. Still keeping this block for future.
-//            if(currentPersonAuth!!.passwordHash != null && currentPersonAuth!!.passwordHash != ""){
-//                if(!currentPersonAuth!!.passwordHash!!.equals(currentPassword)){
-//                    view.sendMessage(MessageID.current_password_not_correct)
-//                    return
-//                }
-//            }
-
-
             val serverUrl = UmAccountManager.getActiveEndpoint(context)
 
-
             GlobalScope.launch {
-
 
                 //Authenticate with current password first to see if current password matches.
                 try {
@@ -102,7 +94,8 @@ class ChangePasswordPresenter(context: Any,
                             encodedPath = "${encodedPath}Login/login"
                         }
                         parameter("username", currentPerson!!.username)
-                        parameter("password", currentPassword)
+                        parameter("password"    , currentPassword)
+                        dbVersionHeader(repository)
                     }
 
                     if(loginResponse.status == HttpStatusCode.OK) {
@@ -117,6 +110,7 @@ class ChangePasswordPresenter(context: Any,
                                 parameter("p0", currentPerson!!.personUid)
                                 parameter("p1", updatePassword!!)
                                 parameter("p2", currentPerson!!.personUid)
+                                dbVersionHeader(repository)
                             }
 
                             if(resetPasswordResponse.status == HttpStatusCode.OK) {

@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.Login2View.Companion.ARG_LOGIN_USERNAME
+import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
