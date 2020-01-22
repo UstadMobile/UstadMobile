@@ -703,7 +703,7 @@ abstract class SaleDao : BaseDao<Sale> {
         const val MY_WE_BY_LEUID =
                 """
                     SELECT 
-                        SUM((SaleItem.saleItemPricePerPiece)) - SaleItem.saleItemDiscount AS totalSale, 
+                        SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
                         GROUP_CONCAT(DISTINCT SaleProduct.saleProductName) AS topProducts, 
                         (SELECT CASE WHEN 
                             (SELECT PersonPicture.PersonPictureUid FROM PersonPicture 

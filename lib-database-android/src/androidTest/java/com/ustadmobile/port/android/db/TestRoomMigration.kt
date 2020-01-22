@@ -102,6 +102,22 @@ class TestRoomMigration {
 //    }
 
     @Test
+    fun migrate27to102032(){
+        helper.createDatabase(TEST_DB, 27).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 102032, true,
+                UmAppDatabase.MIGRATION_27_100028,
+                UmAppDatabase.MIGRATION_100028_100029,
+                UmAppDatabase.MIGRATION_100029_101029,
+                UmAppDatabase.MIGRATION_101029_102029,
+                UmAppDatabase.MIGRATION_102029_102030,
+                UmAppDatabase.MIGRATION_102030_102031,
+                UmAppDatabase.MIGRATION_102031_102032)
+    }
+
+    @Test
     fun migrate102029to102032(){
         helper.createDatabase(TEST_DB, 102029).apply {
             close()
