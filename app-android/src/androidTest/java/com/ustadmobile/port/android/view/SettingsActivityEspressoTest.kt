@@ -15,6 +15,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.staging.port.android.view.SettingsActivity
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
