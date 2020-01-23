@@ -6,13 +6,16 @@
     android:id="@+id/coordinationLayout"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <!--
+    Note the bottom padding is set dynamically in the HomeActivity based on whether or
+    not the bottom navigation is visible
+    -->
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager
+        android:id="@+id/home_view_pager"
         android:layout_below="@id/appBar"
-        android:paddingBottom="@dimen/dimen_40dp"
-        android:id="@+id/um_host_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -94,7 +97,7 @@
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:elevation="8dp"
         android:layout_marginBottom="@dimen/dimen_40dp"
-        app:layout_anchor="@id/um_host_fragment"
+        app:layout_anchor="@id/home_view_pager"
         android:id="@+id/download_all"
         android:layout_width="wrap_content"
         android:padding="@dimen/dimen_8dp"
