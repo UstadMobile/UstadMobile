@@ -93,7 +93,9 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
 
   setEmptyView(filter){}
 
-  setFilterButtons(filterBtns){}
+  setFilterButtons(filterBtns){
+    
+  }
 
 
   setContentEntryProvider(provider: any) {

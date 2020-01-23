@@ -18,7 +18,8 @@ function executeGetRequest(url){
       const fs = require('fs'), path = require('path'),
       filePath = path.join(__dirname, request.path),
       content = fs.readFileSync(filePath, {encoding: 'utf-8'});
-      axios.post(serverUrl+ "UmAppDatabase/" + request.url, JSON.parse(content)).then(function (response) {
+      axios.post(serverUrl+ "UmAppDatabase/" + request.url, JSON.parse(content),
+      {headers: {"door-dbversion": 28}}).then(function (response) {
        resolve(response.data)
       }).catch(function (error) {
        resolve(error)

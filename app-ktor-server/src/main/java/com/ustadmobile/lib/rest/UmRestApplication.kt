@@ -6,6 +6,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.door.DoorConstants
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
@@ -63,11 +64,14 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
     if(devMode) {
         install(CORS) {
+            header(HttpHeaders.AccessControlAllowOrigin)
             method(HttpMethod.Get)
             method(HttpMethod.Post)
             method(HttpMethod.Put)
             method(HttpMethod.Options)
             header(HttpHeaders.ContentType)
+            header(HttpHeaders.ContentType)
+            header(DoorConstants.HEADER_DBVERSION)
             anyHost()
         }
     }

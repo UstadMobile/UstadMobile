@@ -7,14 +7,10 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
-import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -42,12 +38,12 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
     }
 
-    @JsName("onChanged")
-    fun onChanged(t: UmAccount?) {
+    private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
-            val contentEntryListArgs = mutableMapOf(ARG_CONTENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                    ARG_LIBRARIES_CONTENT to "",
-                    ARG_FILTER_BUTTONS to "$ARG_LIBRARIES_CONTENT,$ARG_DOWNLOADED_CONTENT")
+            val contentEntryListArgs = mutableMapOf(
+                    "0" to "${MessageID.libraries};$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
+                            "&$ARG_LIBRARIES_CONTENT",
+                    "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT")
 
             val options = mutableListOf<Pair<Int, String>>()
 
@@ -56,9 +52,8 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 val person = personDao.findByUid(t.personUid)
                 if(person != null){
                     if(person.admin){
-                        //TODO: This is using a DummyView
-                        contentEntryListArgs[ARG_FILTER_BUTTONS] +=  ",$ARG_RECYCLED_CONTENT"
-                        options.add(Pair(MessageID.reports, "DashboardView"))
+                        contentEntryListArgs["2"] =  "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
+                        options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
                     }
 
                     homeView.runOnUiThread(Runnable {
