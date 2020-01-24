@@ -32,6 +32,7 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
   maxItemsPerPage = 20 
   pageIndex = 1 
   private provider: any = null;
+  emptyState = {}
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,
      formBuilder: FormBuilder, private zone:NgZone) {
@@ -40,7 +41,6 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
     this.class_entry_options = this.umService.isLTRDirectionality() ? "right" : "left";
     this.class_entry_thumbnail = this.umService.isLTRDirectionality() ? "left entry-ltr" : "right entry-rtl";
     this.class_entry_collection = this.umService.isLTRDirectionality() ? "" : "collection-rtl";
-
     this.umFilterForm = formBuilder.group({
       'language': ['-1', Validators.required],
       'category': ['-1', Validators.required]
@@ -91,7 +91,12 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
 
   setEditButtonsVisibility(visibility){}
 
-  setEmptyView(filter){}
+  setEmptyView(selectedFilter){ 
+    const states = {}
+    states[this.MessageID.libraries] = {icon: "local_library", message: this.getString(this.MessageID.empty_state_libraries)}
+    states[this.MessageID.recycled] = {icon: "delete", message: this.getString(this.MessageID.empty_state_recycle)}
+    this.emptyState = states[this.route.snapshot.queryParams[selectedFilter] ? this.MessageID.libraries:this.MessageID.recycled]
+  }
 
   setFilterButtons(filterBtns){
     
@@ -99,7 +104,6 @@ core.com.ustadmobile.core.view.ContentEntryListFragmentView , OnDestroy{
 
 
   setContentEntryProvider(provider: any) {
-    console.log("This called ")
     this.provider = provider.create()
     if(this.umFilterForm.value.language != -1 || this.umFilterForm.value.category != -1){
       this.entryList = []

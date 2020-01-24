@@ -46,7 +46,7 @@ export class ElementUtils{
       reports:{
         main: element.all(by.css('app-root app-home > header')),
         profile: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-header div i')),
-        menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-link span')),
+        menus: element.all(by.css('app-root app-home > header mz-sidenav mz-sidenav-collapsible')),
         loginInputs: element.all(by.css('app-login > div div form div mz-input-container input')),
         loginBtn: element.all(by.css('app-login > div div form div div button')),
         options: {

@@ -8,6 +8,7 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 import util from 'UstadMobile-lib-util';
 import core from 'UstadMobile-core'
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import querystring from 'querystring';
 
 @Component({
   selector: 'app-home',
@@ -48,7 +49,7 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
   private presenter: core.com.ustadmobile.core.controller.HomePresenter;
   private navItemMaps = {}
   navMenuOptions = []
-  doOpenEntries = false; 
+  focusMenuMap = {}
 
   constructor(private location: Location, umService: UmBaseService, private elem: ElementRef,private renderer: Renderer2,
     router: Router, route: ActivatedRoute, private zone:NgZone, formBuilder: FormBuilder) {
@@ -67,19 +68,13 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
         this.systemImpl.go(initialRoute.view, initialRoute.args, this.context, 0)
       }
     });
-
-    this.route.queryParams.subscribe(params => {
-      const isFromNext = this.router.url.split("/")[2].split("?")[0] == this.routes.entryList && !params[UmAngularUtil.ARG_CONTENT_ENTRY_UID],
-      isTopEntry = !params[UmAngularUtil.ARG_FILTER_BUTTONS] && this.umService.ROOT_UID == params[UmAngularUtil.ARG_CONTENT_ENTRY_UID]
-      this.doOpenEntries =  isTopEntry || isFromNext
-    });
     
     //Listen for the navigation changes - changes on url
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(_ => {
         UmAngularUtil.registerResourceReadyListener(this)
         UmAngularUtil.registerTitleChangeListener(this)
-        this.activeState = UmAngularUtil.getActiveMenu() 
+        this.activeState = UmAngularUtil.getActiveSubMenu() 
       });
       const currentLocale = this.systemImpl.getAllUiLanguage(this.context)[core.com.ustadmobile.core.impl.UstadMobileSystemCommon.PREFKEY_LOCALE]
       this.umFormLanguage = formBuilder.group({
@@ -123,8 +118,6 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this, this.umService.getDbInstance().personDao, this.systemImpl)
     this.presenter.onCreate(null)
     this.presenter.handleShowLanguageOptions()
-    //TODO: make sure to remove this function manual calling when things getresolved
-    this.presenter.onChanged(core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context));
   }
 
   handleClickPersonIcon(){
@@ -132,18 +125,35 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
   }
 
   setNavigationOptions(options){
-    const menuOptions = UmAngularUtil.kotlinListToJsArray(options);
-    this.navMenuOptions = []
-      menuOptions.forEach(option => {
-        const menuNav = this.navItemMaps[option.first]
+    this.zone.run(() => {
+      const menuOptions = UmAngularUtil.kotlinListToJsArray(options);
+      this.navMenuOptions = []
+      
+      menuOptions.forEach((option, index) => {
+        const menuNav = this.navItemMaps[option.first],
+        objParams = querystring.parse(option.second.split("?")[1]),
+        subMenus = [];
         menuNav['label'] = this.getString(option.first)
-        menuNav['params'] = option.second
+        menuNav['route'] = option.second.split("?")[0]
+        this.focusMenuMap[option.second.split("?")[0]] = index
+        Object.keys(objParams).forEach(key => {
+          const value = objParams[key],
+          needSubMenu = !isNaN(+key)
+          if(needSubMenu){
+            const labelId = value.split(";")[0],
+            params = value.split(";")[1];
+
+            if(labelId != this.MessageID.downloaded){
+              subMenus.push({label: this.getString(labelId), params: "?"+ (params.includes("=") 
+              ? params+"&"+this.getString(labelId).toLowerCase()+"=''": params+"=''")})
+            }
+          }
+        })
+        menuNav['subMenu'] = subMenus
         this.navMenuOptions.push(menuNav)
       }) 
-
-      if(this.doOpenEntries){
-        this.handleSideMenuSelected(0)
-      }
+    })
+    this.handleMenuFocus()
   }
 
   showDownloadAllButton() {}
@@ -164,16 +174,45 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     }
   }
 
-  handleSideMenuSelected(index) {
-    //TODO: handle this well when dashboard is integrated
-    const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context),
-    route = this.navMenuOptions[index].params.split("?")[0], 
-    isReport = route.includes(this.routes.reportOptions), 
-    initQueryParams = this.navMenuOptions[index].params.split("?")[1] 
-    ? "?"+this.navMenuOptions[index].params.split("?")[1]:"",
-    routeView =  isReport && !activeAcount ? this.routes.login : route == "DashboardView" ? this.routes.reportOptions:route,
-    routeParams = {params:!isReport ? initQueryParams: (route != routeView ? "?next="+route: null), route: routeView};
-    this.systemImpl.go(routeView, UmAngularUtil.getArgumentsFromQueryParams(routeParams), this.context);
+  handleMenuFocus(){
+    setTimeout(() => {
+      Object.values(this.focusMenuMap).forEach(value => {
+        this.activateFocus(value, "inactive")
+      })
+      const initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID),
+      elementId = this.focusMenuMap[initialRoute.view];
+      if(initialRoute.view == this.routes.entryList){
+        this.activateFocus(elementId, "active")
+      }
+    }, 500);
+  }
+
+  activateFocus(index, className){
+    const rootElement = document.getElementById("menu_"+index);
+    $(rootElement).find("li").get(0).className = className
+    $(rootElement).find("li ul li").get(0).className = className
+  }
+
+  handleSideMenuSelected(event,index, subIndex, element = null) {
+    //TODO: Handle dashboard when integrated
+    let menuIndex = index, subMenuIndex = (menuIndex == 0 && subIndex == -1) ? 0: subIndex;
+    console.log("Element", element)
+    try{
+      event.stopPropagation();
+      const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context),
+      route = this.navMenuOptions[menuIndex].route, 
+      isReport = route.includes(this.routes.reportOptions), 
+      initQueryParams = this.navMenuOptions[menuIndex].subMenu.length > 0 && subMenuIndex != -1 ? 
+      this.navMenuOptions[menuIndex].subMenu[subMenuIndex].params : (menuIndex == 0 ? null: ""),
+      routeView =  isReport && !activeAcount ? this.routes.login : route == this.routes.reportDashboard ? this.routes.reportOptions:route,
+      routeParams = {params:!isReport ? initQueryParams: (route != routeView ? "?next="+route: null), route: routeView};
+      if(subMenuIndex != -1 && initQueryParams || menuIndex > 0){
+        this.systemImpl.go(routeView, UmAngularUtil.getArgumentsFromQueryParams(routeParams), this.context);
+      }
+      this.handleMenuFocus()
+    }catch(e){
+      console.log(e)
+    }
   }
 
   setToolbarTitle(title) {

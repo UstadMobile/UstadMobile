@@ -1,7 +1,6 @@
 import core from 'UstadMobile-core';
 import {Observable} from 'rxjs';
 import util from 'UstadMobile-lib-util';
-
 /**
  * All app routes
  */
@@ -29,7 +28,9 @@ export class UmAngularUtil {
 
   public static ARG_CONTENT_ENTRY_UID = core.com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID.toString()
   
-  public static ARG_FILTER_BUTTONS  = core.com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+  public static ARG_LIBRARIES_CONTENT  = core.com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+
+  public static ARG_RECYCLED_CONTENT  = core.com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
 
   private static storageEventHandler: any = {};
 
@@ -64,11 +65,16 @@ export class UmAngularUtil {
     const route = args.route ? args.route : this.getRoutePathParam().path,
     params = args.params ? args.params : null
     let search = this.removeParam(this.isWithoutEntryUid(route) 
-    ? [this.ARG_CONTENT_ENTRY_UID, this.ARG_FILTER_BUTTONS,'libraries']:[], (params ? params : this.getRoutePathParam().search)),
+    ? [this.ARG_CONTENT_ENTRY_UID, this.ARG_LIBRARIES_CONTENT,this.ARG_RECYCLED_CONTENT]:[], (params ? params : this.getRoutePathParam().search)),
     paramString = search + (search.includes("ref") ? "":((search.length > 0 ? "&ref=null":"?ref=null")))
-    return core.com.ustadmobile.core.util.UMFileUtil.parseURLQueryString(paramString); 
+    paramString = paramString+ (paramString.includes("next") && paramString.includes(appRountes.entryList)
+     ? "&libraries=''&"+this.ARG_CONTENT_ENTRY_UID+"="+args.rootId:"")
+    return  this.parseURLQueryString(paramString)
   }
 
+  static parseURLQueryString(urlParams){
+    return core.com.ustadmobile.core.util.UMFileUtil.parseURLQueryString(urlParams);
+  }
 
   private static removeParam(keys, sourceURL) {
     var rtn = "",param,params_arr = [],
@@ -289,9 +295,9 @@ export class UmAngularUtil {
   /**
    * Decide which menu to be highlited based on current opened section
    */
-  static getActiveMenu(): boolean[]{
-    const reportActive = this.getRoutePathParam().path.includes("Report")
-    return [!reportActive, reportActive]
+  static getActiveSubMenu(): boolean[]{
+    const libraryActive = this.getRoutePathParam().search.includes("libraries")
+    return this.getRoutePathParam().path.includes(appRountes.entryList) ? [libraryActive, !libraryActive]: [false, false]
   }
 
   /**
@@ -372,7 +378,7 @@ export class UmAngularUtil {
       view = mPath.path.includes(appRountes.notFound) ? appRountes.notFound+"/": appRountes.entryList
       args = mPath.path.includes(appRountes.notFound) ? UmAngularUtil.getArgumentsFromQueryParams()
       :UmAngularUtil.getArgumentsFromQueryParams({params:
-         "?"+this.ARG_CONTENT_ENTRY_UID+"=" + entryUid, route: view});
+         "?"+this.ARG_CONTENT_ENTRY_UID+"=" + entryUid+"&libraries=''", route: view});
     }
     return {view: view, args: args};
   }

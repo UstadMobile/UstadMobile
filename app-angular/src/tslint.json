@@ -17,6 +17,7 @@
   "compilerOptions": {
     "outDir": "../out-tsc/app",
     "module": "es2015",
+    "allowSyntheticDefaultImports": true,
     "types": [
        "jquery",
        "materialize-css"

@@ -232,6 +232,9 @@ ul{
     margin-top: 1% !important;
     left: 90% !important;
   }
+  .empty-state-view {
+    margin-top: 60% !important;
+  }
 
   .brand-logo-rtl{
     margin-top: 1% !important;
@@ -255,7 +258,7 @@ ul{
   .empty-state-view {
     min-height: 200px !important;
     background: white;
-    padding-top: 100px;
+    padding-top: 65% !important;
     padding-bottom: 50px;
   }
 

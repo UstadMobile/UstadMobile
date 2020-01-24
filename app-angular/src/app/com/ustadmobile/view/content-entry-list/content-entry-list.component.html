@@ -1,6 +1,6 @@
 <div class="row white" (close)="ngOnDestroy()">
 
-  <div class="row">
+  <div class="row" *ngIf="entryList.length > 0">
 
     <form class="col s12">
 
@@ -30,7 +30,7 @@
 
 
   </div>
-  <div class="row data-list">
+  <div class="row data-list" *ngIf="entryList.length > 0">
     <ul infinite-scroll [infiniteScrollDistance]="scrollDistance" [infiniteScrollThrottle]="scrollThrottle"
       (scrolled)="onScrollDown()" [fromRoot]="false" *ngIf="entryList"
       class="collection default-padding-top {{class_entry_collection}}">
@@ -53,8 +53,8 @@
     </ul>
   </div>
 
-  <div class="center empty-state-view grey-text" *ngIf="!entryList">
-    <i class="material-icons  large extra">library_books</i>
-    <p class="title-label empty grey-text">No libraries Found</p>
+  <div class="center empty-state-view grey-text" *ngIf="entryList.length == 0">
+    <i class="material-icons  large extra">{{emptyState.icon}}</i>
+    <p class="title-label empty grey-text">{{emptyState.message}}</p>
   </div>
 </div>

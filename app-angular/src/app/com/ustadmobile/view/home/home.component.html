@@ -6,7 +6,7 @@
             class="material-icons {{class_icon_toolbar}}">{{class_toolbar_arrow}}</i></span>
         <span class="truncate">{{toolBarTitle}}</span></p>
       <p class="show-on-small  open-content drawer-menu {{class_drawer_menu}}">
-        <a mz-button [flat]=true class="top-menu" id="um-drawer" (click)="dropwdown.open()">
+        <a mz-button [flat]=true class="top-menu" id="um-drawer" (click)="dropdown.open()">
           <i class="material-icons white-text">menu</i>
         </a>
       </p>
@@ -17,11 +17,16 @@
 
   <!-- side nav starts here-->
 
-  <mz-dropdown #dropwdown [id]="'dropdown-menu'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
+  <mz-dropdown #dropdown [id]="'dropdown-menu'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
 
-    <li *ngFor="let navOption of navMenuOptions"><a (click)="handleSideMenuSelected(navMenuOptions.indexOf(navOption))"><span i18n="{{navOption.i18n}}">{{navOption.label}}</span></a></li>
+    <li *ngFor="let navOption of navMenuOptions" (click)="dropdown.close()"><a (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), -1)"><span i18n="{{navOption.i18n}}">{{navOption.label}}</span></a>
+      <mz-collection *ngIf="navOption.subMenu.length > 0">
+        <mz-collection-item (click)="dropdown.close()" 
+        *ngFor="let sub of navOption.subMenu" (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), navOption.subMenu.indexOf(sub))">{{sub.label}}</mz-collection-item>
+      </mz-collection>
+    </li>
     <li > <a (click)="handleClickPersonIcon()"> <span i18n="@@profile">Profile</span></a></li>
     <li > <a (click)="bottomSheetModal.openModal()"> <span i18n="@@language">Language</span></a></li>
   </mz-dropdown> 
@@ -47,12 +52,17 @@
       </div>
     </mz-sidenav-header>
 
-    <mz-sidenav-link *ngFor="let navOption of navMenuOptions" [active]="activeState[navMenuOptions.indexOf(navOption)]">
-      <a class="collapsible-header" id="{{navOption.label}}" (click)="handleSideMenuSelected(navMenuOptions.indexOf(navOption))"><span
-          i18n="{{navOption.i18n}}">{{navOption.label}}</span>
-        <i class="material-icons {{class_icon_position}}">{{navOption.icon}}</i>
-      </a>
-    </mz-sidenav-link>
+    <mz-sidenav-collapsible *ngFor="let navOption of navMenuOptions" (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), -1)"  id="menu_{{navMenuOptions.indexOf(navOption)}}">
+      <mz-sidenav-collapsible-header>
+        <span  i18n="{{navOption.i18n}}"><i class="material-icons {{class_icon_position}}">{{navOption.icon}}</i>{{navOption.label}}</span>
+      </mz-sidenav-collapsible-header>
+      <mz-sidenav-collapsible-content *ngFor="let sub of navOption.subMenu">
+        <mz-sidenav-link [active]="activeState[navOption.subMenu.indexOf(sub)]" (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), navOption.subMenu.indexOf(sub))"> 
+          <a class="waves-effect">{{sub.label}}</a>
+        </mz-sidenav-link>
+      </mz-sidenav-collapsible-content>
+    </mz-sidenav-collapsible>
+
     <mz-sidenav-subheader></mz-sidenav-subheader>
     <mz-sidenav-divider></mz-sidenav-divider>
 
