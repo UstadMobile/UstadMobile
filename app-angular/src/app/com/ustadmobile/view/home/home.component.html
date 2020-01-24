@@ -21,7 +21,7 @@
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
 
-    <li *ngFor="let navOption of navMenuOptions" (click)="dropdown.close()"><a (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), -1)"><span i18n="{{navOption.i18n}}">{{navOption.label}}</span></a>
+    <li *ngFor="let navOption of navMenuOptions" (click)="dropdown.close()"><a (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), -1)"><span>{{navOption.label}}</span></a>
       <mz-collection *ngIf="navOption.subMenu.length > 0">
         <mz-collection-item (click)="dropdown.close()" 
         *ngFor="let sub of navOption.subMenu" (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), navOption.subMenu.indexOf(sub))">{{sub.label}}</mz-collection-item>
@@ -54,7 +54,7 @@
 
     <mz-sidenav-collapsible *ngFor="let navOption of navMenuOptions" (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), -1)"  id="menu_{{navMenuOptions.indexOf(navOption)}}">
       <mz-sidenav-collapsible-header>
-        <span  i18n="{{navOption.i18n}}"><i class="material-icons {{class_icon_position}}">{{navOption.icon}}</i>{{navOption.label}}</span>
+        <span><i class="material-icons {{class_icon_position}}">{{navOption.icon}}</i>{{navOption.label}}</span>
       </mz-sidenav-collapsible-header>
       <mz-sidenav-collapsible-content *ngFor="let sub of navOption.subMenu">
         <mz-sidenav-link [active]="activeState[navOption.subMenu.indexOf(sub)]" (click)="handleSideMenuSelected($event,navMenuOptions.indexOf(navOption), navOption.subMenu.indexOf(sub))"> 

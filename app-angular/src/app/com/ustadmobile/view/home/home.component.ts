@@ -8,7 +8,7 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 import util from 'UstadMobile-lib-util';
 import core from 'UstadMobile-core'
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import querystring from 'querystring';
+const querystring = require('querystring');
 
 @Component({
   selector: 'app-home',
@@ -60,8 +60,8 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     this.class_toolbar_title = this.umService.isLTRDirectionality() ? "brand-logo-ltr" : "brand-logo-rtl";
     this.class_drawer_menu = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr" : "left drawer-menu-rtl";
     this.class_open_profile = this.umService.isLTRDirectionality() ? "right":"left"
-    this.navItemMaps[core.com.ustadmobile.core.generated.locale.MessageID.reports] = {icon: "pie_chart",i18n: "@@libraries"}; 
-    this.navItemMaps[core.com.ustadmobile.core.generated.locale.MessageID.contents] = {icon:"local_library", i18n:"@@reports"}; 
+    this.navItemMaps[this.MessageID.reports] = {icon: "pie_chart",i18n: "@@"+this.getString(this.MessageID.reports).toLowerCase()}; 
+    this.navItemMaps[this.MessageID.contents] = {icon:"local_library", i18n:"@@"+this.getString(this.MessageID.contents).toLowerCase()}; 
     this.router.events.subscribe((event: NavigationStart)  => {
       if(event.url && event.url == "/"){
         const initialRoute = UmAngularUtil.getInitialRoute(this.umService.ROOT_UID);
@@ -193,12 +193,20 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
     $(rootElement).find("li ul li").get(0).className = className
   }
 
-  handleSideMenuSelected(event,index, subIndex, element = null) {
+  isMenuActive(index){
+    const rootElement = document.getElementById("menu_"+index);
+    return $($(rootElement).find("li").get(0)).hasClass("active")
+  }
+
+
+  handleSideMenuSelected(event,index, subIndex) {
     //TODO: Handle dashboard when integrated
-    let menuIndex = index, subMenuIndex = (menuIndex == 0 && subIndex == -1) ? 0: subIndex;
-    console.log("Element", element)
+    let menuIndex = index, subMenuIndex = (menuIndex == 0 && subIndex == -1 && !this.isMenuActive(index)) ? 0: subIndex;
     try{
       event.stopPropagation();
+      if($(event.target).parent().hasClass("active") && subMenuIndex != -1){
+        menuIndex = -1, subMenuIndex = -1 
+      }
       const activeAcount = core.com.ustadmobile.core.impl.UmAccountManager.getActiveAccountWithContext(this.context),
       route = this.navMenuOptions[menuIndex].route, 
       isReport = route.includes(this.routes.reportOptions), 
@@ -210,9 +218,7 @@ export class HomeComponent extends UmBaseComponent implements OnDestroy,
         this.systemImpl.go(routeView, UmAngularUtil.getArgumentsFromQueryParams(routeParams), this.context);
       }
       this.handleMenuFocus()
-    }catch(e){
-      console.log(e)
-    }
+    }catch(e){}
   }
 
   setToolbarTitle(title) {

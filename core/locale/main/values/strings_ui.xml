@@ -313,7 +313,7 @@
     <string name="content_creation_file_required_error">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
-    <string name="empty_state_libraries">No folders found</string>
+    <string name="empty_state_libraries">No libraries found</string>
     <string name="empty_state_downloaded">No downloads found</string>
     <string name="empty_state_recycle">No recycled items</string>
     <string name="error_message_load_page">Failed to load the page</string>

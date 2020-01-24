@@ -82,9 +82,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (containerDownloadManager != null) {
             GlobalScope.launch(liveDataObserverDispatcher()) {
-                downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).also {
-                    it.observeWithPresenter(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
-                }
+                downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid)
+                downloadJobItemLiveData?.observeWithPresenter(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
             }
         } else {
             view.setDownloadJobItemStatus(null)
