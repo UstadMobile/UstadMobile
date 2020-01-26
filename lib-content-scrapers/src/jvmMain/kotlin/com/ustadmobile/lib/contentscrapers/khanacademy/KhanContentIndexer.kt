@@ -400,7 +400,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                     EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
             val khanAcademyEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.khanacademy.org/", "Khan Academy",
-                    "https://www.khanacademy.org/", KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
+                    "https://www.khanacademy.org/", KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
                     "You can learn anything.\n" + "For free. For everyone. Forever.", false, EMPTY_STRING,
                     "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
                     EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)

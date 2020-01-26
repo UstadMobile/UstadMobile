@@ -6,15 +6,22 @@ import com.ustadmobile.core.db.dao.ContentCategoryDao
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC_ND
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_NC_SA
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_ND
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY_SA
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLIC_DOMAIN
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_SEE_ALSO
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
@@ -22,8 +29,10 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import java.net.URL
 import java.nio.file.Files
+import java.util.*
 
 
 /**
@@ -41,6 +50,17 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
     private val repository: UmAppDatabase = db
 
     private lateinit var contentEntry: ContentEntry
+
+    private val licenseList = listOf(
+            "CC 0" to LICENSE_TYPE_PUBLIC_DOMAIN,
+            "public domain" to LICENSE_TYPE_PUBLIC_DOMAIN,
+            "دامنه عمومی" to LICENSE_TYPE_PUBLIC_DOMAIN,
+            "عامه لمن" to LICENSE_TYPE_PUBLIC_DOMAIN,
+            "CC BY" to LICENSE_TYPE_CC_BY,
+            "CC BY-SA" to LICENSE_TYPE_CC_BY_SA,
+            "CC BY-ND" to LICENSE_TYPE_CC_BY_ND,
+            "CC BY-NC-SA" to LICENSE_TYPE_CC_BY_NC_SA,
+            "CC BY-NC-ND" to LICENSE_TYPE_CC_BY_NC_ND)
 
     init {
         categorySchemaDao = repository.contentCategorySchemaDao
@@ -63,10 +83,30 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         By.cssSelector("span.download-item a[href]")))
                 val list = chromeDriver.findElements(By.cssSelector("span.download-item a[href]"))
                 if (list.isNotEmpty()) {
+                    val href = list[0].getAttribute("href")
                     list[0].click()
+                    waitForJSandJQueryToLoad(it)
+
+                    fileUrl = URL(URL(sourceUrl), href)
+
+
+                    val isMediaFile = isMediaUrl(fileUrl.toString())
+                    if (isMediaFile) {
+                        return@startHarScrape
+                    }
+
+
+                    val fileEntry = proxy.har.log.entries.find { harEntry ->
+                        harEntry.request.url == fileUrl.toString()
+                    }
+
+                    var counter = 0
+                    while (fileEntry!!.response.content.text.isNullOrEmpty() && counter < TIME_OUT_SELENIUM) {
+                        Thread.sleep(1000)
+                        counter++
+                    }
+
                 }
-                waitForJSandJQueryToLoad(it)
-                Thread.sleep(30000)
 
             }, addHarContent = false, filters = listOf { entry ->
 
@@ -90,8 +130,11 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 val thumbnail = doc!!.selectFirst("aside img")?.attr("src") ?: EMPTY_STRING
 
                 val description = doc.selectFirst("meta[name=description]")?.attr("content")
-                val author = doc.selectFirst("article.resource-view-details h3:contains(Author), h3:contains(نویسنده), h3:contains(لیکونکی) ~ p")?.text()
+                val author = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p")?.text()
+                        ?: doc.selectFirst("article.resource-view-details h3:contains(نویسنده) ~ p")?.text()
+                        ?: doc.selectFirst("article.resource-view-details h3:contains(لیکونکی) ~ p")?.text()
                         ?: EMPTY_STRING
+
                 val publisher = doc.selectFirst("article.resource-view-details a[href*=publisher]")?.text()
                         ?: DDL
 
@@ -99,9 +142,27 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                 val langEntity = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, twoLangCode)
 
+                val licenseText = doc.selectFirst("article.resource-view-details h3:contains(جواز/ د چاپ حق لرونکی) ~ p")?.text()
+                        ?: doc.selectFirst("article.resource-view-details h3:contains(License) ~ p")?.text()
+                        ?: doc.selectFirst("article.resource-view-details h3:contains(جواز/ دارنده حق چاپ) ~ p")?.text()
+                        ?: EMPTY_STRING
+
+                val foundMatch = licenseList.firstOrNull { pair ->
+                    licenseText.contains(pair.first)
+                }
+
+                val licenseType = foundMatch?.second ?: 0
+                if (foundMatch == null && licenseText.isNotEmpty()) {
+                    UMLogUtil.logError("found license: $licenseText that didn't match the list for $sourceUrl ")
+                }
+
                 contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc.title(),
-                        sourceUrl, publisher, LICENSE_TYPE_CC_BY, langEntity.langUid, null, description, true, author,
+                        sourceUrl, publisher, licenseType, langEntity.langUid, null, description, true, author,
                         thumbnail, EMPTY_STRING, EMPTY_STRING, ContentEntry.ARTICLE_TYPE, contentEntryDao)
+
+                if (licenseType == 0) {
+                    throw IllegalArgumentException("License type not supported")
+                }
 
                 val subjectContainer = doc.select("article.resource-view-details a[href*=level]")
 
@@ -134,7 +195,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     val index = relatedHref.indexOf("af/")
                     val relatedUrl = StringBuilder(relatedHref).insert(index + 3, "$twoLangCode/").toString()
 
-                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry.primaryLanguageUid, element.text()?: "")
+                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry.primaryLanguageUid, element.text()
+                            ?: "")
 
                     ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, relatedEntry, contentEntry, REL_TYPE_SEE_ALSO)
                 }
@@ -179,6 +241,16 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     throw IllegalStateException("No File found for content in har entry")
                 }
 
+                val isMediaFile = isMediaUrl(fileUrl.toString())
+
+                if(isMediaFile && fileEntry.response.content.text.isNullOrEmpty()){
+
+                    val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fileUrl))
+                    fileEntry.response.content.encoding = "base64"
+                    fileEntry.response.content.size = base64.length.toLong()
+                    fileEntry.response.content.text = base64
+                }
+
                 val entryETag = fileEntry.response.headers.find { valuePair -> valuePair.name == ETAG }
                 eTagValue = entryETag?.value
 
@@ -186,7 +258,6 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         ?: return@startHarScrape true
 
                 return@startHarScrape isContentUpdated(fileEntry, container)
-
 
             }
         } catch (e: Exception) {
@@ -224,6 +295,10 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
         }
 
         close()
+    }
+
+    private fun isMediaUrl(file: String): Boolean {
+        return file.endsWith(".mp3")
     }
 
 

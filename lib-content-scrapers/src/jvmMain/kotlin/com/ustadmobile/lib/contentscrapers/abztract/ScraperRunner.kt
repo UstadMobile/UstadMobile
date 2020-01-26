@@ -64,7 +64,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
 
             val startTime = System.currentTimeMillis()
-            UMLogUtil.logInfo("Started scraper url ${it.scrapeUrl} at start time: $startTime")
+            UMLogUtil.logInfo("Started indexer url ${it.scrapeUrl} at start time: $startTime")
 
             queueDao.setTimeStarted(it.sqiUid, startTime)
             var successful = false
@@ -78,14 +78,14 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
             } catch (e: Exception) {
                 //Must never happen
-                UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
+                UMLogUtil.logError("Exception running indexer ${it.scrapeUrl}")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             }
 
             queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
             queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
-            UMLogUtil.logInfo("Ended scrape for url ${it.scrapeUrl} in duration: $duration")
+            UMLogUtil.logInfo("Ended indexer for url ${it.scrapeUrl} in duration: $duration")
         }
 
         GlobalScope.launch {

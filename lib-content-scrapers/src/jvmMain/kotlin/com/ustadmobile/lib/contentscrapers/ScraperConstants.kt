@@ -237,7 +237,7 @@ object ScraperConstants {
     const val GDL = "Global Digital Library"
     const val CK12 = "CK12"
 
-    const val TIME_OUT_SELENIUM = 500
+    const val TIME_OUT_SELENIUM = 120
 
 
     enum class QUESTION_TYPE private constructor(val type: String) {
