@@ -13,7 +13,7 @@ import com.toughra.ustadmobile.R
 /**
  * A simple [Fragment] subclass.
  */
-class ReportDashboard : UstadBaseFragment() {
+class ReportDashboardFragment : UstadBaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
