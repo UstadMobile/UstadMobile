@@ -1,10 +1,12 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import androidx.room.Database
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.util.*
 import javax.lang.model.element.ExecutableElement
 import com.ustadmobile.door.RepositoryConnectivityListener
+import javax.lang.model.element.TypeElement
 
 /**
  * Add a method or property that overrides the given accessor. The ExecutableElement could be a
@@ -78,6 +80,20 @@ internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName:
             .build())
 
 
+
+    return this
+}
+
+/**
+ * Add a property
+ */
+fun TypeSpec.Builder.addDbVersionProperty(dbTypeElement: TypeElement): TypeSpec.Builder {
+    addProperty(PropertySpec.builder("dbVersion", INT)
+            .addModifiers(KModifier.OVERRIDE)
+            .getter(FunSpec.getterBuilder()
+                    .addCode("return ${dbTypeElement.getAnnotation(Database::class.java).version}")
+                    .build())
+            .build())
 
     return this
 }

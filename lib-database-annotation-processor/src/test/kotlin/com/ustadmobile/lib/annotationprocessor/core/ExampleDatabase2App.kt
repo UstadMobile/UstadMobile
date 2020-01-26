@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.routing.Routing
 import db2.ExampleDatabase2_KtorRoute
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorConstants
 import db2.ExampleEntity2
 import io.ktor.application.call
 import io.ktor.features.CORS
@@ -45,6 +46,7 @@ fun Application.ExampleDatabase2App(devMode: Boolean = true, attachmentsDir: Str
             method(HttpMethod.Post)
             method(HttpMethod.Put)
             header(HttpHeaders.ContentType)
+            header(DoorConstants.HEADER_DBVERSION)
             anyHost()
         }
 

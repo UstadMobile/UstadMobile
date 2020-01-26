@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -10,13 +11,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
+import com.google.android.material.appbar.AppBarLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HomePresenter
-import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -24,15 +27,15 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
-import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.ReportDashboardView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.lang.IllegalArgumentException
+import java.util.*
 
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener{
@@ -45,18 +48,41 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     val impl = UstadMobileSystemImpl.instance
 
-    /**
-     * In case we have addition bottom nav items, add icons here and map to their labels
-     */
-    private val bottomLabelToIconMap = mapOf(
-            MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
-            MessageID.contents to R.drawable.ic_local_library_black_24dp
-    )
+    private var options: List<Pair<Int, String>> = listOf()
+
+    private lateinit var mPager: ViewPager
+
+    private class HomePagerAdapter(fm: FragmentManager,
+                                   val options: List<Pair<Int, String>>): FragmentStatePagerAdapter(fm) {
+
+        private val weakFragmentMap: MutableMap<Int, Fragment> = WeakHashMap()
+
+        override fun getItem(position: Int): Fragment {
+            var thisFragment = weakFragmentMap[position]
+            if(thisFragment == null) {
+                val viewUri = options[position].second // the ViewName followed by ? and any arguments
+                val viewName = viewUri.substringBefore('?')
+                val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
+                if(fragmentClass == null) {
+                    throw IllegalArgumentException("HomeActivity does not know Fragment to create for $viewName")
+                }
+
+                thisFragment = fragmentClass.newInstance()
+                thisFragment.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(viewUri))
+                weakFragmentMap[position] = thisFragment
+            }
+
+            return thisFragment
+        }
+
+        override fun getCount() = options.size
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
+        mPager = findViewById(R.id.home_view_pager)
         downloadAllBtn = findViewById(R.id.download_all)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
@@ -96,8 +122,10 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun setLoggedPerson(person: Person) {}
 
     override fun setOptions(options: List<Pair<Int, String>>) {
+        this.options = options
+
         options.forEach {
-            val navIcon = bottomLabelToIconMap[it.first]
+            val navIcon = BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP[it.first]
             if(navIcon != null){
                 val navigationItem = AHBottomNavigationItem(
                         impl.getString(it.first, this), navIcon)
@@ -105,7 +133,20 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             }
 
         }
-        umBottomNavigation.visibility = if(options.size > 1) View.VISIBLE else View.GONE
+
+        if(options.size > 1) {
+            umBottomNavigation.visibility = View.VISIBLE
+
+            mPager.apply {
+                setPadding(paddingLeft, paddingTop, paddingRight, TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics).toInt())
+            }
+        }else {
+            umBottomNavigation.visibility = View.INVISIBLE
+            mPager.apply {
+                setPadding(paddingLeft, paddingTop, paddingRight, 0)
+            }
+        }
 
         umBottomNavigation.defaultBackgroundColor = ContextCompat.getColor(this, R.color.icons)
         umBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.primary)
@@ -113,32 +154,23 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         umBottomNavigation.isBehaviorTranslationEnabled = false
         umBottomNavigation.currentItem = 0
         umBottomNavigation.titleState = AHBottomNavigation.TitleState.ALWAYS_SHOW
+
         umBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
-            handleFragmentTransaction(options[position].second)
+            mPager.setCurrentItem(position)
+            updateElevation(options[position].second)
             true
         }
-        handleFragmentTransaction(options[0].second)
+
+        mPager.adapter = HomePagerAdapter(supportFragmentManager, options)
+        updateElevation(options[0].second)
     }
 
-    private fun handleFragmentTransaction(params: String){
-        val bundle = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(params))
-        if(bundle != null){
-
-            val selectedFragment = when {
-                params.contains(ContentEntryListView.VIEW_NAME) -> {
-                    bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
-                    bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
-                    ContentEntryListFragment.newInstance(bundle)
-                }
-                else -> {
-                    ReportDashboard()
-                }
-            }
-            val fragmentManager:FragmentManager = supportFragmentManager
-            val fragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.um_host_fragment,selectedFragment,selectedFragment.tag)
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+    private fun updateElevation(optionUri: String) {
+        val viewName = optionUri.substringBefore('?')
+        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == ContentEntryListView.VIEW_NAME) {
+            0f
+        }else {
+            10f
         }
     }
 
@@ -218,4 +250,18 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         dialog.show(supportFragmentManager, "SHARE_APP_DIALOG")
     }
 
+
+    companion object {
+        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
+                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
+                ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java)
+
+        /**
+         * In case we have addition bottom nav items, add icons here and map to their labels
+         */
+        private val BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP = mapOf(
+                MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
+                MessageID.contents to R.drawable.ic_local_library_black_24dp
+        )
+    }
 }

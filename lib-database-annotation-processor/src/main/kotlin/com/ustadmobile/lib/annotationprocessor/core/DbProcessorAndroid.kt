@@ -40,6 +40,23 @@ class DbProcessorAndroid: AbstractDbProcessor() {
         val relativePath = pkgNameOfElement(dbTypeEl, processingEnv).replace(".", File.separator) +
                 "/${dbTypeEl.simpleName}.kt"
 
+        val versionClassSimpleName = "${dbTypeEl.simpleName}_DoorVersion"
+        val dbVersion = dbTypeEl.getAnnotation(Database::class.java).version
+        val fileSpec = FileSpec.builder(dbTypeEl.asClassName().packageName, versionClassSimpleName)
+                .addType(TypeSpec.classBuilder(versionClassSimpleName)
+                        .superclass(ClassName("com.ustadmobile.door", "DoorDatabaseVersion"))
+                        .addProperty(PropertySpec.builder("dbVersion", INT)
+                                .addModifiers(KModifier.OVERRIDE)
+                                .initializer(dbVersion.toString())
+                                .build())
+                        .build())
+                .build()
+
+        outDirs.forEach {
+            fileSpec.writeTo(File(it))
+        }
+
+
         val outFiles = outDirs.map { File(it, relativePath) }
         outFiles.filter { !it.parentFile.exists() }.forEach {
             if(!it.parentFile.mkdirs()) {

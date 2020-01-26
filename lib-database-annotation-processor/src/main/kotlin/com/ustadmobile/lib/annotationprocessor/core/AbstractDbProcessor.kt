@@ -327,7 +327,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    params: List<ParameterSpec>,
                                                    useKotlinxListSerialization: Boolean = false,
                                                    kotlinxSerializationJsonVarName: String = "",
-                                                   useMultipartPartsVarName: String? = null): CodeBlock {
+                                                   useMultipartPartsVarName: String? = null,
+                                                   addDbVersionParamName: String? = "_db"): CodeBlock {
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
             .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
@@ -338,6 +339,11 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, methodName)
             .endControlFlow()
             .add(requestBuilderCodeBlock)
+
+
+
+    codeBlock.takeIf { addDbVersionParamName != null }?.add("%M($addDbVersionParamName)\n",
+            MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
 
     params.filter { isQueryParam(it.type) }.forEach {
         val paramType = it.type
@@ -1506,7 +1512,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
                 "X-reqid")
 
-        //TODO: If entity has attachments, handle that here
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
                 afterInsertCode = {varName, entityTypeClassName, isList ->
                     CodeBlock.builder()
@@ -1517,6 +1522,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             .add("%M(_endpointToTry)\n", MemberName("io.ktor.http", "takeFrom"))
                             .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
                                     "_update${SyncableEntityInfo(entityTypeClassName, processingEnv).tracker.simpleName}Received")
+                            .add("%M(_db)\n", MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
                             .endControlFlow()
                             .add("%M(%S, _requestId)\n", CLIENT_PARAMETER_MEMBER_NAME, "reqId")
                             .endControlFlow()
@@ -1549,7 +1555,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                 .add("var $attRespVarName : %T = null\n", HttpResponse::class.asClassName().copy(nullable = true))
                                 .beginControlFlow("try")
                                 .beginControlFlow("$attRespVarName = _httpClient.%M<%T>",
-                                CLIENT_GET_MEMBER_NAME, HttpResponse::class)
+                                    CLIENT_GET_MEMBER_NAME, HttpResponse::class)
+                                .add("%M(_db)\n",
+                                        MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
                                 .beginControlFlow("url")
                                 .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
                                 .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,

@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.util.test.AbstractContentEntryExportTest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
@@ -66,6 +67,14 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
 
     }
 
+    @After
+    fun cleanUp(){
+        val exportedFile = File(presenter.destinationZipFile)
+        if(exportedFile.exists()){
+            exportedFile.delete()
+        }
+    }
+
 
 
     @Test
@@ -88,7 +97,6 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
             presenter.handleClickPositive()
 
             verify(mockView, timeout(TimeUnit.SECONDS.toMillis(3))).prepareProgressView(eq(true))
-            File(presenter.destinationZipFile).delete()
         }
     }
 
@@ -103,7 +111,6 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
             presenter.handleClickNegative()
 
             verify(mockView, timeout(TimeUnit.SECONDS.toMillis(2))).dismissDialog()
-            File(presenter.destinationZipFile).delete()
         }
     }
 
