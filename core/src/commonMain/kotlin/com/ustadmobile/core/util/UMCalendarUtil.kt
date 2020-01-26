@@ -48,6 +48,11 @@ object UMCalendarUtil {
         return date.unixMillisLong
     }
 
+    fun getPrettyDateWithTimeFromLongSimple(thisDate: Long): String{
+        val format: DateFormat = DateFormat("HH:mm,  dd MMM yy")
+        val cal = DateTime(thisDate)
+        return cal.format(format)
+    }
 
     /**
      * Gets date in long plus/minus the days specified from today.

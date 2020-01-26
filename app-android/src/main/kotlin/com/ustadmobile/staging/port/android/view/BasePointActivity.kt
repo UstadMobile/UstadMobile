@@ -119,7 +119,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         //Style
         bottomNavigation.defaultBackgroundColor = fetchColor(R.color.primary)
         bottomNavigation.accentColor = fetchColor(R.color.just_black)
-        bottomNavigation.inactiveColor = fetchColor(R.color.bottom_nav_yourInactiveColor)
+        bottomNavigation.inactiveColor = fetchColor(R.color.bottomnav_inactive)
         bottomNavigation.isBehaviorTranslationEnabled = false
         bottomNavigation.setUseElevation(true, 2F)
     }
@@ -206,9 +206,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
                         .resize(dpToPxImagePerson(), dpToPxImagePerson())
                         .centerCrop()
                         .into(profileImage)
-
             }
-
         }
     }
 

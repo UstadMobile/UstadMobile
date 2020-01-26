@@ -75,6 +75,19 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
                 }
             }
         }
+
+        val lastSyncedText = impl.getString(MessageID.last_synced_at,
+                context)
+        GlobalScope.launch {
+
+            val latestTimeStamp =
+                    UmAccountManager.getActiveDatabase(context).syncresultDao.getLatestTimeStamp()
+            val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
+            val lastSynced = lastSyncedText + " " + lastSyncedText2
+            view.runOnUiThread(Runnable {
+                view.updateLastSyncedText(lastSynced)
+            })
+        }
     }
 
     fun handleClickChangePassword() {

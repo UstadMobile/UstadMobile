@@ -174,6 +174,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    abstract val syncresultDao : SyncResultDao
+
     abstract val auditLogDao : AuditLogDao
     abstract val clazzActivityChangeDao : ClazzActivityChangeDao
     abstract val clazzActivityDao : ClazzActivityDao

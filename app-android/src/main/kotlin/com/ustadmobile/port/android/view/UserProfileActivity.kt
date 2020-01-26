@@ -75,13 +75,14 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
         pictureEdit = findViewById(R.id.activity_user_profile_edit)
         personEditImage = findViewById(R.id.activity_user_profile_user_image)
+        lastSyncedTV = findViewById(R.id.activity_user_prodile_last_synced)
 
         toolbar = findViewById(R.id.activity_user_profile_toolbar)
         toolbar!!.title = getText(R.string.app_name)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         presenter = UserProfilePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UmAccountManager.getActiveDatabase(this),
+                this, UmAccountManager.getRepositoryForActiveAccount(this),
                 UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
@@ -126,6 +127,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     override fun restartUI() {
         onResume()
+    }
+
+    override fun updateLastSyncedText(lastSynced: String) {
+        lastSyncedTV.setText(lastSynced)
     }
 
     override fun setCurrentLanguage(language: String?) {

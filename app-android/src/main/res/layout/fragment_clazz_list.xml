@@ -44,25 +44,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_list_sort_spinner" />
 
-            <ru.dimorinny.floatingtextbutton.FloatingTextButton
-                android:id="@+id/fragment_clazz_list_fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/fragment_class_list_recyclerview"
-                android:layout_alignParentStart="true"
-                android:layout_gravity="bottom|center"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                app:floating_background_color="@color/accent"
-                app:floating_title="@string/add_class"
-                app:floating_left_icon="@drawable/fab_add"
-                app:floating_title_color="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.502"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_alignParentLeft="true" />
+        <ru.dimorinny.floatingtextbutton.FloatingTextButton
+            android:id="@+id/fragment_clazz_list_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/fragment_class_list_recyclerview"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="bottom|center"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="24dp"
+            app:floating_background_color="@color/accent"
+            app:floating_left_icon="@drawable/fab_add"
+            app:floating_title="@string/add_class"
+            app:floating_title_color="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -21,6 +21,8 @@ interface UserProfileView : LanguageOptionView  {
 
     fun callFinishAffinity()
 
+    fun updateLastSyncedText(lastSynced: String)
+
     @JsName("loadProfileIcon")
     fun loadProfileIcon(profile: String)
 
