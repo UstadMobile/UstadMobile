@@ -13,6 +13,8 @@ import org.junit.Test
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+//Tests are disabled - this is being kept only for reference purposes briefly
+@Deprecated("ResumableDownload2 is no longer used and will be removed shortly")
 class ResumableDownload2Test {
 
     lateinit var server : RouterNanoHTTPD
@@ -25,7 +27,7 @@ class ResumableDownload2Test {
 
     lateinit var mockDispatcher : ReverseProxyDispatcher
 
-    @Before
+    //@Before
     fun startServer() {
         baseDir = File(System.getProperty("user.dir"), "src/jvmTest/resources/http")
         val testFile = File(baseDir, "http/top_header_bg.jpg")
@@ -41,19 +43,19 @@ class ResumableDownload2Test {
         mockServer.start()
     }
 
-    @After
+    //@After
     fun deleteTmpFile() {
         tmpFilesToDelete.forEach { it.delete() }
         tmpFilesToDelete.clear()
     }
 
-    @After
+    //@After
     fun stopServers(){
         server.stop()
         mockServer.shutdown()
     }
 
-    @Test
+    //@Test
     fun `GIVEN serer running normally WHEN download runs SHOULD download successfully and file content should match`() {
         runBlocking {
             val port = server.listeningPort
@@ -71,7 +73,7 @@ class ResumableDownload2Test {
         }
     }
 
-    @Test
+    //@Test
     fun givenServerDisconnectsRepeatedlyWhenDownloadRunsShouldFailAfterRetryCountExceeded() {
         runBlocking {
             mockDispatcher.numTimesToFail.set(7) // each second attempt runs two get requests - HEAD and GEt
@@ -87,7 +89,7 @@ class ResumableDownload2Test {
     }
 
 
-    @Test
+    //@Test
     fun `GIVEN server disconnected during download WHEN download runs SHOULD resume download, return true and file content should be the same`() {
         runBlocking {
             mockDispatcher.numTimesToFail.set(1)
@@ -125,7 +127,7 @@ class ResumableDownload2Test {
         }
     }
 
-    @Test
+    //@Test
     fun `GIVEN file does not exist WHEN download runs SHOULD fail`() {
         runBlocking {
             val downloadDstFile = File.createTempFile("resumabledl2test", "tmp")
@@ -136,7 +138,7 @@ class ResumableDownload2Test {
         }
     }
 
-    @Test
+    //@Test
     fun `GIVEN server offline WHEN download runs SHOULD fail`() {
         runBlocking {
             mockServer.shutdown()

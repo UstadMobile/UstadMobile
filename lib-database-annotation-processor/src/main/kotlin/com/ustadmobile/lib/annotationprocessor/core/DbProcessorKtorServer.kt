@@ -27,10 +27,12 @@ import fi.iki.elonen.router.RouterNanoHTTPD
 import java.util.*
 import javax.lang.model.element.ElementKind
 import com.ustadmobile.door.DoorConstants
+import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_KTOR_NO_CONTENT_RESPOND
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.NANOHTTPD_URIRESOURCE_FUNPARAMS
+import io.ktor.application.ApplicationCallPipeline
 import javax.annotation.processing.ProcessingEnvironment
 
 /**
@@ -140,6 +142,16 @@ fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>,
             fnCodeBlock.add("val ${parameterSpec.name} = _uriResource.initParameter($index, %T::class.java)\n",
                     parameterSpec.type)
         }
+
+
+        fnCodeBlock.add("val _clientDbVersion = _session.headers.get(%T.HEADER_DBVERSION)?.toInt() ?: 0\n",
+                    DoorConstants::class)
+                .beginControlFlow("if(_clientDbVersion < _minSyncVersion)")
+                .add("return %T.newFixedLengthResponse(%T.Response.Status.BAD_REQUEST, %T.MIME_TYPE_PLAIN, %S)",
+                        NanoHTTPD::class, NanoHTTPD::class, DoorConstants::class,
+                        "Client db version does not meet minimum \$_minSyncVersion")
+                .endControlFlow()
+
         val notFoundCodeBlock = CodeBlock.of("%T.newFixedLengthResponse(%T.Status.NOT_FOUND, " +
                 "%T.MIME_TYPE_PLAIN, %S)", NanoHTTPD::class, NanoHTTPD.Response::class,
                 DoorConstants::class, "")
@@ -408,9 +420,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val responderUriClassName = ClassName(daoTypeClassName.packageName,
                     "${daoTypeClassName.simpleName}$SUFFIX_NANOHTTPD_URIRESPONDER")
 
+            val minClientDbVersion = dbTypeElement.getAnnotation(MinSyncVersion::class.java)?.value ?: -1
             codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}/(.)+\", " +
-                    "%T::class.java, _db.$daoFromDbGetter, _db, _gson, _attachmentsDir",
-                    responderUriClassName)
+                    "%T::class.java, _db.$daoFromDbGetter, _db, _gson, _attachmentsDir, %L",
+                    responderUriClassName, minClientDbVersion)
             if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
                 val ktorHelperBaseName = "${daoTypeClassName.simpleName}$SUFFIX_KTOR_HELPER"
                 codeBlock.takeIf { getHelpersFromDb }?.add(",_syncDao ,if(_isMaster){_db._${ktorHelperBaseName}Master()} else {_db._${ktorHelperBaseName}Local()}")
@@ -450,6 +463,21 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
                 dbTypeClassName.simpleName)
 
+        val minSyncVersionAnnotation = dbTypeElement.getAnnotation(MinSyncVersion::class.java)
+        if(minSyncVersionAnnotation != null) {
+            codeBlock.beginControlFlow("this.intercept(%T.Features)", ApplicationCallPipeline::class)
+                    .add("val _clientVersion = this.context.request.headers[%T.HEADER_DBVERSION]?.toInt() ?: 0\n",
+                            DoorConstants::class)
+                    .beginControlFlow("if(_clientVersion < ${minSyncVersionAnnotation.value})")
+                    .add("context.request.call.%M(%T.BadRequest, %S)\n", RESPOND_MEMBER,
+                            HttpStatusCode::class,
+                            "Door DB Version does not meet minimum required: ${minSyncVersionAnnotation.value}")
+                    .add("return@intercept finish()\n")
+                    .endControlFlow()
+                    .endControlFlow()
+        }
+
+
         if(isSyncableDb) {
             val syncDaoBaseName = "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"
             val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
@@ -465,13 +493,15 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     .add(")\n")
         }
 
+
         daosOnDatabase(dbTypeElement, processingEnv).forEach {
             val daoTypeEl = it.first
             val daoFromDbGetter = it.second
             val daoTypeClassName = daoTypeEl.asClassName()
 
-            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson, _attachmentsDir", MemberName(daoTypeClassName.packageName,
-                    "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE"))
+            codeBlock.add("%M(_db.$daoFromDbGetter, _db, _gson, _attachmentsDir, %L",
+                    MemberName(daoTypeClassName.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE"),
+                    minSyncVersionAnnotation?.value ?: 0)
             if(syncableEntitiesOnDao(daoTypeClassName, processingEnv).isNotEmpty()) {
                 val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
                         .map {
@@ -507,7 +537,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 ParameterSpec.builder("_dao", daoTypeElement.asType().asTypeName()).build(),
                 ParameterSpec.builder("_db", DoorDatabase::class).build(),
                 ParameterSpec.builder("_gson", Gson::class).build(),
-                ParameterSpec.builder("_attachmentsDir", String::class).build())
+                ParameterSpec.builder("_attachmentsDir", String::class).build(),
+                ParameterSpec.builder("_minSyncVersion", INT).build())
         val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}$SUFFIX_KTOR_ROUTE")
                 .receiver(Route::class)
 

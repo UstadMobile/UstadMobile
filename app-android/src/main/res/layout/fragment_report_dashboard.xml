@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/dimen_50dp"
-    tools:context="com.ustadmobile.port.android.view.ReportDashboard">
+    tools:context="com.ustadmobile.port.android.view.ReportDashboardFragment">
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/create_report"
         android:layout_marginEnd="@dimen/dimen_16dp"

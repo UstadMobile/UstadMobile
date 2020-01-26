@@ -7,8 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 interface FistItemLoadedListener{
 
     fun onFirstItemLoaded()
-
-    fun onEmptyTopEntryList(status: Int)
 }
 
 abstract class RepoLoadingPageListAdapter<T, VH : RecyclerView.ViewHolder>(itemCallback: DiffUtil.ItemCallback<T>): PagedListAdapter<T, VH>(itemCallback){

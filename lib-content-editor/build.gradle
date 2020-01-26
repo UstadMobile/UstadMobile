@@ -83,7 +83,7 @@ new File(rootPath + "src/js").eachFile { def file ->
             def sourceFile = file.absolutePath
             jsDistFile.mkdirs()
             def destFile = jsDistDir + "${file.name.replaceFirst(~/\.[^\.]+$/, '')}.min.js"
-            commandLine 'uglifyjs', sourceFile, '--compress', '--comments','--keep-fnames', '-o', destFile
+            commandLine commandDir.absolutePath, sourceFile, '--compress', '--comments','--keep-fnames', '-o', destFile
         }
     }else{
         task "${dynamicTaskName}"(type: Copy) {

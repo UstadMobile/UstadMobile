@@ -12,7 +12,9 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.dbVersionHeader
 import db2.ExampleDao2_KtorRoute
+import db2.ExampleDatabase2.Companion.DB_VERSION
 import db2.ExampleEntity2
 import db2.ExampleSyncableEntity
 import db2.ExampleDatabase2SyncDao_JdbcKt
@@ -80,11 +82,14 @@ class TestDbRoute  {
         requestBuilder.body = exampleEntity2
         requestBuilder.url("http://localhost:8089/ExampleDatabase2/ExampleDao2/insertAndReturnId")
         requestBuilder.contentType(ContentType.Application.Json)
+        requestBuilder.header(DoorConstants.HEADER_DBVERSION, DB_VERSION)
 
         exampleEntity2.uid = httpClient.post<Long>(requestBuilder)
 
         val entityFromServer = httpClient.get<ExampleEntity2>(
-                "http://localhost:8089/ExampleDatabase2/ExampleDao2/findByUid?uid=${exampleEntity2.uid}")
+                "http://localhost:8089/ExampleDatabase2/ExampleDao2/findByUid?uid=${exampleEntity2.uid}") {
+            header(DoorConstants.HEADER_DBVERSION, DB_VERSION)
+        }
         assertEquals(exampleEntity2, entityFromServer, "Entity from server is retrieved OK")
 
         httpClient.close()
@@ -100,13 +105,18 @@ class TestDbRoute  {
 
         val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
+            dbVersionHeader(exampleDb)
         }
         val reqId = firstGetListResponse.headers.get("X-reqid")!!.toInt()
         val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
-        httpClient.get<Unit>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=$reqId")
+        httpClient.get<Unit>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=$reqId") {
+            header("X-nid", 1)
+            dbVersionHeader(exampleDb)
+        }
 
         val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
+            dbVersionHeader(exampleDb)
         }
 
         Assert.assertEquals("First list has one item", 1, firstGetList.size)
@@ -129,6 +139,7 @@ class TestDbRoute  {
                 takeFrom("http://localhost:8089/")
                 path("ExampleDatabase2", "ExampleSyncableDao", "findAll")
                 parameter("x", 1)
+                dbVersionHeader(exampleDb)
             }
             header("X-nid", 1)
         }
@@ -137,6 +148,7 @@ class TestDbRoute  {
 
         val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
+            dbVersionHeader(exampleDb)
         }
 
         Assert.assertEquals("First list has one item", 1, firstGetList.size)

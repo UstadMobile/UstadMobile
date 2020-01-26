@@ -8,16 +8,23 @@ import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
+import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
 
-private val okHttpClient = OkHttpClient.Builder()
-        .dispatcher(Dispatcher().also {
-            it.maxRequests = 30
-            it.maxRequestsPerHost = 10
-        })
-        .connectTimeout(45, TimeUnit.SECONDS)
-        .readTimeout(45, TimeUnit.SECONDS)
-        .build()
+private val OK_HTTP_MIN_SDKVERSION = 21
+
+private val okHttpClient = if(Build.VERSION.SDK_INT > OK_HTTP_MIN_SDKVERSION) {
+    OkHttpClient.Builder()
+            .dispatcher(Dispatcher().also {
+                it.maxRequests = 30
+                it.maxRequestsPerHost = 10
+            })
+            .connectTimeout(45, TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
+            .build()
+}else {
+    null
+}
 
 private val defaultGsonSerializer = GsonSerializer()
 
@@ -36,7 +43,7 @@ private val httpClient = if(Build.VERSION.SDK_INT < 21) {
         dispatcher.maxRequestsPerHost = 10
 
         engine {
-            preconfigured = okHttpClient
+            preconfigured = okHttpClient!!
         }
 
     }
@@ -44,6 +51,10 @@ private val httpClient = if(Build.VERSION.SDK_INT < 21) {
 
 actual fun defaultHttpClient() = httpClient
 
-fun defaultOkHttpClient() = okHttpClient
+fun defaultOkHttpClient() = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
+    okHttpClient!!
+} else {
+    throw RuntimeException("OKHttp Min SDK Version is $OK_HTTP_MIN_SDKVERSION")
+}
 
 fun defaultGsonSerializer() = defaultGsonSerializer
