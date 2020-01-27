@@ -322,55 +322,48 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>) {
-        val pagedList = LivePagedListBuilder(entryProvider, 20).build()
+        lastLocalAvailabilityPagedListCallback?.onDestroy()
+        lastRecyclerViewAdapter?.firstItemLoadedListener = null
+        repoLoadingStatusView.reset()
+
+
         val recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, this,
-                managerAndroidBle.containerDownloadManager)
-        pagedList.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
+                managerAndroidBle.containerDownloadManager).apply {
+            isTopEntryList = buttonFilterLabels.isNotEmpty()
+            filterButtons = buttonFilterLabels
+            activeIndex = activeFilterIndex
+        }
+        recyclerAdapter.firstItemLoadedListener = repoLoadingStatusView
+
+
+        val localAvailabilityCallback = LocalAvailabilityPagedListCallback(
+                managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
+            runOnUiThread(Runnable {
+                recyclerAdapter.updateLocalAvailability(availabilityMap)
+            })
+        }
+
+        val data = entryProvider.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
+                repoLoadingStatusView)
+
+        //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
+        //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
+        //any items are loaded
+        if(!data.isRepositoryLiveData()) {
+            repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
+        }
+
+        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
             recyclerAdapter.submitList(it)
+            localAvailabilityCallback.pagedList = it
+            it.addWeakCallback(listSnapShot, localAvailabilityCallback)
         })
+
         recyclerView.adapter = recyclerAdapter
+        lastRecyclerViewAdapter = recyclerAdapter
+        lastLocalAvailabilityPagedListCallback = localAvailabilityCallback
 
-
-//        lastLocalAvailabilityPagedListCallback?.onDestroy()
-//        lastRecyclerViewAdapter?.firstItemLoadedListener = null
-//        repoLoadingStatusView.reset()
-//
-//
-//        val recyclerAdapter = ContentEntryListRecyclerViewAdapter(ustadBaseActivity, this,
-//                managerAndroidBle.containerDownloadManager)
-//
-//        recyclerAdapter.isTopEntryList = buttonFilterLabels.isNotEmpty()
-//        recyclerAdapter.filterButtons = buttonFilterLabels
-//        recyclerAdapter.activeIndex = activeFilterIndex
-//
-//        recyclerAdapter.firstItemLoadedListener = repoLoadingStatusView
-//
-//
-////        val localAvailabilityCallback = LocalAvailabilityPagedListCallback(
-////                managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
-////            recyclerAdapter.updateLocalAvailability(availabilityMap)
-////        }
-//
-//        val data = entryProvider.asRepositoryLiveData(
-//                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
-//                repoLoadingStatusView)
-//
-//        //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
-//        //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
-//        //any items are loaded
-//        if(!data.isRepositoryLiveData()) {
-//            repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
-//        }
-//
-//        data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
-//            recyclerAdapter.submitList(it)
-//            //localAvailabilityCallback.pagedList = it
-//            //it.addWeakCallback(listSnapShot, localAvailabilityCallback)
-//        })
-//
-//        recyclerView.adapter = recyclerAdapter
-//        lastRecyclerViewAdapter = recyclerAdapter
-//        //lastLocalAvailabilityPagedListCallback = localAvailabilityCallback
     }
 
     override fun setToolbarTitle(title: String) {

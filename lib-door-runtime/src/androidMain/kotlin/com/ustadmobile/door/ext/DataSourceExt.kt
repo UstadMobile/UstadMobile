@@ -24,11 +24,14 @@ fun <T> DataSource.Factory<Int, T>.asRepositoryLiveData(dao: Any,
     }
 
     val liveData: LiveData<PagedList<T>> = pagedListBuilder.build()
+    //return liveData
     return if(boundaryCallback != null) {
-        if(repoLoadCallback != null)
-            boundaryCallback.loadHelper.addRepoLoadCallback(repoLoadCallback)
+//        if(repoLoadCallback != null)
+//            //TODO: This could be a weak reference
+//            boundaryCallback.loadHelper.addRepoLoadCallback(repoLoadCallback)
 
         boundaryCallback.loadHelper.wrapLiveData(liveData)
+        liveData
     }else {
         liveData
     }

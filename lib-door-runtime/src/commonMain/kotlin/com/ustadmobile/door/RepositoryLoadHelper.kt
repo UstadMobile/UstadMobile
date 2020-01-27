@@ -10,6 +10,8 @@ import kotlin.jvm.Volatile
 import com.github.aakira.napier.Napier
 import com.ustadmobile.door.util.threadSafeListOf
 
+typealias LifeCycleHelperFactory = (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper
+
 //Empty / null retry:
 // On DataSourceFactory / boundary callback: alwasy - because it was called by onZeroItemsLoaded
 // On LiveData - never - use a reference to the livedata itself, and check if it's null or empty
@@ -25,7 +27,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val maxAttempts: Int = 3,
                               val retryDelay: Int = 5000,
                               val autoRetryOnEmptyLiveData: DoorLiveData<T>? = null,
-                              val lifecycleHelperFactory: (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper =
+                              val lifecycleHelperFactory: LifeCycleHelperFactory =
                                       {RepositoryLoadHelperLifecycleHelper(it)},
                               val uri: String = "",
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
@@ -63,7 +65,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
      * the return type so that we can watch if the data is being observed.
      */
     inner class LiveDataWrapper<L>(private val src: DoorLiveData<L>,
-                                   internal var onActiveCb: (suspend ()-> Unit)? = null) : DoorLiveData<L>() {
+                            internal var onActiveCb: (suspend ()-> Unit)? = null) : DoorLiveData<L>() {
 
         val observerHelpersMap
                 = mutableMapOf<DoorObserver<in L>, RepositoryLoadHelperLifecycleHelper>()
@@ -343,13 +345,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         callback.onLoadStatusChanged(status, null)
     }
 
-    inline fun addRepoLoadCallback(crossinline block: (Int, String?) -> Unit) {
-        addRepoLoadCallback(object: RepoLoadCallback {
-            override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
-                block(status, remoteDevice)
-            }
-        })
-    }
+//    inline fun addRepoLoadCallback(crossinline block: (Int, String?) -> Unit) {
+//        addRepoLoadCallback(object: RepoLoadCallback {
+//            override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
+//                block(status, remoteDevice)
+//            }
+//        })
+//    }
 
     fun removeRepoLoadCallback(callback: RepoLoadCallback) = callbacks.remove(callback)
 
