@@ -5,13 +5,13 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.Html
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
@@ -21,7 +21,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -82,7 +81,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var fileStatusIcon = HashMap<Int, Int>()
 
-    private var showControls : Boolean = false
+    private var showControls: Boolean = false
 
     private var showExportIcon: Boolean = false
 
@@ -145,7 +144,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         downloadProgress!!.setOnStopDownloadListener(this)
 
         findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
-            if(showControls && ::editButton.isInitialized && editButton.visibility == View.VISIBLE){
+            if (showControls && ::editButton.isInitialized && editButton.visibility == View.VISIBLE) {
                 if (scrollY > oldScrollY) {
                     editButton.hide()
                 } else {
@@ -164,7 +163,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onResume() {
         super.onResume()
-        if(::managerAndroidBle.isInitialized) {
+        if (::managerAndroidBle.isInitialized) {
             managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
                     findViewById(R.id.coordinationLayout), this)
         }
@@ -178,12 +177,12 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     @SuppressLint("RestrictedApi")
     override fun setEditButtonVisible(show: Boolean) {
-       if(::editButton.isInitialized){
-           editButton.visibility = if(show) View.VISIBLE else View.GONE
-       }
+        if (::editButton.isInitialized) {
+            editButton.visibility = if (show) View.VISIBLE else View.GONE
+        }
     }
 
-    override fun setExportContentIconVisible(visible: Boolean){
+    override fun setExportContentIconVisible(visible: Boolean) {
         this.showExportIcon = visible
         invalidateOptionsMenu()
     }
@@ -203,7 +202,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 return true
             }
 
-            R.id.export_content ->{
+            R.id.export_content -> {
                 presenter.handleContentEntryExport()
             }
         }
@@ -219,15 +218,15 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun setContentEntry(contentEntry: ContentEntry) {
         entryDetailsTitle!!.text = contentEntry.title
         supportActionBar!!.title = contentEntry.title
-        entryDetailsDesc!!.text = if(!contentEntry.description.isNullOrBlank()) Html.fromHtml(contentEntry.description) else ""
+        entryDetailsDesc!!.text = if (!contentEntry.description.isNullOrBlank()) HtmlCompat.fromHtml(contentEntry.description?.replace("\n","<br />")?: "", 0) else ""
         entryDetailsAuthor!!.text = contentEntry.author
 
-        UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
+        UMAndroidUtil.loadImage(contentEntry.thumbnailUrl, R.drawable.img_placeholder,
                 findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
     }
 
     override fun setDownloadJobItemStatus(downloadJobItem: DownloadJobItem?) {
-        if(currentDownloadJobItemStatus != downloadJobItem?.djiStatus) {
+        if (currentDownloadJobItemStatus != downloadJobItem?.djiStatus) {
             when {
                 downloadJobItem.isStatusCompletedSuccessfully() -> {
                     entry_download_open_button.visibility = View.VISIBLE
@@ -250,12 +249,12 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
             currentDownloadJobItemStatus = downloadJobItem?.djiStatus ?: 0
         }
 
-        if(downloadJobItem != null && downloadJobItem.isStatusQueuedOrDownloading()) {
+        if (downloadJobItem != null && downloadJobItem.isStatusQueuedOrDownloading()) {
             entry_detail_progress.statusText = downloadJobItem.toStatusString(
                     UstadMobileSystemImpl.instance, this)
-            entry_detail_progress.progress = if(downloadJobItem.downloadLength > 0) {
+            entry_detail_progress.progress = if (downloadJobItem.downloadLength > 0) {
                 (downloadJobItem.downloadedSoFar.toFloat()) / (downloadJobItem.downloadLength.toFloat())
-            }else {
+            } else {
                 0f
             }
         }
