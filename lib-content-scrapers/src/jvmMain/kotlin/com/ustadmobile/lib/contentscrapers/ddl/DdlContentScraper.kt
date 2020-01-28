@@ -21,6 +21,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLI
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_SEE_ALSO
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import kotlinx.coroutines.runBlocking
+import net.lightbody.bmp.core.har.HarEntry
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
@@ -89,21 +90,30 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                     fileUrl = URL(URL(sourceUrl), href)
 
-
                     val isMediaFile = isMediaUrl(fileUrl.toString())
                     if (isMediaFile) {
                         return@startHarScrape
                     }
 
+                    var fileEntry: HarEntry? = null
 
-                    val fileEntry = proxy.har.log.entries.find { harEntry ->
-                        harEntry.request.url == fileUrl.toString()
+                    var counterRequest = 0
+                    while (fileEntry == null && counterRequest < TIME_OUT_SELENIUM) {
+                        fileEntry = proxy.har.log.entries.find { harEntry ->
+                            harEntry.request.url == fileUrl.toString()
+                        }
+                        Thread.sleep(1000)
+                        counterRequest++
                     }
 
-                    var counter = 0
-                    while (fileEntry!!.response.content.text.isNullOrEmpty() && counter < TIME_OUT_SELENIUM) {
+                    if(fileEntry == null){
+                        throw IllegalStateException("no request found for link")
+                    }
+
+                    var counterResponse = 0
+                    while (fileEntry.response.content.text.isNullOrEmpty() && counterResponse < TIME_OUT_SELENIUM) {
                         Thread.sleep(1000)
-                        counter++
+                        counterResponse++
                     }
 
                 }
@@ -243,7 +253,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                 val isMediaFile = isMediaUrl(fileUrl.toString())
 
-                if(isMediaFile && fileEntry.response.content.text.isNullOrEmpty()){
+                if (isMediaFile && fileEntry.response.content.text.isNullOrEmpty()) {
 
                     val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fileUrl))
                     fileEntry.response.content.encoding = "base64"
@@ -264,10 +274,11 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
             UMLogUtil.logError("$DDL Exception - Error downloading resource from url $sourceUrl")
             close()
-            throw Exception(e)
+            throw e
         }
 
         if (!scraperResult.updated) {
+            contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
             close()
             return
         }
@@ -278,7 +289,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
             UMLogUtil.logError("$DDL Debug - Did not find any content to download at url $sourceUrl")
             close()
-            throw IllegalStateException("No File found for content in har entry")
+            throw IllegalStateException("Container Manager did not have the file")
         }
 
         runBlocking {
@@ -321,6 +332,10 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             }
 
         }
+
+        const val ERROR_TYPE_LINK_NOT_FOUND = 1
+        const val ERROR_TYPE_FILE_NOT_LOADED = 2
+        const val ERROR_TYPE_INVALID_LICENSE = 4
     }
 
 }

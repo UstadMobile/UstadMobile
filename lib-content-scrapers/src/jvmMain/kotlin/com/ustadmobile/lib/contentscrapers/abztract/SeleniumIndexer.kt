@@ -14,7 +14,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 
 abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : Indexer(parentContentEntry, runUid, db) {
 
-    var chromeDriver: ChromeDriver
+    protected var chromeDriver: ChromeDriver
 
     init {
         WebDriverManager.chromedriver().setup()
@@ -36,6 +36,12 @@ abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, db: UmAppD
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
 
-        return Jsoup.parse(chromeDriver.pageSource)
+        val doc = Jsoup.parse(chromeDriver.pageSource)
+        close()
+        return doc
+    }
+
+    override fun close() {
+        chromeDriver.close()
     }
 }

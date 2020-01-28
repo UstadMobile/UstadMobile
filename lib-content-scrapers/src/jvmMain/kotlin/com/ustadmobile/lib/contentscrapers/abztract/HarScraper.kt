@@ -36,7 +36,7 @@ typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid) {
 
     protected var chromeDriver: ChromeDriver
-    protected var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
+    var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
     val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
 
     data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)

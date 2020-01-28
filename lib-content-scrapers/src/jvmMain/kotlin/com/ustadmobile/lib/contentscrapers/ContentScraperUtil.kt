@@ -118,14 +118,17 @@ object ContentScraperUtil {
 
     const val MOGRIFY_PATH_KEY = "mogrify"
 
+    const val YOUTUBE_DL_PATH_KEY = "youtube-dl"
+
     val SEARCH_LOCATIONS = mapOf(
             CHROME_PATH_KEY to listOf("/usr/bin/chromedriver"),
             FFMPEG_PATH_KEY to listOf("/usr/bin/ffmpeg"),
             CODEC2_PATH_KEY to listOf("/usr/local/bin/c2enc"),
             WEBP_PATH_KEY to listOf("/usr/bin/cwebp"),
-            MOGRIFY_PATH_KEY to listOf("/usr/bin/mogrify"))
+            MOGRIFY_PATH_KEY to listOf("/usr/bin/mogrify"),
+            YOUTUBE_DL_PATH_KEY to listOf("/usr/local/bin/youtube-dl"))
 
-    val driversList = listOf(CHROME_PATH_KEY, FFMPEG_PATH_KEY, /*CODEC2_PATH_KEY,*/ WEBP_PATH_KEY)
+    val driversList = listOf(CHROME_PATH_KEY, FFMPEG_PATH_KEY, /*CODEC2_PATH_KEY,*/ WEBP_PATH_KEY, YOUTUBE_DL_PATH_KEY)
 
     fun checkIfPathsToDriversExist() {
         driversList.forEach { driver ->

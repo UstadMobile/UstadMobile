@@ -108,7 +108,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
                 val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
                 val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java)
-                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid)
+                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid) as Scraper?
                 obj?.scrapeUrl(it.scrapeUrl!!)
                 successful = true
 
@@ -145,6 +145,8 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
         private const val INDEXER_ARGS = "indexer"
         private const val SCRAPER_ARGS = "scraper"
         private const val START_URL_ARGS = "url"
+
+        const val ERROR_TYPE_UNKNOWN = 10
 
         @JvmStatic
         fun main(args: Array<String>) {

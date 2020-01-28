@@ -20,7 +20,6 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) :
 
             it.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.se-pre-con")))
         }
-        close()
 
         val listOfSubjects = document.select("legend#resource-subjects + ul > li")
 
@@ -96,7 +95,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) :
     }
 
     override fun close() {
-        chromeDriver.close()
+
     }
 
 

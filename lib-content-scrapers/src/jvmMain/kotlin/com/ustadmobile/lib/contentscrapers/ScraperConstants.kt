@@ -236,6 +236,7 @@ object ScraperConstants {
     const val KHAN = "Khan Academy"
     const val GDL = "Global Digital Library"
     const val CK12 = "CK12"
+    const val HAB = "Habaybna"
 
     const val TIME_OUT_SELENIUM = 120
 

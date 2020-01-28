@@ -6,7 +6,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import java.io.File
 
-abstract class Scraper(val containerDir: File, var db: UmAppDatabase, var contentEntryUid: Long) {
+abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long) {
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
             MimeType.PDF to ContentEntry.DOCUMENT_TYPE,
@@ -36,6 +36,10 @@ abstract class Scraper(val containerDir: File, var db: UmAppDatabase, var conten
         }
         container.containerUid = containerDao.insert(container)
         return container
+    }
+
+    fun hideContentEntry(){
+        contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
     }
 
     companion object {
