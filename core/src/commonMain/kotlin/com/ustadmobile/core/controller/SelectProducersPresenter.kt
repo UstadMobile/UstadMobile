@@ -38,7 +38,6 @@ class SelectProducersPresenter(context: Any,
     private val providerDao: InventoryItemDao
     private val providerDaoDB: InventoryItemDao
     private val transactionDao: InventoryTransactionDao
-    private val transactionDaoDB: InventoryTransactionDao
     private var saleItemUid: Long = 0L
     private var saleUid: Long = 0L
     private var saleProductUid: Long = 0L
@@ -58,7 +57,6 @@ class SelectProducersPresenter(context: Any,
         providerDao = repository.inventoryItemDao
         providerDaoDB = database.inventoryItemDao
         transactionDao = repository.inventoryTransactionDao
-        transactionDaoDB = database.inventoryTransactionDao
 
         if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)) {
             saleItemUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_ITEM_UID)!!.toLong())
@@ -183,7 +181,7 @@ class SelectProducersPresenter(context: Any,
                 val newInventoryItem = InventoryItem(saleProductUid, loggedInPersonUid, weUid,
                         addedDateTime)
                 newInventoryItem.inventoryItemDayAdded = addedDate
-                providerDaoDB.insertInventoryItem(newInventoryItem, count!!, loggedInPersonUid)
+                providerDao.insertInventoryItem(newInventoryItem, count!!, loggedInPersonUid)
             }
             view.finish()
         }
@@ -240,7 +238,7 @@ class SelectProducersPresenter(context: Any,
                     newInventoryTransaction.inventoryTransactionActive = false
                     newInventoryTransaction.inventoryTransactionSaleItemUid = saleItemUid
 
-                    transactionDaoDB.insertAsync(newInventoryTransaction)
+                    transactionDao.insertAsync(newInventoryTransaction)
                 }
             }
 

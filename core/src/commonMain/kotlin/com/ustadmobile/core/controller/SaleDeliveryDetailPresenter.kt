@@ -37,6 +37,7 @@ class SaleDeliveryDetailPresenter(context: Any,
     var saleItemToSaleItemListDetail : HashMap<Long, SaleItemListDetail>
 
     val inventoryTransactionDB = database.inventoryTransactionDao
+    val inventoryTransactionDao = repository.inventoryTransactionDao
     val inventoryItemDB = database.inventoryItemDao
     val saleDeliveryDB = database.saleDeliveryDao
     val saleItemDB = database.saleItemDao
@@ -79,14 +80,6 @@ class SaleDeliveryDetailPresenter(context: Any,
             GlobalScope.launch {
                 saleDelivery = saleDeliveryDB.findByUidAsync(saleDeliveryUid)!!
                 newDelivery = false
-                if(saleDelivery == null){
-                    saleDelivery = SaleDelivery()
-                    saleDelivery.saleDeliveryDate = UMCalendarUtil.getDateInMilliPlusDays(0)
-                    saleDelivery.saleDeliverySaleUid = saleUid
-                    saleDelivery.saleDeliveryActive = false
-                    saleDelivery.saleDeliveryUid = saleDeliveryDB.insertAsync(saleDelivery)
-                    newDelivery = true
-                }
                 initFromSaleDelivery()
             }
         }else {
@@ -96,7 +89,7 @@ class SaleDeliveryDetailPresenter(context: Any,
             saleDelivery.saleDeliveryDate = UMCalendarUtil.getDateInMilliPlusDays(0)
 
             GlobalScope.launch {
-                saleDelivery.saleDeliveryUid = saleDeliveryDB.insertAsync(saleDelivery)
+                saleDelivery.saleDeliveryUid = saleDeliveryDao.insertAsync(saleDelivery)
                 newDelivery = true
                 initFromSaleDelivery()
             }
@@ -187,14 +180,14 @@ class SaleDeliveryDetailPresenter(context: Any,
             for (saleItemUid in saleItemToWeCounter.keys) {
 
                 var ok = false
-                var saleItem = saleItemDB.findByUidAsync(saleItemUid)
+                val saleItem = saleItemDB.findByUidAsync(saleItemUid)
 
                 val itemDetail = saleItemToSaleItemListDetail.get(saleItemUid)
                 var preOrder = itemDetail!!.saleItemPreorder
                 val saleItemMap = saleItemToWeCounter.get(saleItemUid)
                 var totalSaleItemSelected = 0
                 for (weUid in saleItemMap!!.keys) {
-                    val weCount = saleItemMap!!.get(weUid)
+                    val weCount = saleItemMap.get(weUid)
                     totalSaleItemSelected += weCount!!
                     if (saleItem!!.saleItemPreorder) {
                         //Create new inventoryTransactions
@@ -215,7 +208,7 @@ class SaleDeliveryDetailPresenter(context: Any,
                                 newInventoryTransaction.inventoryTransactionActive = true
                                 newInventoryTransaction.inventoryTransactionSaleItemUid = saleItemUid
                                 newInventoryTransaction.inventoryTransactionSaleDeliveryUid = saleDelivery.saleDeliveryUid
-                                inventoryTransactionDB.insertAsync(newInventoryTransaction)
+                                inventoryTransactionDao.insertAsync(newInventoryTransaction)
                             }
 
                         }
@@ -255,21 +248,17 @@ class SaleDeliveryDetailPresenter(context: Any,
 
             //3. Persist and close
             saleDelivery.saleDeliveryActive = true
-            saleDeliveryDB.updateAsync(saleDelivery!!)
+            saleDeliveryDB.updateAsync(saleDelivery)
             view.finish()
         }
     }
 
     fun saveSignature() {
         if (currentSignSvg != null && !currentSignSvg!!.isEmpty()) {
-            saleDelivery!!.saleDeliverySignature = currentSignSvg!!
+            saleDelivery.saleDeliverySignature = currentSignSvg!!
         }else{
-            saleDelivery!!.saleDeliverySignature = ""
+            saleDelivery.saleDeliverySignature = ""
         }
-    }
-
-    fun handleClickClear(){
-        view.finish()
     }
 
     fun updateSignatureSvg(signSvg: String) {

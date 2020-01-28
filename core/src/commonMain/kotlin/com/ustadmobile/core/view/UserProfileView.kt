@@ -3,22 +3,13 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.Person
 import kotlin.js.JsName
 
-/**
- * Core View. Screen is for UserProfile's View
- */
-interface UserProfileView : UstadView {
+interface UserProfileView : LanguageOptionView  {
 
-
-    /**
-     * Method to finish the screen / view.
-     */
     fun finish()
 
     fun updateToolbarTitle(personName: String)
 
-    fun setLanguageSet(languageSet: String)
-
-    fun setLanguageOption(languages: MutableList<String>)
+    fun setUsername(username: String)
 
     fun updateImageOnView(imagePath: String, skipCached: Boolean)
 
@@ -28,13 +19,11 @@ interface UserProfileView : UstadView {
 
     fun sendMessage(messageId: Int)
 
-    fun updateLastSyncedText(lastSynced: String)
-
     fun callFinishAffinity()
 
-    fun restartUI()
+    fun updateLastSyncedText(lastSynced: String)
 
-    fun showLanguageOptions()
+    fun forceSync()
 
     @JsName("loadProfileIcon")
     fun loadProfileIcon(profile: String)
@@ -44,11 +33,8 @@ interface UserProfileView : UstadView {
 
     companion object {
 
-        // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "UserProfile"
+
+        const val PERSON_UID = "person_uid"
     }
-
-
 }
-
-

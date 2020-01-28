@@ -127,7 +127,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
         //Style
         bottomNavigation.defaultBackgroundColor = fetchColor(R.color.primary)
         bottomNavigation.accentColor = fetchColor(R.color.just_black)
-        bottomNavigation.inactiveColor = fetchColor(R.color.bottom_nav_yourInactiveColor)
+        bottomNavigation.inactiveColor = fetchColor(R.color.bottomnav_inactive)
         bottomNavigation.isBehaviorTranslationEnabled = false
         bottomNavigation.setUseElevation(true, 16F)
     }
@@ -228,11 +228,11 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
 
             runOnUiThread {
                 Picasso
-                    .get()
-                    .load(imageUri)
-                    .resize(dpToPxImagePerson(), dpToPxImagePerson())
-                    .centerCrop()
-                    .into(profileImage)
+                        .get()
+                        .load(imageUri)
+                        .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                        .centerCrop()
+                        .into(profileImage)
             }
         }
     }

@@ -23,9 +23,9 @@ import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SaleProduct
+import com.ustadmobile.staging.core.view.SearchableListener
 
-class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView {
-
+class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView, SearchableListener {
 
     override val viewContext: Any
         get() = context!!
@@ -46,6 +46,12 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun updateToolbar(title: String) {
         //TODO
+    }
+
+    override fun onSearchButtonClick() {     }
+
+    override fun onSearchQueryUpdated(query: String) {
+        searchCatalog(query)
     }
 
     override fun onBackPressed(): Boolean {
@@ -217,6 +223,8 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     }
 
     companion object {
+
+        val icon = R.drawable.ic_list_black_24dp
 
         fun newInstance(): CatalogListFragment {
             val fragment = CatalogListFragment()

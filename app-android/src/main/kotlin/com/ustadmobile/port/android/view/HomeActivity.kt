@@ -3,7 +3,10 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.app.SearchManager
 import android.content.Context
+import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,13 +17,16 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
+import com.google.android.material.appbar.AppBarLayout
+import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HomePresenter
-import com.ustadmobile.core.controller.HomePresenter.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -28,9 +34,6 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
-import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.staging.core.view.SearchableListener
@@ -38,68 +41,80 @@ import com.ustadmobile.staging.port.android.view.*
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import java.io.File
+import java.lang.IllegalArgumentException
+import java.util.*
 
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener{
 
     private lateinit var presenter: HomePresenter
 
-    private lateinit var downloadAllBtn: FloatingTextButton
+    private lateinit var fabButton: FloatingTextButton
 
     private lateinit var profileImage: CircleImageView
 
-    //Position to Title map.
-    private var posToTitle:HashMap<Int, String> = HashMap()
-    //Total number of bottom Navigation items
-    private var bottomNavCount = 0
-    //The toolbar
-    private var toolbar: Toolbar? = null
-    //The toolbar title
-    private lateinit var toolbarTitle: TextView
+    val impl = UstadMobileSystemImpl.instance
+
+    private var options: List<Pair<Int, String>> = listOf()
+
+    private lateinit var mPager: ViewPager
+
     //Menu options
     private lateinit var mOptionsMenu: Menu
     //Show settings flag
-    private var showSettings = false
-    //Show location permission dialog flag
-    private var showLocationPermissionDialog = false
+    private var personAdmin = false
+    //The toolbar title
+    private lateinit var toolbarTitle: TextView
     //The search view
     private lateinit var searchView : SearchView
-
     //A reference to current fragment so we can search for search
-    private var currentFragment: UstadBaseFragment? = null
+    //private var currentFragment : UstadBaseFragment ?= null
+    private var currentFragmentPosition : Int = 0
+    private var fragmentPosMap: MutableMap<Int, UstadBaseFragment> = WeakHashMap()
 
-    val impl = UstadMobileSystemImpl.instance
+    private inner class HomePagerAdapter(fm: FragmentManager, val options: List<Pair<Int, String>>)
+        : FragmentStatePagerAdapter(fm) {
 
-    /**
-     * In case we have addition bottom nav items, add icons here and map to their labels
-     */
-    private val bottomLabelToIconMap = mapOf(
-            MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
-            MessageID.contents to R.drawable.ic_local_library_black_24dp,
-            MessageID.bottomnav_feed_title to FeedListFragment.icon,
-            MessageID.bottomnav_content_title to ContentListFragment.icon,
-            MessageID.bottomnav_classes_title to ClazzListFragment.icon,
-            MessageID.bottomnav_people_title to PeopleListFragment.icon,
-            MessageID.bottomnav_reports_title to ReportSelectionFragment.icon
-    )
+        override fun getItem(position: Int): Fragment {
+            var thisFragment = fragmentPosMap[position]
+            if(thisFragment == null) {
+                val viewUri = options[position].second // the ViewName followed by ? and any arguments
+                val viewName = viewUri.substringBefore('?')
+                val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
+                if(fragmentClass == null) {
+                    throw IllegalArgumentException("HomeActivity does not know Fragment to " +
+                            "create for $viewName")
+                }
+
+                thisFragment = fragmentClass.newInstance()
+                thisFragment.arguments =
+                        UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(viewUri))
+                fragmentPosMap[position] = thisFragment
+            }
+
+
+            return thisFragment
+        }
+
+        override fun getCount() = options.size
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        toolbar = findViewById(R.id.entry_toolbar)
+        mPager = findViewById(R.id.home_view_pager)
+        fabButton = findViewById(R.id.activity_home_fab)
         toolbarTitle = findViewById(R.id.toolBarTitle)
-
-        downloadAllBtn = findViewById(R.id.download_all)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
         profileImage = findViewById(R.id.profile_image)
         setSupportActionBar(toolbar)
-        toolbarTitle.setText(R.string.app_name)
+        findViewById<TextView>(R.id.toolBarTitle).setText(R.string.app_name)
 
-
-        downloadAllBtn.setOnClickListener {
+        fabButton.setOnClickListener {
             presenter.handleDownloadAllClicked()
         }
 
@@ -115,10 +130,30 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun loadProfileIcon(profileUrl: String) {
         UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp,profileImage)
+        if(profileUrl.isNotEmpty()){
+            loadProfileImage(profileUrl)
+        }
+    }
+
+    private fun loadProfileImage(imagePath: String) {
+        val output = File(imagePath)
+
+        if (output.exists()) {
+            val imageUri = Uri.fromFile(output)
+
+            runOnUiThread {
+                Picasso
+                        .get()
+                        .load(imageUri)
+                        .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                        .centerCrop()
+                        .into(profileImage)
+            }
+        }
     }
 
     override fun showDownloadAllButton(show: Boolean) {
-        downloadAllBtn.visibility = if(show) View.VISIBLE else View.GONE
+        fabButton.visibility = if(show) View.VISIBLE else View.GONE
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -128,7 +163,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         val settingsMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_settings)
 
         if (settingsMenuItem != null) {
-            settingsMenuItem.isVisible = showSettings
+            settingsMenuItem.isVisible = personAdmin
         }
 
         //Search stuff
@@ -139,12 +174,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 .getSearchableInfo(componentName))
         searchView.maxWidth = Integer.MAX_VALUE
 
-        //Set visibility based on current fragment
-        searchView.isVisible = currentFragment is SearchableListener
-        val searchViewMenuItem = menu.findItem(R.id.menu_home_activity_search)
-        if(searchViewMenuItem != null){
-            searchViewMenuItem.isVisible = currentFragment is SearchableListener
-        }
+        updateSearchVisibility()
 
         // listening to search query text change
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -167,153 +197,115 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             false
         }
 
-        //Bulk upload for ClassBook
-        val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
-        if(bulkUploadMenuItem != null){
-            val bulkUploadVisibility = impl.getAppConfigString(
-                    AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
-            if(bulkUploadVisibility){
-                bulkUploadMenuItem.isVisible = showSettings
-            }
-        }
-
         return super.onCreateOptionsMenu(menu)
     }
 
+    /**
+     * Search logic for triggering search listener for current fragment for a given query string
+     */
     private fun searchLogic(query: String){
+        val currentFragment = fragmentPosMap[currentFragmentPosition]
         val currentFragmentNN = currentFragment
         if(currentFragmentNN != null && currentFragmentNN is SearchableListener){
             (currentFragmentNN as SearchableListener).onSearchQueryUpdated(query)
         }
     }
 
-    override fun setLoggedPerson(person: Person) {}
-
-    /**
-     * Updates the toolbar's title
-     * @param title The string of the title to be set to the toolbar
-     */
-    private fun updateTitle(title: String) {
-        toolbar!!.title = title
-        toolbarTitle.text = title
+    override fun setLoggedPerson(person: Person) {
+        //Show settings based on if person is admin or not.
+        personAdmin = person.admin
+        showSettings(person.admin)
     }
 
     override fun setOptions(options: List<Pair<Int, String>>) {
-        //Remove all items before adding it.
-        umBottomNavigation.removeAllItems()
+        this.options = options
 
         options.forEach {
-            val titleID = it.first
-            val titleString = impl.getString(titleID, this)
-            val viewName = it.second
-
-            val navIcon = bottomLabelToIconMap[it.first]
+            val navIcon = BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP[it.first]
             if(navIcon != null){
                 val navigationItem = AHBottomNavigationItem(
                         impl.getString(it.first, this), navIcon)
                 umBottomNavigation.addItem(navigationItem)
-                //Assign title to the bottom nav position.
-                posToTitle[bottomNavCount] = titleString
             }
-
-            bottomNavCount ++
         }
-        umBottomNavigation.visibility = if(options.size > 1) View.VISIBLE else View.GONE
 
-        umBottomNavigation.defaultBackgroundColor = ContextCompat.getColor(this, R.color.primary)
-        umBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.icons)
-        umBottomNavigation.inactiveColor = ContextCompat.getColor(this, R.color.primary_dark)
+        if(options.size > 1) {
+            umBottomNavigation.visibility = View.VISIBLE
+
+            mPager.apply {
+                setPadding(paddingLeft, paddingTop, paddingRight, TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics).toInt())
+            }
+            updateTitle(options[0].first)
+            updateElevation(options[0].second)
+
+        }else {
+            umBottomNavigation.visibility = View.INVISIBLE
+            mPager.apply {
+                setPadding(paddingLeft, paddingTop, paddingRight, 0)
+            }
+        }
+
+        umBottomNavigation.defaultBackgroundColor =
+                ContextCompat.getColor(this, R.color.bottomnav_background)
+        umBottomNavigation.accentColor =
+                ContextCompat.getColor(this, R.color.bottomnav_accent)
+        umBottomNavigation.inactiveColor =
+                ContextCompat.getColor(this, R.color.bottomnav_inactive)
         umBottomNavigation.isBehaviorTranslationEnabled = false
         umBottomNavigation.currentItem = 0
         umBottomNavigation.titleState = AHBottomNavigation.TitleState.ALWAYS_SHOW
-        umBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
-            handleFragmentTransaction(options[position].second)
-            true
-        }
 
-        //Set title of bottom navigation selected
+        //Update title for bottom navigation selected. Also update current Item
+
+        updateCurrentFragment(0)
         umBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
-            handleFragmentTransaction(options[position].second)
+            mPager.setCurrentItem(position)
+            updateElevation(options[position].second)
+
             //Update title
-            when (position) {
-                position -> {
-                    val titleString = posToTitle[position]
-                    updateTitle(titleString!!)
-                }
-            }
+            updateTitle(options[position].first)
+
+            //Update search visibility
+            updateSearchVisibility()
+
+            //Update current fragment
+            updateCurrentFragment(position)
+
             true
         }
 
-        handleFragmentTransaction(options[0].second)
+        mPager.adapter = HomePagerAdapter(supportFragmentManager, options)
 
-        //Set the title of current default selection
-        val titleString = posToTitle[0]
-        updateTitle(titleString!!)
+
     }
 
-    private fun handleFragmentTransaction(params: String){
-        val bundle = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(params))
-        if(bundle != null){
-
-            val selectedFragment = when {
-                params.contains(ContentEntryListView.VIEW_NAME) -> {
-                    bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
-                    bundle.putString(ARG_EDIT_BUTTONS_CONTROL_FLAG, EDIT_BUTTONS_NEWFOLDER.toString())
-                    ContentEntryListFragment.newInstance(bundle)
-                }
-                params.contains(FeedListView.VIEW_NAME) -> {
-                    FeedListFragment.newInstance()
-                }
-                params.contains(ContentEntryListView.VIEW_NAME) -> {
-                    ContentListFragment.newInstance()
-                }
-                params.contains(ClazzListView.VIEW_NAME) -> {
-                    ClazzListFragment.newInstance()
-                }
-                params.contains(PeopleListView.VIEW_NAME) -> {
-                    PeopleListFragment.newInstance()
-                }
-                params.contains(BaseReportView.VIEW_NAME) -> {
-                    ReportSelectionFragment.newInstance()
-                }
-                else -> {
-                    ReportDashboard()
-                }
-            }
-            currentFragment = selectedFragment
-
-            val fragmentManager:FragmentManager = supportFragmentManager
-            val fragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.um_host_fragment,selectedFragment,selectedFragment.tag)
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+    private fun updateElevation(optionUri: String) {
+        val viewName = optionUri.substringBefore('?')
+        findViewById<AppBarLayout>(R.id.appBar).elevation =
+                if(viewName == ContentEntryListView.VIEW_NAME) {
+            0f
+        }else {
+            10f
         }
     }
 
-    override fun showSettings(show: Boolean) {
-
-        showSettings = show
-        if(::mOptionsMenu.isInitialized) {
-            val settingsMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_settings)
-            if (settingsMenuItem != null) {
-                settingsMenuItem.isVisible = showSettings
-            }
-
-            //Bulk upload for ClassBook
-            val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
-            if(bulkUploadMenuItem != null){
-                val bulkUploadVisibility = impl.getAppConfigString(
-                        AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
-                if(bulkUploadVisibility){
-                    bulkUploadMenuItem.isVisible = showSettings
-                }
-            }
+    private fun updateSearchVisibility(){
+        //Set visibility based on current fragment
+        val currentFragment = fragmentPosMap[currentFragmentPosition]
+        searchView.isVisible = currentFragment is SearchableListener
+        val searchViewMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_search)
+        if(searchViewMenuItem != null){
+            searchViewMenuItem.isVisible = currentFragment is SearchableListener
         }
     }
 
-    override fun showLocationPermissionDialog(show: Boolean) {
+    private fun updateCurrentFragment(position: Int){
+        currentFragmentPosition = position
+    }
 
-
+    private fun updateTitle(pos: Int){
+        toolbarTitle.text = impl.getString(pos, viewContext)
     }
 
     override fun onPageScrollStateChanged(state: Int) {}
@@ -332,16 +324,13 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun setLanguageOption(languages: MutableList<String>) { }
 
-
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
+            R.id.action_open_about ->
+                UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
             R.id.menu_home_activity_settings -> presenter.handleClickSettings()
-            //Bulk upload for ClassBook
-            R.id.menu_action_bulk_upload_master -> presenter.handleClickBulkUpload()
         }
 
         return super.onOptionsItemSelected(item)
@@ -349,7 +338,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        if(!showLocationPermissionDialog){
+        //Checks if we want to show it
+        if(!presenter.showLocationPermission){
             return
         }
         val locationPermissionArr =arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -366,7 +356,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                     .setNegativeButton(getString(android.R.string.cancel)
                     ) { dialog, _ -> dialog.dismiss() }
                     .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                        runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
+                        runAfterGrantingPermission(locationPermissionArr,
+                                afterPermissionGrantedRunnable,
                                 dialogTitle, dialogMessage)
                     }
                     .create()
@@ -399,4 +390,73 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         dialog.show(supportFragmentManager, "SHARE_APP_DIALOG")
     }
 
+    /**
+     * Shows settings based on given parameter. Also sets variable
+     */
+    private fun showSettings(show: Boolean) {
+        if(::mOptionsMenu.isInitialized) {
+            val settingsMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_settings)
+            if (settingsMenuItem != null) {
+                settingsMenuItem.isVisible = show
+            }
+
+            //Bulk upload for ClassBook
+            val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
+            if(bulkUploadMenuItem != null){
+                val bulkUploadVisibility = impl.getAppConfigString(
+                        AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
+                if(bulkUploadVisibility){
+                    bulkUploadMenuItem.isVisible = show
+                }
+            }
+        }
+    }
+
+    companion object {
+        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
+                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
+                ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java,
+                FeedListView.VIEW_NAME to FeedListFragment::class.java,
+                ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
+                ContentEntryListView.VIEW_NAME to ContentListFragment::class.java,
+                ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
+                PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
+                BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java,
+                SelectSaleProductView.VIEW_NAME to CatalogListFragment::class.java,
+                ComingSoonView.VIEW_NAME to ComingSoonFragment::class.java,
+                SaleListView.VIEW_NAME to SaleListFragment::class.java,
+                InventoryListView.VIEW_NAME to InventoryListFragment::class.java,
+                DashboardEntryListView.VIEW_NAME to DashboardEntryListFragment::class.java)
+
+        /**
+         * In case we have addition bottom nav items, add icons here and map to their labels
+         */
+        private val BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP = mapOf(
+                MessageID.contents to R.drawable.ic_local_library_black_24dp,
+                MessageID.bottomnav_feed_title to FeedListFragment.icon,
+                MessageID.bottomnav_content_title to ContentListFragment.icon,
+                MessageID.bottomnav_classes_title to ClazzListFragment.icon,
+                MessageID.bottomnav_people_title to PeopleListFragment.icon,
+                MessageID.bottomnav_reports_title to ReportSelectionFragment.icon,
+                MessageID.catalog to CatalogListFragment.icon,
+                MessageID.content to ComingSoonFragment.icon,
+                MessageID.sales to SaleListFragment.icon,
+                MessageID.inventory to InventoryListFragment.icon,
+                MessageID.reports to DashboardEntryListFragment.icon
+        )
+
+        private val BOTTOM_LABEL_MESSAGEID_TO_FAB = mapOf(
+                MessageID.bottomnav_classes_title to MessageID.add_class,
+                MessageID.bottomnav_people_title to MessageID.add_person,
+                MessageID.sales to MessageID.record_sale,
+                MessageID.inventory to MessageID.add_item
+        )
+
+        private val IMAGE_PERSON_THUMBNAIL_WIDTH = 26
+
+        private fun dpToPxImagePerson(): Int {
+            return (IMAGE_PERSON_THUMBNAIL_WIDTH *
+                    Resources.getSystem().displayMetrics.density).toInt()
+        }
+    }
 }

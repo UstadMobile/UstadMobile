@@ -2,12 +2,12 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_UID
@@ -26,18 +26,20 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     : UstadBaseController<UserProfileView>(context, arguments, view){
 
     private var loggedInPerson: Person? = null
-    private var personPictureDao: PersonPictureDao
+    private var personPictureDao = repository.personPictureDao
 
     var loggedInPersonUid = 0L
 
-    private val personDao = database.personDao
+    private val personDaoDB = database.personDao
+    private val personDao = repository.personDao
+    private val syncResultDao = database.syncresultDao
 
     private val languageOptions = impl.getAllUiLanguage(context)
 
     init {
 
         //Get provider Dao
-        personPictureDao = repository.personPictureDao
+
 
     }
 
@@ -49,7 +51,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         if (activeAccount != null) {
             loggedInPersonUid = activeAccount.personUid
             GlobalScope.launch {
-                val result = personDao.findByUidAsync(loggedInPersonUid)
+                val result = personDaoDB.findByUidAsync(loggedInPersonUid)
                 loggedInPerson = result
 
                 if (loggedInPerson != null) {
@@ -78,17 +80,22 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
             }
         }
 
-        val lastSyncedText = impl.getString(MessageID.account_last_synced,
-                context)
+        val thisP = this
         GlobalScope.launch {
+            val lastSyncLive = syncResultDao.getLatestTimeStampLive()
+            view.runOnUiThread(Runnable {
+                lastSyncLive.observeWithPresenter(thisP, thisP::updateLastSyncTime)
+            })
 
-            val latestTimeStamp =
-                    UmAccountManager.getActiveDatabase(context).syncresultDao.getLatestTimeStamp()
+        }
+    }
+
+    fun updateLastSyncTime(latestTimeStamp: Long?){
+        if(latestTimeStamp != null) {
+            val lastSyncedText = impl.getString(MessageID.last_synced_at, context)
             val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
             val lastSynced = lastSyncedText + " " + lastSyncedText2
-            view.runOnUiThread(Runnable {
-                view.updateLastSyncedText(lastSynced)
-            })
+            view.updateLastSyncedText(lastSynced)
         }
     }
 
@@ -173,5 +180,13 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
 
     fun handleShowLanguageOptions(){
         view.setLanguageOption(languageOptions.values.sorted().toMutableList())
+    }
+
+    /**
+     * Starts the sync process
+     */
+    fun handleClickLastSync(){
+        //TODO Start the sync process.
+        view.forceSync()
     }
 }

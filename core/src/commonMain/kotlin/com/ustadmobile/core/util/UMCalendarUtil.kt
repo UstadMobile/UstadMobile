@@ -60,7 +60,6 @@ object UMCalendarUtil {
         return date.unixMillisLong
     }
 
-
     /**
      * Appends two digits for the integer i; if i < 10; prepend a leading 0
      *

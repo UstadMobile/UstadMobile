@@ -562,7 +562,8 @@ abstract class SaleDao : BaseDao<Sale> {
         const val ALL_SALE_LIST_LJ2 =
             """ 
                 LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid 
-                LEFT JOIN Person as LE ON sl.salePersonUid = LE.personUid 
+                LEFT JOIN Person as SALELE ON sl.salePersonUid = SALELE.personUid
+				LEFT JOIN Person as LE ON LE.personUid = :leUid
             """
 
         const val ALL_SALE_BY_WE_LJ3 = """
@@ -581,8 +582,9 @@ abstract class SaleDao : BaseDao<Sale> {
             """
         const val GROUP_BY = " GROUP BY saleUid  "
 
-        const val ALL_SALE_LIST_WHERE_LE = " AND ( LE.personUid = :leUid OR CASE WHEN " +
-                " (CAST(LE.admin as INTEGER) = 1) THEN 0 ELSE 1 END )  "
+        const val ALL_SALE_LIST_WHERE_LE = """
+            AND ( CASE WHEN (CAST(LE.admin as INTEGER) = 1) THEN 1 ELSE 0 END OR sl.salePersonUid = LE.personUid)
+        """
 
 
         const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 + ALL_SALE_LIST_LJ2 +

@@ -96,7 +96,7 @@ class SelectSaleProductPresenter(context: Any,
         if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
             producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())
         }
-        if (arguments!!.containsKey(ARG_SELECT_PRODUCERS_SALE_UID)) {
+        if (arguments.containsKey(ARG_SELECT_PRODUCERS_SALE_UID)) {
             saleUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
         }
         if (arguments.containsKey(ARG_SALE_ITEM_UID)) {
@@ -107,8 +107,8 @@ class SelectSaleProductPresenter(context: Any,
             inventoryMode = true
         }
 
-        if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER)){
-            val pos = arguments[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER].toString().toLowerCase()
+        if(arguments.containsKey(ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER)){
+            val pos = arguments[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER].toString().toLowerCase()
             if(pos.equals("true")){
                 preOrder = true
             }
@@ -120,7 +120,7 @@ class SelectSaleProductPresenter(context: Any,
         super.onCreate(savedState)
         GlobalScope.launch(Dispatchers.Main) {
             loggedInPerson = personDao.findByUidAsync(loggedInPersonUid)
-            view.showAddButton(loggedInPerson!!.admin)
+            //view.showAddButton(loggedInPerson!!.admin)
             updateProviders()
         }
 
@@ -138,20 +138,20 @@ class SelectSaleProductPresenter(context: Any,
 
     private fun updateRecentProvider() {
 
-        recentProvider = saleProductDao.findActiveProductsProvider(searchQuery)
+        recentProvider = saleProductDao.findActiveProductsProvider(loggedInPersonUid, searchQuery)
         view.setRecentProvider(recentProvider!!)
 
     }
 
     private fun updateCategoryProvider() {
 
-        categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(searchQuery,0)
+        categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid, searchQuery,0)
         view.setCategoryProvider(categoryProvider!!)
 
     }
 
     private fun updateCollectionProvider() {
-        collectionProvider = productParentJoinDao.findAllCategoriesInCollection(searchQuery)
+        collectionProvider = productParentJoinDao.findAllCategoriesInCollection(loggedInPersonUid, searchQuery)
         view.setCollectionProvider(collectionProvider!!)
     }
 

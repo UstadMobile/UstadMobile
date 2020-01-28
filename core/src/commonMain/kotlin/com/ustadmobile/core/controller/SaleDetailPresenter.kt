@@ -39,15 +39,13 @@ class SaleDetailPresenter(context: Any,
     private lateinit var umProvider: DataSource.Factory<Int,SaleItemListDetail>
     private lateinit var pProvider: DataSource.Factory<Int,SalePayment>
     private lateinit var dProvider: DataSource.Factory<Int,SaleDelivery>
-    internal var repository: UmAppDatabase
-    internal var database: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     private val saleItemDao: SaleItemDao
     private val saleDeliveryDao : SaleDeliveryDao
     private val saleDao: SaleDao
     private val saleVoiceNoteDao: SaleVoiceNoteDao
     private val salePaymentDao: SalePaymentDao
     private val inventoryTransactionDao : InventoryTransactionDao
-    private val inventoryTransactionDaoDB : InventoryTransactionDao
     private val personDao: PersonDao
     private val currentSaleItem: SaleItem? = null
     private var currentSale: Sale? = null
@@ -56,8 +54,6 @@ class SaleDetailPresenter(context: Any,
     private val locationDao: LocationDao
     private var currentSaleName = ""
     private var customerUid : Long = 0L
-
-    private var locationLiveData: DoorLiveData<List<Location>>? = null
 
     private var positionToLocationUid: MutableMap<Int, Long>? = null
 
@@ -71,9 +67,6 @@ class SaleDetailPresenter(context: Any,
 
     init {
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAccountManager.getActiveDatabase(context)
-
         //Get provider Dao
         saleItemDao = repository.saleItemDao
         salePaymentDao = repository.salePaymentDao
@@ -83,7 +76,6 @@ class SaleDetailPresenter(context: Any,
         personDao = repository.personDao
         saleDeliveryDao = repository.saleDeliveryDao
         inventoryTransactionDao = repository.inventoryTransactionDao
-        inventoryTransactionDaoDB = database.inventoryTransactionDao
 
         positionToLocationUid = HashMap()
 
@@ -580,7 +572,7 @@ class SaleDetailPresenter(context: Any,
             //2. Update to false.
             //3. Update Delivery to false too
             GlobalScope.launch {
-                inventoryTransactionDaoDB.deactivateAllTransactionsBySaleDeliveryAndSale(
+                inventoryTransactionDao.deactivateAllTransactionsBySaleDeliveryAndSale(
                         saleDeliveryUid, currentSale!!.saleUid)
                 val saleDelivery = saleDeliveryDao.findByUidAsync(saleDeliveryUid)
                 saleDelivery!!.saleDeliveryActive = false

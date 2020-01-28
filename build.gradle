@@ -64,7 +64,7 @@ group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 191
+    ustadVersionCode = 192
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"
@@ -148,7 +148,7 @@ ext {
     version_android_rotatelayout = "3.0.0"
     version_android_bottom_nav = "2.3.4"
     version_play_core = "1.6.4"
-
+    version_android_leakcanary = "2.1"
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"
 

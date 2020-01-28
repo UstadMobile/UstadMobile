@@ -105,8 +105,12 @@ open class UstadBaseFragment : Fragment() {
                 currentUsername = UmAccountManager.getActiveAccount(context!!)!!.username
             }
             finishAffinity(activity!!)
-            val blankAccount = UmAccount(0, null, null,null)
-            UmAccountManager.setActiveAccount(blankAccount, context!!)
+//            val blankAccount = UmAccount(0, null, null,null)
+//            UmAccountManager.setActiveAccount(blankAccount, context!!)
+
+            UmAccountManager.setActiveAccount(UmAccount(0,
+                    null, null, null), context!!)
+
             val impl = UstadMobileSystemImpl.instance
             val args = HashMap<String, String>()
             if (currentUsername != null)

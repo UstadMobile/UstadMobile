@@ -34,7 +34,6 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     internal var repository: UmAppDatabase
     internal var database: UmAppDatabase
     private var saleItemDao: SaleItemDao
-    private var saleItemDaoDB: SaleItemDao
     private var reminderDao: SaleItemReminderDao
 
     private var currentSaleItem: SaleItem? = null
@@ -60,23 +59,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         database = UmAccountManager.getActiveDatabase(context)
 
         saleItemDao = repository.saleItemDao
-        saleItemDaoDB = database.saleItemDao
         reminderDao = repository.saleItemReminderDao
-    }
-
-    constructor(context: Any,
-                arguments: Map<String, String?>,
-                view: SaleItemDetailView,
-                refresh: Boolean)
-            : super(context, arguments, view) {
-
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAccountManager.getActiveDatabase(context)
-
-        saleItemDao = repository.saleItemDao
-        reminderDao = repository.saleItemReminderDao
-        saleItemDaoDB = database.saleItemDao
-        refreshSaleItem = refresh
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -136,7 +119,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 updatedSaleItem!!.saleItemPreorder = true
             }
             GlobalScope.launch {
-                saleItemUid = saleItemDaoDB.insertAsync(updatedSaleItem!!)
+                saleItemUid = saleItemDao.insertAsync(updatedSaleItem!!)
                 updatedSaleItem!!.saleItemUid = saleItemUid
                 initFromSaleItem(saleItemUid)
             }

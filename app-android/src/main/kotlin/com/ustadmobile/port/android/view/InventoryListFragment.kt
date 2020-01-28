@@ -6,12 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,11 +23,13 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.InventoryListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.SaleListDetail
 import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
+import com.ustadmobile.staging.core.view.SearchableListener
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class InventoryListFragment : UstadBaseFragment, InventoryListView {
+class InventoryListFragment : UstadBaseFragment, InventoryListView, SearchableListener {
+
+
     override val viewContext: Any
         get() = context!!
 
@@ -93,6 +96,12 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
         }
     }
 
+    override fun onSearchButtonClick() {}
+
+    override fun onSearchQueryUpdated(query: String) {
+        searchInventory(query)
+    }
+
     /**
      * Tints the drawable to the color. This method supports the Context compat tinting on drawables.
      *
@@ -139,6 +148,7 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView {
     }
 
     companion object {
+        val icon = R.drawable.ic_assignment_24px
 
         fun newInstance(): InventoryListFragment {
             val fragment = InventoryListFragment()

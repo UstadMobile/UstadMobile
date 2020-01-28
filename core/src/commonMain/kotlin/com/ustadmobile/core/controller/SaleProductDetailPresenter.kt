@@ -35,7 +35,6 @@ class SaleProductDetailPresenter(context: Any,
     : UstadBaseController<SaleProductDetailView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
-    internal var database: UmAppDatabase
     private val saleProductDao: SaleProductDao
     private val productParentJoinDao: SaleProductParentJoinDao
     private val impl: UstadMobileSystemImpl
@@ -45,7 +44,6 @@ class SaleProductDetailPresenter(context: Any,
     private var isCategory: Boolean = false
 
     internal var pictureDao: SaleProductPictureDao
-    internal var pictureDaoDB : SaleProductPictureDao
 
     private val selectedToCategoriesUid: HashMap<Long, Boolean>
 
@@ -55,20 +53,21 @@ class SaleProductDetailPresenter(context: Any,
 
     private var newSaleProduct: Boolean = false
 
+    private var loggedInPersonUid: Long = 0
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAccountManager.getActiveDatabase(context)
 
         //Get provider Dao
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
         pictureDao = UmAccountManager.getRepositoryForActiveAccount(context).saleProductPictureDao
-        pictureDaoDB = database.saleProductPictureDao
 
         impl = UstadMobileSystemImpl.instance
 
         selectedToCategoriesUid = HashMap<Long, Boolean>()
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
     }
 
@@ -90,7 +89,7 @@ class SaleProductDetailPresenter(context: Any,
         view.updateToolbarTitle(toolbarTitle)
         view.updateCategoryTitle(categoryTitle)
 
-        var thisP = this
+        this
         //Get SaleProductSelected and update the view
         GlobalScope.launch {
             if (arguments.containsKey(ARG_SALE_PRODUCT_UID)) {
@@ -108,8 +107,9 @@ class SaleProductDetailPresenter(context: Any,
             } else {
                 newSaleProduct = true
 
-                currentSaleProduct = SaleProduct("", "", isCategory, false)
+                currentSaleProduct = SaleProduct( "", "", isCategory, false)
                 currentSaleProduct!!.saleProductDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                currentSaleProduct!!.saleProductPersonAdded = loggedInPersonUid
 
                 currentSaleProduct!!.saleProductUid = saleProductDao.insertAsync(currentSaleProduct!!)
                 productUid = currentSaleProduct!!.saleProductUid

@@ -25,10 +25,6 @@ interface HomeView : LanguageOptionView {
     @JsName("setMenu")
     fun setOptions(options: List<Pair<Int, String>>)
 
-    fun showSettings(show: Boolean)
-
-    fun showLocationPermissionDialog(show: Boolean)
-
     fun showShareAppDialog()
 
     companion object {

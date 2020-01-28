@@ -232,6 +232,8 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
 
     companion object {
 
+        val icon = R.drawable.ic_payment_note_cash_black_24dp
+
         fun newInstance(): SaleListFragment {
             val fragment = SaleListFragment()
             val args = Bundle()

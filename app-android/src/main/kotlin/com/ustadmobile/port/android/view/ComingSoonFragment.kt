@@ -45,6 +45,7 @@ class ComingSoonFragment : UstadBaseFragment, ComingSoonView {
     }
 
     companion object {
+        val icon = R.drawable.ic_collections_bookmark_black_24dp
 
         fun newInstance(): ComingSoonFragment {
             val fragment = ComingSoonFragment()

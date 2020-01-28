@@ -457,8 +457,12 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 currentUsername = UmAccountManager.getActiveAccount(viewContext)!!.username
             }
             finishAffinity()
-            val blankAccount = UmAccount(0, null, null,null)
-            UmAccountManager.setActiveAccount(blankAccount, viewContext)
+//            val blankAccount = UmAccount(0, null, null,null)
+//            UmAccountManager.setActiveAccount(blankAccount, viewContext)
+
+            UmAccountManager.setActiveAccount(UmAccount(0,
+                    null, null, null), viewContext)
+
             val impl = UstadMobileSystemImpl.instance
             val args = HashMap<String, String>()
             if (currentUsername != null)

@@ -26,6 +26,8 @@
     <color name="fab_ripple">#ffee75</color>
     <color name="fab_text">#000000</color>
 
+    <color name="bottomnav_background">@color/primary</color>
+    <color name="bottomnav_accent">@color/icons</color>
     <color name="bottom_navigation_unselected">#FFDFB2</color>
     <color name="bottom_navigation_selected">#FFFFFF</color>
 
@@ -43,6 +45,7 @@
     <color name="divider_faint_blank">#50b4b4b4</color>
 
     <color name="color_gray">#FF888888</color>
+    <color name="bottomnav_inactive">#C69800</color>
     <color name="background_light">#E8EAED</color>
 
     <color name="just_black">#000000</color>
@@ -84,9 +87,6 @@
 
     <color name="entry_learner_progress_passed">#6bb865</color>
     <color name="color_gray_transparent">#B5A3A3A3</color>
-
-    <color name="bottom_nav_yourAccentColor">#FFFFFF</color>
-    <color name="bottom_nav_yourInactiveColor">#C69800</color>
 
     <!--content editor screen colors-->
     <color name="content_overlay_color">#50000000</color>

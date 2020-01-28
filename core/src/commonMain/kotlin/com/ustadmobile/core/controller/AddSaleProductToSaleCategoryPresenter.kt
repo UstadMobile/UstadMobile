@@ -33,6 +33,7 @@ class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String,
     private var assignToThisSaleProductCategoryUid: Long = 0
     private val impl: UstadMobileSystemImpl
     private var isCategory = false
+    private var loggedInPersonUid: Long = 0
 
 
     init {
@@ -49,7 +50,7 @@ class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String,
             assignToThisSaleProductCategoryUid =
                     (arguments.get(ARG_SALE_PRODUCT_CATEGORY_TO_ASSIGN_TO_UID)!!.toLong())
         }
-
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
     }
 
@@ -84,6 +85,7 @@ class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String,
             toolbarTitle = impl.getString(MessageID.add_item, context)
             //Get provider
             umProvider = providerDao.findAllActiveProductsNotInCategorySNWIProvider(
+                    loggedInPersonUid,
                     assignToThisSaleProductCategoryUid)
             view.setListProvider(umProvider!!)
             isCategory = false
@@ -93,6 +95,7 @@ class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String,
             isCategory = true
             //Get provider
             umProvider = providerDao.findAllActiveCategoriesNotInCategorySNWIProvider(
+                    loggedInPersonUid,
                     assignToThisSaleProductCategoryUid)
             view.setListProvider(umProvider!!)
         }

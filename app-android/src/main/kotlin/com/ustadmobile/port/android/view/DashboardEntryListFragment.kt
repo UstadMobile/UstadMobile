@@ -233,6 +233,8 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
     }
     companion object {
 
+        val icon = R.drawable.ic_insert_chart_black_24dp
+
         fun newInstance(): DashboardEntryListFragment {
             val fragment = DashboardEntryListFragment()
             val args = Bundle()

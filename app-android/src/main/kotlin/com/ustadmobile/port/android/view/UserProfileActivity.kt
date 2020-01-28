@@ -12,20 +12,18 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkManager
 import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -34,9 +32,12 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
 import com.ustadmobile.staging.port.android.view.CircleTransform
 import id.zelory.compressor.Compressor
+import org.acra.util.ToastSender
 import java.io.*
+import java.util.concurrent.TimeUnit
 
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
@@ -47,8 +48,9 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     }
 
 
+
     private var toolbar: Toolbar? = null
-    private var mPresenter: UserProfilePresenter? = null
+    private lateinit var presenter: UserProfilePresenter
 
     private var changePasswordLL: LinearLayout? = null
     private var languageLL: LinearLayout? = null
@@ -65,6 +67,9 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     private var imagePathFromCamera: String? = null
     private lateinit var lastSyncedTV : TextView
+    private lateinit var lastSynced : RelativeLayout
+
+    private lateinit var languageName: TextView
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -87,6 +92,10 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     }
 
+    override fun setUsername(username: String) {
+        supportActionBar!!.title = username
+    }
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -98,7 +107,9 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         toolbar!!.title = getText(R.string.app_name)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
+        pictureEdit = findViewById(R.id.activity_user_profile_edit)
+        personEditImage = findViewById(R.id.activity_user_profile_user_image)
+        lastSyncedTV = findViewById(R.id.activity_user_prodile_last_synced)
         changePasswordLL = findViewById(R.id.activity_user_profile_change_password_ll)
         languageLL = findViewById(R.id.activity_user_profile_language_ll)
         logoutLL = findViewById(R.id.activity_user_profile_logout_ll)
@@ -106,26 +117,42 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         languageSet = findViewById(R.id.activity_user_profile_language_selection)
         pictureEdit = findViewById(R.id.activity_user_profile_edit)
         personEditImage = findViewById(R.id.activity_user_profile_user_image)
-        lastSyncedTV = findViewById(R.id.activity_user_prodile_last_synced)
+        lastSynced = findViewById(R.id.activity_user_profile_last_synced_ll)
+        languageName = findViewById(R.id.activity_user_profile_language_selection)
 
         //Call the Presenter
-        mPresenter = UserProfilePresenter(this,
+        presenter = UserProfilePresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this,
                 UmAccountManager.getRepositoryForActiveAccount(this),
                 UmAccountManager.getActiveDatabase(this), UstadMobileSystemImpl.instance)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        changePasswordLL!!.setOnClickListener { v -> mPresenter!!.handleClickChangePassword() }
-        languageLL!!.setOnClickListener { v -> mPresenter!!.handleClickChangeLanguage() }
+        changePasswordLL!!.setOnClickListener { v -> presenter.handleClickChangePassword() }
+        languageLL!!.setOnClickListener { v -> presenter.handleClickChangeLanguage() }
         logoutLL!!.setOnClickListener { v -> handleClickLogout() }
-        myWomenEntLL!!.setOnClickListener{ v -> mPresenter!!.handleClickMyWomenEntrepreneurs()}
+        myWomenEntLL!!.setOnClickListener{ v -> presenter.handleClickMyWomenEntrepreneurs()}
+        pictureEdit.setOnClickListener { v -> showGetImageAlertDialog() }
 
 
+        lastSynced.setOnClickListener{
+            presenter.handleClickLastSync()
+        }
+
+//        languageLL!!.setOnClickListener {
+//            presenter.handleShowLanguageOptions()
+//        }
+
+        changePasswordLL!!.setOnClickListener { v -> presenter.handleClickChangePassword() }
         pictureEdit.setOnClickListener { v -> showGetImageAlertDialog() }
     }
 
     override fun updateLastSyncedText(lastSynced: String) {
         lastSyncedTV.setText(lastSynced)
+
+    }
+
+    override fun setCurrentLanguage(language: String?) {
+        languageName.text = language
     }
 
     override fun onResume() {
@@ -192,7 +219,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
                 //Click on image - open dialog to show bigger picture
                 personEditImage.setOnClickListener { view ->
-                    mPresenter!!.openPictureDialog(imagePath) }
+                    presenter!!.openPictureDialog(imagePath) }
             }
 
         }
@@ -209,6 +236,13 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         startCameraIntent()
     }
 
+
+    override fun forceSync() {
+        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG)
+        UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(1000, TimeUnit.MILLISECONDS,
+                ExistingWorkPolicy.KEEP)
+        ToastSender.sendToast(applicationContext, "Sync started", 42)
+    }
 
     override fun addImageFromGallery() {
         //READ_EXTERNAL_STORAGE
@@ -242,7 +276,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     private fun startCameraIntent() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         val dir = filesDir
-        val output = File(dir, mPresenter!!.loggedInPersonUid.toString() + "_image.png")
+        val output = File(dir, presenter!!.loggedInPersonUid.toString() + "_image.png")
         imagePathFromCamera = output.absolutePath
 
         val cameraImage = FileProvider.getUriForFile(applicationContext,
@@ -283,7 +317,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    mPresenter!!.handleCompressedImage(imageFile.canonicalPath)
+                    presenter!!.handleCompressedImage(imageFile.canonicalPath)
                 }
 
                 GALLERY_REQUEST_CODE -> {
@@ -302,7 +336,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val galleryFile = File(imagePathFromCamera)
-                    mPresenter!!.handleCompressedImage(galleryFile.canonicalPath)
+                    presenter!!.handleCompressedImage(galleryFile.canonicalPath)
                 }
             }
         }
@@ -395,16 +429,14 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     private fun handleClickLogout() {
         finishAffinity()
-        mPresenter!!.handleClickLogout()
+        presenter!!.handleClickLogout()
     }
 
     override fun updateToolbarTitle(personName: String) {
         toolbar!!.title = personName
     }
 
-    override fun setLanguageSet(lang: String) {
-        languageSet!!.text = lang
-    }
+
 
     companion object {
 

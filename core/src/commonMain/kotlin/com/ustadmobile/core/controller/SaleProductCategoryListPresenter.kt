@@ -60,6 +60,8 @@ class SaleProductCategoryListPresenter(context: Any,
 
     private var saleUid: Long = 0
 
+    private var loggedInPersonUid: Long = 0
+
     init {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -102,6 +104,8 @@ class SaleProductCategoryListPresenter(context: Any,
                 preOrder = true
             }
         }
+
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
     }
 
@@ -182,14 +186,14 @@ class SaleProductCategoryListPresenter(context: Any,
         var allMode : Boolean = false
         if(currentSaleProductCategory != null) {
             if (currentSaleProductCategory!!.saleProductUid != 0L) {
-                itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(sortCode,
+                itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(loggedInPersonUid, sortCode,
                         currentSaleProductCategory!!.saleProductUid)
-                categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(sortCode,
+                categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(loggedInPersonUid, sortCode,
                         currentSaleProductCategory!!.saleProductUid)
                 allMode = false
             } else {
-                itemProvider = productDao.sortAndFindAllActiveSNWIProvider(sortCode)
-                categoryProvider = productDao.sortAndFindActiveCategoriesProvider("", sortCode)
+                itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, sortCode)
+                categoryProvider = productDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid,"", sortCode)
                 allMode = true
             }
             view.setListProvider(itemProvider, allMode)
@@ -220,16 +224,16 @@ class SaleProductCategoryListPresenter(context: Any,
         var allMode : Boolean = false
         if (currentSaleProductCategory!!.saleProductUid != 0L) {
             view.hideEditMenu(false)
-            itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(0,
+            itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(loggedInPersonUid, 0,
                     currentSaleProductCategory!!.saleProductUid)
-            categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(0,
+            categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(loggedInPersonUid, 0,
                     currentSaleProductCategory!!.saleProductUid)
             allMode = false
         } else {
             allMode = true
             view.hideEditMenu(true)
-            itemProvider = productDao.sortAndFindAllActiveSNWIProvider(0)
-            categoryProvider = productDao.sortAndFindActiveCategoriesProvider("" , 0)
+            itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, 0)
+            categoryProvider = productDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid, "" , 0)
         }
 
         if (showRecent)

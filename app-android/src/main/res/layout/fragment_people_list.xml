@@ -52,10 +52,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/fragment_people_list_recyclerview"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_gravity="bottom|center"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="24dp"
+            android:paddingBottom="@dimen/bottom_navigation_height"
             app:floating_background_color="@color/accent"
             app:floating_title="@string/add_person"
             app:floating_left_icon="@drawable/ic_add_black_24dp"
@@ -63,9 +65,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/fragment_people_list_recyclerview"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_alignParentLeft="true"
-            android:paddingBottom="@dimen/bottom_navigation_height"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

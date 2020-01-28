@@ -51,7 +51,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         super.onCreate(savedState)
 
         filterButtons = arguments[ARG_FILTER_BUTTONS]?.split(",") ?: listOf()
-        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong() ?: 0L
+        parentUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
 
         view.setFilterButtons(filterButtons.map { systemImpl.getString(
             FILTERBUTTON_TO_MESSAGEIDMAP[it] ?: MessageID.error, context) }, 0)
@@ -216,16 +216,18 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
+        viewContract.takeIf { filterByLang != langUid }?.setContentEntryProvider(
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, langUid,
+                        filterByCategory, activeAccount?.personUid ?: 0))
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
-                ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
+        viewContract.takeIf{ contentCategoryUid != filterByCategory }?.setContentEntryProvider(
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang,
+                        contentCategoryUid, activeAccount?.personUid ?: 0))
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
-                ?: 0))
     }
 
     @JsName("handleUpNavigation")
