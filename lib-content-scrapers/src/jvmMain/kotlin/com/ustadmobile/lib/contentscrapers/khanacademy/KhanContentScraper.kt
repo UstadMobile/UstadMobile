@@ -223,7 +223,7 @@ class KhanContentScraper : Runnable {
 
         for (content in contentList) {
 
-            if (destinationDirectory!!.name.contains(content.id!!) || scrapUrl.contains(content.relativeUrl!!)) {
+            if (destinationDirectory.name.contains(content.id!!) || scrapUrl.contains(content.relativeUrl!!)) {
 
                 var videoUrl = content.downloadUrls!!.mp4
                 if (videoUrl == null || videoUrl.isEmpty()) {

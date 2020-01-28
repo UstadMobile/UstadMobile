@@ -297,6 +297,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             val entry = containerManager.allEntries[0]
             val mimeType = Files.probeContentType(File(entry.cePath ?: "").toPath())
             val container = containerDao.findByUid(containerManager.containerUid)
+            contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
             containerDao.updateMimeType(mimeType, container?.containerUid ?: 0)
             if (!eTagValue.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container?.containerUid ?: 0, eTagValue!!)

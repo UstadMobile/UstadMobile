@@ -198,7 +198,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
                     val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(module.slug!!, module.title, subjectUrl.toString(),
                             KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
-                            module.description, false, EMPTY_STRING, module.icon, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                            module.description, false, EMPTY_STRING, module.icon, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry, subjectEntry, subjectCount++)
 
@@ -322,13 +322,13 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
     companion object {
 
-        val ROOT_URL = "https://www.khanacademy.org/"
+        const val ROOT_URL = "https://www.khanacademy.org/"
 
-        val TABLE_OF_CONTENTS_ROW = "TableOfContentsRow"
-        val SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard"
-        val SUBJECT_CHALLENGE = "SubjectChallenge"
-        val SUBJECT_PROGRESS = "SubjectProgress"
-        private val KHAN_PREFIX = "khan-id://"
+        const val TABLE_OF_CONTENTS_ROW = "TableOfContentsRow"
+        const val SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard"
+        const val SUBJECT_CHALLENGE = "SubjectChallenge"
+        const val SUBJECT_PROGRESS = "SubjectProgress"
+        const val KHAN_PREFIX = "khan-id://"
         private lateinit var contentEntryDao: ContentEntryDao
         private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao
         private lateinit var englishLang: Language
