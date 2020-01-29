@@ -1,5 +1,6 @@
 package com.ustadmobile.door.ext
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -14,8 +15,7 @@ import com.ustadmobile.door.RepositoryLoadHelper
  * BoundaryCallback so that items are loaded automatically. It will also wrap the live data using
  * the loadHelper so that the LoadHelper can detect if data is being actively observed.
  */
-fun <T> DataSource.Factory<Int, T>.asRepositoryLiveData(dao: Any,
-                                                        repoLoadCallback: RepositoryLoadHelper.RepoLoadCallback? = null) : DoorLiveData<PagedList<T>> {
+fun <T> DataSource.Factory<Int, T>.asRepositoryLiveData(dao: Any, lifecycleOwner: LifecycleOwner? = null) : DoorLiveData<PagedList<T>> {
     val boundaryCallback = (dao as DoorBoundaryCallbackProvider).getBoundaryCallback(this)
     val pagedListBuilder = LivePagedListBuilder(this, 20)
 
@@ -24,15 +24,12 @@ fun <T> DataSource.Factory<Int, T>.asRepositoryLiveData(dao: Any,
     }
 
     val liveData: LiveData<PagedList<T>> = pagedListBuilder.build()
-    //return liveData
-    return if(boundaryCallback != null) {
+    if(boundaryCallback != null) {
+        boundaryCallback.loadHelper.lifecycleOwner = lifecycleOwner
 //        if(repoLoadCallback != null)
 //            //TODO: This could be a weak reference
-//            boundaryCallback.loadHelper.addRepoLoadCallback(repoLoadCallback)
-
-        boundaryCallback.loadHelper.wrapLiveData(liveData)
-        liveData
-    }else {
-        liveData
+//            boundaryCallback.loadHelper.repoLoadCallback = repoLoadCallback
     }
+
+    return liveData
 }

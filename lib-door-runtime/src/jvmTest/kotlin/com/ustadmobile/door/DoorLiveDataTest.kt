@@ -85,15 +85,13 @@ class DoorLiveDataTest {
 
     @Test
     fun givenEmptyLiveData_whenObsevedAndNewValuePosted_thenShouldCallOnChanged() {
-        val livedataTest = object : DoorLiveData<Int>() {
-            override fun onActive() {
-                super.onActive()
-                postValue(42)
-            }
+        val livedataTest = DoorMutableLiveData<Int>()
+        val mockObserver = mock<DoorObserver<Int>> {
+
         }
 
-        val mockObserver = mock<DoorObserver<Int>> {}
         livedataTest.observeForever(mockObserver)
+        livedataTest.sendValue(42)
         verify(mockObserver, timeout(5000)).onChanged(42)
     }
 

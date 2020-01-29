@@ -3,4 +3,5 @@ package com.ustadmobile.door.ext
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.RepositoryLoadHelper
 
-fun DoorLiveData<*>.isRepositoryLiveData() = (this is RepositoryLoadHelper<*>.LiveDataWrapper<*>)
+@Deprecated("We are no longer using the LiveData wrapper so this technique won't work")
+fun DoorLiveData<*>.isRepositoryLiveData() = false

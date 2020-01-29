@@ -101,7 +101,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     internal class LocalAvailabilityPagedListCallback(private val localAvailabilityManager: LocalAvailabilityManager,
                                                       var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
-                                                      private val onEntityAvailabilityChanged: (Map<Long, Boolean>) -> Unit) : PagedList.Callback() {
+                                                      private var onEntityAvailabilityChanged: ((Map<Long, Boolean>) -> Unit)?) : PagedList.Callback() {
 
         private val availabilityMonitorRequest = AtomicReference<AvailabilityMonitorRequest?>()
 
@@ -136,8 +136,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
                             }
                             uidList
                         })
-                val newRequest = if (containerUidsToMonitor.isNotEmpty()) {
-                    AvailabilityMonitorRequest(containerUidsToMonitor, onEntityAvailabilityChanged)
+                val entityAvailabilityChangeVal = onEntityAvailabilityChanged
+                val newRequest = if (containerUidsToMonitor.isNotEmpty() && entityAvailabilityChangeVal != null) {
+                    AvailabilityMonitorRequest(containerUidsToMonitor, entityAvailabilityChangeVal)
                 } else {
                     null
                 }
@@ -157,6 +158,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
             if (currentRequest != null) {
                 localAvailabilityManager.removeMonitoringRequest(currentRequest)
             }
+            pagedList = null
+            onEntityAvailabilityChanged = null
             println("")
         }
     }
@@ -338,18 +341,17 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
         val localAvailabilityCallback = LocalAvailabilityPagedListCallback(
                 managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
-            runOnUiThread(Runnable {
-                recyclerAdapter.updateLocalAvailability(availabilityMap)
-            })
+            recyclerAdapter.updateLocalAvailability(availabilityMap)
         }
 
         val data = entryProvider.asRepositoryLiveData(
                 UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
-                repoLoadingStatusView)
+                this)
 
         //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
         //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
         //any items are loaded
+        //TODO: fix this as we are no longer using the live data wrapper
         if(!data.isRepositoryLiveData()) {
             repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
         }
