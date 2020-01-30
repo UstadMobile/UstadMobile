@@ -354,7 +354,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         //any items are loaded
         //TODO: fix this as we are no longer using the live data wrapper
         if(!data.isRepositoryLiveData()) {
-            repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
+            //repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
         }
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
