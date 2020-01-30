@@ -34,15 +34,12 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
 
+    @Deprecated("Dont use this - it leads to memory leaks - use status live data")
     interface RepoLoadCallback {
 
         fun onLoadStatusChanged(status: Int, remoteDevice: String?)
 
     }
-
-    val statusLiveData = DoorMutableLiveData<Pair<Int, String?>>()
-
-    var repoLoadCallback: RepoLoadCallback? = null
 
     val requestLock = Mutex()
 
@@ -50,48 +47,39 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     val repoHelperId = ID_ATOMICINT.getAndIncrement()
 
-    private inner class LiveDataWrapper2<T>(private val src: DoorLiveData<T>): DoorMutableLiveData<T>(), DoorObserver<T> {
+    val statusLiveData = DoorMutableLiveData<RepoLoadStatus>()
 
-        override fun onChanged(t: T) {
-            sendValue(t)
+    class RepoLoadStatus(var loadStatus: Int = 0, var remoteNode: String? = null)
+
+    /**
+     * This wrapper class is loosely modeled on the MediatorLiveData. The difference is that there
+     * is only one source.
+     *
+     * It also provides access to the loadingStatus LiveData
+     *
+     */
+    inner class LiveDataWrapper2<L>(private val src: DoorLiveData<L>): DoorMutableLiveData<L>(), DoorObserver<L> {
+
+        val loadingStatus: DoorMutableLiveData<RepoLoadStatus>
+            get() = statusLiveData
+
+
+        override fun onChanged(t: L) {
+            setVal(t)
         }
 
-        fun onActive() {
+        override fun onActive2() {
+            super.onActive2()
             src.observeForever(this)
+            onLifecycleActive()
         }
 
-        fun onInactive() {
+        override fun onInactive2() {
+            super.onInactive2()
             src.removeObserver(this)
         }
 
     }
-
-    private var lifecycleHelper: RepositoryLoadHelperLifecycleHelper? = null
-
-    var lifecycleOwner: DoorLifecycleOwner? = null
-            set(value) {
-                lifecycleHelper?.onInactive?.invoke()
-                lifecycleHelper?.removeObserver()
-                lifecycleHelper?.dispose()
-
-                lifecycleHelper = null
-                field = value
-
-                if(value != null) {
-                    lifecycleHelper = RepositoryLoadHelperLifecycleHelper(value).apply {
-                        onActive = {
-                            onLifecycleActive()
-                        }
-
-                        onDestroyed = {
-                            lifecycleOwner = null
-                            lifecycleHelper = null
-                        }
-
-                        addObserver()
-                    }
-                }
-            }
 
     @Volatile
     var status: Int = 0
@@ -103,6 +91,14 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     private val logPrefix
         get() = "ID [$uri] $repoHelperId "
+
+    private var wrappedLiveData: DoorLiveData<*>? = null
+
+    fun <L> wrapLiveData(src: DoorLiveData<L>): DoorLiveData<L> {
+        return LiveDataWrapper2(src).also {
+            wrappedLiveData = it
+        }
+    }
 
 
     internal fun onLifecycleActive() {
@@ -127,7 +123,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     override fun onConnectivityStatusChanged(newStatus: Int) {
         if(!completed.value && newStatus == DoorDatabaseRepository.STATUS_CONNECTED
-                && lifecycleHelper?.isActive() ?: false) {
+                && wrappedLiveData?.hasActiveObservers() ?: false) {
             GlobalScope.launch {
                 try {
                     Napier.d("$logPrefix RepositoryLoadHelper: onConnectivityStatusChanged: did not complete " +
@@ -142,7 +138,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     }
 
     override fun onNewMirrorAvailable(mirror: MirrorEndpoint) {
-        if(!completed.value && lifecycleHelper?.isActive() ?: true) {
+        if(!completed.value && wrappedLiveData?.hasActiveObservers() ?: true) {
             GlobalScope.launch {
                 try {
                     Napier.d("$logPrefix RepositoryLoadHelper: onNewMirrorAvailable: Mirror # ${mirror.mirrorId} " +
@@ -190,7 +186,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                     if(newStatus != status) {
                         status = newStatus
-                        fireStatusChanged(status, null)
+                        statusLiveData.sendValue(RepoLoadStatus(status))
                     }
 
                     endpointToUse = if(mirrorToUse == null) {
@@ -231,7 +227,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                         completed.value = true
                         loadedVal.complete(t)
-                        fireStatusChanged(status, null)
+                        statusLiveData.sendValue(RepoLoadStatus(status))
+
 
                         Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse ."})
                         return t
@@ -273,7 +270,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                 if(newStatus != status) {
                     status = newStatus
-                    fireStatusChanged(status, null)
+                    statusLiveData.sendValue(RepoLoadStatus(status))
                 }
 
 
@@ -310,26 +307,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         Napier.d({"$logPrefix Finished waiting for non empty live data. Result=$nonEmptyVal."})
 
         return nonEmptyVal
-    }
-
-//    fun addRepoLoadCallback(callback: RepoLoadCallback) {
-//        callbacks.add(callback)
-//        callback.onLoadStatusChanged(status, null)
-//    }
-
-//    inline fun addRepoLoadCallback(crossinline block: (Int, String?) -> Unit) {
-//        addRepoLoadCallback(object: RepoLoadCallback {
-//            override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
-//                block(status, remoteDevice)
-//            }
-//        })
-//    }
-
-    //fun removeRepoLoadCallback(callback: RepoLoadCallback) = callbacks.remove(callback)
-
-    private fun fireStatusChanged(status: Int, remoteDevice: String?) {
-        //callbacks.forEach { it.onLoadStatusChanged(status, remoteDevice) }
-        repoLoadCallback?.onLoadStatusChanged(status, remoteDevice)
     }
 
     companion object {

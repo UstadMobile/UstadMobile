@@ -34,6 +34,7 @@ import kotlin.jvm.Volatile
 
 class DownloadDialogPresenter(context: Any,
                               arguments: Map<String, String>, view: DownloadDialogView,
+                              private val lifecycleOwner: DoorLifecycleOwner,
                               private var appDatabase: UmAppDatabase,
                               private val appDatabaseRepo: UmAppDatabase,
                               private val containerDownloadManager: ContainerDownloadManager,
@@ -80,7 +81,7 @@ class DownloadDialogPresenter(context: Any,
                 GlobalScope.launch(liveDataObserverDispatcher()) {
                     val downloadJobLiveDataVal = containerDownloadManager.getDownloadJob(newDownloadJobIdVal)
                     downloadJobLiveData = downloadJobLiveDataVal
-                    downloadJobLiveDataVal.observe(context as DoorLifecycleOwner,
+                    downloadJobLiveDataVal.observe(lifecycleOwner,
                             this@DownloadDialogPresenter)
                 }
             }
@@ -100,8 +101,7 @@ class DownloadDialogPresenter(context: Any,
             val isWifiOnly = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
             wifiOnlyChecked.value = isWifiOnly
             view.setDownloadOverWifiOnly(isWifiOnly)
-            downloadJobItemLiveData.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
-                    downloadJobItemObserver)
+            downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
 
             val storageDirs = impl.getStorageDirsAsync(context)
             view.runOnUiThread(Runnable {

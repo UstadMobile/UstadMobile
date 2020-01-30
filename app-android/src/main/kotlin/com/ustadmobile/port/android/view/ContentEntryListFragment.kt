@@ -345,8 +345,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         }
 
         val data = entryProvider.asRepositoryLiveData(
-                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
-                this)
+                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao)
+
+        repoLoadingStatusView.observerRepoStatus(data, this)
 
         //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
         //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
