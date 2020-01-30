@@ -50,6 +50,22 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     val repoHelperId = ID_ATOMICINT.getAndIncrement()
 
+    private inner class LiveDataWrapper2<T>(private val src: DoorLiveData<T>): DoorMutableLiveData<T>(), DoorObserver<T> {
+
+        override fun onChanged(t: T) {
+            sendValue(t)
+        }
+
+        fun onActive() {
+            src.observeForever(this)
+        }
+
+        fun onInactive() {
+            src.removeObserver(this)
+        }
+
+    }
+
     private var lifecycleHelper: RepositoryLoadHelperLifecycleHelper? = null
 
     var lifecycleOwner: DoorLifecycleOwner? = null
