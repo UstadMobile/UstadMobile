@@ -16,6 +16,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.InventoryDetailView
 import com.ustadmobile.core.view.InventoryDetailView.Companion.ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.InventoryListView
+import com.ustadmobile.core.view.NewInventoryItemView
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
 import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.core.view.SelectSaleProductView.Companion.ARG_INVENTORY_MODE
@@ -117,7 +118,6 @@ class InventoryListPresenter(context: Any,
         getAndSetProvider(currentSortOrder)
     }
 
-
     fun handleClickSaleProductInventory(saleProductUid: Long){
         val args = HashMap<String, String>()
         args.put(ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID, saleProductUid.toString())
@@ -126,9 +126,11 @@ class InventoryListPresenter(context: Any,
 
     fun handleClickAddItems(){
         val args = HashMap<String, String>()
-        args.put(ARG_INVENTORY_MODE, "true")
-        args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION, "true")
-        impl.go(SelectSaleProductView.VIEW_NAME, args, context)
+//        args.put(ARG_INVENTORY_MODE, "true")
+//        args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION, "true")
+//        impl.go(SelectSaleProductView.VIEW_NAME, args, context)
+        impl.go(NewInventoryItemView.VIEW_NAME, args, context)
+        view.finish()
     }
 
 }

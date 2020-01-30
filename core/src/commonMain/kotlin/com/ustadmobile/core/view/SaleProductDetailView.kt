@@ -50,6 +50,7 @@ interface SaleProductDetailView : UstadView {
         const val ARG_NEW_CATEGORY = "ArgNewCategory"
         const val ARG_SALE_PRODUCT_UID = "ArgSaleProductUid"
         const val ARG_ASSIGN_TO_CATEGORY_UID = "ArgAssignToCategoryUid"
+        const val ARG_ADD_INVENTORY_POST_SAVE = "ArgAddInventoryPostSave"
     }
 
 }

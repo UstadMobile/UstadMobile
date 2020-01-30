@@ -16,6 +16,9 @@ import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_ASSIGN_TO_C
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
+import com.ustadmobile.core.view.SelectProducersView
+import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
+import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.lib.db.entities.SaleProductParentJoin
@@ -183,6 +186,14 @@ class SaleProductDetailPresenter(context: Any,
 
     fun handleClickSave() {
 
+        var forwardToInventory = false
+        if(arguments.containsKey(SaleProductDetailView.ARG_ADD_INVENTORY_POST_SAVE)){
+            val value = arguments.get(SaleProductDetailView.ARG_ADD_INVENTORY_POST_SAVE)
+            if(value.equals("true")){
+                forwardToInventory = true
+            }
+        }
+
         val selectedIterator = selectedToCategoriesUid.keys.iterator()
         while (selectedIterator.hasNext()) {
             val productUid = selectedIterator.next()
@@ -199,6 +210,13 @@ class SaleProductDetailPresenter(context: Any,
         GlobalScope.launch {
             try {
                 saleProductDao.updateAsync(currentSaleProduct!!)
+                if(forwardToInventory){
+                    val args = HashMap<String, String>()
+                    args.put(SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION, "true")
+                    args.put(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_PRODUCT_UID,
+                            productUid.toString())
+                    impl.go(SelectProducersView.VIEW_NAME, args, context)
+                }
                 view.finish()
             }catch(e:Exception){
                 print(e.message)

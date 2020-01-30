@@ -214,7 +214,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SelectProducersView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectProducersActivity"),
             InventoryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}InventoryDetailActivity"),
             SelectSaleTypeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectSaleTypeDialogFragment"),
-            SaleDeliveryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDeliveryDetailActivity")
+            SaleDeliveryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDeliveryDetailActivity"),
+            NewInventoryItemView.VIEW_NAME to Class.forName("${PACKAGE_NAME}NewInventoryItemActivity")
     )
 
 

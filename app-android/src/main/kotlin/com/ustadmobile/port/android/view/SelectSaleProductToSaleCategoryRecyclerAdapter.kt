@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AddSaleProductToSaleCategoryPresenter
+import com.ustadmobile.core.controller.CommonHandlerPresenter
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -27,7 +28,7 @@ import java.io.File
 
 class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         diffCallback: DiffUtil.ItemCallback<SaleProduct>,
-        internal var mPresenter: AddSaleProductToSaleCategoryPresenter,
+        internal var mPresenter: CommonHandlerPresenter<*>,
         internal var theActivity: Activity,
         private val listCategory: Boolean,
         internal var theContext: Context)
@@ -132,7 +133,7 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         name.text = saleProductNameLocale
         desc.text = saleProductDescLocale
 
-        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity!!.saleProductUid) }
+        holder.itemView.setOnClickListener { v -> mPresenter.handleCommonPressed(entity!!.saleProductUid) }
 
     }
 

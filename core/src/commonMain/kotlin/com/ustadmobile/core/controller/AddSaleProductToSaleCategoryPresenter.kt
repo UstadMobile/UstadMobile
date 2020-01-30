@@ -22,9 +22,16 @@ import kotlinx.coroutines.launch
 /**
  * Presenter for AddSaleProductToSaleCategory view
  */
-class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String, String?>,
+class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String, String>,
                                             view: AddSaleProductToSaleCategoryView)
-    : UstadBaseController<AddSaleProductToSaleCategoryView>(context, arguments, view) {
+    : CommonHandlerPresenter<AddSaleProductToSaleCategoryView>(context, arguments, view) {
+    override fun handleCommonPressed(arg: Any, arg2: Any) {
+        handleClickProduct(arg as Long)
+    }
+
+    override fun handleSecondaryPressed(arg: Any) {
+        //Do nothing
+    }
 
     private var umProvider: DataSource.Factory<Int, SaleProduct>? = null
     internal var repository: UmAppDatabase

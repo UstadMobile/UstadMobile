@@ -238,4 +238,7 @@
 
     <string name="save_sale">Please save the sale before adding a delivery</string>
 
+    <string name="add_inventory">Add inventory</string>
+    <string name="create_new_product">Create a new product</string>
+
 </resources>
