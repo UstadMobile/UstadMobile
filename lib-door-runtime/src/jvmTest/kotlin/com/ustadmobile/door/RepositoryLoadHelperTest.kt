@@ -85,10 +85,7 @@ class RepositoryLoadHelperTest  {
 //        val loadCallback = mock<RepositoryLoadHelper.RepoLoadCallback>()
 //        repoLoadHelper.addRepoLoadCallback(loadCallback)
 
-        val mockLiveData = mock<DoorLiveData<DummyEntity>> {  }
-        repoLoadHelper.lifecycleOwner = mock {
-            on { currentState}.thenReturn(DoorLifecycleObserver.NOT_CREATED)
-        }
+        var mockLiveData = repoLoadHelper.wrapLiveData(mock<DoorLiveData<DummyEntity>> {  })
 
         runBlocking {
             try {
@@ -139,16 +136,16 @@ class RepositoryLoadHelperTest  {
 //        val repoLoadCallback = mock<RepositoryLoadHelper.RepoLoadCallback>()
 //        repoLoadHelper.addRepoLoadCallback(repoLoadCallback)
 
-        val mockLiveData = mock<DoorLiveData<DummyEntity>> {  }
+        var liveData = mock<DoorLiveData<DummyEntity>> {  }
 //        val wrappedLiveData = repoLoadHelper.wrapLiveData(mockLiveData)
 //                as RepositoryLoadHelper<DummyEntity>.LiveDataWrapper<DummyEntity>
 
+        val observer = mock<DoorObserver<DummyEntity>> {}
         runBlocking {
             try {
                 //mark that there is an active observer - this will fail because it's still disconnected
-                repoLoadHelper.lifecycleOwner = mock {
-                    on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-                }
+                liveData = repoLoadHelper.wrapLiveData(liveData)
+                liveData.observeForever(observer)
             } catch(e: Exception) {
                 println(e)
                 //do nothing
@@ -165,6 +162,7 @@ class RepositoryLoadHelperTest  {
             repoLoadHelper.onConnectivityStatusChanged(DoorDatabaseRepository.STATUS_CONNECTED)
 
             val entityWithTimeout = withTimeout(5000 ) { completableDeferred.await() }
+
             Assert.assertEquals("After connectivity is restored and the obserer is active, " +
                     "the loadhelper automatically calls the request function", entity,
                     entityWithTimeout)
@@ -210,16 +208,16 @@ class RepositoryLoadHelperTest  {
         }
 
         val lifecycleState = AtomicInteger(DoorLifecycleObserver.NOT_CREATED)
-        repoLoadHelper.lifecycleOwner = mock {
-            on { currentState }.thenAnswer { lifecycleState.get()}
-        }
+//        repoLoadHelper.lifecycleOwner = mock {
+//            on { currentState }.thenAnswer { lifecycleState.get()}
+//        }
 
 //        val repoLoadCallback = mock<RepositoryLoadHelper.RepoLoadCallback>()
 //        repoLoadHelper.addRepoLoadCallback(repoLoadCallback)
 
-//        val mockLiveData = mock<DoorLiveData<DummyEntity>> {  }
-//        val wrappedLiveData = repoLoadHelper.wrapLiveData(mockLiveData)
-//                as RepositoryLoadHelper<DummyEntity>.LiveDataWrapper<DummyEntity>
+        val mockLiveData = mock<DoorLiveData<DummyEntity>> {  }
+        val wrappedLiveData = repoLoadHelper.wrapLiveData(mockLiveData)
+        val mockObserver = mock<DoorObserver<DummyEntity>> {}
 
         runBlocking {
             try {
@@ -235,7 +233,7 @@ class RepositoryLoadHelperTest  {
             val callCountAfterConnectivityRestored = loadHelperCallCount.get()
 
             //now observe it - this should trigger a call to try the request again
-            repoLoadHelper.onLifecycleActive()
+            wrappedLiveData.observeForever(mockObserver)
             val entityResult = withTimeout(2000) { completableDeferred.await() }
 
 
@@ -276,12 +274,16 @@ class RepositoryLoadHelperTest  {
             loadHelperCallCount.incrementAndGet()
             throw IOException("Mock IOException Not connected")
         }
+
+        var liveData = mock<DoorLiveData<DummyEntity>> {}
+        liveData = repoLoadHelper.wrapLiveData(liveData)
+        val mockObserver = mock<DoorObserver<DummyEntity>> {}
 //        val loadCallback = mock<RepositoryLoadHelper.RepoLoadCallback>()
 //        repoLoadHelper.addRepoLoadCallback(loadCallback)
 
-        repoLoadHelper.lifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
+//        repoLoadHelper.lifecycleOwner = mock {
+//            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+//        }
 
         runBlocking {
             try {
@@ -291,7 +293,12 @@ class RepositoryLoadHelperTest  {
             }
 
             val callCountBeforeObserving = loadHelperCallCount.get()
+
+            //now observe it
+            liveData.observeForever(mockObserver)
+
             delay(2000)
+
 
             Assert.assertEquals("When adding an observer there are no further calls to the load" +
                     "function", callCountBeforeObserving, loadHelperCallCount.get())
@@ -471,12 +478,11 @@ class RepositoryLoadHelperTest  {
             val endpointCompleteOnFirstRequest = endpointCompletableDeferred.isCompleted
 
             val mockLiveData = mock<DoorLiveData<DummyEntity>> {  }
-//            val wrappedLiveData = repoLoadHelper.wrapLiveData(mockLiveData)
-//                    as RepositoryLoadHelper<DummyEntity>.LiveDataWrapper<DummyEntity>
-//            wrappedLiveData.addActiveObserver(mock {})
-            repoLoadHelper.lifecycleOwner = mock {
-                on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-            }
+            val wrappedLiveData = repoLoadHelper.wrapLiveData(mockLiveData)
+            wrappedLiveData.observeForever(mock {})
+//            repoLoadHelper.lifecycleOwner = mock {
+//                on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+//            }
 
             val newMirror = MirrorEndpoint(1, mockMirrorEndpoint, 100)
             currentActiveMirrorList.add(newMirror)
@@ -542,10 +548,11 @@ class RepositoryLoadHelperTest  {
 
             val loadFnCountBeforeMirror = loadFnCount.get()
 
-            val mockLiveData = mock<DoorLiveData<DummyEntity>> {  }
-            repoLoadHelper.lifecycleOwner = mock {
-                on { currentState }.thenReturn(DoorLifecycleObserver.STOPPED)
-            }
+            var liveData = mock<DoorLiveData<DummyEntity>> {  }
+            liveData = repoLoadHelper.wrapLiveData(liveData)
+//            repoLoadHelper.lifecycleOwner = mock {
+//                on { currentState }.thenReturn(DoorLifecycleObserver.STOPPED)
+//            }
 
             val newMirror = MirrorEndpoint(1, mockMirrorEndpoint, 100)
             currentActiveMirrorList.add(newMirror)
