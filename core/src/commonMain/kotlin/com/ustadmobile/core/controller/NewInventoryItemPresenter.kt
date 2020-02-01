@@ -51,6 +51,7 @@ class NewInventoryItemPresenter(context: Any,
                 args.put(SaleProductDetailView.ARG_SALE_PRODUCT_UID, productUid.toString())
                 args.put(ARG_ADD_INVENTORY_POST_SAVE, "true")
                 impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+                view.finish()
             })
 
         }
