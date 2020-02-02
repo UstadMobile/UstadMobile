@@ -71,4 +71,15 @@ class TestRoomMigration {
     }
 
 
+    @Test
+    fun migrate32to33() {
+        helper.createDatabase(TEST_DB, 32).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 33, true,
+                UmAppDatabase.MIGRATION_32_33)
+    }
+
+
 }
