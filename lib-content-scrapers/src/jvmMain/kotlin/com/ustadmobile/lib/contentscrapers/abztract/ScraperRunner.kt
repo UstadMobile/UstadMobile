@@ -108,7 +108,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
                 val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
                 val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java)
-                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid) as Scraper?
+                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid)
                 obj?.scrapeUrl(it.scrapeUrl!!)
                 successful = true
 

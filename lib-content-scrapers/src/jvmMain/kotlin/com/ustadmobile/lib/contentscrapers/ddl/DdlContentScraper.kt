@@ -90,11 +90,6 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                     fileUrl = URL(URL(sourceUrl), href)
 
-                    val isMediaFile = isMediaUrl(fileUrl.toString())
-                    if (isMediaFile) {
-                        return@startHarScrape
-                    }
-
                     var fileEntry: HarEntry? = null
 
                     var counterRequest = 0
@@ -106,9 +101,16 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         counterRequest++
                     }
 
-                    if(fileEntry == null){
+                    if (fileEntry == null) {
                         throw IllegalStateException("no request found for link")
                     }
+
+                    val isMediaFile = isMediaUrl(fileUrl.toString())
+
+                    if (isMediaFile) {
+                        return@startHarScrape
+                    }
+
 
                     var counterResponse = 0
                     while (fileEntry.response.content.text.isNullOrEmpty() && counterResponse < TIME_OUT_SELENIUM) {
@@ -231,20 +233,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     }
                 }
 
-
-                val downloadList = doc.select("span.download-item a[href]")
-
-                if (downloadList.isEmpty()) {
-                    throw IllegalStateException("No link found to download in the source page")
-                }
-
-                val downloadItem = downloadList[0]
-                val href = downloadItem.attr("href")
-
-                fileUrl = URL(URL(sourceUrl), href)
-
                 val fileEntry = it.har.log.entries.find { harEntry ->
-                    harEntry.request.url == fileUrl.toString()
+                    harEntry?.request?.url == fileUrl.toString()
                 }
 
                 if (fileEntry == null) {
