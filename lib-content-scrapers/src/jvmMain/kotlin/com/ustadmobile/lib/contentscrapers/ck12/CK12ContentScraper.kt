@@ -63,7 +63,6 @@ import com.ustadmobile.lib.contentscrapers.harscraper.setupProxyWithSelenium
 import com.ustadmobile.lib.contentscrapers.harscraper.scrapeUrlwithHar
 import com.ustadmobile.lib.db.entities.ContentEntry
 import net.lightbody.bmp.BrowserMobProxyServer
-import net.lightbody.bmp.client.ClientUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
@@ -72,7 +71,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.openqa.selenium.By
-import org.openqa.selenium.Proxy
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -207,7 +205,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
                 }
                 else -> {
                     UMLogUtil.logError("unsupported kind = $contentType at url = $scrapeUrl")
-                    queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+                    queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
                     queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
                     val modifiedFile = File(destLocation, destLocation.name + LAST_MODIFIED_TXT)
                     FileUtils.deleteQuietly(modifiedFile)
@@ -228,7 +226,7 @@ constructor(var scrapeUrl: URL, var destLocation: File, var containerDir: File, 
             ContentScraperUtil.deleteETagOrModified(destLocation, destLocation.name)
         }
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $scrapeUrl in duration: $duration squUid  $sqiUid")

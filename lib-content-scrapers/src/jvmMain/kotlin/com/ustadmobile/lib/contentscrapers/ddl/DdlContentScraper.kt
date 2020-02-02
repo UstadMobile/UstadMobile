@@ -9,6 +9,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
+import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -26,6 +27,8 @@ import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
+import org.openqa.selenium.NoSuchElementException
+import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
@@ -102,7 +105,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     }
 
                     if (fileEntry == null) {
-                        throw IllegalStateException("no request found for link")
+                        throw ScraperException(ERROR_TYPE_LINK_NOT_FOUND, "no request found for link")
                     }
 
                     val isMediaFile = isMediaUrl(fileUrl.toString())
@@ -134,7 +137,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 }
 
                 if (entry == null) {
-                    throw IllegalStateException("no source url found in har entry")
+                    throw ScraperException(ERROR_TYPE_INVALID_SOURCE_URL, "no source url found in har entry")
                 }
 
                 val doc = Jsoup.parse(entry.response.content.text)
@@ -173,7 +176,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         thumbnail, EMPTY_STRING, EMPTY_STRING, ContentEntry.ARTICLE_TYPE, contentEntryDao)
 
                 if (licenseType == 0) {
-                    throw IllegalArgumentException("License type not supported")
+                    throw ScraperException(ERROR_TYPE_INVALID_LICENSE, "License type not supported")
                 }
 
                 val subjectContainer = doc.select("article.resource-view-details a[href*=level]")
@@ -238,7 +241,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 }
 
                 if (fileEntry == null) {
-                    throw IllegalStateException("No File found for content in har entry")
+                    throw ScraperException(ERROR_TYPE_FILE_NOT_LOADED, "No File found for content in har entry")
                 }
 
                 val isMediaFile = isMediaUrl(fileUrl.toString())
@@ -264,6 +267,9 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
             UMLogUtil.logError("$DDL Exception - Error downloading resource from url $sourceUrl")
             close()
+            if (e is TimeoutException || e is NoSuchElementException) {
+                throw ScraperException(ERROR_TYPE_NO_FILE_AVAILABLE, "no file found in the website")
+            }
             throw e
         }
 
@@ -279,7 +285,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
             UMLogUtil.logError("$DDL Debug - Did not find any content to download at url $sourceUrl")
             close()
-            throw IllegalStateException("Container Manager did not have the file")
+            throw ScraperException(ERROR_TYPE_FILE_NOT_LOADED, "Container Manager did not have the file")
         }
 
         runBlocking {
@@ -324,9 +330,14 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
         }
 
-        const val ERROR_TYPE_LINK_NOT_FOUND = 1
-        const val ERROR_TYPE_FILE_NOT_LOADED = 2
-        const val ERROR_TYPE_INVALID_LICENSE = 4
+
+        const val ERROR_TYPE_INVALID_LICENSE = 100
+        const val ERROR_TYPE_LINK_NOT_FOUND = 101
+        const val ERROR_TYPE_INVALID_SOURCE_URL = 102
+
+        const val ERROR_TYPE_FILE_NOT_LOADED = 200
+        const val ERROR_TYPE_NO_FILE_AVAILABLE = 201
+
     }
 
 }

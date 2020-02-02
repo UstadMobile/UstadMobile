@@ -71,7 +71,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
         }
 
-        queueDao!!.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao!!.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao!!.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
@@ -282,7 +282,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessors) {
 
-                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)
                 val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
 
                 val scrapeContentUrl: URL
@@ -306,7 +306,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
-                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)
                 val parent = contentEntryDao.findByUidAsync(it!!.sqiContentEntryParentUid)
 
                 val scrapeContentUrl: URL

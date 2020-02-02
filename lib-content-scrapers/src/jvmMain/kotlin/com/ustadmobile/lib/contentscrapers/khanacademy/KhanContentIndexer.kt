@@ -86,7 +86,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
         }
 
-        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
@@ -419,7 +419,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessor) {
-                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)
                 val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
                 val queueUrl: URL
 
@@ -442,7 +442,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
-                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+                queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)
                 val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
 
                 val scrapeUrl: URL

@@ -100,7 +100,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             UMLogUtil.logError("Error creating topics for url $queueUrl")
         }
 
-        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.updateSetStatusById(scrapeQueueItemUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao.setTimeFinished(scrapeQueueItemUid, System.currentTimeMillis())
     }
 
@@ -562,7 +562,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessor) {
-                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
+                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
                 val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
                 val queueUrl: URL
 
@@ -584,7 +584,7 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
             var scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
-                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
+                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
                 val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
 
                 val scrapeUrl: URL

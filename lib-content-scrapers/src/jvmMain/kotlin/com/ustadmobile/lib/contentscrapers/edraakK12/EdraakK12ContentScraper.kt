@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.edraakK12
 
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.util.UMIOUtils
@@ -104,7 +103,7 @@ class EdraakK12ContentScraper : Runnable {
             ContentScraperUtil.deleteFile(lastModified)
         }
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $scrapUrl in duration: $duration")

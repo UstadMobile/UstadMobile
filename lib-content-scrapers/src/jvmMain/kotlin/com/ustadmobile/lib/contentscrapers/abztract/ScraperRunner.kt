@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
@@ -16,7 +15,6 @@ import org.apache.commons.cli.*
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
 import java.lang.IllegalArgumentException
-import java.lang.System.exit
 import kotlin.system.exitProcess
 
 
@@ -61,7 +59,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                 { item1, item2 -> item1.sqiUid == item2.sqiUid },
                 indexTotal) {
 
-            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
+            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
 
             val startTime = System.currentTimeMillis()
             UMLogUtil.logInfo("Started indexer url ${it.scrapeUrl} at start time: $startTime")
@@ -82,7 +80,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             }
 
-            queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+            queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
             queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             UMLogUtil.logInfo("Ended indexer for url ${it.scrapeUrl} in duration: $duration")
@@ -96,14 +94,14 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
         val scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid }, scraperTotal) {
 
-            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING)
+            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
 
             val startTime = System.currentTimeMillis()
             UMLogUtil.logInfo("Started scraper url ${it.scrapeUrl} at start time: $startTime")
 
             queueDao.setTimeStarted(it.sqiUid, startTime)
             var successful = false
-
+            var errorCode = 0
             try {
 
                 val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
@@ -114,11 +112,12 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
 
             } catch (e: Exception) {
+                errorCode = if(e is ScraperException) e.errorCode else 0
                 UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             }
 
-            queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+            queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
             queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             UMLogUtil.logInfo("Ended scrape for url ${it.scrapeUrl} in duration: $duration")

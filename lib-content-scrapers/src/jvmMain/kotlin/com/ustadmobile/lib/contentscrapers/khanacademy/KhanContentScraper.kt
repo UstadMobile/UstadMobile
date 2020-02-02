@@ -189,7 +189,7 @@ class KhanContentScraper : Runnable {
 
         factory.returnObject(driver)
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $url in duration: $duration")

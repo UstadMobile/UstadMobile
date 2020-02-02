@@ -117,7 +117,7 @@ class VoaScraper : Runnable {
                             FilenameUtils.getBaseName(scrapUrl!!.path) + ScraperConstants.LAST_MODIFIED_TXT))
         }
 
-        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED)
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis())
         val duration = System.currentTimeMillis() - startTime
         UMLogUtil.logInfo("Ended scrape for url $scrapUrl in duration: $duration")

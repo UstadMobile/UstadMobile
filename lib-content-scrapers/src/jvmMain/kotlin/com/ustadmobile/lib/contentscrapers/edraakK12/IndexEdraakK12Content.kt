@@ -140,7 +140,7 @@ class IndexEdraakK12Content {
                 { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
 
-            queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING)
+            queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)
             val parent = contentEntryDao.findByUidAsync(it.sqiContentEntryParentUid)
 
             val scrapeContentUrl: URL
