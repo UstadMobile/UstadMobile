@@ -23,6 +23,8 @@ class ScrapeQueueItem() {
 
     var itemType: Int = 0
 
+    var errorCode: Int = 0
+
     var contentType: String? = null
 
     var timeAdded: Long = 0
