@@ -32,9 +32,11 @@ class DdlPageIndexer(contentEntryUid: Long, runId: Int, db: UmAppDatabase) : Ind
 
         }
 
+        val subjectId = sourceUrl.substringAfterLast("=")
+
         for (i in 1..maxNumber) {
 
-            val url = "https://www.ddl.af/$twoCodeLang/resources/list?subject_area=${contentEntry!!.entryId}&page=$i"
+            val url = "https://www.ddl.af/$twoCodeLang/resources/list?subject_area=${subjectId}&page=$i"
             createQueueItem(url, contentEntry!!, ScraperTypes.DDL_LIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
         }
     }

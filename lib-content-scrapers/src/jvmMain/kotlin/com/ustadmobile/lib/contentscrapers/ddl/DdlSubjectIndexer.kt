@@ -71,6 +71,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) :
 
                 val hrefLink = subTopic.attr("data-link")
                 val title = subTopic.text()
+                val subTopicId = subTopic.attr("value")
 
                 UMLogUtil.logInfo("found subtopic $title")
 
@@ -78,7 +79,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) :
 
                 UMLogUtil.logInfo("with subtopic url $subjectUrl")
 
-                val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subjectId, title,
+                val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subTopicId, title,
                         subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, contentEntry!!.primaryLanguageUid, null,
                         ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
                         ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
