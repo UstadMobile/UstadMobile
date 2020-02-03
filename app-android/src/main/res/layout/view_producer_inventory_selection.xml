@@ -33,6 +33,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintEnd_toStartOf="@+id/view_producer_with_inventory_selection_selected_edittext"
         app:layout_constraintStart_toEndOf="@+id/view_producer_with_inventory_selection_picture"
         app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name" />

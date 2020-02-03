@@ -11,7 +11,6 @@ import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 /**
  *  Presenter for SaleDeliveryDetail view
@@ -24,7 +23,6 @@ class SaleDeliveryDetailPresenter(context: Any,
                                           UmAccountManager.getRepositoryForActiveAccount(context))
     : CommonInventorySelectionPresenter<SaleDeliveryDetailView>(context, arguments!!, view) {
 
-
     private var saleUid : Long = 0
     private var saleDeliveryUid : Long = 0
     private lateinit var saleDelivery: SaleDelivery
@@ -32,24 +30,24 @@ class SaleDeliveryDetailPresenter(context: Any,
     private var sale : Sale? = null
 
     val database = UmAccountManager.getActiveDatabase(context)
-    internal var saleItemToWeCounter: HashMap<Long, HashMap<Long, Int>>
-    var saleItemToProducerSelection : HashMap<SaleItemListDetail, List<PersonWithInventory>>
+    internal var saleItemToWeCounter: HashMap<Long, HashMap<Long, Int>> = HashMap()
+    private var saleItemToProducerSelection : HashMap<SaleItemListDetail, List<PersonWithInventory>>
     var saleItemToSaleItemListDetail : HashMap<Long, SaleItemListDetail>
 
-    val inventoryTransactionDB = database.inventoryTransactionDao
-    val inventoryTransactionDao = repository.inventoryTransactionDao
-    val inventoryItemDB = database.inventoryItemDao
-    val saleDeliveryDB = database.saleDeliveryDao
-    val saleItemDB = database.saleItemDao
-    val saleDaoDB = database.saleDao
+    private val inventoryTransactionDB = database.inventoryTransactionDao
+    private val inventoryTransactionDao = repository.inventoryTransactionDao
+    private val inventoryItemDB = database.inventoryItemDao
+    private val saleDeliveryDB = database.saleDeliveryDao
+    private val saleItemDB = database.saleItemDao
+    private val saleItemDao = repository.saleItemDao
+    private val saleDaoDB = database.saleDao
     val saleDao = repository.saleDao
-    val saleDeliveryDao = repository.saleDeliveryDao
+    private val saleDeliveryDao = repository.saleDeliveryDao
     var loggedInPersonUid : Long = 0
 
 
     init {
         //Initialise Daos, etc here.
-        saleItemToWeCounter = HashMap()
         saleItemToProducerSelection = HashMap()
         saleItemToSaleItemListDetail = HashMap()
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
@@ -150,19 +148,6 @@ class SaleDeliveryDetailPresenter(context: Any,
 
     }
 
-    private fun calculateTotalCountForSaleItem(saleItemUid: Long):Int{
-        var count = 0
-
-        if(saleItemToWeCounter.containsKey(saleItemUid)) {
-            val weToCount = saleItemToWeCounter[saleItemUid]
-            for (weUid in weToCount!!.keys) {
-                count += weToCount[weUid]!!
-            }
-
-        }
-        return count
-    }
-
     fun handleClickAccept(){
 
         //1. Save the signature
@@ -183,7 +168,6 @@ class SaleDeliveryDetailPresenter(context: Any,
                 val saleItem = saleItemDB.findByUidAsync(saleItemUid)
 
                 val itemDetail = saleItemToSaleItemListDetail.get(saleItemUid)
-                var preOrder = itemDetail!!.saleItemPreorder
                 val saleItemMap = saleItemToWeCounter.get(saleItemUid)
                 var totalSaleItemSelected = 0
                 for (weUid in saleItemMap!!.keys) {
@@ -194,7 +178,7 @@ class SaleDeliveryDetailPresenter(context: Any,
 
                         // Get count number of unique InventoryItems and build Transactions for them.
                         val availableItems = inventoryItemDB.findAvailableInventoryItemsByProductLimit(
-                                itemDetail.saleItemProductUid, weCount, loggedInPersonUid, weUid)
+                                itemDetail!!.saleItemProductUid, weCount, loggedInPersonUid, weUid)
                         if (availableItems.count() != weCount) {
                             //ERROR: We are asking for more than we have.
                             println("Asked for more than required")
@@ -210,7 +194,6 @@ class SaleDeliveryDetailPresenter(context: Any,
                                 newInventoryTransaction.inventoryTransactionSaleDeliveryUid = saleDelivery.saleDeliveryUid
                                 inventoryTransactionDao.insertAsync(newInventoryTransaction)
                             }
-
                         }
 
                     } else {
@@ -225,7 +208,7 @@ class SaleDeliveryDetailPresenter(context: Any,
                             ok = true
                             for (everyTransaction in transactions){
                                 everyTransaction.inventoryTransactionSaleDeliveryUid = saleDelivery.saleDeliveryUid
-                                inventoryTransactionDB.update(everyTransaction)
+                                inventoryTransactionDao.update(everyTransaction)
                             }
                         }
                     }
@@ -233,7 +216,7 @@ class SaleDeliveryDetailPresenter(context: Any,
 
                 if(ok) {
                     saleItem!!.saleItemPreorder = false
-                    saleItemDB.updateAsync(saleItem)
+                    saleItemDao.updateAsync(saleItem)
                 }else{
                     if(allSaleItemDone) {
                         allSaleItemDone = false
@@ -243,12 +226,12 @@ class SaleDeliveryDetailPresenter(context: Any,
 
             if(allSaleItemDone){
                 sale!!.salePreOrder = false
-                saleDaoDB.updateAsync(sale!!)
+                saleDao.updateAsync(sale!!)
             }
 
             //3. Persist and close
             saleDelivery.saleDeliveryActive = true
-            saleDeliveryDB.updateAsync(saleDelivery)
+            saleDeliveryDao.updateAsync(saleDelivery)
             view.finish()
         }
     }

@@ -65,6 +65,14 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
     """)
     abstract suspend fun activateAllTransactionsBySaleAndLe(saleUid: Long, leUid: Long): Int
 
+    @Query("""
+        UPDATE InventoryTransaction SET inventoryTransactionActive = 1 
+        WHERE InventoryTransaction.inventoryTransactionSaleItemUid = :saleItemUid AND 
+        InventoryTransaction.inventoryTransactionFromLeUid = :leUid AND 
+        CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 0 
+    """)
+    abstract suspend fun activateAllTransactionsBySaleItemAndLe(saleItemUid: Long, leUid: Long): Int
+
 
     //TODO: Case where leUid is admin and can see but not do anything on an le's behalf
     @Query("""

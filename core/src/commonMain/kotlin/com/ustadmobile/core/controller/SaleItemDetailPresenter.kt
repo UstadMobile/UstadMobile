@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
     internal var repository: UmAppDatabase
-    internal var database: UmAppDatabase
     private var saleItemDao: SaleItemDao
     private var reminderDao: SaleItemReminderDao
 
@@ -50,13 +49,18 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     private var preOrder = false
     private var saleUid: Long = 0
 
+    private var loggedInPersonUid: Long = 0
+
+    init {
+        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+    }
+
     constructor(context: Any,
                 arguments: Map<String, String?>,
                 view: SaleItemDetailView)
             : super(context, arguments, view) {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAccountManager.getActiveDatabase(context)
 
         saleItemDao = repository.saleItemDao
         reminderDao = repository.saleItemReminderDao
@@ -268,7 +272,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
             val thisP = this
             GlobalScope.launch {
 
-                saleItemDao!!.updateAsync(updatedSaleItem!!)
+                saleItemDao.updateAsync(updatedSaleItem!!)
 
                 //Get all reminders.
                 val remindersLive =
@@ -276,6 +280,20 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 view.runOnUiThread(Runnable {
                     remindersLive.observeWithPresenter(thisP, thisP::handleReminderLive)
                 })
+
+                //Activate all transactions
+                val inventoryTransactionDao = repository.inventoryTransactionDao
+                inventoryTransactionDao.activateAllTransactionsBySaleItemAndLe(
+                        updatedSaleItem!!.saleItemUid, loggedInPersonUid)
+
+                //Set parent sale to active if it isnt
+                val saleDao = repository.saleDao
+                val saleItemSale = saleDao.findByUidAsync(updatedSaleItem!!.saleItemSaleUid)
+                if(!saleItemSale!!.saleActive){
+                    saleItemSale.saleActive = true
+                    saleDao.updateAsync(saleItemSale)
+                }
+
             }
             view.finish()
         }

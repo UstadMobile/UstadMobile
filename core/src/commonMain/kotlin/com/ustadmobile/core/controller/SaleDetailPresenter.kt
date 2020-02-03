@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMENT_DEFAULT_VALUE
 import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMENT_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.Dispatchers
@@ -33,13 +32,14 @@ import kotlinx.io.IOException
  */
 class SaleDetailPresenter(context: Any,
                           arguments: Map<String, String>?,
-                          view: SaleDetailView)
+                          view: SaleDetailView,
+                          var impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
+                          var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context))
     : UstadBaseController<SaleDetailView>(context, arguments!!, view) {
 
     private lateinit var umProvider: DataSource.Factory<Int,SaleItemListDetail>
     private lateinit var pProvider: DataSource.Factory<Int,SalePayment>
     private lateinit var dProvider: DataSource.Factory<Int,SaleDelivery>
-    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     private val saleItemDao: SaleItemDao
     private val saleDeliveryDao : SaleDeliveryDao
     private val saleDao: SaleDao
@@ -59,7 +59,7 @@ class SaleDetailPresenter(context: Any,
 
     var isShowSaveButton = false
 
-    var voiceNoteFileName: String? = null
+    private var voiceNoteFileName: String? = null
     private var totalPayment: Long = 0
     private var totalAfterDiscount: Long = 0
 
@@ -122,7 +122,7 @@ class SaleDetailPresenter(context: Any,
         }
     }
 
-    fun initFromSale(saleUid: Long) {
+    private fun initFromSale(saleUid: Long) {
 
         if(saleUid != null) {
             val thisP = this
@@ -133,8 +133,6 @@ class SaleDetailPresenter(context: Any,
                 view.runOnUiThread(Runnable {
                     resultLive.observeWithPresenter(thisP, thisP::updateSaleOnView)
                 })
-
-                //startObservingLocations()
 
                 val saleVoiceNote = saleVoiceNoteDao.findBySaleUidAsync(saleUid)
                 if(saleVoiceNote != null) {
@@ -158,7 +156,7 @@ class SaleDetailPresenter(context: Any,
         view.setDeliveriesProvider(dProvider)
     }
 
-    fun updateSaleOnView(sale:Sale?){
+    private fun updateSaleOnView(sale:Sale?){
         if(sale != null){
 
             //set the og person value
@@ -246,6 +244,35 @@ class SaleDetailPresenter(context: Any,
         }
     }
 
+    fun updateVoiceNoteFilePath(filePath: String?){
+        voiceNoteFileName = filePath
+        //Persist voice note
+        if (voiceNoteFileName != null && voiceNoteFileName!!.isNotEmpty()) {
+            GlobalScope.launch {
+                try {
+                    var voiceNoteUid : Long = 0L
+
+                    var existingVN = saleVoiceNoteDao.findByPersonUidAsync(updatedSale!!.saleUid)
+                    if(existingVN == null){
+                        existingVN = SaleVoiceNote()
+                        existingVN.saleVoiceNoteSaleUid = updatedSale!!.saleUid
+                        existingVN.saleVoiceNoteTimestamp = DateTime.nowUnixLong()
+                        voiceNoteUid = saleVoiceNoteDao.insertAsync(existingVN)
+                        existingVN.saleVoiceNoteUid = voiceNoteUid
+                    }
+
+                    if(existingVN!=null) {
+                        saleVoiceNoteDao.setAttachment(existingVN, voiceNoteFileName!!)
+                    }
+                } catch (e: IOException) {
+                    println(e.message)
+                }
+            }
+        }
+
+
+    }
+
     fun updateBalanceDueFromTotal(totalAD: Float) {
         totalAfterDiscount = totalAD.toLong()
         updateBalance()
@@ -256,7 +283,7 @@ class SaleDetailPresenter(context: Any,
         view.updateBalanceDue(totalAfterDiscount - totalPayment)
     }
 
-    fun getPaymentTotalAndUpdateView() {
+    private fun getPaymentTotalAndUpdateView() {
         if (currentSaleItem != null) {
             GlobalScope.launch {
                 val result =
@@ -264,7 +291,6 @@ class SaleDetailPresenter(context: Any,
                 if(result!=null)
                     view.updatePaymentTotal(result.toLong())
             }
-
         }
     }
 
@@ -291,7 +317,6 @@ class SaleDetailPresenter(context: Any,
         var firstNames = ""
         var lastName = ""
 
-
         if(changedCustomer != null){
             if(changedCustomer.firstNames != null){
                 firstNames = changedCustomer.firstNames!!
@@ -300,8 +325,16 @@ class SaleDetailPresenter(context: Any,
                 lastName = changedCustomer.lastName!!
             }
             if(changedCustomer!!.personLocationUid != 0L) {
-                updatedSale!!.saleLocationUid = changedCustomer.personLocationUid
+                if(updatedSale!!.saleLocationUid != changedCustomer.personLocationUid) {
+                    updatedSale!!.saleLocationUid = changedCustomer.personLocationUid
+                    //Update the sale
+                    GlobalScope.launch {
+                        saleDao.updateAsync(updatedSale!!)
+                    }
+                }
             }
+
+
         }
 
         view.updateCustomerNameOnView(firstNames + " " + lastName)
@@ -320,8 +353,6 @@ class SaleDetailPresenter(context: Any,
         if (updatedSale!!.saleLocationUid != 0L) {
             locationUid = updatedSale!!.saleLocationUid
         }
-
-
 
         val locationList = ArrayList<String>()
         var spinnerId = 0
@@ -347,8 +378,8 @@ class SaleDetailPresenter(context: Any,
     fun handleClickSave() {
 
         if (updatedSale != null) {
-            if(updatedSale!!.saleCustomerUid == null || updatedSale!!.saleCustomerUid == 0L){
-                val selectCustomerMessage = UstadMobileSystemImpl.instance.getString(
+            if(updatedSale!!.saleCustomerUid == 0L){
+                val selectCustomerMessage = impl.getString(
                         MessageID.please_select_customer, context)
                 view.sendMessage(selectCustomerMessage)
             }else{
@@ -364,32 +395,8 @@ class SaleDetailPresenter(context: Any,
                     }
                 }
 
-                //Persist voice note
-                if (voiceNoteFileName != null && voiceNoteFileName!!.isNotEmpty()) {
-                    GlobalScope.launch {
-                        try {
-                            var voiceNoteUid : Long = 0L
-
-                            var existingVN = saleVoiceNoteDao.findByPersonUidAsync(updatedSale!!.saleUid)
-                            if(existingVN == null){
-                                existingVN = SaleVoiceNote()
-                                existingVN.saleVoiceNoteSaleUid = updatedSale!!.saleUid
-                                existingVN.saleVoiceNoteTimestamp = DateTime.nowUnixLong()
-                                voiceNoteUid = saleVoiceNoteDao.insertAsync(existingVN)
-                                existingVN.saleVoiceNoteUid = voiceNoteUid
-                            }
-
-                            if(existingVN!=null) {
-                                saleVoiceNoteDao.setAttachment(existingVN, voiceNoteFileName!!)
-                            }
-                        } catch (e: IOException) {
-                            println(e!!.message)
-                        }
-                    }
-                }
-
-                val inventoryTransactionDao = repository.inventoryTransactionDao
                 //Activate all transactions
+                val inventoryTransactionDao = repository.inventoryTransactionDao
                 GlobalScope.launch {
                     inventoryTransactionDao.activateAllTransactionsBySaleAndLe(
                             updatedSale!!.saleUid, updatedSale!!.salePersonUid)
@@ -397,7 +404,7 @@ class SaleDetailPresenter(context: Any,
                 }
 
                 //Generate title for this Sale
-                var thisP = this
+                val thisP = this
                 GlobalScope.launch {
                     val resultLive = saleItemDao.getTitleForSaleUidLive(updatedSale!!.saleUid)
                     view.runOnUiThread(Runnable {
@@ -408,6 +415,7 @@ class SaleDetailPresenter(context: Any,
             }
         }
     }
+
     private fun handleUpdateSaleName(result:String?){
         updatedSale!!.saleTitle = result
         GlobalScope.launch {
@@ -417,7 +425,7 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleClickSaleItemEdit(saleItemUid: Long) {
-        val impl = UstadMobileSystemImpl.instance
+        
         val args = HashMap<String, String>()
         args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
         args.put(ARG_SALE_ITEM_NAME, currentSaleName)
@@ -435,7 +443,7 @@ class SaleDetailPresenter(context: Any,
         GlobalScope.launch {
             val result = salePaymentDao.insertAsync(newSalePayment)
             newSalePayment.salePaymentUid = result
-            val impl = UstadMobileSystemImpl.instance
+            
             val args = HashMap<String, String>()
             args.put(ARG_SALE_PAYMENT_UID, newSalePayment.salePaymentUid.toString())
             args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE,
@@ -445,45 +453,37 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleClickAddDelivery(){
-
-        if(updatedSale!!.saleActive == false){
-            val saveMessage = UstadMobileSystemImpl.instance.getString(MessageID.save_sale, context)
-            view.sendMessage(saveMessage)
-        }else {
-            GlobalScope.launch {
-                val impl = UstadMobileSystemImpl.instance
-                val args = HashMap<String, String>()
-
-                args.put(ARG_SALE_DELIVERY_SALE_UID, updatedSale!!.saleUid.toString())
-                impl.go(SaleDeliveryDetailView.VIEW_NAME, args, context)
-            }
+        GlobalScope.launch {
+            val args = HashMap<String, String>()
+            args.put(ARG_SALE_DELIVERY_SALE_UID, updatedSale!!.saleUid.toString())
+            impl.go(SaleDeliveryDetailView.VIEW_NAME, args, context)
         }
-
     }
 
     fun updateCustomerUid(cUid: Long){
         customerUid = cUid
-        updatedSale!!.saleCustomerUid = customerUid
-        GlobalScope.launch {
-            saleDao.updateAsync(updatedSale!!)
+        if(updatedSale!!.saleCustomerUid != customerUid) {
+            updatedSale!!.saleCustomerUid = customerUid
+            GlobalScope.launch {
+                saleDao.updateAsync(updatedSale!!)
 
-            customer = personDao.findByUid(customerUid)
-            var firstNames = ""
-            var lastName = ""
-            if(customer!= null && customer!!.firstNames != null){
-                firstNames = customer!!.firstNames!!
+                customer = personDao.findByUid(customerUid)
+                var firstNames = ""
+                var lastName = ""
+                if (customer != null && customer!!.firstNames != null) {
+                    firstNames = customer!!.firstNames!!
+                }
+                if (customer != null && customer!!.lastName != null) {
+                    lastName = customer!!.lastName!!
+                }
+                view.runOnUiThread(Runnable {
+                    view.updateCustomerNameOnView(firstNames + " " + lastName)
+                })
             }
-            if(customer!= null && customer!!.lastName != null){
-                lastName = customer!!.lastName!!
-            }
-            view.runOnUiThread(Runnable {
-                view.updateCustomerNameOnView(firstNames + " " + lastName)
-            })
         }
     }
 
     fun handleClickCustomer(){
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args.put(SelectCustomerView.ARG_SP_LE_UID,
                 UmAccountManager.getActiveAccount(context)!!.personUid.toString())
@@ -491,13 +491,11 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleClickAddSaleItem(){
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         impl.go(SelectSaleTypeDialogView.VIEW_NAME, args, context)
     }
 
     fun handleClickAddSaleItemSold(){
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args[SelectSaleProductView.ARG_INVENTORY_MODE] = "true"
         args[SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = "true"
@@ -507,7 +505,6 @@ class SaleDetailPresenter(context: Any,
 
     fun handleClickAddSaleItemPreOrder(){
 
-        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args[SelectSaleProductView.ARG_INVENTORY_MODE] = "true"
         args[SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = "false"
@@ -517,17 +514,24 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleDiscountChanged(discount: Long) {
-        updatedSale!!.saleDiscount = discount
-        view.updateOrderTotalAfterDiscount(discount)
+        if(updatedSale!!.saleDiscount != discount) {
+            updatedSale!!.saleDiscount = discount
+            view.updateOrderTotalAfterDiscount(discount)
+            //Update the sale
+            GlobalScope.launch {
+                saleDao.updateAsync(updatedSale!!)
+            }
+        }
     }
 
     fun handleOrderNotesChanged(notes: String) {
-        updatedSale!!.saleNotes = notes
-    }
-
-    fun handleSetDelivered(delivered: Boolean) {
-        updatedSale!!.saleDone = delivered
-        updatedSale!!.salePreOrder = !delivered
+        if(!updatedSale!!.saleNotes.equals(notes)){
+            updatedSale!!.saleNotes = notes
+            //Update the sale
+            GlobalScope.launch {
+                saleDao.updateAsync(updatedSale!!)
+            }
+        }
     }
 
     fun handleLocationSelected(position: Int) {
@@ -549,7 +553,7 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleEditPayment(salePaymentUid: Long) {
-        val impl = UstadMobileSystemImpl.instance
+        
         val args = HashMap<String, String>()
         args.put(ARG_SALE_PAYMENT_UID, salePaymentUid.toString())
         args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE,
@@ -558,7 +562,7 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleEditDelivery(saleDeliveryUid: Long){
-        val impl = UstadMobileSystemImpl.instance
+        
         val args = HashMap<String, String>()
         args.put(ARG_SALE_DELIVERY_UID, saleDeliveryUid.toString())
         args.put(ARG_SALE_DELIVERY_SALE_UID, currentSale!!.saleUid.toString())

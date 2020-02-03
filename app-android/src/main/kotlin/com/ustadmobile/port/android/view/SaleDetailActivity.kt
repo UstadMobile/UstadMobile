@@ -259,7 +259,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
             stopIB!!.visibility = View.INVISIBLE
 
-            mPresenter!!.voiceNoteFileName = saleVoiceNoteFilePath
+            mPresenter!!.updateVoiceNoteFilePath(saleVoiceNoteFilePath)
         }
 
     }
