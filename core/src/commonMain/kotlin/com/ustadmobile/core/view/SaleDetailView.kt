@@ -53,7 +53,6 @@ interface SaleDetailView : UstadView {
 
     fun showSaveButton(show: Boolean)
     fun showCalculations(show: Boolean)
-    fun showDelivered(show: Boolean)
     fun showNotes(show: Boolean)
     fun showDeliveries(show: Boolean)
     fun showPayments(show: Boolean)

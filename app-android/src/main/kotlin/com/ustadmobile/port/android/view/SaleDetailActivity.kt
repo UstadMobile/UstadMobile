@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Picture
 import android.graphics.drawable.AnimationDrawable
-import android.graphics.drawable.PictureDrawable
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
@@ -26,8 +24,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DiffUtil.ItemCallback
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.caverock.androidsvg.SVG
-import com.caverock.androidsvg.SVGParseException
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
@@ -48,7 +44,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         CustomerDetailDialogFragment.ChoosenCustomerListener {
 
     private var toolbar: Toolbar? = null
-    private var mPresenter: SaleDetailPresenter? = null
+    private lateinit var mPresenter: SaleDetailPresenter
     private var mRecyclerView: RecyclerView? = null
 
     private var menu: Menu? = null
@@ -88,7 +84,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
     private var recorded = false
     private var fromFile = false
 
-    private var paymentTV: TextView? = null
+    private lateinit var paymentTV: TextView
     private lateinit var addPaymentCL: ConstraintLayout
     private var pRecyclerView: RecyclerView? = null
     private var balanceDueTV: TextView? = null
@@ -117,10 +113,10 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
     override fun onSaleTypeSelected(sale: Boolean) {
         if(sale){
-            mPresenter!!.handleClickAddSaleItemSold()
+            mPresenter.handleClickAddSaleItemSold()
 
         }else{
-            mPresenter!!.handleClickAddSaleItemPreOrder()
+            mPresenter.handleClickAddSaleItemPreOrder()
         }
     }
 
@@ -205,12 +201,12 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
             playRecordDeleteSound()
             //TODO: handle delete video (null it on the Sale)
-            mPresenter!!.handleDeleteVoiceNote()
+            mPresenter.handleDeleteVoiceNote()
 
-            recordVoiceNotesIB!!.setImageResource(R.drawable.ic_mic_black_24dp)
-            recordVoiceNotesIB!!.visibility = View.VISIBLE
-            playIB!!.visibility = View.INVISIBLE
-            stopIB!!.visibility = View.INVISIBLE
+            recordVoiceNotesIB.setImageResource(R.drawable.ic_mic_black_24dp)
+            recordVoiceNotesIB.visibility = View.VISIBLE
+            playIB.visibility = View.INVISIBLE
+            stopIB.visibility = View.INVISIBLE
 
 
             recorded = false
@@ -230,16 +226,16 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
             playRecordStartSound()
 
-            recordVoiceNotesIB!!.setImageResource(R.drawable.animation_recording)
-            val frameAnimation = recordVoiceNotesIB!!.drawable as AnimationDrawable
+            recordVoiceNotesIB.setImageResource(R.drawable.animation_recording)
+            val frameAnimation = recordVoiceNotesIB.drawable as AnimationDrawable
             frameAnimation.start()
-            recordVoiceNotesIB!!.visibility = View.VISIBLE
+            recordVoiceNotesIB.visibility = View.VISIBLE
 
             recorder!!.start()
 
-            playIB!!.visibility = View.INVISIBLE
-            stopIB!!.setImageResource(R.drawable.ic_stop_black_24dp)
-            stopIB!!.visibility = View.VISIBLE
+            playIB.visibility = View.INVISIBLE
+            stopIB.setImageResource(R.drawable.ic_stop_black_24dp)
+            stopIB.visibility = View.VISIBLE
 
             recorded = true
         }
@@ -253,15 +249,15 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
             playRecordStopSound()
 
-            recordVoiceNotesIB!!.setImageResource(R.drawable.ic_delete_black_24dp)
-            recordVoiceNotesIB!!.visibility = View.VISIBLE
+            recordVoiceNotesIB.setImageResource(R.drawable.ic_delete_black_24dp)
+            recordVoiceNotesIB.visibility = View.VISIBLE
 
-            playIB!!.visibility = View.VISIBLE
-            playIB!!.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+            playIB.visibility = View.VISIBLE
+            playIB.setImageResource(R.drawable.ic_play_arrow_black_24dp)
 
-            stopIB!!.visibility = View.INVISIBLE
+            stopIB.visibility = View.INVISIBLE
 
-            mPresenter!!.updateVoiceNoteFilePath(saleVoiceNoteFilePath)
+            mPresenter.updateVoiceNoteFilePath(saleVoiceNoteFilePath)
         }
 
     }
@@ -276,23 +272,23 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         player!!.start()
     }
 
-    fun playRecordStopSound() {
+    private fun playRecordStopSound() {
         player = MediaPlayer.create(this, R.raw.videostop)
         player!!.start()
     }
 
-    override fun sendMessage(toast: String) {
+    override fun sendMessage(message: String) {
 
         runOnUiThread {
             Toast.makeText(
                     this,
-                    toast,
+                    message,
                     Toast.LENGTH_SHORT
             ).show()
         }
     }
 
-    fun initiateRecording() {
+    private fun initiateRecording() {
 
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -305,7 +301,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
     }
 
-    fun initiatePlayRecording() {
+    private fun initiatePlayRecording() {
         onPlay(mStartPlaying)
 
         mStartPlaying = !mStartPlaying
@@ -322,7 +318,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         inflater.inflate(R.menu.menu_save, menu)
 
 
-        showSaveButton(mPresenter!!.isShowSaveButton)
+        showSaveButton(mPresenter.isShowSaveButton)
         return true
     }
 
@@ -340,7 +336,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
             return true
 
         } else if (i == R.id.menu_save) {
-            mPresenter!!.handleClickSave()
+            mPresenter.handleClickSave()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -411,7 +407,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         //Call the Presenter
         mPresenter = SaleDetailPresenter(this,
                 bundleToMap(intent.extras), this)
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        mPresenter.onCreate(bundleToMap(savedInstanceState))
 
         discountET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -420,10 +416,10 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
             override fun afterTextChanged(s: Editable?) {
                 var discount: Long = 0
-                if (s != null && s.length > 0) {
+                if (s != null && s.isNotEmpty()) {
                     discount = java.lang.Long.valueOf(s.toString())
                 }
-                mPresenter!!.handleDiscountChanged(discount)
+                mPresenter.handleDiscountChanged(discount)
             }
         })
 
@@ -433,59 +429,50 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable) {
-                mPresenter!!.handleOrderNotesChanged(s.toString())
+                mPresenter.handleOrderNotesChanged(s.toString())
             }
         })
 
+        addItemCL.setOnClickListener { mPresenter.handleClickAddSaleItem() }
 
-        addItemCL.setOnClickListener { v -> mPresenter!!.handleClickAddSaleItem() }
+        addPaymentCL.setOnClickListener { mPresenter.handleClickAddPayment() }
 
-        addPaymentCL!!.setOnClickListener { v -> mPresenter!!.handleClickAddPayment() }
+        addDeliveriesCL.setOnClickListener{mPresenter.handleClickAddDelivery() }
 
-        addDeliveriesCL.setOnClickListener{mPresenter!!.handleClickAddDelivery() }
+        customerET.setOnTouchListener { _, motionEvent ->
 
-        customerET.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-
-                if(motionEvent.action == MotionEvent.ACTION_DOWN) {
-                    mPresenter!!.handleClickCustomer();
-                }
-                true
-
-        })
+            if(motionEvent.action == MotionEvent.ACTION_DOWN) {
+                mPresenter.handleClickCustomer()
+            }
+            true
+        }
 
         //Location spinner
         locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                mPresenter!!.handleLocationSelected(position)
+                mPresenter.handleLocationSelected(position)
             }
-
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
+        recordVoiceNotesIB.setOnClickListener { initiateRecording() }
 
-        recordVoiceNotesIB!!.setOnClickListener { v -> initiateRecording() }
-
-        playIB!!.setOnClickListener { v -> initiatePlayRecording() }
+        playIB.setOnClickListener { initiatePlayRecording() }
 
         // Record to the external cache directory for visibility
         saleVoiceNoteFilePath = externalCacheDir!!.absolutePath
         saleVoiceNoteFilePath += "/audiorecordtest.3gp"
 
-        stopIB!!.setOnClickListener { v -> stopRecording() }
+        stopIB.setOnClickListener { stopRecording() }
 
 
-        totalAfterDiscount!!.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+        totalAfterDiscount.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-
-            }
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable) {
-                mPresenter!!.updateBalanceDueFromTotal(java.lang.Float.valueOf(s.toString()))
-
+                mPresenter.updateBalanceDueFromTotal(java.lang.Float.valueOf(s.toString()))
             }
         })
     }
@@ -494,24 +481,24 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         customerET.setText(customerName)
     }
 
-    override fun onSelectCustomerListener(cUid: Long, customerName: String) {
-        customerUid = cUid
-        mPresenter!!.updateCustomerUid(customerUid)
+    override fun onSelectCustomerListener(customerUid: Long, customerName: String) {
+        this.customerUid = customerUid
+        mPresenter.updateCustomerUid(this.customerUid)
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, SaleItemListDetail>) {
-        val recyclerAdapter = SaleItemRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
+    override fun setListProvider(listProvider: DataSource.Factory<Int, SaleItemListDetail>) {
+        val recyclerAdapter = SaleItemRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
                 this)
 
         //saleItemDao.findAllSaleItemListDetailActiveBySaleProvider
 
         // get the provider, set , observe, etc.
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleItemDao)
+        val data = listProvider.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleItemDao)
 
         val customObserver = Observer{ o:PagedList<SaleItemListDetail>->
 
             recyclerAdapter.submitList(o)
-            mPresenter!!.getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
+            mPresenter.getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
         }
 
         //Observe the data:
@@ -525,16 +512,16 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
     }
 
 
-    override fun setPaymentProvider(factory: DataSource.Factory<Int, SalePayment>) {
-        val recyclerAdapter = SalePaymentRecyclerAdapter(DIFF_CALLBACK_PAYMENT, mPresenter!!, this,
+    override fun setPaymentProvider(paymentProvider: DataSource.Factory<Int, SalePayment>) {
+        val recyclerAdapter = SalePaymentRecyclerAdapter(DIFF_CALLBACK_PAYMENT, mPresenter, this,
                 this)
 
         // get the provider, set , observe, etc.
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).salePaymentDao)
+        val data = paymentProvider.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).salePaymentDao)
 
         val customObserver = Observer{ o:PagedList<SalePayment> ->
             recyclerAdapter.submitList(o)
-            mPresenter!!.getTotalPaymentsAndUpdateTotalView(saleUid)
+            mPresenter.getTotalPaymentsAndUpdateTotalView(saleUid)
         }
 
         //Observe the data:
@@ -549,7 +536,7 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
     }
 
     override fun setDeliveriesProvider(factory: DataSource.Factory<Int, SaleDelivery>) {
-        val recyclerAdapter = SaleDeliveryRecyclerAdapter(DIFF_CALLBACK_DELIVERY, mPresenter!!, this,
+        val recyclerAdapter = SaleDeliveryRecyclerAdapter(DIFF_CALLBACK_DELIVERY, mPresenter, this,
                 this)
 
         // get the provider, set , observe, etc.
@@ -578,109 +565,52 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         val adapter = ArrayAdapter(this,
                 R.layout.item_simple_spinner, locationPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        locationSpinner!!.adapter = adapter
-        locationSpinner!!.setSelection(selectedPosition)
+        locationSpinner.adapter = adapter
+        locationSpinner.setSelection(selectedPosition)
 
     }
 
-    override fun updateOrderTotal(orderTotalValue: Long) {
+    override fun updateOrderTotal(orderTotal: Long) {
         runOnUiThread {
-            orderTotal!!.text = orderTotalValue.toString()
-            updateOrderTotalAfterDiscountTotalChanged(orderTotalValue)
+            this.orderTotal.text = orderTotal.toString()
+            updateOrderTotalAfterDiscountTotalChanged(orderTotal)
         }
 
     }
 
-    override fun updateOrderTotalAfterDiscount(discountValue: Long) {
-        if (orderTotal!!.text !== "") {
-            val orderTotalValue = java.lang.Long.parseLong(orderTotal!!.text.toString())
-            val totalAfterDiscountVal = orderTotalValue - discountValue
-            totalAfterDiscount!!.text = totalAfterDiscountVal.toString()
+    override fun updateOrderTotalAfterDiscount(discount: Long) {
+        if (orderTotal.text !== "") {
+            val orderTotalValue = java.lang.Long.parseLong(orderTotal.text.toString())
+            val totalAfterDiscountVal = orderTotalValue - discount
+            totalAfterDiscount.text = totalAfterDiscountVal.toString()
         } else {
-            totalAfterDiscount!!.text = "0"
+            totalAfterDiscount.text = "0"
         }
     }
 
     override fun updateOrderTotalAfterDiscountTotalChanged(total: Long) {
         if (total > 0) {
-            orderTotal!!.text = total.toString()
+            orderTotal.text = total.toString()
         }
         var discount: Long = 0
-        if (discountET!!.text != null && discountET!!.text.toString() != "") {
-            discount = java.lang.Long.parseLong(discountET!!.text.toString())
+        if (discountET.text != null && discountET.text.toString() != "") {
+            discount = java.lang.Long.parseLong(discountET.text.toString())
         }
         updateOrderTotalAfterDiscount(discount)
 
     }
 
-    override fun onResume() {
-        super.onResume()
-
-    }
-
-    override fun onPostResume() {
-        super.onPostResume()
-    }
-
     override fun updateSaleOnView(sale: Sale) {
         runOnUiThread {
-            if (sale != null) {
-                saleUid = sale.saleUid
+            saleUid = sale.saleUid
 
-                orderNotesET!!.setText(sale.saleNotes)
-                var discountValue = "0"
-                if (sale.saleDiscount > 0) {
-                    discountValue = sale.saleDiscount.toString()
-                }
-                discountET!!.setText(discountValue)
-                if (sale.saleSignature != null && !sale.saleSignature!!.isEmpty()) {
-                    try {
-                        val saleSignature = sale.saleSignature
-                        val svg = SVG.getFromString(saleSignature)
-
-                        val signPic = svg.renderToPicture()
-
-                        val picW = signPic.getWidth()
-                        val picH = signPic.getHeight()
-                        var adjustedPic = signPic
-                        if (picH > picW) {
-                            adjustedPic = rotatePicture(0f, signPic)
-                        }
-                        val pd = PictureDrawable(adjustedPic)
-
-                        runOnUiThread {
-//                            signatureIB!!.invalidateDrawable(signatureIB!!.background)
-//                            signatureIB!!.background = pd
-                        }
-
-
-                    } catch (e: SVGParseException) {
-                        e.printStackTrace()
-                    }
-
-                }
-
-                if(sale.saleCustomerUid != 0L){
-
-                }
+            orderNotesET.setText(sale.saleNotes)
+            var discountValue = "0"
+            if (sale.saleDiscount > 0) {
+                discountValue = sale.saleDiscount.toString()
             }
+            discountET.setText(discountValue)
         }
-
-    }
-
-    fun rotatePicture(degrees: Float, picture: Picture): Picture {
-        val width = picture.width
-        val height = picture.height
-
-        val rotatedPicture = Picture()
-        val canvas = rotatedPicture.beginRecording(width, height)
-        canvas.save()
-        canvas.rotate(degrees, width.toFloat(), height.toFloat())
-        picture.draw(canvas)
-        canvas.restore()
-        rotatedPicture.endRecording()
-
-        return rotatedPicture
     }
 
     override fun updatePaymentTotal(paymentTotal: Long) {
@@ -703,29 +633,25 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
             toolbar!!.title = getText(R.string.record_sale)
         }
 
-        c1!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        c2!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        c3!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        c4!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        c5!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        c6!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        discountET!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        discountET!!.isEnabled = show
-        orderTotal!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        orderTotal!!.isEnabled = show
-        totalAfterDiscount!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        totalAfterDiscount!!.isEnabled = show
-        hlineCalc!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        c1.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        c2.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        c3.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        c4.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        c5.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        c6.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        discountET.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        discountET.isEnabled = show
+        orderTotal.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        orderTotal.isEnabled = show
+        totalAfterDiscount.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        totalAfterDiscount.isEnabled = show
+        hlineCalc.visibility = if (show) View.VISIBLE else View.INVISIBLE
 
-    }
-
-    override fun showDelivered(show: Boolean) {
-        //TODO: Remove or replace
     }
 
     override fun showNotes(show: Boolean) {
-        orderNotesET!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        recordVoiceNotesIB!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        orderNotesET.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        recordVoiceNotesIB.visibility = if (show) View.VISIBLE else View.INVISIBLE
 
     }
 
@@ -738,8 +664,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
     }
 
     override fun showPayments(show: Boolean) {
-        paymentTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        addPaymentCL!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        paymentTV.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        addPaymentCL.visibility = if (show) View.VISIBLE else View.INVISIBLE
         pRecyclerView!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         //private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
         balanceCurrencyTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
@@ -747,23 +673,21 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         balanceDueTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         paymentHLineBeforeRV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         anotherOneHLine!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-
         deliveriesTV.visibility = if(show) View.VISIBLE else View.INVISIBLE
         addDeliveriesCL.visibility = if(show) View.VISIBLE else View.INVISIBLE
         dRecyclerView.visibility = if(show) View.VISIBLE else View.INVISIBLE
-
     }
 
 
     override fun updateSaleVoiceNoteOnView(fileName: String) {
-        if (fileName != null && !fileName.isEmpty()) {
+        if (fileName.isNotEmpty()) {
             saleVoiceNoteFilePath = fileName
-            playIB!!.setImageResource(R.drawable.ic_play_arrow_black_24dp)
-            playIB!!.visibility = View.VISIBLE
-            stopIB!!.visibility = View.INVISIBLE
-            stopIB!!.setImageResource(R.drawable.ic_stop_black_24dp)
-            recordVoiceNotesIB!!.visibility = View.VISIBLE
-            recordVoiceNotesIB!!.setImageResource(R.drawable.ic_delete_black_24dp)
+            playIB.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+            playIB.visibility = View.VISIBLE
+            stopIB.visibility = View.INVISIBLE
+            stopIB.setImageResource(R.drawable.ic_stop_black_24dp)
+            recordVoiceNotesIB.visibility = View.VISIBLE
+            recordVoiceNotesIB.setImageResource(R.drawable.ic_delete_black_24dp)
             recorded = true
             fromFile = true
         }
@@ -771,18 +695,18 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
     override fun updateBalanceDue(balance: Long) {
         runOnUiThread { balanceTV!!.text = balance.toString() }
-
     }
 
     companion object {
-        private val RECORD_AUDIO_PERMISSION_REQUEST = 108
+        private const val RECORD_AUDIO_PERMISSION_REQUEST = 108
         var saleVoiceNoteFilePath: String? = null
 
 
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleItemListDetail> = object : DiffUtil.ItemCallback<SaleItemListDetail>() {
+        val DIFF_CALLBACK: ItemCallback<SaleItemListDetail> = object
+            : ItemCallback<SaleItemListDetail>() {
             override fun areItemsTheSame(oldItem: SaleItemListDetail,
                                          newItem: SaleItemListDetail): Boolean {
                 return oldItem == newItem
@@ -797,7 +721,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK_PAYMENT: ItemCallback<SalePayment> = object : DiffUtil.ItemCallback<SalePayment>() {
+        val DIFF_CALLBACK_PAYMENT: ItemCallback<SalePayment> = object
+            : DiffUtil.ItemCallback<SalePayment>() {
             override fun areItemsTheSame(oldItem: SalePayment,
                                          newItem: SalePayment): Boolean {
                 return oldItem == newItem
@@ -812,7 +737,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK_DELIVERY: ItemCallback<SaleDelivery> = object : DiffUtil.ItemCallback<SaleDelivery>() {
+        val DIFF_CALLBACK_DELIVERY: ItemCallback<SaleDelivery> = object
+            : DiffUtil.ItemCallback<SaleDelivery>() {
             override fun areItemsTheSame(oldItem: SaleDelivery,
                                          newItem: SaleDelivery): Boolean {
                 return oldItem.saleDeliveryUid == newItem.saleDeliveryUid
