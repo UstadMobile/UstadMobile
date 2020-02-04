@@ -97,7 +97,6 @@ class SaleDetailPresenter(context: Any,
             view.runOnUiThread(Runnable{
                 view.showCalculations(true)
                 view.showDeliveries(true)
-                view.showDelivered(true)
                 view.showNotes(true)
                 view.showPayments(true)
             })
@@ -105,7 +104,6 @@ class SaleDetailPresenter(context: Any,
         } else {
             view.runOnUiThread(Runnable{
                 view.showPayments(false)
-                view.showDelivered(false)
             })
             updatedSale = Sale()
             updatedSale!!.salePersonUid = loggedInPersonUid
@@ -216,10 +214,8 @@ class SaleDetailPresenter(context: Any,
             view.runOnUiThread(Runnable {
                 view.showSaveButton(true)
                 view.showNotes(true)
-                view.showDelivered(true)
                 view.showCalculations(true)
                 view.showPayments(true)
-                view.showDelivered(true)
             })
         }
     }
