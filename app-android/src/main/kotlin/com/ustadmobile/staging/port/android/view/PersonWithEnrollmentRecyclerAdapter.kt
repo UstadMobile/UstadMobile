@@ -258,7 +258,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             position: Int) {
 
         //Get person with enrollment and other info
-        val personWithEnrollment = getItem(position)!!
+        val personWithEnrollment = getItem(position) ?: return
 
         val studentNameTextView =
                 holder.itemView.findViewById<TextView>(

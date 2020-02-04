@@ -35,7 +35,7 @@ class PersonSelectedRecyclerAdapter internal constructor(
     }
 
     override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
-        val person = getItem(position)!!
+        val person = getItem(position) ?: return
 
         var fullName = ""
         var firstNames = ""

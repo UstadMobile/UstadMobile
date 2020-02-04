@@ -20,7 +20,7 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
     @Query("""
     SELECT 
         COUNT(*) as stockCount,  
-        GROUP_CONCAT(DISTINCT WE.firstNames||' '||WE.lastName) as weNames,  
+        CASE WHEN GROUP_CONCAT(DISTINCT WE.firstNames||' '||WE.lastName) THEN GROUP_CONCAT(DISTINCT WE.firstNames||' '||WE.lastName) ELSE '' END  as weNames,  
         LE.firstNames||' '||LE.lastName as leName,
         LE.personUid AS fromLeUid,
         Sale.saleUid, TOLE.personUid as toLeUid,
