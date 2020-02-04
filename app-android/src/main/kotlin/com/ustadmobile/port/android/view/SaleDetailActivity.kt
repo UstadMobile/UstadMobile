@@ -79,8 +79,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
     private var player: MediaPlayer? = null
 
-    internal var mStartRecording = true
-    internal var mStartPlaying = true
+    private var mStartRecording = true
+    private var mStartPlaying = true
 
     private var permissionToRecordAccepted = false
     private val permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
@@ -128,7 +128,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@SaleDetailActivity, permissions, RECORD_AUDIO_PERMISSION_REQUEST)
+            ActivityCompat.requestPermissions(this@SaleDetailActivity, permissions,
+                    RECORD_AUDIO_PERMISSION_REQUEST)
             return
         }
         startRecording()
@@ -138,7 +139,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
                                             grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            RECORD_AUDIO_PERMISSION_REQUEST -> permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+            RECORD_AUDIO_PERMISSION_REQUEST -> permissionToRecordAccepted =
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
         }
         if (!permissionToRecordAccepted){
             finish()
@@ -161,27 +163,27 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
 
         } else {
             stopPlaying()
-            stopIB!!.visibility = View.INVISIBLE
-            playIB!!.visibility = View.VISIBLE
+            stopIB.visibility = View.INVISIBLE
+            playIB.visibility = View.VISIBLE
         }
     }
 
-    fun playStopped() {
-        stopIB!!.visibility = View.INVISIBLE
-        playIB!!.visibility = View.VISIBLE
+    private fun playStopped() {
+        stopIB.visibility = View.INVISIBLE
+        playIB.visibility = View.VISIBLE
     }
 
     private fun startPlaying() {
         player = MediaPlayer()
-        player!!.setOnCompletionListener { mp -> playStopped() }
+        player!!.setOnCompletionListener { playStopped() }
         try {
 
             player!!.setDataSource(saleVoiceNoteFilePath)
             player!!.prepare()
             player!!.start()
 
-            stopIB!!.visibility = View.VISIBLE
-            playIB!!.visibility = View.INVISIBLE
+            stopIB.visibility = View.VISIBLE
+            playIB.visibility = View.INVISIBLE
 
 
         } catch (e: IOException) {

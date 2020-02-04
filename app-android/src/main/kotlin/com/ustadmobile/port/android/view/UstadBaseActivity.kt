@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
@@ -28,6 +29,7 @@ import androidx.lifecycle.LiveData
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.install.InstallState
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
@@ -160,9 +162,18 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         ).show()
     }
 
+    private open class FakeUpdate(context: Context) : FakeAppUpdateManager(context) {
+    }
 
     private fun checkForAppUpdate() {
         appUpdateManager = AppUpdateManagerFactory.create(this);
+
+//        var fakeAppUpdateManager: FakeAppUpdateManager = FakeAppUpdateManager(this)
+//        fakeAppUpdateManager.partiallyAllowedUpdateType = AppUpdateType.FLEXIBLE
+//        fakeAppUpdateManager.setUpdateAvailable(2)
+//        fakeAppUpdateManager.isImmediateFlowVisible
+//        appUpdateManager = fakeAppUpdateManager
+
         // Returns an intent object that you use to check for an update.
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
@@ -523,7 +534,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             }
         }
         if (requestCode == APP_UPDATE_REQUEST_CODE) {
-            if (resultCode != RESULT_OK) {
+            if (resultCode != RESULT_OK && resultCode != Activity.RESULT_CANCELED) {
                 Toast.makeText(this,
                         "App Update failed, please try again on the next app launch.",
                         Toast.LENGTH_SHORT)

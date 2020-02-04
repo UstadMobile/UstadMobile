@@ -265,7 +265,7 @@ abstract class  PersonDao : BaseDao<Person> {
             " END AS enrolled " +
             "  FROM Person " +
             " LEFT JOIN Role ON Role.roleUid = Person.personRoleUid " +
-            "WHERE CAST(Person.active AS INTEGER) = 1 ORDER BY Person.firstNames ASC")
+            " WHERE CAST(Person.active AS INTEGER) = 1 ORDER BY Person.firstNames ASC ")
     abstract fun findAllPeopleWithEnrollmentInGroup(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Insert

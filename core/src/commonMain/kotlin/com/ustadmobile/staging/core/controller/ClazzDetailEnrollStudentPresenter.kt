@@ -12,7 +12,6 @@ import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -45,19 +44,18 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
     private var teacherRole: Role? = null
 
     init {
-
         //Set current Clazz being enrolled.
         if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
+            currentClazzUid = arguments[ARG_CLAZZ_UID]!!.toLong()
         }
 
-        if (arguments!!.containsKey(ARG_NEW_PERSON_TYPE)) {
-            currentRole = arguments!!.get(ARG_NEW_PERSON_TYPE)!!.toInt()
+        if (arguments.containsKey(ARG_NEW_PERSON_TYPE)) {
+            currentRole = arguments[ARG_NEW_PERSON_TYPE]!!.toInt()
         }
 
         //Group uid usually used and given in editing Groups from GroupDetail screen.
-        if (arguments!!.containsKey(GROUP_UID)) {
-            groupUid = arguments!!.get(GROUP_UID)!!.toLong()
+        if (arguments.containsKey(GROUP_UID)) {
+            groupUid = arguments[GROUP_UID]!!.toLong()
         }
     }
 
@@ -123,7 +121,6 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
 
             handleEnrollChanged(pwe, true)
 
-
             val args = HashMap<String, String>()
             args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
             args.put(ARG_PERSON_UID, newPersonUid.toString())
@@ -131,10 +128,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             args.put(ARG_NEW_PERSON, "true")
             view.finish()
             impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
-
         }
-
-
     }
 
     /**
@@ -232,7 +226,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             }
 
             //Find existing Role Assignment
-            var personClazzTeacherAssignments: List<EntityRole>
+            val personClazzTeacherAssignments: List<EntityRole>
             var personClazzTeacherAssignment: EntityRole? = null
             if(teacherRole != null) {
                 personClazzTeacherAssignments =

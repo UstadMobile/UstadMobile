@@ -544,6 +544,7 @@ class SaleDetailPresenter(context: Any,
 
     fun handleDeleteVoiceNote() {
         this.voiceNoteFileName = ""
+        updateVoiceNoteFilePath("")
     }
 
     fun handleDeletePayment(salePaymentUid: Long) {

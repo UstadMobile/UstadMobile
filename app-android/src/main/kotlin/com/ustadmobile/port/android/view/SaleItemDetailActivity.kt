@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleItemDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.lib.db.entities.SaleItem
@@ -38,7 +37,7 @@ import java.util.*
 class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
 
     private lateinit var toolbar: Toolbar
-    private var mPresenter: SaleItemDetailPresenter? = null
+    private lateinit var mPresenter: SaleItemDetailPresenter
     private lateinit var menu: Menu
 
     private lateinit var totalTV: TextView
@@ -48,7 +47,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
     private lateinit var pppNPET: EditText
     private lateinit var quantityNPET: EditText
     private var quantityDefaultValue = 1
-    internal var pppDefaultValue = 0
+    private var pppDefaultValue = 0
     internal var minValue = 0
     internal var maxValue = 99990
 
@@ -59,8 +58,6 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
     private lateinit var reminderHline: View
     private lateinit var addReminderTV: TextView
     private lateinit var remindersRV: RecyclerView
-
-    private var preOrderSelected = false
 
     override fun showQuantityTextView(show: Boolean) {
 
@@ -110,7 +107,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
 
     private fun checkAndSave(){
 
-        mPresenter!!.handleClickSave()
+        mPresenter.handleClickSave()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,20 +118,21 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
 
         //Toolbar
         toolbar = findViewById(R.id.activity_sale_item_detail_toolbar)
-        toolbar!!.title = getText(R.string.sale_detail)
+        toolbar.title = getText(R.string.sale_detail)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         totalTV = findViewById(R.id.activity_sale_item_detail_total_amount)
         quantityNP = findViewById(R.id.activity_sale_item_detail_quantity_numberpicker)
         quantityTV = findViewById(R.id.activity_sale_item_detail_quantity_textview)
-        quantityNPET = quantityNP!!.findViewById(Resources.getSystem().getIdentifier("numberpicker_input", "id", "android"))
-        quantityNPET!!.isFocusable = false
+        quantityNPET = quantityNP.findViewById(Resources.getSystem().getIdentifier(
+                "numberpicker_input", "id", "android"))
+        quantityNPET.isFocusable = false
 
         pppNP = findViewById(R.id.activity_sale_payment_detail_amount_np)
-        pppNPET = pppNP!!.findViewById(Resources.getSystem().getIdentifier("numberpicker_input",
+        pppNPET = pppNP.findViewById(Resources.getSystem().getIdentifier("numberpicker_input",
                 "id", "android"))
-        pppNPET!!.isFocusable = true
+        pppNPET.isFocusable = true
 
         preOrderHline = findViewById(R.id.activity_sale_item_detail_preorder_hline)
         orderDueDateTV = findViewById(R.id.activity_sale_item_detail_preorder_due_date_tv)
@@ -156,27 +154,27 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
             myCalendar.set(Calendar.YEAR, year)
 
             val dateString = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(myCalendar.timeInMillis)
-            mPresenter!!.handleChangeOrderDueDate(myCalendar.timeInMillis)
-            orderDueDateET!!.setText(dateString)
+            mPresenter.handleChangeOrderDueDate(myCalendar.timeInMillis)
+            orderDueDateET.setText(dateString)
         }
 
         //Default view: not focusable.
-        orderDueDateET!!.isFocusable = false
+        orderDueDateET.isFocusable = false
 
         //From time on click -> opens a timer picker.
-        orderDueDateET!!.setOnClickListener { v ->
+        orderDueDateET.setOnClickListener { v ->
             DatePickerDialog(this, dateListener,
                     myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                     myCalendar.get(Calendar.DAY_OF_MONTH)).show()
         }
 
-        quantityNP!!.minValue = 1
-        quantityNP!!.value = quantityDefaultValue
-        quantityNP!!.maxValue = 99999
+        quantityNP.minValue = 1
+        quantityNP.value = quantityDefaultValue
+        quantityNP.maxValue = 99999
 
-        pppNP!!.minValue = minValue
-        pppNP!!.maxValue = maxValue
-        pppNP!!.value = pppDefaultValue
+        pppNP.minValue = minValue
+        pppNP.maxValue = maxValue
+        pppNP.value = pppDefaultValue
 
         //Inventory total amount click listenere
         quantityTV.setOnClickListener{
@@ -187,86 +185,87 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         //Presenter
         mPresenter = SaleItemDetailPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        quantityNP!!.setOnValueChangedListener { picker, oldVal, newVal ->
-            val ppp = pppNP!!.value
-            mPresenter!!.handleChangeQuantity(newVal)
-            mPresenter!!.updateTotal(newVal, ppp.toLong())
+        quantityNP.setOnValueChangedListener { _, _, newVal ->
+            val ppp = pppNP.value
+            mPresenter.handleChangeQuantity(newVal)
+            mPresenter.updateTotal(newVal, ppp.toLong())
         }
 
-        pppNP!!.setOnValueChangedListener { picker, oldVal, newVal ->
-            val q = quantityNP!!.value
-            mPresenter!!.handleChangePPP(newVal.toLong())
-            mPresenter!!.updateTotal(q, newVal.toLong())
+        pppNP.setOnValueChangedListener { _, _, newVal ->
+            val q = quantityNP.value
+            mPresenter.handleChangePPP(newVal.toLong())
+            mPresenter.updateTotal(q, newVal.toLong())
         }
 
-        pppNPET!!.addTextChangedListener(object : TextWatcher {
+        pppNPET.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable) {
-                val newVal = Integer.valueOf(s.toString())
-                val q = quantityNP!!.value
-                mPresenter!!.handleChangePPP(newVal.toLong())
-                mPresenter!!.updateTotal(q, newVal.toLong())
+                var newVal = 0
+                val q = quantityNP.value
+                if(s.toString().isNotEmpty()) {
+                    newVal = Integer.valueOf(s.toString())
+                }
+                mPresenter.handleChangePPP(newVal.toLong())
+                mPresenter.updateTotal(q, newVal.toLong())
             }
         })
 
-        addReminderTV.setOnClickListener { v -> mPresenter!!.handleClickAddReminder() }
+        addReminderTV.setOnClickListener { mPresenter.handleClickAddReminder() }
     }
 
-    fun togglePreOrderView(isChecked : Boolean){
-        mPresenter!!.setPreOrder(isChecked)
+    private fun togglePreOrderView(isChecked : Boolean){
+        mPresenter.setPreOrder(isChecked)
         showPreOrder(isChecked)
     }
 
     override fun updateSaleItemOnView(saleItem: SaleItem) {
         runOnUiThread {
-            if (saleItem != null) {
-                val q = saleItem.saleItemQuantity
-                val ppp = saleItem.saleItemPricePerPiece
-                val total = (q * ppp).toLong()
+            val q = saleItem.saleItemQuantity
+            val ppp = saleItem.saleItemPricePerPiece
+            val total = (q * ppp).toLong()
 
-                if (q != 0) {
-                    quantityNP.value = q
-                    quantityTV.text = q.toString()
-                }
-                if (ppp > 0) {
-                    pppNP.value = ppp.toInt()
-                }
-                totalTV.text = total.toString()
-
-
-                togglePreOrderView(saleItem.saleItemPreorder)
+            if (q != 0) {
+                quantityNP.value = q
+                quantityTV.text = q.toString()
+            }
+            if (ppp > 0) {
+                pppNP.value = ppp.toInt()
+            }
+            totalTV.text = total.toString()
 
 
-                val dueDate = saleItem.saleItemDueDate
-                if (dueDate > 0) {
-                    orderDueDateET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                            dueDate, null))
-                }
+            this.togglePreOrderView(saleItem.saleItemPreorder)
+
+
+            val dueDate = saleItem.saleItemDueDate
+            if (dueDate > 0) {
+                orderDueDateET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                        dueDate, null))
             }
         }
     }
 
-    override fun updateProductTitleOnView(productName: String) {
+    override fun updateProductTitleOnView(productTitle: String) {
         runOnUiThread {
-            if (productName != null && productName !== "") {
-                toolbar.title = productName
+            if (productTitle !== "") {
+                toolbar.title = productTitle
             }
         }
     }
 
-    override fun setReminderProvider(factory: DataSource.Factory<Int, SaleItemReminder>) {
+    override fun setReminderProvider(paymentProvider: DataSource.Factory<Int, SaleItemReminder>) {
         val recyclerAdapter =
-                SaleItemReminderRecyclerAdapter(DIFF_CALLBACK_REMINDER, mPresenter!!,
+                SaleItemReminderRecyclerAdapter(DIFF_CALLBACK_REMINDER, mPresenter,
                         this, applicationContext)
 
         // get the provider, set , observe, etc.
         val data =
-                LivePagedListBuilder(factory, 20).build()
+                LivePagedListBuilder(paymentProvider, 20).build()
 
         //Observe the data:
         val thisP = this
@@ -328,7 +327,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
             }
         }
 
-        val REMINER_REQUEST_CODE = 530
+        const val REMINER_REQUEST_CODE = 530
 
         fun getNextMidnightReminder(days: Int, saleDueDate: Long): Long {
             val cal = Calendar.getInstance()
