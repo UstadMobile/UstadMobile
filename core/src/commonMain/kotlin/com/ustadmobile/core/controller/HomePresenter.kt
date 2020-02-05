@@ -146,7 +146,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     companion object {
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
-        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651542427L
 
         /**
          * This view name will generate a tabbed set of ContentEntryList views. See
