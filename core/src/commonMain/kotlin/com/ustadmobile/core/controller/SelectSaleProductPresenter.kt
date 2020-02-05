@@ -47,9 +47,9 @@ class SelectSaleProductPresenter(context: Any,
                                  private var inventoryMode:Boolean = false)
     : UstadBaseController<SelectSaleProductView>(context, arguments!!, view) {
 
-    private var recentProvider: DataSource.Factory<Int, SaleProduct>? = null
-    private var categoryProvider: DataSource.Factory<Int, SaleProduct>? = null
-    private var collectionProvider: DataSource.Factory<Int, SaleProduct>? = null
+    private lateinit var recentProvider: DataSource.Factory<Int, SaleProduct>
+    private lateinit var categoryProvider: DataSource.Factory<Int, SaleProduct>
+    private lateinit var collectionProvider: DataSource.Factory<Int, SaleProduct>
 
     internal var repository: UmAppDatabase
     internal var database: UmAppDatabase
@@ -138,20 +138,22 @@ class SelectSaleProductPresenter(context: Any,
     private fun updateRecentProvider() {
 
         recentProvider = saleProductDao.findActiveProductsProvider(loggedInPersonUid, searchQuery)
-        view.setRecentProvider(recentProvider!!)
+        view.setRecentProvider(recentProvider)
 
     }
 
     private fun updateCategoryProvider() {
 
-        categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid, searchQuery,0)
-        view.setCategoryProvider(categoryProvider!!)
+        categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid,
+                searchQuery,0)
+        view.setCategoryProvider(categoryProvider)
 
     }
 
     private fun updateCollectionProvider() {
-        collectionProvider = productParentJoinDao.findAllCategoriesInCollection(loggedInPersonUid, searchQuery)
-        view.setCollectionProvider(collectionProvider!!)
+        collectionProvider = productParentJoinDao.findAllCategoriesInCollection(loggedInPersonUid,
+                searchQuery)
+        view.setCollectionProvider(collectionProvider)
     }
 
     fun handleClickProduct(productUid: Long, isCategory: Boolean){

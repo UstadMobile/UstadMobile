@@ -86,7 +86,7 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
         val mRecyclerLayoutManager = GridLayoutManager(context, spanCount)
         //        RecyclerView.LayoutManager mRecyclerLayoutManager
         //                = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        entriesRV!!.setLayoutManager(mRecyclerLayoutManager)
+        entriesRV.setLayoutManager(mRecyclerLayoutManager)
 
         tags = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_tags_cg)
         //tagAll = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_chip_all);
@@ -165,7 +165,7 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
     override fun setDashboardEntryProvider(factory: DataSource.Factory<Int, DashboardEntry>) {
 
         recyclerAdapter = DashboardEntryListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                context!!)
+                activity!!.applicationContext)
 
         // get the provider, set , observe, etc.
 
@@ -182,7 +182,7 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
 
         runOnUiThread(Runnable {
             //set the adapter
-            entriesRV!!.setAdapter(recyclerAdapter)
+            entriesRV.setAdapter(recyclerAdapter)
         })
 
     }
@@ -195,8 +195,8 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
     override fun loadChips(chipNames: Array<String>) {
         for (chipName in chipNames) {
             val tag = Chip(Objects.requireNonNull(context))
-            tag.setText(chipName)
-            tags!!.addView(tag)
+            tag.text = chipName
+            tags.addView(tag)
         }
     }
 
@@ -209,10 +209,10 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
                 .setTitle("")
                 .setMessage(getText(R.string.set_title))
                 .setView(edittext)
-                .setPositiveButton(R.string.ok, { dialog, which ->
+                .setPositiveButton(R.string.ok) { dialog, which ->
                     mPresenter!!.handleSetTitle(entryUid, edittext.text.toString())
                     dialog.dismiss()
-                })
+                }
 
                 .setNegativeButton(R.string.cancel, { dialog, which -> dialog.dismiss() })
 

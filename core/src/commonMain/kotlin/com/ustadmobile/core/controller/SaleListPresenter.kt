@@ -37,8 +37,14 @@ class SaleListPresenter(context: Any,
     : CommonHandlerPresenter<SaleListView>(context, arguments!!, view) {
 
     private var umProvider: DataSource.Factory<Int, SaleListDetail>? = null
-    private val saleDao: SaleDao
-    private val salePaymentDao: SalePaymentDao
+
+    private var saleDao: SaleDao = repository.saleDao
+    private var salePaymentDao: SalePaymentDao = repository.salePaymentDao
+
+    //Using database until Postgres queries support for database
+    private val database = UmAccountManager.getActiveDatabase(context)
+    private val saleDaoDB = database.saleDao
+    private val salePaymentDaoDB = database.salePaymentDao
 
     private var idToOrderInteger: MutableMap<Long, Int>? = null
 
@@ -52,14 +58,12 @@ class SaleListPresenter(context: Any,
 
     init {
 
-
-
         //Get provider Dao
-        saleDao = repository.saleDao
-        salePaymentDao = repository.salePaymentDao
-
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
+        //TODO: REMOVE WHEN Postgres queries run OK on Daos
+        saleDao = saleDaoDB
+        salePaymentDao = salePaymentDaoDB
     }
 
     //Can be used to put "static" methods in for kotlin
@@ -81,7 +85,7 @@ class SaleListPresenter(context: Any,
     }
 
     fun handleChangeSortOrder(order: Long) {
-        var orderI = order + 1
+        val orderI = order + 1
 
         if (idToOrderInteger!!.containsKey(orderI)) {
             currentSortOrder = idToOrderInteger!![orderI]!!
@@ -97,20 +101,20 @@ class SaleListPresenter(context: Any,
     private fun updateSortSpinnerPreset() {
         val presetAL = ArrayList<String>()
 
-        idToOrderInteger = HashMap<Long, Int>()
+        idToOrderInteger = HashMap()
 
         presetAL.add(impl.getString(MessageID.sort_by_name_asc, context))
-        idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_NAME_ASC)
+        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_NAME_ASC
         presetAL.add(impl.getString(MessageID.sort_by_name_desc, context))
-        idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_NAME_DESC)
+        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_NAME_DESC
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_asc, context))
-        idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_AMOUNT_ASC)
+        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_AMOUNT_ASC
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_desc, context))
-        idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_AMOUNT_DESC)
+        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_AMOUNT_DESC
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_date_desc, context))
-        idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_DATE_CREATED_DESC)
+        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_DATE_CREATED_DESC
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_date_asc, context))
-        idToOrderInteger!!.put(presetAL.size.toLong(), SORT_ORDER_DATE_CREATED_ASC)
+        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_DATE_CREATED_ASC
 
         val sortPresets = arrayListToStringArray(presetAL)
 
@@ -120,13 +124,13 @@ class SaleListPresenter(context: Any,
 
     private fun getAndSetProvider(sortCode: Int) {
 
-        if(personUid != 0L){
-            umProvider = saleDao.filterAndSortSaleByWeUid(loggedInPersonUid!!, sortCode, personUid)
+        umProvider = if(personUid != 0L){
+            saleDao.filterAndSortSaleByWeUid(loggedInPersonUid!!, sortCode, personUid)
         }else {
-            umProvider = saleDao.filterAndSortSaleByLeUid(loggedInPersonUid!!, filterSelected,
+            saleDao.filterAndSortSaleByLeUid(loggedInPersonUid!!, filterSelected,
                     sortCode, impl.getLocale(context))
         }
-        view.setListProvider(umProvider!!, false, false)
+        view.setListProvider(umProvider!!, false, preOrderTab = false)
 
     }
 
@@ -135,7 +139,7 @@ class SaleListPresenter(context: Any,
 
         //Get provider
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, false, false)
+        view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = false)
 
         idToOrderInteger = HashMap()
         updateSortSpinnerPreset()
@@ -143,12 +147,12 @@ class SaleListPresenter(context: Any,
         observePreOrderAndPaymentCounters()
 
         if(arguments.containsKey(PersonWithSaleInfoDetailView.ARG_WE_UID)){
-            personUid = arguments.get(PersonWithSaleInfoDetailView.ARG_WE_UID).toString().toLong()
+            personUid = arguments[PersonWithSaleInfoDetailView.ARG_WE_UID].toString().toLong()
         }
 
     }
 
-    fun observePreOrderAndPaymentCounters() {
+    private fun observePreOrderAndPaymentCounters() {
         val preOrderLiveData = saleDao.getPreOrderSaleCountLive(loggedInPersonUid!!)
         val paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive(loggedInPersonUid!!)
 
@@ -157,13 +161,13 @@ class SaleListPresenter(context: Any,
 
     }
 
-    fun handlePreOrderCountUpdate(count: Int?) {
+    private fun handlePreOrderCountUpdate(count: Int?) {
         if (count != null) {
             view.updatePreOrderCounter(count)
         }
     }
 
-    fun handlePaymentDueCountUpdate(count: Int?) {
+    private fun handlePaymentDueCountUpdate(count: Int?) {
         if (count != null) {
             view.updatePaymentDueCounter(count)
         }
@@ -172,28 +176,28 @@ class SaleListPresenter(context: Any,
     fun filterAll() {
         filterSelected = ALL_SELECTED
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, false, false)
+        view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = false)
 
     }
 
     fun filterPreOrder() {
         filterSelected = PREORDER_SELECTED
         umProvider = saleDao.findAllActiveSaleListDetailPreOrdersProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, false, true)
+        view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = true)
 
     }
 
     fun filterPaymentDue() {
         filterSelected = PAYMENT_SELECTED
         umProvider = saleDao.findAllActiveSaleListDetailPaymentDueProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, true, false)
+        view.setListProvider(umProvider!!, paymentsDueTab = true, preOrderTab = false)
     }
 
-    internal fun handleClickSale(saleUid: Long, saleName: String?) {
+    private fun handleClickSale(saleUid: Long, saleName: String?) {
         val args = HashMap<String, String>()
-        args.put(ARG_SALE_UID, saleUid.toString())
-        if (saleName != null && !saleName.isEmpty())
-            args.put(ARG_SALE_GEN_NAME, saleName)
+        args[ARG_SALE_UID] = saleUid.toString()
+        if (saleName != null && saleName.isNotEmpty())
+            args[ARG_SALE_GEN_NAME] = saleName
         impl.go(SaleDetailView.VIEW_NAME, args, context)
 
     }

@@ -42,7 +42,6 @@ import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.util.*
 
 
@@ -71,7 +70,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     //A reference to current fragment so we can search for search
     //private var currentFragment : UstadBaseFragment ?= null
     private var currentFragmentPosition : Int = 0
-    private var fragmentPosMap: MutableMap<Int, UstadBaseFragment> = WeakHashMap()
+    private var fragmentPosMap: WeakHashMap<Int, UstadBaseFragment> = WeakHashMap()
 
     private inner class HomePagerAdapter(fm: FragmentManager, val options: List<Pair<Int, String>>)
         : FragmentStatePagerAdapter(fm) {
@@ -282,8 +281,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     private fun updateElevation(optionUri: String) {
         val viewName = optionUri.substringBefore('?')
-        findViewById<AppBarLayout>(R.id.appBar).elevation =
-                if(viewName == ContentEntryListView.VIEW_NAME) {
+        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
             10f
@@ -414,19 +412,20 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     companion object {
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
-                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
                 ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java,
                 FeedListView.VIEW_NAME to FeedListFragment::class.java,
                 ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
-                ContentEntryListView.VIEW_NAME to ContentListFragment::class.java,
                 ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
                 PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
                 BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java,
+
                 SelectSaleProductView.VIEW_NAME to CatalogListFragment::class.java,
                 ComingSoonView.VIEW_NAME to ComingSoonFragment::class.java,
                 SaleListView.VIEW_NAME to SaleListFragment::class.java,
                 InventoryListView.VIEW_NAME to InventoryListFragment::class.java,
-                DashboardEntryListView.VIEW_NAME to DashboardEntryListFragment::class.java)
+                DashboardEntryListView.VIEW_NAME to DashboardEntryListFragment::class.java,
+
+                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java)
 
         /**
          * In case we have addition bottom nav items, add icons here and map to their labels

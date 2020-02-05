@@ -21,7 +21,6 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.staging.core.view.SearchableListener
 
@@ -30,44 +29,40 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     override val viewContext: Any
         get() = context!!
 
-    internal var rootContainer: View ?= null
-    private var mPresenter: SelectSaleProductPresenter? = null
-    private var recentRV: RecyclerView? = null
-    private var categoryRV: RecyclerView? = null
-    private var collectionRV: RecyclerView? = null
-    private var floatingActionMenu: FloatingActionMenu? = null
-    private var recentMore: TextView? = null
-    private var categoryMore: TextView? = null
-    private var collectionMore: TextView? = null
-
-    override fun onCreate(@Nullable savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    internal lateinit var rootContainer: View
+    private lateinit var mPresenter: SelectSaleProductPresenter
+    private lateinit var recentRV: RecyclerView
+    private lateinit var categoryRV: RecyclerView
+    private lateinit var collectionRV: RecyclerView
+    private lateinit var floatingActionMenu: FloatingActionMenu
+    private lateinit var recentMore: TextView
+    private lateinit var categoryMore: TextView
+    private lateinit var collectionMore: TextView
 
     override fun updateToolbar(title: String) {
         //TODO
     }
 
-    override fun onSearchButtonClick() {     }
+    override fun onSearchButtonClick() {}
 
     override fun onSearchQueryUpdated(query: String) {
         searchCatalog(query)
     }
 
     override fun onBackPressed(): Boolean {
-        if(floatingActionMenu!!.isOpened()){
-            floatingActionMenu!!.close(true)
-            return false
+        return if(floatingActionMenu.isOpened){
+            floatingActionMenu.close(true)
+            false
         }else{
-            return true
+            true
         }
     }
 
     override fun showAddButton(show: Boolean) {
         if(show) {
-            floatingActionMenu!!.visibility = View.VISIBLE
+            floatingActionMenu.visibility = View.VISIBLE
         }else{
-            floatingActionMenu!!.visibility = View.GONE
+            floatingActionMenu.visibility = View.GONE
         }
     }
 
@@ -81,50 +76,50 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
         //Set recycler views
         //RecyclerView - Recent
-        recentRV = rootContainer!!.findViewById(R.id.activity_select_sale_product_recent_rv)
+        recentRV = rootContainer.findViewById(R.id.activity_select_sale_product_recent_rv)
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        recentRV!!.setLayoutManager(layoutManager)
+        recentRV.layoutManager = layoutManager
 
         //RecyclerView - Category
-        categoryRV = rootContainer!!.findViewById(R.id.activity_select_sale_product_category_rv)
+        categoryRV = rootContainer.findViewById(R.id.activity_select_sale_product_category_rv)
         val layoutManager2 = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        categoryRV!!.setLayoutManager(layoutManager2)
+        categoryRV.layoutManager = layoutManager2
 
         //Recyclerview - Collection
-        collectionRV = rootContainer!!.findViewById(R.id.activity_select_sale_product_collection_rv)
+        collectionRV = rootContainer.findViewById(R.id.activity_select_sale_product_collection_rv)
         val layoutManager3 = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        collectionRV!!.setLayoutManager(layoutManager3)
+        collectionRV.layoutManager = layoutManager3
 
         //Set other views
-        recentMore = rootContainer!!.findViewById(R.id.activity_select_sale_product_recent_more)
-        categoryMore = rootContainer!!.findViewById(R.id.activity_select_sale_product_category_more)
-        collectionMore = rootContainer!!.findViewById(R.id.activity_select_sale_product_collections_more)
+        recentMore = rootContainer.findViewById(R.id.activity_select_sale_product_recent_more)
+        categoryMore = rootContainer.findViewById(R.id.activity_select_sale_product_category_more)
+        collectionMore = rootContainer.findViewById(R.id.activity_select_sale_product_collections_more)
 
-        floatingActionMenu = rootContainer!!.findViewById(R.id.activity_select_sale_product_fab_menu)
+        floatingActionMenu = rootContainer.findViewById(R.id.activity_select_sale_product_fab_menu)
 
         //Call the Presenter
         mPresenter = SelectSaleProductPresenter(context!!,
                 bundleToMap(arguments), this, true)
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        mPresenter.onCreate(bundleToMap(savedInstanceState))
 
         //Set listeners
-        rootContainer!!.findViewById<View>(R.id.activity_select_sale_product_fab_subcategory)
-                .setOnClickListener { v ->
-                    floatingActionMenu!!.close(true)
-                    mPresenter!!.handleClickAddSubCategory()
+        rootContainer.findViewById<View>(R.id.activity_select_sale_product_fab_subcategory)
+                .setOnClickListener {
+                    floatingActionMenu.close(true)
+                    mPresenter.handleClickAddSubCategory()
                 }
 
-        rootContainer!!.findViewById<View>(R.id.activity_select_sale_product_fab_item)
-                .setOnClickListener { v ->
-                    floatingActionMenu!!.close(true)
-                    mPresenter!!.handleClickAddItem()
+        rootContainer.findViewById<View>(R.id.activity_select_sale_product_fab_item)
+                .setOnClickListener {
+                    floatingActionMenu.close(true)
+                    mPresenter.handleClickAddItem()
                 }
 
-        recentMore!!.setOnClickListener { v -> mPresenter!!.handleClickRecentMore() }
+        recentMore.setOnClickListener { mPresenter.handleClickRecentMore() }
 
-        categoryMore!!.setOnClickListener { v -> mPresenter!!.handleClickCategoryMore() }
+        categoryMore.setOnClickListener { mPresenter.handleClickCategoryMore() }
 
-        collectionMore!!.setOnClickListener { v -> mPresenter!!.handleClickCollectionMore() }
+        collectionMore.setOnClickListener { mPresenter.handleClickCollectionMore() }
 
         return rootContainer
     }
@@ -135,74 +130,79 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         super.onViewCreated(view, savedInstanceState)
 
         //Hide the appbar
-        rootContainer!!.findViewById<View>(
+        rootContainer.findViewById<View>(
                 R.id.activity_select_sale_product_appbar).visibility = View.GONE
     }
 
     override fun finish() { }
 
-    override fun setRecentProvider(factory: DataSource.Factory<Int, SaleProduct>) {
+    override fun setRecentProvider(recentProvider: DataSource.Factory<Int, SaleProduct>) {
 
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
-                mPresenter!!,
-                this,false, true,
-                context!!)
+                mPresenter,
+                this, isCategory = false, catalog = true,
+                context = activity!!.applicationContext)
 
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
+        val data = recentProvider.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
 
         //Observe the data:
         data.observe(this,
                 Observer<PagedList<SaleProduct>>
-                { recyclerAdapter!!.submitList(it) }
+                { recyclerAdapter.submitList(it) }
                 )
 
         //set the adapter
-        recentRV!!.setAdapter(recyclerAdapter)
+        recentRV.setAdapter(recyclerAdapter)
     }
 
-    override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleProduct>) {
-
+    override fun setCategoryProvider(categoryProvider: DataSource.Factory<Int, SaleProduct>) {
+        
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
-                mPresenter!!,
-                this, true, true,
-                context!!)
+                mPresenter,
+                this, isCategory = true, catalog = true,
+                context = activity!!.applicationContext)
 
         // get the provider, set , observe, etc.
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
+        val data = categoryProvider.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
 
         //Observe the data:
         data.observe(this, Observer<PagedList<SaleProduct>>
-        { recyclerAdapter!!.submitList(it) })
+        { recyclerAdapter.submitList(it) })
 
         //set the adapter
-        categoryRV!!.setAdapter(recyclerAdapter)
+        categoryRV.setAdapter(recyclerAdapter)
     }
 
     fun searchCatalog(searchValue: String) {
-        if(mPresenter != null) {
-            mPresenter!!.setQuerySearch(searchValue)
-            mPresenter!!.updateProviders()
-        }
+        mPresenter.setQuerySearch(searchValue)
+        mPresenter.updateProviders()
     }
 
 
-    override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleProduct>) {
-        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
-                mPresenter!!,
-                this,true, true,
-                context!!)
+    override fun setCollectionProvider(collectionProvider: DataSource.Factory<Int, SaleProduct>) {
 
+        if(context == null){
+            print("here")
+        }
+        
+        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
+                mPresenter,
+                this,true, true,
+                context = activity!!.applicationContext)
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductParentJoinDao)
+        val data = collectionProvider.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductParentJoinDao)
 
         //Observe the data:
         data.observe(this, Observer<PagedList<SaleProduct>>
-        { recyclerAdapter!!.submitList(it) })
+        { recyclerAdapter.submitList(it) })
 
         //set the adapter
-        collectionRV!!.setAdapter(recyclerAdapter)
+        collectionRV.adapter = recyclerAdapter
     }
 
     override fun showMessage(messageId: Int) {
@@ -222,10 +222,6 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         arguments = args
         icon = R.drawable.ic_list_black_24dp
         title = R.string.catalog
-    }
-
-    constructor(args:Bundle) : this() {
-        arguments = args
     }
 
     companion object {
