@@ -97,7 +97,7 @@
         android:layout_gravity="bottom|center"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="60dp"
         app:floating_background_color="@color/fab"
         app:floating_left_icon="@drawable/ic_add_black_24dp"
         app:floating_title=""
