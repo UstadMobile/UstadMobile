@@ -47,9 +47,9 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     val repoHelperId = ID_ATOMICINT.getAndIncrement()
 
-    val statusLiveData = DoorMutableLiveData<RepoLoadStatus>()
+    val statusLiveData = DoorMutableLiveData<RepoLoadStatus>(RepoLoadStatus(STATUS_NOT_STARTED))
 
-    class RepoLoadStatus(var loadStatus: Int = 0, var remoteNode: String? = null)
+    data class RepoLoadStatus(var loadStatus: Int = 0, var remoteNode: String? = null)
 
     /**
      * This wrapper class is loosely modeled on the MediatorLiveData. The difference is that there
@@ -314,6 +314,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         private const val PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE = "LoadHelper-NOCONNECTION"
 
         val ID_ATOMICINT = atomic(0)
+
+        const val STATUS_NOT_STARTED = 0
 
         const val STATUS_LOADING_CLOUD = 1
 
