@@ -278,8 +278,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     private fun updateElevation(optionUri: String) {
         val viewName = optionUri.substringBefore('?')
-        findViewById<AppBarLayout>(R.id.appBar).elevation =
-                if(viewName == ContentEntryListView.VIEW_NAME) {
+        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
             10f
@@ -416,7 +415,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 ContentEntryListView.VIEW_NAME to ContentListFragment::class.java,
                 ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
                 PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
-                BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java)
+                BaseReportView.VIEW_NAME to ReportSelectionFragment::class.java,
+                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java)
 
         /**
          * In case we have addition bottom nav items, add icons here and map to their labels

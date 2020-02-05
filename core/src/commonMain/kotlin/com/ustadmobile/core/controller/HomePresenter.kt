@@ -51,7 +51,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
-            val contentEntryListArgs = mutableMapOf(
+            val contentEntryListTabsArgs = mutableMapOf(
                     "0" to "${MessageID.libraries};$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
                             "&$ARG_LIBRARIES_CONTENT",
                     "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT")
@@ -62,9 +62,9 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
             if(t != null) {
                 account = t
                 val person = personDao.findByUid(t.personUid)
-                if (person != null) {
-                    if (person.admin) {
-                        contentEntryListArgs["2"] = "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
+                if(person != null){
+                    if(person.admin){
+                        contentEntryListTabsArgs["2"] =  "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
                         options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
                     }
 
@@ -94,10 +94,11 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
             }
 
             homeView.runOnUiThread(Runnable {
-                homeView.loadProfileIcon(profilePicturePath)
-//                options.add(0, Pair(MessageID.contents,
-//                        ContentEntryListView.VIEW_NAME + "?" +
-//                                UMFileUtil.mapToQueryString(contentEntryListArgs)))
+
+                homeView.loadProfileIcon(if(account == null) "" else "")
+                options.add(0, Pair(MessageID.contents,
+                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
+                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
                 homeView.setOptions(options)
             })
 
@@ -152,5 +153,12 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
     companion object {
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+
+        /**
+         * This view name will generate a tabbed set of ContentEntryList views. See
+         * HomeContentEntryTabsFragment for information about arguments
+         */
+        const val HOME_CONTENTENTRYLIST_TABS_VIEWNAME = "ContentEntryListTabs"
+
     }
 }
