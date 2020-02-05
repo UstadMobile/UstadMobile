@@ -53,8 +53,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         GlobalScope.launch {
             val contentEntryListArgs = mutableMapOf(
                     "0" to "${MessageID.libraries};$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
-                            "&$ARG_LIBRARIES_CONTENT",
-                    "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT")
+                            "&$ARG_LIBRARIES_CONTENT"
+//                    ,
+//                    "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT"
+                    )
 
             val options = mutableListOf<Pair<Int, String>>()
 
@@ -64,7 +66,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 val person = personDao.findByUid(t.personUid)
                 if (person != null) {
                     if (person.admin) {
-                        contentEntryListArgs["2"] = "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
+                        //contentEntryListArgs["2"] = "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
                         options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
                     }
 
@@ -76,9 +78,12 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                             InventoryListView.VIEW_NAME))
                     options.add(2, Pair(MessageID.sales,
                             SaleListView.VIEW_NAME))
-                    options.add(3, Pair(MessageID.content,
-                            ComingSoonView.VIEW_NAME))
-                    options.add(4, Pair(MessageID.content,
+//                    options.add(3, Pair(MessageID.content,
+//                            ComingSoonView.VIEW_NAME))
+                    options.add(3, Pair(MessageID.contents,
+                        ContentEntryListView.VIEW_NAME + "?" +
+                                UMFileUtil.mapToQueryString(contentEntryListArgs)))
+                    options.add(4, Pair(MessageID.reports,
                             DashboardEntryListView.VIEW_NAME))
 
                     homeView.runOnUiThread(Runnable {
@@ -102,8 +107,6 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 //                                UMFileUtil.mapToQueryString(contentEntryListArgs)))
                 homeView.setOptions(options)
             })
-
-
         }
     }
 
@@ -112,7 +115,6 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
             homeView.showDownloadAllButton(show && showDownloadAll)
         })
     }
-
 
     fun handleDownloadAllClicked(){
         val args = HashMap<String, String>()
@@ -140,16 +142,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         impl.go(SettingsView.VIEW_NAME, args, context)
     }
 
-    /**
-     * For ClassBook - Goes to Bulk upload screen.
-     */
-    fun handleClickBulkUpload(){
-        val args = HashMap<String, String>()
-        impl.go(BulkUploadMasterView.VIEW_NAME, args, context)
-    }
-
     override fun handleNavigation() {}
-
 
     companion object {
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")

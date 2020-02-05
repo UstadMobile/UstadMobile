@@ -143,8 +143,10 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun setRecentProvider(factory: DataSource.Factory<Int, SaleProduct>) {
 
-        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                this,false, true, context!!)
+        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
+                mPresenter!!,
+                this,false, true,
+                context!!)
 
         val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
 
@@ -160,8 +162,10 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun setCategoryProvider(factory: DataSource.Factory<Int, SaleProduct>) {
 
-        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                this, true, true, context!!)
+        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
+                mPresenter!!,
+                this, true, true,
+                context!!)
 
         // get the provider, set , observe, etc.
         val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
@@ -183,8 +187,10 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
 
     override fun setCollectionProvider(factory: DataSource.Factory<Int, SaleProduct>) {
-        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                this,true, true, context!!)
+        val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
+                mPresenter!!,
+                this,true, true,
+                context!!)
 
 
         // get the provider, set , observe, etc.

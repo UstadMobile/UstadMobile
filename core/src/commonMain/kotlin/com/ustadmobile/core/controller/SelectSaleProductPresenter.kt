@@ -120,7 +120,6 @@ class SelectSaleProductPresenter(context: Any,
         super.onCreate(savedState)
         GlobalScope.launch(Dispatchers.Main) {
             loggedInPerson = personDao.findByUidAsync(loggedInPersonUid)
-            //view.showAddButton(loggedInPerson!!.admin)
             updateProviders()
         }
 
