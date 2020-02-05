@@ -24,11 +24,11 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.InventoryListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
+import com.ustadmobile.staging.core.view.FabListener
 import com.ustadmobile.staging.core.view.SearchableListener
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class InventoryListFragment : UstadBaseFragment, InventoryListView, SearchableListener {
-
+class InventoryListFragment : UstadBaseFragment, InventoryListView, SearchableListener, FabListener {
 
     override val viewContext: Any
         get() = context!!
@@ -46,6 +46,10 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView, SearchableLi
 
     }
 
+
+    override fun handleClickFAB() {
+        mPresenter!!.handleClickAddItems()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -76,6 +80,7 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView, SearchableLi
         }
 
         fab!!.setOnClickListener({ v -> mPresenter!!.handleClickAddItems() })
+        fab!!.visibility = View.GONE
 
 
         return rootContainer

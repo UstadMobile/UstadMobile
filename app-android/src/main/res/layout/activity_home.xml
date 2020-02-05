@@ -90,6 +90,23 @@
         android:layout_gravity="bottom"/>
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_home_rounded_fab"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="56dp"
+        app:floating_background_color="@color/fab"
+        app:floating_left_icon="@drawable/ic_add_black_24dp"
+        app:floating_title=""
+        app:floating_title_color="@color/fab_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:elevation="8dp"
         android:layout_marginBottom="@dimen/dimen_40dp"
         app:layout_anchor="@id/home_view_pager"
@@ -102,6 +119,8 @@
         app:floating_title="@string/download_all"
         app:layout_anchorGravity="bottom|center"
         app:floating_title_color="@android:color/black" />
+
+
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

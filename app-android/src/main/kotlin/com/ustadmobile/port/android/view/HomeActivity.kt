@@ -36,6 +36,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.staging.core.view.FabListener
 import com.ustadmobile.staging.core.view.SearchableListener
 import com.ustadmobile.staging.port.android.view.*
 import de.hdodenhof.circleimageview.CircleImageView
@@ -50,6 +51,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private lateinit var presenter: HomePresenter
 
     private lateinit var fabButton: FloatingTextButton
+
+    private lateinit var roundedFab: FloatingTextButton
 
     private lateinit var profileImage: CircleImageView
 
@@ -106,6 +109,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         mPager = findViewById(R.id.home_view_pager)
         fabButton = findViewById(R.id.activity_home_fab)
         toolbarTitle = findViewById(R.id.toolBarTitle)
+        roundedFab = findViewById<FloatingTextButton>(R.id.activity_home_rounded_fab)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
@@ -115,6 +119,10 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         fabButton.setOnClickListener {
             presenter.handleDownloadAllClicked()
+        }
+
+        roundedFab.setOnClickListener{
+            handleClickRoundedFab()
         }
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
@@ -210,6 +218,14 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         }
     }
 
+    fun handleClickRoundedFab(){
+        val currentFragment = fragmentPosMap[currentFragmentPosition]
+        val currentFragmentNN = currentFragment
+        if(currentFragmentNN != null && currentFragmentNN is FabListener){
+            (currentFragmentNN as FabListener).handleClickFAB()
+        }
+    }
+
     override fun setLoggedPerson(person: Person) {
         //Show settings based on if person is admin or not.
         personAdmin = person.admin
@@ -265,6 +281,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             //Update title
             updateTitle(options[position].first)
 
+            //Update FAB
+            updateFAB(options[position].first)
+
             //Update search visibility
             updateSearchVisibility()
 
@@ -276,7 +295,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         mPager.adapter = HomePagerAdapter(supportFragmentManager, options)
 
-
     }
 
     private fun updateElevation(optionUri: String) {
@@ -286,6 +304,33 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         }else {
             10f
         }
+    }
+
+    private fun updateFAB(pos: Int){
+
+        if(BOTTOM_LABEL_MESSAGEID_TO_FAB.containsKey(pos)){
+            showRoundedFAB(true)
+            var fabStringId = 0
+            fabStringId = BOTTOM_LABEL_MESSAGEID_TO_FAB[pos]!!
+            val fabString = impl.getString(fabStringId, this)
+            updateFABTitle(fabString)
+
+        }else{
+            showRoundedFAB(false)
+        }
+    }
+
+    private fun showRoundedFAB(show: Boolean){
+
+        if(show){
+            roundedFab.visibility = View.VISIBLE
+        }else{
+            roundedFab.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun updateFABTitle(fabString: String){
+        roundedFab.title = fabString
     }
 
     private fun updateSearchVisibility(){

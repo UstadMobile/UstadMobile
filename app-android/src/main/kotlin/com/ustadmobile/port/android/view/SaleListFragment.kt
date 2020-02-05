@@ -24,9 +24,11 @@ import com.ustadmobile.core.view.PersonWithSaleInfoDetailView
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleListDetail
+import com.ustadmobile.staging.core.view.FabListener
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
-class SaleListFragment : UstadBaseFragment, SaleListView {
+class SaleListFragment : UstadBaseFragment, SaleListView, FabListener {
+
     override val viewContext: Any
         get() = context!!
 
@@ -120,6 +122,7 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
         }
 
         fab!!.setOnClickListener({ v -> mPresenter!!.handleClickPrimaryActionButton() })
+        fab!!.visibility = View.GONE
 
         if(personUid != 0L){
             allSalesButton!!.visibility = View.GONE
@@ -135,6 +138,10 @@ class SaleListFragment : UstadBaseFragment, SaleListView {
         }
 
         return rootContainer
+    }
+
+    override fun handleClickFAB() {
+        mPresenter!!.handleClickPrimaryActionButton()
     }
 
     override fun updateSortSpinner(presets: Array<String?>) {

@@ -58,6 +58,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
             val options = mutableListOf<Pair<Int, String>>()
 
+            var profilePicturePath = ""
             if(t != null) {
                 account = t
                 val person = personDao.findByUid(t.personUid)
@@ -87,12 +88,20 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                     homeView.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)
                     })
+
+                    val personPicture = personPictureDao.findByPersonUidAsync(person.personUid)
+                    if (personPicture != null) {
+                        val imagePath = personPictureDao.getAttachmentPath(personPicture)
+                        if (imagePath != null && imagePath.isNotEmpty()) {
+                            profilePicturePath=imagePath
+                        }
+                    }
                 }
             }
 
             homeView.runOnUiThread(Runnable {
 
-                homeView.loadProfileIcon(if(account == null) "" else "")
+                homeView.loadProfileIcon(profilePicturePath)
 //                options.add(0, Pair(MessageID.contents,
 //                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
 //                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
