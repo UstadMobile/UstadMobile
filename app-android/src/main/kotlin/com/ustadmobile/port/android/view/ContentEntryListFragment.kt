@@ -28,6 +28,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
+import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.door.ext.isRepositoryLiveData
@@ -352,9 +353,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
         //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
         //any items are loaded
-        //TODO: fix this as we are no longer using the live data wrapper
         if(!data.isRepositoryLiveData()) {
-            //repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
+            repoLoadingStatusView.onChanged(RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA))
         }
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
