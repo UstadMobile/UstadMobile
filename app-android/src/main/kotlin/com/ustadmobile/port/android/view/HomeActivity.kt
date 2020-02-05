@@ -42,9 +42,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener{

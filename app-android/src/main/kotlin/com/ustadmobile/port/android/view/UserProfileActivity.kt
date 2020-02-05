@@ -372,7 +372,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    presenter!!.handleCompressedImage(imageFile.canonicalPath)
+                    presenter.handleCompressedImage(imageFile.canonicalPath)
                 }
 
                 GALLERY_REQUEST_CODE -> {
@@ -391,7 +391,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val galleryFile = File(imagePathFromCamera)
-                    presenter!!.handleCompressedImage(galleryFile.canonicalPath)
+                    presenter.handleCompressedImage(galleryFile.canonicalPath)
                 }
             }
         }
