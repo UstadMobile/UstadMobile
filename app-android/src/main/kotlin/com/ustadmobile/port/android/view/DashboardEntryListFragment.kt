@@ -43,7 +43,6 @@ class DashboardEntryListFragment() : UstadBaseFragment(), IOnBackPressed, Dashbo
     private lateinit var entriesRV: RecyclerView
     private lateinit var floatingActionMenu: FloatingActionMenu
     private lateinit var tags: ChipGroup
-    private val tagAll: Chip ?= null
     private lateinit var salesPerformance: FloatingActionButton
     private lateinit var salesLog: FloatingActionButton
     private lateinit var topLEs: FloatingActionButton
@@ -99,7 +98,7 @@ class DashboardEntryListFragment() : UstadBaseFragment(), IOnBackPressed, Dashbo
         if(floatingActionMenu.isOpened){
             floatingActionMenu.close(false)
         }
-        salesPerformance = rootContainer.findViewById<FloatingActionButton>(
+        salesPerformance = rootContainer.findViewById(
                 R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
         salesPerformance.setOnClickListener {
             floatingActionMenu.close(true)
@@ -161,8 +160,7 @@ class DashboardEntryListFragment() : UstadBaseFragment(), IOnBackPressed, Dashbo
 
         // get the provider, set , observe, etc.
 
-        val data =
-                LivePagedListBuilder(listProvider, 20).build()
+        val data = LivePagedListBuilder(listProvider, 20).build()
 
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
