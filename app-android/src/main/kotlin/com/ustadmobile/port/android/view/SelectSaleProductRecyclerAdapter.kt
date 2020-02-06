@@ -131,9 +131,17 @@ class SelectSaleProductRecyclerAdapter
 
         if (isCatalog) {
 
+            if(listCategory){
+                if(mPresenter.isLoggedInPersonAdmin()){
+                    dots.visibility = View.VISIBLE
+                }else{
+                    dots.visibility = View.GONE
+                }
+            }
+
             if(entity.saleProductName.equals("Collections")){
                 dots.visibility = View.GONE
-            }else {
+            }else if(!listCategory) {
                 dots.visibility = View.VISIBLE
             }
             //Options to Edit/Delete every schedule in the list
@@ -148,7 +156,7 @@ class SelectSaleProductRecyclerAdapter
                                     true)
                             true
                         } else if (i == R.id.delete) {
-                            mPresenter.handleDelteSaleProduct(entity.saleProductUid, listCategory)
+                            mPresenter.handleDeleteSaleProduct(entity.saleProductUid, listCategory)
                             true
                         } else {
                             false
@@ -175,7 +183,7 @@ class SelectSaleProductRecyclerAdapter
                                     true)
                             true
                         } else if (i == R.id.delete) {
-                            mPresenter.handleDelteSaleProduct(entity.saleProductUid, listCategory)
+                            mPresenter.handleDeleteSaleProduct(entity.saleProductUid, listCategory)
                             true
                         } else {
                             false
@@ -197,12 +205,6 @@ class SelectSaleProductRecyclerAdapter
             }
         } else {
             dots.visibility = View.GONE
-        }
-
-        if(mPresenter.isLoggedInPersonAdmin()){
-            //dots.visibility = View.VISIBLE
-        }else{
-            //dots.visibility = View.GONE
         }
 
         holder.itemView.setOnClickListener { mPresenter.handleClickProduct(entity.saleProductUid,
@@ -239,15 +241,4 @@ class SelectSaleProductRecyclerAdapter
         isCatalog = catalog!!
         theContext = context
     }
-
-    companion object {
-
-        private val IMAGE_WIDTH = 100
-
-        private fun dpToPxImagePerson(): Int {
-            return (IMAGE_WIDTH * Resources.getSystem().displayMetrics.density).toInt()
-        }
-    }
-
-
 }

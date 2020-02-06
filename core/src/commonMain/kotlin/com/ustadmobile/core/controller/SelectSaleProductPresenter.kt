@@ -24,7 +24,6 @@ import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
-import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_MODE
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_SALE_UID
@@ -51,42 +50,37 @@ class SelectSaleProductPresenter(context: Any,
     private lateinit var categoryProvider: DataSource.Factory<Int, SaleProduct>
     private lateinit var collectionProvider: DataSource.Factory<Int, SaleProduct>
 
-    internal var repository: UmAppDatabase
-    internal var database: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+    internal var database: UmAppDatabase = UmAccountManager.getActiveDatabase(context)
 
     internal var saleProductDao: SaleProductDao
     internal var personDao : PersonDao
-    internal var productParentJoinDao: SaleProductParentJoinDao
-    internal var impl: UstadMobileSystemImpl
+    private var productParentJoinDao: SaleProductParentJoinDao
+    internal var impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
     private var producerUid: Long = 0
     private var saleItemUid: Long = 0
     private var saleUid: Long = 0
 
     var searchQuery: String = "%%"
-    var preOrder = false
+    private var preOrder = false
 
     var loggedInPersonUid : Long = 0
-    var loggedInPerson : Person? = null
+    private var loggedInPerson : Person? = null
 
     fun setQuerySearch(query:String){
         searchQuery = "%$query%"
     }
 
     fun isLoggedInPersonAdmin(): Boolean{
-        if(loggedInPerson == null){
-            return false
+        return if(loggedInPerson == null){
+            false
         }else{
-            return loggedInPerson!!.admin
+            loggedInPerson!!.admin
         }
     }
 
     init {
-
-        impl = UstadMobileSystemImpl.instance
-
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        database = UmAccountManager.getActiveDatabase(context)
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
         saleProductDao = repository.saleProductDao
@@ -113,7 +107,6 @@ class SelectSaleProductPresenter(context: Any,
                 preOrder = true
             }
         }
-
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -166,17 +159,15 @@ class SelectSaleProductPresenter(context: Any,
         if(inventoryMode){
 
             if(saleUid != 0L) {
-                args.put(ARG_SELECT_PRODUCERS_SALE_UID, saleUid.toString())
+                args[ARG_SELECT_PRODUCERS_SALE_UID] = saleUid.toString()
             }
 
             if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)){
-                args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION,
-                        arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION)!!)
+                args[ARG_SELECT_PRODUCERS_INVENTORY_ADDITION] = arguments[ARG_SELECT_PRODUCERS_INVENTORY_ADDITION]!!
             }
 
             if(arguments.containsKey(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)){
-                args.put(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION,
-                        arguments!!.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!)
+                args[ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = arguments.get(ARG_SELECT_PRODUCERS_INVENTORY_SELECTION)!!
             }
 
             if(preOrder) {
@@ -187,8 +178,8 @@ class SelectSaleProductPresenter(context: Any,
             }
 
             if (isCategory) {
-                args.put(ARG_SALEPRODUCT_UID, productUid.toString())
-                args.put(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE, "true")
+                args[ARG_SALEPRODUCT_UID] = productUid.toString()
+                args[ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE] = "true"
                 view.finish()
                 impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
             } else {
@@ -207,29 +198,29 @@ class SelectSaleProductPresenter(context: Any,
 
             if (isCategory) {
                 if(editMode){
-                    args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
+                    args[ARG_SALE_PRODUCT_UID] = productUid.toString()
                     impl.go(SaleProductDetailView.VIEW_NAME, args, context)
                 }else {
-                    args.put(ARG_SALEPRODUCT_UID, productUid.toString())
+                    args[ARG_SALEPRODUCT_UID] = productUid.toString()
                     impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
                 }
             } else {
-                args.put(ARG_SALE_PRODUCT_UID, productUid.toString())
+                args[ARG_SALE_PRODUCT_UID] = productUid.toString()
                 impl.go(SaleProductDetailView.VIEW_NAME, args, context)
             }
         } else {
             //Need to select the product.
             if (isCategory) {
-                args.put(ARG_SALEPRODUCT_UID, productUid.toString())
-                args.put(ARG_PASS_PRODUCER_UID, producerUid.toString())
-                args.put(ARG_PASS_SALE_ITEM_UID, saleItemUid.toString())
-                args.put(ARG_SELECT_PRODUCT, "true")
+                args[ARG_SALEPRODUCT_UID] = productUid.toString()
+                args[ARG_PASS_PRODUCER_UID] = producerUid.toString()
+                args[ARG_PASS_SALE_ITEM_UID] = saleItemUid.toString()
+                args[ARG_SELECT_PRODUCT] = "true"
                 impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
             } else {
-                args.put(ARG_SALE_ITEM_PRODUCT_UID, productUid.toString())
-                args.put(ARG_PRODUCER_UID, producerUid.toString())
-                args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
-                args.put(ARG_SELECT_PRODUCT, "true")
+                args[ARG_SALE_ITEM_PRODUCT_UID] = productUid.toString()
+                args[ARG_PRODUCER_UID] = producerUid.toString()
+                args[ARG_SALE_ITEM_UID] = saleItemUid.toString()
+                args[ARG_SELECT_PRODUCT] = "true"
                 impl.go(SaleItemDetailView.VIEW_NAME, args, context)
             }
             view.finish()
@@ -249,15 +240,24 @@ class SelectSaleProductPresenter(context: Any,
         impl.go(SaleProductDetailView.VIEW_NAME, args, context)
     }
 
-    fun handleDelteSaleProduct(productUid: Long, isCategory: Boolean) {
+    fun handleDeleteSaleProduct(productUid: Long, isCategory: Boolean) {
         GlobalScope.launch {
             try{
-                val result = saleProductDao.inactivateEntityAsync(productUid)
-                //Send message to view
-                if (isCategory) {
-                    view.runOnUiThread(Runnable { view.showMessage(MessageID.category_deleted) })
-                } else {
-                    view.runOnUiThread(Runnable { view.showMessage(MessageID.item_deleted) })
+                val saleProduct = saleProductDao.findByUidAsync(productUid)
+                //Either you are an admin or the owner of this product
+                if(loggedInPersonUid == saleProduct!!.saleProductPersonAdded ||
+                        loggedInPerson!!.admin){
+                    if (isCategory) {
+                        //Only admins can delete categories.
+                        if(loggedInPerson!!.admin) {
+                            saleProductDao.inactivateEntityAsync(productUid)
+                            view.runOnUiThread(Runnable {
+                                view.showMessage(MessageID.category_deleted) })
+                        }
+                    } else {
+                        saleProductDao.inactivateEntityAsync(productUid)
+                        view.runOnUiThread(Runnable { view.showMessage(MessageID.item_deleted) })
+                    }
                 }
             }catch(e:Exception){
                 println(e.message)
@@ -267,7 +267,7 @@ class SelectSaleProductPresenter(context: Any,
 
     fun handleClickRecentMore() {
         val args = HashMap<String, String>()
-        args.put(ARG_MORE_RECENT, "true")
+        args[ARG_MORE_RECENT] = "true"
         if (catalogMode) {
             impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
 
@@ -275,9 +275,9 @@ class SelectSaleProductPresenter(context: Any,
             //Need to select the product.
 
             //Pass it on
-            args.put(ARG_PASS_PRODUCER_UID, producerUid.toString())
-            args.put(ARG_PASS_SALE_ITEM_UID, saleItemUid.toString())
-            args.put(ARG_SELECT_PRODUCT, "true")
+            args[ARG_PASS_PRODUCER_UID] = producerUid.toString()
+            args[ARG_PASS_SALE_ITEM_UID] = saleItemUid.toString()
+            args[ARG_SELECT_PRODUCT] = "true"
 
             impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
         }

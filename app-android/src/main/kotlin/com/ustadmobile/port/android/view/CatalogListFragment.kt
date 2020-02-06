@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.Nullable
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectSaleProductPresenter
@@ -23,6 +25,7 @@ import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.staging.core.view.SearchableListener
+import kotlinx.android.synthetic.main.xapi_header_report.*
 
 class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView, SearchableListener {
 
@@ -38,6 +41,8 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     private lateinit var recentMore: TextView
     private lateinit var categoryMore: TextView
     private lateinit var collectionMore: TextView
+    private lateinit var addCollection: FloatingActionButton
+    private lateinit var addItem: FloatingActionButton
 
     override fun updateToolbar(title: String) {
         //TODO
@@ -96,6 +101,8 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         collectionMore = rootContainer.findViewById(R.id.activity_select_sale_product_collections_more)
 
         floatingActionMenu = rootContainer.findViewById(R.id.activity_select_sale_product_fab_menu)
+        addCollection = rootContainer.findViewById(R.id.activity_select_sale_product_fab_subcategory)
+        addItem = rootContainer.findViewById(R.id.activity_select_sale_product_fab_item)
 
         //Call the Presenter
         mPresenter = SelectSaleProductPresenter(context!!,
@@ -103,14 +110,12 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         mPresenter.onCreate(bundleToMap(savedInstanceState))
 
         //Set listeners
-        rootContainer.findViewById<View>(R.id.activity_select_sale_product_fab_subcategory)
-                .setOnClickListener {
+        addCollection.setOnClickListener {
                     floatingActionMenu.close(true)
                     mPresenter.handleClickAddSubCategory()
                 }
 
-        rootContainer.findViewById<View>(R.id.activity_select_sale_product_fab_item)
-                .setOnClickListener {
+        addItem.setOnClickListener {
                     floatingActionMenu.close(true)
                     mPresenter.handleClickAddItem()
                 }
@@ -121,10 +126,11 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
         collectionMore.setOnClickListener { mPresenter.handleClickCollectionMore() }
 
+        addCollection.isVisible = mPresenter.isLoggedInPersonAdmin()
+
+
         return rootContainer
     }
-
-
 
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

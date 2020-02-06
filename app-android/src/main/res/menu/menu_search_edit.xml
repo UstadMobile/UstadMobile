@@ -9,7 +9,7 @@
         android:title="@string/search"
         app:showAsAction="always"
         android:iconTint="@color/icons"
-        android:visible="true"
+        android:visible="false"
         />
 
     <item

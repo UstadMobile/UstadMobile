@@ -57,7 +57,7 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
         menu.findItem(R.id.action_search).isVisible = true
 
-        menu.findItem(R.id.action_edit).isVisible = !hideEdit
+        //menu.findItem(R.id.action_edit).isVisible = !hideEdit
         return true
     }
 
@@ -226,6 +226,9 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
     override fun hideEditMenu(hide: Boolean) {
         hideEdit = hide
+            if(menu != null) {
+                menu!!.findItem(R.id.action_edit).isVisible = !hideEdit
+            }
     }
 
     companion object {

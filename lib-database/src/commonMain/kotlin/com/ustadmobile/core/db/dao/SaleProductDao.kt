@@ -104,6 +104,12 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
             AND (CAST(LE.admin AS INTEGER) = 1 OR SaleProduct.saleProductPersonAdded = LE.personUid )
         """
 
+        const val ALL_ACTIVE_QUERY_WITHOUT_LE_FILTER = """
+            SELECT SaleProduct.* FROM SaleProduct 
+            LEFT JOIN Person AS LE ON LE.personUid = :leUid
+            WHERE CAST(saleProductActive AS INTEGER) = 1
+        """
+
         const val ALL_ACTIVE_QUERY_WITH_SEARCH = " AND SaleProduct.saleProductName LIKE :query "
 
         const val SORT_BY_NAME_ASC_QUERY = " ORDER BY SaleProduct.saleProductName ASC "
@@ -126,7 +132,7 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
         const  val ACTIVE_PRODUCTS_QUERY = ALL_ACTIVE_QUERY_WITH_LE_FILTER + ALL_ACTIVE_QUERY_WITH_SEARCH +
                 AND_IS_NOT_CATEGORY + " ORDER BY SaleProduct.saleProductDateAdded DESC "
 
-        const val ACTIVE_CATEGORIES_QUERY = ALL_ACTIVE_QUERY_WITH_LE_FILTER + ALL_ACTIVE_QUERY_WITH_SEARCH +
+        const val ACTIVE_CATEGORIES_QUERY = ALL_ACTIVE_QUERY_WITHOUT_LE_FILTER + ALL_ACTIVE_QUERY_WITH_SEARCH +
                 AND_IS_CATEGORY
 
         const val ACTIVE_PRODUCTS_NOT_IN_CATEGORY_QUERY =

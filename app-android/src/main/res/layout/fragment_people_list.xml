@@ -57,7 +57,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="24dp"
-            android:paddingBottom="@dimen/bottom_navigation_height"
             app:floating_background_color="@color/accent"
             app:floating_title="@string/add_person"
             app:floating_left_icon="@drawable/ic_add_black_24dp"

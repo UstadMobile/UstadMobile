@@ -24,6 +24,7 @@ import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SALEP
 import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELECT_PRODUCT
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -61,6 +62,7 @@ class SaleProductCategoryListPresenter(context: Any,
     private var saleUid: Long = 0
 
     private var loggedInPersonUid: Long = 0
+    private var loggedInPerson : Person ? = null
 
     init {
 
@@ -111,6 +113,10 @@ class SaleProductCategoryListPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
+
+        GlobalScope.launch {
+            loggedInPerson = repository.personDao.findByUidAsync(loggedInPersonUid)
+        }
 
         val thisP = this
         if (arguments.containsKey(ARG_SALEPRODUCT_UID)) {
@@ -208,22 +214,23 @@ class SaleProductCategoryListPresenter(context: Any,
             view.runOnUiThread(Runnable{
                 view.updateToolbar(impl.getString(MessageID.categories, context))
             })
-
-
-
-
     }
 
     private fun setCategoryOnView(showRecent: Boolean, showCategory: Boolean) {
         //Update on view
         view.initFromSaleCategory(currentSaleProductCategory!!)
 
-        //Get showCategory and item providers
+        view.hideEditMenu(true)
 
-        //Get SaleNameWithImage for all items
         var allMode : Boolean = false
         if (currentSaleProductCategory!!.saleProductUid != 0L) {
-            view.hideEditMenu(false)
+
+            //view.hideEditMenu(false)
+            if(loggedInPerson != null) {
+                view.hideEditMenu(!loggedInPerson!!.admin)
+            }else{
+                view.hideEditMenu(false)
+            }
             itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(loggedInPersonUid, 0,
                     currentSaleProductCategory!!.saleProductUid)
             categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(loggedInPersonUid, 0,
@@ -231,6 +238,7 @@ class SaleProductCategoryListPresenter(context: Any,
             allMode = false
         } else {
             allMode = true
+
             view.hideEditMenu(true)
             itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, 0)
             categoryProvider = productDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid, "" , 0)
