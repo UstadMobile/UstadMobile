@@ -31,7 +31,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardEntryListView {
+class DashboardEntryListFragment() : UstadBaseFragment(), IOnBackPressed, DashboardEntryListView {
 
 
     override val viewContext: Any
@@ -84,13 +84,9 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
 
 
         val mRecyclerLayoutManager = GridLayoutManager(context, spanCount)
-        //        RecyclerView.LayoutManager mRecyclerLayoutManager
-        //                = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        entriesRV.setLayoutManager(mRecyclerLayoutManager)
+        entriesRV.layoutManager = mRecyclerLayoutManager
 
         tags = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_tags_cg)
-        //tagAll = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_chip_all);
-        //TODO: Handle tag click
 
         floatingActionMenu = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu)
 
@@ -100,32 +96,31 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Set listeners
-
         if(floatingActionMenu.isOpened){
             floatingActionMenu.close(false)
         }
         salesPerformance = rootContainer.findViewById<FloatingActionButton>(
                 R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
-        salesPerformance.setOnClickListener { v ->
-                    floatingActionMenu.close(true)
+        salesPerformance.setOnClickListener {
+            floatingActionMenu.close(true)
                     mPresenter!!.handleClickNewSalePerformanceReport()
                 }
         salesPerformance.setColorNormalResId(R.color.fab)
         salesPerformance.setColorPressedResId(R.color.fab_pressed)
         salesPerformance.setColorRippleResId(R.color.fab_ripple)
 
-        salesLog = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_sales_log)
-        salesLog.setOnClickListener { v ->
-                    floatingActionMenu.close(true)
+        salesLog = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu_sales_log)
+        salesLog.setOnClickListener {
+            floatingActionMenu.close(true)
                     mPresenter!!.handleClickNewSalesLogReport()
                 }
         salesLog.setColorNormalResId(R.color.fab)
         salesLog.setColorPressedResId(R.color.fab_pressed)
         salesLog.setColorRippleResId(R.color.fab_ripple)
 
-        topLEs = rootContainer.findViewById<FloatingActionButton>(R.id.fragment_dashboard_entry_list_fab_menu_top_les)
-        topLEs.setOnClickListener { v ->
-                    floatingActionMenu.close(true)
+        topLEs = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu_top_les)
+        topLEs.setOnClickListener {
+            floatingActionMenu.close(true)
                     mPresenter!!.handleClickTopLEsReport()
                 }
         topLEs.setColorNormalResId(R.color.fab)
@@ -136,41 +131,38 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
     }
 
     override fun showSalesLogOption(show: Boolean) {
-        if(show){
-//            salesLog.visibility = View.VISIBLE
-        }else{
+        if(!show){
             salesLog.visibility = View.GONE
         }
     }
 
     override fun showTopLEsOption(show: Boolean) {
-        if(show){
-//            topLEs.visibility = View.VISIBLE
-        }else{
+        if(!show){
             topLEs.visibility = View.GONE
         }
     }
 
     override fun showSalesPerformanceOption(show: Boolean) {
-        if(show){
-//            salesPerformance.visibility = View.VISIBLE
-        }else{
+        if(!show){
             salesPerformance.visibility = View.GONE
         }
     }
 
-
     override fun finish() {}
 
-    override fun setDashboardEntryProvider(factory: DataSource.Factory<Int, DashboardEntry>) {
+    override fun setDashboardEntryProvider(listProvider: DataSource.Factory<Int, DashboardEntry>) {
+
+        if(context == null){
+            return
+        }
 
         recyclerAdapter = DashboardEntryListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                activity!!.applicationContext)
+                context!!)
 
         // get the provider, set , observe, etc.
 
         val data =
-                LivePagedListBuilder(factory, 20).build()
+                LivePagedListBuilder(listProvider, 20).build()
 
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
@@ -178,7 +170,6 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
             data.observe(thisP,
                     Observer<PagedList<DashboardEntry>> { recyclerAdapter!!.submitList(it) })
         }
-
 
         runOnUiThread(Runnable {
             //set the adapter
@@ -188,49 +179,44 @@ class DashboardEntryListFragment : UstadBaseFragment, IOnBackPressed, DashboardE
     }
 
     override fun setDashboardTagProvider(listProvider: DataSource.Factory<Int, DashboardTag>) {
-
         //TODO
     }
 
-    override fun loadChips(chipNames: Array<String>) {
-        for (chipName in chipNames) {
+    override fun loadChips(tags: Array<String>) {
+        for (chipName in tags) {
             val tag = Chip(Objects.requireNonNull(context))
             tag.text = chipName
-            tags.addView(tag)
+            this.tags.addView(tag)
         }
     }
 
     override fun showSetTitle(existingTitle: String, entryUid: Long) {
-        val edittext = EditText(context)
-        edittext.inputType = InputType.TYPE_TEXT_FLAG_CAP_WORDS
-        edittext.setText(existingTitle)
+        val editText = EditText(context)
+        editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        editText.setText(existingTitle)
 
         val adb = AlertDialog.Builder(context!!)
                 .setTitle("")
                 .setMessage(getText(R.string.set_title))
-                .setView(edittext)
-                .setPositiveButton(R.string.ok) { dialog, which ->
-                    mPresenter!!.handleSetTitle(entryUid, edittext.text.toString())
+                .setView(editText)
+                .setPositiveButton(R.string.ok) { dialog, _ ->
+                    mPresenter!!.handleSetTitle(entryUid, editText.text.toString())
                     dialog.dismiss()
                 }
 
-                .setNegativeButton(R.string.cancel, { dialog, which -> dialog.dismiss() })
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
 
         adb.create()
         adb.show()
     }
 
-
-    constructor()  {
+    init {
         val args = Bundle()
         arguments = args
         icon = R.drawable.ic_insert_chart_black_24dp
         title = R.string.reports
     }
 
-    constructor(args:Bundle) : this() {
-        arguments = args
-    }
     companion object {
 
         val icon = R.drawable.ic_insert_chart_black_24dp

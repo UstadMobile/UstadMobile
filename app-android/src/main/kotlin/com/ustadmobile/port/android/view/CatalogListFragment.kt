@@ -138,10 +138,14 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
     override fun setRecentProvider(recentProvider: DataSource.Factory<Int, SaleProduct>) {
 
+        if(context == null){
+            return
+        }
+
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
                 mPresenter,
                 this, isCategory = false, catalog = true,
-                context = activity!!.applicationContext)
+                context = context!!)
 
         val data = recentProvider.asRepositoryLiveData(
                 UmAccountManager.getRepositoryForActiveAccount(context!!).saleProductDao)
@@ -157,11 +161,15 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     }
 
     override fun setCategoryProvider(categoryProvider: DataSource.Factory<Int, SaleProduct>) {
+
+        if(context == null){
+            return
+        }
         
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
                 mPresenter,
                 this, isCategory = true, catalog = true,
-                context = activity!!.applicationContext)
+                context = context!!)
 
         // get the provider, set , observe, etc.
         val data = categoryProvider.asRepositoryLiveData(
@@ -184,13 +192,13 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     override fun setCollectionProvider(collectionProvider: DataSource.Factory<Int, SaleProduct>) {
 
         if(context == null){
-            print("here")
+            return
         }
         
         val recyclerAdapter = SelectSaleProductRecyclerAdapter(DIFF_CALLBACK,
                 mPresenter,
-                this,true, true,
-                context = activity!!.applicationContext)
+                this, isCategory = true, catalog = true,
+                context = context!!)
 
         // get the provider, set , observe, etc.
         // A warning is expected
