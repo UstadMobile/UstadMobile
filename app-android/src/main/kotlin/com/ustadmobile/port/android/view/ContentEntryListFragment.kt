@@ -230,9 +230,12 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.findItem(R.id.create_new_folder)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_NEWFOLDER) == EDIT_BUTTONS_NEWFOLDER
-        menu.findItem(R.id.edit_category_content)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_EDITOPTION) == EDIT_BUTTONS_EDITOPTION
-        menu.findItem(R.id.create_new_content)?.isVisible = (buttonVisibilityFlags and EDIT_BUTTONS_ADD_CONTENT) == EDIT_BUTTONS_ADD_CONTENT
+        menu.findItem(R.id.create_new_folder)?.isVisible =
+                (buttonVisibilityFlags and EDIT_BUTTONS_NEWFOLDER) == EDIT_BUTTONS_NEWFOLDER
+        menu.findItem(R.id.edit_category_content)?.isVisible =
+                (buttonVisibilityFlags and EDIT_BUTTONS_EDITOPTION) == EDIT_BUTTONS_EDITOPTION
+        menu.findItem(R.id.create_new_content)?.isVisible =
+                (buttonVisibilityFlags and EDIT_BUTTONS_ADD_CONTENT) == EDIT_BUTTONS_ADD_CONTENT
         super.onPrepareOptionsMenu(menu)
     }
 

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:icon="@drawable/ic_done_white_24dp"
+        android:icon="@drawable/ic_check_black_24dp"
         android:id="@+id/save_content"
         android:iconTint="@color/icons"
         android:title="@string/content_editor_action_done"

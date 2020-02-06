@@ -78,8 +78,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                             SaleListView.VIEW_NAME))
 
 
-                    options.add(3, Pair(MessageID.contents,
-                            "${ContentEntryListView.VIEW_NAME}?$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID&$ARG_LIBRARIES_CONTENT"))
+                    options.add(3, Pair(MessageID.content,
+                            "${ContentEntryListView.VIEW_NAME}?$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
+                                    "&$ARG_LIBRARIES_CONTENT&${ContentEntryListView.EDIT_BUTTONS_NEWFOLDER}=2" +
+                                    "&${ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG}=2"))
 
 
                     options.add(4, Pair(MessageID.reports,

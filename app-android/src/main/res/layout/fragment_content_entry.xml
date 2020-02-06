@@ -11,7 +11,7 @@
         android:elevation="@dimen/dimen_8dp"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
         android:fitsSystemWindows="true"
         tools:targetApi="lollipop">
 
@@ -53,7 +53,7 @@
                 android:elevation="@dimen/dimen_4dp"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:theme="@style/ThemeOverlay.AppCompat.Light"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:layout_collapseMode="pin"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -83,6 +83,7 @@
                     android:layout_width="match_parent"
                     android:textSize="16sp"
                     android:id="@+id/entry_title"
+                    android:textColor="@color/primary_text"
                     android:hint="@string/content_entry_label_title"
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -96,6 +97,7 @@
                     android:layout_width="match_parent"
                     android:textSize="16sp"
                     android:minLines="2"
+                    android:textColor="@color/primary_text"
                     android:id="@+id/entry_description"
                     android:hint="@string/content_entry_label_desc"
                     android:layout_height="wrap_content" />
@@ -107,7 +109,7 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:textSize="12sp"
                 android:text="@string/content_entry_label_licence"
-                android:textColor="@color/primary"
+                android:textColor="@color/primary_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
@@ -189,7 +191,7 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:textSize="12sp"
                 android:text="@string/content_creation_storage_option_title"
-                android:textColor="@color/primary"
+                android:textColor="@color/primary_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
             <Spinner

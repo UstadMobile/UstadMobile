@@ -605,11 +605,13 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
             saleUid = sale.saleUid
 
             orderNotesET.setText(sale.saleNotes)
+            orderNotesET.setSelection(orderNotesET.text.length)
             var discountValue = "0"
             if (sale.saleDiscount > 0) {
                 discountValue = sale.saleDiscount.toString()
             }
             discountET.setText(discountValue)
+            discountET.setSelection(discountValue.length)
         }
     }
 
