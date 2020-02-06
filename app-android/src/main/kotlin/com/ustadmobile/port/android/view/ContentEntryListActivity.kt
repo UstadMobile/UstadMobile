@@ -142,24 +142,22 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onItemSelected(adapterView: AdapterView<*>, view: View, pos: Int, id: Long) {
-        runOnUiThread {
-            val item = adapterView.getItemAtPosition(pos)
+        val item = adapterView.getItemAtPosition(pos)
 
-            if (adapterView.getChildAt(0) != null) {
-                (adapterView.getChildAt(0) as TextView).setTextColor(Color.WHITE)
-            }
-
-            val fragment = supportFragmentManager.findFragmentById(R.id.entry_content)
-                    as ContentEntryListFragment?
-            if (item is LangUidAndName) {
-                // language
-                fragment?.filterByLang(item.langUid)
-
-            } else if (item is DistinctCategorySchema) {
-                fragment?.filterBySchemaCategory(item.contentCategoryUid)
-            }
+        val firstItem = adapterView.getChildAt(0)
+        if (firstItem is TextView) {
+            firstItem.setTextColor(Color.WHITE)
         }
 
+        val fragment = supportFragmentManager.findFragmentById(R.id.entry_content)
+                as ContentEntryListFragment?
+        if (item is LangUidAndName) {
+            // language
+            fragment?.filterByLang(item.langUid)
+
+        } else if (item is DistinctCategorySchema) {
+            fragment?.filterBySchemaCategory(item.contentCategoryUid)
+        }
     }
 
     override fun onBackPressed() {
