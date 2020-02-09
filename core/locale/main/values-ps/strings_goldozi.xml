@@ -31,7 +31,7 @@
     <string name="payments">تادیات</string>
     <string name="add_payment">د تادیاتو زیاتول</string>
     <string name="order_total">د فرمایش ټولټال:</string>
-    <string name="discount">تخفیف</string>
+    <string name="discount">تخفیف:</string>
     <string name="balance_due">پاتې پیسی</string>
     <string name="order_notes">د فرمایش یادښتونه</string>
     <string name="collections">ټولګه</string>
@@ -54,7 +54,6 @@
     <string name="sort_by_name_asc">نوم(asc)</string>
     <string name="sorT_by_name_desc">نوم(desc)</string>
     <string name="feature_coming_soon">دا بڼه، ډیر ژر... .</string>
-
     <!--Sprint 2-->
     <string name="change_password">د پټ نوم بدلول</string>
     <string name="current_password">اوسنی پټ نوم</string>
@@ -71,13 +70,12 @@
     <string name="order_due_date">د فرمایش ټاکلی نیټه</string>
     <string name="not_delivered">و نه سپارل شو</string>
     <string name="passwords_dont_match">پټ نوم سره ورته نه دي بیا هڅه وکړئ</string>
-    <string name="unable_to_update_password">د پټ نوم بیا جوړل ترسره نه شو</string>
+    <string name="unable_to_update_password">د پټ نوم بیا جوړل ترسره نه شو.</string>
     <string name="syncing">هممهالی کیږی</string>
     <string name="edit">سمون</string>
     <string name="camera">کامره</string>
     <string name="gallery">گالري</string>
     <string name="unable_open_image">د دې انځول خلاصول ترسره نه شو</string>
-
     <!-- Sprint 3 -->
     <string name="create_new_subcategory">د نوی فرعی کټګوری جوړول</string>
     <string name="title">عنوان</string>
@@ -114,7 +112,6 @@
     <string name="category_deleted">کټګوری له کتلاګ څخه ړنګ شو</string>
     <string name="fingerprint_authentication">د ګوتې نښې اعتبار معلومول</string>
     <string name="fingerprint_instructions">د خپل د هویت د تصدیقولو لپاره د خپل د ګوتې نښه د ګوتې د نښې په حس کوونکی باندې کیږدئ</string>
-
     <!--Sprint 4-->
     <string name="i_have_received_order">دغه فرمایش مې ترلاسه کړ</string>
     <string name="i_have_received_the_order">ما دا فرمایش ترلاسه کړی</string>
@@ -137,7 +134,6 @@
     <string name="days">ورځي</string>
     <string name="is_sale">خرڅلا ده</string>
     <string name="product_name">د محصول نوم.</string>
-
     <!--Sprint 5-->
     <string name="tags">نښي</string>
     <string name="pinned">میخ شو</string>
@@ -166,62 +162,89 @@
     <string name="products">محصولات</string>
     <string name="sale_value">د خرڅلا بیه</string>
     <string name="set_title"> سرنوم ټاکل</string>
-
     <string name="this_language">پښتو</string>
-
     <string name="select_image_from_camera_or_gallery">د کامرې یا ګالرئ څخه د انځور غوره کړئ</string>
     <string name="shake_feedback">د نظریاتو لپاره ځړول</string>
     <string name="feedback_hint">مهرباني وکړئ خپل نظر ولیکئ</string>
     <string name="send_feedback">غبرګون واستوئ</string>
     <string name="feedback_thanks">مننه</string>
-
     <!--Sprint 6-->
     <string name="my_women_entrepreneurs">My Women Entreprenrurs</string>
-    <string name="top_products">Top products</string>
-    <string name="summary">Summary</string>
-
+    <string name="top_products">غوره محصولات</string>
+    <string name="summary">لنډیز</string>
     <!-- Untranslated bits-->
-    <string name="sales_performance_report_options">Sales Performance Report Options</string>
-    <string name="sales_log_report_options">Sales Log Report Options</string>
+    <string name="sales_performance_report_options">د خرڅلا د کارکردګی د رپوټ غوراوی</string>
+    <string name="sales_log_report_options">د خرڅلا د ثبت/سجل د رپورټ غوراوی</string>
     <string name="top_les_report_options">Top LEs Report Options</string>
-    <string name="show_average_desc">Select to display the average in your report.</string>
+    <string name="show_average_desc">پخپل رپورټ کې د منځنی کچه د ښکاره کولو لپاره غوره کړئ.</string>
     <string name="les">LEs</string>
-    <string name="week">Week</string>
-    <string name="selected_les">Selected LEs</string>
-    <string name="select_product_types">Select product types</string>
-
-
+    <string name="week">اوونۍ</string>
+    <string name="selected_les">غوره شوی مخکښ متشبثین</string>
+    <string name="select_product_types">د محصول ډول غوره کړئ</string>
     <!--Sprint 7-->
     <string name="users">Users</string>
     <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
     <string name="user">User</string>
     <string name="send_message">Send message</string>
     <string name="reset_password">Reset password</string>
-    <string name="deactivate">Deactivate</string>
+    <string name="deactivate">غیر فعال کول</string>
     <string name="groups">Groups</string>
-    <string name="group">Group</string>
+    <string name="group">ګروپ/ډله بندی</string>
     <string name="group_setting_desc">Add, remove, or modify groups</string>
     <string name="group_name">Group name</string>
     <string name="members">Members</string>
-    <string name="add_members">Add members</string>
-    <string name="remove">Remove</string>
-    <string name="subgroup">Subgroup</string>
+    <string name="add_members">غړي ورزیاتول</string>
+    <string name="remove">لری کول/ له مینځه وړل</string>
+    <string name="subgroup">فرعی ګروپ/ډله</string>
     <string name="locations">Locations</string>
     <string name="locations_setting_desc">Manage locations</string>
-    <string name="account_last_synced">Account last synced</string>
+    <string name="account_last_synced">حساب/اکاونټ تیر ځلی هم مهال شوی</string>
     <string name="ago">ago</string>
     <string name="minutes">minutes</string>
-    <string name="hours">hours</string>
-    <string name="weeks">weeks</string>
-    <string name="years">years</string>
-
+    <string name="hours">ساعت</string>
+    <string name="weeks">اووني</string>
+    <string name="years">کلونه</string>
     <!--Sprint8-->
-    <string name="customer">Customer</string>
-    <string name="customer_details">Customer Details</string>
+    <string name="customer">پیریدونکی</string>
+    <string name="customer_details">د پیریدونکی په اړه تفصیل</string>
     <string name="select_customers">Select Customers</string>
-    <string name="new_customer">New Customer</string>
-    <string name="select">Select</string>
-
+    <string name="new_customer">نوی پیریدونکی</string>
+    <string name="select">غوره کول</string>
     <string name="sort_by_text">د ترتیب اساس</string>
-
+    <string name="women_entrepreneurs_group">د ښځینه ګلدوزانو ګروپ</string>
+    <string name="no_women_embroiderers_set">د ښځینه ګلدوزانو کوم ګروپ ندی جوړ شوی</string>
+    <string name="current_password_not_correct">پټ نوم/پاسورډ سم نه دی</string>
+    <string name="please_select_sale_as_pre_order_or_sale">مهربانی وکړئ توک/جنس د خرڅ شوی یا فرمایش په توګه غوره کړئ</string>
+    <string name="please_select_customer">مهربانی وکړئ یو پیریدونکی غوره کړئ ترڅو دا خرڅلا ثبت/ذخیره شی</string>
+    <string name="please_enter_a_name">مهربانی وکړئ یو نوم ولیکئ</string>
+    <string name="sort_by_inventory_asc">موجودی(په صعودی بڼه)</string>
+    <string name="sort_by_inventory_desc">موجودی (په نزولی بڼه)</string>
+    <string name="items_in_stock">په ذخیره کې موجوده توکي</string>
+    <string name="item_in_stock">په ذخیره کې موجوده توکی</string>
+    <string name="sort_stock_asc">ذخیره (په صعودی بڼه)</string>
+    <string name="sort_stock_desc">ذخیره (په نزولی بڼه)</string>
+    <string name="sort_most_recent">اوسني</string>
+    <string name="sort_lease_recent">پخواني</string>
+    <string name="select_type">ډول یې غوره کړئ</string>
+    <string name="select_producers">تولید کوونکي غوره کړئ</string>
+    <string name="sale_product_inventory">د توکی موجودي</string>
+    <string name="sell">خرڅول</string>
+    <string name="by">په واسطه</string>
+    <string name="select_sale_type">د خرڅلا ډول غوره کړئ</string>
+    <string name="sold_now">اوس خرڅ شوی</string>
+    <string name="in_stock">په ذخیره کې</string>
+    <string name="by_you">ستاسو لخوا</string>
+    <string name="sale_list_sort_by_total_ascending">ټولټال (په صعودی بڼه)</string>
+    <string name="sale_list_sort_by_total_descending">ټولټال (په نزولی بڼه)</string>
+    <string name="deliveries">سپارل شوي</string>
+    <string name="add_delivery">د سپارلو زیاتول</string>
+    <string name="record_delivery">د سپارلو ثبتول</string>
+    <string name="already_delivered">له مخکی سپارل شوی</string>
+    <string name="remaining">پاتی</string>
+    <string name="over_selected_delivery">مهربانی وکړئ د محصول لپاره په ذخیره کې پاتی شوی توکو څخه لږي توکي غوره کړئ</string>
+    <string name="in_stock_selected">په ذخیره کې د دې خرڅلا لپاره</string>
+    <string name="delivered_here">دلته وسپارل شو</string>
+    <string name="save_sale">مهربانی وکړئ د سپارلو د زیاتولو څخه وړاندې، خرڅلا ثبت/ذخیره کړئ</string>
+    <string name="add_inventory">موجودی زیاتول</string>
+    <string name="create_new_product">د نوی محصول جوړول</string>
 </resources>
